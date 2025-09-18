@@ -1,0 +1,14 @@
+:root {
+  --bg: #0B0B0B;
+  --text: #FFFFFF;
+  --textMuted: rgba(255, 255, 255, 0.64);
+  --yellow: #FFD31D;
+  --surfaceDark: #111111;
+}
+
+html,
+body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+}

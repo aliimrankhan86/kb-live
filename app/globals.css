@@ -1,0 +1,40 @@
+@import '../styles/tokens.css';
+@import "tailwindcss";
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-text: var(--text);
+  --color-text-muted: var(--textMuted);
+  --color-yellow: var(--yellow);
+  --color-surface-dark: var(--surfaceDark);
+  --font-sans: var(--font-exo2);
+  --font-exo2: var(--font-exo2);
+}
+
+body {
+  background: var(--bg);
+  background-image: url('/kaaba-bg2.svg');
+  background-size: 100%;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  color: var(--text);
+  font-family: var(--font-exo2), system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+/* Responsive background adjustments */
+@media (max-width: 768px) {
+  body {
+    background-attachment: scroll;
+    background-size: cover;
+    background-position: center top;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    background-size: cover;
+    background-position: center top;
+  }
+}

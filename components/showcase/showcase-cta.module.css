@@ -1,0 +1,156 @@
+/* Showcase CTA Component Styles */
+.cta {
+  padding: 4rem 0 6rem;
+  position: relative;
+  z-index: 10;
+}
+
+.cta__container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.cta__content {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.cta__title {
+  font-size: 2.5rem;
+  font-weight: 300;
+  color: var(--text);
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+.cta__description {
+  font-size: 1.125rem;
+  color: var(--textMuted);
+  line-height: 1.6;
+  margin-bottom: 2.5rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cta__buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.cta__button {
+  display: inline-block;
+  padding: 1rem 2rem;
+  background: var(--yellow);
+  color: var(--bg);
+  text-decoration: none;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  border: 2px solid var(--yellow);
+  min-width: 200px;
+  text-align: center;
+}
+
+.cta__button:hover {
+  background: transparent;
+  color: var(--yellow);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(255, 211, 29, 0.3);
+}
+
+.cta__button:focus {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+}
+
+.cta__buttonSecondary {
+  background: transparent;
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.cta__buttonSecondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive styles */
+@media (max-width: 1024px) {
+  .cta {
+    padding: 3rem 0 4rem;
+  }
+  
+  .cta__title {
+    font-size: 2rem;
+  }
+  
+  .cta__description {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .cta__buttons {
+    gap: 0.75rem;
+  }
+  
+  .cta__button {
+    padding: 0.875rem 1.5rem;
+    font-size: 0.9rem;
+    min-width: 180px;
+  }
+}
+
+@media (max-width: 768px) {
+  .cta__container {
+    padding: 0 1rem;
+  }
+  
+  .cta__title {
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  .cta__description {
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .cta__buttons {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .cta__button {
+    width: 100%;
+    max-width: 300px;
+    padding: 0.875rem 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .cta {
+    padding: 2rem 0 3rem;
+  }
+  
+  .cta__title {
+    font-size: 1.5rem;
+  }
+  
+  .cta__description {
+    font-size: 0.85rem;
+  }
+  
+  .cta__button {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.85rem;
+  }
+}
