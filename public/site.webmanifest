@@ -1,0 +1,16 @@
+{
+  "name": "KaabaTrip",
+  "short_name": "KaabaTrip",
+  "description": "Your Journey to the Holy Land",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "theme_color": "#0B0B0B",
+  "background_color": "#0B0B0B",
+  "display": "standalone",
+  "start_url": "/"
+}
