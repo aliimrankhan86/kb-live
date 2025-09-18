@@ -191,6 +191,7 @@
 }
 
 .searchForm__searchButton {
+  display: block;
   width: 100%;
   background: var(--yellow);
   color: var(--bg);
@@ -203,6 +204,8 @@
   transition: all 0.3s ease;
   margin: 2rem 0 1rem 0;
   box-shadow: 0 4px 16px rgba(255, 211, 29, 0.3);
+  text-decoration: none;
+  text-align: center;
 }
 
 .searchForm__searchButton:hover {

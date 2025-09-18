@@ -64,7 +64,7 @@ export const Testimonials: React.FC<TestimonialsProps> = ({ className = '' }) =>
                 ))}
               </div>
               <blockquote className={styles.testimonial__text}>
-                "{testimonial.text}"
+                &ldquo;{testimonial.text}&rdquo;
               </blockquote>
               <div className={styles.testimonial__author}>
                 <cite className={styles.testimonial__name}>
