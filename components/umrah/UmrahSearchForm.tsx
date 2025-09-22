@@ -89,9 +89,30 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
   return (
     <div className={`${styles.searchForm} ${className}`}>
       <div className={styles.searchForm__card}>
-        <h1 className={styles.searchForm__title}>
-          We at Kaaba Trip will help you find the best packages for Umrah
-        </h1>
+        {/* Back Button */}
+        <div className={styles.searchForm__header}>
+          <Link 
+            href="/" 
+            className={styles.searchForm__backButton}
+            aria-label="Go back to home page"
+          >
+            <svg 
+              width="20" 
+              height="20" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2"
+              aria-hidden="true"
+            >
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+          </Link>
+          
+          <h1 className={styles.searchForm__title}>
+            We at Kaaba Trip will help you find the best packages for Umrah
+          </h1>
+        </div>
 
         {/* Time Period Selection */}
         <div className={styles.searchForm__section}>
