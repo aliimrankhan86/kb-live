@@ -89,9 +89,31 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
   return (
     <div className={`${styles.searchForm} ${className}`}>
       <div className={styles.searchForm__card}>
-        <h1 className={styles.searchForm__title}>
-          We at Kaaba Trip will help you find the best packages for Umrah
-        </h1>
+        {/* Back Button */}
+        <div className={styles.searchForm__header}>
+          <Link 
+            href="/" 
+            className={styles.searchForm__backButton}
+            aria-label="Go back to home page"
+          >
+            <svg 
+              width="20" 
+              height="20" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2"
+              aria-hidden="true"
+            >
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            <span>Back</span>
+          </Link>
+          
+          <h1 className={styles.searchForm__title}>
+            We at Kaaba Trip will help you find the best packages for Umrah
+          </h1>
+        </div>
 
         {/* Time Period Selection */}
         <div className={styles.searchForm__section}>
@@ -102,6 +124,15 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
             {selectedPeriod}
           </div>
           <div className={styles.searchForm__sliderContainer}>
+            <div className={styles.searchForm__track}>
+              <div 
+                className={styles.searchForm__activeTrack}
+                style={{
+                  left: `${timeRange[0]}%`,
+                  width: `${timeRange[1] - timeRange[0]}%`
+                }}
+              />
+            </div>
             <input
               type="range"
               min="0"
@@ -164,6 +195,15 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
                 £{budgetRange[0]} - £{budgetRange[1]} per person
               </div>
               <div className={styles.searchForm__budgetSliderContainer}>
+                <div className={styles.searchForm__budgetTrack}>
+                  <div 
+                    className={styles.searchForm__budgetActiveTrack}
+                    style={{
+                      left: `${((budgetRange[0] - 300) / (2000 - 300)) * 100}%`,
+                      width: `${((budgetRange[1] - budgetRange[0]) / (2000 - 300)) * 100}%`
+                    }}
+                  />
+                </div>
                 <input
                   type="range"
                   min="300"

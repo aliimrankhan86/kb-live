@@ -1,0 +1,437 @@
+/* Enhanced Filter Overlay Styles - Production Ready */
+
+/* Design System Integration */
+:root {
+  --filter-overlay-bg: var(--bg);
+  --filter-overlay-text: var(--text);
+  --filter-overlay-text-muted: var(--textMuted);
+  --filter-overlay-yellow: var(--yellow);
+  --filter-overlay-surface: var(--surfaceDark);
+  
+  /* Enhanced spacing system */
+  --filter-spacing-xs: 0.25rem;
+  --filter-spacing-sm: 0.5rem;
+  --filter-spacing-md: 1rem;
+  --filter-spacing-lg: 1.5rem;
+  --filter-spacing-xl: 2rem;
+  --filter-spacing-2xl: 3rem;
+  
+  /* Enhanced border radius system */
+  --filter-radius-sm: 0.375rem;
+  --filter-radius-md: 0.5rem;
+  --filter-radius-lg: 0.75rem;
+  --filter-radius-xl: 1rem;
+  
+  /* Enhanced shadow system */
+  --filter-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --filter-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --filter-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --filter-shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+  --filter-shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.25);
+  
+  /* Enhanced animation timing */
+  --filter-transition-fast: 150ms ease-out;
+  --filter-transition-normal: 200ms ease-out;
+  --filter-transition-slow: 300ms ease-out;
+  
+  /* Z-index management */
+  --filter-z-backdrop: 1000;
+  --filter-z-overlay: 1001;
+  --filter-z-header: 1002;
+  --filter-z-footer: 1002;
+}
+
+/* Backdrop with enhanced blur and accessibility */
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: var(--filter-z-backdrop);
+  display: flex;
+  align-items: center; /* Changed from flex-start to center */
+  justify-content: center;
+  padding: var(--filter-spacing-xl);
+  animation: fadeIn var(--filter-transition-slow);
+  will-change: opacity;
+  overflow-y: auto; /* Allow scrolling if content is too tall */
+}
+
+/* Enhanced overlay with better positioning and shadows */
+.overlay {
+  background: var(--filter-overlay-bg);
+  border: 1px solid var(--filter-overlay-yellow);
+  border-radius: var(--filter-radius-xl);
+  box-shadow: 
+    var(--filter-shadow-2xl),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+  max-width: 42rem; /* 672px */
+  width: 100%;
+  max-height: 97vh; /* Maximum height for optimal button visibility */
+  min-height: 0; /* Allow flex item to shrink */
+  overflow: hidden; /* Changed back to hidden for proper scrolling */
+  animation: slideIn var(--filter-transition-slow);
+  position: relative;
+  z-index: var(--filter-z-overlay);
+  will-change: transform, opacity;
+  display: flex;
+  flex-direction: column; /* Ensure proper flex layout */
+  margin: auto; /* Center the overlay */
+}
+
+/* Animation states */
+.overlay.animating {
+  animation-play-state: running;
+}
+
+.overlay.reducedMotion {
+  animation: none;
+}
+
+/* Enhanced header with better typography */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--filter-spacing-lg) var(--filter-spacing-xl);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: var(--filter-z-header);
+}
+
+.title {
+  color: var(--filter-overlay-text);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  font-family: var(--font-exo2);
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+
+/* Enhanced close button with better accessibility */
+.closeButton {
+  background: none;
+  border: none;
+  color: var(--filter-overlay-text);
+  cursor: pointer;
+  padding: var(--filter-spacing-sm);
+  border-radius: var(--filter-radius-md);
+  transition: all var(--filter-transition-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+}
+
+.closeButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--filter-overlay-yellow);
+  transform: scale(1.05);
+}
+
+.closeButton:focus {
+  outline: 2px solid var(--filter-overlay-yellow);
+  outline-offset: 2px;
+}
+
+.closeButton:active {
+  transform: scale(0.95);
+}
+
+/* Enhanced content area with better scrolling */
+.content {
+  padding: var(--filter-spacing-xl);
+  flex: 1; /* Take available space */
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--filter-spacing-xl);
+  scroll-behavior: smooth;
+  min-height: 0; /* Allow flex item to shrink */
+}
+
+/* Enhanced footer with better button styling */
+.footer {
+  display: flex;
+  gap: 0.75rem; /* Reduced gap between buttons */
+  padding: 1rem 1.5rem; /* Reduced padding for more space */
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: var(--filter-z-footer);
+  flex-shrink: 0; /* Prevent footer from shrinking */
+  margin-top: auto; /* Push footer to bottom */
+}
+
+/* Enhanced reset button */
+.resetButton {
+  flex: 1;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: var(--filter-overlay-text);
+  padding: 0.75rem 1.25rem; /* Reduced padding for more compact buttons */
+  border-radius: var(--filter-radius-md);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--filter-transition-normal);
+  font-family: var(--font-exo2);
+  position: relative;
+  overflow: hidden;
+  min-height: 2.5rem; /* Reduced minimum button height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2; /* Better line height for text */
+}
+
+.resetButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left var(--filter-transition-slow);
+}
+
+.resetButton:hover::before {
+  left: 100%;
+}
+
+.resetButton:hover {
+  border-color: var(--filter-overlay-yellow);
+  color: var(--filter-overlay-yellow);
+  transform: translateY(-1px);
+  box-shadow: var(--filter-shadow-md);
+}
+
+.resetButton:focus {
+  outline: 2px solid var(--filter-overlay-yellow);
+  outline-offset: 2px;
+}
+
+.resetButton:active {
+  transform: translateY(0);
+}
+
+/* Enhanced apply button */
+.applyButton {
+  flex: 1;
+  background: var(--filter-overlay-yellow);
+  border: none;
+  color: var(--filter-overlay-bg);
+  padding: 0.75rem 1.25rem; /* Reduced padding for more compact buttons */
+  border-radius: var(--filter-radius-md);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--filter-transition-normal);
+  font-family: var(--font-exo2);
+  position: relative;
+  overflow: hidden;
+  min-height: 2.5rem; /* Reduced minimum button height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2; /* Better line height for text */
+}
+
+.applyButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left var(--filter-transition-slow);
+}
+
+.applyButton:hover::before {
+  left: 100%;
+}
+
+.applyButton:hover {
+  background: #e6c200;
+  transform: translateY(-2px);
+  box-shadow: 
+    var(--filter-shadow-lg),
+    0 0 0 1px rgba(255, 211, 29, 0.3);
+}
+
+.applyButton:focus {
+  outline: 2px solid var(--filter-overlay-yellow);
+  outline-offset: 2px;
+}
+
+.applyButton:active {
+  transform: translateY(-1px);
+}
+
+/* Enhanced animations with better performance */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-2rem) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Enhanced responsive design */
+@media (max-width: 768px) {
+  .backdrop {
+    padding: var(--filter-spacing-md);
+    align-items: center;
+  }
+  
+  .overlay {
+    max-height: calc(100vh - 2rem); /* Account for reduced backdrop padding */
+    max-width: 100%;
+    margin: 1rem; /* Ensure some margin on mobile */
+  }
+  
+  .header {
+    padding: var(--filter-spacing-md) var(--filter-spacing-lg);
+  }
+  
+  .title {
+    font-size: 1.25rem;
+  }
+  
+  .content {
+    padding: var(--filter-spacing-lg);
+    gap: var(--filter-spacing-lg);
+  }
+  
+  .footer {
+    padding: 0.75rem 1rem; /* Reduced padding for mobile */
+    flex-direction: column;
+    gap: 0.5rem; /* Reduced gap for mobile */
+  }
+  
+  .resetButton,
+  .applyButton {
+    width: 100%;
+    min-height: 2.75rem; /* Slightly reduced for better fit */
+    padding: 0.75rem 1rem; /* Reduced padding for mobile */
+  }
+}
+
+@media (max-width: 480px) {
+  .backdrop {
+    padding: var(--filter-spacing-sm);
+  }
+  
+  .overlay {
+    max-height: calc(100vh - 1rem); /* Account for minimal backdrop padding */
+    margin: 0.5rem; /* Minimal margin on small screens */
+  }
+  
+  .header {
+    padding: var(--filter-spacing-md);
+  }
+  
+  .content {
+    padding: var(--filter-spacing-md);
+    gap: var(--filter-spacing-md);
+  }
+  
+  .footer {
+    padding: 0.5rem 0.75rem; /* Further reduced padding for small mobile */
+    gap: 0.375rem; /* Further reduced gap for small mobile */
+  }
+  
+  .title {
+    font-size: 1.125rem;
+  }
+  
+  .resetButton,
+  .applyButton {
+    min-height: 2.5rem; /* Reduced for better fit on small screens */
+    padding: 0.625rem 1rem; /* Reduced padding for small mobile */
+    font-size: 1rem; /* Standard font size for better fit */
+  }
+}
+
+/* Enhanced scrollbar styling */
+.content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--filter-radius-sm);
+}
+
+.content::-webkit-scrollbar-thumb {
+  background: var(--filter-overlay-yellow);
+  border-radius: var(--filter-radius-sm);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.content::-webkit-scrollbar-thumb:hover {
+  background: #e6c200;
+  background-clip: content-box;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .overlay {
+    border-width: 2px;
+  }
+  
+  .closeButton:focus,
+  .resetButton:focus,
+  .applyButton:focus {
+    outline-width: 3px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .backdrop,
+  .overlay,
+  .closeButton,
+  .resetButton,
+  .applyButton {
+    animation: none;
+    transition: none;
+  }
+  
+  .closeButton:hover,
+  .resetButton:hover,
+  .applyButton:hover {
+    transform: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .backdrop {
+    display: none;
+  }
+}

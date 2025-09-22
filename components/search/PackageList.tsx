@@ -122,13 +122,13 @@ const PackageList: React.FC<PackageListProps> = ({
         ))}
       </section>
 
-      <FilterOverlay
-        isOpen={isFilterOpen}
-        onClose={handleFilterClose}
-        onApply={handleFilterApply}
-        onReset={handleFilterReset}
-        initialFilters={appliedFilters || undefined}
-      />
+              <FilterOverlay
+                isOpen={isFilterOpen}
+                onClose={handleFilterClose}
+                onApply={handleFilterApply}
+                onReset={handleFilterReset}
+                initialFilters={appliedFilters || undefined}
+              />
     </div>
   );
 };
