@@ -4,12 +4,6 @@ import React, { useCallback } from 'react';
 import { useFilter } from '../FilterOverlayContext';
 import styles from './EnhancedTimePeriodFilter.module.css';
 
-// Time period value interface for type safety (used internally)
-interface TimePeriodValue {
-  start: string;
-  end: string;
-}
-
 interface SpecialOccasion {
   id: string;
   label: string;

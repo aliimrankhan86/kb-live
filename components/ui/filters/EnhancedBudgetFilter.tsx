@@ -4,12 +4,6 @@ import React, { useState, useCallback } from 'react';
 import { useFilter } from '../FilterOverlayContext';
 import styles from './EnhancedBudgetFilter.module.css';
 
-// Budget value interface for type safety (used internally)
-interface BudgetValue {
-  min: number;
-  max: number;
-}
-
 export const EnhancedBudgetFilter: React.FC = () => {
   const [budget, setBudget] = useFilter('budget');
   const [isEnabled, setIsEnabled] = useState(true);
