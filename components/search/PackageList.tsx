@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Package } from '@/lib/mock-packages';
 import PackageCard from './PackageCard';
+import { FilterOverlay, FilterState } from './FilterOverlay';
 import styles from './packages.module.css';
 
 interface PackageListProps {
@@ -16,6 +17,8 @@ const PackageList: React.FC<PackageListProps> = ({
   onSort 
 }) => {
   const [shortlistCount, setShortlistCount] = useState(0);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [appliedFilters, setAppliedFilters] = useState<FilterState | null>(null);
 
   const handleAddToShortlist = (packageId: string) => {
     // Placeholder for shortlist functionality
@@ -29,7 +32,22 @@ const PackageList: React.FC<PackageListProps> = ({
   };
 
   const handleFilterClick = () => {
-    console.log('Filter clicked - placeholder');
+    setIsFilterOpen(true);
+  };
+
+  const handleFilterClose = () => {
+    setIsFilterOpen(false);
+  };
+
+  const handleFilterApply = (filters: FilterState) => {
+    setAppliedFilters(filters);
+    console.log('Applied filters:', filters);
+    // Here you would typically filter the packages based on the applied filters
+  };
+
+  const handleFilterReset = () => {
+    setAppliedFilters(null);
+    console.log('Reset filters');
   };
 
   return (
@@ -104,7 +122,13 @@ const PackageList: React.FC<PackageListProps> = ({
         ))}
       </section>
 
-              {/* FilterOverlay temporarily removed for debugging */}
+              <FilterOverlay
+                isOpen={isFilterOpen}
+                onClose={handleFilterClose}
+                onApply={handleFilterApply}
+                onReset={handleFilterReset}
+                initialFilters={appliedFilters || undefined}
+              />
     </div>
   );
 };
