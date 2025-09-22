@@ -1,4 +1,5 @@
 import React from 'react'
+import Image from 'next/image'
 
 interface KaabaIllustrationProps {
   className?: string
@@ -13,9 +14,11 @@ export const KaabaIllustration: React.FC<KaabaIllustrationProps> = ({
 }) => {
   return (
     <div className={className} style={{ width, height }}>
-      <img
+      <Image
         src="/kaaba-illustration.svg"
         alt="Kaaba and Minarets Illustration"
+        width={width}
+        height={height}
         style={{ 
           width: '100%', 
           height: '100%', 

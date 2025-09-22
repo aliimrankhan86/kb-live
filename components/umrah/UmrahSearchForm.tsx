@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import Link from 'next/link'
 import styles from './umrah-search-form.module.css'
 
 interface UmrahSearchFormProps {
@@ -56,7 +57,7 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
     if (!selectedPeriod) {
       setSelectedPeriod(generateFutureDateRange(timeRange[0], timeRange[1]))
     }
-  }, [])
+  }, [selectedPeriod, timeRange])
 
   const handleTimeRangeChange = (index: number, value: number) => {
     const newRange = [...timeRange]
@@ -189,9 +190,13 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
         </div>
 
         {/* Search Button */}
-        <button className={styles.searchForm__searchButton}>
+        <Link 
+          href="/search/packages"
+          className={styles.searchForm__searchButton}
+          aria-label="Search for amazing Umrah packages"
+        >
           Search For Amazing Packages
-        </button>
+        </Link>
 
         {/* Disclaimer */}
         <p className={styles.searchForm__disclaimer}>
