@@ -107,6 +107,7 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
             >
               <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
+            <span>Back</span>
           </Link>
           
           <h1 className={styles.searchForm__title}>
