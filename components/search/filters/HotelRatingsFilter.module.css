@@ -1,0 +1,86 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.label {
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0;
+  font-family: var(--font-exo2);
+}
+
+.starsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.stars {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.star {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.star:hover {
+  transform: scale(1.1);
+}
+
+.star:focus {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+}
+
+.star.filled {
+  color: var(--yellow);
+}
+
+.star.empty {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.star:hover.filled {
+  color: #e6c200;
+}
+
+.star:hover.empty {
+  color: var(--yellow);
+}
+
+.ratingText {
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: var(--font-exo2);
+  margin-left: 0.25rem;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .label,
+  .ratingText {
+    font-size: 0.9rem;
+  }
+  
+  .star {
+    padding: 0.125rem;
+  }
+  
+  .star svg {
+    width: 18px;
+    height: 18px;
+  }
+}
