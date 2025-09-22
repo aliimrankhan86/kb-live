@@ -71,7 +71,7 @@
     0 0 0 1px rgba(255, 255, 255, 0.05);
   max-width: 42rem; /* 672px */
   width: 100%;
-  max-height: calc(100vh - 2rem); /* Increased height for better button visibility */
+  max-height: 97vh; /* Increased height for better button visibility */
   min-height: 0; /* Allow flex item to shrink */
   overflow: hidden; /* Changed back to hidden for proper scrolling */
   animation: slideIn var(--filter-transition-slow);
@@ -308,7 +308,7 @@
   }
   
   .overlay {
-    max-height: calc(100vh - 2rem); /* Account for reduced backdrop padding */
+    max-height: 97vh; /* Consistent height across all breakpoints */
     max-width: 100%;
     margin: 1rem; /* Ensure some margin on mobile */
   }
@@ -346,7 +346,7 @@
   }
   
   .overlay {
-    max-height: calc(100vh - 1rem); /* Account for minimal backdrop padding */
+    max-height: 97vh; /* Consistent height across all breakpoints */
     margin: 0.5rem; /* Minimal margin on small screens */
   }
   
