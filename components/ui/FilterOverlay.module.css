@@ -71,11 +71,13 @@
   max-width: 42rem; /* 672px */
   width: 100%;
   max-height: 90vh;
-  overflow: hidden;
+  overflow: visible; /* Changed from hidden to prevent cropping */
   animation: slideIn var(--filter-transition-slow);
   position: relative;
   z-index: var(--filter-z-overlay);
   will-change: transform, opacity;
+  display: flex;
+  flex-direction: column; /* Ensure proper flex layout */
 }
 
 /* Animation states */
@@ -144,13 +146,14 @@
 /* Enhanced content area with better scrolling */
 .content {
   padding: var(--filter-spacing-xl);
-  max-height: calc(90vh - 140px);
+  flex: 1; /* Take available space */
   overflow-y: auto;
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
   gap: var(--filter-spacing-xl);
   scroll-behavior: smooth;
+  min-height: 0; /* Allow flex item to shrink */
 }
 
 /* Enhanced footer with better button styling */
@@ -162,6 +165,8 @@
   background: rgba(0, 0, 0, 0.2);
   position: relative;
   z-index: var(--filter-z-footer);
+  flex-shrink: 0; /* Prevent footer from shrinking */
+  margin-top: auto; /* Push footer to bottom */
 }
 
 /* Enhanced reset button */
@@ -170,7 +175,7 @@
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.3);
   color: var(--filter-overlay-text);
-  padding: var(--filter-spacing-md) var(--filter-spacing-lg);
+  padding: 0.875rem 1.5rem; /* Increased padding for better text spacing */
   border-radius: var(--filter-radius-md);
   font-size: 1rem;
   font-weight: 500;
@@ -179,6 +184,11 @@
   font-family: var(--font-exo2);
   position: relative;
   overflow: hidden;
+  min-height: 2.75rem; /* Ensure minimum button height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2; /* Better line height for text */
 }
 
 .resetButton::before {
@@ -218,7 +228,7 @@
   background: var(--filter-overlay-yellow);
   border: none;
   color: var(--filter-overlay-bg);
-  padding: var(--filter-spacing-md) var(--filter-spacing-lg);
+  padding: 0.875rem 1.5rem; /* Increased padding for better text spacing */
   border-radius: var(--filter-radius-md);
   font-size: 1rem;
   font-weight: 600;
@@ -227,6 +237,11 @@
   font-family: var(--font-exo2);
   position: relative;
   overflow: hidden;
+  min-height: 2.75rem; /* Ensure minimum button height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2; /* Better line height for text */
 }
 
 .applyButton::before {
@@ -310,11 +325,14 @@
   .footer {
     padding: var(--filter-spacing-md) var(--filter-spacing-lg);
     flex-direction: column;
+    gap: var(--filter-spacing-sm);
   }
   
   .resetButton,
   .applyButton {
     width: 100%;
+    min-height: 3rem; /* Larger touch targets on mobile */
+    padding: 1rem 1.5rem;
   }
 }
 
@@ -334,10 +352,18 @@
   
   .footer {
     padding: var(--filter-spacing-md);
+    gap: var(--filter-spacing-sm);
   }
   
   .title {
     font-size: 1.125rem;
+  }
+  
+  .resetButton,
+  .applyButton {
+    min-height: 3.25rem; /* Even larger touch targets on small mobile */
+    padding: 1.125rem 1.5rem;
+    font-size: 1.125rem; /* Slightly larger text for better readability */
   }
 }
 
