@@ -102,6 +102,15 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
             {selectedPeriod}
           </div>
           <div className={styles.searchForm__sliderContainer}>
+            <div className={styles.searchForm__track}>
+              <div 
+                className={styles.searchForm__activeTrack}
+                style={{
+                  left: `${timeRange[0]}%`,
+                  width: `${timeRange[1] - timeRange[0]}%`
+                }}
+              />
+            </div>
             <input
               type="range"
               min="0"
@@ -164,6 +173,15 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
                 £{budgetRange[0]} - £{budgetRange[1]} per person
               </div>
               <div className={styles.searchForm__budgetSliderContainer}>
+                <div className={styles.searchForm__budgetTrack}>
+                  <div 
+                    className={styles.searchForm__budgetActiveTrack}
+                    style={{
+                      left: `${((budgetRange[0] - 300) / (2000 - 300)) * 100}%`,
+                      width: `${((budgetRange[1] - budgetRange[0]) / (2000 - 300)) * 100}%`
+                    }}
+                  />
+                </div>
                 <input
                   type="range"
                   min="300"
