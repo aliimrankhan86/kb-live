@@ -53,11 +53,12 @@
   -webkit-backdrop-filter: blur(8px);
   z-index: var(--filter-z-backdrop);
   display: flex;
-  align-items: flex-start;
+  align-items: center; /* Changed from flex-start to center */
   justify-content: center;
   padding: var(--filter-spacing-xl);
   animation: fadeIn var(--filter-transition-slow);
   will-change: opacity;
+  overflow-y: auto; /* Allow scrolling if content is too tall */
 }
 
 /* Enhanced overlay with better positioning and shadows */
@@ -70,14 +71,16 @@
     0 0 0 1px rgba(255, 255, 255, 0.05);
   max-width: 42rem; /* 672px */
   width: 100%;
-  max-height: 90vh;
-  overflow: visible; /* Changed from hidden to prevent cropping */
+  max-height: calc(100vh - 4rem); /* Account for backdrop padding */
+  min-height: 0; /* Allow flex item to shrink */
+  overflow: hidden; /* Changed back to hidden for proper scrolling */
   animation: slideIn var(--filter-transition-slow);
   position: relative;
   z-index: var(--filter-z-overlay);
   will-change: transform, opacity;
   display: flex;
   flex-direction: column; /* Ensure proper flex layout */
+  margin: auto; /* Center the overlay */
 }
 
 /* Animation states */
@@ -305,8 +308,9 @@
   }
   
   .overlay {
-    max-height: 95vh;
+    max-height: calc(100vh - 2rem); /* Account for reduced backdrop padding */
     max-width: 100%;
+    margin: 1rem; /* Ensure some margin on mobile */
   }
   
   .header {
@@ -339,6 +343,11 @@
 @media (max-width: 480px) {
   .backdrop {
     padding: var(--filter-spacing-sm);
+  }
+  
+  .overlay {
+    max-height: calc(100vh - 1rem); /* Account for minimal backdrop padding */
+    margin: 0.5rem; /* Minimal margin on small screens */
   }
   
   .header {
