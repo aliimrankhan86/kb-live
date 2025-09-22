@@ -1,0 +1,325 @@
+/* Enhanced Time Period Filter Styles */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--filter-spacing-lg);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--filter-spacing-sm);
+}
+
+.label {
+  color: var(--filter-overlay-text);
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+  font-family: var(--font-exo2);
+  line-height: 1.3;
+}
+
+.selectedDisplay {
+  padding: var(--filter-spacing-sm) var(--filter-spacing-md);
+  background: rgba(255, 211, 29, 0.1);
+  border: 1px solid var(--filter-overlay-yellow);
+  border-radius: var(--filter-radius-md);
+}
+
+.selectedText {
+  color: var(--filter-overlay-yellow);
+  font-size: 1rem;
+  font-weight: 500;
+  font-family: var(--font-exo2);
+}
+
+/* Custom Range Section */
+.customRangeSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--filter-spacing-md);
+}
+
+.subLabel {
+  color: var(--filter-overlay-text);
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0;
+  font-family: var(--font-exo2);
+}
+
+.rangeSlider {
+  position: relative;
+  padding: var(--filter-spacing-lg) 0;
+}
+
+.track {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  background: #2D2D2D;
+  border-radius: var(--filter-radius-sm);
+  overflow: visible;
+}
+
+.activeTrack {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: #4A9EFF;
+  border-radius: var(--filter-radius-sm);
+  transition: all var(--filter-transition-normal);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.rangeInput {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 40px;
+  transform: translateY(-50%);
+  background: transparent;
+  cursor: pointer;
+  appearance: none;
+  margin: 0;
+  z-index: 5;
+  border: none;
+  outline: none;
+}
+
+.rangeInput::-webkit-slider-thumb {
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  background: var(--filter-overlay-yellow);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid #1A1A1A;
+  box-shadow: 
+    0 2px 6px rgba(0, 0, 0, 0.3), 
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all var(--filter-transition-normal);
+  position: relative;
+  z-index: 15;
+}
+
+.rangeInput::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 
+    0 4px 12px rgba(255, 215, 0, 0.4), 
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.rangeInput::-moz-range-thumb {
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  background: var(--filter-overlay-yellow);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid #1A1A1A;
+  box-shadow: 
+    0 2px 6px rgba(0, 0, 0, 0.3), 
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all var(--filter-transition-normal);
+  position: relative;
+  z-index: 15;
+}
+
+.rangeInput::-moz-range-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 
+    0 4px 12px rgba(255, 215, 0, 0.4), 
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.rangeInput:focus {
+  outline: none;
+}
+
+.rangeInput:focus::-webkit-slider-thumb {
+  outline: 2px solid var(--filter-overlay-yellow);
+  outline-offset: 2px;
+}
+
+.rangeInput:focus::-moz-range-thumb {
+  outline: 2px solid var(--filter-overlay-yellow);
+  outline-offset: 2px;
+}
+
+.monthLabels {
+  position: relative;
+  height: 1.5rem;
+  margin-top: var(--filter-spacing-sm);
+}
+
+.monthLabel {
+  position: absolute;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  color: var(--filter-overlay-text-muted);
+  font-family: var(--font-exo2);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Special Occasions Section */
+.specialOccasionsSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--filter-spacing-md);
+}
+
+.occasionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--filter-spacing-sm);
+}
+
+.occasionButton {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: var(--filter-overlay-text);
+  padding: var(--filter-spacing-md);
+  border-radius: var(--filter-radius-md);
+  cursor: pointer;
+  transition: all var(--filter-transition-normal);
+  font-family: var(--font-exo2);
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: var(--filter-spacing-xs);
+  position: relative;
+  overflow: hidden;
+}
+
+.occasionButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+  transition: left var(--filter-transition-slow);
+}
+
+.occasionButton:hover::before {
+  left: 100%;
+}
+
+.occasionButton:hover {
+  border-color: var(--filter-overlay-yellow);
+  color: var(--filter-overlay-yellow);
+  transform: translateY(-1px);
+  box-shadow: var(--filter-shadow-md);
+}
+
+.occasionButton.selected {
+  border-color: var(--filter-overlay-yellow);
+  color: var(--filter-overlay-yellow);
+  background: rgba(255, 211, 29, 0.1);
+  box-shadow: var(--filter-shadow-sm);
+}
+
+.occasionButton:focus {
+  outline: 2px solid var(--filter-overlay-yellow);
+  outline-offset: 2px;
+}
+
+.occasionButton:active {
+  transform: translateY(0);
+}
+
+.occasionLabel {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.occasionDescription {
+  font-size: 0.875rem;
+  font-weight: 400;
+  opacity: 0.8;
+  line-height: 1.3;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .occasionGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .occasionButton {
+    text-align: center;
+  }
+  
+  .monthLabels {
+    display: none; /* Hide month labels on mobile for cleaner look */
+  }
+}
+
+@media (max-width: 480px) {
+  .label {
+    font-size: 1rem;
+  }
+  
+  .selectedText {
+    font-size: 0.875rem;
+  }
+  
+  .subLabel {
+    font-size: 0.875rem;
+  }
+  
+  .occasionButton {
+    padding: var(--filter-spacing-sm) var(--filter-spacing-md);
+  }
+  
+  .occasionLabel {
+    font-size: 0.875rem;
+  }
+  
+  .occasionDescription {
+    font-size: 0.75rem;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .track {
+    border: 1px solid var(--filter-overlay-text);
+  }
+  
+  .occasionButton {
+    border-width: 2px;
+  }
+  
+  .occasionButton.selected {
+    border-width: 3px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .rangeInput,
+  .occasionButton,
+  .activeTrack {
+    transition: none;
+  }
+  
+  .occasionButton:hover,
+  .rangeInput::-webkit-slider-thumb:hover,
+  .rangeInput::-moz-range-thumb:hover {
+    transform: none;
+  }
+  
+  .occasionButton::before {
+    display: none;
+  }
+}
