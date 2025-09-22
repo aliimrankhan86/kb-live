@@ -71,7 +71,7 @@
     0 0 0 1px rgba(255, 255, 255, 0.05);
   max-width: 42rem; /* 672px */
   width: 100%;
-  max-height: calc(100vh - 4rem); /* Account for backdrop padding */
+  max-height: calc(100vh - 2rem); /* Increased height for better button visibility */
   min-height: 0; /* Allow flex item to shrink */
   overflow: hidden; /* Changed back to hidden for proper scrolling */
   animation: slideIn var(--filter-transition-slow);
@@ -162,8 +162,8 @@
 /* Enhanced footer with better button styling */
 .footer {
   display: flex;
-  gap: var(--filter-spacing-md);
-  padding: var(--filter-spacing-lg) var(--filter-spacing-xl);
+  gap: 0.75rem; /* Reduced gap between buttons */
+  padding: 1rem 1.5rem; /* Reduced padding for more space */
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(0, 0, 0, 0.2);
   position: relative;
@@ -178,7 +178,7 @@
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.3);
   color: var(--filter-overlay-text);
-  padding: 0.875rem 1.5rem; /* Increased padding for better text spacing */
+  padding: 0.75rem 1.25rem; /* Reduced padding for more compact buttons */
   border-radius: var(--filter-radius-md);
   font-size: 1rem;
   font-weight: 500;
@@ -187,7 +187,7 @@
   font-family: var(--font-exo2);
   position: relative;
   overflow: hidden;
-  min-height: 2.75rem; /* Ensure minimum button height */
+  min-height: 2.5rem; /* Reduced minimum button height */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -231,7 +231,7 @@
   background: var(--filter-overlay-yellow);
   border: none;
   color: var(--filter-overlay-bg);
-  padding: 0.875rem 1.5rem; /* Increased padding for better text spacing */
+  padding: 0.75rem 1.25rem; /* Reduced padding for more compact buttons */
   border-radius: var(--filter-radius-md);
   font-size: 1rem;
   font-weight: 600;
@@ -240,7 +240,7 @@
   font-family: var(--font-exo2);
   position: relative;
   overflow: hidden;
-  min-height: 2.75rem; /* Ensure minimum button height */
+  min-height: 2.5rem; /* Reduced minimum button height */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -327,16 +327,16 @@
   }
   
   .footer {
-    padding: var(--filter-spacing-md) var(--filter-spacing-lg);
+    padding: 0.75rem 1rem; /* Reduced padding for mobile */
     flex-direction: column;
-    gap: var(--filter-spacing-sm);
+    gap: 0.5rem; /* Reduced gap for mobile */
   }
   
   .resetButton,
   .applyButton {
     width: 100%;
-    min-height: 3rem; /* Larger touch targets on mobile */
-    padding: 1rem 1.5rem;
+    min-height: 2.75rem; /* Slightly reduced for better fit */
+    padding: 0.75rem 1rem; /* Reduced padding for mobile */
   }
 }
 
@@ -360,8 +360,8 @@
   }
   
   .footer {
-    padding: var(--filter-spacing-md);
-    gap: var(--filter-spacing-sm);
+    padding: 0.5rem 0.75rem; /* Further reduced padding for small mobile */
+    gap: 0.375rem; /* Further reduced gap for small mobile */
   }
   
   .title {
@@ -370,9 +370,9 @@
   
   .resetButton,
   .applyButton {
-    min-height: 3.25rem; /* Even larger touch targets on small mobile */
-    padding: 1.125rem 1.5rem;
-    font-size: 1.125rem; /* Slightly larger text for better readability */
+    min-height: 2.5rem; /* Reduced for better fit on small screens */
+    padding: 0.625rem 1rem; /* Reduced padding for small mobile */
+    font-size: 1rem; /* Standard font size for better fit */
   }
 }
 
