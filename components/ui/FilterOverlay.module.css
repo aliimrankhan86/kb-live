@@ -71,7 +71,7 @@
     0 0 0 1px rgba(255, 255, 255, 0.05);
   max-width: 42rem; /* 672px */
   width: 100%;
-  max-height: 97vh; /* Increased height for better button visibility */
+  max-height: 97vh; /* Maximum height for optimal button visibility */
   min-height: 0; /* Allow flex item to shrink */
   overflow: hidden; /* Changed back to hidden for proper scrolling */
   animation: slideIn var(--filter-transition-slow);
