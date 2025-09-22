@@ -2,6 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Logo } from '@/components/graphics/Logo'
 import styles from './header.module.css'
 
@@ -24,12 +25,12 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
           aria-label="KaabaTrip - Go to homepage"
         >
           <Logo size={32} />
-          <img 
+          <Image 
             src="/text-logo.svg" 
             alt="KaabaTrip" 
             className={styles.header__textLogo}
-            width="108"
-            height="45"
+            width={108}
+            height={45}
           />
         </Link>
 

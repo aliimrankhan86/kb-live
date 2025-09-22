@@ -136,7 +136,7 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({
     };
   }, [isOpen, onClose]);
 
-  const handleFilterChange = (filterType: keyof FilterState, value: any) => {
+  const handleFilterChange = (filterType: keyof FilterState, value: FilterState[keyof FilterState]) => {
     setFilters(prev => ({
       ...prev,
       [filterType]: value

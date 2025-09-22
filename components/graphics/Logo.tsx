@@ -1,4 +1,5 @@
 import React from 'react'
+import Image from 'next/image'
 
 interface LogoProps {
   className?: string
@@ -12,7 +13,7 @@ export const Logo: React.FC<LogoProps> = ({
   'aria-label': ariaLabel = 'KaabaTrip Logo'
 }) => {
   return (
-    <img
+    <Image
       src="/logo.svg"
       alt="KaabaTrip Logo"
       width={size}

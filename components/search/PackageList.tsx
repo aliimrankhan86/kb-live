@@ -14,7 +14,6 @@ interface PackageListProps {
 
 const PackageList: React.FC<PackageListProps> = ({ 
   packages, 
-  onFilter, 
   onSort 
 }) => {
   const [shortlistCount, setShortlistCount] = useState(0);
