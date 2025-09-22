@@ -11,6 +11,12 @@ import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { useEscapeKey } from '@/hooks/useEscapeKey';
 import { useClickOutside } from '@/hooks/useClickOutside';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
+// Import existing filter components for perfect compatibility
+import { TimePeriodFilter } from '../search/filters/TimePeriodFilter';
+import { BudgetFilter } from '../search/filters/BudgetFilter';
+import { FlightTypeFilter } from '../search/filters/FlightTypeFilter';
+import { HotelRatingsFilter } from '../search/filters/HotelRatingsFilter';
+import { DistanceFilter } from '../search/filters/DistanceFilter';
 import styles from './FilterOverlay.module.css';
 
 // Enhanced Filter State Interface with better type safety
@@ -206,10 +212,37 @@ const FilterOverlayComponent: React.FC<FilterOverlayProps> = ({
         <FilterOverlayContent ref={overlayRef}>
           <FilterOverlayHeader title={title} onClose={onClose} />
           
-          <div className={styles.content}>
-            {/* Import and use your existing filter components */}
-            {/* This maintains compatibility with your current implementation */}
-          </div>
+        <div className={styles.content}>
+          {/* Use existing filter components for perfect compatibility */}
+          <TimePeriodFilter
+            value={filters.timePeriod}
+            specialOccasion={filters.specialOccasion}
+            onChange={(timePeriod, specialOccasion) => {
+              handleFilterChange('timePeriod', timePeriod);
+              handleFilterChange('specialOccasion', specialOccasion);
+            }}
+          />
+
+          <BudgetFilter
+            value={filters.budget}
+            onChange={(budget) => handleFilterChange('budget', budget)}
+          />
+
+          <FlightTypeFilter
+            value={filters.flightType}
+            onChange={(flightType) => handleFilterChange('flightType', flightType)}
+          />
+
+          <HotelRatingsFilter
+            value={filters.hotelRatings}
+            onChange={(rating) => handleFilterChange('hotelRatings', rating)}
+          />
+
+          <DistanceFilter
+            value={filters.distance}
+            onChange={(distance) => handleFilterChange('distance', distance)}
+          />
+        </div>
           
           <FilterOverlayFooter 
             showResetButton={showResetButton}

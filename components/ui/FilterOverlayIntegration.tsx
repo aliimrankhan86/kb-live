@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { FilterOverlay, FilterState } from './FilterOverlay';
-import { EnhancedTimePeriodFilter } from './filters/EnhancedTimePeriodFilter';
-// Import your existing filter components
+// Import your existing filter components for direct usage
+import { TimePeriodFilter } from '../search/filters/TimePeriodFilter';
 import { BudgetFilter } from '../search/filters/BudgetFilter';
 import { FlightTypeFilter } from '../search/filters/FlightTypeFilter';
 import { HotelRatingsFilter } from '../search/filters/HotelRatingsFilter';
@@ -72,38 +72,9 @@ export const FilterOverlayIntegration: React.FC = () => {
       >
         {/* You can customize the content by providing children */}
         <div className="custom-filter-content">
-          {/* Use the enhanced time period filter */}
-          <EnhancedTimePeriodFilter />
-          
-          {/* Use your existing filter components */}
-          <BudgetFilter
-            value={appliedFilters?.budget || { min: 1000, max: 3000 }}
-            onChange={(budget) => {
-              // This would be handled by the context in a real implementation
-              console.log('Budget changed:', budget);
-            }}
-          />
-          
-          <FlightTypeFilter
-            value={appliedFilters?.flightType || { direct: true, stopover: false }}
-            onChange={(flightType) => {
-              console.log('Flight type changed:', flightType);
-            }}
-          />
-          
-          <HotelRatingsFilter
-            value={appliedFilters?.hotelRatings || 3}
-            onChange={(rating) => {
-              console.log('Hotel rating changed:', rating);
-            }}
-          />
-          
-          <DistanceFilter
-            value={appliedFilters?.distance || { min: 100, max: 2000 }}
-            onChange={(distance) => {
-              console.log('Distance changed:', distance);
-            }}
-          />
+          {/* The FilterOverlay now automatically includes all existing filter components */}
+          {/* with the exact same styling and behavior as your current implementation */}
+          {/* No additional components needed - perfect compatibility! */}
         </div>
       </FilterOverlay>
     </>
