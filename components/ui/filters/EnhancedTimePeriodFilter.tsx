@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { useFilter } from '../FilterOverlayContext';
 import styles from './EnhancedTimePeriodFilter.module.css';
 
+// Time period value interface for type safety (used internally)
 interface TimePeriodValue {
   start: string;
   end: string;
@@ -56,19 +57,20 @@ const specialOccasions: SpecialOccasion[] = [
 export const EnhancedTimePeriodFilter: React.FC = () => {
   const [timePeriod, setTimePeriod] = useFilter('timePeriod');
   const [specialOccasion, setSpecialOccasion] = useFilter('specialOccasion');
-  const [isCustomRange, setIsCustomRange] = useState(!specialOccasion);
+  // Track if user is using custom range vs predefined occasions (for future use)
+  // const [isCustomRange] = useState(!specialOccasion);
 
   const handleSpecialOccasionSelect = useCallback((occasion: SpecialOccasion) => {
     setTimePeriod({ start: occasion.start, end: occasion.end });
     setSpecialOccasion(occasion.id);
-    setIsCustomRange(false);
+    // setIsCustomRange(false); // Not needed as we're not using setter
   }, [setTimePeriod, setSpecialOccasion]);
 
   const handleCustomRangeChange = useCallback((type: 'start' | 'end', month: string) => {
     const newValue = { ...timePeriod, [type]: month };
     setTimePeriod(newValue);
     setSpecialOccasion(null);
-    setIsCustomRange(true);
+    // setIsCustomRange(true); // Not needed as we're not using setter
   }, [timePeriod, setTimePeriod, setSpecialOccasion]);
 
   const getSelectedOccasion = () => {

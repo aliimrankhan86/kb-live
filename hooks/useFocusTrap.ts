@@ -7,7 +7,7 @@ import { useEffect, useRef } from 'react';
  * Ensures keyboard navigation stays within the specified element
  */
 export const useFocusTrap = (
-  containerRef: React.RefObject<HTMLElement>,
+  containerRef: React.RefObject<HTMLElement | null>,
   isActive: boolean
 ): void => {
   const previousActiveElement = useRef<HTMLElement | null>(null);

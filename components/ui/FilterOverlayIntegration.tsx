@@ -2,12 +2,6 @@
 
 import React, { useState } from 'react';
 import { FilterOverlay, FilterState } from './FilterOverlay';
-// Import your existing filter components for direct usage
-import { TimePeriodFilter } from '../search/filters/TimePeriodFilter';
-import { BudgetFilter } from '../search/filters/BudgetFilter';
-import { FlightTypeFilter } from '../search/filters/FlightTypeFilter';
-import { HotelRatingsFilter } from '../search/filters/HotelRatingsFilter';
-import { DistanceFilter } from '../search/filters/DistanceFilter';
 
 /**
  * Integration example showing how to use the new FilterOverlay
@@ -69,14 +63,7 @@ export const FilterOverlayIntegration: React.FC = () => {
         showResetButton={true}
         closeOnBackdropClick={true}
         ariaLabel="Filter packages overlay"
-      >
-        {/* You can customize the content by providing children */}
-        <div className="custom-filter-content">
-          {/* The FilterOverlay now automatically includes all existing filter components */}
-          {/* with the exact same styling and behavior as your current implementation */}
-          {/* No additional components needed - perfect compatibility! */}
-        </div>
-      </FilterOverlay>
+      />
     </>
   );
 };

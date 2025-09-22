@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { FilterOverlayProvider, useFilterOverlay } from './FilterOverlayContext';
+import { FilterOverlayProvider } from './FilterOverlayContext';
 import { FilterOverlayBackdrop } from './FilterOverlayBackdrop';
 import { FilterOverlayContent } from './FilterOverlayContent';
 import { FilterOverlayHeader } from './FilterOverlayHeader';
