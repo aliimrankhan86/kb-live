@@ -1,0 +1,351 @@
+/* Login Modal Styles */
+/* Following the established design system with CSS variables */
+
+/* Backdrop */
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(11, 11, 11, 0.8);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+  z-index: 1000;
+}
+
+.backdropVisible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Modal Container */
+.modal {
+  background: var(--surfaceDark);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  max-width: 480px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  transform: scale(0.95) translateY(20px);
+  transition: transform 0.2s ease-in-out;
+}
+
+.modalVisible {
+  transform: scale(1) translateY(0);
+}
+
+/* Modal Content */
+.modalContent {
+  padding: 2rem;
+}
+
+/* Header */
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.modalTitle {
+  font-family: var(--font-exo2);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: var(--textMuted);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: color 0.2s ease, background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+.closeButton:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.closeButton:focus {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+}
+
+/* Description */
+.modalDescription {
+  color: var(--textMuted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0 0 1.5rem 0;
+}
+
+/* Form */
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Form Fields */
+.formField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.fieldLabel {
+  font-family: var(--font-exo2);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text);
+  margin: 0;
+}
+
+.fieldInput {
+  background: var(--bg);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: var(--font-exo2);
+  font-size: 1rem;
+  padding: 0.75rem 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.fieldInput::placeholder {
+  color: var(--textMuted);
+}
+
+.fieldInput:focus {
+  outline: none;
+  border-color: var(--yellow);
+  box-shadow: 0 0 0 3px rgba(255, 211, 29, 0.1);
+}
+
+.fieldInput:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.fieldInputError {
+  border-color: #ff6b6b;
+  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+}
+
+.fieldInputError:focus {
+  border-color: #ff6b6b;
+  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.2);
+}
+
+/* Error Messages */
+.errorMessage {
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  border-radius: 6px;
+  color: #ff6b6b;
+  font-size: 0.9rem;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.fieldError {
+  color: #ff6b6b;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+/* Forgot Password */
+.forgotPasswordContainer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -0.5rem;
+}
+
+.forgotPasswordLink {
+  background: none;
+  border: none;
+  color: var(--yellow);
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+  padding: 0.25rem;
+}
+
+.forgotPasswordLink:hover {
+  color: #e6c200;
+}
+
+.forgotPasswordLink:focus {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.forgotPasswordLink:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Submit Button */
+.submitButton {
+  background: var(--yellow);
+  border: 1px solid var(--yellow);
+  border-radius: 8px;
+  color: var(--bg);
+  font-family: var(--font-exo2);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.875rem 1.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.submitButton:hover:not(:disabled) {
+  background: #e6c200;
+  border-color: #e6c200;
+  transform: translateY(-1px);
+}
+
+.submitButton:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submitButton:focus {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+}
+
+.submitButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Loading Spinner */
+.loadingSpinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid var(--bg);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Submit Description */
+.submitDescription {
+  color: var(--textMuted);
+  font-size: 0.8rem;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .backdrop {
+    padding: 0.5rem;
+  }
+  
+  .modal {
+    max-width: 100%;
+    border-radius: 8px;
+  }
+  
+  .modalContent {
+    padding: 1.5rem;
+  }
+  
+  .modalTitle {
+    font-size: 1.25rem;
+  }
+  
+  .fieldInput {
+    padding: 0.875rem 1rem;
+  }
+  
+  .submitButton {
+    padding: 1rem 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .modalContent {
+    padding: 1.25rem;
+  }
+  
+  .modalTitle {
+    font-size: 1.125rem;
+  }
+  
+  .loginForm {
+    gap: 1.25rem;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .backdrop,
+  .modal,
+  .fieldInput,
+  .submitButton,
+  .closeButton,
+  .forgotPasswordLink {
+    transition: none;
+  }
+  
+  .loadingSpinner {
+    animation: none;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .fieldInput {
+    border-width: 2px;
+  }
+  
+  .fieldInput:focus {
+    box-shadow: 0 0 0 4px rgba(255, 211, 29, 0.3);
+  }
+  
+  .submitButton:focus {
+    outline-width: 3px;
+  }
+}
