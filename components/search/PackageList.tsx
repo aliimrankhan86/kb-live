@@ -172,17 +172,7 @@ const PackageList: React.FC<PackageListProps> = ({
             onClick={resetCompareState}
             aria-label="Reset comparison selection"
           >
-            <svg 
-              width="14" 
-              height="14" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2"
-              aria-hidden="true"
-            >
-              <path d="M3 6h18M7 12h10M10 18h4" />
-            </svg>
+            <span className={styles.resetIcon} aria-hidden="true">📌</span>
             Reset Comparison
           </button>
           
