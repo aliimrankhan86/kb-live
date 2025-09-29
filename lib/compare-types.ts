@@ -23,15 +23,15 @@ export function isCompareEnabled(shortlistCount: number): boolean {
 }
 
 /**
- * Get the compare button text based on shortlist count
+ * Get the compare button text based on compare state
  */
-export function getCompareButtonText(shortlistCount: number): string {
-  if (shortlistCount === 0) {
-    return 'Compare the Package';
-  } else if (shortlistCount === 1) {
-    return 'Compare the Package';
+export function getCompareButtonText(shortlistCount: number, isInCompare: boolean = false, compareCount: number = 0): string {
+  if (isInCompare) {
+    return 'Remove from Compare';
+  } else if (compareCount >= 3) {
+    return 'Max 3 packages';
   } else {
-    return `Compare ${shortlistCount} packages`;
+    return 'Compare the Package';
   }
 }
 
@@ -50,20 +50,19 @@ export function getCompareAriaLabel(shortlistCount: number): string {
 
 /**
  * Get the compare button disabled state
+ * Allow clicking to add packages to compare even when shortlist count is low
  */
 export function isCompareDisabled(shortlistCount: number): boolean {
-  return shortlistCount < 2;
+  return false; // Always allow clicking to add/remove from compare
 }
 
 /**
  * Get the compare button visual state class
  */
-export function getCompareButtonClass(shortlistCount: number, isInShortlist: boolean): string {
-  if (isInShortlist) {
-    return 'compareButtonAdded';
-  } else if (shortlistCount >= 2) {
-    return 'compareButtonEnabled';
+export function getCompareButtonClass(shortlistCount: number, isInShortlist: boolean, isInCompare: boolean): string {
+  if (isInCompare) {
+    return 'compareButtonActive';
   } else {
-    return 'compareButtonDisabled';
+    return 'compareButtonDefault';
   }
 }

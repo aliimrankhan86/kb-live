@@ -40,7 +40,8 @@
 }
 
 .filterButton,
-.sortButton {
+.sortButton,
+.resetButton {
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: var(--text);
@@ -55,14 +56,34 @@
 }
 
 .filterButton:hover,
-.sortButton:hover {
+.sortButton:hover,
+.resetButton:hover {
   border-color: var(--yellow);
   color: var(--yellow);
 }
 
 .filterButton:focus,
-.sortButton:focus {
+.sortButton:focus,
+.resetButton:focus {
   outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+}
+
+/* Reset button specific styling */
+.resetButton {
+  border-color: rgba(255, 107, 107, 0.3);
+  color: rgba(255, 107, 107, 0.9);
+  font-weight: 500;
+}
+
+.resetButton:hover {
+  border-color: #ff6b6b;
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.1);
+}
+
+.resetButton:focus {
+  outline: 2px solid #ff6b6b;
   outline-offset: 2px;
 }
 
@@ -323,6 +344,23 @@
   background: rgba(255, 211, 29, 0.3);
   border-color: #e6c200;
   color: #e6c200;
+}
+
+.compareButtonActive {
+  background: var(--yellow);
+  border-color: var(--yellow);
+  color: var(--bg);
+  font-weight: 600;
+}
+
+.compareButtonActive:hover {
+  background: #e6c200;
+  border-color: #e6c200;
+  color: var(--bg);
+}
+
+.compareButtonDefault {
+  /* Uses default secondaryAction styles */
 }
 
 /* Basket button states */

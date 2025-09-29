@@ -24,6 +24,13 @@ const PackageList: React.FC<PackageListProps> = ({
   const [shortlistedPackages, setShortlistedPackages] = useState<Set<string>>(new Set());
   const [basketCount, setBasketCount] = useState(0);
   const [basketedPackages, setBasketedPackages] = useState<Set<string>>(new Set());
+  const [comparedPackages, setComparedPackages] = useState<Set<string>>(new Set());
+  
+  // Calculate compare count from the set size
+  const compareCount = comparedPackages.size;
+  
+  // Debug logging
+  console.log('Compare count:', compareCount, 'Compared packages:', Array.from(comparedPackages));
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<FilterState | null>(null);
   const [sortOption, setSortOption] = useState<SortOption>('recommended');
@@ -57,13 +64,24 @@ const PackageList: React.FC<PackageListProps> = ({
   };
 
   const handleAddToCompare = (packageId: string) => {
-    if (compareEnabled) {
-      console.log(`Added package ${packageId} to compare`);
-      // Here you would implement the actual compare functionality
-      // For now, we'll just log the action
-    } else {
-      console.log('Compare requires at least 2 packages in shortlist');
-    }
+    setComparedPackages(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(packageId)) {
+        // Remove from compare
+        newSet.delete(packageId);
+        console.log(`Removed package ${packageId} from compare`);
+      } else {
+        // Check if we've reached the maximum limit of 3 packages
+        if (newSet.size >= 3) {
+          console.log('Maximum of 3 packages can be compared');
+          return newSet; // Don't add more packages
+        }
+        // Add to compare
+        newSet.add(packageId);
+        console.log(`Added package ${packageId} to compare`);
+      }
+      return newSet;
+    });
   };
 
   const handleAddToBasket = (packageId: string) => {
@@ -108,6 +126,12 @@ const PackageList: React.FC<PackageListProps> = ({
     console.log('Sort changed to:', option);
   };
 
+  // Reset compare state (for debugging)
+  const resetCompareState = () => {
+    setComparedPackages(new Set());
+    console.log('Compare state reset');
+  };
+
   return (
     <div className={styles.searchContainer}>
       {/* Top Info Bar */}
@@ -142,18 +166,38 @@ const PackageList: React.FC<PackageListProps> = ({
             ariaLabel="Sort packages"
           />
           
+          {/* Debug reset button */}
+          <button 
+            className={styles.resetButton}
+            onClick={resetCompareState}
+            aria-label="Reset comparison selection"
+          >
+            <svg 
+              width="14" 
+              height="14" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2"
+              aria-hidden="true"
+            >
+              <path d="M3 6h18M7 12h10M10 18h4" />
+            </svg>
+            Reset Comparison
+          </button>
+          
           <div className={styles.statusContainer}>
             <div 
               className={styles.shortlistCount}
               aria-live="polite"
-              aria-label={getBasketCountAriaLabel(shortlistCount)}
+              aria-label={`${compareCount} packages selected for compare`}
             >
-              {shortlistCount === 0 && "No packages in shortlist"}
-              {shortlistCount === 1 && "1 package in shortlist"}
-              {shortlistCount > 1 && `${shortlistCount} packages in shortlist`}
-              {compareEnabled && (
+              {compareCount === 0 && "No packages selected for compare"}
+              {compareCount === 1 && "1 package selected for compare"}
+              {compareCount > 1 && `${compareCount} packages selected for compare`}
+              {compareCount >= 3 && (
                 <span className={styles.compareHint}>
-                  • Compare enabled
+                  • Max 3 packages
                 </span>
               )}
             </div>
@@ -183,8 +227,10 @@ const PackageList: React.FC<PackageListProps> = ({
             onAddToBasket={handleAddToBasket}
             isInShortlist={shortlistedPackages.has(pkg.id)}
             isInBasket={basketedPackages.has(pkg.id)}
+            isInCompare={comparedPackages.has(pkg.id)}
             compareEnabled={compareEnabled}
             shortlistCount={shortlistCount}
+            compareCount={compareCount}
           />
         ))}
       </section>

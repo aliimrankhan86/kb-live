@@ -15,8 +15,10 @@ interface PackageCardProps {
   onAddToBasket: (packageId: string) => void;
   isInShortlist: boolean;
   isInBasket: boolean;
+  isInCompare: boolean;
   compareEnabled: boolean;
   shortlistCount: number;
+  compareCount: number;
 }
 
 const PackageCard: React.FC<PackageCardProps> = ({ 
@@ -26,8 +28,10 @@ const PackageCard: React.FC<PackageCardProps> = ({
   onAddToBasket,
   isInShortlist,
   isInBasket,
+  isInCompare,
   compareEnabled,
-  shortlistCount
+  shortlistCount,
+  compareCount
 }) => {
   const renderStars = (rating: number) => {
     const stars = [];
@@ -143,12 +147,12 @@ const PackageCard: React.FC<PackageCardProps> = ({
             {isInShortlist ? 'Remove from Shortlist' : 'Add to Shortlist'}
           </button> */}
           <button
-            className={`${styles.secondaryAction} ${getCompareButtonClass(shortlistCount, isInShortlist)}`}
+            className={`${styles.secondaryAction} ${getCompareButtonClass(shortlistCount, isInShortlist, isInCompare)}`}
             onClick={() => onAddToCompare(pkg.id)}
             disabled={isCompareDisabled(shortlistCount)}
             aria-label={getCompareAriaLabel(shortlistCount)}
           >
-            {getCompareButtonText(shortlistCount)}
+            {getCompareButtonText(shortlistCount, isInCompare, compareCount)}
           </button>
           <button
             className={`${styles.secondaryAction} ${getBasketButtonClass(isInBasket)}`}
