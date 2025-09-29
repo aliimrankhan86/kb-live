@@ -17,7 +17,7 @@
 
 .overlay {
   background: var(--bg);
-  border: 1px solid var(--yellow);
+  border: 1px solid #D4AF37; /* Medium yellow - Gold */
   border-radius: 1rem;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   max-width: 600px;
@@ -59,11 +59,11 @@
 
 .closeButton:hover {
   background: rgba(255, 255, 255, 0.1);
-  color: var(--yellow);
+  color: #D4AF37; /* Medium yellow - Gold */
 }
 
 .closeButton:focus {
-  outline: 2px solid var(--yellow);
+  outline: 2px solid #D4AF37; /* Medium yellow - Gold */
   outline-offset: 2px;
 }
 
@@ -74,6 +74,28 @@
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  /* Scroll styling */
+  scrollbar-width: thin;
+  scrollbar-color: #D4AF37 rgba(212, 175, 55, 0.1);
+}
+
+.content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.content::-webkit-scrollbar-track {
+  background: rgba(212, 175, 55, 0.1);
+  border-radius: 4px;
+}
+
+.content::-webkit-scrollbar-thumb {
+  background: #D4AF37;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.content::-webkit-scrollbar-thumb:hover {
+  background: #B8860B; /* Slightly darker on hover */
 }
 
 .footer {
@@ -100,11 +122,11 @@
 
 .resetButton:hover {
   border-color: var(--yellow);
-  color: var(--yellow);
+  color: #D4AF37; /* Medium yellow - Gold */
 }
 
 .resetButton:focus {
-  outline: 2px solid var(--yellow);
+  outline: 2px solid #D4AF37; /* Medium yellow - Gold */
   outline-offset: 2px;
 }
 
@@ -129,7 +151,7 @@
 }
 
 .applyButton:focus {
-  outline: 2px solid var(--yellow);
+  outline: 2px solid #D4AF37; /* Medium yellow - Gold */
   outline-offset: 2px;
 }
 

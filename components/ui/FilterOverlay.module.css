@@ -5,7 +5,7 @@
   --filter-overlay-bg: var(--bg);
   --filter-overlay-text: var(--text);
   --filter-overlay-text-muted: var(--textMuted);
-  --filter-overlay-yellow: var(--yellow);
+  --filter-overlay-yellow: #D4AF37; /* Medium yellow - Gold */
   --filter-overlay-surface: var(--surfaceDark);
   
   /* Enhanced spacing system */
@@ -39,6 +39,10 @@
   --filter-z-overlay: 1001;
   --filter-z-header: 1002;
   --filter-z-footer: 1002;
+  
+  /* Scroll styling */
+  --filter-scroll-thumb: #D4AF37; /* Medium yellow for scroll thumb */
+  --filter-scroll-track: rgba(212, 175, 55, 0.1); /* Medium yellow track */
 }
 
 /* Backdrop with enhanced blur and accessibility */
@@ -90,6 +94,31 @@
 
 .overlay.reducedMotion {
   animation: none;
+}
+
+/* Scroll styling for content areas */
+.content {
+  scrollbar-width: thin;
+  scrollbar-color: var(--filter-scroll-thumb) var(--filter-scroll-track);
+}
+
+.content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.content::-webkit-scrollbar-track {
+  background: var(--filter-scroll-track);
+  border-radius: 4px;
+}
+
+.content::-webkit-scrollbar-thumb {
+  background: var(--filter-scroll-thumb);
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.content::-webkit-scrollbar-thumb:hover {
+  background: #B8860B; /* Slightly darker on hover */
 }
 
 /* Enhanced header with better typography */
