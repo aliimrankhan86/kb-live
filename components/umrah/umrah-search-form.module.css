@@ -139,7 +139,7 @@
   appearance: none;
   width: 24px;
   height: 24px;
-  background: #FFD700;
+  background: #D4AF37; /* Medium yellow - Gold (matching filter overlay) */
   border: 2px solid #1A1A1A;
   border-radius: 50%;
   cursor: pointer;
@@ -161,7 +161,7 @@
 .searchForm__slider::-moz-range-thumb {
   width: 24px;
   height: 24px;
-  background: #FFD700;
+  background: #D4AF37; /* Medium yellow - Gold (matching filter overlay) */
   border: 2px solid #1A1A1A;
   border-radius: 50%;
   cursor: pointer;
@@ -283,7 +283,7 @@
   appearance: none;
   width: 20px;
   height: 20px;
-  background: #FFD700;
+  background: #D4AF37; /* Medium yellow - Gold (matching filter overlay) */
   border: 2px solid #1A1A1A;
   border-radius: 50%;
   cursor: pointer;
@@ -305,7 +305,7 @@
 .searchForm__budgetSlider::-moz-range-thumb {
   width: 20px;
   height: 20px;
-  background: #FFD700;
+  background: #D4AF37; /* Medium yellow - Gold (matching filter overlay) */
   border: 2px solid #1A1A1A;
   border-radius: 50%;
   cursor: pointer;
