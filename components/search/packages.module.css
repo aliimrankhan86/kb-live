@@ -107,6 +107,19 @@
   gap: 0.25rem;
 }
 
+.basketContent {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.basketIcon {
+  width: 16px;
+  height: 16px;
+  color: var(--text);
+  flex-shrink: 0;
+}
+
 /* Highlight compare count when packages are selected */
 .shortlistCount.hasPackages {
   background: var(--yellow);
