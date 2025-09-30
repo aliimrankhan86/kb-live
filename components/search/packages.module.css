@@ -109,10 +109,10 @@
 
 /* Highlight compare count when packages are selected */
 .shortlistCount.hasPackages {
-  background: rgba(255, 211, 29, 0.1);
+  background: var(--yellow);
   border-color: var(--yellow);
-  color: var(--yellow);
-  font-weight: 500;
+  color: var(--bg);
+  font-weight: 600;
 }
 
 .compareHint {
