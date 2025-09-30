@@ -107,6 +107,14 @@
   gap: 0.25rem;
 }
 
+/* Highlight compare count when packages are selected */
+.shortlistCount.hasPackages {
+  background: rgba(255, 211, 29, 0.1);
+  border-color: var(--yellow);
+  color: var(--yellow);
+  font-weight: 500;
+}
+
 .compareHint {
   color: var(--yellow);
   font-size: 0.75rem;

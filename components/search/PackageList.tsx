@@ -178,7 +178,7 @@ const PackageList: React.FC<PackageListProps> = ({
           
           <div className={styles.statusContainer}>
             <div 
-              className={styles.shortlistCount}
+              className={`${styles.shortlistCount} ${compareCount > 1 ? styles.hasPackages : ''}`}
               aria-live="polite"
               aria-label={`${compareCount} packages selected for compare`}
             >
