@@ -4,18 +4,34 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Package } from '@/lib/mock-packages';
+import { getCompareButtonText, getCompareAriaLabel, isCompareDisabled, getCompareButtonClass } from '@/lib/compare-types';
+import { getBasketButtonText, getBasketAriaLabel, getBasketButtonClass } from '@/lib/basket-types';
 import styles from './packages.module.css';
 
 interface PackageCardProps {
   package: Package;
   onAddToShortlist: (packageId: string) => void;
   onAddToCompare: (packageId: string) => void;
+  onAddToBasket: (packageId: string) => void;
+  isInShortlist: boolean;
+  isInBasket: boolean;
+  isInCompare: boolean;
+  compareEnabled: boolean;
+  shortlistCount: number;
+  compareCount: number;
 }
 
 const PackageCard: React.FC<PackageCardProps> = ({ 
   package: pkg, 
   onAddToShortlist, 
-  onAddToCompare 
+  onAddToCompare,
+  onAddToBasket,
+  isInShortlist,
+  isInBasket,
+  isInCompare,
+  compareEnabled,
+  shortlistCount,
+  compareCount
 }) => {
   const renderStars = (rating: number) => {
     const stars = [];
@@ -123,19 +139,27 @@ const PackageCard: React.FC<PackageCardProps> = ({
         </div>
 
         <div className={styles.packageActions}>
-          <button
-            className={styles.secondaryAction}
+          {/* <button
+            className={`${styles.secondaryAction} ${isInShortlist ? styles.shortlistAdded : ''}`}
             onClick={() => onAddToShortlist(pkg.id)}
-            aria-label={`Add ${pkg.makkahHotel.name} and ${pkg.madinaHotel.name} to shortlist`}
+            aria-label={`${isInShortlist ? 'Remove' : 'Add'} ${pkg.makkahHotel.name} and ${pkg.madinaHotel.name} ${isInShortlist ? 'from' : 'to'} shortlist`}
           >
-            Add to Shortlist
+            {isInShortlist ? 'Remove from Shortlist' : 'Add to Shortlist'}
+          </button> */}
+          <button
+            className={`${styles.secondaryAction} ${getCompareButtonClass(shortlistCount, isInShortlist, isInCompare)}`}
+            onClick={() => onAddToCompare(pkg.id)}
+            disabled={isCompareDisabled(shortlistCount)}
+            aria-label={getCompareAriaLabel(shortlistCount)}
+          >
+            {getCompareButtonText(shortlistCount, isInCompare, compareCount)}
           </button>
           <button
-            className={styles.secondaryAction}
-            onClick={() => onAddToCompare(pkg.id)}
-            aria-label={`Add ${pkg.makkahHotel.name} and ${pkg.madinaHotel.name} to compare`}
+            className={`${styles.secondaryAction} ${getBasketButtonClass(isInBasket)}`}
+            onClick={() => onAddToBasket(pkg.id)}
+            aria-label={getBasketAriaLabel(isInBasket, `${pkg.makkahHotel.name} and ${pkg.madinaHotel.name}`)}
           >
-            Add to Compare
+            {getBasketButtonText(isInBasket)}
           </button>
           <Link 
             href={`/packages/${pkg.id}`}

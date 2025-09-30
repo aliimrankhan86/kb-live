@@ -30,10 +30,19 @@
   display: flex;
   gap: 1rem;
   align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.statusContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .filterButton,
-.sortButton {
+.sortButton,
+.resetButton {
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: var(--text);
@@ -48,24 +57,77 @@
 }
 
 .filterButton:hover,
-.sortButton:hover {
+.sortButton:hover,
+.resetButton:hover {
   border-color: var(--yellow);
   color: var(--yellow);
 }
 
 .filterButton:focus,
-.sortButton:focus {
+.sortButton:focus,
+.resetButton:focus {
   outline: 2px solid var(--yellow);
   outline-offset: 2px;
 }
 
-.shortlistCount {
+/* Reset button specific styling */
+.resetButton {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--text);
+  font-weight: 500;
+}
+
+.resetButton:hover {
+  border-color: var(--yellow);
+  color: var(--yellow);
+  background: rgba(255, 211, 29, 0.1);
+}
+
+.resetButton:focus {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+}
+
+.resetIcon {
+  font-size: 14px;
+  line-height: 1;
+  display: inline-block;
+}
+
+.shortlistCount,
+.basketCount {
   background: var(--surfaceDark);
   border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
   color: var(--text);
   font-size: 0.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* Highlight compare count when packages are selected */
+.shortlistCount.hasPackages {
+  background: var(--yellow);
+  border-color: var(--yellow);
+  color: var(--bg);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.shortlistCount.hasPackages:hover {
+  background: #e6c200;
+  border-color: #e6c200;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 211, 29, 0.3);
+}
+
+.compareHint {
+  color: var(--yellow);
+  font-size: 0.75rem;
+  font-weight: 500;
 }
 
 .packageList {
@@ -256,6 +318,93 @@
   outline-offset: 2px;
 }
 
+.secondaryAction:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Shortlist button states */
+.shortlistAdded {
+  background: rgba(255, 211, 29, 0.15);
+  border-color: var(--yellow);
+  color: var(--yellow);
+}
+
+.shortlistAdded:hover {
+  background: rgba(255, 211, 29, 0.25);
+  border-color: #e6c200;
+  color: #e6c200;
+}
+
+/* Compare button states */
+.compareButtonDisabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.compareButtonEnabled {
+  background: rgba(255, 211, 29, 0.1);
+  border-color: var(--yellow);
+  color: var(--yellow);
+}
+
+.compareButtonEnabled:hover {
+  background: rgba(255, 211, 29, 0.2);
+  border-color: #e6c200;
+  color: #e6c200;
+}
+
+.compareButtonAdded {
+  background: rgba(255, 211, 29, 0.2);
+  border-color: var(--yellow);
+  color: var(--yellow);
+  font-weight: 500;
+}
+
+.compareButtonAdded:hover {
+  background: rgba(255, 211, 29, 0.3);
+  border-color: #e6c200;
+  color: #e6c200;
+}
+
+.compareButtonActive {
+  background: var(--yellow);
+  border-color: var(--yellow);
+  color: var(--bg);
+  font-weight: 600;
+}
+
+.compareButtonActive:hover {
+  background: #e6c200;
+  border-color: #e6c200;
+  color: var(--bg);
+}
+
+.compareButtonDefault {
+  /* Uses default secondaryAction styles */
+}
+
+/* Basket button states */
+.basketButtonDefault {
+  /* Uses default secondaryAction styles */
+}
+
+.basketButtonAdded {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: #22c55e;
+  color: #22c55e;
+  font-weight: 500;
+}
+
+.basketButtonAdded:hover {
+  background: rgba(34, 197, 94, 0.25);
+  border-color: #16a34a;
+  color: #16a34a;
+}
+
 .primaryAction {
   background: var(--yellow);
   border: none;
@@ -313,6 +462,11 @@
   
   .searchControls {
     justify-content: space-between;
+  }
+  
+  .statusContainer {
+    flex-direction: row;
+    gap: 1rem;
   }
   
   .hotelsColumn {
