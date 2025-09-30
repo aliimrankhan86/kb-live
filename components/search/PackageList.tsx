@@ -22,15 +22,16 @@ const PackageList: React.FC<PackageListProps> = ({
 }) => {
   const [shortlistCount, setShortlistCount] = useState(0);
   const [shortlistedPackages, setShortlistedPackages] = useState<Set<string>>(new Set());
-  const [basketCount, setBasketCount] = useState(0);
   const [basketedPackages, setBasketedPackages] = useState<Set<string>>(new Set());
   const [comparedPackages, setComparedPackages] = useState<Set<string>>(new Set());
   
-  // Calculate compare count from the set size
+  // Calculate counts from the set sizes
   const compareCount = comparedPackages.size;
+  const basketCount = basketedPackages.size;
   
   // Debug logging
   console.log('Compare count:', compareCount, 'Compared packages:', Array.from(comparedPackages));
+  console.log('Basket count:', basketCount, 'Basketed packages:', Array.from(basketedPackages));
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<FilterState | null>(null);
   const [sortOption, setSortOption] = useState<SortOption>('recommended');
@@ -90,12 +91,10 @@ const PackageList: React.FC<PackageListProps> = ({
       if (newSet.has(packageId)) {
         // Remove from basket
         newSet.delete(packageId);
-        setBasketCount(prevCount => prevCount - 1);
         console.log(`Removed package ${packageId} from basket`);
       } else {
         // Add to basket
         newSet.add(packageId);
-        setBasketCount(prevCount => prevCount + 1);
         console.log(`Added package ${packageId} to basket`);
       }
       return newSet;
