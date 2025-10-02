@@ -1,4 +1,22 @@
-/* Centralized Round Slider Component Styles */
+/* Centralized Round Slider Component Styles
+ * 
+ * Design Tokens:
+ * - --yellowDim: #D4AF37 (dim yellow for active states)
+ * - Canonical size: 24px thumb, 8px track height
+ * - Touch targets: 44px minimum (48px on tablet, 52px on mobile)
+ * 
+ * Responsive Breakpoints:
+ * - Desktop: 24px thumb, 8px track
+ * - Tablet (≤768px): 28px thumb, 10px track, 48px touch target
+ * - Mobile (≤480px): 32px thumb, 12px track, 52px touch target
+ * 
+ * Accessibility:
+ * - 3:1 contrast ratio for UI indicators
+ * - 4.5:1 contrast ratio for text
+ * - Focus ring: 3px yellow outline
+ * - High contrast mode support
+ * - Reduced motion support
+ */
 
 .sliderContainer {
   display: flex;

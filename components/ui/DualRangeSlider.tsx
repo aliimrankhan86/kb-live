@@ -3,6 +3,20 @@
 import React, { useState, useCallback } from 'react'
 import styles from './DualRangeSlider.module.css'
 
+/**
+ * Dual Range Slider Component
+ * 
+ * Provides standardized dual-range slider functionality with:
+ * - Canonical size: 24px thumb, 8px track height
+ * - Dim yellow active color using --yellowDim token (#D4AF37)
+ * - Constraint handling: min cannot exceed max, vice versa
+ * - Responsive behavior: 44px+ touch targets on mobile
+ * - Keyboard navigation: Arrow keys, Home, End for both handles
+ * - Accessibility: ARIA labels, focus management for both sliders
+ * - High contrast mode support
+ * - Reduced motion support
+ */
+
 export interface DualRangeSliderProps {
   min: number
   max: number

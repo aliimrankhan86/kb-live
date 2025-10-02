@@ -3,6 +3,19 @@
 import React, { useState, useCallback } from 'react'
 import styles from './RoundSlider.module.css'
 
+/**
+ * Centralized Round Slider Component
+ * 
+ * Provides standardized slider functionality with:
+ * - Canonical size: 24px thumb, 8px track height
+ * - Dim yellow active color using --yellowDim token (#D4AF37)
+ * - Responsive behavior: 44px+ touch targets on mobile
+ * - Keyboard navigation: Arrow keys, Home, End
+ * - Accessibility: ARIA labels, focus management
+ * - High contrast mode support
+ * - Reduced motion support
+ */
+
 export interface RoundSliderProps {
   min: number
   max: number

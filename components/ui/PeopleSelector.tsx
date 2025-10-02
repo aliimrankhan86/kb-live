@@ -3,6 +3,19 @@
 import React, { useState, useCallback } from 'react'
 import styles from './PeopleSelector.module.css'
 
+/**
+ * People Selector Component
+ * 
+ * Provides standardized people count selection with:
+ * - Four options: 1-2, 3-4, up to 5, more than 5
+ * - Responsive grid layout: 2 columns on desktop, 1 column on mobile
+ * - Touch-friendly: 44px+ touch targets on mobile
+ * - Keyboard navigation: Arrow keys, Enter, Space, Home, End
+ * - Accessibility: Radio group with proper ARIA labels
+ * - Theme-consistent styling with hover and focus states
+ * - Required field validation support
+ */
+
 export type PeopleBucket = '1-2' | '3-4' | '5' | '5+'
 
 export interface PeopleSelectorProps {
