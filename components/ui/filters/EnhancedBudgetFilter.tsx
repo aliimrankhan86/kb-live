@@ -65,10 +65,6 @@ export const EnhancedBudgetFilter: React.FC = () => {
               onChange={(e) => handleBudgetChange('min', parseInt(e.target.value))}
               className={styles.rangeInput}
               aria-label="Minimum budget"
-              aria-valuemin={500}
-              aria-valuemax={5000}
-              aria-valuenow={budget.min}
-              aria-valuetext={formatCurrency(budget.min)}
             />
             <input
               type="range"
@@ -79,10 +75,6 @@ export const EnhancedBudgetFilter: React.FC = () => {
               onChange={(e) => handleBudgetChange('max', parseInt(e.target.value))}
               className={styles.rangeInput}
               aria-label="Maximum budget"
-              aria-valuemin={500}
-              aria-valuemax={5000}
-              aria-valuenow={budget.max}
-              aria-valuetext={formatCurrency(budget.max)}
             />
           </div>
           

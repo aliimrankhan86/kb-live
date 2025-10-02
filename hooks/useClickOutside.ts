@@ -18,10 +18,14 @@ export const useClickOutside = (
     };
 
     // Use mousedown instead of click for better UX
-    document.addEventListener('mousedown', handleClickOutside);
+    if (typeof document !== 'undefined') {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('mousedown', handleClickOutside);
+      }
     };
   }, [ref, callback]);
 };

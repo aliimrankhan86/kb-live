@@ -1,0 +1,150 @@
+/* People Selector Component Styles */
+
+.selectorContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.legend {
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: inherit;
+  margin-bottom: 0.75rem;
+}
+
+.required {
+  color: var(--yellow);
+}
+
+.optionsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  background: var(--surfaceDark);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  min-height: 80px;
+  justify-content: center;
+  text-align: center;
+}
+
+.option:hover:not(.optionDisabled) {
+  border-color: var(--yellowDim);
+  background: rgba(212, 175, 55, 0.05);
+  transform: translateY(-1px);
+}
+
+.optionSelected {
+  border-color: var(--yellowDim);
+  background: rgba(212, 175, 55, 0.1);
+  box-shadow: 0 0 0 1px var(--yellowDim);
+}
+
+.optionFocused {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+}
+
+.optionDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.radioInput {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.optionLabel {
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  line-height: 1.2;
+}
+
+.optionDescription {
+  color: var(--textMuted);
+  font-size: 0.75rem;
+  line-height: 1.3;
+}
+
+/* Responsive behavior */
+@media (max-width: 768px) {
+  .optionsGrid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .option {
+    min-height: 60px;
+    padding: 0.75rem;
+  }
+  
+  .optionLabel {
+    font-size: 0.8rem;
+  }
+  
+  .optionDescription {
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .option {
+    min-height: 56px;
+    padding: 0.5rem;
+  }
+  
+  .optionLabel {
+    font-size: 0.75rem;
+  }
+  
+  .optionDescription {
+    font-size: 0.65rem;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .optionSelected {
+    border-color: var(--yellow);
+    background: rgba(255, 211, 29, 0.15);
+  }
+  
+  .option:hover:not(.optionDisabled) {
+    border-color: var(--yellow);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .option {
+    transition: none;
+  }
+  
+  .option:hover:not(.optionDisabled) {
+    transform: none;
+  }
+}

@@ -3,6 +3,7 @@
   --text: #FFFFFF;
   --textMuted: rgba(255, 255, 255, 0.64);
   --yellow: #FFD31D;
+  --yellowDim: #D4AF37; /* Dim yellow for slider active states */
   --surfaceDark: #111111;
 }
 

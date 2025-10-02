@@ -163,6 +163,7 @@ export const SortDropdown: React.FC<SortDropdownProps> = ({
       role="combobox"
       aria-expanded={isOpen}
       aria-haspopup="listbox"
+      aria-controls="sort-options"
       aria-label={ariaLabel}
     >
       {/* Dropdown Button */}
@@ -175,6 +176,7 @@ export const SortDropdown: React.FC<SortDropdownProps> = ({
         disabled={disabled}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
+        aria-controls="sort-options"
         aria-label={`${ariaLabel}: ${currentConfig?.label || 'Select sort option'}`}
       >
         <span className={styles.buttonContent}>
@@ -207,11 +209,12 @@ export const SortDropdown: React.FC<SortDropdownProps> = ({
           className={styles.options}
           role="listbox"
           aria-label="Sort options"
+          id="sort-options"
         >
           {SORT_OPTIONS.map((option, index) => (
             <button
               key={option.value}
-              ref={el => optionRefs.current[index] = el}
+              ref={el => { optionRefs.current[index] = el; }}
               type="button"
               className={`${styles.option} ${value === option.value ? styles.optionSelected : ''} ${focusedIndex === index ? styles.optionFocused : ''}`}
               onClick={() => handleOptionSelect(option.value)}

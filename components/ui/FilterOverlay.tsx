@@ -254,6 +254,11 @@ const FilterOverlayComponent: React.FC<FilterOverlayProps> = ({
     </FilterOverlayProvider>
   );
 
+  // Ensure document.body exists before creating portal
+  if (typeof document === 'undefined') {
+    return null;
+  }
+
   return createPortal(overlayContent, document.body);
 };
 
