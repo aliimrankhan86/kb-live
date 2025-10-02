@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react';
+import { DualRangeSlider } from '@/components/ui/DualRangeSlider';
 import styles from './DistanceFilter.module.css';
 
 interface DistanceFilterProps {
@@ -45,42 +46,18 @@ export const DistanceFilter: React.FC<DistanceFilterProps> = ({
         {formatDistance(value.min)} - {formatDistance(value.max)}
       </div>
 
-      <div className={styles.sliderContainer}>
-        <div className={styles.track}>
-          <div 
-            className={styles.activeTrack}
-            style={{
-              left: `${getPercentage(value.min)}%`,
-              width: `${getPercentage(value.max) - getPercentage(value.min)}%`
-            }}
-          />
-          <input
-            type="range"
-            min={minDistance}
-            max={maxDistance}
-            step="50"
-            value={value.min}
-            onChange={(e) => handleMinChange(parseInt(e.target.value))}
-            className={styles.rangeInput}
-            aria-label="Minimum distance"
-          />
-          <input
-            type="range"
-            min={minDistance}
-            max={maxDistance}
-            step="50"
-            value={value.max}
-            onChange={(e) => handleMaxChange(parseInt(e.target.value))}
-            className={styles.rangeInput}
-            aria-label="Maximum distance"
-          />
-        </div>
-        
-        <div className={styles.labels}>
-          <span className={styles.minLabel}>{formatDistance(minDistance)}</span>
-          <span className={styles.maxLabel}>{formatDistance(maxDistance)}</span>
-        </div>
-      </div>
+      <DualRangeSlider
+        min={minDistance}
+        max={maxDistance}
+        step={50}
+        values={[value.min, value.max]}
+        onChange={(values) => onChange({ min: values[0], max: values[1] })}
+        label="Distance Range"
+        ariaLabels={['Minimum distance', 'Maximum distance']}
+        formatValue={formatDistance}
+        showValues={false}
+        className={styles.sliderContainer}
+      />
     </div>
   );
 };

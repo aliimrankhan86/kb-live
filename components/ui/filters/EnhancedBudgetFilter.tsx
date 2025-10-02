@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { useFilter } from '../FilterOverlayContext';
+import { DualRangeSlider } from '@/components/ui/DualRangeSlider';
 import styles from './EnhancedBudgetFilter.module.css';
 
 export const EnhancedBudgetFilter: React.FC = () => {
@@ -47,50 +48,21 @@ export const EnhancedBudgetFilter: React.FC = () => {
       </div>
 
       {isEnabled && (
-        <div className={styles.sliderContainer}>
-          <div className={styles.track}>
-            <div 
-              className={styles.activeTrack}
-              style={{
-                left: `${((budget.min - 500) / (5000 - 500)) * 100}%`,
-                width: `${((budget.max - budget.min) / (5000 - 500)) * 100}%`
-              }}
-            />
-            <input
-              type="range"
-              min="500"
-              max="5000"
-              step="100"
-              value={budget.min}
-              onChange={(e) => handleBudgetChange('min', parseInt(e.target.value))}
-              className={styles.rangeInput}
-              aria-label="Minimum budget"
-              aria-valuemin={500}
-              aria-valuemax={5000}
-              aria-valuenow={budget.min}
-              aria-valuetext={formatCurrency(budget.min)}
-            />
-            <input
-              type="range"
-              min="500"
-              max="5000"
-              step="100"
-              value={budget.max}
-              onChange={(e) => handleBudgetChange('max', parseInt(e.target.value))}
-              className={styles.rangeInput}
-              aria-label="Maximum budget"
-              aria-valuemin={500}
-              aria-valuemax={5000}
-              aria-valuenow={budget.max}
-              aria-valuetext={formatCurrency(budget.max)}
-            />
-          </div>
-          
-          <div className={styles.labels}>
-            <span className={styles.minLabel}>{formatCurrency(500)}</span>
-            <span className={styles.maxLabel}>{formatCurrency(5000)}</span>
-          </div>
-        </div>
+        <DualRangeSlider
+          min={500}
+          max={5000}
+          step={100}
+          values={[budget.min, budget.max]}
+          onChange={(values) => {
+            handleBudgetChange('min', values[0]);
+            handleBudgetChange('max', values[1]);
+          }}
+          label="Budget Range"
+          ariaLabels={['Minimum budget', 'Maximum budget']}
+          formatValue={formatCurrency}
+          showValues={false}
+          className={styles.sliderContainer}
+        />
       )}
     </div>
   );
