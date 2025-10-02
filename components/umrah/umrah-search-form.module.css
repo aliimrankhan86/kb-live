@@ -474,3 +474,17 @@
     font-size: 0.8rem;
   }
 }
+
+/* People Selector Styles */
+.searchForm__peopleSelector {
+  margin-top: 0.5rem;
+}
+
+/* Override slider container styles for new components */
+.searchForm__sliderContainer {
+  margin-top: 0.5rem;
+}
+
+.searchForm__budgetSliderContainer {
+  margin-top: 0.5rem;
+}

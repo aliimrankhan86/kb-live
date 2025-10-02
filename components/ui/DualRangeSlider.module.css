@@ -1,0 +1,225 @@
+/* Dual Range Slider Component Styles */
+
+.sliderContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.label {
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: inherit;
+  margin-bottom: 0.25rem;
+}
+
+.sliderWrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.track {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  background: #2D2D2D;
+  border-radius: 6px;
+  overflow: visible;
+}
+
+.activeTrack {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: var(--yellowDim);
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.slider {
+  position: absolute;
+  width: 100%;
+  height: 44px; /* Minimum touch target */
+  background: transparent;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  z-index: 5;
+  cursor: pointer;
+  top: -18px; /* Center the touch target */
+}
+
+.sliderMin {
+  z-index: 6; /* Higher z-index for minimum slider */
+}
+
+.sliderMax {
+  z-index: 7; /* Highest z-index for maximum slider */
+}
+
+/* WebKit slider thumb styling */
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  background: var(--yellowDim);
+  border: 2px solid var(--bg);
+  border-radius: 50%;
+  cursor: pointer;
+  position: relative;
+  z-index: 15;
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+}
+
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 
+    0 4px 8px rgba(0, 0, 0, 0.4),
+    0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+
+.slider::-webkit-slider-thumb:active {
+  transform: scale(1.05);
+}
+
+/* Mozilla slider thumb styling */
+.slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  background: var(--yellowDim);
+  border: 2px solid var(--bg);
+  border-radius: 50%;
+  cursor: pointer;
+  position: relative;
+  z-index: 15;
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+}
+
+.slider::-moz-range-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 
+    0 4px 8px rgba(0, 0, 0, 0.4),
+    0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+
+.slider::-moz-range-thumb:active {
+  transform: scale(1.05);
+}
+
+/* Focus states */
+.sliderFocused::-webkit-slider-thumb {
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    0 0 0 3px rgba(255, 211, 29, 0.3);
+}
+
+.sliderFocused::-moz-range-thumb {
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    0 0 0 3px rgba(255, 211, 29, 0.3);
+}
+
+/* Disabled states */
+.sliderDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sliderDisabled::-webkit-slider-thumb {
+  cursor: not-allowed;
+  background: #666;
+  border-color: #333;
+}
+
+.sliderDisabled::-moz-range-thumb {
+  cursor: not-allowed;
+  background: #666;
+  border-color: #333;
+}
+
+.valueDisplay {
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: center;
+  padding: 0.25rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+/* Responsive behavior */
+@media (max-width: 768px) {
+  .slider {
+    height: 48px; /* Larger touch target on mobile */
+    top: -20px;
+  }
+  
+  .slider::-webkit-slider-thumb,
+  .slider::-moz-range-thumb {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .track {
+    height: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .slider {
+    height: 52px; /* Even larger touch target on small mobile */
+    top: -22px;
+  }
+  
+  .slider::-webkit-slider-thumb,
+  .slider::-moz-range-thumb {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .track {
+    height: 12px;
+  }
+  
+  .valueDisplay {
+    font-size: 0.8rem;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .activeTrack {
+    background: var(--yellow);
+  }
+  
+  .slider::-webkit-slider-thumb,
+  .slider::-moz-range-thumb {
+    background: var(--yellow);
+    border-color: var(--text);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .activeTrack,
+  .slider::-webkit-slider-thumb,
+  .slider::-moz-range-thumb {
+    transition: none;
+  }
+}

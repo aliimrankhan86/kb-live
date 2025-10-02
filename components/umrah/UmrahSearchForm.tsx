@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
+import { DualRangeSlider } from '@/components/ui/DualRangeSlider'
+import { PeopleSelector, PeopleBucket } from '@/components/ui/PeopleSelector'
 import styles from './umrah-search-form.module.css'
 
 interface UmrahSearchFormProps {
@@ -13,6 +15,7 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
   const [selectedPeriod, setSelectedPeriod] = useState('')
   const [budgetEnabled, setBudgetEnabled] = useState(true)
   const [budgetRange, setBudgetRange] = useState([500, 1000]) // Start with a reasonable gap
+  const [numberOfPeople, setNumberOfPeople] = useState<PeopleBucket | null>(null)
 
   // Generate quick select options with future years
   const currentYear = new Date().getFullYear()
@@ -123,35 +126,20 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
           <div className={styles.searchForm__selectedPeriod}>
             {selectedPeriod}
           </div>
-          <div className={styles.searchForm__sliderContainer}>
-            <div className={styles.searchForm__track}>
-              <div 
-                className={styles.searchForm__activeTrack}
-                style={{
-                  left: `${timeRange[0]}%`,
-                  width: `${timeRange[1] - timeRange[0]}%`
-                }}
-              />
-            </div>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={timeRange[0]}
-              onChange={(e) => handleTimeRangeChange(0, parseInt(e.target.value))}
-              className={styles.searchForm__slider}
-              aria-label="Start date"
-            />
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={timeRange[1]}
-              onChange={(e) => handleTimeRangeChange(1, parseInt(e.target.value))}
-              className={styles.searchForm__slider}
-              aria-label="End date"
-            />
-          </div>
+          <DualRangeSlider
+            min={0}
+            max={100}
+            step={1}
+            values={timeRange}
+            onChange={(values) => {
+              setTimeRange(values)
+              setSelectedPeriod(generateFutureDateRange(values[0], values[1]))
+            }}
+            label="Time Period Range"
+            ariaLabels={['Start date', 'End date']}
+            showValues={false}
+            className={styles.searchForm__sliderContainer}
+          />
         </div>
 
         {/* Quick Select Options */}
@@ -171,6 +159,17 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Number of People Selector */}
+        <div className={styles.searchForm__section}>
+          <PeopleSelector
+            value={numberOfPeople}
+            onChange={setNumberOfPeople}
+            label="Number of people"
+            required={true}
+            className={styles.searchForm__peopleSelector}
+          />
         </div>
 
         {/* Budget Range */}
@@ -194,37 +193,17 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
               <div className={styles.searchForm__selectedBudget}>
                 £{budgetRange[0]} - £{budgetRange[1]} per person
               </div>
-              <div className={styles.searchForm__budgetSliderContainer}>
-                <div className={styles.searchForm__budgetTrack}>
-                  <div 
-                    className={styles.searchForm__budgetActiveTrack}
-                    style={{
-                      left: `${((budgetRange[0] - 300) / (2000 - 300)) * 100}%`,
-                      width: `${((budgetRange[1] - budgetRange[0]) / (2000 - 300)) * 100}%`
-                    }}
-                  />
-                </div>
-                <input
-                  type="range"
-                  min="300"
-                  max="2000"
-                  step="50"
-                  value={budgetRange[0]}
-                  onChange={(e) => handleBudgetRangeChange(0, parseInt(e.target.value))}
-                  className={styles.searchForm__budgetSlider}
-                  aria-label="Minimum budget"
-                />
-                <input
-                  type="range"
-                  min="300"
-                  max="2000"
-                  step="50"
-                  value={budgetRange[1]}
-                  onChange={(e) => handleBudgetRangeChange(1, parseInt(e.target.value))}
-                  className={styles.searchForm__budgetSlider}
-                  aria-label="Maximum budget"
-                />
-              </div>
+              <DualRangeSlider
+                min={300}
+                max={2000}
+                step={50}
+                values={budgetRange}
+                onChange={setBudgetRange}
+                label="Budget Range"
+                ariaLabels={['Minimum budget', 'Maximum budget']}
+                formatValue={(value) => `£${value}`}
+                className={styles.searchForm__budgetSliderContainer}
+              />
             </>
           )}
         </div>
