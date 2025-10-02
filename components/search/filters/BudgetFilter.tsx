@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react';
-import { DualRangeSlider } from '@/components/ui/DualRangeSlider';
 import styles from './BudgetFilter.module.css';
 
 interface BudgetFilterProps {
@@ -39,18 +38,42 @@ export const BudgetFilter: React.FC<BudgetFilterProps> = ({
         ${value.min.toLocaleString()} - ${value.max.toLocaleString()}
       </div>
 
-      <DualRangeSlider
-        min={minBudget}
-        max={maxBudget}
-        step={100}
-        values={[value.min, value.max]}
-        onChange={(values) => onChange({ min: values[0], max: values[1] })}
-        label="Budget Range"
-        ariaLabels={['Minimum budget', 'Maximum budget']}
-        formatValue={(val) => `$${val.toLocaleString()}`}
-        showValues={false}
-        className={styles.sliderContainer}
-      />
+      <div className={styles.sliderContainer}>
+        <div className={styles.track}>
+          <div 
+            className={styles.activeTrack}
+            style={{
+              left: `${getPercentage(value.min)}%`,
+              width: `${getPercentage(value.max) - getPercentage(value.min)}%`
+            }}
+          />
+          <input
+            type="range"
+            min={minBudget}
+            max={maxBudget}
+            step="100"
+            value={value.min}
+            onChange={(e) => handleMinChange(parseInt(e.target.value))}
+            className={styles.rangeInput}
+            aria-label="Minimum budget"
+          />
+          <input
+            type="range"
+            min={minBudget}
+            max={maxBudget}
+            step="100"
+            value={value.max}
+            onChange={(e) => handleMaxChange(parseInt(e.target.value))}
+            className={styles.rangeInput}
+            aria-label="Maximum budget"
+          />
+        </div>
+        
+        <div className={styles.labels}>
+          <span className={styles.minLabel}>${minBudget.toLocaleString()}</span>
+          <span className={styles.maxLabel}>${maxBudget.toLocaleString()}</span>
+        </div>
+      </div>
     </div>
   );
 };
