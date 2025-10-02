@@ -20,10 +20,14 @@ export const useEscapeKey = (
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
+    if (typeof document !== 'undefined') {
+      document.addEventListener('keydown', handleKeyDown);
+    }
 
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('keydown', handleKeyDown);
+      }
     };
   }, [isActive, onEscape]);
 };

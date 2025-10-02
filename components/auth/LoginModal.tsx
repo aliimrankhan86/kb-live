@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { useEscapeKey } from '@/hooks/useEscapeKey'
 import { useClickOutside } from '@/hooks/useClickOutside'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
@@ -172,7 +173,7 @@ const LoginModalComponent: React.FC<LoginModalProps> = ({
   // Don't render if not open
   if (!isOpen) return null
 
-  return (
+  const modalContent = (
     <div
       className={`${styles.backdrop} ${isAnimating ? styles.backdropVisible : ''}`}
       style={{ zIndex }}
@@ -302,6 +303,13 @@ const LoginModalComponent: React.FC<LoginModalProps> = ({
       </div>
     </div>
   )
+
+  // Ensure document.body exists before creating portal
+  if (typeof document === 'undefined') {
+    return null
+  }
+
+  return createPortal(modalContent, document.body)
 }
 
 export const LoginModal = React.memo(LoginModalComponent)
