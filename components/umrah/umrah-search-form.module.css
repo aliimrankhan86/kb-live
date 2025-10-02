@@ -137,16 +137,16 @@
 .searchForm__slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   background: #D4AF37; /* Medium yellow - Gold (matching filter overlay) */
-  border: 2px solid #1A1A1A;
+  border: 3px solid #1A1A1A;
   border-radius: 50%;
   cursor: pointer;
   position: relative;
   z-index: 15;
   box-shadow: 
-    0 2px 4px rgba(0, 0, 0, 0.3),
+    0 3px 8px rgba(0, 0, 0, 0.4),
     0 0 0 1px rgba(255, 255, 255, 0.1);
   transition: all 0.2s ease;
 }
@@ -159,16 +159,16 @@
 }
 
 .searchForm__slider::-moz-range-thumb {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   background: #D4AF37; /* Medium yellow - Gold (matching filter overlay) */
-  border: 2px solid #1A1A1A;
+  border: 3px solid #1A1A1A;
   border-radius: 50%;
   cursor: pointer;
   position: relative;
   z-index: 15;
   box-shadow: 
-    0 2px 4px rgba(0, 0, 0, 0.3),
+    0 3px 8px rgba(0, 0, 0, 0.4),
     0 0 0 1px rgba(255, 255, 255, 0.1);
   transition: all 0.2s ease;
 }
@@ -281,16 +281,16 @@
 .searchForm__budgetSlider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 20px;
-  height: 20px;
+  width: 32px;
+  height: 32px;
   background: #D4AF37; /* Medium yellow - Gold (matching filter overlay) */
-  border: 2px solid #1A1A1A;
+  border: 3px solid #1A1A1A;
   border-radius: 50%;
   cursor: pointer;
   position: relative;
   z-index: 15;
   box-shadow: 
-    0 2px 4px rgba(0, 0, 0, 0.3),
+    0 3px 8px rgba(0, 0, 0, 0.4),
     0 0 0 1px rgba(255, 255, 255, 0.1);
   transition: all 0.2s ease;
 }
@@ -303,16 +303,16 @@
 }
 
 .searchForm__budgetSlider::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
+  width: 32px;
+  height: 32px;
   background: #D4AF37; /* Medium yellow - Gold (matching filter overlay) */
-  border: 2px solid #1A1A1A;
+  border: 3px solid #1A1A1A;
   border-radius: 50%;
   cursor: pointer;
   position: relative;
   z-index: 15;
   box-shadow: 
-    0 2px 4px rgba(0, 0, 0, 0.3),
+    0 3px 8px rgba(0, 0, 0, 0.4),
     0 0 0 1px rgba(255, 255, 255, 0.1);
   transition: all 0.2s ease;
 }
