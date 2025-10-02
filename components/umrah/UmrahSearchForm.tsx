@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
+import { PeopleSelector, PeopleBucket } from '@/components/ui/PeopleSelector'
 import styles from './umrah-search-form.module.css'
 
 interface UmrahSearchFormProps {
@@ -13,6 +14,7 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
   const [selectedPeriod, setSelectedPeriod] = useState('')
   const [budgetEnabled, setBudgetEnabled] = useState(true)
   const [budgetRange, setBudgetRange] = useState([500, 1000]) // Start with a reasonable gap
+  const [numberOfPeople, setNumberOfPeople] = useState<PeopleBucket | null>(null)
 
   // Generate quick select options with future years
   const currentYear = new Date().getFullYear()
@@ -173,6 +175,16 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
           </div>
         </div>
 
+        {/* Number of People Selector */}
+        <div className={styles.searchForm__section}>
+          <PeopleSelector
+            value={numberOfPeople}
+            onChange={setNumberOfPeople}
+            label="Number of people"
+            required={true}
+            className={styles.searchForm__peopleSelector}
+          />
+        </div>
 
         {/* Budget Range */}
         <div className={styles.searchForm__section}>
