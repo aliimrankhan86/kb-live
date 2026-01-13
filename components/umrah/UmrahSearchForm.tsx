@@ -13,6 +13,16 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
   const [selectedPeriod, setSelectedPeriod] = useState('')
   const [budgetEnabled, setBudgetEnabled] = useState(true)
   const [budgetRange, setBudgetRange] = useState([500, 1000]) // Start with a reasonable gap
+  const minTime = Math.min(timeRange[0], timeRange[1])
+  const maxTime = Math.max(timeRange[0], timeRange[1])
+  const timeRangeStart = minTime
+  const timeRangeWidth = maxTime - minTime
+  const minBudgetValue = 300
+  const maxBudgetValue = 2000
+  const minBudget = Math.min(budgetRange[0], budgetRange[1])
+  const maxBudget = Math.max(budgetRange[0], budgetRange[1])
+  const budgetRangeStart = ((minBudget - minBudgetValue) / (maxBudgetValue - minBudgetValue)) * 100
+  const budgetRangeWidth = ((maxBudget - minBudgetValue) / (maxBudgetValue - minBudgetValue)) * 100 - budgetRangeStart
 
   // Generate quick select options with future years
   const currentYear = new Date().getFullYear()
@@ -102,6 +112,12 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
             {selectedPeriod}
           </div>
           <div className={styles.searchForm__sliderContainer}>
+            <div className={styles.searchForm__track}>
+              <div
+                className={styles.searchForm__activeTrack}
+                style={{ left: `${timeRangeStart}%`, width: `${timeRangeWidth}%` }}
+              />
+            </div>
             <input
               type="range"
               min="0"
@@ -164,10 +180,16 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
                 £{budgetRange[0]} - £{budgetRange[1]} per person
               </div>
               <div className={styles.searchForm__budgetSliderContainer}>
+                <div className={styles.searchForm__track}>
+                  <div
+                    className={styles.searchForm__activeTrack}
+                    style={{ left: `${budgetRangeStart}%`, width: `${budgetRangeWidth}%` }}
+                  />
+                </div>
                 <input
                   type="range"
-                  min="300"
-                  max="2000"
+                  min={minBudgetValue}
+                  max={maxBudgetValue}
                   step="50"
                   value={budgetRange[0]}
                   onChange={(e) => handleBudgetRangeChange(0, parseInt(e.target.value))}
@@ -176,8 +198,8 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
                 />
                 <input
                   type="range"
-                  min="300"
-                  max="2000"
+                  min={minBudgetValue}
+                  max={maxBudgetValue}
                   step="50"
                   value={budgetRange[1]}
                   onChange={(e) => handleBudgetRangeChange(1, parseInt(e.target.value))}
