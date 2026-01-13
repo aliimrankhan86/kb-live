@@ -30,6 +30,12 @@ export const TimePeriodFilter: React.FC<TimePeriodFilterProps> = ({
   onChange
 }) => {
   const [isCustomRange, setIsCustomRange] = useState(!specialOccasion);
+  const startIndex = months.indexOf(value.start);
+  const endIndex = months.indexOf(value.end);
+  const minIndex = Math.min(startIndex, endIndex);
+  const maxIndex = Math.max(startIndex, endIndex);
+  const leftPercent = (minIndex / 11) * 100;
+  const widthPercent = ((maxIndex - minIndex) / 11) * 100;
 
   const handleSpecialOccasionSelect = (occasion: typeof specialOccasions[0]) => {
     onChange({ start: occasion.start, end: occasion.end }, occasion.id);
@@ -63,15 +69,15 @@ export const TimePeriodFilter: React.FC<TimePeriodFilterProps> = ({
           <div 
             className={styles.activeTrack}
             style={{
-              left: `${(months.indexOf(value.start) / 11) * 100}%`,
-              width: `${((months.indexOf(value.end) - months.indexOf(value.start) + 1) / 12) * 100}%`
+              left: `${leftPercent}%`,
+              width: `${widthPercent}%`
             }}
           />
           <input
             type="range"
             min="0"
             max="11"
-            value={months.indexOf(value.start)}
+            value={startIndex}
             onChange={(e) => handleCustomRangeChange('start', months[parseInt(e.target.value)])}
             className={styles.rangeInput}
             aria-label="Start month"
@@ -80,7 +86,7 @@ export const TimePeriodFilter: React.FC<TimePeriodFilterProps> = ({
             type="range"
             min="0"
             max="11"
-            value={months.indexOf(value.end)}
+            value={endIndex}
             onChange={(e) => handleCustomRangeChange('end', months[parseInt(e.target.value)])}
             className={styles.rangeInput}
             aria-label="End month"
