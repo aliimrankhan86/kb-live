@@ -14,6 +14,7 @@ interface PackageListProps {
 
 const PackageList: React.FC<PackageListProps> = ({ 
   packages, 
+  onFilter,
   onSort 
 }) => {
   const [shortlistCount, setShortlistCount] = useState(0);
@@ -22,13 +23,13 @@ const PackageList: React.FC<PackageListProps> = ({
 
   const handleAddToShortlist = (packageId: string) => {
     // Placeholder for shortlist functionality
+    void packageId;
     setShortlistCount(prev => prev + 1);
-    console.log(`Added package ${packageId} to shortlist`);
   };
 
   const handleAddToCompare = (packageId: string) => {
     // Placeholder for compare functionality
-    console.log(`Added package ${packageId} to compare`);
+    void packageId;
   };
 
   const handleFilterClick = () => {
@@ -41,13 +42,13 @@ const PackageList: React.FC<PackageListProps> = ({
 
   const handleFilterApply = (filters: FilterState) => {
     setAppliedFilters(filters);
-    console.log('Applied filters:', filters);
     // Here you would typically filter the packages based on the applied filters
+    onFilter?.();
   };
 
   const handleFilterReset = () => {
     setAppliedFilters(null);
-    console.log('Reset filters');
+    onFilter?.();
   };
 
   return (
