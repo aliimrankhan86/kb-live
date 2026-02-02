@@ -41,16 +41,20 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
           aria-label="Main menu"
         >
           <Link 
-            href="/partner" 
+            href="/quote" 
             className={styles.header__navLink}
-            aria-label="Become a partner with KaabaTrip"
           >
-            Become A Partner
+            Get a Quote
+          </Link>
+          <Link 
+            href="/operator/dashboard" 
+            className={styles.header__navLink}
+          >
+            Operator Dashboard
           </Link>
           <Link 
             href="/login" 
             className={styles.header__navLink}
-            aria-label="Login to your account"
           >
             Login
           </Link>
