@@ -1,8 +1,9 @@
-import { QuoteRequest, Offer, OperatorProfile, User } from '@/lib/types';
+import { QuoteRequest, Offer, OperatorProfile, User, BookingIntent } from '@/lib/types';
 
 const STORAGE_KEYS = {
   REQUESTS: 'kb_requests',
   OFFERS: 'kb_offers',
+  BOOKING_INTENTS: 'kb_bookings',
   USERS: 'kb_users',
   OPERATORS: 'kb_operators',
 };
@@ -75,6 +76,14 @@ export const MockDB = {
   },
   getOffersByRequestId: (requestId: string) =>
     MockDB.getOffers().filter((o) => o.requestId === requestId),
+
+  getBookingIntents: (): BookingIntent[] => getStorage(STORAGE_KEYS.BOOKING_INTENTS, []),
+  saveBookingIntent: (booking: BookingIntent) => {
+    const bookings = MockDB.getBookingIntents();
+    bookings.push(booking);
+    setStorage(STORAGE_KEYS.BOOKING_INTENTS, bookings);
+    return booking;
+  },
 
   getOperators: (): OperatorProfile[] => {
     const ops = getStorage<OperatorProfile[]>(STORAGE_KEYS.OPERATORS, []);

@@ -72,6 +72,19 @@ export interface QuoteRequest {
   notes?: string;
 }
 
+export type BookingStatus = 'started' | 'contacted' | 'confirmed' | 'closed';
+
+export interface BookingIntent {
+  id: string;
+  offerId: string;
+  customerId: string;
+  operatorId: string;
+  status: BookingStatus;
+  createdAt: string;
+  updatedAt: string;
+  notes?: string;
+}
+
 export interface Offer {
   id: string;
   requestId: string;

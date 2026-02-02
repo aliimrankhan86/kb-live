@@ -39,7 +39,7 @@ export function Step5Review() {
             <p>£{draft.budgetRange?.min} - £{draft.budgetRange?.max}</p>
             <p>
               {Object.entries(draft.occupancy || {})
-                .filter(([_, count]) => count > 0)
+                .filter(([, count]) => count > 0)
                 .map(([type, count]) => `${count} ${type}`)
                 .join(', ')}
             </p>
@@ -50,7 +50,7 @@ export function Step5Review() {
           <h3 className="mb-2 font-medium text-[rgba(255,255,255,0.4)]">Inclusions</h3>
           <div className="flex flex-wrap gap-2">
             {Object.entries(draft.inclusions || {})
-              .filter(([_, included]) => included)
+              .filter(([, included]) => included)
               .map(([key]) => (
                 <span key={key} className="rounded-full bg-[#FFD31D] px-3 py-1 text-xs font-medium text-black capitalize">
                   {key}

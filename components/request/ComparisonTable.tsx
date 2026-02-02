@@ -3,6 +3,7 @@
 import { Offer, OperatorProfile } from '@/lib/types';
 import { MockDB } from '@/lib/api/mock-db';
 import { useEffect, useState } from 'react';
+import { mapOfferToComparison, ComparisonRow } from '@/lib/comparison';
 
 interface ComparisonTableProps {
   offers: Offer[];
@@ -17,40 +18,22 @@ export function ComparisonTable({ offers }: ComparisonTableProps) {
     setOperators(opsMap);
   }, []);
 
-  const features = [
-    { label: 'Price', render: (o: Offer) => `${o.currency} ${o.pricePerPerson}` },
-    { label: 'Operator', render: (o: Offer) => operators[o.operatorId]?.companyName || 'Unknown' },
-    { label: 'Total Nights', render: (o: Offer) => o.totalNights },
-    { label: 'Makkah / Madinah', render: (o: Offer) => `${o.nightsMakkah} / ${o.nightsMadinah}` },
-    { label: 'Hotel Rating', render: (o: Offer) => `${o.hotelStars} Stars` },
-    { label: 'Distance to Haram', render: (o: Offer) => o.distanceToHaram },
-    { 
-      label: 'Room Occupancy', 
-      render: (o: Offer) => {
-        const supported = [];
-        if (o.roomOccupancy.single) supported.push('Single');
-        if (o.roomOccupancy.double) supported.push('Double');
-        if (o.roomOccupancy.triple) supported.push('Triple');
-        if (o.roomOccupancy.quad) supported.push('Quad');
-        return supported.join(', ') || 'None specified';
-      }
-    },
-    {
-      label: 'Inclusions',
-      render: (o: Offer) => {
-        const inc = [];
-        if (o.inclusions.visa) inc.push('Visa');
-        if (o.inclusions.flights) inc.push('Flights');
-        if (o.inclusions.transfers) inc.push('Transfers');
-        if (o.inclusions.meals) inc.push('Meals');
-        return inc.length > 0 ? inc.join(', ') : 'None';
-      }
-    },
-    { label: 'Notes', render: (o: Offer) => o.notes || '-' },
+  const comparisonRows = offers.map(o => mapOfferToComparison(o, operators[o.operatorId]));
+
+  const features: { label: string; key: keyof ComparisonRow }[] = [
+    { label: 'Price', key: 'price' },
+    { label: 'Operator', key: 'operatorName' },
+    { label: 'Total Nights', key: 'totalNights' },
+    { label: 'Makkah / Madinah', key: 'splitNights' },
+    { label: 'Hotel Rating', key: 'hotelRating' },
+    { label: 'Distance to Haram', key: 'distance' },
+    { label: 'Room Occupancy', key: 'occupancy' },
+    { label: 'Inclusions', key: 'inclusions' },
+    { label: 'Notes', key: 'notes' },
   ];
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto" data-testid="comparison-table">
       <table className="w-full min-w-[600px] border-collapse text-left text-sm text-[#FFFFFF]">
         <thead>
           <tr>
@@ -70,9 +53,9 @@ export function ComparisonTable({ offers }: ComparisonTableProps) {
               <td className="py-4 pl-4 font-medium text-[rgba(255,255,255,0.64)]">
                 {feature.label}
               </td>
-              {offers.map((offer) => (
-                <td key={offer.id} className="p-4">
-                  {feature.render(offer)}
+              {comparisonRows.map((row) => (
+                <td key={row.id} className="p-4">
+                  {row[feature.key]}
                 </td>
               ))}
             </tr>

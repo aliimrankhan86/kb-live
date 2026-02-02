@@ -11,6 +11,8 @@ import {
   OverlayTitle,
 } from '@/components/ui/Overlay';
 import { ComparisonTable } from './ComparisonTable';
+import { handleOfferSelection } from '@/lib/comparison';
+import { Repository, RequestContext } from '@/lib/api/repository';
 
 export function RequestDetail({ id }: { id: string }) {
   const [request, setRequest] = useState<QuoteRequest | undefined>(undefined);
@@ -19,19 +21,37 @@ export function RequestDetail({ id }: { id: string }) {
   const [loading, setLoading] = useState(true);
   const [selectedOffers, setSelectedOffers] = useState<string[]>([]);
   const [showComparison, setShowComparison] = useState(false);
+  const [bookingSuccess, setBookingSuccess] = useState<string | null>(null);
+
+  // Mock Context
+  const context: RequestContext = { userId: 'cust1', role: 'customer' };
 
   useEffect(() => {
     // Simulate API fetch
-    const req = MockDB.getRequestById(id);
+    const req = Repository.getRequestById(context, id);
     if (req) {
       setRequest(req);
-      const offs = MockDB.getOffersByRequestId(id);
+      const offs = Repository.getOffersForRequest(context, id);
       setOffers(offs);
       const ops = MockDB.getOperators();
       setOperators(ops);
     }
     setLoading(false);
   }, [id]);
+
+  const handleBooking = (offer: Offer) => {
+    try {
+      Repository.createBookingIntent(context, {
+        offerId: offer.id,
+        operatorId: offer.operatorId,
+        notes: 'Customer clicked Proceed',
+      });
+      setBookingSuccess(offer.id);
+      setTimeout(() => setBookingSuccess(null), 3000);
+    } catch (err) {
+      alert('Failed to create booking intent');
+    }
+  };
 
   if (loading) return <div className="p-8 text-center text-[#FFFFFF]">Loading...</div>;
   if (!request) return <div className="p-8 text-center text-[#FFFFFF]">Request not found.</div>;
@@ -98,6 +118,7 @@ export function RequestDetail({ id }: { id: string }) {
               return (
                 <div 
                   key={offer.id} 
+                  data-testid="offer-card"
                   className={`rounded-lg border bg-[#111111] p-6 shadow-sm transition-colors ${
                     isSelected ? 'border-[#FFD31D] bg-[rgba(255,211,29,0.02)]' : 'border-[rgba(255,255,255,0.1)] hover:border-[#FFD31D]'
                   }`}
@@ -106,13 +127,14 @@ export function RequestDetail({ id }: { id: string }) {
                     <div className="flex items-center space-x-3">
                       <input
                         type="checkbox"
+                        data-testid="offer-compare-checkbox"
                         checked={isSelected}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            if (selectedOffers.length < 3) setSelectedOffers([...selectedOffers, offer.id]);
-                            else alert('You can compare up to 3 offers');
-                          } else {
-                            setSelectedOffers(selectedOffers.filter(id => id !== offer.id));
+                        onChange={() => {
+                          try {
+                            const newSelected = handleOfferSelection(selectedOffers, offer.id);
+                            setSelectedOffers(newSelected);
+                          } catch (err) {
+                            alert((err as Error).message);
                           }
                         }}
                         className="h-4 w-4 rounded border-[rgba(255,255,255,0.3)] bg-transparent text-[#FFD31D] focus:ring-[#FFD31D]"
@@ -132,9 +154,16 @@ export function RequestDetail({ id }: { id: string }) {
                     <p>{offer.hotelStars} Star Hotels</p>
                     <p>{offer.distanceToHaram} to Haram</p>
                   </div>
-                  <div className="mt-6">
-                    <button className="w-full rounded-lg bg-[rgba(255,255,255,0.1)] py-2 text-sm font-medium text-[#FFFFFF] hover:bg-[rgba(255,255,255,0.2)]">
+                  <div className="mt-6 flex gap-2">
+                    <button className="flex-1 rounded-lg bg-[rgba(255,255,255,0.1)] py-2 text-sm font-medium text-[#FFFFFF] hover:bg-[rgba(255,255,255,0.2)]">
                       View Details
+                    </button>
+                    <button 
+                      onClick={() => handleBooking(offer)}
+                      disabled={bookingSuccess === offer.id}
+                      className="flex-1 rounded-lg bg-[#FFD31D] py-2 text-sm font-medium text-[#000000] hover:bg-[#E5BD1A] disabled:opacity-50"
+                    >
+                      {bookingSuccess === offer.id ? 'Requested!' : 'Book Now'}
                     </button>
                   </div>
                 </div>

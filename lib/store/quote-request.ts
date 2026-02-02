@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { QuoteRequest, Season } from '@/lib/types';
+import { QuoteRequest } from '@/lib/types';
 
 interface QuoteRequestState {
   draft: Partial<QuoteRequest>;

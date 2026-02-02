@@ -1,7 +1,6 @@
 'use client';
 
 import { useQuoteRequestStore } from '@/lib/store/quote-request';
-import { clsx } from 'clsx';
 
 export function Step2LocationDates() {
   const { draft, setDraft } = useQuoteRequestStore();

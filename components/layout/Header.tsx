@@ -53,6 +53,12 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
             Operator Dashboard
           </Link>
           <Link 
+            href="/kanban" 
+            className={styles.header__navLink}
+          >
+            Kanban
+          </Link>
+          <Link 
             href="/login" 
             className={styles.header__navLink}
           >

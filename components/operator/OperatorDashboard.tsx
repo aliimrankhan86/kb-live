@@ -78,7 +78,7 @@ export function OperatorDashboard() {
           <OverlayHeader>
             <OverlayTitle>Reply to Quote Request</OverlayTitle>
             <OverlayDescription>
-              Review the customer's request and send a structured offer.
+              Review the request from the customer and send a structured offer.
             </OverlayDescription>
           </OverlayHeader>
           

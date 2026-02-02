@@ -49,3 +49,25 @@
 
 - [ ] Check `localStorage` (Key: `kb_requests`, `kb_offers`) to see data persistence.
 - [ ] Verify `id`s are generated correctly.
+
+## 6. Kanban Board
+
+- [ ] Navigate to `/kanban`.
+- [ ] Add a new task (Title, Assignee: Tuffy Dev).
+- [ ] Verify it appears in "Backlog".
+- [ ] Drag task to "In Progress".
+- [ ] Verify task updates.
+- [ ] Edit task -> Check "User Story" field is available.
+- [ ] Move task to "Done".
+- [ ] Check "History" tab (should be empty for new task as < 7 days).
+
+## 7. Operator Analytics
+
+- [ ] Navigate to `/operator/analytics`.
+- [ ] Verify "Total Requests" matches dashboard.
+- [ ] Verify "Booking Intents" count.
+
+## 8. E2E Tests
+
+- [ ] Run `npx playwright test e2e/flow.spec.ts`.
+- [ ] Verify all 3 browsers pass.
