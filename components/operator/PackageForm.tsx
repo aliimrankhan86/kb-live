@@ -68,6 +68,7 @@ export function PackageForm({ initialData, onSuccess, onCancel }: PackageFormPro
           <input
             type="text"
             required
+            data-testid="package-title-input"
             value={formData.title || ''}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
             className="w-full rounded border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] px-3 py-2 focus:border-[#FFD31D] focus:outline-none"
@@ -285,6 +286,7 @@ export function PackageForm({ initialData, onSuccess, onCancel }: PackageFormPro
         </button>
         <button
           type="submit"
+          data-testid="save-package-button"
           className="rounded bg-[#FFD31D] px-6 py-2 text-[#000000] hover:bg-[#E5BD1A]"
         >
           Save Package

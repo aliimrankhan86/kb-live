@@ -67,7 +67,27 @@
 - [ ] Verify "Total Requests" matches dashboard.
 - [ ] Verify "Booking Intents" count.
 
-## 8. E2E Tests
+## 8. Operator Packages (Phase 2A)
+
+- [ ] Navigate to `/operator/packages`.
+- [ ] Verify existing packages are listed.
+- [ ] Click **Create Package**.
+- [ ] Fill form:
+  - Title: "Test Package"
+  - Type: Umrah
+  - Price: 1200
+  - Nights: 10
+- [ ] Click **Save Package**.
+- [ ] Verify new package appears in the list.
+- [ ] Click **Edit** on the new package.
+- [ ] Change title to "Test Package Updated".
+- [ ] Click **Save Package**.
+- [ ] Verify title is updated.
+- [ ] Click **Delete**.
+- [ ] Confirm deletion.
+- [ ] Verify package is removed.
+
+## 9. E2E Tests
 
 - [ ] Run `npx playwright test e2e/flow.spec.ts`.
 - [ ] Verify all 3 browsers pass.

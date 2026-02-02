@@ -24,12 +24,14 @@ const setStorage = <T>(key: string, val: T) => {
 const SEED_OPERATORS: OperatorProfile[] = [
   {
     id: 'op1',
+    slug: 'al-hidayah-travel',
     companyName: 'Al-Hidayah Travel',
     verificationStatus: 'verified',
     contactEmail: 'info@alhidayah.com',
   },
   {
     id: 'op2',
+    slug: 'makkah-tours',
     companyName: 'Makkah Tours',
     verificationStatus: 'verified',
     contactEmail: 'sales@makkahtours.com',

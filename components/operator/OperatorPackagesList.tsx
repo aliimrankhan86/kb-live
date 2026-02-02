@@ -1,134 +1,141 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { Package } from '@/lib/types';
-import { MockDB } from '@/lib/api/mock-db';
-import { Repository, RequestContext } from '@/lib/api/repository';
-import { PackageForm } from './PackageForm';
-import {
-  Dialog,
-  OverlayContent,
-  OverlayHeader,
-  OverlayTitle,
-} from '@/components/ui/Overlay';
 
-export function OperatorPackagesList() {
-  const [packages, setPackages] = useState<Package[]>([]);
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingPackage, setEditingPackage] = useState<Package | undefined>(undefined);
+interface OperatorPackagesListProps {
+  packages: Package[];
+  isLoading?: boolean;
+  error?: string;
+  onCreate: () => void;
+  onEdit: (packageId: string) => void;
+  onDelete: (packageId: string) => void;
+  onRetry?: () => void;
+}
 
-  // Mock Context
-  const context: RequestContext = { userId: 'op1', role: 'operator' };
+const getSeasonOrDateWindow = (pkg: Package) => {
+  if (pkg.seasonLabel) return pkg.seasonLabel;
+  if (pkg.dateWindow?.start && pkg.dateWindow?.end) {
+    return `${pkg.dateWindow.start} - ${pkg.dateWindow.end}`;
+  }
+  if (pkg.dateWindow?.start) return `From ${pkg.dateWindow.start}`;
+  if (pkg.dateWindow?.end) return `Until ${pkg.dateWindow.end}`;
+  return 'Custom Dates';
+};
 
-  const loadPackages = () => {
-    // In real app, use Repository.getPackagesByOperator(context.userId)
-    // For now, access MockDB directly for simplicity in Client Component
-    const pkgs = MockDB.getPackages().filter(p => p.operatorId === context.userId);
-    setPackages(pkgs);
-  };
-
-  useEffect(() => {
-    MockDB.setCurrentUser('operator');
-    loadPackages();
-  }, []);
-
-  const handleDelete = (id: string) => {
-    if (confirm('Are you sure you want to delete this package?')) {
-      Repository.deletePackage(context, id);
-      loadPackages();
-    }
-  };
-
-  const handleEdit = (pkg: Package) => {
-    setEditingPackage(pkg);
-    setIsFormOpen(true);
-  };
-
-  const handleCreate = () => {
-    setEditingPackage(undefined);
-    setIsFormOpen(true);
-  };
-
-  const handleFormSuccess = () => {
-    setIsFormOpen(false);
-    loadPackages();
-  };
+export function OperatorPackagesList({
+  packages,
+  isLoading = false,
+  error,
+  onCreate,
+  onEdit,
+  onDelete,
+  onRetry,
+}: OperatorPackagesListProps) {
+  const hasPackages = packages.length > 0;
 
   return (
-    <div>
-      <div className="mb-6 flex justify-end">
-        <button
-          onClick={handleCreate}
-          className="rounded bg-[#FFD31D] px-4 py-2 text-sm font-medium text-[#000000] hover:bg-[#E5BD1A]"
-        >
-          Create Package
-        </button>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {packages.length === 0 ? (
-          <div className="col-span-full py-12 text-center text-[rgba(255,255,255,0.4)]">
-            No packages found. Create one to get started.
-          </div>
-        ) : (
-          packages.map((pkg) => (
-            <div
-              key={pkg.id}
-              className="flex flex-col justify-between rounded-lg border border-[rgba(255,255,255,0.1)] bg-[#111111] p-6 transition-colors hover:border-[#FFD31D]"
+    <div data-testid="operator-packages-list">
+      {isLoading ? (
+        <div className="py-10 text-center" role="status" aria-live="polite" aria-busy="true">
+          Loading packages…
+        </div>
+      ) : error ? (
+        <div className="py-10 text-center" role="alert">
+          <p className="text-red-500">{error}</p>
+          {onRetry ? (
+            <button
+              type="button"
+              onClick={onRetry}
+              className="mt-4 rounded bg-[#FFD31D] px-4 py-2 text-sm font-medium text-[#000000] hover:bg-[#E5BD1A]"
             >
-              <div>
-                <div className="mb-2 flex items-start justify-between">
-                  <span className="rounded bg-[rgba(255,211,29,0.1)] px-2 py-0.5 text-xs font-medium text-[#FFD31D] uppercase">
-                    {pkg.pilgrimageType}
-                  </span>
-                  <span className="text-xs text-[rgba(255,255,255,0.4)]">
-                    {pkg.seasonLabel || 'Custom Dates'}
-                  </span>
-                </div>
-                <h3 className="mb-2 text-lg font-bold text-[#FFFFFF] line-clamp-2">{pkg.title}</h3>
-                <p className="mb-4 text-2xl font-bold text-[#FFD31D]">
-                  {pkg.currency} {pkg.pricePerPerson}
-                  <span className="text-sm font-normal text-[rgba(255,255,255,0.64)]">
-                    {pkg.priceType === 'from' ? ' (from)' : ''}
-                  </span>
-                </p>
-                <div className="space-y-1 text-sm text-[rgba(255,255,255,0.64)]">
-                  <p>{pkg.totalNights} Nights ({pkg.nightsMakkah} Makkah / {pkg.nightsMadinah} Madinah)</p>
-                  <p>{pkg.hotelMakkahStars}★ Makkah / {pkg.hotelMadinahStars}★ Madinah</p>
-                </div>
-              </div>
-              
-              <div className="mt-6 flex gap-2 border-t border-[rgba(255,255,255,0.1)] pt-4">
-                <button
-                  onClick={() => handleEdit(pkg)}
-                  className="flex-1 rounded bg-[rgba(255,255,255,0.1)] py-2 text-sm text-[#FFFFFF] hover:bg-[rgba(255,255,255,0.2)]"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(pkg.id)}
-                  className="flex-1 rounded bg-red-500/10 py-2 text-sm text-red-500 hover:bg-red-500/20"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
+              Retry
+            </button>
+          ) : null}
+        </div>
+      ) : !hasPackages ? (
+        <div className="py-12 text-center text-[rgba(255,255,255,0.4)]" data-testid="operator-packages-empty">
+          <p>No packages found. Create one to get started.</p>
+          <button
+            type="button"
+            onClick={onCreate}
+            className="mt-4 rounded bg-[#FFD31D] px-4 py-2 text-sm font-medium text-[#000000] hover:bg-[#E5BD1A]"
+          >
+            Create package
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={onCreate}
+              className="rounded bg-[#FFD31D] px-4 py-2 text-sm font-medium text-[#000000] hover:bg-[#E5BD1A]"
+            >
+              Create package
+            </button>
+          </div>
 
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <OverlayContent className="max-w-2xl overflow-y-auto max-h-[90vh]">
-          <OverlayHeader>
-            <OverlayTitle>{editingPackage ? 'Edit Package' : 'Create Package'}</OverlayTitle>
-          </OverlayHeader>
-          <PackageForm
-            initialData={editingPackage}
-            onSuccess={handleFormSuccess}
-            onCancel={() => setIsFormOpen(false)}
-          />
-        </OverlayContent>
-      </Dialog>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse" aria-label="Operator packages list">
+              <thead>
+                <tr className="border-b border-[rgba(255,255,255,0.1)] text-left text-sm text-[rgba(255,255,255,0.6)]">
+                  <th scope="col" className="px-3 py-2">Title</th>
+                  <th scope="col" className="px-3 py-2">Type</th>
+                  <th scope="col" className="px-3 py-2">Season/Date window</th>
+                  <th scope="col" className="px-3 py-2">Price</th>
+                  <th scope="col" className="px-3 py-2">Nights</th>
+                  <th scope="col" className="px-3 py-2">Status</th>
+                  <th scope="col" className="px-3 py-2">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="text-sm">
+                {packages.map((pkg) => (
+                  <tr
+                    key={pkg.id}
+                    data-testid={`operator-package-item-${pkg.id}`}
+                    className="border-b border-[rgba(255,255,255,0.06)]"
+                  >
+                    <td className="px-3 py-3 font-medium text-[#FFFFFF]">{pkg.title}</td>
+                    <td className="px-3 py-3 uppercase text-[rgba(255,255,255,0.7)]">{pkg.pilgrimageType}</td>
+                    <td className="px-3 py-3 text-[rgba(255,255,255,0.7)]">{getSeasonOrDateWindow(pkg)}</td>
+                    <td className="px-3 py-3 text-[#FFD31D]">
+                      {pkg.currency ?? 'GBP'} {pkg.pricePerPerson}
+                      {pkg.priceType === 'from' ? ' (from)' : ''}
+                    </td>
+                    <td className="px-3 py-3 text-[rgba(255,255,255,0.7)]">
+                      {pkg.totalNights}
+                      {pkg.nightsMakkah != null && pkg.nightsMadinah != null
+                        ? ` (${pkg.nightsMakkah} Makkah / ${pkg.nightsMadinah} Madinah)`
+                        : ''}
+                  </td>
+                    <td className="px-3 py-3 text-[rgba(255,255,255,0.7)]">{pkg.status ?? 'Not set'}</td>
+                    <td className="px-3 py-3">
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => onEdit(pkg.id)}
+                          data-testid={`operator-package-edit-${pkg.id}`}
+                          className="rounded bg-[rgba(255,255,255,0.1)] px-3 py-1.5 text-sm text-[#FFFFFF] hover:bg-[rgba(255,255,255,0.2)]"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onDelete(pkg.id)}
+                          data-testid={`operator-package-delete-${pkg.id}`}
+                          className="rounded bg-red-500/10 px-3 py-1.5 text-sm text-red-500 hover:bg-red-500/20"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
