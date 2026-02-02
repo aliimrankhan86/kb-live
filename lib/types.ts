@@ -12,6 +12,7 @@ export type VerificationStatus = 'pending' | 'verified' | 'rejected';
 export interface OperatorProfile {
   id: string; // linked to User.id
   companyName: string;
+  slug: string; // url-friendly
   verificationStatus: VerificationStatus;
   contactEmail: string;
   contactPhone?: string;
@@ -125,8 +126,16 @@ export interface Package {
   operatorId: string;
   title: string;
   slug: string;
+  status: 'draft' | 'published';
   
-  // Comparison Fields (matches Offer)
+  pilgrimageType: 'umrah' | 'hajj';
+  seasonLabel?: string;
+  dateWindow?: {
+    start: string;
+    end: string;
+  };
+  
+  priceType: 'exact' | 'from';
   pricePerPerson: number;
   currency: string;
   
@@ -134,14 +143,17 @@ export interface Package {
   nightsMakkah: number;
   nightsMadinah: number;
   
-  hotelStars: 3 | 4 | 5;
-  distanceToHaram: string;
+  hotelMakkahStars?: 3 | 4 | 5;
+  hotelMadinahStars?: 3 | 4 | 5;
   
-  roomOccupancy: {
-    single?: boolean;
-    double?: boolean;
-    triple?: boolean;
-    quad?: boolean;
+  distanceBandMakkah: 'near' | 'medium' | 'far' | 'unknown';
+  distanceBandMadinah: 'near' | 'medium' | 'far' | 'unknown';
+  
+  roomOccupancyOptions: {
+    single: boolean;
+    double: boolean;
+    triple: boolean;
+    quad: boolean;
   };
   
   inclusions: {
@@ -151,13 +163,8 @@ export interface Package {
     meals: boolean;
   };
   
-  season: Season;
-  availableDates: {
-    start: string;
-    end: string;
-  }[];
-  
-  description?: string;
+  notes?: string; // sanitized, no HTML
+  images?: string[];
 }
 
 // Unified shape for comparison

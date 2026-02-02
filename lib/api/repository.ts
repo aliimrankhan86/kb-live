@@ -1,5 +1,6 @@
 import { MockDB } from './mock-db';
-import { BookingIntent, Offer, QuoteRequest, UserRole } from '@/lib/types';
+import { BookingIntent, Offer, Package, QuoteRequest, UserRole } from '@/lib/types';
+import { generateSlug } from '@/lib/slug';
 
 // Simulate a secure context from the server (e.g. session)
 export interface RequestContext {
@@ -85,5 +86,59 @@ export const Repository = {
     if (ctx.role === 'customer') return all.filter(b => b.customerId === ctx.userId);
     if (ctx.role === 'operator') return all.filter(b => b.operatorId === ctx.userId);
     return all;
+  },
+
+  // Packages
+  createPackage: (ctx: RequestContext, pkg: Partial<Package>): Package => {
+    if (ctx.role !== 'operator') throw new Error('Unauthorized');
+    
+    // Validate required fields (basic check)
+    if (!pkg.title || !pkg.pricePerPerson) throw new Error('Missing required fields');
+
+    const newPackage: Package = {
+      ...pkg as Package,
+      id: crypto.randomUUID(),
+      operatorId: ctx.userId, // Enforce ownership
+      slug: generateSlug(pkg.title) + '-' + Math.random().toString(36).substring(7), // Ensure unique
+    };
+    
+    return MockDB.savePackage(newPackage);
+  },
+
+  listPackages: (): Package[] => {
+    return MockDB.getPackages().filter(p => p.status === 'published'); // Public read: only published
+  },
+
+  getPackageBySlug: (slug: string): Package | undefined => {
+    return MockDB.getPackages().find(p => p.slug === slug);
+  },
+
+  getPackagesByOperator: (operatorId: string): Package[] => {
+    return MockDB.getPackages().filter(p => p.operatorId === operatorId);
+  },
+
+  updatePackage: (ctx: RequestContext, id: string, updates: Partial<Package>): Package => {
+    const existing = MockDB.getPackages().find(p => p.id === id);
+    if (!existing) throw new Error('Not found');
+    
+    // RBAC: Only owner can update
+    if (ctx.role !== 'operator' || existing.operatorId !== ctx.userId) {
+      throw new Error('Unauthorized');
+    }
+
+    const updated = { ...existing, ...updates, id, operatorId: existing.operatorId }; // Protect id/operatorId
+    return MockDB.savePackage(updated);
+  },
+
+  deletePackage: (ctx: RequestContext, id: string): void => {
+    const existing = MockDB.getPackages().find(p => p.id === id);
+    if (!existing) return;
+
+    // RBAC: Only owner can delete
+    if (ctx.role !== 'operator' || existing.operatorId !== ctx.userId) {
+      throw new Error('Unauthorized');
+    }
+
+    MockDB.deletePackage(id);
   }
 };
