@@ -76,10 +76,10 @@ This phase focuses on stabilizing the MVP, ensuring test reliability, implementi
 - Customer Quote Request Wizard at `/quote` (multi-step, validated, persisted)
 - Request detail at `/requests/[id]` showing offers and comparison selection
 - Operator dashboard at `/operator/dashboard` to view open requests and submit offers
-- Delivery Kanban at `/kanban` (roles, checklists, Done -> History after 7 days, persists)
 - Offers comparison table supports up to 3 offers side-by-side
 - Standard UI components: Overlay (Dialog) and Slider, used consistently
 - Mock persistence via localStorage (MockDB) to test end-to-end without backend
+- Delivery Kanban at `/kanban` (roles, checklists, Done -> History after 7 days, persists)
 
 ### Phase 1.1 stabilisation evidence
 
