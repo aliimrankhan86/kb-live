@@ -91,3 +91,22 @@
 
 - [ ] Run `npx playwright test e2e/flow.spec.ts`.
 - [ ] Verify all 3 browsers pass.
+
+## Phase 1 Regression Checklist (run before Phase 2 work)
+
+Automated
+
+- npm run test must pass
+- npx playwright test e2e/flow.spec.ts must pass
+
+Manual smoke (if dev server runs)
+
+1. /quote submit request, confirm redirect to /requests/[id], refresh persists
+2. /operator/dashboard submit offer, return to request, refresh shows offer
+3. compare up to 3 offers renders correctly
+
+Accessibility quick checks
+
+- Keyboard works through wizard steps
+- Overlay focus trap and close behaviour correct
+- Sliders usable via keyboard

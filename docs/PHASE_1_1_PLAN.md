@@ -67,8 +67,8 @@ This phase focuses on stabilizing the MVP, ensuring test reliability, implementi
 
 ## Phase 1 Final Close-Out
 
-**Date:** <YYYY-MM-DD>  
-**Repo commit:** <git rev-parse --short HEAD>  
+**Date:** 2026-02-02  
+**Repo commit:** a598ab2  
 **Verdict:** PASS
 
 ### What Phase 1 delivers
@@ -76,6 +76,7 @@ This phase focuses on stabilizing the MVP, ensuring test reliability, implementi
 - Customer Quote Request Wizard at `/quote` (multi-step, validated, persisted)
 - Request detail at `/requests/[id]` showing offers and comparison selection
 - Operator dashboard at `/operator/dashboard` to view open requests and submit offers
+- Delivery Kanban at `/kanban` (roles, checklists, Done -> History after 7 days, persists)
 - Offers comparison table supports up to 3 offers side-by-side
 - Standard UI components: Overlay (Dialog) and Slider, used consistently
 - Mock persistence via localStorage (MockDB) to test end-to-end without backend
@@ -97,6 +98,7 @@ This phase focuses on stabilizing the MVP, ensuring test reliability, implementi
 - No payments or booking confirmation. Booking is tracked as intent only (where applicable).
 - No real authentication. “Current user” is simulated in MockDB.
 - localStorage persistence is not a backend. It is for prototyping and QA only.
+- No SEO/public catalogue pages are included in Phase 1. Those begin in Phase 2.
 
 ### Next approved scope
 
