@@ -34,3 +34,11 @@ If a task changes behaviour and docs are not updated, the task is not complete.
 | 02_REPO_MAP.md         | Where things live, key files              | Tuffy Dev       | Structural refactors, new feature folders     |
 | 09_KANBAN_WORKFLOW.md  | Kanban rules, roles, DoD                  | Ali             | Any process change                            |
 | 10_PROMPT_TEMPLATES.md | Reusable prompts and micro-task templates | Ali + Architect | Prompt improvements, new workflow patterns    |
+
+## Aliases / Pointer files
+
+These files are intentionally lightweight pointers. Update the canonical doc instead.
+
+- `docs/06_ACCESSIBILITY.md` → `docs/ACCESSIBILITY.md`
+- `docs/05_SECURITY.md` → `docs/SECURITY.md`
+- `docs/07_QA.md` → `QA.md` (repo root)
