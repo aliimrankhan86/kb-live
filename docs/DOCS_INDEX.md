@@ -39,6 +39,6 @@ If a task changes behaviour and docs are not updated, the task is not complete.
 
 These files are intentionally lightweight pointers. Update the canonical doc instead.
 
-- `docs/06_ACCESSIBILITY.md` → `docs/ACCESSIBILITY.md`
 - `docs/05_SECURITY.md` → `docs/SECURITY.md`
+- `docs/06_ACCESSIBILITY.md` → `docs/ACCESSIBILITY.md`
 - `docs/07_QA.md` → `QA.md` (repo root)
