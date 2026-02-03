@@ -218,3 +218,50 @@ As a customer, I want to browse Umrah and Hajj packages with basic filters so I 
 **Follow-ups created:**
 
 - None.
+
+---
+
+### 2026-02-03 - Micro-task 2: Public Package Detail (/packages/[slug])
+
+**Goal:**  
+Create a customer-facing package detail page that loads a published package by slug and renders key fields with disclaimers.
+
+**User story (if applicable):**  
+As a customer, I want to review package details and inclusions so I can decide whether to request a quote.
+
+**Acceptance criteria:**
+
+- [x] Page loads a published package by slug and shows key fields.
+- [x] Not-found, error, and CTA states are present with required test IDs.
+- [x] Disclaimer text is displayed.
+- [x] Required checks pass.
+
+**Result:** PASS
+
+**Files changed:**
+
+- app/packages/[slug]/page.tsx
+- components/packages/PackageDetail.tsx
+- docs/PHASE_2_AUDIT.md
+
+- **Commands run (with results):**
+
+- `npm run test` → PASS
+- `npx playwright test e2e/flow.spec.ts` → PASS
+
+**Manual smoke steps (if applicable):**
+
+- N/A
+
+**Notes / Decisions:**
+
+- Operator shown as ID (public operator profile wiring in later micro-task).
+- Test IDs: `package-detail-page`, `package-title`, `package-price`, `package-inclusions`, `package-cta-request-quote`, `package-not-found`.
+
+**Risks / Tech debt introduced:**
+
+- None observed.
+
+**Follow-ups created:**
+
+- None.
