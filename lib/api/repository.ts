@@ -1,5 +1,5 @@
 import { MockDB } from './mock-db';
-import { BookingIntent, Offer, Package, QuoteRequest, UserRole } from '@/lib/types';
+import { BookingIntent, Offer, OperatorProfile, Package, QuoteRequest, UserRole } from '@/lib/types';
 import { generateSlug } from '@/lib/slug';
 
 // Simulate a secure context from the server (e.g. session)
@@ -115,6 +115,10 @@ export const Repository = {
 
   getPackagesByOperator: (operatorId: string): Package[] => {
     return MockDB.getPackages().filter(p => p.operatorId === operatorId);
+  },
+
+  getOperatorBySlug: (slug: string): OperatorProfile | undefined => {
+    return MockDB.getOperators().find((operator) => operator.slug === slug);
   },
 
   updatePackage: (ctx: RequestContext, id: string, updates: Partial<Package>): Package => {

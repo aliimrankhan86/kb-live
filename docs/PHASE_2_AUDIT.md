@@ -265,3 +265,51 @@ As a customer, I want to review package details and inclusions so I can decide w
 **Follow-ups created:**
 
 - None.
+
+---
+
+### 2026-02-03 - Micro-task 3: Public Operator Profile (/operators/[slug])
+
+**Goal:**  
+Create a customer-facing operator profile page that shows operator details and published packages.
+
+**User story (if applicable):**  
+As a customer, I want to review an operator profile and their published packages so I can choose a trusted provider.
+
+**Acceptance criteria:**
+
+- [x] Operator profile loads by slug and shows key details.
+- [x] Operator packages list shows published packages with required test IDs.
+- [x] Not-found and empty states present with `role="alert"`.
+- [x] Required checks pass.
+
+**Result:** PASS
+
+**Files changed:**
+
+- app/operators/[slug]/page.tsx
+- components/operators/OperatorProfileDetail.tsx
+- lib/api/repository.ts
+- docs/PHASE_2_AUDIT.md
+
+- **Commands run (with results):**
+
+- `npm run test` → PASS
+- `npx playwright test e2e/flow.spec.ts` → PASS
+
+**Manual smoke steps (if applicable):**
+
+- N/A
+
+**Notes / Decisions:**
+
+- Status labels mapped to user-friendly text.
+- Test IDs: `operator-page`, `operator-name`, `operator-status`, `operator-packages`, `operator-package-card-{id}`, `operator-package-link-{slug}`, `operator-empty`.
+
+**Risks / Tech debt introduced:**
+
+- None observed.
+
+**Follow-ups created:**
+
+- None.
