@@ -171,3 +171,50 @@ As a customer, I want to browse Umrah and Hajj packages with basic filters so I 
 **Follow-ups created:**
 
 - None.
+
+---
+
+### 2026-02-03 - Micro-task 1: Public Packages Browse (/packages)
+
+**Goal:**  
+Provide a customer-facing packages browse page with filters, states, and stable test hooks.
+
+**User story (if applicable):**  
+As a customer, I want to browse Umrah and Hajj packages with basic filters so I can find the right option quickly.
+
+**Acceptance criteria:**
+
+- [x] `/packages` lists published packages with stable test IDs.
+- [x] Filters for pilgrimage type, season, and price sort are available.
+- [x] Loading, error, and empty states are present and accessible.
+- [x] Required checks pass.
+
+**Result:** PASS
+
+**Files changed:**
+
+- app/packages/page.tsx
+- components/packages/PackagesBrowse.tsx
+- docs/PHASE_2_AUDIT.md
+
+- **Commands run (with results):**
+
+- `npm run test` → PASS
+- `npx playwright test e2e/flow.spec.ts` → PASS
+
+**Manual smoke steps (if applicable):**
+
+- N/A
+
+**Notes / Decisions:**
+
+- Added `aria-busy` on the packages page container while filters update.
+- Test IDs: `packages-page`, `package-card-{id}`, `package-link-{slug}`, `packages-filter-type`, `packages-empty`.
+
+**Risks / Tech debt introduced:**
+
+- None observed.
+
+**Follow-ups created:**
+
+- None.

@@ -63,7 +63,11 @@ export function PackagesBrowse({ packages, error }: PackagesBrowseProps) {
   const showEmpty = !error && filteredPackages.length === 0
 
   return (
-    <section data-testid="packages-page" className="w-full max-w-6xl mx-auto px-4 py-10">
+    <section
+      data-testid="packages-page"
+      aria-busy={isPending ? 'true' : 'false'}
+      className="w-full max-w-6xl mx-auto px-4 py-10"
+    >
       <header className="mb-8">
         <h1 className="text-3xl font-semibold text-[var(--text)]">Browse Packages</h1>
         <p className="mt-2 text-[var(--textMuted)]">
