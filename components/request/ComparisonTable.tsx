@@ -6,10 +6,11 @@ import { useEffect, useState } from 'react';
 import { mapOfferToComparison, ComparisonRow } from '@/lib/comparison';
 
 interface ComparisonTableProps {
-  offers: Offer[];
+  offers?: Offer[];
+  rows?: ComparisonRow[];
 }
 
-export function ComparisonTable({ offers }: ComparisonTableProps) {
+export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
   const [operators, setOperators] = useState<Record<string, OperatorProfile>>({});
 
   useEffect(() => {
@@ -18,7 +19,7 @@ export function ComparisonTable({ offers }: ComparisonTableProps) {
     setOperators(opsMap);
   }, []);
 
-  const comparisonRows = offers.map(o => mapOfferToComparison(o, operators[o.operatorId]));
+  const comparisonRows = rows ?? offers.map(o => mapOfferToComparison(o, operators[o.operatorId]));
 
   const features: { label: string; key: keyof ComparisonRow }[] = [
     { label: 'Price', key: 'price' },
@@ -40,8 +41,8 @@ export function ComparisonTable({ offers }: ComparisonTableProps) {
             <th className="border-b border-[rgba(255,255,255,0.1)] py-4 pl-4 font-medium text-[rgba(255,255,255,0.4)]">
               Feature
             </th>
-            {offers.map((offer, i) => (
-              <th key={offer.id} className="border-b border-[rgba(255,255,255,0.1)] p-4 font-semibold text-[#FFD31D]">
+            {comparisonRows.map((row, i) => (
+              <th key={row.id} className="border-b border-[rgba(255,255,255,0.1)] p-4 font-semibold text-[#FFD31D]">
                 Option {i + 1}
               </th>
             ))}

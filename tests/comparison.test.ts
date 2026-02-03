@@ -37,7 +37,7 @@ describe('Comparison Logic', () => {
 
   it('handles missing operator', () => {
     const result = mapOfferToComparison(mockOffer, undefined);
-    expect(result.operatorName).toBe('Unknown');
+    expect(result.operatorName).toBe('Not provided');
   });
 
   it('handles missing values gracefully', () => {
@@ -49,8 +49,8 @@ describe('Comparison Logic', () => {
     };
     const result = mapOfferToComparison(sparseOffer, mockOperator);
     expect(result.distance).toBe('Not provided');
-    expect(result.notes).toBe('-');
-    expect(result.inclusions).toBe('None');
+    expect(result.notes).toBe('Not provided');
+    expect(result.inclusions).toBe('Not provided');
   });
 
   it('handles offer selection logic', () => {

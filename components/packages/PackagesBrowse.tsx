@@ -1,8 +1,17 @@
 'use client'
 
 import Link from 'next/link'
-import { useMemo, useState, useTransition } from 'react'
-import type { Package } from '@/lib/types'
+import { useEffect, useMemo, useState, useTransition } from 'react'
+import type { Package, OperatorProfile } from '@/lib/types'
+import { MockDB } from '@/lib/api/mock-db'
+import { mapPackageToComparison, handleComparisonSelection } from '@/lib/comparison'
+import { ComparisonTable } from '@/components/request/ComparisonTable'
+import {
+  Dialog,
+  OverlayContent,
+  OverlayHeader,
+  OverlayTitle,
+} from '@/components/ui/Overlay'
 
 type PilgrimageFilter = 'all' | 'umrah' | 'hajj'
 type PriceSort = 'none' | 'price-asc' | 'price-desc'
@@ -29,6 +38,18 @@ export function PackagesBrowse({ packages, error }: PackagesBrowseProps) {
   const [seasonLabel, setSeasonLabel] = useState<string>('all')
   const [priceSort, setPriceSort] = useState<PriceSort>('none')
   const [isPending, startTransition] = useTransition()
+  const [selectedPackages, setSelectedPackages] = useState<string[]>([])
+  const [operatorsById, setOperatorsById] = useState<Record<string, OperatorProfile>>({})
+  const [showComparison, setShowComparison] = useState(false)
+
+  useEffect(() => {
+    const ops = MockDB.getOperators()
+    const map = ops.reduce<Record<string, OperatorProfile>>((acc, op) => {
+      acc[op.id] = op
+      return acc
+    }, {})
+    setOperatorsById(map)
+  }, [])
 
   const seasonOptions = useMemo(() => {
     const labels = packages
@@ -61,6 +82,13 @@ export function PackagesBrowse({ packages, error }: PackagesBrowseProps) {
   }, [packages, pilgrimageType, priceSort, seasonLabel])
 
   const showEmpty = !error && filteredPackages.length === 0
+  const comparisonRows = useMemo(
+    () =>
+      filteredPackages
+        .filter((pkg) => selectedPackages.includes(pkg.id))
+        .map((pkg) => mapPackageToComparison(pkg, operatorsById[pkg.operatorId])),
+    [filteredPackages, operatorsById, selectedPackages]
+  )
 
   return (
     <section
@@ -134,6 +162,19 @@ export function PackagesBrowse({ packages, error }: PackagesBrowseProps) {
         </div>
       </div>
 
+      {selectedPackages.length > 1 ? (
+        <div className="mb-6">
+          <button
+            type="button"
+            data-testid="packages-compare-button"
+            onClick={() => setShowComparison(true)}
+            className="rounded bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
+          >
+            Compare ({selectedPackages.length})
+          </button>
+        </div>
+      ) : null}
+
       {error ? (
         <div role="alert" className="rounded border border-red-500/30 bg-red-500/10 px-4 py-3">
           <p className="text-sm text-red-100">{error}</p>
@@ -194,9 +235,41 @@ export function PackagesBrowse({ packages, error }: PackagesBrowseProps) {
                 </dd>
               </div>
             </dl>
+
+            <div className="mt-4 flex items-center gap-2 text-sm text-[var(--textMuted)]">
+              <input
+                id={`package-compare-${pkg.id}`}
+                type="checkbox"
+                data-testid={`package-compare-checkbox-${pkg.id}`}
+                checked={selectedPackages.includes(pkg.id)}
+                onChange={() => {
+                  try {
+                    const next = handleComparisonSelection(selectedPackages, pkg.id)
+                    setSelectedPackages(next)
+                  } catch (err) {
+                    alert((err as Error).message)
+                  }
+                }}
+                className="h-4 w-4 rounded border-[var(--border)] bg-[var(--panel)] text-[var(--primary)] focus:ring-[var(--primary)]"
+              />
+              <label htmlFor={`package-compare-${pkg.id}`} className="cursor-pointer">
+                Compare
+              </label>
+            </div>
           </li>
         ))}
       </ul>
+
+      <Dialog open={showComparison} onOpenChange={setShowComparison}>
+        <OverlayContent className="max-w-4xl overflow-x-auto">
+          <OverlayHeader>
+            <OverlayTitle>Compare Packages</OverlayTitle>
+          </OverlayHeader>
+          <div className="mt-4">
+            <ComparisonTable rows={comparisonRows} />
+          </div>
+        </OverlayContent>
+      </Dialog>
     </section>
   )
 }

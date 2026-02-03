@@ -3,6 +3,7 @@ import { generateSlug } from '../lib/slug';
 import { Repository, RequestContext } from '../lib/api/repository';
 import { MockDB } from '../lib/api/mock-db';
 import { Package } from '../lib/types';
+import { mapPackageToComparison } from '../lib/comparison';
 
 describe('Phase 2 Foundations', () => {
   
@@ -79,6 +80,37 @@ describe('Phase 2 Foundations', () => {
       const list = Repository.listPackages();
       expect(list.some(p => p.id === draft.id)).toBe(false);
       expect(list.some(p => p.id === pub.id)).toBe(true);
+    });
+  });
+
+  describe('Package comparison mapping', () => {
+    it('uses Not provided for missing values', () => {
+      const pkg: Package = {
+        id: 'pkg-test',
+        operatorId: 'op1',
+        title: 'Starter Umrah',
+        slug: 'starter-umrah',
+        status: 'published',
+        pilgrimageType: 'umrah',
+        priceType: 'from',
+        pricePerPerson: 1200,
+        currency: 'GBP',
+        totalNights: 7,
+        nightsMakkah: 4,
+        nightsMadinah: 3,
+        distanceBandMakkah: 'unknown',
+        distanceBandMadinah: 'unknown',
+        roomOccupancyOptions: { single: false, double: false, triple: false, quad: false },
+        inclusions: { visa: false, flights: false, transfers: false, meals: false },
+      };
+
+      const row = mapPackageToComparison(pkg);
+
+      expect(row.hotelRating).toBe('Not provided');
+      expect(row.distance).toBe('Not provided');
+      expect(row.occupancy).toBe('Not provided');
+      expect(row.inclusions).toBe('Not provided');
+      expect(row.price).toContain('From');
     });
   });
 });

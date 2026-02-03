@@ -361,3 +361,53 @@ As a customer, I want the quote form prefilled from a package so I can request a
 **Follow-ups created:**
 
 - None.
+
+---
+
+### 2026-02-03 - Micro-task 5: Mixed Comparison (Offers + Packages)
+
+**Goal:**  
+Allow customers to compare selected packages using the existing comparison UI while keeping offer comparison intact.
+
+**User story (if applicable):**  
+As a customer, I want to compare multiple packages side by side so I can choose the best option.
+
+**Acceptance criteria:**
+
+- [x] Packages can be selected for comparison with stable test IDs.
+- [x] Comparison table supports package rows and missing values show “Not provided”.
+- [x] Offer comparison flow remains intact.
+- [x] Required checks pass.
+
+**Result:** PASS
+
+**Files changed:**
+
+- components/request/ComparisonTable.tsx
+- components/packages/PackagesBrowse.tsx
+- lib/comparison.ts
+- tests/comparison.test.ts
+- tests/phase2.test.ts
+- docs/PHASE_2_AUDIT.md
+
+- **Commands run (with results):**
+
+- `npm run test` → PASS
+- `npx playwright test e2e/flow.spec.ts` → PASS
+
+**Manual smoke steps (if applicable):**
+
+- N/A
+
+**Notes / Decisions:**
+
+- Added package->comparison mapping with “Not provided” for missing values.
+- New test IDs: `package-compare-checkbox-{id}`, `packages-compare-button`.
+
+**Risks / Tech debt introduced:**
+
+- None observed.
+
+**Follow-ups created:**
+
+- None.
