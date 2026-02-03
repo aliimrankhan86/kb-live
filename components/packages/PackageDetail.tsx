@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { Package } from '@/lib/types'
+import { createQuotePrefillUrl } from '@/lib/quote-prefill'
 
 interface PackageDetailProps {
   pkg: Package
@@ -118,13 +119,13 @@ export function PackageDetail({ pkg }: PackageDetailProps) {
       </section>
 
       <div className="mt-6">
-        <button
-          type="button"
+        <Link
+          href={createQuotePrefillUrl(pkg)}
           data-testid="package-cta-request-quote"
-          className="rounded bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
+          className="inline-flex items-center justify-center rounded bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
         >
           Request quote
-        </button>
+        </Link>
       </div>
     </section>
   )

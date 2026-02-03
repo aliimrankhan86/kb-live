@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useQuoteRequestStore } from '@/lib/store/quote-request';
 import { Step1TypeSeason } from './steps/Step1TypeSeason';
 import { Step2LocationDates } from './steps/Step2LocationDates';
@@ -10,10 +12,30 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { MockDB } from '@/lib/api/mock-db';
 import { useRouter } from 'next/navigation';
 import { QuoteRequest } from '@/lib/types';
+import { parseQuotePrefillParams } from '@/lib/quote-prefill';
 
 export function QuoteRequestWizard() {
-  const { draft, step, nextStep, prevStep, reset } = useQuoteRequestStore();
+  const { draft, step, nextStep, prevStep, reset, setDraft } = useQuoteRequestStore();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const prefillParams = useMemo(() => (searchParams ? searchParams.toString() : ''), [searchParams]);
+
+  useEffect(() => {
+    if (!searchParams || prefillParams.length === 0) return;
+
+    try {
+      const prefill = parseQuotePrefillParams(searchParams);
+      if (Object.keys(prefill).length > 0) {
+        setDraft(prefill);
+      }
+    } catch (error) {
+      console.warn('Failed to parse quote prefill params', error);
+    } finally {
+      if (typeof window !== 'undefined') {
+        window.history.replaceState({}, '', '/quote');
+      }
+    }
+  }, [prefillParams, searchParams, setDraft]);
 
   const handleSubmit = () => {
     const newRequest: QuoteRequest = {

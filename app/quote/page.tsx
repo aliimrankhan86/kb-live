@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { QuoteRequestWizard } from '@/components/quote/QuoteRequestWizard';
 
 export default function QuotePage() {
@@ -13,7 +14,15 @@ export default function QuotePage() {
           </p>
         </div>
         
-        <QuoteRequestWizard />
+        <Suspense
+          fallback={
+            <div role="status" aria-busy="true" className="text-sm text-[rgba(255,255,255,0.64)]">
+              Loading quote form...
+            </div>
+          }
+        >
+          <QuoteRequestWizard />
+        </Suspense>
       </div>
     </main>
   );

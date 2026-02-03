@@ -313,3 +313,51 @@ As a customer, I want to review an operator profile and their published packages
 **Follow-ups created:**
 
 - None.
+
+---
+
+### 2026-02-03 - Micro-task 4: Quote Prefill from Package Detail
+
+**Goal:**  
+Prefill the quote request wizard from package detail via URL params and then clean the URL.
+
+**User story (if applicable):**  
+As a customer, I want the quote form prefilled from a package so I can request a quote faster.
+
+**Acceptance criteria:**
+
+- [x] Package CTA routes to `/quote` with prefill parameters.
+- [x] Quote wizard reads params, hydrates draft safely, and cleans URL.
+- [x] Required checks pass.
+
+**Result:** PASS
+
+**Files changed:**
+
+- lib/quote-prefill.ts
+- components/packages/PackageDetail.tsx
+- app/quote/page.tsx
+- components/quote/QuoteRequestWizard.tsx
+- docs/PHASE_2_AUDIT.md
+
+- **Commands run (with results):**
+
+- `npm run test` → PASS
+- `npx playwright test e2e/flow.spec.ts` → PASS
+
+**Manual smoke steps (if applicable):**
+
+- N/A
+
+**Notes / Decisions:**
+
+- Approach A: URL query params with immediate cleanup via `window.history.replaceState`.
+- Prefill mapping follows rules for season, dates, nights, hotel stars, distance preference, inclusions, and budget.
+
+**Risks / Tech debt introduced:**
+
+- None observed.
+
+**Follow-ups created:**
+
+- None.
