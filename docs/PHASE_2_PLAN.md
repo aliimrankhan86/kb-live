@@ -36,6 +36,7 @@ Implement Catalogue Lite (Packages), Mixed Comparison, and SEO Lite foundations 
 ### 3. Public Package Browse & Detail (Priority B)
 
 - **Goal**: Customer-facing catalogue.
+- **Status**: **DONE**
 - **Implementation**:
   - Page: `/packages` (Browse/Filter).
   - Page: `/packages/[slug]` (Detail).
@@ -47,6 +48,7 @@ Implement Catalogue Lite (Packages), Mixed Comparison, and SEO Lite foundations 
 ### 4. Quote Prefill (Priority B)
 
 - **Goal**: Conversion path from Package -> Quote.
+- **Status**: **DONE**
 - **Implementation**:
   - Add "Request Quote" CTA on package page.
   - Update `QuoteRequestWizard` (or store) to accept initial data via URL/State.
@@ -56,6 +58,7 @@ Implement Catalogue Lite (Packages), Mixed Comparison, and SEO Lite foundations 
 ### 5. Mixed Comparison (Priority B)
 
 - **Goal**: Compare Offers and Packages.
+- **Status**: **DONE**
 - **Implementation**:
   - Refactor `ComparisonTable` to accept `CompareItem` (union).
   - Mapper: `Package -> CompareItem`.
@@ -68,6 +71,7 @@ Implement Catalogue Lite (Packages), Mixed Comparison, and SEO Lite foundations 
 ### 6. SEO Lite (Priority C)
 
 - **Goal**: Indexable pages.
+- **Status**: **DONE**
 - **Implementation**:
   - Pages: `/umrah`, `/hajj`, `/umrah/ramadan` (Static/SSG or server components).
   - Metadata: Dynamic titles/descriptions.
@@ -85,9 +89,18 @@ Implement Catalogue Lite (Packages), Mixed Comparison, and SEO Lite foundations 
   - Accessibility check (ARIA labels, keyboard nav).
   - Update `QA.md`.
   - Create `PHASE_2_AUDIT.md`.
+- **Status**: **DONE**
 
 ## Validation Commands
 
 - `npm test`
 - `npx playwright test`
 - `npm run dev`
+
+## Current status (as of 2026-02-03)
+
+- Priority A: DONE
+- Priority B: DONE
+- Priority C: DONE (SEO lite implemented: robots + sitemap + metadata + Ramadan landing)
+- Priority D: DONE (tests + audit)
+- Notes: Non-blocking ESLint warnings remain (see PHASE_2_AUDIT.md).
