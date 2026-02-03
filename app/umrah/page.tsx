@@ -4,7 +4,7 @@ import { UmrahSearchForm } from '@/components/umrah/UmrahSearchForm'
 
 export const metadata: Metadata = {
   title: 'Umrah Packages',
-  description: 'We at Kaaba Trip will help you find the best packages for Umrah. Search and compare Umrah packages with ease.',
+  description: 'Find and compare Umrah packages from verified operators.',
 }
 
 export default function UmrahPage() {

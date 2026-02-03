@@ -4,9 +4,28 @@ import { PackageDetail } from '@/components/packages/PackageDetail'
 import { Repository } from '@/lib/api/repository'
 import type { Package } from '@/lib/types'
 
-export const metadata: Metadata = {
-  title: 'Package details',
-  description: 'Review package details, inclusions, and pricing.',
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
+  try {
+    const { slug } = await params
+    const pkg = Repository.getPackageBySlug(slug)
+    if (pkg && pkg.status === 'published') {
+      return {
+        title: `${pkg.title} | Packages`,
+        description: `Explore ${pkg.title} and request a quote from the operator.`,
+      }
+    }
+  } catch (err) {
+    // fall through to generic metadata
+  }
+
+  return {
+    title: 'Package not found',
+    description: 'Package details are unavailable.',
+  }
 }
 
 const renderNotFound = (message: string) => (

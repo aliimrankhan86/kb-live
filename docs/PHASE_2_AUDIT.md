@@ -411,3 +411,56 @@ As a customer, I want to compare multiple packages side by side so I can choose 
 **Follow-ups created:**
 
 - None.
+
+---
+
+### 2026-02-03 - Micro-task 6: SEO Lite (Robots + Sitemap + Metadata)
+
+**Goal:**  
+Add minimal SEO foundations with robots rules, static sitemap, and safe metadata for public routes.
+
+**User story (if applicable):**  
+As a customer, I want public pages to be indexable and have meaningful metadata for search results.
+
+**Acceptance criteria:**
+
+- [x] `robots.txt` allows public routes and disallows private areas.
+- [x] `sitemap.xml` includes only static public routes.
+- [x] Metadata added for public routes; dynamic metadata is safe and never throws.
+- [x] Required checks pass.
+
+**Result:** PASS
+
+**Files changed:**
+
+- app/robots.ts
+- app/sitemap.ts
+- app/umrah/page.tsx
+- app/hajj/page.tsx
+- app/umrah/ramadan/page.tsx
+- app/packages/[slug]/page.tsx
+- app/operators/[slug]/page.tsx
+- docs/PHASE_2_AUDIT.md
+
+- **Commands run (with results):**
+
+- `npm run test` → PASS
+- `npx playwright test e2e/flow.spec.ts` → PASS
+
+**Manual smoke steps (if applicable):**
+
+- Open `/robots.txt` in browser.
+- Open `/sitemap.xml` in browser.
+
+**Notes / Decisions:**
+
+- Sitemap is static to avoid server access to localStorage-backed data.
+- Dynamic metadata gracefully falls back to generic titles/descriptions when not found.
+
+**Risks / Tech debt introduced:**
+
+- None observed.
+
+**Follow-ups created:**
+
+- None.

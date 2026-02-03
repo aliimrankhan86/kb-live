@@ -8,9 +8,28 @@ interface OperatorPageProps {
   params: Promise<{ slug: string }>
 }
 
-export const metadata: Metadata = {
-  title: 'Operator profile',
-  description: 'Learn about the operator and browse their published packages.',
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
+  try {
+    const { slug } = await params
+    const operator = Repository.getOperatorBySlug(slug)
+    if (operator) {
+      return {
+        title: `${operator.companyName} | Operator`,
+        description: `Browse packages and reviews for ${operator.companyName}.`,
+      }
+    }
+  } catch (err) {
+    // fall through to generic metadata
+  }
+
+  return {
+    title: 'Operator not found',
+    description: 'Operator details are unavailable.',
+  }
 }
 
 const renderNotFound = (message: string) => (
