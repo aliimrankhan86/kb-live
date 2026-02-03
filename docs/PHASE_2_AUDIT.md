@@ -464,3 +464,47 @@ As a customer, I want public pages to be indexable and have meaningful metadata 
 **Follow-ups created:**
 
 - None.
+
+---
+
+### 2026-02-03 - Micro-task 7: Phase 2 Quality Gates (E2E + Close-out)
+
+**Goal:**  
+Add minimal E2E coverage for public catalogue and mixed comparison, then record final evidence.
+
+**User story (if applicable):**  
+As a QA reviewer, I want deterministic tests that validate the public catalogue flows.
+
+**Acceptance criteria:**
+
+- [x] Public catalogue E2E covers browse, detail, and operator profile.
+- [x] Mixed compare tested when at least two packages exist.
+- [x] Required checks pass.
+
+**Result:** PASS
+
+**Files changed:**
+
+- e2e/catalogue.spec.ts
+- docs/PHASE_2_AUDIT.md
+
+- **Commands run (with results):**
+
+- `npx playwright test e2e/catalogue.spec.ts` → PASS
+- `npx playwright test e2e/flow.spec.ts` → PASS
+
+**Manual smoke steps (if applicable):**
+
+- N/A
+
+**Notes / Decisions:**
+
+- Compare section is conditional; if only one published package exists, the test skips compare assertions to avoid false failures.
+
+**Risks / Tech debt introduced:**
+
+- None observed.
+
+**Follow-ups created:**
+
+- None.
