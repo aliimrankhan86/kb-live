@@ -46,6 +46,3 @@ next-env.d.ts
 playwright-report/
 test-results/
 
-# Playwright outputs
-playwright-report/
-test-results/
