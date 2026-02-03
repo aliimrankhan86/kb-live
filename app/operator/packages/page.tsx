@@ -12,8 +12,8 @@ export default function OperatorPackagesPage() {
           isLoading={false}
           error={undefined}
           onCreate={() => {}}
-          onEdit={(id) => {}}
-          onDelete={(id) => {}}
+          onEdit={() => {}}
+          onDelete={() => {}}
         />
       </div>
     </main>

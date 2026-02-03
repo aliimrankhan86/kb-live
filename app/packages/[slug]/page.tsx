@@ -18,7 +18,7 @@ export async function generateMetadata({
         description: `Explore ${pkg.title} and request a quote from the operator.`,
       }
     }
-  } catch (err) {
+  } catch {
     // fall through to generic metadata
   }
 

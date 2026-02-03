@@ -30,7 +30,7 @@ export function KanbanBoard() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [mounted, setMounted] = useState(false);
   const [search, setSearch] = useState('');
-  const [assigneeFilter, setAssigneeFilter] = useState('');
+  const [assigneeFilter] = useState('');
 
   useEffect(() => {
     setMounted(true);

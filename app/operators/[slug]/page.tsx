@@ -22,7 +22,7 @@ export async function generateMetadata({
         description: `Browse packages and reviews for ${operator.companyName}.`,
       }
     }
-  } catch (err) {
+  } catch {
     // fall through to generic metadata
   }
 

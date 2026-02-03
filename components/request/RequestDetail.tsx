@@ -14,6 +14,8 @@ import { ComparisonTable } from './ComparisonTable';
 import { handleOfferSelection } from '@/lib/comparison';
 import { Repository, RequestContext } from '@/lib/api/repository';
 
+const customerContext: RequestContext = { userId: 'cust1', role: 'customer' };
+
 export function RequestDetail({ id }: { id: string }) {
   const [request, setRequest] = useState<QuoteRequest | undefined>(undefined);
   const [offers, setOffers] = useState<Offer[]>([]);
@@ -23,15 +25,12 @@ export function RequestDetail({ id }: { id: string }) {
   const [showComparison, setShowComparison] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState<string | null>(null);
 
-  // Mock Context
-  const context: RequestContext = { userId: 'cust1', role: 'customer' };
-
   useEffect(() => {
     // Simulate API fetch
-    const req = Repository.getRequestById(context, id);
+    const req = Repository.getRequestById(customerContext, id);
     if (req) {
       setRequest(req);
-      const offs = Repository.getOffersForRequest(context, id);
+      const offs = Repository.getOffersForRequest(customerContext, id);
       setOffers(offs);
       const ops = MockDB.getOperators();
       setOperators(ops);
@@ -41,14 +40,14 @@ export function RequestDetail({ id }: { id: string }) {
 
   const handleBooking = (offer: Offer) => {
     try {
-      Repository.createBookingIntent(context, {
+      Repository.createBookingIntent(customerContext, {
         offerId: offer.id,
         operatorId: offer.operatorId,
         notes: 'Customer clicked Proceed',
       });
       setBookingSuccess(offer.id);
       setTimeout(() => setBookingSuccess(null), 3000);
-    } catch (err) {
+    } catch {
       alert('Failed to create booking intent');
     }
   };

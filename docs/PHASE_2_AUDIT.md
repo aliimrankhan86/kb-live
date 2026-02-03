@@ -547,6 +547,54 @@ As a QA reviewer, I want deterministic tests that validate the public catalogue 
 
 ---
 
+### 2026-02-03 - Phase 2 Hygiene: ESLint Warnings Cleanup
+
+**Goal:**  
+Resolve build-time ESLint warnings without changing behavior.
+
+**Acceptance criteria:**
+
+- [x] Only lint warning files updated.
+- [x] No behavior changes introduced.
+- [x] Build and test gates pass.
+
+**Result:** PASS
+
+**Files changed:**
+
+- app/operator/packages/page.tsx
+- app/operators/[slug]/page.tsx
+- app/packages/[slug]/page.tsx
+- components/kanban/KanbanBoard.tsx
+- components/operator/AnalyticsDashboard.tsx
+- components/request/RequestDetail.tsx
+- docs/PHASE_2_AUDIT.md
+
+**Commands run (with results):**
+
+- `npm run test` → PASS
+- `npx playwright test e2e/flow.spec.ts` → PASS
+- `npx playwright test e2e/catalogue.spec.ts` → PASS
+- `npm run build` → PASS
+
+**Manual smoke steps (if applicable):**
+
+- N/A
+
+**Notes / Decisions:**
+
+- Removed unused variables and the unnecessary hook dependency flagged by ESLint.
+
+**Risks / Tech debt introduced:**
+
+- None observed.
+
+**Follow-ups created:**
+
+- None.
+
+---
+
 ## Phase 2 Close-out (Final Gates)
 
 **Date:** 2026-02-03  
@@ -560,22 +608,10 @@ As a QA reviewer, I want deterministic tests that validate the public catalogue 
 - `npx playwright test e2e/catalogue.spec.ts` → PASS
 - `npm run build` → PASS
 
-### Build notes (non-blocking warnings)
+### Build notes
 
-ESLint/TypeScript warnings exist but did not fail the build:
-
-- Unused vars:
-  - `app/operator/packages/page.tsx`
-  - `app/operators/[slug]/page.tsx`
-  - `app/packages/[slug]/page.tsx`
-  - `components/kanban/KanbanBoard.tsx`
-  - `components/operator/AnalyticsDashboard.tsx`
-  - `components/request/RequestDetail.tsx`
-
-- Hook dependency warning:
-  - `components/request/RequestDetail.tsx` (react-hooks/exhaustive-deps)
+- No ESLint/TypeScript warnings after hygiene pass.
 
 ### Follow-ups (hygiene)
 
-- Fix unused variables and hook dependency warning (no behaviour change expected).
 - Consider seeding a second published package for stronger compare E2E coverage, or keep conditional compare.

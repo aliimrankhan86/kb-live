@@ -16,16 +16,6 @@ export function AnalyticsDashboard() {
     MockDB.setCurrentUser('operator');
     const ctx = { userId: 'op1', role: 'operator' as const }; // Explicit type match
 
-    const offers = Repository.getOffersForRequest(ctx, 'any'); // 'any' hack as method expects requestId, but logic inside might filter by operator if ID not found? 
-    // Wait, getOffersForRequest logic:
-    // if operator: return all.filter(o => o.operatorId === ctx.userId)
-    // But it filters by requestId first: MockDB.getOffersByRequestId(requestId)
-    // I need a method to get ALL offers for an operator.
-    
-    // I'll assume for MVP analytics I can access MockDB directly or extend Repository.
-    // Extending repository is better.
-    // For now, I'll access MockDB directly for "Analytics" view as it aggregates.
-    
     const allOffers = MockDB.getOffers().filter(o => o.operatorId === 'op1');
     const allBookings = MockDB.getBookingIntents().filter(b => b.operatorId === 'op1');
     
