@@ -8,14 +8,16 @@ import styles from './packages.module.css';
 
 interface PackageCardProps {
   package: Package & { slug?: string };
+  isShortlisted?: boolean;
   onAddToShortlist: (packageId: string) => void;
   onAddToCompare: (packageId: string) => void;
 }
 
-const PackageCard: React.FC<PackageCardProps> = ({ 
-  package: pkg, 
-  onAddToShortlist, 
-  onAddToCompare 
+const PackageCard: React.FC<PackageCardProps> = ({
+  package: pkg,
+  isShortlisted = false,
+  onAddToShortlist,
+  onAddToCompare,
 }) => {
   const renderStars = (rating: number) => {
     const stars = [];
@@ -124,11 +126,13 @@ const PackageCard: React.FC<PackageCardProps> = ({
 
         <div className={styles.packageActions}>
           <button
+            type="button"
             className={styles.secondaryAction}
             onClick={() => onAddToShortlist(pkg.id)}
-            aria-label={`Add ${pkg.makkahHotel.name} and ${pkg.madinaHotel.name} to shortlist`}
+            aria-pressed={isShortlisted}
+            aria-label={isShortlisted ? `Remove from shortlist` : `Add ${pkg.makkahHotel.name} and ${pkg.madinaHotel.name} to shortlist`}
           >
-            Add to Shortlist
+            {isShortlisted ? 'Shortlisted' : 'Add to Shortlist'}
           </button>
           <button
             className={styles.secondaryAction}

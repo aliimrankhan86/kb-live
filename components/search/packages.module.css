@@ -59,6 +59,19 @@
   outline-offset: 2px;
 }
 
+.shortlistFilterLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.shortlistFilterLabel input {
+  accent-color: var(--yellow);
+}
+
 .shortlistCount {
   background: var(--surfaceDark);
   border: 1px solid rgba(255, 255, 255, 0.1);
