@@ -1,21 +1,26 @@
 'use client'
 
 import React, { useState } from 'react';
+import type { Package as CataloguePackage } from '@/lib/types';
 import { Package } from '@/lib/mock-packages';
 import PackageCard from './PackageCard';
 import { FilterOverlay, FilterState } from './FilterOverlay';
 import styles from './packages.module.css';
 
+export type SearchPackageDisplay = Package & { slug?: string };
+
 interface PackageListProps {
-  packages: Package[];
+  packages: SearchPackageDisplay[];
+  cataloguePackages?: CataloguePackage[];
   onFilter?: () => void;
   onSort?: () => void;
 }
 
-const PackageList: React.FC<PackageListProps> = ({ 
-  packages, 
+const PackageList: React.FC<PackageListProps> = ({
+  packages,
+  cataloguePackages,
   onFilter,
-  onSort 
+  onSort,
 }) => {
   const [shortlistCount, setShortlistCount] = useState(0);
   const [isFilterOpen, setIsFilterOpen] = useState(false);

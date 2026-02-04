@@ -7,7 +7,7 @@ import { Package } from '@/lib/mock-packages';
 import styles from './packages.module.css';
 
 interface PackageCardProps {
-  package: Package;
+  package: Package & { slug?: string };
   onAddToShortlist: (packageId: string) => void;
   onAddToCompare: (packageId: string) => void;
 }
@@ -137,8 +137,8 @@ const PackageCard: React.FC<PackageCardProps> = ({
           >
             Add to Compare
           </button>
-          <Link 
-            href={`/packages/${pkg.id}`}
+          <Link
+            href={`/packages/${pkg.slug ?? pkg.id}`}
             className={styles.primaryAction}
             aria-label={`View full details for ${pkg.makkahHotel.name} and ${pkg.madinaHotel.name} package`}
           >
