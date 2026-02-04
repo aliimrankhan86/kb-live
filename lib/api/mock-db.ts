@@ -64,6 +64,28 @@ const SEED_PACKAGES: Package[] = [
     roomOccupancyOptions: { single: false, double: true, triple: true, quad: true },
     inclusions: { visa: true, flights: true, transfers: true, meals: false },
     notes: 'Suhoor included.',
+  },
+  {
+    id: 'pkg2',
+    operatorId: 'op1',
+    title: 'Hajj 2026 - Standard 7 Nights',
+    slug: 'hajj-2026-standard-7-nights',
+    status: 'published',
+    pilgrimageType: 'hajj',
+    seasonLabel: 'Hajj',
+    priceType: 'from',
+    pricePerPerson: 3200,
+    currency: 'GBP',
+    totalNights: 7,
+    nightsMakkah: 4,
+    nightsMadinah: 3,
+    hotelMakkahStars: 4,
+    hotelMadinahStars: 4,
+    distanceBandMakkah: 'medium',
+    distanceBandMadinah: 'near',
+    roomOccupancyOptions: { single: false, double: true, triple: true, quad: false },
+    inclusions: { visa: true, flights: false, transfers: true, meals: true },
+    notes: 'Guided rites support included.',
   }
 ];
 

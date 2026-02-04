@@ -91,7 +91,7 @@ describe('PackagesBrowse shortlist', () => {
   };
 
   it('loads shortlist from localStorage and persists toggles', async () => {
-    window.localStorage.setItem(SHORTLIST_KEY, JSON.stringify(['pkg-1']));
+    window.localStorage.setItem(SHORTLIST_KEY, JSON.stringify(['pkg-1', 'pkg-1']));
     await renderBrowse();
 
     const count = container.querySelector('[data-testid="shortlist-count"]');
@@ -150,5 +150,30 @@ describe('PackagesBrowse shortlist', () => {
     expect(container.querySelector('[data-testid="shortlist-empty"]')).toBeNull();
     const cards = container.querySelectorAll('[data-testid^="package-card-"]');
     expect(cards.length).toBe(1);
+  });
+
+  it('keeps shortlist ids unique when toggling repeatedly', async () => {
+    await renderBrowse();
+
+    const toggle = container.querySelector(
+      '[data-testid="shortlist-toggle-pkg-1"]'
+    ) as HTMLButtonElement;
+
+    await act(async () => {
+      toggle.click();
+    });
+    await act(async () => {
+      toggle.click();
+    });
+    await act(async () => {
+      toggle.click();
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    const stored = JSON.parse(window.localStorage.getItem(SHORTLIST_KEY) ?? '[]');
+    expect(stored).toEqual(['pkg-1']);
   });
 });

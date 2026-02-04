@@ -16,6 +16,7 @@ import {
 type PilgrimageFilter = 'all' | 'umrah' | 'hajj'
 type PriceSort = 'none' | 'price-asc' | 'price-desc'
 const SHORTLIST_STORAGE_KEY = 'kb_shortlist_packages'
+const uniqueIds = (ids: string[]) => Array.from(new Set(ids))
 
 interface PackagesBrowseProps {
   packages: Package[]
@@ -61,7 +62,7 @@ export function PackagesBrowse({ packages, error }: PackagesBrowseProps) {
     try {
       const stored = window.localStorage.getItem(SHORTLIST_STORAGE_KEY)
       const parsed = stored ? (JSON.parse(stored) as string[]) : []
-      setShortlistedPackages(Array.isArray(parsed) ? parsed : [])
+      setShortlistedPackages(Array.isArray(parsed) ? uniqueIds(parsed) : [])
     } catch {
       setShortlistedPackages([])
     } finally {
@@ -72,7 +73,10 @@ export function PackagesBrowse({ packages, error }: PackagesBrowseProps) {
   useEffect(() => {
     if (!shortlistLoaded || typeof window === 'undefined') return
     try {
-      window.localStorage.setItem(SHORTLIST_STORAGE_KEY, JSON.stringify(shortlistedPackages))
+      window.localStorage.setItem(
+        SHORTLIST_STORAGE_KEY,
+        JSON.stringify(uniqueIds(shortlistedPackages))
+      )
     } catch {
       // Ignore persistence errors (private mode, storage full, etc.)
     }
@@ -339,11 +343,12 @@ export function PackagesBrowse({ packages, error }: PackagesBrowseProps) {
                 type="button"
                 data-testid={`shortlist-toggle-${pkg.id}`}
                 onClick={() => {
-                  setShortlistedPackages((prev) =>
-                    prev.includes(pkg.id)
+                  setShortlistedPackages((prev) => {
+                    const next = prev.includes(pkg.id)
                       ? prev.filter((id) => id !== pkg.id)
                       : [...prev, pkg.id]
-                  )
+                    return uniqueIds(next)
+                  })
                 }}
                 aria-pressed={shortlistedPackages.includes(pkg.id)}
                 className="rounded border border-[var(--border)] px-2 py-1 text-xs font-medium text-[var(--text)] hover:border-[var(--primary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
