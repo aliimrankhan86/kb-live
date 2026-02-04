@@ -36,6 +36,16 @@
   margin-bottom: 0.75rem;
 }
 
+.searchForm__input {
+  width: 5rem;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  background: rgba(17, 17, 17, 0.6);
+  color: var(--text);
+}
+
 .searchForm__selectedPeriod {
   font-size: 1rem;
   font-weight: 500;

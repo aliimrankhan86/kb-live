@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import styles from './umrah-search-form.module.css'
 
 interface UmrahSearchFormProps {
@@ -9,10 +9,13 @@ interface UmrahSearchFormProps {
 }
 
 export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = '' }) => {
+  const router = useRouter()
   const [timeRange, setTimeRange] = useState([0, 50]) // 0-100 range for slider
   const [selectedPeriod, setSelectedPeriod] = useState('')
+  const [selectedQuickPick, setSelectedQuickPick] = useState<string>('')
   const [budgetEnabled, setBudgetEnabled] = useState(true)
   const [budgetRange, setBudgetRange] = useState([500, 1000]) // Start with a reasonable gap
+  const [adults, setAdults] = useState(2)
   const minTime = Math.min(timeRange[0], timeRange[1])
   const maxTime = Math.max(timeRange[0], timeRange[1])
   const timeRangeStart = minTime
@@ -28,10 +31,10 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
   const currentYear = new Date().getFullYear()
   const nextYear = currentYear + 1
   const quickSelectOptions = [
-    { id: 'christmas', label: `Christmas: Dec ${currentYear} - Jan ${nextYear}`, value: `Dec ${currentYear} - Jan ${nextYear}` },
-    { id: 'easter', label: `Easter: Mar - Apr ${nextYear}`, value: `Mar - Apr ${nextYear}` },
-    { id: 'ramadan', label: `Ramadan: May - Jun ${nextYear}`, value: `May - Jun ${nextYear}` },
-    { id: 'summer', label: `Summer: Jul - Sep ${nextYear}`, value: `Jul - Sep ${nextYear}` }
+    { id: 'christmas', label: `Christmas: Dec ${currentYear} - Jan ${nextYear}`, value: `Dec ${currentYear} - Jan ${nextYear}`, season: 'school-holidays' },
+    { id: 'easter', label: `Easter: Mar - Apr ${nextYear}`, value: `Mar - Apr ${nextYear}`, season: 'school-holidays' },
+    { id: 'ramadan', label: `Ramadan: May - Jun ${nextYear}`, value: `May - Jun ${nextYear}`, season: 'ramadan' },
+    { id: 'summer', label: `Summer: Jul - Sep ${nextYear}`, value: `Jul - Sep ${nextYear}`, season: 'flexible' }
   ]
 
   // Function to generate future date range
@@ -78,8 +81,23 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
     setSelectedPeriod(generateFutureDateRange(newRange[0], newRange[1]))
   }
 
-  const handleQuickSelect = (value: string) => {
+  const handleQuickSelect = (id: string, value: string) => {
     setSelectedPeriod(value)
+    setSelectedQuickPick(id)
+  }
+
+  const handleSearch = () => {
+    const opt = quickSelectOptions.find((o) => o.id === selectedQuickPick)
+    const season = opt?.season ?? 'flexible'
+    const params = new URLSearchParams()
+    params.set('type', 'umrah')
+    params.set('season', season)
+    if (budgetEnabled) {
+      params.set('budgetMin', String(budgetRange[0]))
+      params.set('budgetMax', String(budgetRange[1]))
+    }
+    params.set('adults', String(adults))
+    router.push(`/search/packages?${params.toString()}`)
   }
 
   const handleBudgetRangeChange = (index: number, value: number) => {
@@ -148,7 +166,7 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
             {quickSelectOptions.map((option) => (
               <button
                 key={option.id}
-                onClick={() => handleQuickSelect(option.value)}
+                onClick={() => handleQuickSelect(option.id, option.value)}
                 className={styles.searchForm__quickButton}
                 aria-label={`Select ${option.label}`}
               >
@@ -211,14 +229,27 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
           )}
         </div>
 
-        {/* Search Button */}
-        <Link 
-          href="/search/packages"
+        <div className={styles.searchForm__section}>
+          <label className={styles.searchForm__label}>Adults</label>
+          <input
+            type="number"
+            min={1}
+            max={20}
+            value={adults}
+            onChange={(e) => setAdults(Math.max(1, parseInt(e.target.value, 10) || 1))}
+            className={styles.searchForm__input}
+            aria-label="Number of adults"
+          />
+        </div>
+
+        <button
+          type="button"
+          onClick={handleSearch}
           className={styles.searchForm__searchButton}
           aria-label="Search for amazing Umrah packages"
         >
           Search For Amazing Packages
-        </Link>
+        </button>
 
         {/* Disclaimer */}
         <p className={styles.searchForm__disclaimer}>
