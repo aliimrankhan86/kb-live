@@ -5,9 +5,12 @@ const STORAGE_KEYS = {
   OFFERS: 'kb_offers',
   BOOKING_INTENTS: 'kb_bookings',
   PACKAGES: 'kb_packages',
+  PACKAGES_SEED_VERSION: 'kb_packages_seed_version',
   USERS: 'kb_users',
   OPERATORS: 'kb_operators',
 };
+
+const PACKAGES_SEED_VERSION = 2;
 
 const getStorage = <T>(key: string, defaultVal: T): T => {
   if (typeof window === 'undefined') return defaultVal;
@@ -68,6 +71,28 @@ const SEED_PACKAGES: Package[] = [
   {
     id: 'pkg2',
     operatorId: 'op1',
+    title: 'Umrah 2026 - 7 Nights Near Haram',
+    slug: 'umrah-2026-7-nights-near-haram',
+    status: 'published',
+    pilgrimageType: 'umrah',
+    seasonLabel: 'Ramadan',
+    priceType: 'from',
+    pricePerPerson: 1200,
+    currency: 'GBP',
+    totalNights: 7,
+    nightsMakkah: 4,
+    nightsMadinah: 3,
+    hotelMakkahStars: 4,
+    hotelMadinahStars: 4,
+    distanceBandMakkah: 'near',
+    distanceBandMadinah: 'near',
+    roomOccupancyOptions: { single: false, double: true, triple: true, quad: false },
+    inclusions: { visa: true, flights: true, transfers: true, meals: false },
+    notes: 'Great value Ramadan package.',
+  },
+  {
+    id: 'pkg3',
+    operatorId: 'op1',
     title: 'Hajj 2026 - Standard 7 Nights',
     slug: 'hajj-2026-standard-7-nights',
     status: 'published',
@@ -86,7 +111,51 @@ const SEED_PACKAGES: Package[] = [
     roomOccupancyOptions: { single: false, double: true, triple: true, quad: false },
     inclusions: { visa: true, flights: false, transfers: true, meals: true },
     notes: 'Guided rites support included.',
-  }
+  },
+  {
+    id: 'pkg4',
+    operatorId: 'op2',
+    title: 'Umrah 2026 - 7 Nights Value',
+    slug: 'umrah-2026-7-nights-value',
+    status: 'published',
+    pilgrimageType: 'umrah',
+    seasonLabel: 'Flexible',
+    priceType: 'from',
+    pricePerPerson: 750,
+    currency: 'GBP',
+    totalNights: 7,
+    nightsMakkah: 4,
+    nightsMadinah: 3,
+    hotelMakkahStars: 4,
+    hotelMadinahStars: 4,
+    distanceBandMakkah: 'medium',
+    distanceBandMadinah: 'near',
+    roomOccupancyOptions: { single: false, double: true, triple: true, quad: false },
+    inclusions: { visa: true, flights: true, transfers: true, meals: false },
+    notes: 'Great value for flexible dates.',
+  },
+  {
+    id: 'pkg5',
+    operatorId: 'op2',
+    title: 'Umrah 2026 - 10 Nights Near Haram',
+    slug: 'umrah-2026-10-nights-near-haram',
+    status: 'published',
+    pilgrimageType: 'umrah',
+    seasonLabel: 'Flexible',
+    priceType: 'from',
+    pricePerPerson: 950,
+    currency: 'GBP',
+    totalNights: 10,
+    nightsMakkah: 6,
+    nightsMadinah: 4,
+    hotelMakkahStars: 5,
+    hotelMadinahStars: 4,
+    distanceBandMakkah: 'near',
+    distanceBandMadinah: 'near',
+    roomOccupancyOptions: { single: false, double: true, triple: true, quad: true },
+    inclusions: { visa: true, flights: true, transfers: true, meals: false },
+    notes: 'Premium 10-night package near Haram.',
+  },
 ];
 
 export const MockDB = {
@@ -135,9 +204,11 @@ export const MockDB = {
   },
 
   getPackages: (): Package[] => {
+    const version = getStorage<number>(STORAGE_KEYS.PACKAGES_SEED_VERSION, 0);
     const pkgs = getStorage<Package[]>(STORAGE_KEYS.PACKAGES, []);
-    if (pkgs.length === 0) {
+    if (pkgs.length === 0 || version < PACKAGES_SEED_VERSION) {
       setStorage(STORAGE_KEYS.PACKAGES, SEED_PACKAGES);
+      setStorage(STORAGE_KEYS.PACKAGES_SEED_VERSION, PACKAGES_SEED_VERSION);
       return SEED_PACKAGES;
     }
     return pkgs;

@@ -33,6 +33,10 @@ Key routes:
 
 - `app/`
   - `page.tsx` Home
+- `app/umrah/`
+  - `page.tsx` Umrah preferences; CTA goes to /search/packages with query params
+- `app/search/packages/`
+  - `page.tsx` Option A search results; filters by type/season/budget; shortlist + compare (modal with ComparisonTable)
 - `app/packages/`
   - `page.tsx` Public package browse
 - `app/packages/[slug]/`
@@ -76,6 +80,12 @@ Key feature folders/files:
 - `components/request/`
   - `RequestDetail.tsx` Customer request view, offer selection, compare
   - `ComparisonTable.tsx` Comparison UI (supports offers + packages)
+- `components/search/`
+  - `PackageList.tsx` Option A search results list; shortlist state, compare selection, Compare(n) CTA, Dialog with ComparisonTable
+  - `PackageCard.tsx` Card UI; shortlist + compare toggles; test IDs for E2E
+  - `FilterOverlay.tsx` Filter UI (if used)
+- `components/umrah/`
+  - `UmrahSearchForm.tsx` Preferences form; submits to /search/packages with query params
 - `components/kanban/`
   - `KanbanBoard.tsx` Delivery workflow board
 
@@ -196,6 +206,13 @@ Pointer docs:
 - Mapping: `lib/comparison.ts`
 - UI table: `components/request/ComparisonTable.tsx`
 - Update unit tests: `tests/comparison.test.ts`, `tests/phase2.test.ts`
+
+### Change /search/packages (Option A) behaviour
+
+- Page + filtering: `app/search/packages/page.tsx` (filterByParams, toSearchDisplay, Repository.listPackages)
+- List + shortlist + compare: `components/search/PackageList.tsx` (state, Compare CTA, Dialog)
+- Card UI: `components/search/PackageCard.tsx`
+- Seed data: `lib/api/mock-db.ts` (SEED_PACKAGES, PACKAGES_SEED_VERSION)
 
 ### Fix failing E2E tests
 

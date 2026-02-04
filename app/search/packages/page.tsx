@@ -1,6 +1,6 @@
 'use client'
 
-import React, { Suspense, useMemo } from 'react';
+import React, { Suspense, useMemo, useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import PackageList from '@/components/search/PackageList';
@@ -11,6 +11,13 @@ import styles from '@/components/search/packages.module.css';
 
 const PLACEHOLDER_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjgwIiB2aWV3Qm94PSIwIDAgMTIwIDgwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iODAiIGZpbGw9InJnYmEoMjU1LCAyNTUsIDI1NSwgMC4xKSIvPjx0ZXh0IHg9IjYwIiB5PSI0MCIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9InJnYmEoMjU1LCAyNTUsIDI1NSwgMC41KSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+SG90ZWwgSW1hZ2U8L3RleHQ+PC9zdmc+';
 
+/** Map URL season param to catalogue seasonLabel values (local to this page). */
+const SEASON_QUERY_TO_LABELS: Record<string, string[]> = {
+  ramadan: ['Ramadan', 'ramadan'],
+  'school-holidays': ['Christmas', 'Easter', 'School Holidays', 'school-holidays', 'Hajj'],
+  flexible: [],
+};
+
 function filterByParams(packages: CataloguePackage[], params: URLSearchParams): CataloguePackage[] {
   let next = [...packages];
   const type = params.get('type');
@@ -18,17 +25,22 @@ function filterByParams(packages: CataloguePackage[], params: URLSearchParams): 
   const season = params.get('season');
   if (season) {
     const s = season.toLowerCase();
-    next = next.filter((p) => (p.seasonLabel?.toLowerCase() ?? '').includes(s) || s === 'flexible');
+    const labels = SEASON_QUERY_TO_LABELS[s];
+    if (labels && labels.length > 0) {
+      const set = new Set(labels.map((l) => l.toLowerCase()));
+      next = next.filter((p) => set.has((p.seasonLabel ?? '').toLowerCase()));
+    } else if (s !== 'flexible') {
+      next = next.filter((p) => (p.seasonLabel?.toLowerCase() ?? '').includes(s));
+    }
   }
   const budgetMin = params.get('budgetMin');
-  if (budgetMin != null && budgetMin !== '') {
-    const min = Number(budgetMin);
-    if (Number.isFinite(min)) next = next.filter((p) => p.pricePerPerson >= min);
-  }
   const budgetMax = params.get('budgetMax');
-  if (budgetMax != null && budgetMax !== '') {
-    const max = Number(budgetMax);
-    if (Number.isFinite(max)) next = next.filter((p) => p.pricePerPerson <= max);
+  const minNum = budgetMin != null && budgetMin !== '' ? Number(budgetMin) : NaN;
+  const maxNum = budgetMax != null && budgetMax !== '' ? Number(budgetMax) : NaN;
+  if (Number.isFinite(minNum)) next = next.filter((p) => p.pricePerPerson >= minNum);
+  if (Number.isFinite(maxNum)) {
+    const afterMax = next.filter((p) => p.pricePerPerson <= maxNum);
+    if (afterMax.length > 0) next = afterMax;
   }
   return next;
 }
@@ -62,7 +74,12 @@ function toSearchDisplay(pkg: CataloguePackage): SearchPackage & { slug: string 
 
 function SearchPackagesContent() {
   const searchParams = useSearchParams();
-  const cataloguePackages = useMemo(() => filterByParams(Repository.listPackages(), searchParams), [searchParams]);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const cataloguePackages = useMemo(() => {
+    if (!mounted) return [];
+    return filterByParams(Repository.listPackages(), searchParams);
+  }, [mounted, searchParams]);
   const displayPackages = useMemo(() => cataloguePackages.map(toSearchDisplay), [cataloguePackages]);
   return (
     <main className={styles.searchPage}>

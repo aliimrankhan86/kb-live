@@ -40,3 +40,10 @@
   - npm run test → PASS (17 tests)
   - npx playwright test e2e/flow.spec.ts → PASS (Chromium, Firefox, WebKit)
 - Result: PASS
+
+### UX Option A: Search packages wiring (2026-02-04)
+- Scope: Wire /search/packages (Option A UI) with real data, shortlist persistence, compare modal; fix console errors; ensure 2+ packages for compare.
+- Flow: /umrah → /search/packages with query params; filter by type/season/budget; shortlist in localStorage (kb_shortlist_packages); compare (max 3) opens Dialog with ComparisonTable.
+- Files touched: app/search/packages/page.tsx, components/search/PackageList.tsx, PackageCard.tsx, components/graphics/Logo.tsx, components/layout/Header.tsx, lib/api/mock-db.ts, docs/NOW.md, docs/CURSOR_CONTEXT.md, docs/00_AGENT_HANDOVER.md, QA.md, docs/02_REPO_MAP.md, docs/PHASE_3_AUDIT.md.
+- Commands: npm run test, npx playwright test e2e/catalogue.spec.ts (and e2e/flow.spec.ts if touched).
+- Result: Wiring complete; seed versioning ensures existing users get new Umrah packages (pkg4, pkg5) in 500–1000 range.
