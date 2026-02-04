@@ -15,6 +15,7 @@ import {
 
 type PilgrimageFilter = 'all' | 'umrah' | 'hajj'
 type PriceSort = 'none' | 'price-asc' | 'price-desc'
+const SHORTLIST_STORAGE_KEY = 'kb_shortlist_packages'
 
 interface PackagesBrowseProps {
   packages: Package[]
@@ -39,8 +40,12 @@ export function PackagesBrowse({ packages, error }: PackagesBrowseProps) {
   const [priceSort, setPriceSort] = useState<PriceSort>('none')
   const [isPending, startTransition] = useTransition()
   const [selectedPackages, setSelectedPackages] = useState<string[]>([])
+  const [shortlistedPackages, setShortlistedPackages] = useState<string[]>([])
+  const [shortlistOnly, setShortlistOnly] = useState(false)
+  const [shortlistLoaded, setShortlistLoaded] = useState(false)
   const [operatorsById, setOperatorsById] = useState<Record<string, OperatorProfile>>({})
   const [showComparison, setShowComparison] = useState(false)
+  const [compareMessage, setCompareMessage] = useState<string>('')
 
   useEffect(() => {
     const ops = MockDB.getOperators()
@@ -50,6 +55,28 @@ export function PackagesBrowse({ packages, error }: PackagesBrowseProps) {
     }, {})
     setOperatorsById(map)
   }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      const stored = window.localStorage.getItem(SHORTLIST_STORAGE_KEY)
+      const parsed = stored ? (JSON.parse(stored) as string[]) : []
+      setShortlistedPackages(Array.isArray(parsed) ? parsed : [])
+    } catch {
+      setShortlistedPackages([])
+    } finally {
+      setShortlistLoaded(true)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!shortlistLoaded || typeof window === 'undefined') return
+    try {
+      window.localStorage.setItem(SHORTLIST_STORAGE_KEY, JSON.stringify(shortlistedPackages))
+    } catch {
+      // Ignore persistence errors (private mode, storage full, etc.)
+    }
+  }, [shortlistLoaded, shortlistedPackages])
 
   const seasonOptions = useMemo(() => {
     const labels = packages
@@ -78,10 +105,16 @@ export function PackagesBrowse({ packages, error }: PackagesBrowseProps) {
       next.sort((a, b) => b.pricePerPerson - a.pricePerPerson)
     }
 
+    if (shortlistOnly) {
+      next = next.filter((pkg) => shortlistedPackages.includes(pkg.id))
+    }
+
     return next
-  }, [packages, pilgrimageType, priceSort, seasonLabel])
+  }, [packages, pilgrimageType, priceSort, seasonLabel, shortlistOnly, shortlistedPackages])
 
   const showEmpty = !error && filteredPackages.length === 0
+  const showShortlistEmpty = shortlistOnly && !error && filteredPackages.length === 0
+  const compareDisabled = selectedPackages.length < 2
   const comparisonRows = useMemo(
     () =>
       filteredPackages
@@ -160,20 +193,55 @@ export function PackagesBrowse({ packages, error }: PackagesBrowseProps) {
             <option value="price-desc">Highest to lowest</option>
           </select>
         </div>
+
+        <div className="flex flex-col gap-2">
+          <span className="text-sm font-medium text-[var(--text)]">Shortlist</span>
+          <label className="flex items-center gap-2 text-sm text-[var(--textMuted)]">
+            <input
+              type="checkbox"
+              data-testid="shortlist-filter"
+              checked={shortlistOnly}
+              onChange={(event) => setShortlistOnly(event.target.checked)}
+              className="h-4 w-4 rounded border-[var(--border)] bg-[var(--panel)] text-[var(--primary)] focus:ring-[var(--primary)]"
+            />
+            Show shortlist only
+          </label>
+          <div
+            data-testid="shortlist-count"
+            className="text-xs font-medium text-[var(--textMuted)]"
+          >
+            {shortlistedPackages.length} shortlisted
+          </div>
+        </div>
       </div>
 
-      {selectedPackages.length > 1 ? (
-        <div className="mb-6">
-          <button
-            type="button"
-            data-testid="packages-compare-button"
-            onClick={() => setShowComparison(true)}
-            className="rounded bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
+      <div className="mb-6 flex flex-col gap-2">
+        <button
+          type="button"
+          data-testid="packages-compare-button"
+          onClick={() => setShowComparison(true)}
+          disabled={compareDisabled}
+          aria-disabled={compareDisabled ? 'true' : 'false'}
+          aria-describedby={compareDisabled ? 'packages-compare-help' : undefined}
+          className="rounded bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Compare ({selectedPackages.length})
+        </button>
+        {compareDisabled ? (
+          <p id="packages-compare-help" className="text-xs text-[var(--textMuted)]">
+            Select at least 2 packages to compare
+          </p>
+        ) : null}
+        {compareMessage ? (
+          <div
+            role="alert"
+            data-testid="compare-message"
+            className="rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-100"
           >
-            Compare ({selectedPackages.length})
-          </button>
-        </div>
-      ) : null}
+            {compareMessage}
+          </div>
+        ) : null}
+      </div>
 
       {error ? (
         <div role="alert" className="rounded border border-red-500/30 bg-red-500/10 px-4 py-3">
@@ -187,7 +255,18 @@ export function PackagesBrowse({ packages, error }: PackagesBrowseProps) {
         </div>
       ) : null}
 
-      {showEmpty ? (
+      {showShortlistEmpty ? (
+        <div
+          data-testid="shortlist-empty"
+          className="mt-6 rounded border border-dashed border-[var(--border)] px-4 py-6 text-center"
+        >
+          <p className="text-sm text-[var(--textMuted)]">
+            No packages in your shortlist yet. Add some to see them here.
+          </p>
+        </div>
+      ) : null}
+
+      {showEmpty && !showShortlistEmpty ? (
         <div
           data-testid="packages-empty"
           className="mt-6 rounded border border-dashed border-[var(--border)] px-4 py-6 text-center"
@@ -236,7 +315,7 @@ export function PackagesBrowse({ packages, error }: PackagesBrowseProps) {
               </div>
             </dl>
 
-            <div className="mt-4 flex items-center gap-2 text-sm text-[var(--textMuted)]">
+            <div className="mt-4 flex items-center gap-4 text-sm text-[var(--textMuted)]">
               <input
                 id={`package-compare-${pkg.id}`}
                 type="checkbox"
@@ -246,8 +325,9 @@ export function PackagesBrowse({ packages, error }: PackagesBrowseProps) {
                   try {
                     const next = handleComparisonSelection(selectedPackages, pkg.id)
                     setSelectedPackages(next)
+                    setCompareMessage('')
                   } catch (err) {
-                    alert((err as Error).message)
+                    setCompareMessage((err as Error).message)
                   }
                 }}
                 className="h-4 w-4 rounded border-[var(--border)] bg-[var(--panel)] text-[var(--primary)] focus:ring-[var(--primary)]"
@@ -255,6 +335,21 @@ export function PackagesBrowse({ packages, error }: PackagesBrowseProps) {
               <label htmlFor={`package-compare-${pkg.id}`} className="cursor-pointer">
                 Compare
               </label>
+              <button
+                type="button"
+                data-testid={`shortlist-toggle-${pkg.id}`}
+                onClick={() => {
+                  setShortlistedPackages((prev) =>
+                    prev.includes(pkg.id)
+                      ? prev.filter((id) => id !== pkg.id)
+                      : [...prev, pkg.id]
+                  )
+                }}
+                aria-pressed={shortlistedPackages.includes(pkg.id)}
+                className="rounded border border-[var(--border)] px-2 py-1 text-xs font-medium text-[var(--text)] hover:border-[var(--primary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
+              >
+                {shortlistedPackages.includes(pkg.id) ? 'Shortlisted' : 'Shortlist'}
+              </button>
             </div>
           </li>
         ))}

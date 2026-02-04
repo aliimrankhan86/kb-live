@@ -5,6 +5,24 @@ test('Public catalogue flow: browse, detail, operator, compare', async ({ page }
   await expect(page.locator('[data-testid="packages-page"]')).toBeVisible();
   const packageCards = page.locator('[data-testid^="package-card-"]');
   await expect(packageCards.first()).toBeVisible();
+  const compareButton = page.locator('[data-testid="packages-compare-button"]');
+  await expect(compareButton).toBeVisible();
+  await expect(compareButton).toBeDisabled();
+  const compareCheckboxes = page.locator('[data-testid^="package-compare-checkbox-"]');
+  const packageCount = await packageCards.count();
+  if (packageCount >= 1) {
+    await compareCheckboxes.nth(0).check();
+    await expect(compareButton).toBeDisabled();
+  }
+  if (packageCount >= 2) {
+    await compareCheckboxes.nth(1).check();
+    await expect(compareButton).toBeEnabled();
+    await compareButton.click();
+
+    const comparison = page.locator('[data-testid="comparison-table"]');
+    await expect(comparison).toBeVisible();
+    await page.keyboard.press('Escape');
+  }
 
   const firstPackageLink = page.locator('[data-testid^="package-link-"]').first();
   await firstPackageLink.click();
@@ -18,15 +36,8 @@ test('Public catalogue flow: browse, detail, operator, compare', async ({ page }
   await expect(page.locator('[data-testid="operator-name"]')).toBeVisible();
   await expect(page.locator('[data-testid^="operator-package-link-"]')).toBeVisible();
 
-  const packageCount = await packageCards.count();
   if (packageCount >= 2) {
     await page.goto('/packages');
-    const compareCheckboxes = page.locator('[data-testid^="package-compare-checkbox-"]');
-    await compareCheckboxes.nth(0).check();
-    await compareCheckboxes.nth(1).check();
-    await page.click('[data-testid="packages-compare-button"]');
-
-    const comparison = page.locator('[data-testid="comparison-table"]');
-    await expect(comparison).toBeVisible();
+    await expect(page.locator('[data-testid="packages-page"]')).toBeVisible();
   }
 });
