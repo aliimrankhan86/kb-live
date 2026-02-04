@@ -6,6 +6,8 @@ import type { Package, OperatorProfile } from '@/lib/types'
 import { MockDB } from '@/lib/api/mock-db'
 import { mapPackageToComparison, handleComparisonSelection } from '@/lib/comparison'
 import { ComparisonTable } from '@/components/request/ComparisonTable'
+import { getRegionSettings } from '@/lib/i18n/region'
+import { formatPriceForRegion } from '@/lib/i18n/format'
 import {
   Dialog,
   OverlayContent,
@@ -21,16 +23,6 @@ const uniqueIds = (ids: string[]) => Array.from(new Set(ids))
 interface PackagesBrowseProps {
   packages: Package[]
   error?: string
-}
-
-const formatPrice = (pkg: Package) => {
-  const amount = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: pkg.currency,
-    maximumFractionDigits: 0,
-  }).format(pkg.pricePerPerson)
-
-  return pkg.priceType === 'from' ? `From ${amount}` : amount
 }
 
 const formatSeasonLabel = (pkg: Package) => pkg.seasonLabel ?? 'Flexible'
@@ -82,6 +74,8 @@ export function PackagesBrowse({ packages, error }: PackagesBrowseProps) {
     }
   }, [shortlistLoaded, shortlistedPackages])
 
+  const regionSettings = useMemo(() => getRegionSettings(), [])
+
   const seasonOptions = useMemo(() => {
     const labels = packages
       .map((pkg) => pkg.seasonLabel)
@@ -119,6 +113,10 @@ export function PackagesBrowse({ packages, error }: PackagesBrowseProps) {
   const showEmpty = !error && filteredPackages.length === 0
   const showShortlistEmpty = shortlistOnly && !error && filteredPackages.length === 0
   const compareDisabled = selectedPackages.length < 2
+  const formatPrice = (pkg: Package) => {
+    const priceInfo = formatPriceForRegion(pkg.pricePerPerson, pkg.currency, regionSettings)
+    return pkg.priceType === 'from' ? `From ${priceInfo.formatted}` : priceInfo.formatted
+  }
   const comparisonRows = useMemo(
     () =>
       filteredPackages

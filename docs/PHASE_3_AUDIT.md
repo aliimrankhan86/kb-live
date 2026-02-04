@@ -32,3 +32,11 @@
   - npx playwright test e2e/flow.spec.ts → PASS (Chromium, Firefox, WebKit)
   - npx playwright test e2e/catalogue.spec.ts → PASS (Chromium, Firefox, WebKit)
 - Result: PASS
+
+### Phase 3B-1: Region detection + formatting foundations (2026-02-04)
+- Scope: Region detection, currency + distance formatting helpers, wired into packages + comparison; stabilise flow test price assertion.
+- Files touched: lib/i18n/region.ts, lib/i18n/format.ts, components/packages/PackagesBrowse.tsx, components/packages/PackageDetail.tsx, lib/comparison.ts, tests/comparison.test.ts, e2e/flow.spec.ts
+- Commands:
+  - npm run test → PASS (17 tests)
+  - npx playwright test e2e/flow.spec.ts → PASS (Chromium, Firefox, WebKit)
+- Result: PASS

@@ -1,19 +1,17 @@
 import Link from 'next/link'
 import type { Package } from '@/lib/types'
 import { createQuotePrefillUrl } from '@/lib/quote-prefill'
+import { getRegionSettings } from '@/lib/i18n/region'
+import { formatPriceForRegion } from '@/lib/i18n/format'
 
 interface PackageDetailProps {
   pkg: Package
 }
 
 const formatPrice = (pkg: Package) => {
-  const amount = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: pkg.currency,
-    maximumFractionDigits: 0,
-  }).format(pkg.pricePerPerson)
-
-  return pkg.priceType === 'from' ? `From ${amount}` : amount
+  const settings = getRegionSettings()
+  const priceInfo = formatPriceForRegion(pkg.pricePerPerson, pkg.currency, settings)
+  return pkg.priceType === 'from' ? `From ${priceInfo.formatted}` : priceInfo.formatted
 }
 
 const formatDateWindow = (pkg: Package) => {

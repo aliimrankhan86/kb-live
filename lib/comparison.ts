@@ -1,4 +1,6 @@
 import { Offer, OperatorProfile, Package } from './types';
+import { getRegionSettings } from './i18n/region';
+import { formatDistance, formatPriceForRegion, parseDistanceKm } from './i18n/format';
 
 export interface ComparisonRow {
   id: string;
@@ -14,6 +16,7 @@ export interface ComparisonRow {
 }
 
 export function mapOfferToComparison(offer: Offer, operator?: OperatorProfile): ComparisonRow {
+  const settings = getRegionSettings();
   const supportedOccupancy = [];
   if (offer.roomOccupancy.single) supportedOccupancy.push('Single');
   if (offer.roomOccupancy.double) supportedOccupancy.push('Double');
@@ -26,17 +29,20 @@ export function mapOfferToComparison(offer: Offer, operator?: OperatorProfile): 
   if (offer.inclusions.transfers) inclusionsList.push('Transfers');
   if (offer.inclusions.meals) inclusionsList.push('Meals');
 
+  const priceInfo = formatPriceForRegion(offer.pricePerPerson, offer.currency, settings);
+  const distanceKm = parseDistanceKm(offer.distanceToHaram);
+  const distance = distanceKm
+    ? formatDistance(distanceKm, settings.distanceUnit)
+    : offer.distanceToHaram || 'Not provided';
+
   return {
     id: offer.id,
-    price:
-      offer.currency && Number.isFinite(offer.pricePerPerson)
-        ? `${offer.currency} ${offer.pricePerPerson}`
-        : 'Not provided',
+    price: offer.currency && Number.isFinite(offer.pricePerPerson) ? priceInfo.formatted : 'Not provided',
     operatorName: operator?.companyName || 'Not provided',
     totalNights: offer.totalNights,
     splitNights: `${offer.nightsMakkah} / ${offer.nightsMadinah}`,
     hotelRating: offer.hotelStars ? `${offer.hotelStars} Stars` : 'Not provided',
-    distance: offer.distanceToHaram || 'Not provided',
+    distance,
     occupancy: supportedOccupancy.join(', ') || 'Not provided',
     inclusions: inclusionsList.length > 0 ? inclusionsList.join(', ') : 'Not provided',
     notes: offer.notes || 'Not provided',
@@ -44,6 +50,7 @@ export function mapOfferToComparison(offer: Offer, operator?: OperatorProfile): 
 }
 
 export function mapPackageToComparison(pkg: Package, operator?: OperatorProfile): ComparisonRow {
+  const settings = getRegionSettings();
   const supportedOccupancy = [];
   if (pkg.roomOccupancyOptions.single) supportedOccupancy.push('Single');
   if (pkg.roomOccupancyOptions.double) supportedOccupancy.push('Double');
@@ -72,16 +79,14 @@ export function mapPackageToComparison(pkg: Package, operator?: OperatorProfile)
     return `Makkah ${makkah} / Madinah ${madinah}`;
   })();
 
+  const priceInfo = formatPriceForRegion(pkg.pricePerPerson, pkg.currency, settings);
   const price = pkg.priceType === 'from'
-    ? `From ${pkg.currency} ${pkg.pricePerPerson}`
-    : `${pkg.currency} ${pkg.pricePerPerson}`;
+    ? `From ${priceInfo.formatted}`
+    : priceInfo.formatted;
 
   return {
     id: pkg.id,
-    price:
-      pkg.currency && Number.isFinite(pkg.pricePerPerson)
-        ? price
-        : 'Not provided',
+    price: pkg.currency && Number.isFinite(pkg.pricePerPerson) ? price : 'Not provided',
     operatorName: operator?.companyName || 'Not provided',
     totalNights: pkg.totalNights,
     splitNights: `${pkg.nightsMakkah} / ${pkg.nightsMadinah}`,

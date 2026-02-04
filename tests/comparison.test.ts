@@ -1,8 +1,14 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { mapOfferToComparison, handleOfferSelection } from '../lib/comparison';
 import { Offer, OperatorProfile } from '../lib/types';
 
 describe('Comparison Logic', () => {
+  beforeEach(() => {
+    Object.defineProperty(window.navigator, 'language', {
+      value: 'en-GB',
+      configurable: true,
+    });
+  });
   const mockOffer: Offer = {
     id: 'off1',
     requestId: 'req1',
@@ -30,7 +36,7 @@ describe('Comparison Logic', () => {
   it('maps offer correctly with operator', () => {
     const result = mapOfferToComparison(mockOffer, mockOperator);
     expect(result.operatorName).toBe('Test Operator');
-    expect(result.price).toBe('GBP 1000');
+    expect(result.price).toBe('£1,000');
     expect(result.occupancy).toBe('Double, Quad');
     expect(result.inclusions).toBe('Visa, Transfers');
   });
