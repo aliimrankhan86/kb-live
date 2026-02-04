@@ -25,16 +25,22 @@ test('Public catalogue flow: browse, detail, operator, compare', async ({ page }
   }
 
   const firstPackageLink = page.locator('[data-testid^="package-link-"]').first();
-  await firstPackageLink.click();
+  await Promise.all([
+    page.waitForURL('**/packages/**'),
+    firstPackageLink.click(),
+  ]);
+  await page.waitForLoadState('domcontentloaded');
 
   await expect(page.locator('[data-testid="package-detail-page"]')).toBeVisible();
   await expect(page.locator('[data-testid="package-cta-request-quote"]')).toBeVisible();
   await expect(page.locator('[data-testid="package-title"]')).toBeVisible();
 
+  await page.waitForLoadState('domcontentloaded');
   await page.goto('/operators/al-hidayah-travel');
+  await page.waitForLoadState('domcontentloaded');
   await expect(page.locator('[data-testid="operator-page"]')).toBeVisible();
   await expect(page.locator('[data-testid="operator-name"]')).toBeVisible();
-  await expect(page.locator('[data-testid^="operator-package-link-"]')).toBeVisible();
+  await expect(page.locator('[data-testid^="operator-package-link-"]').first()).toBeVisible();
 
   if (packageCount >= 2) {
     await page.goto('/packages');

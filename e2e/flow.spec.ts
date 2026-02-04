@@ -25,7 +25,11 @@ test('End-to-end Quote -> Offer -> Compare Flow', async ({ page }) => {
   await page.click('text=Next Step');
   
   // Step 5: Review
-  await page.click('text=Submit Request');
+  await Promise.all([
+    page.waitForURL('**/requests/**'),
+    page.click('text=Submit Request'),
+  ]);
+  await page.waitForLoadState('domcontentloaded');
   
   // Check redirect
   await expect(page).toHaveURL(/\/requests\/[\w-]+/);
@@ -37,6 +41,7 @@ test('End-to-end Quote -> Offer -> Compare Flow', async ({ page }) => {
   
   // 2. Operator Dashboard
   await page.goto('/operator/dashboard');
+  await page.waitForLoadState('domcontentloaded');
   
   // Find request (it might take a moment to poll, but initial load should have it)
   // Dashboard shows Type, Season, Departure City
@@ -57,6 +62,7 @@ test('End-to-end Quote -> Offer -> Compare Flow', async ({ page }) => {
   
   // 3. Customer View
   await page.goto(requestUrl);
+  await page.waitForLoadState('domcontentloaded');
   
   // Verify Offer
   await expect(page.locator('text=1500')).toBeVisible();
@@ -65,6 +71,7 @@ test('End-to-end Quote -> Offer -> Compare Flow', async ({ page }) => {
   // 4. Comparison
   // Create second offer to enable comparison
   await page.goto('/operator/dashboard');
+  await page.waitForLoadState('domcontentloaded');
   await page.click('text=London');
   await expect(page.locator('text=Reply to Quote Request')).toBeVisible();
   await page.fill('input[type="number"] >> nth=0', '2000');
@@ -73,6 +80,7 @@ test('End-to-end Quote -> Offer -> Compare Flow', async ({ page }) => {
   
   // Back to customer
   await page.goto(requestUrl);
+  await page.waitForLoadState('domcontentloaded');
   
   // Wait for 2 offers to be visible
   await expect(page.locator('[data-testid="offer-card"]')).toHaveCount(2);
