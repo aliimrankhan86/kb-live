@@ -1,8 +1,12 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
-import type { Package as CataloguePackage } from '@/lib/types';
+import React, { useState, useEffect, useMemo } from 'react';
+import type { Package as CataloguePackage, OperatorProfile } from '@/lib/types';
 import { Package } from '@/lib/mock-packages';
+import { MockDB } from '@/lib/api/mock-db';
+import { mapPackageToComparison, handleComparisonSelection } from '@/lib/comparison';
+import { ComparisonTable } from '@/components/request/ComparisonTable';
+import { Dialog, OverlayContent, OverlayHeader, OverlayTitle } from '@/components/ui/Overlay';
 import PackageCard from './PackageCard';
 import { FilterOverlay, FilterState } from './FilterOverlay';
 import styles from './packages.module.css';
@@ -28,8 +32,17 @@ const PackageList: React.FC<PackageListProps> = ({
   const [shortlistedPackages, setShortlistedPackages] = useState<string[]>([]);
   const [shortlistLoaded, setShortlistLoaded] = useState(false);
   const [shortlistOnly, setShortlistOnly] = useState(false);
+  const [selectedForCompare, setSelectedForCompare] = useState<string[]>([]);
+  const [compareMessage, setCompareMessage] = useState('');
+  const [showCompareModal, setShowCompareModal] = useState(false);
+  const [operatorsById, setOperatorsById] = useState<Record<string, OperatorProfile>>({});
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<FilterState | null>(null);
+
+  useEffect(() => {
+    const ops = MockDB.getOperators();
+    setOperatorsById(ops.reduce<Record<string, OperatorProfile>>((acc, op) => ({ ...acc, [op.id]: op }), {}));
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -58,7 +71,12 @@ const PackageList: React.FC<PackageListProps> = ({
   };
 
   const handleAddToCompare = (packageId: string) => {
-    void packageId;
+    try {
+      setSelectedForCompare((prev) => handleComparisonSelection(prev, packageId));
+      setCompareMessage('');
+    } catch (err) {
+      setCompareMessage((err as Error).message);
+    }
   };
 
   const handleFilterClick = () => {
@@ -82,6 +100,13 @@ const PackageList: React.FC<PackageListProps> = ({
 
   const shortlistCount = shortlistedPackages.length;
   const listPackages = shortlistOnly ? packages.filter((p) => shortlistedPackages.includes(p.id)) : packages;
+  const compareDisabled = selectedForCompare.length < 2;
+  const comparisonRows = useMemo(() => {
+    if (!cataloguePackages?.length) return [];
+    return cataloguePackages
+      .filter((p) => selectedForCompare.includes(p.id))
+      .map((p) => mapPackageToComparison(p, operatorsById[p.operatorId]));
+  }, [cataloguePackages, operatorsById, selectedForCompare]);
 
   return (
     <div className={styles.searchContainer}>
@@ -118,14 +143,35 @@ const PackageList: React.FC<PackageListProps> = ({
           <div className={styles.shortlistCount} aria-live="polite" aria-label={`${shortlistCount} packages in shortlist`}>
             {shortlistCount} in shortlist
           </div>
+          <button
+            type="button"
+            className={styles.compareButton}
+            onClick={() => setShowCompareModal(true)}
+            disabled={compareDisabled}
+            aria-disabled={compareDisabled}
+            aria-describedby={compareDisabled ? 'search-compare-help' : undefined}
+          >
+            Compare ({selectedForCompare.length})
+          </button>
         </div>
       </header>
+      {compareDisabled && (
+        <p id="search-compare-help" className={styles.compareHelpText}>
+          Select at least 2 packages to compare
+        </p>
+      )}
+      {compareMessage ? (
+        <p role="status" className={styles.compareMessageText}>
+          {compareMessage}
+        </p>
+      ) : null}
       <section className={styles.packageList} aria-label="Search results">
         {listPackages.map((pkg) => (
           <PackageCard
             key={pkg.id}
             package={pkg}
             isShortlisted={shortlistedPackages.includes(pkg.id)}
+            isCompareSelected={selectedForCompare.includes(pkg.id)}
             onAddToShortlist={handleAddToShortlist}
             onAddToCompare={handleAddToCompare}
           />
@@ -139,6 +185,16 @@ const PackageList: React.FC<PackageListProps> = ({
         onReset={handleFilterReset}
         initialFilters={appliedFilters || undefined}
       />
+      <Dialog open={showCompareModal} onOpenChange={setShowCompareModal}>
+        <OverlayContent className="max-w-4xl overflow-x-auto">
+          <OverlayHeader>
+            <OverlayTitle>Compare Packages</OverlayTitle>
+          </OverlayHeader>
+          <div className="mt-4">
+            <ComparisonTable rows={comparisonRows} />
+          </div>
+        </OverlayContent>
+      </Dialog>
     </div>
   );
 };

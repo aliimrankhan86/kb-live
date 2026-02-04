@@ -9,6 +9,7 @@ import styles from './packages.module.css';
 interface PackageCardProps {
   package: Package & { slug?: string };
   isShortlisted?: boolean;
+  isCompareSelected?: boolean;
   onAddToShortlist: (packageId: string) => void;
   onAddToCompare: (packageId: string) => void;
 }
@@ -16,6 +17,7 @@ interface PackageCardProps {
 const PackageCard: React.FC<PackageCardProps> = ({
   package: pkg,
   isShortlisted = false,
+  isCompareSelected = false,
   onAddToShortlist,
   onAddToCompare,
 }) => {
@@ -134,13 +136,15 @@ const PackageCard: React.FC<PackageCardProps> = ({
           >
             {isShortlisted ? 'Shortlisted' : 'Add to Shortlist'}
           </button>
-          <button
-            className={styles.secondaryAction}
-            onClick={() => onAddToCompare(pkg.id)}
-            aria-label={`Add ${pkg.makkahHotel.name} and ${pkg.madinaHotel.name} to compare`}
-          >
-            Add to Compare
-          </button>
+          <label className={styles.compareLabel}>
+            <input
+              type="checkbox"
+              checked={isCompareSelected}
+              onChange={() => onAddToCompare(pkg.id)}
+              aria-label={`${isCompareSelected ? 'Remove from' : 'Add to'} compare`}
+            />
+            Compare
+          </label>
           <Link
             href={`/packages/${pkg.slug ?? pkg.id}`}
             className={styles.primaryAction}

@@ -81,6 +81,46 @@
   font-size: 0.875rem;
 }
 
+.compareButton {
+  background: var(--yellow);
+  color: var(--bg);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.compareButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.compareHelpText,
+.compareMessageText {
+  font-size: 0.75rem;
+  color: var(--textMuted);
+  margin: 0.25rem 0 0;
+}
+
+.compareMessageText {
+  color: var(--yellow);
+}
+
+.compareLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.compareLabel input {
+  accent-color: var(--yellow);
+}
+
 .packageList {
   display: flex;
   flex-direction: column;
