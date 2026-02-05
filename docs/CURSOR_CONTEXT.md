@@ -47,12 +47,12 @@ This is the single source of truth Cursor must read at the start of every sessio
 - ComparisonTable uses mapPackageToComparison(pkg, operatorsById[p.operatorId]); PackageList passes cataloguePackages + selectedCompareIds to build comparisonRows.
 - MockDB seed: 5 packages (pkg1–pkg5); pkg4 and pkg5 are Umrah in 500–1000 range. Seed version PACKAGES_SEED_VERSION=2; getPackages() reseeds when stored version < 2.
 
-## Current state (as of last commit)
+## Current state (parked)
 
-- /search/packages wiring is done: shortlist persists, compare (2–3) opens modal with ComparisonTable.
-- Seed includes 2 Umrah packages in 500–1000 budget so compare is possible for typical query.
-- Console warnings (Image aspect-ratio, LCP, hydration) addressed.
-- For next session: read docs/NOW.md first; run npm run test and e2e/catalogue.spec.ts before changing behaviour.
+- /search/packages wiring is done; shortlist + compare work when the app loads.
+- **App is broken in dev** from user’s perspective — parked; figure out tomorrow. Build passes; issue is likely dev-only (stale .next, chunk 404s, clientReferenceManifest, _document.js ENOENT). See docs/NOW.md for “Next steps (tomorrow)”.
+- Uncommitted this session: dev:clean/dev:turbo, Umrah form progressive enhancement, error.tsx/global-error.tsx/not-found.tsx, README troubleshooting, PackageList lint fix.
+- For next session: read docs/NOW.md first; reproduce “app broken” then fix; run npm run test and e2e before commit.
 
 ## Debug checklist for "Compare button does nothing"
 

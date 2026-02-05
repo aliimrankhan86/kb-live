@@ -82,10 +82,6 @@ const PackageList: React.FC<PackageListProps> = ({
     });
   };
 
-  const openCompareModal = () => {
-    setShowComparison(true);
-  };
-
   const handleFilterClick = () => {
     setIsFilterOpen(true);
   };

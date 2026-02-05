@@ -86,15 +86,16 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
     setSelectedQuickPick(id)
   }
 
-  const handleSearch = () => {
-    const opt = quickSelectOptions.find((o) => o.id === selectedQuickPick)
-    const season = opt?.season ?? 'flexible'
+  const seasonParam = quickSelectOptions.find((o) => o.id === selectedQuickPick)?.season ?? 'flexible'
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
     const params = new URLSearchParams()
     params.set('type', 'umrah')
-    params.set('season', season)
+    params.set('season', seasonParam)
     if (budgetEnabled) {
-      params.set('budgetMin', String(budgetRange[0]))
-      params.set('budgetMax', String(budgetRange[1]))
+      params.set('budgetMin', String(minBudget))
+      params.set('budgetMax', String(maxBudget))
     }
     params.set('adults', String(adults))
     router.push(`/search/packages?${params.toString()}`)
@@ -116,7 +117,24 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
 
   return (
     <div className={`${styles.searchForm} ${className}`}>
-      <div className={styles.searchForm__card}>
+      <form
+        action="/search/packages"
+        method="get"
+        onSubmit={handleSearch}
+        className={styles.searchForm__card}
+        noValidate
+      >
+        {/* Hidden inputs for progressive enhancement: when JS fails to load (e.g. chunk 404), form submit still navigates */}
+        <input type="hidden" name="type" value="umrah" />
+        <input type="hidden" name="season" value={seasonParam} />
+        <input type="hidden" name="adults" value={String(adults)} />
+        {budgetEnabled && (
+          <>
+            <input type="hidden" name="budgetMin" value={String(minBudget)} />
+            <input type="hidden" name="budgetMax" value={String(maxBudget)} />
+          </>
+        )}
+
         <h1 className={styles.searchForm__title}>
           We at Kaaba Trip will help you find the best packages for Umrah
         </h1>
@@ -243,8 +261,7 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
         </div>
 
         <button
-          type="button"
-          onClick={handleSearch}
+          type="submit"
           className={styles.searchForm__searchButton}
           aria-label="Search for amazing Umrah packages"
         >
@@ -255,7 +272,7 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
         <p className={styles.searchForm__disclaimer}>
           Currently only available in the UK
         </p>
-      </div>
+      </form>
     </div>
   )
 }

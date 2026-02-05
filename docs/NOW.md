@@ -1,37 +1,37 @@
 # NOW (Cursor session anchor)
 
-**Last updated:** End of session before commit. Read this first so any AI (or human) knows where things stand.
+**Last updated:** Parked end of session. Read this first so any AI (or human) knows where things stand.
+
+## Status: Parked
+
+- **App is broken** from the user’s perspective; we’re pausing and will **figure out the problem tomorrow**.
+- Build passes (`npm run build`). With a clean `.next`, dev server starts and home returns 200. So the issue is likely **dev-only**: stale `.next`, chunk 404s (main-app.js, app-pages-internals.js), `clientReferenceManifest` invariant, `_document.js` ENOENT, or “missing required error components”.
 
 ## Current working branch
 
-- Branch: ux-option-a (or ux-option-a-search-results — confirm with `git branch`)
-- Goal: Option A UX for search results is wired; shortlist + compare work on /search/packages.
+- Branch: ux-option-a or ux-option-a-search-results (confirm with `git branch`).
+- Goal: Option A search wiring is done; need to fix “app broken” in dev.
 
-## What was committed (this session)
+## What was done this session (not yet committed)
 
-- **UX Option A – Search packages wiring**
-  - /umrah form submits to /search/packages with query params (type, season, budgetMin, budgetMax, adults).
-  - /search/packages filters Repository.listPackages() by params, maps to display model, defers list until client mount (avoids hydration mismatch).
-  - Shortlist: localStorage kb_shortlist_packages, de-duped, count in header, "Shortlist only" filter.
-  - Compare: handleComparisonSelection (max 3), Compare(n) button enabled when ≥2 selected, opens Dialog with ComparisonTable; data-testid="comparison-table".
-  - Console fixes: Logo + PackageCard Image aspect-ratio (width/height auto); Header text-logo priority for LCP; no hydration mismatch.
-  - Seed: two new Umrah packages (pkg4 £750, pkg5 £950) in 500–1000 range; seed version kb_packages_seed_version so existing users get new packages on next load.
-  - Process: "Before each commit" rule in 00_AGENT_HANDOVER.md (update NOW.md + CURSOR_CONTEXT if scope changed).
+- **Dev reliability:** `dev:clean` (rimraf .next && next dev), `dev:turbo` (Turbopack), README + 00_AGENT_HANDOVER troubleshooting for chunk 404s, clientReferenceManifest, _document.js ENOENT.
+- **Progressive enhancement:** Umrah form is a real `<form action="/search/packages" method="get">` with hidden inputs so “Search For Amazing Packages” works even when JS chunks 404.
+- **Error boundaries:** Added `app/error.tsx`, `app/global-error.tsx`, `app/not-found.tsx` to fix “missing required error components, refreshing…”.
+- **Lint:** Removed unused `openCompareModal` from PackageList.tsx.
 
-## User journey (current state)
+## User journey (when app works)
 
-- Landing: /umrah collects preferences → CTA goes to /search/packages?type=…&season=…&budgetMin=…&budgetMax=…&adults=…
-- Results: /search/packages shows packages (Option A UI), shortlist persists, compare (2–3) opens modal with comparison table.
+- /umrah → Search For Amazing Packages → /search/packages with params; shortlist + compare (2–3) with modal.
 
 ## Non-negotiables (must not break)
 
-- Option A look and feel (CSS modules, existing layout).
-- Shortlist key: kb_shortlist_packages; Compare: handleComparisonSelection, max 3; modal contains [data-testid="comparison-table"].
-- /packages flow and existing E2E remain stable.
+- Option A look and feel; shortlist key kb_shortlist_packages; Compare handleComparisonSelection max 3; /packages flow and E2E stable.
 
-## Next steps (for tomorrow or next session)
+## Next steps (tomorrow)
 
-- No blocking bugs known. Optional: add E2E for /search/packages shortlist + compare; extend filters (e.g. adults); verify a11y on compare modal.
+1. **Reproduce “app broken”:** Run `npm run dev` (or dev:clean / dev:turbo), open app, note exact behaviour (blank screen, error message, console errors).
+2. **Fix root cause:** Likely clean `.next` + correct dev command + hard refresh; or switch to Turbopack if Webpack keeps failing.
+3. **Then:** Commit session work if everything is stable; optional E2E for /search/packages, a11y on compare modal.
 
 ## Allowed edit scope (search/packages work)
 

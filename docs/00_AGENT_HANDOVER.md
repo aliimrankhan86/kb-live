@@ -20,6 +20,10 @@
 - Ask before reading any additional file.
 - Prefer deterministic selectors (data-testid) for E2E stability.
 
+## Local development (avoid chunk 404s)
+
+After clone/pull or when you see 404s for `_next/static/chunks/*`, start the dev server with a clean build so the browser loads matching assets: **`npm run dev:clean`**. Then hard-refresh the page. This prevents "button does nothing" and other JS failures caused by missing chunks.
+
 ## Definition of Done (mandatory)
 
 A task is only Done when:

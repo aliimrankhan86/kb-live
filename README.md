@@ -105,6 +105,8 @@ kaabatrip/
 ```bash
 # Development
 npm run dev          # Start development server with hot reload
+npm run dev:clean    # Clear .next and start dev (use after pull or to fix chunk 404s)
+npm run dev:turbo    # Same but with Turbopack (use if clientReferenceManifest error persists)
 npm run build        # Build for production
 npm run start        # Start production server
 
@@ -121,6 +123,31 @@ npm run format       # Format code with Prettier
 npm run storybook    # Start Storybook dev server
 npm run build-storybook # Build Storybook for production
 ```
+
+### Troubleshooting
+
+- **404 on `layout.css`, `main-app.js`, or `app-pages-internals.js`**  
+  The dev server generates new asset URLs after restarts. If the browser still requests old URLs, you get 404s and the app can appear broken (e.g. buttons that rely on JS do nothing).  
+
+  **Recommended (avoids recurrence):** Use a clean dev start when starting work or after pulling:  
+  `npm run dev:clean`  
+  This clears the `.next` build cache and starts the dev server so chunk URLs match what the browser loads. Then hard-refresh (Ctrl+Shift+R / Cmd+Shift+R) or use an incognito window.  
+
+  **One-off fix:** Stop the dev server, run `rm -rf .next`, then `npm run dev`, and hard-refresh.
+
+- **`Invariant: Expected clientReferenceManifest to be defined`**  
+  This is a known Next.js (Webpack) bug, often due to a stale or corrupted `.next` build.  
+
+  1. Stop the dev server and run **`npm run dev:clean`** (clears `.next` and starts dev). Reload the app.  
+  2. If it persists, try the Turbopack dev server (different bundler, avoids the Webpack manifest bug): **`npm run dev:turbo`**.
+
+- **`ENOENT: no such file or directory, open '.next/server/pages/_document.js'`**  
+  This project uses the **App Router only** (no `pages/` directory). The error means the `.next` build is stale or corrupted and Webpack is looking for old Pages Router artifacts.  
+
+  **Fix:** Stop the dev server and run **`npm run dev:clean`** to remove `.next` and start fresh. If you keep seeing Webpack-related errors, use **`npm run dev:turbo`** instead.
+
+- **`missing required error components, refreshing...`**  
+  The app now includes `app/error.tsx`, `app/global-error.tsx`, and `app/not-found.tsx`. If you still see this after a clean dev start, it usually means a runtime error occurred and Next.js is trying to show the error UI; check the console for the underlying error.
 
 ## 🎨 Design System
 
