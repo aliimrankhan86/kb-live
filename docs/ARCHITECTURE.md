@@ -2,49 +2,85 @@
 
 ## Overview
 
-KaabaTrip is a Next.js application using a client-side "MockDB" pattern to simulate backend persistence via `localStorage`.
+KaabaTrip is a Next.js 15 App Router application. Currently uses a client-side MockDB (localStorage) to simulate backend persistence. The Repository pattern abstracts data access and enforces RBAC. When a real backend is added, only `lib/api/` changes.
 
-## Data Model (Phase 2)
+## Architecture diagram
 
-### Core Entities
+```
+PUBLIC SIDE                      OPERATOR SIDE
+/  /umrah  /search/packages      /operator/dashboard  /packages  /analytics
+        |                                |
+        v                                v
+   lib/api/repository.ts  (RBAC-aware data access)
+        |
+        v
+   lib/api/mock-db.ts  -->  future: API/Postgres
+        |
+        v
+   localStorage (browser)
+```
 
-- **User**: Customer, Operator, Admin roles.
-- **OperatorProfile**: Details for verified operators.
-- **QuoteRequest**: Customer demand signal (Umrah/Hajj, dates, budget).
-- **Offer**: Operator response to a request.
-- **BookingIntent**: Signal of interest to proceed with an offer.
-- **Package** (New in Phase 2): Structured travel package listing.
+**Rule:** UI components never import MockDB directly. Always go through Repository.
 
-### Package Entity
+## Data model
 
-A `Package` represents a pre-defined offer that customers can browse.
+### Core entities
 
-- **Status**: `draft` (visible only to owner) vs `published` (visible to all).
-- **Slug**: URL-friendly identifier derived from title.
-- **Pricing**: `exact` or `from` price type.
-- **Structure**: Mirrors `Offer` structure for easy comparison (nights, hotels, inclusions).
+| Entity | Purpose | Key fields |
+|--------|---------|------------|
+| `User` | Customer, Operator, Admin roles | id, email, role |
+| `OperatorProfile` | Operator company details | id, companyName, slug, verificationStatus |
+| `Package` | Structured travel listing | id, operatorId, title, slug, status, pilgrimageType, price, nights, hotels, inclusions |
+| `QuoteRequest` | Customer demand signal | id, customerId, type, season, budget, nights, inclusions |
+| `Offer` | Operator response to a request | id, requestId, operatorId, price, nights, inclusions |
+| `BookingIntent` | Signal of interest to proceed | id, offerId, customerId, operatorId, status |
 
-## Data Access Layer (`lib/api/repository.ts`)
+### RBAC matrix
 
-We use a Repository pattern to abstract data access and enforce security rules.
+| Resource | Customer | Operator | Public |
+|----------|----------|----------|--------|
+| Requests | Own only | All open + own responses | None |
+| Offers | On own requests | Own only | None |
+| BookingIntents | Own only | On own offers | None |
+| Packages | Read published | CRUD own | Read published |
 
-### RBAC Matrix
+### Storage keys (localStorage)
 
-| Resource           | Customer Access        | Operator Access                   | Public Access  |
-| :----------------- | :--------------------- | :-------------------------------- | :------------- |
-| **Requests**       | Own requests only      | All open requests + own responses | None           |
-| **Offers**         | Offers on own requests | Own offers only                   | None           |
-| **BookingIntents** | Own intents            | Intents on own offers             | None           |
-| **Packages**       | Read Published         | CRUD Own Packages                 | Read Published |
+- `kb_requests`, `kb_offers`, `kb_bookings`, `kb_packages`
+- `kb_packages_seed_version` (migration trigger)
+- `kb_shortlist_packages` (user's shortlisted IDs)
+- `kb_language` (user's language preference)
 
-### Security Enforcement
+## i18n layer
 
-- The `Repository` methods accept a `RequestContext` (simulated session).
-- All data returned is filtered based on the `ctx.role` and `ctx.userId`.
-- Write operations validate ownership before persisting to `MockDB`.
+```
+lib/i18n/
+  region.ts          — Detect user region from navigator.language + timezone
+  format.ts          — Currency conversion, price formatting, distance formatting
+  translations/      — (planned) JSON files for en, fr, ar
+  use-translation.ts — (planned) React hook for translated strings
+```
 
-## Storage Strategy
+**Current state:** Region detection and currency formatting are built and wired into comparison and package display. Translation files and the hook are planned (see `docs/I18N.md`).
 
-- **MockDB**: A singleton wrapper around `localStorage`.
-- **Keys**: `kb_requests`, `kb_offers`, `kb_bookings`, `kb_packages`.
-- **Migration**: To move to a real backend (Supabase/Postgres), replace `lib/api/repository.ts` implementation to call API endpoints instead of `MockDB`.
+**Key design decisions:**
+- Detection: `navigator.language` + `Intl.DateTimeFormat().resolvedOptions().timeZone`
+- Currency: static GBP-based conversion rates (acceptable for MVP)
+- RTL: Arabic layout via `dir="rtl"` on `<html>` + Tailwind `rtl:` variants
+- Persistence: language choice stored in `kb_language` localStorage key
+
+## Security enforcement
+
+- Repository methods accept `RequestContext` (simulated session).
+- All data filtered by `ctx.role` and `ctx.userId`.
+- Write operations validate ownership before persisting.
+- No auth middleware yet — planned for operator dashboard.
+- See `docs/SECURITY.md` for full threat model.
+
+## Migration path (MockDB → real backend)
+
+1. Replace `lib/api/mock-db.ts` with API client calls.
+2. `Repository` interface stays the same.
+3. Add auth middleware for operator routes.
+4. Move from localStorage to server-side sessions.
+5. Replace static exchange rates with API-based rates.

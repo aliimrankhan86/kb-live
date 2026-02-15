@@ -36,6 +36,7 @@ export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
   return (
     <div className="overflow-x-auto" data-testid="comparison-table">
       <table className="w-full min-w-[600px] border-collapse text-left text-sm text-[#FFFFFF]">
+        <caption className="sr-only">Package comparison</caption>
         <thead>
           <tr>
             <th className="border-b border-[rgba(255,255,255,0.1)] py-4 pl-4 font-medium text-[rgba(255,255,255,0.4)]">

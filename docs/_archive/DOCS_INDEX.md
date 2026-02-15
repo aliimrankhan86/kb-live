@@ -2,7 +2,7 @@
 
 ## How to use this
 
-- Start here.
+- **Entry point for AI agents:** Read `docs/README_AI.md` first, then `docs/skills/*`, then this index for deep dives.
 - Each doc below has:
   - Purpose
   - Owner (role)
@@ -23,8 +23,9 @@ If a task changes behaviour and docs are not updated, the task is not complete.
 | SECURITY.md          | Threat model, RBAC rules, data handling             | Tuffy Architect       | Any data model change, auth/RBAC change, new endpoints, new storage          |
 | ACCESSIBILITY.md     | A11y rules and checklist                            | Tuffy QA              | Any new UI component, overlay, form, navigation changes                      |
 | QA.md                | QA checklists and test matrix                       | Tuffy QA              | Any feature added/changed, any bug fixed, any test added                     |
-| PHASE_1_1_PLAN.md    | Phase 1.1 gates and evidence                        | Ali + QA              | Only if Phase 1.1 standards change                                           |
-| PHASE_2_PLAN.md      | Phase 2 scope and micro-task list                   | Ali + Architect       | Any Phase 2 scope change, resequencing, new acceptance criteria              |
+| NOW.md               | Current session state, branch, next tasks            | Any agent             | Every commit (mandatory)                                                     |
+| README_AI.md         | Canonical AI onboarding (single source of truth)     | Tuffy Architect       | Any route, key code, or dev routine change                                   |
+| CURSOR_CONTEXT.md    | Cursor-specific session rules and file map           | Tuffy Architect       | Architecture changes, scope changes, new files                               |
 
 ## Supporting docs
 

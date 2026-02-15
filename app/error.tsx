@@ -1,23 +1,13 @@
 'use client';
 
 import { useEffect } from 'react';
-
-function getErrorMessage(err: unknown): string {
-  if (typeof err === 'object' && err !== null && 'message' in err) {
-    const msg = (err as { message: unknown }).message;
-    if (typeof msg === 'string') return msg;
-  }
-  if (err instanceof Error) return (err as Error).message;
-  const s = String(err);
-  if (s === '[object Event]') return 'An unexpected error occurred.';
-  return s || 'An unexpected error occurred.';
-}
+import { getErrorMessage } from '@/lib/get-error-message';
 
 export default function Error({
   error,
   reset,
 }: {
-  error: unknown;
+  error: Error & { digest?: string };
   reset: () => void;
 }) {
   const message = getErrorMessage(error);
