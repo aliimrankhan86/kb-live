@@ -13,7 +13,7 @@ export interface OperatorProfile {
   id: string; // linked to User.id
   companyName: string;
   tradingName?: string;
-  slug: string; // url-friendly
+  slug?: string; // url-friendly
   companyRegistrationNumber?: string;
   verificationStatus: VerificationStatus;
   atolNumber?: string;
@@ -153,7 +153,7 @@ export interface Package {
     end: string;
   };
   
-  priceType: 'exact' | 'from';
+  priceType: 'exact' | 'from' | 'fixed';
   pricePerPerson: number;
   currency: string;
   
