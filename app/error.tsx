@@ -2,13 +2,26 @@
 
 import { useEffect } from 'react';
 
+function getErrorMessage(err: unknown): string {
+  if (typeof err === 'object' && err !== null && 'message' in err) {
+    const msg = (err as { message: unknown }).message;
+    if (typeof msg === 'string') return msg;
+  }
+  if (err instanceof Error) return (err as Error).message;
+  const s = String(err);
+  if (s === '[object Event]') return 'An unexpected error occurred.';
+  return s || 'An unexpected error occurred.';
+}
+
 export default function Error({
   error,
   reset,
 }: {
-  error: Error & { digest?: string };
+  error: unknown;
   reset: () => void;
 }) {
+  const message = getErrorMessage(error);
+
   useEffect(() => {
     console.error('Route error:', error);
   }, [error]);
@@ -29,7 +42,7 @@ export default function Error({
     >
       <h2 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>Something went wrong</h2>
       <p style={{ color: 'rgba(255,255,255,0.64)', marginBottom: '1.5rem', textAlign: 'center' }}>
-        {error.message || 'An unexpected error occurred.'}
+        {message}
       </p>
       <button
         type="button"

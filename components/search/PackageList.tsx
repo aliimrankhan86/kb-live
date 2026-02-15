@@ -128,7 +128,7 @@ const PackageList: React.FC<PackageListProps> = ({
             </svg>
             Filter
           </button>
-          <button className={styles.sortButton} onClick={onSort} aria-label="Sort packages">
+          <button className={styles.sortButton} onClick={() => onSort?.()} aria-label="Sort packages">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
               <path d="M3 6h18M7 12h10M10 18h4" />
             </svg>
@@ -197,11 +197,11 @@ const PackageList: React.FC<PackageListProps> = ({
         initialFilters={appliedFilters || undefined}
       />
       <Dialog open={showComparison} onOpenChange={setShowComparison}>
-        <OverlayContent className="max-w-4xl overflow-x-auto">
+        <OverlayContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
           <OverlayHeader>
             <OverlayTitle>Compare Packages</OverlayTitle>
           </OverlayHeader>
-          <div className="mt-4">
+          <div className={`mt-4 ${styles.comparisonModalBody}`}>
             <ComparisonTable rows={comparisonRows} />
           </div>
         </OverlayContent>

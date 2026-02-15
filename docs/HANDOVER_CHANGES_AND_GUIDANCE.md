@@ -1,10 +1,39 @@
-# Handover: Changes Made & Guidance Needed
+# Handover: Changes & Guidance
 
-**Purpose:** Inform ChatGPT (covering requirements in phases) what has been done so far, and capture guidance needed from Gemini Pro (or similar) for Next.js–related issues to improve performance and app structure.
+**Purpose:** Short change log, known issues, Next.js notes, and "where to look" for any AI (Cursor/Codex/Gemini/ChatGPT). Keep token-efficient; details in NOW.md and CURSOR_CONTEXT.md.
 
 ---
 
-## 1. What We Have Done So Far
+## Recent change log (dated)
+
+- **Mobile responsiveness + docs discipline:** Hero, header, Umrah form, search packages CSS (breakpoints 640/768/1024; 44px tap targets; compare modal scroll; overflow guardrails). DOCS_MERGE_CHECKLIST.md added; NOW.md, CURSOR_CONTEXT.md trimmed; README "Definition of Done for any PR".
+- **(Earlier)** UX Option A search flow, shortlist/compare, seed packages, error boundaries, dev:clean/dev:turbo, Umrah form progressive enhancement — see git history and NOW.md.
+
+---
+
+## Known issues & fixes (final conclusions only)
+
+- **Chunk 404s / app "broken" in dev:** Use `npm run dev:clean` (or `dev:turbo`). Umrah form works without JS (native form submit).
+- **clientReferenceManifest / _document.js ENOENT:** Stale .next; App Router only. Fix: dev:clean or dev:turbo.
+- **Missing error components:** Resolved by app/error.tsx, global-error.tsx, not-found.tsx.
+
+---
+
+## Next.js / App Router (proven only)
+
+- Next.js 15.5.3, App Router only, no `pages/`. For dev stability: dev:clean or dev:turbo. Production build unaffected.
+
+---
+
+## Where to look
+
+- **Landing / Umrah / Search packages:** docs/NOW.md "What works" + CURSOR_CONTEXT "File map".
+- **Merge and doc discipline:** docs/DOCS_MERGE_CHECKLIST.md.
+- **Guidance for Gemini (Next.js perf/structure):** Section 3 below (paste when asking).
+
+---
+
+## 1. What We Have Done So Far (reference)
 
 ### 1.1 UX Option A – Search Packages Flow (committed earlier)
 

@@ -2,6 +2,16 @@
 
 import { useEffect } from 'react';
 
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === 'object' && error !== null && 'message' in error && typeof (error as { message: unknown }).message === 'string') {
+    return (error as { message: string }).message;
+  }
+  const s = String(error);
+  if (s === '[object Event]') return 'An unexpected error occurred.';
+  return s || 'An unexpected error occurred.';
+}
+
 export default function GlobalError({
   error,
   reset,
@@ -9,6 +19,8 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const message = getErrorMessage(error);
+
   useEffect(() => {
     console.error('Global error:', error);
   }, [error]);
@@ -28,7 +40,7 @@ export default function GlobalError({
         >
           <h2 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>Something went wrong</h2>
           <p style={{ color: 'rgba(255,255,255,0.64)', marginBottom: '1.5rem', textAlign: 'center' }}>
-            {error.message || 'An unexpected error occurred.'}
+            {message}
           </p>
           <button
             type="button"

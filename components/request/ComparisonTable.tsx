@@ -41,11 +41,17 @@ export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
             <th className="border-b border-[rgba(255,255,255,0.1)] py-4 pl-4 font-medium text-[rgba(255,255,255,0.4)]">
               Feature
             </th>
-            {comparisonRows.map((row, i) => (
-              <th key={row.id} className="border-b border-[rgba(255,255,255,0.1)] p-4 font-semibold text-[#FFD31D]">
-                Option {i + 1}
-              </th>
-            ))}
+            {comparisonRows.map((row) => {
+              const headerLabel =
+                row.operatorName && row.operatorName !== 'Not provided'
+                  ? row.operatorName
+                  : 'Travel agent (name TBC)';
+              return (
+                <th key={row.id} className="border-b border-[rgba(255,255,255,0.1)] p-4 font-semibold text-[#FFD31D]" title={headerLabel}>
+                  {headerLabel}
+                </th>
+              );
+            })}
           </tr>
         </thead>
         <tbody>

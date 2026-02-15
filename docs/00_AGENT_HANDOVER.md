@@ -1,5 +1,7 @@
 # Agent Handover and Operating Rules
 
+**Start here (any AI):** Read in order: **docs/NOW.md** → **docs/CURSOR_CONTEXT.md** → this file. Then DOCS_INDEX, AGENTS.md, and product/QA docs as needed. On merge, use **docs/DOCS_MERGE_CHECKLIST.md**.
+
 ## Read order (required)
 
 1. docs/DOCS_INDEX.md

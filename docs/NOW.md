@@ -1,46 +1,34 @@
-# NOW (Cursor session anchor)
+# NOW (session anchor)
 
-**Last updated:** Parked end of session. Read this first so any AI (or human) knows where things stand.
+**Read first.** Short, factual. Update on every branch/commit.
 
-## Status: Parked
+## Branch & goal
 
-- **App is broken** from the user’s perspective; we’re pausing and will **figure out the problem tomorrow**.
-- Build passes (`npm run build`). With a clean `.next`, dev server starts and home returns 200. So the issue is likely **dev-only**: stale `.next`, chunk 404s (main-app.js, app-pages-internals.js), `clientReferenceManifest` invariant, `_document.js` ENOENT, or “missing required error components”.
+- **Branch:** ux-option-a-search-results (confirm: `git branch --show-current`)
+- **Goal:** Desktop UX responsive on mobile; docs discipline so merges include doc updates and stay token-efficient for AI.
 
-## Current working branch
+## What works (verified)
 
-- Branch: ux-option-a or ux-option-a-search-results (confirm with `git branch`).
-- Goal: Option A search wiring is done; need to fix “app broken” in dev.
+- **Landing (/):** Hero CTAs stack on tablet/mobile; no horizontal overflow; header nav wraps, 44px tap targets.
+- **Umrah (/umrah):** Form responsive; quick picks 1 col on mobile; Search button 44px; form submits to /search/packages (progressive enhancement).
+- **Search (/search/packages?type=umrah&...):** Cards stack (1 col); header controls wrap; Compare/Filter/Sort 44px; compare modal scrolls (max-height 85vh); shortlist count visible; kb_shortlist_packages, compare cap 3, modal with ComparisonTable.
 
-## What was done this session (not yet committed)
+## What changed this branch
 
-- **Dev reliability:** `dev:clean` (rimraf .next && next dev), `dev:turbo` (Turbopack), README + 00_AGENT_HANDOVER troubleshooting for chunk 404s, clientReferenceManifest, _document.js ENOENT.
-- **Progressive enhancement:** Umrah form is a real `<form action="/search/packages" method="get">` with hidden inputs so “Search For Amazing Packages” works even when JS chunks 404.
-- **Error boundaries:** Added `app/error.tsx`, `app/global-error.tsx`, `app/not-found.tsx` to fix “missing required error components, refreshing…”.
-- **Lint:** Removed unused `openCompareModal` from PackageList.tsx.
+- **Mobile:** hero.module.css, header.module.css, umrah-search-form.module.css, packages.module.css — breakpoints 640/768/1024, min-height 44px on CTAs/buttons, flex-wrap, comparisonModalBody scroll, overflow-x hidden, min-width: 0 guardrails.
+- **Docs:** NOW.md, CURSOR_CONTEXT.md, HANDOVER_CHANGES_AND_GUIDANCE.md trimmed; DOCS_MERGE_CHECKLIST.md added; README “Definition of Done for any PR”; 00_AGENT_HANDOVER “Start here” index.
 
-## User journey (when app works)
+## Next (top 3)
 
-- /umrah → Search For Amazing Packages → /search/packages with params; shortlist + compare (2–3) with modal.
+1. Run verification (test, e2e, build); manual check /, /umrah, /search/packages on mobile viewport.
+2. Fix any remaining dev-only issues (chunk 404s / Turbopack) if needed.
+3. Optional: E2E for /search/packages shortlist + compare; a11y audit compare modal.
 
-## Non-negotiables (must not break)
+## Commands to verify
 
-- Option A look and feel; shortlist key kb_shortlist_packages; Compare handleComparisonSelection max 3; /packages flow and E2E stable.
-
-## Next steps (tomorrow)
-
-1. **Reproduce “app broken”:** Run `npm run dev` (or dev:clean / dev:turbo), open app, note exact behaviour (blank screen, error message, console errors).
-2. **Fix root cause:** Likely clean `.next` + correct dev command + hard refresh; or switch to Turbopack if Webpack keeps failing.
-3. **Then:** Commit session work if everything is stable; optional E2E for /search/packages, a11y on compare modal.
-
-## Allowed edit scope (search/packages work)
-
-- app/search/packages/page.tsx
-- components/search/PackageList.tsx, PackageCard.tsx, packages.module.css
-- components/ui/Overlay.tsx (only if modal issues)
-- lib/api/mock-db.ts, lib/api/repository.ts, lib/types.ts, lib/comparison.ts
-
-## Required checks before any commit
-
-- npm run test
-- npx playwright test e2e/catalogue.spec.ts (and e2e/flow.spec.ts if shared compare/quote touched)
+```bash
+npm run test
+npx playwright test e2e/flow.spec.ts
+npx playwright test e2e/catalogue.spec.ts
+npm run build
+```

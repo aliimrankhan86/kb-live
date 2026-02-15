@@ -97,6 +97,8 @@ kaabatrip/
    npm run dev
    ```
 
+   **Stable dev setup:** `npm run dev` binds to **127.0.0.1:3000**, uses the default bundler (Webpack unless you use `dev:turbo`), and clears any process on port 3000 before starting so you don’t need to manually kill it. If you see chunk 404s or manifest errors, run **`npm run dev:clean`** once (clears `.next` and restarts).
+
 4. **Open your browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
@@ -124,6 +126,17 @@ npm run storybook    # Start Storybook dev server
 npm run build-storybook # Build Storybook for production
 ```
 
+### Definition of Done for any PR
+
+Before merge, the branch must satisfy:
+
+- **Docs updated** in the same branch: `docs/NOW.md`, `docs/CURSOR_CONTEXT.md` (if scope changed), and `docs/HANDOVER_CHANGES_AND_GUIDANCE.md` (short dated entry if behaviour changed). On merge, follow `docs/DOCS_MERGE_CHECKLIST.md` to reconcile docs.
+- **Tests ran:** `npm run test` passes.
+- **E2E ran:** `npx playwright test e2e/flow.spec.ts` and `e2e/catalogue.spec.ts` pass if core flows or selectors were touched.
+- **Build ran:** `npm run build` succeeds.
+
+Documentation upkeep is a global rule: every PR that changes UX, routing, data shapes, persistence keys, compare/shortlist logic, or tests must include the doc updates above.
+
 ### Troubleshooting
 
 - **404 on `layout.css`, `main-app.js`, or `app-pages-internals.js`**  
@@ -141,10 +154,10 @@ npm run build-storybook # Build Storybook for production
   1. Stop the dev server and run **`npm run dev:clean`** (clears `.next` and starts dev). Reload the app.  
   2. If it persists, try the Turbopack dev server (different bundler, avoids the Webpack manifest bug): **`npm run dev:turbo`**.
 
-- **`ENOENT: no such file or directory, open '.next/server/pages/_document.js'`**  
-  This project uses the **App Router only** (no `pages/` directory). The error means the `.next` build is stale or corrupted and Webpack is looking for old Pages Router artifacts.  
+- **`ENOENT: no such file or directory, open '.next/server/...'`**  
+  (e.g. `.next/server/pages/_document.js`, `.next/server/app/page.js`) The `.next` build is stale, incomplete, or corrupted.  
 
-  **Fix:** Stop the dev server and run **`npm run dev:clean`** to remove `.next` and start fresh. If you keep seeing Webpack-related errors, use **`npm run dev:turbo`** instead.
+  **Fix:** Stop the dev server and run **`npm run dev:clean`** to remove `.next` and start fresh. If Webpack errors persist, use **`npm run dev:turbo`** instead.
 
 - **`missing required error components, refreshing...`**  
   The app now includes `app/error.tsx`, `app/global-error.tsx`, and `app/not-found.tsx`. If you still see this after a clean dev start, it usually means a runtime error occurred and Next.js is trying to show the error UI; check the console for the underlying error.

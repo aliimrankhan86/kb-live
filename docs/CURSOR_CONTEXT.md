@@ -47,12 +47,20 @@ This is the single source of truth Cursor must read at the start of every sessio
 - ComparisonTable uses mapPackageToComparison(pkg, operatorsById[p.operatorId]); PackageList passes cataloguePackages + selectedCompareIds to build comparisonRows.
 - MockDB seed: 5 packages (pkg1–pkg5); pkg4 and pkg5 are Umrah in 500–1000 range. Seed version PACKAGES_SEED_VERSION=2; getPackages() reseeds when stored version < 2.
 
-## Current state (parked)
+## File map (key flows)
 
-- /search/packages wiring is done; shortlist + compare work when the app loads.
-- **App is broken in dev** from user’s perspective — parked; figure out tomorrow. Build passes; issue is likely dev-only (stale .next, chunk 404s, clientReferenceManifest, _document.js ENOENT). See docs/NOW.md for “Next steps (tomorrow)”.
-- Uncommitted this session: dev:clean/dev:turbo, Umrah form progressive enhancement, error.tsx/global-error.tsx/not-found.tsx, README troubleshooting, PackageList lint fix.
-- For next session: read docs/NOW.md first; reproduce “app broken” then fix; run npm run test and e2e before commit.
+- **Landing:** app/page.tsx → Header, Hero. Hero: components/marketing/hero.module.css. Header: components/layout/header.module.css.
+- **Umrah:** app/umrah/page.tsx → UmrahSearchForm. components/umrah/umrah-search-form.module.css.
+- **Search packages:** app/search/packages/page.tsx → PackageList, PackageCard. components/search/packages.module.css, PackageList.tsx (shortlist, compare, modal).
+
+## Current state
+
+- /, /umrah, /search/packages are responsive (breakpoints 640/768/1024; 44px tap targets; compare modal scrolls). Shortlist + compare unchanged; test IDs preserved.
+- Docs: NOW.md, DOCS_MERGE_CHECKLIST.md, README DoD. On merge, reconcile docs per DOCS_MERGE_CHECKLIST.
+
+## Required response format after changes (A–E)
+
+When you change UX, routes, or docs, report: **A)** What changed **B)** Files changed **C)** Why **D)** Commands run + results **E)** Next steps + risks (short).
 
 ## Debug checklist for "Compare button does nothing"
 
