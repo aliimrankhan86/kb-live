@@ -86,7 +86,7 @@ Add to `Package`:
 
 ### Task 2: Update MockDB seed data
 
-**Status:** `[ ]`
+**Status:** `[x] 2026-02-15`
 **Complexity:** Small
 **Files to modify:** `lib/api/mock-db.ts`
 **Depends on:** Task 1
