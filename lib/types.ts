@@ -12,10 +12,28 @@ export type VerificationStatus = 'pending' | 'verified' | 'rejected';
 export interface OperatorProfile {
   id: string; // linked to User.id
   companyName: string;
-  slug: string; // url-friendly
+  tradingName?: string;
+  slug?: string; // url-friendly
+  companyRegistrationNumber?: string;
   verificationStatus: VerificationStatus;
+  atolNumber?: string;
+  abtaMemberNumber?: string;
   contactEmail: string;
   contactPhone?: string;
+  officeAddress?: {
+    line1: string;
+    line2?: string;
+    city: string;
+    postcode: string;
+    country: string;
+  };
+  websiteUrl?: string;
+  servingRegions?: string[];
+  departureAirports?: string[];
+  yearsInBusiness?: number;
+  pilgrimageTypesOffered?: ('umrah' | 'hajj')[];
+  createdAt?: string;
+  updatedAt?: string;
   branding?: {
     logoUrl?: string;
     primaryColor?: string;
@@ -135,7 +153,7 @@ export interface Package {
     end: string;
   };
   
-  priceType: 'exact' | 'from';
+  priceType: 'exact' | 'from' | 'fixed';
   pricePerPerson: number;
   currency: string;
   
@@ -145,9 +163,23 @@ export interface Package {
   
   hotelMakkahStars?: 3 | 4 | 5;
   hotelMadinahStars?: 3 | 4 | 5;
+  hotelMakkahName?: string;
+  hotelMadinahName?: string;
+  distanceToHaramMakkahMetres?: number;
+  distanceToHaramMadinahMetres?: number;
   
   distanceBandMakkah: 'near' | 'medium' | 'far' | 'unknown';
   distanceBandMadinah: 'near' | 'medium' | 'far' | 'unknown';
+  airline?: string;
+  departureAirport?: string;
+  flightType?: 'direct' | 'one-stop' | 'multi-stop';
+  depositAmount?: number;
+  paymentPlanAvailable?: boolean;
+  cancellationPolicy?: string;
+  highlights?: string[];
+  groupType?: 'private' | 'small-group' | 'large-group';
+  createdAt?: string;
+  updatedAt?: string;
   
   roomOccupancyOptions: {
     single: boolean;
