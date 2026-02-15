@@ -31,6 +31,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
             className={styles.header__textLogo}
             width={108}
             height={45}
+            priority
           />
         </Link>
 

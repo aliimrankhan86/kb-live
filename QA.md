@@ -87,7 +87,15 @@
 - [ ] Confirm deletion.
 - [ ] Verify package is removed.
 
-## 9. E2E Tests
+## 9. Search Packages – Option A (/search/packages)
+
+- [ ] Go to `/umrah`, fill preferences, click **Search For Amazing Packages** → redirects to `/search/packages` with query params.
+- [ ] On `/search/packages`: results show filtered packages (e.g. type=umrah, budgetMin/Max).
+- [ ] **Shortlist:** Click shortlist on 1+ packages → count updates in header; refresh → shortlist persists (localStorage `kb_shortlist_packages`). Toggle "Shortlist only" → only shortlisted packages shown.
+- [ ] **Compare:** Select 2 (or 3) packages via "Add to Compare" → **Compare (n)** button enables. Click **Compare (n)** → modal opens with comparison table (`[data-testid="comparison-table"]`). Close modal → works.
+- [ ] Console: no hydration error, no Image aspect-ratio or LCP warnings.
+
+## 10. E2E Tests
 
 - [ ] Run `npx playwright test e2e/flow.spec.ts`.
 - [ ] Verify all 3 browsers pass.
