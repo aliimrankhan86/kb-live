@@ -28,7 +28,7 @@ Ordered list of tasks for building the operator dashboard and enhancing the plat
 
 ### Task 1: Evolve types — OperatorProfile + Package
 
-**Status:** `[ ]`
+**Status:** `[x] 2026-02-15`
 **Complexity:** Small
 **Files to modify:** `lib/types.ts`
 **Read first:** `docs/OPERATOR_ONBOARDING.md` §2 (OperatorProfile) and §4 (Package interface)
