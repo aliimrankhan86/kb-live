@@ -1,6 +1,3 @@
-'use client'
-
-import React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Logo } from '@/components/graphics/Logo'
@@ -14,7 +11,6 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
   return (
     <header 
       className={`${styles.header} ${className}`}
-      role="banner"
       aria-label="Main navigation"
     >
       <div className={styles.header__container}>
@@ -31,26 +27,36 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
             className={styles.header__textLogo}
             width={108}
             height={45}
+            priority
           />
         </Link>
 
         {/* Navigation */}
         <nav 
           className={styles.header__navigation}
-          role="navigation"
           aria-label="Main menu"
         >
           <Link 
-            href="/partner" 
+            href="/quote" 
             className={styles.header__navLink}
-            aria-label="Become a partner with KaabaTrip"
           >
-            Become A Partner
+            Get a Quote
+          </Link>
+          <Link 
+            href="/operator/dashboard" 
+            className={styles.header__navLink}
+          >
+            Operator Dashboard
+          </Link>
+          <Link 
+            href="/kanban" 
+            className={styles.header__navLink}
+          >
+            Kanban
           </Link>
           <Link 
             href="/login" 
             className={styles.header__navLink}
-            aria-label="Login to your account"
           >
             Login
           </Link>

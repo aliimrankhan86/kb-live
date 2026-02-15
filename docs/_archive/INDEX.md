@@ -1,0 +1,31 @@
+# Docs index (one line per doc)
+
+- **README_AI.md** — Canonical AI onboarding; read this first.
+- **INDEX.md** — This file; list of docs and purpose.
+- **DOCS_INDEX.md** — Authoritative map: purpose, owner, update triggers for canonical/supporting docs.
+- **skills/DEV_ROUTINES.md** — Dev command, recovery steps, localhost, hard refresh.
+- **skills/FLOW_PUBLIC_SEARCH.md** — /umrah params, /search/packages filter, success criteria.
+- **skills/SHORTLIST.md** — Storage key, de-dupe, toggle behaviour.
+- **skills/COMPARE.md** — Selection rules, CTA, modal testid, debug checks.
+- **skills/TEST_GATES.md** — When to run unit tests, Playwright, build.
+- **00_PRODUCT_CANON.md** — Product goals, scope, non-goals.
+- **00_AGENT_HANDOVER.md** — How agents must work, doc update rules.
+- **01_STATUS.md** — Current status and priorities.
+- **01_MODEL_ROUTING.md** — Model roles and token control.
+- **02_ROUTES_AND_UX.md** — Routes and UX summary.
+- **02_REPO_MAP.md** — Where key code lives.
+- **03_SHORTLIST_COMPARE_SPEC.md** — Shortlist and compare spec (detail).
+- **05_SECURITY.md** — Pointer to SECURITY.md.
+- **06_ACCESSIBILITY.md** — Pointer to ACCESSIBILITY.md.
+- **07_QA.md** / **07_QA_TESTS.md** — QA checklists and tests.
+- **09_KANBAN_WORKFLOW.md** — Kanban process.
+- **10_PROMPT_TEMPLATES.md** — Reusable prompts.
+- **ARCHITECTURE.md** — System design, boundaries.
+- **SECURITY.md** — Threat model, RBAC.
+- **ACCESSIBILITY.md** — A11y rules.
+- **HANDOVER_CHANGES_AND_GUIDANCE.md** — Handover and change log.
+- **NOW.md** — Current focus and decisions.
+- **CURSOR_CONTEXT.md** — Cursor-specific context.
+- **DOCS_MERGE_CHECKLIST.md** — Merge-time doc checklist.
+- **PHASE_*.md** — Phase plans and audits.
+- **_archive/** — Superseded or duplicated docs; see _archive/README.md.

@@ -2,8 +2,11 @@
 .searchForm {
   width: 100%;
   max-width: 800px;
+  min-width: 0;
   position: relative;
   z-index: 10;
+  padding: 0 0.5rem;
+  box-sizing: border-box;
 }
 
 .searchForm__card {
@@ -34,6 +37,16 @@
   font-weight: 400;
   color: var(--text);
   margin-bottom: 0.75rem;
+}
+
+.searchForm__input {
+  width: 5rem;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  background: rgba(17, 17, 17, 0.6);
+  color: var(--text);
 }
 
 .searchForm__selectedPeriod {
@@ -117,6 +130,10 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 0.5rem;
   padding: 0.75rem 1rem;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: var(--text);
   font-size: 0.9rem;
   font-weight: 400;
@@ -216,6 +233,7 @@
 .searchForm__searchButton {
   display: block;
   width: 100%;
+  min-height: 44px;
   background: var(--yellow);
   color: var(--bg);
   border: none;
@@ -312,5 +330,34 @@
   
   .searchForm__disclaimer {
     font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .searchForm {
+    padding: 0 0.25rem;
+  }
+
+  .searchForm__card {
+    padding: 1rem 0.75rem;
+  }
+
+  .searchForm__title {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .searchForm__section {
+    margin-bottom: 1.25rem;
+  }
+
+  .searchForm__quickButton,
+  .searchForm__searchButton {
+    min-height: 44px;
+  }
+
+  .searchForm__searchButton {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
   }
 }

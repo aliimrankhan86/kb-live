@@ -7,15 +7,19 @@ import { Package } from '@/lib/mock-packages';
 import styles from './packages.module.css';
 
 interface PackageCardProps {
-  package: Package;
+  package: Package & { slug?: string };
+  isShortlisted?: boolean;
+  isCompareSelected?: boolean;
   onAddToShortlist: (packageId: string) => void;
-  onAddToCompare: (packageId: string) => void;
+  onToggleCompare: (id: string) => void;
 }
 
-const PackageCard: React.FC<PackageCardProps> = ({ 
-  package: pkg, 
-  onAddToShortlist, 
-  onAddToCompare 
+const PackageCard: React.FC<PackageCardProps> = ({
+  package: pkg,
+  isShortlisted = false,
+  isCompareSelected = false,
+  onAddToShortlist,
+  onToggleCompare,
 }) => {
   const renderStars = (rating: number) => {
     const stars = [];
@@ -80,6 +84,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
             width={120}
             height={80}
             className={styles.hotelImage}
+            style={{ width: 'auto', height: 'auto' }}
           />
           <div className={styles.hotelLocation}>{pkg.makkahHotel.location}</div>
           <div className={styles.hotelName}>{pkg.makkahHotel.name}</div>
@@ -99,6 +104,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
             width={120}
             height={80}
             className={styles.hotelImage}
+            style={{ width: 'auto', height: 'auto' }}
           />
           <div className={styles.hotelLocation}>{pkg.madinaHotel.location}</div>
           <div className={styles.hotelName}>{pkg.madinaHotel.name}</div>
@@ -124,21 +130,35 @@ const PackageCard: React.FC<PackageCardProps> = ({
 
         <div className={styles.packageActions}>
           <button
+            type="button"
             className={styles.secondaryAction}
-            onClick={() => onAddToShortlist(pkg.id)}
-            aria-label={`Add ${pkg.makkahHotel.name} and ${pkg.madinaHotel.name} to shortlist`}
+            data-testid={`shortlist-toggle-${pkg.id}`}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onAddToShortlist(pkg.id);
+            }}
+            aria-pressed={isShortlisted}
+            aria-label={isShortlisted ? `Remove from shortlist` : `Add ${pkg.makkahHotel.name} and ${pkg.madinaHotel.name} to shortlist`}
           >
-            Add to Shortlist
+            {isShortlisted ? 'Shortlisted' : 'Add to Shortlist'}
           </button>
           <button
+            type="button"
             className={styles.secondaryAction}
-            onClick={() => onAddToCompare(pkg.id)}
-            aria-label={`Add ${pkg.makkahHotel.name} and ${pkg.madinaHotel.name} to compare`}
+            data-testid={`package-compare-toggle-${pkg.id}`}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onToggleCompare(pkg.id);
+            }}
+            aria-pressed={isCompareSelected}
+            aria-label={isCompareSelected ? `Remove from comparison` : `Add ${pkg.makkahHotel.name} and ${pkg.madinaHotel.name} to compare`}
           >
-            Add to Compare
+            {isCompareSelected ? 'Added for comparison' : 'Add to Compare'}
           </button>
-          <Link 
-            href={`/packages/${pkg.id}`}
+          <Link
+            href={`/packages/${pkg.slug ?? pkg.id}`}
             className={styles.primaryAction}
             aria-label={`View full details for ${pkg.makkahHotel.name} and ${pkg.madinaHotel.name} package`}
           >

@@ -1,6 +1,3 @@
-'use client'
-
-import React from 'react'
 import Link from 'next/link'
 import styles from './hero.module.css'
 
@@ -41,7 +38,6 @@ export const Hero: React.FC<HeroProps> = ({ className = '' }) => {
   return (
     <main 
       className={`${styles.hero} ${className}`}
-      role="main"
       aria-label="Main content"
     >
     <div className={styles.hero__container}>
