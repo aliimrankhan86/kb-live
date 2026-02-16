@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import styles from './umrah-search-form.module.css'
 
 interface UmrahSearchFormProps {
@@ -9,7 +8,6 @@ interface UmrahSearchFormProps {
 }
 
 export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = '' }) => {
-  const router = useRouter()
   const [timeRange, setTimeRange] = useState([0, 50]) // 0-100 range for slider
   const [selectedPeriod, setSelectedPeriod] = useState('')
   const [selectedQuickPick, setSelectedQuickPick] = useState<string>('')
@@ -88,19 +86,6 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
 
   const seasonParam = quickSelectOptions.find((o) => o.id === selectedQuickPick)?.season ?? 'flexible'
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    const params = new URLSearchParams()
-    params.set('type', 'umrah')
-    params.set('season', seasonParam)
-    if (budgetEnabled) {
-      params.set('budgetMin', String(minBudget))
-      params.set('budgetMax', String(maxBudget))
-    }
-    params.set('adults', String(adults))
-    router.push(`/search/packages?${params.toString()}`)
-  }
-
   const handleBudgetRangeChange = (index: number, value: number) => {
     const newRange = [...budgetRange]
     
@@ -120,7 +105,6 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
       <form
         action="/search/packages"
         method="get"
-        onSubmit={handleSearch}
         className={styles.searchForm__card}
         noValidate
       >
@@ -184,6 +168,7 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
             {quickSelectOptions.map((option) => (
               <button
                 key={option.id}
+                type="button"
                 onClick={() => handleQuickSelect(option.id, option.value)}
                 className={styles.searchForm__quickButton}
                 aria-label={`Select ${option.label}`}
