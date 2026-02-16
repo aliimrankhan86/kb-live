@@ -1,43 +1,56 @@
 # Design System
 
-Core UI primitives live in `components/ui` and are the default starting point for all new feature UI.
+Core UI primitives live in `components/ui` and are the default path for all feature UI.
 
-## Primitives
+## Architecture
 
-- `components/ui/Text.tsx`
-- `components/ui/Heading.tsx`
-- `components/ui/Button.tsx`
-- `components/ui/Input.tsx`
-- `components/ui/Select.tsx`
+- Tokens: `styles/tokens.css` is the visual source of truth.
+- Primitives: `components/ui/*` contains reusable building blocks.
+- Exports: import from `components/ui/index.ts` for feature usage.
+- Playground: `/showcase` is the live validation surface.
 
-All primitives must:
+## Current primitives
 
-- Use tokens from `styles/tokens.css`
-- Use `cn()` from `lib/utils.ts` for class merging
-- Keep accessibility defaults (focus-visible styles, disabled states, minimum target size)
+- Typography: `Text`, `Heading`
+- Form controls: `Button`, `Input`, `Select`, `Slider`, `Checkbox`, `Radio`, `Switch`
+- Feedback: `Alert`
+- Overlay: `Dialog` + `OverlayContent` + related overlay slots
+- Navigation: `Pagination`
+- Data display: `Card`, `Badge`, `Table`
+- Charts: `ChartContainer`, `LineChart`, `BarChart`
 
-## Usage rules
+## Rules for feature development
 
-1. Prefer primitives over one-off styles in feature components.
-2. Add a new variant only when at least 2 features need it.
-3. Keep variant names semantic (`primary`, `secondary`, `danger`) not page-specific.
-4. Do not introduce duplicate primitives in feature folders.
-5. Keep primitives behavior-light; business logic belongs in feature components.
+1. Use existing primitives first; avoid one-off component clones.
+2. Style using design tokens (or classes mapped to tokens), not hardcoded repeated values.
+3. Keep primitive APIs semantic (`variant`, `size`, `tone`) and reuse-focused.
+4. Preserve accessibility defaults:
+   - keyboard support
+   - visible focus styles
+   - labels/aria wiring for controls
+   - disabled states
+5. Keep minimum tap target around 44px for primary controls.
 
-## Showcase
+## When to add a variant
 
-`/showcase` is the styleguide surface for quick visual validation.
+Add a new variant only when all are true:
 
-Required states shown:
+1. At least two features need the same visual/behavioral pattern.
+2. Existing variants cannot represent the pattern safely.
+3. The new variant remains generic (not route-specific).
 
-- Buttons: variants, sizes, loading, disabled
-- Inputs: normal, disabled, error
-- Select: normal, disabled
-- Typography: heading + text scale
+## Playground requirements
 
-## When to extend
+`/showcase` should continue to demonstrate component states with live examples:
 
-Add or change primitive variants only when:
+- default
+- focus/hover sample
+- disabled
+- error
+- loading (where applicable)
+- mobile notes where behavior differs
 
-- Existing primitive cannot express a repeated design need, and
-- The change improves consistency across multiple routes/components.
+## Non-goals
+
+- No Storybook in this repo.
+- No business logic in UI primitives.

@@ -1,31 +1,52 @@
 # Tokens
 
-Design tokens are defined in `styles/tokens.css`.
+Design tokens are defined in `styles/tokens.css` and are the source of visual consistency.
 
-## Current tokens
+## Current token set
 
-- `--bg`: application background
-- `--text`: primary foreground text
-- `--textMuted`: secondary/muted text
-- `--yellow`: primary accent/action color
-- `--surfaceDark`: surface/card background
+- Surface + text:
+  - `--bg`
+  - `--surfaceDark`
+  - `--text`
+  - `--textMuted`
+- Brand + semantic colors:
+  - `--yellow`
+  - `--success`
+  - `--warning`
+  - `--danger`
+  - `--info`
+- Borders + focus:
+  - `--borderSubtle`
+  - `--borderStrong`
+  - `--focusRing`
+- Radius:
+  - `--radiusSm`
+  - `--radiusMd`
+  - `--radiusLg`
+- Spacing:
+  - `--spaceXs`
+  - `--spaceSm`
+  - `--spaceMd`
+  - `--spaceLg`
+- Shadow:
+  - `--shadowSoft`
 
-## Usage
+## Usage rules
 
-- Reference tokens via CSS variables (example: `text-[var(--text)]`).
-- Do not hardcode repeated colors in components when a token exists.
-- Prefer token-first styling in all shared UI primitives.
+1. Prefer tokens in primitives and shared components.
+2. Avoid route-specific or temporary token names.
+3. Do not hardcode repeated colors when a semantic token exists.
+4. Use `var(--token-name)` in CSS/Tailwind arbitrary values.
 
-## Adding new tokens
+## Adding tokens
 
 1. Add token to `styles/tokens.css`.
-2. Use clear semantic naming (`--success`, `--danger`, `--borderSubtle`).
-3. Avoid route-specific names (`--homeHeroYellow` is not allowed).
-4. Update this document with name and purpose.
-5. Only add tokens for repeated design needs across multiple screens.
+2. Use semantic names (`--danger`, `--borderStrong`), not page names.
+3. Apply the token in at least one shared primitive before introducing it into feature UI.
+4. Update this file and `docs/DESIGN_SYSTEM.md` if behavior guidance changed.
 
 ## Naming convention
 
-- Use lowercase kebab-case.
-- Use semantic intent over raw value.
-- Keep names stable; avoid renaming without migration.
+- lowercase kebab-case
+- semantic intent over literal value
+- keep names stable to avoid broad migration churn
