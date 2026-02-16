@@ -1,5 +1,6 @@
 export type Region = 'UK' | 'EU' | 'US' | 'CA' | 'UAE'
 export type DistanceUnit = 'miles' | 'km'
+export type DisplayCurrency = 'GBP' | 'USD' | 'EUR'
 
 export interface RegionSettings {
   region: Region
@@ -16,6 +17,21 @@ const REGION_SETTINGS: Record<Region, Omit<RegionSettings, 'region'>> = {
   UAE: { locale: 'ar-AE', currency: 'AED', distanceUnit: 'km' },
 }
 
+const CURRENCY_TO_REGION: Record<DisplayCurrency, Region> = {
+  GBP: 'UK',
+  USD: 'US',
+  EUR: 'EU',
+}
+
+export const CURRENCY_STORAGE_KEY = 'kb_display_currency'
+export const CURRENCY_CHANGE_EVENT = 'kb:currency-change'
+
+export const DISPLAY_CURRENCY_OPTIONS: Array<{ value: DisplayCurrency; label: string }> = [
+  { value: 'GBP', label: 'GBP (£)' },
+  { value: 'USD', label: 'USD ($)' },
+  { value: 'EUR', label: 'EUR (€)' },
+]
+
 const normalizeLocale = (locale?: string) => (locale ?? '').trim().toLowerCase()
 
 export const detectRegion = (locale?: string, timeZone?: string): Region => {
@@ -31,7 +47,38 @@ export const detectRegion = (locale?: string, timeZone?: string): Region => {
   return 'UK'
 }
 
-export const getRegionSettings = (options?: { locale?: string; timeZone?: string }): RegionSettings => {
+const isDisplayCurrency = (value: string | null | undefined): value is DisplayCurrency =>
+  value === 'GBP' || value === 'USD' || value === 'EUR'
+
+export const getPreferredCurrency = (): DisplayCurrency | null => {
+  if (typeof window === 'undefined') return null
+  const stored = window.localStorage.getItem(CURRENCY_STORAGE_KEY)
+  return isDisplayCurrency(stored) ? stored : null
+}
+
+export const setPreferredCurrency = (currency: DisplayCurrency) => {
+  if (typeof window === 'undefined') return
+  window.localStorage.setItem(CURRENCY_STORAGE_KEY, currency)
+  window.dispatchEvent(new CustomEvent(CURRENCY_CHANGE_EVENT, { detail: currency }))
+}
+
+export const getRegionSettings = (options?: {
+  locale?: string
+  timeZone?: string
+  currency?: DisplayCurrency
+}): RegionSettings => {
+  const preferredCurrency = options?.currency ?? getPreferredCurrency()
+  if (preferredCurrency) {
+    const region = CURRENCY_TO_REGION[preferredCurrency]
+    const settings = REGION_SETTINGS[region]
+    return {
+      region,
+      locale: settings.locale,
+      currency: preferredCurrency,
+      distanceUnit: settings.distanceUnit,
+    }
+  }
+
   const locale =
     options?.locale ?? (typeof navigator !== 'undefined' ? navigator.language : undefined)
   const timeZone =

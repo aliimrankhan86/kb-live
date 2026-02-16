@@ -1,9 +1,12 @@
 'use client';
 
 import { useQuoteRequestStore } from '@/lib/store/quote-request';
+import { getCurrencySymbol } from '@/lib/i18n/format';
 
 export function Step5Review() {
   const { draft, setDraft } = useQuoteRequestStore();
+  const budgetCurrency = draft.budgetRange?.currency || 'GBP';
+  const currencySymbol = getCurrencySymbol(budgetCurrency);
 
   return (
     <div className="space-y-8">
@@ -36,7 +39,7 @@ export function Step5Review() {
 
           <div>
             <h3 className="mb-2 font-medium text-[rgba(255,255,255,0.4)]">Budget & Group</h3>
-            <p>£{draft.budgetRange?.min} - £{draft.budgetRange?.max}</p>
+            <p>{currencySymbol}{draft.budgetRange?.min} - {currencySymbol}{draft.budgetRange?.max}</p>
             <p>
               {Object.entries(draft.occupancy || {})
                 .filter(([, count]) => count > 0)

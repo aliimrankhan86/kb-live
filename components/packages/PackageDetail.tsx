@@ -1,15 +1,18 @@
+'use client'
+
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import type { Package } from '@/lib/types'
 import { createQuotePrefillUrl } from '@/lib/quote-prefill'
-import { getRegionSettings } from '@/lib/i18n/region'
+import { CURRENCY_CHANGE_EVENT, getRegionSettings } from '@/lib/i18n/region'
 import { formatPriceForRegion } from '@/lib/i18n/format'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface PackageDetailProps {
   pkg: Package
 }
 
-const formatPrice = (pkg: Package) => {
-  const settings = getRegionSettings()
+const formatPrice = (pkg: Package, settings = getRegionSettings()) => {
   const priceInfo = formatPriceForRegion(pkg.pricePerPerson, pkg.currency, settings)
   return pkg.priceType === 'from' ? `From ${priceInfo.formatted}` : priceInfo.formatted
 }
@@ -22,6 +25,14 @@ const formatDateWindow = (pkg: Package) => {
 const renderBoolean = (value: boolean) => (value ? 'Included' : 'Not included')
 
 export function PackageDetail({ pkg }: PackageDetailProps) {
+  const [regionSettings, setRegionSettings] = useState(() => getRegionSettings())
+
+  useEffect(() => {
+    const updateSettings = () => setRegionSettings(getRegionSettings())
+    window.addEventListener(CURRENCY_CHANGE_EVENT, updateSettings)
+    return () => window.removeEventListener(CURRENCY_CHANGE_EVENT, updateSettings)
+  }, [])
+
   return (
     <section data-testid="package-detail-page" className="w-full max-w-5xl mx-auto px-4 py-10">
       <nav className="text-sm text-[var(--textMuted)] mb-6">
@@ -39,7 +50,7 @@ export function PackageDetail({ pkg }: PackageDetailProps) {
         </h1>
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <p data-testid="package-price" className="text-2xl font-semibold text-[var(--text)]">
-            {formatPrice(pkg)}
+            {formatPrice(pkg, regionSettings)}
           </p>
           <span className="text-sm text-[var(--textMuted)]">
             Operator ID: {pkg.operatorId}
@@ -120,7 +131,11 @@ export function PackageDetail({ pkg }: PackageDetailProps) {
         <Link
           href={createQuotePrefillUrl(pkg)}
           data-testid="package-cta-request-quote"
-          className="inline-flex items-center justify-center rounded bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
+          className={buttonVariants({
+            variant: 'primary',
+            size: 'md',
+            className: 'px-5',
+          })}
         >
           Request quote
         </Link>

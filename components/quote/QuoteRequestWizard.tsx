@@ -13,6 +13,7 @@ import { MockDB } from '@/lib/api/mock-db';
 import { useRouter } from 'next/navigation';
 import { QuoteRequest } from '@/lib/types';
 import { parseQuotePrefillParams } from '@/lib/quote-prefill';
+import { Button } from '@/components/ui';
 
 export function QuoteRequestWizard() {
   const { draft, step, nextStep, prevStep, reset, setDraft } = useQuoteRequestStore();
@@ -78,6 +79,19 @@ export function QuoteRequestWizard() {
 
   return (
     <div className="rounded-xl border border-[rgba(255,255,255,0.1)] bg-[#111111] p-6 shadow-xl sm:p-10">
+      <div className="mb-4">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          data-testid="quote-back-button"
+          onClick={() => router.back()}
+          className="px-0 text-[var(--textMuted)] hover:bg-transparent hover:text-[var(--text)]"
+        >
+          Back to previous page
+        </Button>
+      </div>
+
       {/* Progress Bar */}
       <div className="mb-8">
         <div className="flex justify-between text-sm font-medium text-[#FFFFFF]">
@@ -105,32 +119,34 @@ export function QuoteRequestWizard() {
       </AnimatePresence>
 
       <div className="mt-8 flex justify-between pt-6 border-t border-[rgba(255,255,255,0.1)]">
-        <button
+        <Button
+          type="button"
           onClick={prevStep}
           disabled={step === 1}
-          className={`rounded-lg px-6 py-2.5 text-sm font-medium transition-colors ${
-            step === 1
-              ? 'cursor-not-allowed opacity-50 text-[rgba(255,255,255,0.4)]'
-              : 'text-[#FFFFFF] hover:bg-[rgba(255,255,255,0.05)]'
-          }`}
+          variant="ghost"
+          className={step === 1 ? 'text-[rgba(255,255,255,0.4)]' : 'text-[var(--text)]'}
         >
           Back
-        </button>
+        </Button>
         
         {step < 5 ? (
-          <button
+          <Button
+            type="button"
             onClick={nextStep}
-            className="rounded-lg bg-[#FFD31D] px-6 py-2.5 text-sm font-medium text-[#000000] hover:bg-[#E5BD1A] transition-colors"
+            variant="primary"
+            className="px-6"
           >
             Next Step
-          </button>
+          </Button>
         ) : (
-          <button
+          <Button
+            type="button"
             onClick={handleSubmit}
-            className="rounded-lg bg-[#FFD31D] px-6 py-2.5 text-sm font-medium text-[#000000] hover:bg-[#E5BD1A] transition-colors"
+            variant="primary"
+            className="px-6"
           >
             Submit Request
-          </button>
+          </Button>
         )}
       </div>
     </div>

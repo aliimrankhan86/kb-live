@@ -4,31 +4,46 @@
 
 ## Branch & goal
 
-- **Branch:** `main-v2`
-- **Goal:** Dev server permanently stabilised (Turbopack). Tasks 1-3 from execution queue completed. Task 4 is next.
+- **Branch:** `feature/quote-journey`
+- **Goal:** Trace and document the package detail to quote journey, then apply minimal UX consistency fixes without changing routes.
 
 ## What works (verified)
 
-- **Build:** `npm run build` passes (webpack, production). 17 unit tests green.
-- **Dev server:** Turbopack starts in ~800ms. All routes compile cleanly. Zero errors.
-- **Operator layout:** Shared sidebar for all `/operator/*` routes (Task 3, done by Codex).
-- **Types evolved:** OperatorProfile + Package enhanced with optional fields (Task 1, done by Codex).
-- **Seed data enriched:** 5 packages + 2 operators with realistic data (Task 2, done by Codex).
+- Package detail to quote prefill flow is functioning end-to-end with query-based prefill.
+- `/quote` and `/requests/[id]` now use the shared header, so logo/navigation are consistent with the rest of the app.
+- Quote journey now exposes a clear "Back to previous page" action in wizard and request detail views.
+- Header now includes a design-system currency dropdown (`GBP`, `USD`, `EUR`) that updates displayed package rates client-side.
 
 ## What changed this session
 
-- **`next.config.ts`:** Removed custom `webpack` function. Dev uses Turbopack (no webpack module registry = no `__webpack_modules__` crash). Kept `optimizePackageImports`.
-- **`package.json`:** All dev scripts now use `--turbopack`. Added `dev:webpack` as legacy fallback.
-- **`docs/skills/DEV_ROUTINES.md`:** Documents Turbopack architecture decision.
+- Traced the "Request quote" control source in `components/packages/PackageDetail.tsx` and prefill serializer in `lib/quote-prefill.ts`.
+- Confirmed `/quote` hydration behavior in `components/quote/QuoteRequestWizard.tsx`:
+  - Parses search params into a draft.
+  - Merges prefill into persisted zustand state (`quote-request-storage`).
+  - Clears URL params with `window.history.replaceState`.
+- Updated "Request quote" CTA to consume design-system button variants.
+- Added token aliases for legacy variables (`--primary`, `--panel`, `--border`, `--background`) to keep styles consistent.
+- Added shared header to quote pages and a back action in quote/request screens.
+- Standardized request summary budget formatting through the i18n money formatter.
+- Added persisted display-currency preference (`kb_display_currency`) and shared currency change event handling.
+- Standardized symbol display to avoid `GBP750`-style output in visible price cards and quote review budget sections.
+
+## Current journey (as implemented now)
+
+- User opens `/packages/umrah-2026-7-nights-value` and clicks **Request quote**.
+- CTA navigates to `/quote` with serialized prefill query params from the package.
+- Quote wizard reads and validates params, then merges them into the persisted quote draft.
+- Wizard removes query params from the URL after hydration (`/quote` stays clean).
+- On submit, a new request ID is generated, saved in MockDB, and user is redirected to `/requests/{id}`.
 
 ## What to build next
 
-Start **Task 4: Operator registration form** in `docs/EXECUTION_QUEUE.md`.
+Create a small `ButtonLink` primitive in `components/ui` and migrate legacy link-style CTAs in public flow so all interactive controls are sourced from the design system.
 
 ## Commands to verify
 
 ```bash
-npm run test         # Must pass
-npm run build        # Must pass
-npm run dev          # Turbopack — should start in <1s, zero errors
+npm run test
+npx playwright test e2e/flow.spec.ts
+npm run build
 ```

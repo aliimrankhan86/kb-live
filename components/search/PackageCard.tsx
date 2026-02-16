@@ -4,6 +4,8 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Package } from '@/lib/mock-packages';
+import { CURRENCY_CHANGE_EVENT, getRegionSettings } from '@/lib/i18n/region';
+import { formatPriceForRegion } from '@/lib/i18n/format';
 import styles from './packages.module.css';
 
 interface PackageCardProps {
@@ -21,6 +23,19 @@ const PackageCard: React.FC<PackageCardProps> = ({
   onAddToShortlist,
   onToggleCompare,
 }) => {
+  const [regionSettings, setRegionSettings] = React.useState(() => getRegionSettings());
+
+  React.useEffect(() => {
+    const updateSettings = () => setRegionSettings(getRegionSettings());
+    window.addEventListener(CURRENCY_CHANGE_EVENT, updateSettings);
+    return () => window.removeEventListener(CURRENCY_CHANGE_EVENT, updateSettings);
+  }, []);
+
+  const priceInfo = React.useMemo(
+    () => formatPriceForRegion(pkg.price, pkg.currency, regionSettings),
+    [pkg.currency, pkg.price, regionSettings]
+  );
+
   const renderStars = (rating: number) => {
     const stars = [];
     for (let i = 1; i <= 5; i++) {
@@ -122,8 +137,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
       <div className={styles.priceColumn}>
         <div className={styles.price}>
           <div className={styles.priceAmount}>
-            <span className={styles.priceCurrency}>{pkg.currency}</span>
-            {pkg.price.toLocaleString()}
+            {priceInfo.formatted}
           </div>
           <div className={styles.priceNote}>{pkg.priceNote}</div>
         </div>

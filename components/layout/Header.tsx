@@ -1,6 +1,16 @@
+'use client'
+
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Logo } from '@/components/graphics/Logo'
+import { Select } from '@/components/ui/Select'
+import {
+  DISPLAY_CURRENCY_OPTIONS,
+  getPreferredCurrency,
+  setPreferredCurrency,
+  type DisplayCurrency,
+} from '@/lib/i18n/region'
 import styles from './header.module.css'
 
 interface HeaderProps {
@@ -8,6 +18,13 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
+  const [currency, setCurrency] = useState<DisplayCurrency>('GBP')
+
+  useEffect(() => {
+    const preferred = getPreferredCurrency()
+    if (preferred) setCurrency(preferred)
+  }, [])
+
   return (
     <header 
       className={`${styles.header} ${className}`}
@@ -36,6 +53,20 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
           className={styles.header__navigation}
           aria-label="Main menu"
         >
+          <div className={styles.header__currency}>
+            <Select
+              id="header-currency-select"
+              aria-label="Display currency"
+              value={currency}
+              options={DISPLAY_CURRENCY_OPTIONS}
+              onChange={(event) => {
+                const next = event.target.value as DisplayCurrency
+                setCurrency(next)
+                setPreferredCurrency(next)
+              }}
+              selectClassName={styles.header__currencySelect}
+            />
+          </div>
           <Link 
             href="/quote" 
             className={styles.header__navLink}
