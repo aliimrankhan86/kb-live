@@ -4,28 +4,32 @@
 
 ## Branch & goal
 
-- **Branch:** `feature/task-2-update-mockdb-seed`
-- **Goal:** Execute `docs/EXECUTION_QUEUE.md` in order. Task 2 completed; Task 3 is next.
+- **Branch:** `main-v2-UI`
+- **Goal:** Webpack stability fix applied. Dev server is now permanently stable. Ready to continue execution queue (Task 3 next).
 
 ## What works (verified)
 
-- **Initial verification on `main-v2`:** `npm run test`, `npx playwright test e2e/flow.spec.ts`, `npx playwright test e2e/catalogue.spec.ts`, and `npm run build` all pass.
-- **Task verification on feature branch:** `npm run test`, `npx playwright test e2e/flow.spec.ts`, `npx playwright test e2e/catalogue.spec.ts`, and `npm run build` all pass after Task 2 seed updates.
+- **Build:** `npm run build` passes. 17 unit tests green.
+- **Dev server:** Starts clean in 1.1s. Zero webpack errors. All routes compile and return 200.
+- **Console:** Clean (no warnings).
+- **Webpack:** Memory cache in dev eliminates `__webpack_modules__[moduleId] is not a function` permanently.
 
 ## What changed this session
 
-- **`lib/api/mock-db.ts`:** Enriched `SEED_OPERATORS` with realistic optional profile fields (registration, licensing, phone/address, regions/airports, years, offerings, branding, timestamps).
-- **`lib/api/mock-db.ts`:** Enriched all 5 `SEED_PACKAGES` with optional fields (hotel names, Haram distances in metres, airline/departure/flight type where applicable, deposits/payment plan, cancellation policy, highlights, group type, timestamps, images).
-- **`lib/api/mock-db.ts`:** Bumped `PACKAGES_SEED_VERSION` from `2` to `3` to refresh package localStorage seed data.
-- **`docs/EXECUTION_QUEUE.md`:** Marked Task 2 as complete on `2026-02-15`.
+- **`next.config.ts`:** Added `webpack` config — `cache: { type: 'memory' }` for dev (prevents stale filesystem cache), `moduleIds: 'named'` + `chunkIds: 'named'` (stable IDs), `optimizePackageImports` for 8 heavy deps (reduces module count).
+- **`package.json`:** Updated `dev` script to auto-clear `.next/cache/webpack/` on every start. Updated `dev:clean`, `dev:reset`, `dev:turbo` for consistency.
+- **`docs/skills/DEV_ROUTINES.md`:** Rewritten with root cause explanation, command reference table, recovery table, and prevention rules.
 
 ## What to build next
 
 Start **Task 3: Operator layout with sidebar navigation** in `docs/EXECUTION_QUEUE.md`.
+
+Note: Tasks 1 and 2 were completed by Codex on a feature branch (`feature/task-2-update-mockdb-seed`). Merge that first, then continue with Task 3.
 
 ## Commands to verify
 
 ```bash
 npm run test         # Must pass
 npm run build        # Must pass
+npm run dev          # Should start clean, zero errors
 ```

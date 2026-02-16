@@ -1,17 +1,38 @@
 # Dev routines (skills)
 
-**One recommended dev command (preferred)**  
-- `npm run dev:clean` — Clears port 3000, removes `.next`, then starts dev. Use this when starting work or after pull to avoid chunk/manifest issues.  
-- For a quick restart without wiping cache: `npm run dev` (kills anything on 3000, then starts).
+## Why webpack crashes happen (and why they won't anymore)
 
-**Recovery when Next dev breaks**  
-- Chunk 404, blank screen, or manifest/ENOENT: stop dev, run `npm run dev:clean`, then hard refresh (Ctrl+Shift+R / Cmd+Shift+R) or use an incognito window.  
-- If it persists: run `npm run dev:reset` (kills port 3000, removes `.next` and `node_modules/.cache`, then starts dev).  
-- Last resort: `rm -rf .next node_modules/.cache` then `npm run dev:clean`.
+The error `__webpack_modules__[moduleId] is not a function` is caused by stale webpack filesystem cache in `.next/cache/webpack/`. Module IDs from a previous dev session become invalid after file changes, branch switches, or dependency updates. HMR then references those stale IDs.
 
-**Known-good port/host**  
-- Dev binds to **127.0.0.1:3000** only (localhost). Do not use 0.0.0.0 unless required; it can cause stale chunk requests.
+**Permanent fix (already applied in `next.config.ts`):**
+1. `config.cache = { type: 'memory' }` in development — no persistent disk cache, clean on every restart.
+2. `optimizePackageImports` for heavy deps — reduces total module count, fewer IDs to go stale.
+3. `moduleIds: 'named'` and `chunkIds: 'named'` in dev — human-readable IDs that are stable across rebuilds.
+4. `npm run dev` automatically clears `.next/cache/webpack/` on every start as an extra safeguard.
 
-**Hard refresh safely**  
-- Browser: Cmd+Shift+R (Mac) or Ctrl+Shift+R (Windows/Linux). Or DevTools → right-click refresh → Empty Cache and Hard Reload.  
-- Do not rely on normal refresh after a dev:clean; hard refresh once so the browser drops old script URLs.
+## Dev commands
+
+| Command | What it does | When to use |
+|---------|-------------|-------------|
+| `npm run dev` | Kills port 3000, clears webpack cache, starts dev at 127.0.0.1:3000 | Default. Use this always. |
+| `npm run dev:clean` | Kills port 3000, deletes entire `.next/`, starts dev | After branch switch, dependency change, or persistent errors |
+| `npm run dev:reset` | Kills port 3000, deletes `.next/` + `node_modules/.cache`, starts dev | Nuclear option. After `npm install` or major config changes |
+| `npm run dev:turbo` | Deletes `.next/`, starts with Turbopack | Experimental. Faster cold starts, less stable HMR |
+
+## Recovery when Next dev breaks
+
+| Symptom | Fix |
+|---------|-----|
+| `__webpack_modules__[moduleId] is not a function` | Stop dev → `npm run dev` (auto-clears webpack cache) |
+| Chunk 404, blank screen, manifest ENOENT | Stop dev → `npm run dev:clean` → hard refresh (Cmd+Shift+R) |
+| TypeScript errors after branch switch | `npm run dev:clean` (stale type cache) |
+| Persistent build failures | `npm run dev:reset` → if still broken: `rm -rf node_modules && npm install && npm run dev:clean` |
+
+## Rules to prevent instability
+
+1. **Never edit files in `.next/`** — it's a build artifact.
+2. **Always use `npm run dev`** — it clears webpack cache automatically.
+3. **After `git checkout` to a different branch:** run `npm run dev:clean`.
+4. **After `npm install`:** run `npm run dev:reset`.
+5. **Dev binds to `127.0.0.1:3000` only** — do not use `0.0.0.0`.
+6. **Hard refresh after restart:** Cmd+Shift+R (Mac) or Ctrl+Shift+R (Windows/Linux).
