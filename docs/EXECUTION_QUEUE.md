@@ -22,6 +22,10 @@ Ordered list of tasks for building the operator dashboard and enhancing the plat
 - `[x]` — Done (add date: `[x] 2026-02-04`)
 - `[-]` — Skipped (add reason)
 
+## Ad-hoc Completed
+
+- `[x] 2026-02-16` Design system foundation: added UI primitives (`Text`, `Heading`, `Button`, `Input`, `Select`), updated `/showcase` as styleguide, and added `docs/DESIGN_SYSTEM.md` + `docs/TOKENS.md`.
+
 ---
 
 ## Phase 1: Foundation (must complete before Phase 2)
