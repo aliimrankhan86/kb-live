@@ -16,16 +16,14 @@
 
 ## What changed this session
 
-- Expanded design system primitives:
-  - Added `Alert`, `Badge`, `Card`, `ChartContainer` + `LineChart` + `BarChart`, `Pagination`, `Table`, `Checkbox`, `Radio`, `Switch`.
-  - Enhanced `Text`, `Heading`, `Button`, `Input`, `Select`, `Slider`, and canonical `Overlay` styling.
-  - Added `components/ui/index.ts` as the primitive export barrel.
-- Rebuilt `/showcase` using `DesignSystemPlayground`:
-  - Sidebar navigation with section grouping, active section highlighting, deep-link anchors, and search filter.
-  - Mobile component picker.
-  - Full state examples (default, focus sample, disabled, error, loading where relevant).
-- Fixed chart render key collision by making point keys unique (`label-index`).
-- Extended token usage and token docs to support the component system.
+- Locked design-system documentation as single source of truth:
+  - `docs/DESIGN_SYSTEM.md` now defines token/component locations, update workflow, and non-negotiable usage rules.
+  - Explicit rule added: no one-off control/overlay implementations when primitives exist.
+- Updated AI entry doc:
+  - `docs/README_AI.md` now includes: “Always use the design system components for UI controls and overlays.”
+- Added sanity-check routine in `docs/skills/DEV_ROUTINES.md`:
+  - viewport checks for `/showcase`, `/umrah`, `/search/packages`
+  - command checks: `npm run test`, `npx playwright test e2e/flow.spec.ts`, `npm run build`
 
 ## What to build next
 

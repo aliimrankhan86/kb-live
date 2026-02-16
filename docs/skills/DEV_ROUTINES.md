@@ -36,3 +36,13 @@ As of this commit, **all dev commands use Turbopack** (`--turbopack`). This is a
 3. **After `npm install`:** run `npm run dev:reset`.
 4. **Dev binds to `127.0.0.1:3000`** — do not change this.
 5. **`npm run build` uses webpack** — this is correct and expected. Do not add `--turbopack` to build.
+
+## Sanity check (before push)
+
+1. Visual checks:
+   - Verify `/showcase` at `320px` and `1280px`.
+   - Verify `/umrah` and `/search/packages` at `320px`.
+2. Commands:
+   - `npm run test`
+   - `npx playwright test e2e/flow.spec.ts`
+   - `npm run build`

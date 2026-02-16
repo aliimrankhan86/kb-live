@@ -73,6 +73,7 @@ See `docs/APP_STRUCTURE.md` for full journey maps and wireframes.
 5. **Error boundaries:** Keep `app/error.tsx`, `app/global-error.tsx`, `app/not-found.tsx`.
 6. **`data-testid` attributes:** These are test contracts. Do not rename without updating E2E tests.
 7. **Docs:** Update `docs/NOW.md` before every push. This is mandatory.
+8. **Design system:** Always use the design system components for UI controls and overlays.
 
 ## Dev commands
 
