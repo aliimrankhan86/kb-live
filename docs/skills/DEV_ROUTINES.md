@@ -1,38 +1,38 @@
 # Dev routines (skills)
 
-## Why webpack crashes happen (and why they won't anymore)
+## Architecture decision: Turbopack for development
 
-The error `__webpack_modules__[moduleId] is not a function` is caused by stale webpack filesystem cache in `.next/cache/webpack/`. Module IDs from a previous dev session become invalid after file changes, branch switches, or dependency updates. HMR then references those stale IDs.
+As of this commit, **all dev commands use Turbopack** (`--turbopack`). This is a permanent fix, not a workaround.
 
-**Permanent fix (already applied in `next.config.ts`):**
-1. `config.cache = { type: 'memory' }` in development — no persistent disk cache, clean on every restart.
-2. `optimizePackageImports` for heavy deps — reduces total module count, fewer IDs to go stale.
-3. `moduleIds: 'named'` and `chunkIds: 'named'` in dev — human-readable IDs that are stable across rebuilds.
-4. `npm run dev` automatically clears `.next/cache/webpack/` on every start as an extra safeguard.
+**Why:** Webpack's HMR (Hot Module Replacement) has a fundamental bug where its module registry (`__webpack_modules__`) accumulates stale module IDs during development — from file edits, branch switches, dependency changes, and rapid saves. This causes `__webpack_modules__[moduleId] is not a function` repeatedly. Cache clearing is a bandaid that doesn't prevent it from happening again within the same session.
+
+**Why Turbopack eliminates it:** Turbopack is a Rust-based bundler built into Next.js 15. It has a completely different module system — there is no `__webpack_modules__` registry. The error literally cannot occur. It is the officially stable dev bundler for Next.js 15.5.3.
+
+**Production builds still use webpack** via `next build`. This is safe because webpack is stable for one-shot builds (the HMR bug only affects hot reloading during development).
 
 ## Dev commands
 
 | Command | What it does | When to use |
 |---------|-------------|-------------|
-| `npm run dev` | Kills port 3000, clears webpack cache, starts dev at 127.0.0.1:3000 | Default. Use this always. |
-| `npm run dev:clean` | Kills port 3000, deletes entire `.next/`, starts dev | After branch switch, dependency change, or persistent errors |
-| `npm run dev:reset` | Kills port 3000, deletes `.next/` + `node_modules/.cache`, starts dev | Nuclear option. After `npm install` or major config changes |
-| `npm run dev:turbo` | Deletes `.next/`, starts with Turbopack | Experimental. Faster cold starts, less stable HMR |
+| `npm run dev` | Kills port 3000, starts Turbopack dev at 127.0.0.1:3000 | **Default. Use this always.** |
+| `npm run dev:clean` | Kills port 3000, deletes `.next/`, starts Turbopack | After branch switch or persistent issues |
+| `npm run dev:reset` | Kills port 3000, deletes `.next/` + `node_modules/.cache`, starts Turbopack | After `npm install` or major changes |
+| `npm run dev:webpack` | Kills port 3000, clears webpack cache, starts with webpack (legacy) | Only if Turbopack has a specific incompatibility |
 
-## Recovery when Next dev breaks
+## Recovery
 
 | Symptom | Fix |
 |---------|-----|
-| `__webpack_modules__[moduleId] is not a function` | Stop dev → `npm run dev` (auto-clears webpack cache) |
-| Chunk 404, blank screen, manifest ENOENT | Stop dev → `npm run dev:clean` → hard refresh (Cmd+Shift+R) |
-| TypeScript errors after branch switch | `npm run dev:clean` (stale type cache) |
-| Persistent build failures | `npm run dev:reset` → if still broken: `rm -rf node_modules && npm install && npm run dev:clean` |
+| Port already in use | `npm run dev` (auto-kills port 3000) |
+| Stale UI / wrong styles | `npm run dev:clean` → hard refresh (Cmd+Shift+R) |
+| TypeScript errors after branch switch | `npm run dev:clean` |
+| Build failure after npm install | `npm run dev:reset` |
+| Any issue with Turbopack | `npm run dev:webpack` (temporary fallback) |
 
-## Rules to prevent instability
+## Rules
 
-1. **Never edit files in `.next/`** — it's a build artifact.
-2. **Always use `npm run dev`** — it clears webpack cache automatically.
-3. **After `git checkout` to a different branch:** run `npm run dev:clean`.
-4. **After `npm install`:** run `npm run dev:reset`.
-5. **Dev binds to `127.0.0.1:3000` only** — do not use `0.0.0.0`.
-6. **Hard refresh after restart:** Cmd+Shift+R (Mac) or Ctrl+Shift+R (Windows/Linux).
+1. **Always use `npm run dev`** — it uses Turbopack by default.
+2. **After `git checkout`:** run `npm run dev:clean`.
+3. **After `npm install`:** run `npm run dev:reset`.
+4. **Dev binds to `127.0.0.1:3000`** — do not change this.
+5. **`npm run build` uses webpack** — this is correct and expected. Do not add `--turbopack` to build.

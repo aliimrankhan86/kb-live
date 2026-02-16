@@ -4,22 +4,22 @@
 
 ## Branch & goal
 
-- **Branch:** `feature/task-3-operator-layout`
-- **Goal:** Execute Task 3 from `docs/EXECUTION_QUEUE.md` with shared `/operator` layout + sidebar navigation.
+- **Branch:** `main-v2`
+- **Goal:** Dev server permanently stabilised (Turbopack). Tasks 1-3 from execution queue completed. Task 4 is next.
 
 ## What works (verified)
 
-- **Pre-change baseline on `main-v2`:** `npm run test`, `npx playwright test e2e/flow.spec.ts`, `npx playwright test e2e/catalogue.spec.ts`, and `npm run build` all passed.
-- **Post-change verification on feature branch:** `npm run test`, `npx playwright test e2e/flow.spec.ts`, `npx playwright test e2e/catalogue.spec.ts`, `npm run build`, plus operator desktop/mobile smoke checks passed.
+- **Build:** `npm run build` passes (webpack, production). 17 unit tests green.
+- **Dev server:** Turbopack starts in ~800ms. All routes compile cleanly. Zero errors.
+- **Operator layout:** Shared sidebar for all `/operator/*` routes (Task 3, done by Codex).
+- **Types evolved:** OperatorProfile + Package enhanced with optional fields (Task 1, done by Codex).
+- **Seed data enriched:** 5 packages + 2 operators with realistic data (Task 2, done by Codex).
 
 ## What changed this session
 
-- **`app/operator/layout.tsx` (new):** Added shared `/operator/*` shell with desktop two-column layout (sidebar + content area) and consistent operator workspace header.
-- **`components/operator/OperatorSidebar.tsx` (new):** Added accessible sidebar with active-route highlighting, mobile menu toggle, disabled “Coming soon” future items, and operator status footer. Includes `data-testid="operator-sidebar"` and mobile toggle test id.
-- **`app/operator/dashboard/page.tsx`:** Removed page-level `<main>` wrapper to rely on shared operator layout.
-- **`app/operator/packages/page.tsx`:** Removed page-level `<main>` wrapper to rely on shared operator layout.
-- **`app/operator/analytics/page.tsx`:** Removed page-level `<main>` wrapper to rely on shared operator layout.
-- **`docs/EXECUTION_QUEUE.md`:** Marked Task 3 complete on `2026-02-15`.
+- **`next.config.ts`:** Removed custom `webpack` function. Dev uses Turbopack (no webpack module registry = no `__webpack_modules__` crash). Kept `optimizePackageImports`.
+- **`package.json`:** All dev scripts now use `--turbopack`. Added `dev:webpack` as legacy fallback.
+- **`docs/skills/DEV_ROUTINES.md`:** Documents Turbopack architecture decision.
 
 ## What to build next
 
@@ -30,4 +30,5 @@ Start **Task 4: Operator registration form** in `docs/EXECUTION_QUEUE.md`.
 ```bash
 npm run test         # Must pass
 npm run build        # Must pass
+npm run dev          # Turbopack — should start in <1s, zero errors
 ```

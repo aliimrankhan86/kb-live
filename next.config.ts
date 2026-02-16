@@ -10,8 +10,8 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
   },
 
-  // Reduce module count for heavy dependencies — fewer module IDs = fewer
-  // stale-cache collisions during HMR.
+  // Tree-shake barrel imports from heavy dependencies. Works with both
+  // Turbopack (dev) and webpack (production build).
   experimental: {
     optimizePackageImports: [
       "framer-motion",
@@ -25,30 +25,10 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  webpack: (config, { dev, isServer }) => {
-    if (dev) {
-      // Use in-memory cache during development instead of filesystem cache.
-      // Webpack's persistent filesystem cache (.next/cache/webpack/) is the
-      // root cause of "__webpack_modules__[moduleId] is not a function" —
-      // module IDs from a previous session become stale after branch switches,
-      // dependency updates, or file renames, and HMR references them before
-      // the manifest is refreshed. Memory cache is fast within a session and
-      // automatically clean on every restart.
-      config.cache = { type: "memory" };
-    }
-
-    // Ensure consistent module ID generation so HMR patches reference the
-    // same IDs the runtime already has loaded.
-    if (dev && !isServer) {
-      config.optimization = {
-        ...config.optimization,
-        moduleIds: "named",
-        chunkIds: "named",
-      };
-    }
-
-    return config;
-  },
+  // No custom webpack config. Development uses Turbopack (--turbopack flag
+  // in npm run dev), which has its own Rust-based module system and does not
+  // suffer from the __webpack_modules__[moduleId] HMR bug. Production builds
+  // use webpack with default settings, which are stable for one-shot builds.
 };
 
 export default nextConfig;
