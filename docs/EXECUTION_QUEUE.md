@@ -128,7 +128,7 @@ Do the same for `op2` (Makkah Tours) with different realistic data.
 
 ### Task 3: Operator layout with sidebar navigation
 
-**Status:** `[ ]`
+**Status:** `[x] 2026-02-15`
 **Complexity:** Small-Medium
 **Files to create:** `app/operator/layout.tsx`, `components/operator/OperatorSidebar.tsx`
 **Files to modify:** `app/operator/dashboard/page.tsx`, `app/operator/packages/page.tsx`, `app/operator/analytics/page.tsx`

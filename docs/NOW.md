@@ -4,32 +4,31 @@
 
 ## Branch & goal
 
-- **Branch:** `main-v2-UI`
-- **Goal:** Webpack stability fix applied. Dev server is now permanently stable. Ready to continue execution queue (Task 3 next).
+- **Branch:** `main-v2`
+- **Goal:** Dev server permanently stabilised (Turbopack). Tasks 1-3 from execution queue completed. Task 4 is next.
 
 ## What works (verified)
 
-- **Build:** `npm run build` passes. 17 unit tests green.
-- **Dev server:** Starts clean in 1.1s. Zero webpack errors. All routes compile and return 200.
-- **Console:** Clean (no warnings).
-- **Webpack:** Memory cache in dev eliminates `__webpack_modules__[moduleId] is not a function` permanently.
+- **Build:** `npm run build` passes (webpack, production). 17 unit tests green.
+- **Dev server:** Turbopack starts in ~800ms. All routes compile cleanly. Zero errors.
+- **Operator layout:** Shared sidebar for all `/operator/*` routes (Task 3, done by Codex).
+- **Types evolved:** OperatorProfile + Package enhanced with optional fields (Task 1, done by Codex).
+- **Seed data enriched:** 5 packages + 2 operators with realistic data (Task 2, done by Codex).
 
 ## What changed this session
 
-- **`next.config.ts`:** Added `webpack` config — `cache: { type: 'memory' }` for dev (prevents stale filesystem cache), `moduleIds: 'named'` + `chunkIds: 'named'` (stable IDs), `optimizePackageImports` for 8 heavy deps (reduces module count).
-- **`package.json`:** Updated `dev` script to auto-clear `.next/cache/webpack/` on every start. Updated `dev:clean`, `dev:reset`, `dev:turbo` for consistency.
-- **`docs/skills/DEV_ROUTINES.md`:** Rewritten with root cause explanation, command reference table, recovery table, and prevention rules.
+- **`next.config.ts`:** Removed custom `webpack` function. Dev uses Turbopack (no webpack module registry = no `__webpack_modules__` crash). Kept `optimizePackageImports`.
+- **`package.json`:** All dev scripts now use `--turbopack`. Added `dev:webpack` as legacy fallback.
+- **`docs/skills/DEV_ROUTINES.md`:** Documents Turbopack architecture decision.
 
 ## What to build next
 
-Start **Task 3: Operator layout with sidebar navigation** in `docs/EXECUTION_QUEUE.md`.
-
-Note: Tasks 1 and 2 were completed by Codex on a feature branch (`feature/task-2-update-mockdb-seed`). Merge that first, then continue with Task 3.
+Start **Task 4: Operator registration form** in `docs/EXECUTION_QUEUE.md`.
 
 ## Commands to verify
 
 ```bash
 npm run test         # Must pass
 npm run build        # Must pass
-npm run dev          # Should start clean, zero errors
+npm run dev          # Turbopack — should start in <1s, zero errors
 ```
