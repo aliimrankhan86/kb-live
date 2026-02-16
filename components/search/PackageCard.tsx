@@ -4,6 +4,9 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Package } from '@/lib/mock-packages';
+import { Button } from '@/components/ui/Button';
+import { getRegionSettings } from '@/lib/i18n/region';
+import { formatPriceForRegion } from '@/lib/i18n/format';
 import styles from './packages.module.css';
 
 interface PackageCardProps {
@@ -21,6 +24,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
   onAddToShortlist,
   onToggleCompare,
 }) => {
+  const regionSettings = getRegionSettings();
   const renderStars = (rating: number) => {
     const stars = [];
     for (let i = 1; i <= 5; i++) {
@@ -37,6 +41,8 @@ const PackageCard: React.FC<PackageCardProps> = ({
     }
     return stars;
   };
+
+  const formattedPrice = formatPriceForRegion(pkg.price, pkg.currency, regionSettings).formatted;
 
   return (
     <article className={styles.packageCard}>
@@ -122,15 +128,15 @@ const PackageCard: React.FC<PackageCardProps> = ({
       <div className={styles.priceColumn}>
         <div className={styles.price}>
           <div className={styles.priceAmount}>
-            <span className={styles.priceCurrency}>{pkg.currency}</span>
-            {pkg.price.toLocaleString()}
+            {formattedPrice}
           </div>
           <div className={styles.priceNote}>{pkg.priceNote}</div>
         </div>
 
         <div className={styles.packageActions}>
-          <button
+          <Button
             type="button"
+            variant="secondary"
             className={styles.secondaryAction}
             data-testid={`shortlist-toggle-${pkg.id}`}
             onClick={(e) => {
@@ -142,9 +148,10 @@ const PackageCard: React.FC<PackageCardProps> = ({
             aria-label={isShortlisted ? `Remove from shortlist` : `Add ${pkg.makkahHotel.name} and ${pkg.madinaHotel.name} to shortlist`}
           >
             {isShortlisted ? 'Shortlisted' : 'Add to Shortlist'}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="secondary"
             className={styles.secondaryAction}
             data-testid={`package-compare-toggle-${pkg.id}`}
             onClick={(e) => {
@@ -156,9 +163,10 @@ const PackageCard: React.FC<PackageCardProps> = ({
             aria-label={isCompareSelected ? `Remove from comparison` : `Add ${pkg.makkahHotel.name} and ${pkg.madinaHotel.name} to compare`}
           >
             {isCompareSelected ? 'Added for comparison' : 'Add to Compare'}
-          </button>
+          </Button>
           <Link
             href={`/packages/${pkg.slug ?? pkg.id}`}
+            scroll={false}
             className={styles.primaryAction}
             aria-label={`View full details for ${pkg.makkahHotel.name} and ${pkg.madinaHotel.name} package`}
           >

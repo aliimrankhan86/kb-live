@@ -7,6 +7,8 @@ import { MockDB } from '@/lib/api/mock-db';
 import { mapPackageToComparison, handleComparisonSelection } from '@/lib/comparison';
 import { ComparisonTable } from '@/components/request/ComparisonTable';
 import { Dialog, OverlayContent, OverlayHeader, OverlayTitle } from '@/components/ui/Overlay';
+import { Button } from '@/components/ui/Button';
+import { Switch } from '@/components/ui/Switch';
 import PackageCard from './PackageCard';
 import { FilterOverlay, FilterState } from './FilterOverlay';
 import styles from './packages.module.css';
@@ -118,31 +120,31 @@ const PackageList: React.FC<PackageListProps> = ({
           Found {listPackages.length} amazing packages for your journey
         </div>
         <div className={styles.searchControls}>
-          <button
+          <Button
             className={styles.filterButton}
             onClick={handleFilterClick}
             aria-label="Filter packages"
+            variant="secondary"
+            type="button"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
               <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46 22,3" />
             </svg>
             Filter
-          </button>
-          <button className={styles.sortButton} onClick={() => onSort?.()} aria-label="Sort packages">
+          </Button>
+          <Button className={styles.sortButton} onClick={() => onSort?.()} aria-label="Sort packages" variant="secondary" type="button">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
               <path d="M3 6h18M7 12h10M10 18h4" />
             </svg>
             Sort
-          </button>
-          <label className={styles.shortlistFilterLabel}>
-            <input
-              type="checkbox"
-              checked={shortlistOnly}
-              onChange={(e) => setShortlistOnly(e.target.checked)}
-              aria-label="Show shortlist only"
-            />
-            Shortlist only
-          </label>
+          </Button>
+          <Switch
+            className={styles.shortlistFilterLabel}
+            checked={shortlistOnly}
+            onChange={(e) => setShortlistOnly(e.target.checked)}
+            label="Shortlist only"
+            aria-label="Show shortlist only"
+          />
           <div
             className={styles.shortlistCount}
             data-testid="search-shortlist-count"
@@ -151,7 +153,7 @@ const PackageList: React.FC<PackageListProps> = ({
           >
             {shortlistCount} in shortlist
           </div>
-          <button
+          <Button
             type="button"
             data-testid="search-compare-button"
             className={styles.compareButton}
@@ -161,9 +163,24 @@ const PackageList: React.FC<PackageListProps> = ({
             disabled={compareDisabled}
             aria-disabled={compareDisabled}
             aria-describedby={compareDisabled ? 'search-compare-help' : undefined}
+            variant="primary"
           >
             Compare ({selectedCompareIds.length})
-          </button>
+          </Button>
+          {listPackages.length >= 3 ? (
+            <Button
+              type="button"
+              variant="ghost"
+              data-testid="search-compare-demo-button"
+              onClick={() => {
+                setCompareMessage('');
+                setSelectedCompareIds(listPackages.slice(0, 3).map((p) => p.id));
+                setShowComparison(true);
+              }}
+            >
+              Demo 3-way comparison
+            </Button>
+          ) : null}
         </div>
       </header>
       {compareDisabled && (

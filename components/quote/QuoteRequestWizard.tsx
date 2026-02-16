@@ -56,7 +56,7 @@ export function QuoteRequestWizard() {
 
     MockDB.saveRequest(newRequest);
     reset(); // Clear draft
-    router.push(`/requests/${newRequest.id}`);
+    router.push(`/requests/${newRequest.id}`, { scroll: false });
   };
 
   const renderStep = () => {

@@ -21,6 +21,7 @@ const CTASection: React.FC<CTASectionProps> = ({
   return (
     <Link 
       href={href} 
+      scroll={false}
       className={`${styles.hero__ctaSection} ${className}`}
       aria-label={`${buttonText} packages - ${title}`}
     >

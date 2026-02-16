@@ -3,6 +3,9 @@
 import { useState } from 'react';
 import { QuoteRequest, Offer } from '@/lib/types';
 import { MockDB } from '@/lib/api/mock-db';
+import { Button, Input, Select, Textarea } from '@/components/ui';
+import { getRegionSettings } from '@/lib/i18n/region';
+import { formatMoney } from '@/lib/i18n/format';
 
 interface OfferFormProps {
   request: QuoteRequest;
@@ -10,6 +13,7 @@ interface OfferFormProps {
 }
 
 export function OfferForm({ request, onSuccess }: OfferFormProps) {
+  const regionSettings = getRegionSettings();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<Partial<Offer>>({
     pricePerPerson: 0,
@@ -52,12 +56,16 @@ export function OfferForm({ request, onSuccess }: OfferFormProps) {
     }, 1000);
   };
 
+  const budgetCurrency = request.budgetRange?.currency || 'GBP';
+  const budgetMin = request.budgetRange?.min ?? 0;
+  const budgetMax = request.budgetRange?.max ?? 0;
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6 text-sm text-[#FFFFFF]">
       {/* Request Context */}
       <div className="rounded bg-[rgba(255,255,255,0.05)] p-4 text-xs text-[rgba(255,255,255,0.64)]">
         <p>Customer Request: {request.type} • {request.season}</p>
-        <p>Budget: £{request.budgetRange?.min}-{request.budgetRange?.max}</p>
+        <p>Budget: {formatMoney(budgetMin, budgetCurrency, regionSettings.locale)} - {formatMoney(budgetMax, budgetCurrency, regionSettings.locale)}</p>
         <p>Notes: {request.notes || 'None'}</p>
       </div>
 
@@ -65,44 +73,48 @@ export function OfferForm({ request, onSuccess }: OfferFormProps) {
         <div>
           <label className="mb-1.5 block text-[rgba(255,255,255,0.8)]">Price Per Person</label>
           <div className="flex gap-2">
-            <input
+            <Input
               type="number"
               required
               min="0"
               value={formData.pricePerPerson || ''}
               onChange={(e) => setFormData({ ...formData, pricePerPerson: parseFloat(e.target.value) })}
-              className="w-full rounded border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] px-3 py-2 focus:border-[#FFD31D] focus:outline-none"
+              className="w-full"
             />
-            <select
+            <Select
               value={formData.currency}
               onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-              className="rounded border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] px-2 py-2 focus:border-[#FFD31D] focus:outline-none"
+              className="min-w-24"
+              options={[
+                { label: 'GBP', value: 'GBP' },
+                { label: 'USD', value: 'USD' },
+                { label: 'EUR', value: 'EUR' },
+              ]}
             >
-              <option value="GBP">GBP</option>
-              <option value="USD">USD</option>
-              <option value="EUR">EUR</option>
-            </select>
+            </Select>
           </div>
         </div>
 
         <div>
           <label className="mb-1.5 block text-[rgba(255,255,255,0.8)]">Hotel Rating</label>
-          <select
+          <Select
             value={formData.hotelStars}
             onChange={(e) => setFormData({ ...formData, hotelStars: parseInt(e.target.value) as 3 | 4 | 5 })}
-            className="w-full rounded border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] px-3 py-2 focus:border-[#FFD31D] focus:outline-none"
+            options={[
+              { label: '3 Stars', value: '3' },
+              { label: '4 Stars', value: '4' },
+              { label: '5 Stars', value: '5' },
+            ]}
+            className="w-full"
           >
-            <option value="3">3 Stars</option>
-            <option value="4">4 Stars</option>
-            <option value="5">5 Stars</option>
-          </select>
+          </Select>
         </div>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
         <div>
           <label className="mb-1.5 block text-[rgba(255,255,255,0.8)]">Makkah Nights</label>
-          <input
+          <Input
             type="number"
             min="0"
             value={formData.nightsMakkah}
@@ -110,12 +122,12 @@ export function OfferForm({ request, onSuccess }: OfferFormProps) {
               const val = parseInt(e.target.value) || 0;
               setFormData({ ...formData, nightsMakkah: val, totalNights: val + (formData.nightsMadinah || 0) });
             }}
-            className="w-full rounded border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] px-3 py-2 focus:border-[#FFD31D] focus:outline-none"
+            className="w-full"
           />
         </div>
         <div>
           <label className="mb-1.5 block text-[rgba(255,255,255,0.8)]">Madinah Nights</label>
-          <input
+          <Input
             type="number"
             min="0"
             value={formData.nightsMadinah}
@@ -123,50 +135,51 @@ export function OfferForm({ request, onSuccess }: OfferFormProps) {
               const val = parseInt(e.target.value) || 0;
               setFormData({ ...formData, nightsMadinah: val, totalNights: (formData.nightsMakkah || 0) + val });
             }}
-            className="w-full rounded border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] px-3 py-2 focus:border-[#FFD31D] focus:outline-none"
+            className="w-full"
           />
         </div>
         <div>
           <label className="mb-1.5 block text-[rgba(255,255,255,0.8)]">Total Nights</label>
-          <input
+          <Input
             type="number"
             readOnly
             value={formData.totalNights}
-            className="w-full rounded border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] px-3 py-2 opacity-50"
+            className="w-full opacity-50"
           />
         </div>
       </div>
       
       <div>
         <label className="mb-1.5 block text-[rgba(255,255,255,0.8)]">Distance to Haram</label>
-        <input
+        <Input
            type="text"
            value={formData.distanceToHaram || ''}
            onChange={(e) => setFormData({ ...formData, distanceToHaram: e.target.value })}
            placeholder="e.g. 500m or Shuttle"
-           className="w-full rounded border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] px-3 py-2 focus:border-[#FFD31D] focus:outline-none"
+           className="w-full"
         />
       </div>
 
       <div>
         <label className="mb-1.5 block text-[rgba(255,255,255,0.8)]">Notes / Description</label>
-        <textarea
+        <Textarea
           rows={3}
           value={formData.notes || ''}
           onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-          className="w-full rounded border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] px-3 py-2 focus:border-[#FFD31D] focus:outline-none"
+          className="w-full"
           placeholder="Describe hotel names, airline, etc."
         />
       </div>
 
       <div className="flex justify-end pt-4">
-        <button
+        <Button
           type="submit"
           disabled={loading}
-          className="rounded-lg bg-[#FFD31D] px-6 py-2.5 text-sm font-medium text-[#000000] hover:bg-[#E5BD1A] disabled:opacity-50"
+          className="px-6"
+          loading={loading}
         >
-          {loading ? 'Sending...' : 'Send Offer'}
-        </button>
+          Send Offer
+        </Button>
       </div>
     </form>
   );

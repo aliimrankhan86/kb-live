@@ -186,7 +186,7 @@ export function RequestDetail({ id }: { id: string }) {
       {/* Temporary Link to Operator Dashboard for Demo */}
       <div className="mt-12 border-t border-[rgba(255,255,255,0.1)] pt-8 text-center">
         <p className="text-sm text-[rgba(255,255,255,0.4)]">Demo Navigation</p>
-        <Link href="/operator/dashboard" className="mt-2 inline-block rounded text-[#FFD31D] underline hover:text-[#E5BD1A]">
+        <Link href="/operator/dashboard" scroll={false} className="mt-2 inline-block rounded text-[#FFD31D] underline hover:text-[#E5BD1A]">
           Go to Operator Dashboard (Simulate Response)
         </Link>
       </div>

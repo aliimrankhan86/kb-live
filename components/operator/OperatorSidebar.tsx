@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import { Button } from '@/components/ui';
 
 type NavItem = {
   label: string;
@@ -28,23 +29,25 @@ export function OperatorSidebar() {
 
   return (
     <>
-      <button
+      <Button
         type="button"
         className="mb-3 inline-flex min-h-11 items-center rounded-md border border-[rgba(255,255,255,0.15)] bg-[#111111] px-3 py-2 text-sm font-medium text-[#FFFFFF] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFD31D] md:hidden"
         aria-expanded={mobileOpen}
         aria-controls="operator-sidebar-panel"
         onClick={() => setMobileOpen((prev) => !prev)}
         data-testid="operator-sidebar-toggle"
+        variant="secondary"
       >
         {mobileOpen ? 'Close menu' : 'Menu'}
-      </button>
+      </Button>
 
       {mobileOpen ? (
-        <button
+        <Button
           type="button"
           className="fixed inset-0 z-30 bg-black/50 md:hidden"
           onClick={() => setMobileOpen(false)}
           aria-label="Dismiss operator menu overlay"
+          variant="ghost"
         />
       ) : null}
 
@@ -57,14 +60,15 @@ export function OperatorSidebar() {
         aria-label="Operator navigation"
       >
         <div className="mb-6">
-          <button
+          <Button
             type="button"
             onClick={() => setMobileOpen(false)}
             className="mb-4 inline-flex min-h-11 items-center rounded-md border border-[rgba(255,255,255,0.15)] px-3 py-2 text-sm font-medium text-[#FFFFFF] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFD31D] md:hidden"
             aria-label="Close operator menu"
+            variant="secondary"
           >
             Close menu
-          </button>
+          </Button>
           <p className="text-xs uppercase tracking-wide text-[rgba(255,255,255,0.64)]">KaabaTrip</p>
           <h2 className="text-xl font-semibold text-[#FFFFFF]">Operator</h2>
         </div>
@@ -90,6 +94,7 @@ export function OperatorSidebar() {
               <Link
                 key={item.href}
                 href={item.href}
+                scroll={false}
                 onClick={() => setMobileOpen(false)}
                 className={`${navItemClasses} ${
                   active

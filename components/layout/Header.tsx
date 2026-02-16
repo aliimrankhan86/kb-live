@@ -17,6 +17,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
         {/* Logo and Brand */}
         <Link 
           href="/" 
+          scroll={false}
           className={styles.header__brand}
           aria-label="KaabaTrip - Go to homepage"
         >
@@ -38,24 +39,28 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
         >
           <Link 
             href="/quote" 
+            scroll={false}
             className={styles.header__navLink}
           >
             Get a Quote
           </Link>
           <Link 
             href="/operator/dashboard" 
+            scroll={false}
             className={styles.header__navLink}
           >
             Operator Dashboard
           </Link>
           <Link 
             href="/kanban" 
+            scroll={false}
             className={styles.header__navLink}
           >
             Kanban
           </Link>
           <Link 
             href="/login" 
+            scroll={false}
             className={styles.header__navLink}
           >
             Login

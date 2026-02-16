@@ -25,7 +25,7 @@ export function PackageDetail({ pkg }: PackageDetailProps) {
   return (
     <section data-testid="package-detail-page" className="w-full max-w-5xl mx-auto px-4 py-10">
       <nav className="text-sm text-[var(--textMuted)] mb-6">
-        <Link href="/packages" className="hover:underline">
+        <Link href="/packages" scroll={false} className="hover:underline">
           Back to packages
         </Link>
       </nav>
@@ -119,6 +119,7 @@ export function PackageDetail({ pkg }: PackageDetailProps) {
       <div className="mt-6">
         <Link
           href={createQuotePrefillUrl(pkg)}
+          scroll={false}
           data-testid="package-cta-request-quote"
           className="inline-flex items-center justify-center rounded bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
         >

@@ -4,6 +4,7 @@ export { Button } from '@/components/ui/Button';
 export { Input } from '@/components/ui/Input';
 export { Select } from '@/components/ui/Select';
 export { Slider } from '@/components/ui/Slider';
+export { Textarea } from '@/components/ui/Textarea';
 export { Alert } from '@/components/ui/Alert';
 export { Checkbox } from '@/components/ui/Checkbox';
 export { Radio } from '@/components/ui/Radio';

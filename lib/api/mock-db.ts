@@ -10,7 +10,7 @@ const STORAGE_KEYS = {
   OPERATORS: 'kb_operators',
 };
 
-const PACKAGES_SEED_VERSION = 3;
+const PACKAGES_SEED_VERSION = 4;
 
 const getStorage = <T>(key: string, defaultVal: T): T => {
   if (typeof window === 'undefined') return defaultVal;
@@ -282,6 +282,45 @@ const SEED_PACKAGES: Package[] = [
     notes: 'Premium 10-night package near Haram.',
     images: [
       'https://images.unsplash.com/photo-1580655653885-65763b2597d0?auto=format&fit=crop&w=1200&q=80',
+    ],
+  },
+  {
+    id: 'pkg6',
+    operatorId: 'op2',
+    title: 'Umrah 2026 - Premium Direct 12 Nights',
+    slug: 'umrah-2026-premium-direct-12-nights',
+    status: 'published',
+    pilgrimageType: 'umrah',
+    seasonLabel: 'Flexible',
+    priceType: 'exact',
+    pricePerPerson: 1650,
+    currency: 'GBP',
+    totalNights: 12,
+    nightsMakkah: 7,
+    nightsMadinah: 5,
+    hotelMakkahStars: 5,
+    hotelMadinahStars: 5,
+    hotelMakkahName: 'Jabal Omar Hyatt Regency',
+    hotelMadinahName: 'InterContinental Dar Al Iman',
+    distanceToHaramMakkahMetres: 140,
+    distanceToHaramMadinahMetres: 210,
+    distanceBandMakkah: 'near',
+    distanceBandMadinah: 'near',
+    airline: 'Saudia',
+    departureAirport: 'LHR',
+    flightType: 'direct',
+    depositAmount: 500,
+    paymentPlanAvailable: true,
+    cancellationPolicy: 'Full refund if cancelled 60+ days before departure. 40% refund between 30-59 days. Non-refundable within 30 days.',
+    highlights: ['Direct flights', '5-star hotels in both cities', 'Extended 12-night stay'],
+    groupType: 'private',
+    createdAt: '2026-01-12T09:00:00.000Z',
+    updatedAt: '2026-02-16T09:00:00.000Z',
+    roomOccupancyOptions: { single: true, double: true, triple: false, quad: false },
+    inclusions: { visa: true, flights: true, transfers: true, meals: true },
+    notes: 'Designed as a premium benchmark package for side-by-side comparison.',
+    images: [
+      'https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&w=1200&q=80',
     ],
   },
 ];

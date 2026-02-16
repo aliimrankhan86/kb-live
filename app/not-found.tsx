@@ -27,6 +27,7 @@ export default function NotFound() {
       </p>
       <Link
         href="/"
+        scroll={false}
         style={{
           background: '#FFD31D',
           color: '#0B0B0B',

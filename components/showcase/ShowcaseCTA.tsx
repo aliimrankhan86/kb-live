@@ -27,6 +27,7 @@ export const ShowcaseCTA: React.FC<ShowcaseCTAProps> = ({ className = '' }) => {
           <div className={styles.cta__buttons}>
             <Link 
               href="/hajj" 
+              scroll={false}
               className={styles.cta__button}
               aria-label="Explore Hajj packages"
             >
@@ -34,6 +35,7 @@ export const ShowcaseCTA: React.FC<ShowcaseCTAProps> = ({ className = '' }) => {
             </Link>
             <Link 
               href="/umrah" 
+              scroll={false}
               className={`${styles.cta__button} ${styles.cta__buttonSecondary}`}
               aria-label="Explore Umrah packages"
             >

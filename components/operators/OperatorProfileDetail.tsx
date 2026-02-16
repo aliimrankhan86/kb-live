@@ -65,6 +65,7 @@ export function OperatorProfileDetail({ operator, packages }: OperatorProfileDet
                 <h3 className="mt-2 text-lg font-semibold text-[var(--text)]">
                   <Link
                     href={`/packages/${pkg.slug}`}
+                    scroll={false}
                     data-testid={`operator-package-link-${pkg.slug}`}
                     className="hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
                   >

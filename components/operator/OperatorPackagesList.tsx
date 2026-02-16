@@ -1,6 +1,9 @@
 'use client';
 
 import { Package } from '@/lib/types';
+import { Button } from '@/components/ui';
+import { getRegionSettings } from '@/lib/i18n/region';
+import { formatMoney } from '@/lib/i18n/format';
 
 interface OperatorPackagesListProps {
   packages: Package[];
@@ -31,6 +34,7 @@ export function OperatorPackagesList({
   onDelete,
   onRetry,
 }: OperatorPackagesListProps) {
+  const regionSettings = getRegionSettings();
   const hasPackages = packages.length > 0;
 
   return (
@@ -43,36 +47,36 @@ export function OperatorPackagesList({
         <div className="py-10 text-center" role="alert">
           <p className="text-red-500">{error}</p>
           {onRetry ? (
-            <button
+            <Button
               type="button"
               onClick={onRetry}
-              className="mt-4 rounded bg-[#FFD31D] px-4 py-2 text-sm font-medium text-[#000000] hover:bg-[#E5BD1A]"
+              className="mt-4 px-4"
             >
               Retry
-            </button>
+            </Button>
           ) : null}
         </div>
       ) : !hasPackages ? (
         <div className="py-12 text-center text-[rgba(255,255,255,0.4)]" data-testid="operator-packages-empty">
           <p>No packages found. Create one to get started.</p>
-          <button
+          <Button
             type="button"
             onClick={onCreate}
-            className="mt-4 rounded bg-[#FFD31D] px-4 py-2 text-sm font-medium text-[#000000] hover:bg-[#E5BD1A]"
+            className="mt-4 px-4"
           >
             Create package
-          </button>
+          </Button>
         </div>
       ) : (
         <div className="space-y-4">
           <div className="flex justify-end">
-            <button
+            <Button
               type="button"
               onClick={onCreate}
-              className="rounded bg-[#FFD31D] px-4 py-2 text-sm font-medium text-[#000000] hover:bg-[#E5BD1A]"
+              className="px-4"
             >
               Create package
-            </button>
+            </Button>
           </div>
 
           <div className="overflow-x-auto">
@@ -99,7 +103,7 @@ export function OperatorPackagesList({
                     <td className="px-3 py-3 uppercase text-[rgba(255,255,255,0.7)]">{pkg.pilgrimageType}</td>
                     <td className="px-3 py-3 text-[rgba(255,255,255,0.7)]">{getSeasonOrDateWindow(pkg)}</td>
                     <td className="px-3 py-3 text-[#FFD31D]">
-                      {pkg.currency ?? 'GBP'} {pkg.pricePerPerson}
+                      {formatMoney(pkg.pricePerPerson, pkg.currency ?? 'GBP', regionSettings.locale)}
                       {pkg.priceType === 'from' ? ' (from)' : ''}
                     </td>
                     <td className="px-3 py-3 text-[rgba(255,255,255,0.7)]">
@@ -111,22 +115,26 @@ export function OperatorPackagesList({
                     <td className="px-3 py-3 text-[rgba(255,255,255,0.7)]">{pkg.status ?? 'Not set'}</td>
                     <td className="px-3 py-3">
                       <div className="flex flex-wrap gap-2">
-                        <button
+                        <Button
                           type="button"
                           onClick={() => onEdit(pkg.id)}
                           data-testid={`operator-package-edit-${pkg.id}`}
-                          className="rounded bg-[rgba(255,255,255,0.1)] px-3 py-1.5 text-sm text-[#FFFFFF] hover:bg-[rgba(255,255,255,0.2)]"
+                          variant="secondary"
+                          size="sm"
+                          className="px-3"
                         >
                           Edit
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           type="button"
                           onClick={() => onDelete(pkg.id)}
                           data-testid={`operator-package-delete-${pkg.id}`}
-                          className="rounded bg-red-500/10 px-3 py-1.5 text-sm text-red-500 hover:bg-red-500/20"
+                          variant="danger"
+                          size="sm"
+                          className="px-3"
                         >
                           Delete
-                        </button>
+                        </Button>
                       </div>
                     </td>
                   </tr>

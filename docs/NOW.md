@@ -16,14 +16,18 @@
 
 ## What changed this session
 
-- Locked design-system documentation as single source of truth:
-  - `docs/DESIGN_SYSTEM.md` now defines token/component locations, update workflow, and non-negotiable usage rules.
-  - Explicit rule added: no one-off control/overlay implementations when primitives exist.
-- Updated AI entry doc:
-  - `docs/README_AI.md` now includes: “Always use the design system components for UI controls and overlays.”
-- Added sanity-check routine in `docs/skills/DEV_ROUTINES.md`:
-  - viewport checks for `/showcase`, `/umrah`, `/search/packages`
-  - command checks: `npm run test`, `npx playwright test e2e/flow.spec.ts`, `npm run build`
+- Fixed overlay behavior at the design-system layer:
+  - `components/ui/Overlay.tsx` close icon is now pinned at top-right for all overlays (not pushed to bottom by content).
+- Unified overlay look-and-feel:
+  - `components/search/FilterOverlay.tsx` now uses shared `Dialog` + `OverlayContent` primitives instead of custom backdrop/modal mechanics.
+- Improved Umrah comparison demo data:
+  - added a 6th published Umrah package seed (`pkg6`) in `lib/api/mock-db.ts`
+  - bumped seed version to `4` so localStorage refreshes
+  - added a `Demo 3-way comparison` action in `components/search/PackageList.tsx` for quick visual validation.
+- Improved currency consistency in key UI:
+  - `components/search/PackageCard.tsx` now formats price via shared i18n money formatter.
+  - `lib/mock-packages.ts` now uses ISO currency code (`GBP`) instead of symbol literals.
+  - `components/operator/OfferForm.tsx` budget display now uses shared money formatting.
 
 ## What to build next
 

@@ -5,7 +5,16 @@ import type { Package } from '@/lib/types';
 import { PackagesBrowse } from '@/components/packages/PackagesBrowse';
 
 vi.mock('next/link', () => ({
-  default: ({ href, children, ...props }: { href: string; children: React.ReactNode }) => (
+  default: ({
+    href,
+    children,
+    scroll: _scroll,
+    ...props
+  }: {
+    href: string;
+    children: React.ReactNode;
+    scroll?: boolean;
+  }) => (
     <a href={href} {...props}>
       {children}
     </a>

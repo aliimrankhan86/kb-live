@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import styles from './umrah-search-form.module.css'
+import { Button, Input } from '@/components/ui'
 
 interface UmrahSearchFormProps {
   className?: string
@@ -166,15 +167,16 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
           </label>
           <div className={styles.searchForm__quickSelect}>
             {quickSelectOptions.map((option) => (
-              <button
+              <Button
                 key={option.id}
                 type="button"
                 onClick={() => handleQuickSelect(option.id, option.value)}
                 className={styles.searchForm__quickButton}
                 aria-label={`Select ${option.label}`}
+                variant="secondary"
               >
                 {option.label}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -234,24 +236,25 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
 
         <div className={styles.searchForm__section}>
           <label className={styles.searchForm__label}>Adults</label>
-          <input
+          <Input
             type="number"
             min={1}
             max={20}
             value={adults}
             onChange={(e) => setAdults(Math.max(1, parseInt(e.target.value, 10) || 1))}
-            className={styles.searchForm__input}
+            className=""
+            inputClassName={styles.searchForm__input}
             aria-label="Number of adults"
           />
         </div>
 
-        <button
+        <Button
           type="submit"
           className={styles.searchForm__searchButton}
           aria-label="Search for amazing Umrah packages"
         >
           Search For Amazing Packages
-        </button>
+        </Button>
 
         {/* Disclaimer */}
         <p className={styles.searchForm__disclaimer}>
