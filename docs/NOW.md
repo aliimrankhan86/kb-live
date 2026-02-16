@@ -4,38 +4,46 @@
 
 ## Branch & goal
 
-- **Branch:** `feature/design-system-complete`
-- **Goal:** Deliver a comprehensive design system foundation and a full component playground at `/showcase`.
+- **Branch:** `feature/quote-journey`
+- **Goal:** Trace and document the package detail to quote journey, then apply minimal UX consistency fixes without changing routes.
 
 ## What works (verified)
 
-- `/showcase` now provides live, interactive examples across typography, form controls, overlays, navigation, data display, and charts.
-- Shared primitives are centralized under `components/ui` and exported through `components/ui/index.ts`.
-- Public flow remains stable (`/`, `/umrah`, `/search/packages`) and shortlist/compare behavior is unchanged.
-- Verification complete: unit tests, flow E2E, catalogue E2E, and production build all pass.
+- Package detail to quote prefill flow is functioning end-to-end with query-based prefill.
+- `/quote` and `/requests/[id]` now use the shared header, so logo/navigation are consistent with the rest of the app.
+- Quote journey now exposes a clear "Back to previous page" action in wizard and request detail views.
+- Header now includes a design-system currency dropdown (`GBP`, `USD`, `EUR`) that updates displayed package rates client-side.
 
 ## What changed this session
 
-- Expanded design system primitives:
-  - Added `Alert`, `Badge`, `Card`, `ChartContainer` + `LineChart` + `BarChart`, `Pagination`, `Table`, `Checkbox`, `Radio`, `Switch`.
-  - Enhanced `Text`, `Heading`, `Button`, `Input`, `Select`, `Slider`, and canonical `Overlay` styling.
-  - Added `components/ui/index.ts` as the primitive export barrel.
-- Rebuilt `/showcase` using `DesignSystemPlayground`:
-  - Sidebar navigation with section grouping, active section highlighting, deep-link anchors, and search filter.
-  - Mobile component picker.
-  - Full state examples (default, focus sample, disabled, error, loading where relevant).
-- Fixed chart render key collision by making point keys unique (`label-index`).
-- Extended token usage and token docs to support the component system.
+- Traced the "Request quote" control source in `components/packages/PackageDetail.tsx` and prefill serializer in `lib/quote-prefill.ts`.
+- Confirmed `/quote` hydration behavior in `components/quote/QuoteRequestWizard.tsx`:
+  - Parses search params into a draft.
+  - Merges prefill into persisted zustand state (`quote-request-storage`).
+  - Clears URL params with `window.history.replaceState`.
+- Updated "Request quote" CTA to consume design-system button variants.
+- Added token aliases for legacy variables (`--primary`, `--panel`, `--border`, `--background`) to keep styles consistent.
+- Added shared header to quote pages and a back action in quote/request screens.
+- Standardized request summary budget formatting through the i18n money formatter.
+- Added persisted display-currency preference (`kb_display_currency`) and shared currency change event handling.
+- Standardized symbol display to avoid `GBP750`-style output in visible price cards and quote review budget sections.
+
+## Current journey (as implemented now)
+
+- User opens `/packages/umrah-2026-7-nights-value` and clicks **Request quote**.
+- CTA navigates to `/quote` with serialized prefill query params from the package.
+- Quote wizard reads and validates params, then merges them into the persisted quote draft.
+- Wizard removes query params from the URL after hydration (`/quote` stays clean).
+- On submit, a new request ID is generated, saved in MockDB, and user is redirected to `/requests/{id}`.
 
 ## What to build next
 
-Continue the execution queue from **Task 4: Operator registration form** in `docs/EXECUTION_QUEUE.md`.
+Create a small `ButtonLink` primitive in `components/ui` and migrate legacy link-style CTAs in public flow so all interactive controls are sourced from the design system.
 
 ## Commands to verify
 
 ```bash
 npm run test
 npx playwright test e2e/flow.spec.ts
-npx playwright test e2e/catalogue.spec.ts
 npm run build
 ```

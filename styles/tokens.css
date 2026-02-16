@@ -5,6 +5,10 @@
   --textMuted: rgba(255, 255, 255, 0.64);
   --yellow: #FFD31D;
   --surfaceDark: #111111;
+  --background: transparent;
+  --panel: rgba(17, 17, 17, 0.88);
+  --border: var(--borderSubtle);
+  --primary: var(--yellow);
   --focusRing: #FFD31D;
   --borderSubtle: rgba(255, 255, 255, 0.14);
   --borderStrong: rgba(255, 255, 255, 0.3);
