@@ -4,32 +4,30 @@
 
 ## Branch & goal
 
-- **Branch:** `main-v2-UI`
-- **Goal:** Webpack stability fix applied. Dev server is now permanently stable. Ready to continue execution queue (Task 3 next).
+- **Branch:** `feature/task-3-operator-layout`
+- **Goal:** Execute Task 3 from `docs/EXECUTION_QUEUE.md` with shared `/operator` layout + sidebar navigation.
 
 ## What works (verified)
 
-- **Build:** `npm run build` passes. 17 unit tests green.
-- **Dev server:** Starts clean in 1.1s. Zero webpack errors. All routes compile and return 200.
-- **Console:** Clean (no warnings).
-- **Webpack:** Memory cache in dev eliminates `__webpack_modules__[moduleId] is not a function` permanently.
+- **Pre-change baseline on `main-v2`:** `npm run test`, `npx playwright test e2e/flow.spec.ts`, `npx playwright test e2e/catalogue.spec.ts`, and `npm run build` all passed.
+- **Post-change verification on feature branch:** `npm run test`, `npx playwright test e2e/flow.spec.ts`, `npx playwright test e2e/catalogue.spec.ts`, `npm run build`, plus operator desktop/mobile smoke checks passed.
 
 ## What changed this session
 
-- **`next.config.ts`:** Added `webpack` config — `cache: { type: 'memory' }` for dev (prevents stale filesystem cache), `moduleIds: 'named'` + `chunkIds: 'named'` (stable IDs), `optimizePackageImports` for 8 heavy deps (reduces module count).
-- **`package.json`:** Updated `dev` script to auto-clear `.next/cache/webpack/` on every start. Updated `dev:clean`, `dev:reset`, `dev:turbo` for consistency.
-- **`docs/skills/DEV_ROUTINES.md`:** Rewritten with root cause explanation, command reference table, recovery table, and prevention rules.
+- **`app/operator/layout.tsx` (new):** Added shared `/operator/*` shell with desktop two-column layout (sidebar + content area) and consistent operator workspace header.
+- **`components/operator/OperatorSidebar.tsx` (new):** Added accessible sidebar with active-route highlighting, mobile menu toggle, disabled “Coming soon” future items, and operator status footer. Includes `data-testid="operator-sidebar"` and mobile toggle test id.
+- **`app/operator/dashboard/page.tsx`:** Removed page-level `<main>` wrapper to rely on shared operator layout.
+- **`app/operator/packages/page.tsx`:** Removed page-level `<main>` wrapper to rely on shared operator layout.
+- **`app/operator/analytics/page.tsx`:** Removed page-level `<main>` wrapper to rely on shared operator layout.
+- **`docs/EXECUTION_QUEUE.md`:** Marked Task 3 complete on `2026-02-15`.
 
 ## What to build next
 
-Start **Task 3: Operator layout with sidebar navigation** in `docs/EXECUTION_QUEUE.md`.
-
-Note: Tasks 1 and 2 were completed by Codex on a feature branch (`feature/task-2-update-mockdb-seed`). Merge that first, then continue with Task 3.
+Start **Task 4: Operator registration form** in `docs/EXECUTION_QUEUE.md`.
 
 ## Commands to verify
 
 ```bash
 npm run test         # Must pass
 npm run build        # Must pass
-npm run dev          # Should start clean, zero errors
 ```
