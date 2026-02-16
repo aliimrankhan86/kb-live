@@ -1,25 +1,55 @@
-import { forwardRef, type InputHTMLAttributes } from 'react';
+import { forwardRef, useId, type InputHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
+  helperText?: string;
+  errorMessage?: string;
   hasError?: boolean;
+  inputClassName?: string;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { className, hasError = false, ...props },
+  { className, label, helperText, errorMessage, hasError = false, inputClassName, id, ...props },
   ref
 ) {
+  const generatedId = useId();
+  const resolvedId = id ?? generatedId;
+  const hasStateError = hasError || Boolean(errorMessage);
+  const helperId = helperText ? `${resolvedId}-help` : undefined;
+  const errorId = hasStateError ? `${resolvedId}-error` : undefined;
+  const describedBy = [helperId, errorId].filter(Boolean).join(' ') || undefined;
+
   return (
-    <input
-      ref={ref}
-      className={cn(
-        'min-h-11 w-full rounded-md border bg-[var(--surfaceDark)] px-3 py-2 text-sm text-[var(--text)] placeholder:text-[var(--textMuted)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--yellow)] disabled:cursor-not-allowed disabled:opacity-50',
-        hasError
-          ? 'border-red-500 focus-visible:outline-red-500'
-          : 'border-[rgba(255,255,255,0.15)] hover:border-[rgba(255,255,255,0.3)]',
-        className
-      )}
-      {...props}
-    />
+    <div className={cn('space-y-1.5', className)}>
+      {label ? (
+        <label htmlFor={resolvedId} className="block text-sm font-medium text-[var(--text)]">
+          {label}
+        </label>
+      ) : null}
+      <input
+        ref={ref}
+        id={resolvedId}
+        aria-invalid={hasStateError || undefined}
+        aria-describedby={describedBy}
+        className={cn(
+          'min-h-11 w-full rounded-md border bg-[var(--surfaceDark)] px-3 py-2 text-sm text-[var(--text)] placeholder:text-[var(--textMuted)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+          hasStateError
+            ? 'border-[var(--danger)] focus-visible:outline-[var(--danger)]'
+            : 'border-[var(--borderSubtle)] hover:border-[var(--borderStrong)] focus-visible:outline-[var(--focusRing)]',
+          inputClassName
+        )}
+        {...props}
+      />
+      {errorMessage ? (
+        <p id={errorId} className="text-xs text-[var(--danger)]">
+          {errorMessage}
+        </p>
+      ) : helperText ? (
+        <p id={helperId} className="text-xs text-[var(--textMuted)]">
+          {helperText}
+        </p>
+      ) : null}
+    </div>
   );
 });

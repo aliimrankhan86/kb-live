@@ -4,35 +4,38 @@
 
 ## Branch & goal
 
-- **Branch:** `feature/design-system-foundation`
-- **Goal:** Add shared UI primitives and a styleguide surface so global look/feel updates can be applied consistently.
+- **Branch:** `feature/design-system-complete`
+- **Goal:** Deliver a comprehensive design system foundation and a full component playground at `/showcase`.
 
 ## What works (verified)
 
-- **UI primitives:** `Text`, `Heading`, `Button`, `Input`, and `Select` available under `components/ui`.
-- **Styleguide:** `/showcase` now renders primitive states for visual regression checks.
-- **Stability checks:** unit tests, flow E2E, catalogue E2E, and production build pass after design-system changes.
+- `/showcase` now provides live, interactive examples across typography, form controls, overlays, navigation, data display, and charts.
+- Shared primitives are centralized under `components/ui` and exported through `components/ui/index.ts`.
+- Public flow remains stable (`/`, `/umrah`, `/search/packages`) and shortlist/compare behavior is unchanged.
+- Verification complete: unit tests, flow E2E, catalogue E2E, and production build all pass.
 
 ## What changed this session
 
-- **`components/ui/Text.tsx`:** Added text primitive with size/tone API.
-- **`components/ui/Heading.tsx`:** Added heading primitive with level/size API.
-- **`components/ui/Button.tsx`:** Added button primitive with variants, sizes, loading, and disabled states.
-- **`components/ui/Input.tsx`:** Added input primitive with base and error styles.
-- **`components/ui/Select.tsx`:** Added select primitive with option abstraction and disabled state.
-- **`app/showcase/page.tsx`:** Reworked as design-system showcase with required state examples.
-- **`docs/DESIGN_SYSTEM.md`:** Added usage and extension rules for primitives.
-- **`docs/TOKENS.md`:** Added token catalog and naming/addition rules.
-- **`docs/EXECUTION_QUEUE.md`:** Added ad-hoc completion entry for design-system foundation.
+- Expanded design system primitives:
+  - Added `Alert`, `Badge`, `Card`, `ChartContainer` + `LineChart` + `BarChart`, `Pagination`, `Table`, `Checkbox`, `Radio`, `Switch`.
+  - Enhanced `Text`, `Heading`, `Button`, `Input`, `Select`, `Slider`, and canonical `Overlay` styling.
+  - Added `components/ui/index.ts` as the primitive export barrel.
+- Rebuilt `/showcase` using `DesignSystemPlayground`:
+  - Sidebar navigation with section grouping, active section highlighting, deep-link anchors, and search filter.
+  - Mobile component picker.
+  - Full state examples (default, focus sample, disabled, error, loading where relevant).
+- Fixed chart render key collision by making point keys unique (`label-index`).
+- Extended token usage and token docs to support the component system.
 
 ## What to build next
 
-Resume queue execution with **Task 4: Operator registration form** in `docs/EXECUTION_QUEUE.md`.
+Continue the execution queue from **Task 4: Operator registration form** in `docs/EXECUTION_QUEUE.md`.
 
 ## Commands to verify
 
 ```bash
-npm run test         # Must pass
-npm run build        # Must pass
-npm run dev          # Turbopack — should start in <1s, zero errors
+npm run test
+npx playwright test e2e/flow.spec.ts
+npx playwright test e2e/catalogue.spec.ts
+npm run build
 ```
