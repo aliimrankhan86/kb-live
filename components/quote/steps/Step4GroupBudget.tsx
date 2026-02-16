@@ -2,9 +2,12 @@
 
 import { useQuoteRequestStore } from '@/lib/store/quote-request';
 import { Slider } from '@/components/ui/Slider';
+import { getCurrencySymbol } from '@/lib/i18n/format';
 
 export function Step4GroupBudget() {
   const { draft, setDraft } = useQuoteRequestStore();
+  const budgetCurrency = draft.budgetRange?.currency || 'GBP';
+  const currencySymbol = getCurrencySymbol(budgetCurrency);
 
   const handleOccupancyChange = (type: 'single' | 'double' | 'triple' | 'quad', val: number) => {
     setDraft({
@@ -63,7 +66,7 @@ export function Step4GroupBudget() {
       <div>
         <h2 className="text-xl font-semibold text-[#FFFFFF]">Budget per Person</h2>
         <p className="mt-1 text-sm text-[rgba(255,255,255,0.64)]">
-          Adjust the range (GBP)
+          Adjust the range ({budgetCurrency})
         </p>
         <div className="mt-8 px-2">
           <Slider
@@ -74,7 +77,7 @@ export function Step4GroupBudget() {
             onValueChange={(vals) =>
               setDraft({
                 budgetRange: {
-                  currency: draft.budgetRange?.currency || 'GBP',
+                  currency: budgetCurrency,
                   min: vals[0],
                   max: vals[1],
                 },
@@ -82,8 +85,8 @@ export function Step4GroupBudget() {
             }
           />
           <div className="mt-4 flex justify-between text-sm text-[#FFD31D]">
-            <span>£{draft.budgetRange?.min || 1000}</span>
-            <span>£{draft.budgetRange?.max || 5000}</span>
+            <span>{currencySymbol}{draft.budgetRange?.min || 1000}</span>
+            <span>{currencySymbol}{draft.budgetRange?.max || 5000}</span>
           </div>
         </div>
       </div>

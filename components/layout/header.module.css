@@ -51,6 +51,17 @@
   gap: 2rem;
 }
 
+.header__currency {
+  min-width: 132px;
+}
+
+.header__currencySelect {
+  min-height: 40px;
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
+  font-size: 0.8125rem;
+}
+
 .header__navLink {
   color: var(--text);
   text-decoration: none;
@@ -89,6 +100,10 @@
     gap: 0.75rem;
   }
 
+  .header__currency {
+    min-width: 120px;
+  }
+
   .header__navLink {
     font-size: 0.875rem;
     padding: 0.5rem 0.75rem;
@@ -103,6 +118,10 @@
 
   .header__navigation {
     gap: 0.5rem;
+  }
+
+  .header__currency {
+    min-width: 108px;
   }
 
   .header__navLink {

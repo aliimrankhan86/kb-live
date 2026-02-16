@@ -6,7 +6,7 @@ import type { Package, OperatorProfile } from '@/lib/types'
 import { MockDB } from '@/lib/api/mock-db'
 import { mapPackageToComparison, handleComparisonSelection } from '@/lib/comparison'
 import { ComparisonTable } from '@/components/request/ComparisonTable'
-import { getRegionSettings } from '@/lib/i18n/region'
+import { CURRENCY_CHANGE_EVENT, getRegionSettings } from '@/lib/i18n/region'
 import { formatPriceForRegion } from '@/lib/i18n/format'
 import {
   Dialog,
@@ -39,6 +39,7 @@ export function PackagesBrowse({ packages, error }: PackagesBrowseProps) {
   const [operatorsById, setOperatorsById] = useState<Record<string, OperatorProfile>>({})
   const [showComparison, setShowComparison] = useState(false)
   const [compareMessage, setCompareMessage] = useState<string>('')
+  const [regionSettings, setRegionSettings] = useState(() => getRegionSettings())
 
   useEffect(() => {
     const ops = MockDB.getOperators()
@@ -74,7 +75,11 @@ export function PackagesBrowse({ packages, error }: PackagesBrowseProps) {
     }
   }, [shortlistLoaded, shortlistedPackages])
 
-  const regionSettings = useMemo(() => getRegionSettings(), [])
+  useEffect(() => {
+    const updateSettings = () => setRegionSettings(getRegionSettings())
+    window.addEventListener(CURRENCY_CHANGE_EVENT, updateSettings)
+    return () => window.removeEventListener(CURRENCY_CHANGE_EVENT, updateSettings)
+  }, [])
 
   const seasonOptions = useMemo(() => {
     const labels = packages

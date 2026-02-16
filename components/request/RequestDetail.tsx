@@ -4,19 +4,25 @@ import { useEffect, useState } from 'react';
 import { QuoteRequest, Offer, OperatorProfile } from '@/lib/types';
 import { MockDB } from '@/lib/api/mock-db';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   Dialog,
   OverlayContent,
   OverlayHeader,
   OverlayTitle,
 } from '@/components/ui/Overlay';
+import { Button } from '@/components/ui';
 import { ComparisonTable } from './ComparisonTable';
 import { handleOfferSelection } from '@/lib/comparison';
 import { Repository, RequestContext } from '@/lib/api/repository';
+import { formatMoney, getCurrencySymbol } from '@/lib/i18n/format';
+import { CURRENCY_CHANGE_EVENT, getRegionSettings } from '@/lib/i18n/region';
 
 const customerContext: RequestContext = { userId: 'cust1', role: 'customer' };
 
 export function RequestDetail({ id }: { id: string }) {
+  const router = useRouter();
+  const [regionSettings, setRegionSettings] = useState(() => getRegionSettings());
   const [request, setRequest] = useState<QuoteRequest | undefined>(undefined);
   const [offers, setOffers] = useState<Offer[]>([]);
   const [operators, setOperators] = useState<OperatorProfile[]>([]);
@@ -37,6 +43,12 @@ export function RequestDetail({ id }: { id: string }) {
     }
     setLoading(false);
   }, [id]);
+
+  useEffect(() => {
+    const updateSettings = () => setRegionSettings(getRegionSettings());
+    window.addEventListener(CURRENCY_CHANGE_EVENT, updateSettings);
+    return () => window.removeEventListener(CURRENCY_CHANGE_EVENT, updateSettings);
+  }, []);
 
   const handleBooking = (offer: Offer) => {
     try {
@@ -59,6 +71,19 @@ export function RequestDetail({ id }: { id: string }) {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
+      <div className="mb-3">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          data-testid="request-back-button"
+          onClick={() => router.back()}
+          className="px-0 text-[var(--textMuted)] hover:bg-transparent hover:text-[var(--text)]"
+        >
+          Back to previous page
+        </Button>
+      </div>
+
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-[#FFFFFF]">Quote Request #{request.id.slice(0, 8)}</h1>
         <span className={`rounded-full px-3 py-1 text-sm font-medium capitalize ${
@@ -85,7 +110,11 @@ export function RequestDetail({ id }: { id: string }) {
           </div>
           <div>
             <p className="text-[rgba(255,255,255,0.4)]">Budget</p>
-            <p>£{request.budgetRange?.min} - £{request.budgetRange?.max}</p>
+            <p>
+              {request.budgetRange
+                ? `${formatMoney(request.budgetRange.min, request.budgetRange.currency, regionSettings.locale)} - ${formatMoney(request.budgetRange.max, request.budgetRange.currency, regionSettings.locale)}`
+                : 'Not provided'}
+            </p>
           </div>
         </div>
       </div>
@@ -145,7 +174,7 @@ export function RequestDetail({ id }: { id: string }) {
                     )}
                   </div>
                   <div className="mb-4 text-2xl font-bold text-[#FFD31D]">
-                    {offer.currency} {offer.pricePerPerson}
+                    {getCurrencySymbol(offer.currency)}{offer.pricePerPerson}
                     <span className="text-sm font-normal text-[rgba(255,255,255,0.64)]">/person</span>
                   </div>
                   <div className="space-y-2 text-sm text-[rgba(255,255,255,0.64)]">

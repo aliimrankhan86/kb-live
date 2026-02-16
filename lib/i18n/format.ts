@@ -7,6 +7,31 @@ const GBP_RATES: Record<string, number> = {
   AED: 4.67,
 }
 
+const CURRENCY_SYMBOL_TO_CODE: Record<string, string> = {
+  '£': 'GBP',
+  '$': 'USD',
+  '€': 'EUR',
+}
+
+const CURRENCY_CODE_TO_SYMBOL: Record<string, string> = {
+  GBP: '£',
+  USD: '$',
+  EUR: '€',
+}
+
+export const normalizeCurrencyCode = (currency: string) => {
+  const trimmed = `${currency ?? ''}`.trim()
+  if (!trimmed) return 'GBP'
+  const fromSymbol = CURRENCY_SYMBOL_TO_CODE[trimmed]
+  if (fromSymbol) return fromSymbol
+  return trimmed.toUpperCase()
+}
+
+export const getCurrencySymbol = (currency: string) => {
+  const code = normalizeCurrencyCode(currency)
+  return CURRENCY_CODE_TO_SYMBOL[code] ?? code
+}
+
 export const formatMoney = (
   amount: number,
   currency: string,
@@ -14,25 +39,28 @@ export const formatMoney = (
   maximumFractionDigits = 0
 ) => {
   if (!Number.isFinite(amount)) return 'Not provided'
+  const code = normalizeCurrencyCode(currency)
   try {
     return new Intl.NumberFormat(locale, {
       style: 'currency',
-      currency,
+      currency: code,
       maximumFractionDigits,
     }).format(amount)
   } catch {
-    return `${currency} ${amount}`
+    return `${getCurrencySymbol(code)}${amount}`
   }
 }
 
 export const convertCurrency = (amount: number, fromCurrency: string, toCurrency: string) => {
   if (!Number.isFinite(amount)) return null
-  if (fromCurrency === toCurrency) return amount
-  if (fromCurrency === 'GBP' && GBP_RATES[toCurrency]) {
-    return amount * GBP_RATES[toCurrency]
+  const fromCode = normalizeCurrencyCode(fromCurrency)
+  const toCode = normalizeCurrencyCode(toCurrency)
+  if (fromCode === toCode) return amount
+  if (fromCode === 'GBP' && GBP_RATES[toCode]) {
+    return amount * GBP_RATES[toCode]
   }
-  if (toCurrency === 'GBP' && GBP_RATES[fromCurrency]) {
-    return amount / GBP_RATES[fromCurrency]
+  if (toCode === 'GBP' && GBP_RATES[fromCode]) {
+    return amount / GBP_RATES[fromCode]
   }
   return null
 }
@@ -42,9 +70,11 @@ export const formatPriceForRegion = (
   currency: string,
   settings: RegionSettings
 ) => {
-  const converted = convertCurrency(amount, currency, settings.currency)
+  const normalizedCurrency = normalizeCurrencyCode(currency)
+  const normalizedTargetCurrency = normalizeCurrencyCode(settings.currency)
+  const converted = convertCurrency(amount, normalizedCurrency, normalizedTargetCurrency)
   const displayAmount = converted ?? amount
-  const displayCurrency = converted ? settings.currency : currency
+  const displayCurrency = converted ? normalizedTargetCurrency : normalizedCurrency
   return {
     amount: displayAmount,
     currency: displayCurrency,
