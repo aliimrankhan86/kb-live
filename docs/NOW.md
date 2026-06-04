@@ -16,6 +16,16 @@
 - BookingIntent creation now issues a unique immutable reference code.
 - Request detail payment handoff now supports image/PDF evidence metadata, optional text fields, and explicit skip-proof acknowledgement.
 
+## Shipped
+
+### `c8c1774` - BookingIntent reference and payment evidence
+
+- BookingIntent creation issues `KT-...` reference codes, with uniqueness and immutability enforced in the MockDB/Repository path.
+- Payment evidence is MVP metadata-only for image/PDF selections and optional text; file bytes are not stored.
+- Skipping proof requires explicit acknowledgement and records `skipProofAcknowledged` plus `proofSkippedAt`.
+- Payment handoff remains pay-operator-direct only: KaabaTrip does not collect, hold, or transfer customer funds.
+- Remaining MVP limit: operator 48h payment confirmation and evidence review surfaces are not yet enforced in UI/repository.
+
 ## What changed this session
 
 - Traced the "Request quote" control source in `components/packages/PackageDetail.tsx` and prefill serializer in `lib/quote-prefill.ts`.
@@ -45,9 +55,14 @@
 - On submit, a new request ID is generated, saved in MockDB, and user is redirected to `/requests/{id}`.
 - On request detail, a customer proceeds direct with the operator, uploads payment evidence metadata or explicitly skips proof, and receives an immutable BookingIntent reference code.
 
-## What to build next
+## Next step
 
-Add operator/admin surfaces for reviewing BookingIntent evidence metadata through the existing Repository RBAC path.
+Recommended next micro-task: Verified onboarding bank-details change-control + eligibility gating.
+
+- Capture bank details only inside controlled operator onboarding.
+- Block high-intent routing until required onboarding/eligibility checks are satisfied.
+- Bank-detail changes should require a change request, cooling period, audit log, and manual review.
+- Keep this as a planned micro-task; no code was changed in this docs-only update.
 
 ## Commands to verify
 

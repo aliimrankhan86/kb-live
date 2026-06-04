@@ -46,11 +46,13 @@ Goal: onboard supply easily while giving customers clarity and confidence.
 - Catalogue-lite Packages and public pages
 - Mixed comparison (Offers + Packages)
 - BookingIntent tracking only (no payments)
+- BookingIntent reference codes and pay-operator-direct evidence metadata
 - SEO-lite: curated pages, package detail pages, sitemap, canonical/noindex rules
 
 ### Out of scope (for now)
 
 - Payment gateway integration
+- KaabaTrip-held customer funds, escrow, chargebacks, merchant-of-record checkout, or KaabaTrip invoices
 - Scraping competitor sites
 - Automated WhatsApp/phone follow-ups
 - Self-serve onboarding with verification unless explicitly added
@@ -62,6 +64,25 @@ Goal: onboard supply easily while giving customers clarity and confidence.
 - If data is missing, show "Not provided" (never guess).
 - Notes are plain text (no HTML).
 - Price must declare type (exact vs from) and currency.
+
+## BookingIntent and payment evidence policy
+
+- BookingIntent is a pay-operator-direct intent record, not a KaabaTrip payment or booking confirmation.
+- `BookingIntent.referenceCode` is generated as `KT-...`, unique, and immutable once issued.
+- Payment evidence accepts image/PDF metadata plus optional text. MVP storage is metadata-only; file bytes are not stored.
+- If proof is skipped, `skipProofAcknowledged` is required and `proofSkippedAt` is recorded.
+- BookingIntent and evidence metadata are visible only to the customer, the involved operator, and admin.
+- Operator payment confirmation within 48h is required product behaviour, but UI/repository enforcement is not shipped yet.
+
+### Payment handoff copy
+
+Pay-operator-direct disclosure:
+
+> You pay the operator directly. KaabaTrip does not collect, hold, or transfer customer funds. The operator is the contracting party and is responsible for package fulfilment, payment records, and any payment outcome.
+
+Skip-proof acknowledgement must include:
+
+> KaabaTrip does not have access to the operator’s payment records… ability to help evidence payment may be limited… This does not remove legal rights…
 
 ## Geography and currency
 
@@ -77,6 +98,7 @@ Goal: onboard supply easily while giving customers clarity and confidence.
 
 - Marketplace and enquiry system until payments are implemented.
 - No guarantees. Final confirmation is with the operator.
+- Operators are the contracting party. KaabaTrip does not hold customer funds.
 
 ## Naming
 

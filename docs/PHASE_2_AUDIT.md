@@ -17,7 +17,7 @@ This file is the evidence log for Phase 2 work. Every completed micro-task must 
 
 ### YYYY-MM-DD - <Task title>
 
-**Goal:**  
+**Goal:**
 <one sentence>
 
 **User story (if applicable):**  
@@ -615,3 +615,49 @@ Resolve build-time ESLint warnings without changing behavior.
 ### Follow-ups (hygiene)
 
 - Consider seeding a second published package for stronger compare E2E coverage, or keep conditional compare.
+
+---
+
+## 2026-06-04 - BookingIntent Reference + Payment Evidence Flow (`c8c1774`)
+
+**Goal:** Add immutable BookingIntent reference codes, pay-operator-direct payment evidence metadata, and mandatory skip-proof acknowledgement.
+
+**Acceptance criteria:**
+
+- [x] BookingIntent created with unique immutable `referenceCode`.
+- [x] Evidence upload accepts image/PDF metadata and optional text fields.
+- [x] Skip proof requires explicit acknowledgement before continuing.
+- [x] BookingIntent/evidence visibility is restricted to customer, involved operator, and admin through Repository RBAC.
+- [x] Stable `data-testid` hooks added for reference code, upload control, skip checkbox, and submit.
+
+**Result:** PASS
+
+**Files changed:**
+
+- `components/request/RequestDetail.tsx`
+- `lib/types.ts`
+- `lib/api/repository.ts`
+- `lib/api/mock-db.ts`
+- `e2e/flow.spec.ts`
+- `docs/NOW.md`
+- `docs/PRODUCT.md`
+- `docs/ARCHITECTURE.md`
+- `docs/SECURITY.md`
+
+**Commands run (with results):**
+
+- `npm run test` -> PASS
+- `npm run build` -> PASS
+- `npx playwright test e2e/flow.spec.ts` -> PASS (3 browsers)
+- `npx playwright test e2e/catalogue.spec.ts` -> PASS (3 browsers)
+
+**Notes / Decisions:**
+
+- MVP remains pay-operator-direct only. KaabaTrip stores no customer funds.
+- Payment evidence storage is metadata-only in MockDB; no file bytes are stored.
+- Operator 48h payment confirmation remains a product requirement but is not yet enforced in UI/repository.
+
+**Risks / Tech debt introduced:**
+
+- Evidence review surfaces for operator/admin are still needed.
+- Bank-detail change-control and eligibility gating are still needed before higher-intent routing.

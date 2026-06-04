@@ -13,11 +13,14 @@
 Any change to code, UX, tests, or workflow must include a docs update per this index.  
 If a task changes behaviour and docs are not updated, the task is not complete.
 
+AI agents must read `docs/AI_HANDOFF.md` before any KaabaTrip product or implementation work. It is the token-optimised constraint digest; `docs/00_PRODUCT_CANON.md` remains the behavioural policy canon.
+
 ## Canonical docs
 
 | File                 | Purpose                                             | Owner                 | Update triggers                                                              |
 | -------------------- | --------------------------------------------------- | --------------------- | ---------------------------------------------------------------------------- |
 | 00_PRODUCT_CANON.md  | Product truth: goals, scope, non-goals, policies    | Ali + Tuffy Architect | Any scope change, pricing policy, onboarding policy, legal stance, geography |
+| AI_HANDOFF.md        | Required AI constraint digest for all product work  | Ali + Tuffy Architect | Any binding constraint change or shipped behaviour that affects AI decisions |
 | 00_AGENT_HANDOVER.md | How any agent must work, including doc update rules | Tuffy Architect       | Any workflow/tooling change, Definition of Done, checks, model routing       |
 | ARCHITECTURE.md      | System design, domain entities, repo boundaries     | Tuffy Architect       | Any change to types, repo pattern, storage, auth/RBAC                        |
 | SECURITY.md          | Threat model, RBAC rules, data handling             | Tuffy Architect       | Any data model change, auth/RBAC change, new endpoints, new storage          |
@@ -42,3 +45,4 @@ These files are intentionally lightweight pointers. Update the canonical doc ins
 - `docs/05_SECURITY.md` → `docs/SECURITY.md`
 - `docs/06_ACCESSIBILITY.md` → `docs/ACCESSIBILITY.md`
 - `docs/07_QA.md` → `QA.md` (repo root)
+- `docs/PRODUCT.md` → `docs/00_PRODUCT_CANON.md`
