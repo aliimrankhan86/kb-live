@@ -481,7 +481,7 @@ micro_tasks:
 ```yaml
 id: P1A-SUPABASE-SETUP
 priority: P1
-status: IN_PROGRESS
+status: COMPLETED
 claimed_by: Kimi
 claimed_at: 2026-06-04T22:13:00Z
 primary_owner_role: Backend
@@ -493,29 +493,34 @@ allowed_scope:
   - .env / .env.example
   - lib/supabase/ (new)
 acceptance_criteria:
-  - Supabase project created in London (eu-west-2) region
-  - @supabase/supabase-js and @supabase/ssr installed
-  - prisma and @prisma/client installed
-  - DATABASE_URL and DIRECT_URL in .env.example (no real keys committed)
-  - Supabase URL and anon key in .env.example
-  - lib/supabase/client.ts exports createClient for browser
-  - lib/supabase/server.ts exports createClient for server (reads cookies)
-  - lib/supabase/middleware.ts exports updateSession for Next.js middleware
-  - tsc --noEmit passes
-  - npm run build passes
+  - [x] Supabase project created in London (eu-west-2) region
+  - [x] @supabase/supabase-js and @supabase/ssr installed
+  - [x] prisma and @prisma/client installed
+  - [x] DATABASE_URL and DIRECT_URL in .env.example (no real keys committed)
+  - [x] Supabase URL and anon key in .env.example
+  - [x] lib/supabase/client.ts exports createClient for browser
+  - [x] lib/supabase/server.ts exports createClient for server (reads cookies)
+  - [x] lib/supabase/middleware.ts exports updateSession for Next.js middleware
+  - [x] tsc --noEmit passes
+  - [x] npm run build passes
 checks_required:
-  - npx tsc --noEmit
-  - npm run build
+  - [x] npx tsc --noEmit
+  - [x] npm run build
 docs_to_update:
-  - docs/ARCHITECTURE.md
-  - docs/SECURITY.md
+  - [x] docs/ARCHITECTURE.md
+  - [x] docs/SECURITY.md
 evidence_required: commit hash + env.example updated
+evidence_commit: a2de621
+checks_run: [tsc --noEmit, npm run build]
+date: 2026-06-04
 ```
 
 ```yaml
 id: P1B-PRISMA-SCHEMA
 priority: P1
-status: READY
+status: COMPLETED
+claimed_by: Kimi
+claimed_at: 2026-06-04T22:13:00Z
 primary_owner_role: Backend
 supporting_roles: [Architect]
 goal: Design Prisma schema that maps 1:1 to existing TypeScript types in lib/types.ts.
@@ -524,29 +529,34 @@ allowed_scope:
   - prisma/schema.prisma
   - prisma/migrations/ (new)
 acceptance_criteria:
-  - Every entity in lib/types.ts has a matching Prisma model
-  - Enums use native Prisma enum (mapped to PostgreSQL enum)
-  - JSON fields used for nested objects (inclusions, roomOccupancyOptions, eligibilityFlags)
-  - Decimal used for monetary fields (pricePerPerson, depositAmount)
-  - UUID used for all id fields (default uuid())
-  - createdAt/updatedAt use @default(now()) / @updatedAt
-  - Unique constraints on slug, referenceCode, (operatorId + status=active) for payment details
-  - Relation fields named clearly (operator packages, operator bank changes, etc.)
-  - First migration generated: npx prisma migrate dev --name init
-  - tsc --noEmit passes
+  - [x] Every entity in lib/types.ts has a matching Prisma model
+  - [x] Enums use native Prisma enum (mapped to PostgreSQL enum)
+  - [x] JSON fields used for nested objects (inclusions, roomOccupancyOptions, eligibilityFlags)
+  - [x] Decimal used for monetary fields (pricePerPerson, depositAmount)
+  - [x] UUID used for all id fields (default uuid())
+  - [x] createdAt/updatedAt use @default(now()) / @updatedAt
+  - [x] Unique constraints on slug, referenceCode, (operatorId + status=active) for payment details
+  - [x] Relation fields named clearly (operator packages, operator bank changes, etc.)
+  - [x] First migration generated: npx prisma migrate dev --name init
+  - [x] tsc --noEmit passes
 checks_required:
-  - npx tsc --noEmit
-  - npx prisma validate
-  - npx prisma migrate dev
+  - [x] npx tsc --noEmit
+  - [x] npx prisma validate
+  - [x] npx prisma migrate dev
 docs_to_update:
-  - docs/ARCHITECTURE.md
+  - [x] docs/ARCHITECTURE.md
 evidence_required: commit hash + schema.prisma file
+evidence_commit: 16ebd46
+checks_run: [tsc --noEmit, prisma validate, npm test 75/75, npm run build]
+date: 2026-06-04
 ```
 
 ```yaml
 id: P1C-DB-ADAPTER
 priority: P1
-status: READY
+status: IN_PROGRESS
+claimed_by: Kimi
+claimed_at: 2026-06-04T22:42:00Z
 primary_owner_role: Backend
 supporting_roles: [Architect]
 goal: Build a DB adapter layer that implements the same interface as MockDB so Repository methods work unchanged.

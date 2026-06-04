@@ -166,8 +166,6 @@ npm run build
 ## Last verified
 
 - `npx tsc --noEmit`: pass (0 errors)
-- `npm test`: 34/34 pass
-- `npm run build`: pass
 - `npm test`: 75/75 pass
 - `npm run build`: pass
 
@@ -212,9 +210,18 @@ npm run build
 
 **Checks:** `npx prisma validate` pass, `npx tsc --noEmit` pass (0 errors), `npm test` 75/75 pass, `npm run build` pass (0 errors)
 
+## P1C-DB-ADAPTER shipped
+
+- **Files:** `lib/api/db/prisma.ts`, `lib/api/db/adapter.ts`
+- Prisma singleton with global cache for dev to prevent connection exhaustion
+- Full `DBAdapter` with bidirectional type-safe mappers for all 10 entity types (User, OperatorProfile, PaymentDetails, BankChangeRequest, AuditLogEntry, QuoteRequest, Offer, BookingIntent, Package, Complaint)
+- Prisma schema fix: `OperatorProfile.id` = `User.id` (1:1 shared PK, no separate `userId`)
+- `pj()` helper for Prisma 7 strict JSON typing
+- Build: zero errors, 75/75 tests pass
+
 ## Next step
 
-Next micro-task: **P1C-PRISMA-CLIENT-SINGLETON** — create a type-safe PrismaClient singleton with connection pooling for server-side usage.
+Next micro-task: **P1D-AUTH-MIDDLEWARE** — replace Supabase SSR auth with real auth in `middleware.ts`. Implement role-based route guards for `/operator/*`, `/admin/*`. Create `app/api/auth/me` route.
 
 - `npx playwright test e2e/bank-payment.spec.ts`: 4/4 pass (chromium)
 - `npx playwright test e2e/flow.spec.ts e2e/catalogue.spec.ts e2e/bank-payment.spec.ts`: 18/18 pass (all browsers)

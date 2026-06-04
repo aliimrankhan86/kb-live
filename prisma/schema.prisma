@@ -143,8 +143,7 @@ model User {
 }
 
 model OperatorProfile {
-  id                        String             @id @default(uuid())
-  userId                    String             @unique @map("user_id")
+  id                        String             @id // Same as User.id
   companyName               String             @map("company_name")
   tradingName               String?            @map("trading_name")
   slug                      String?            @unique
@@ -173,7 +172,7 @@ model OperatorProfile {
   paymentSlaFlagged  Boolean @default(false) @map("payment_sla_flagged")
 
   // Relations
-  user               User                @relation(fields: [userId], references: [id])
+  user               User                @relation(fields: [id], references: [id])
   paymentDetails     PaymentDetails[]
   bankChangeRequests BankChangeRequest[]
   auditLogEntries    AuditLogEntry[]
