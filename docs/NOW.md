@@ -5,7 +5,7 @@
 ## Branch & goal
 
 - **Branch:** `main`
-- **Goal:** Add BookingIntent reference codes, pay-operator-direct payment evidence upload, and required skip-proof acknowledgement.
+- **Goal:** Implement Verified onboarding MT-1/MT-2: bank details data model, change-control repository methods, and eligibility gating.
 
 ## What works (verified)
 
@@ -15,6 +15,7 @@
 - Header now includes a design-system currency dropdown (`GBP`, `USD`, `EUR`) that updates displayed package rates client-side.
 - BookingIntent creation now issues a unique immutable reference code.
 - Request detail payment handoff now supports image/PDF evidence metadata, optional text fields, and explicit skip-proof acknowledgement.
+- Operator payment details now have MockDB storage keys, seeded active details for one verified operator, bank-change requests, audit logs, and repository-level eligibility checks.
 
 ## Shipped
 
@@ -28,23 +29,13 @@
 
 ## What changed this session
 
-- Traced the "Request quote" control source in `components/packages/PackageDetail.tsx` and prefill serializer in `lib/quote-prefill.ts`.
-- Confirmed `/quote` hydration behavior in `components/quote/QuoteRequestWizard.tsx`:
-  - Parses search params into a draft.
-  - Merges prefill into persisted zustand state (`quote-request-storage`).
-  - Clears URL params with `window.history.replaceState`.
-- Updated "Request quote" CTA to consume design-system button variants.
-- Added token aliases for legacy variables (`--primary`, `--panel`, `--border`, `--background`) to keep styles consistent.
-- Added shared header to quote pages and a back action in quote/request screens.
-- Standardized request summary budget formatting through the i18n money formatter.
-- Added persisted display-currency preference (`kb_display_currency`) and shared currency change event handling.
-- Standardized symbol display to avoid `GBP750`-style output in visible price cards and quote review budget sections.
-- Added BookingIntent `referenceCode`, `paymentEvidence`, `skipProofAcknowledged`, and `proofSkippedAt` fields.
-- Added repository validation that the selected offer belongs to the customer request and the involved operator before saving a BookingIntent.
-- Added payment evidence upload controls to `RequestDetail` with stable Playwright hooks for reference code, upload, skip proof, and submit.
-- Extended `e2e/flow.spec.ts` to verify skip-proof validation, acknowledgement, and issued reference code display.
-- Removed refund-promise wording from a seeded cancellation policy while preserving operator-policy context.
-- Documented pay-operator-direct disclosure wording and BookingIntent evidence RBAC in product, architecture, and security docs.
+- Added `OperatorProfile` tier and eligibility flags plus bank details, bank change request, audit log, and payment instruction types.
+- Added MockDB keys: `kb_payment_details`, `kb_bank_change_requests`, and `kb_audit_log`.
+- Seeded `op1` as a verified/bookable operator with active payment details; legacy operators normalise to `tier='listed'` and `canReceiveBookings=false`.
+- Added repository methods for initial payment-details capture, bookability checks, bank-change request create/approve/reject/cancel, payment instructions, audit-log reads, and lazy activation after cooling period.
+- Added BookingIntent eligibility gating so non-bookable operators cannot receive high-intent bookings.
+- Added unit tests for bank details/change-control and operator eligibility matrix.
+- Updated architecture, security, and QA docs for the new data model, RBAC, audit, and admin-review placeholders.
 
 ## Current journey (as implemented now)
 
@@ -53,20 +44,21 @@
 - Quote wizard reads and validates params, then merges them into the persisted quote draft.
 - Wizard removes query params from the URL after hydration (`/quote` stays clean).
 - On submit, a new request ID is generated, saved in MockDB, and user is redirected to `/requests/{id}`.
-- On request detail, a customer proceeds direct with the operator, uploads payment evidence metadata or explicitly skips proof, and receives an immutable BookingIntent reference code.
+- On request detail, a customer can proceed direct only with a bookable operator, uploads payment evidence metadata or explicitly skips proof, and receives an immutable BookingIntent reference code.
+- Payment instructions are repository-gated to the BookingIntent owner, involved operator, or admin and remain in-app only.
 
 ## Next step
 
-Recommended next micro-task: Verified onboarding bank-details change-control + eligibility gating.
+Recommended next micro-task: MT-3+ from the Verified onboarding spec, after review/merge of MT-1/MT-2.
 
-- Capture bank details only inside controlled operator onboarding.
-- Block high-intent routing until required onboarding/eligibility checks are satisfied.
-- Bank-detail changes should require a change request, cooling period, audit log, and manual review.
-- Keep this as a planned micro-task; no code was changed in this docs-only update.
+- Add operator/admin UI surfaces for onboarding bank capture and review queue.
+- Add real route/API rate limiting when moving repository methods behind API routes.
+- Keep public UI unchanged until the next scoped task.
 
 ## Commands to verify
 
 ```bash
+npx tsc --noEmit
 npm run test
 npx playwright test e2e/flow.spec.ts
 npx playwright test e2e/catalogue.spec.ts

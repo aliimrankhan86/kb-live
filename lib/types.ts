@@ -9,6 +9,15 @@ export interface User {
 
 export type VerificationStatus = 'pending' | 'verified' | 'rejected';
 
+export type OperatorTier = 'listed' | 'verified' | 'verified_plus';
+
+export interface OperatorEligibilityFlags {
+  canReceiveBookings: boolean;
+  bankDetailsActive: boolean;
+  onboardingComplete: boolean;
+  paymentSlaFlagged?: boolean;
+}
+
 export interface OperatorProfile {
   id: string; // linked to User.id
   companyName: string;
@@ -16,6 +25,9 @@ export interface OperatorProfile {
   slug?: string; // url-friendly
   companyRegistrationNumber?: string;
   verificationStatus: VerificationStatus;
+  verifiedAt?: string;
+  tier?: OperatorTier;
+  eligibilityFlags?: OperatorEligibilityFlags;
   atolNumber?: string;
   abtaMemberNumber?: string;
   contactEmail: string;
@@ -38,6 +50,92 @@ export interface OperatorProfile {
     logoUrl?: string;
     primaryColor?: string;
   };
+}
+
+export type PaymentDetailsStatus = 'active' | 'superseded' | 'disabled';
+
+export interface PaymentDetailsInput {
+  accountHolderName: string;
+  bankName: string;
+  sortCode: string;
+  accountNumber: string;
+  currency: string;
+  country: string;
+}
+
+export interface PaymentPhoneConfirmation {
+  confirmed: boolean;
+  phoneLastFour: string;
+}
+
+export interface PaymentDetails extends PaymentDetailsInput {
+  id: string;
+  operatorId: string;
+  status: PaymentDetailsStatus;
+  createdAt: string;
+  updatedAt: string;
+  activatedAt?: string;
+  supersededAt?: string;
+  createdByUserId: string;
+  phoneVerifiedAt: string;
+  phoneLastFour: string;
+}
+
+export type BankChangeRequestStatus = 'pending_review' | 'approved' | 'rejected' | 'cancelled' | 'activated';
+
+export interface BankChangeRequest {
+  id: string;
+  operatorId: string;
+  currentPaymentDetailsId?: string;
+  proposedDetails: PaymentDetailsInput;
+  status: BankChangeRequestStatus;
+  requestedByUserId: string;
+  requestedAt: string;
+  reason?: string;
+  reviewedByUserId?: string;
+  reviewedAt?: string;
+  reviewNotes?: string;
+  activationEligibleAt?: string;
+  activatedAt?: string;
+  cancelledByUserId?: string;
+  cancelledAt?: string;
+  phoneVerifiedAt: string;
+  phoneLastFour: string;
+}
+
+export type AuditLogAction =
+  | 'payment_details.created'
+  | 'bank_change.requested'
+  | 'bank_change.approved'
+  | 'bank_change.rejected'
+  | 'bank_change.cancelled'
+  | 'bank_change.activated';
+
+export interface AuditLogEntry {
+  id: string;
+  action: AuditLogAction;
+  actorUserId: string;
+  actorRole: UserRole;
+  operatorId: string;
+  targetType: 'payment_details' | 'bank_change_request';
+  targetId: string;
+  createdAt: string;
+  metadata?: Record<string, string | number | boolean | null>;
+}
+
+export interface PaymentInstructions {
+  bookingIntentId: string;
+  operatorId: string;
+  operatorName: string;
+  paymentDetailsId: string;
+  accountHolderName: string;
+  bankName: string;
+  sortCode: string;
+  accountNumber: string;
+  currency: string;
+  country: string;
+  disclosure: string;
+  delivery: 'in_app_only';
 }
 
 export type Season = 'ramadan' | 'hajj' | 'school-holidays' | 'flexible' | 'custom';

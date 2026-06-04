@@ -34,6 +34,21 @@ PUBLIC SIDE                      OPERATOR SIDE
 | `QuoteRequest` | Customer demand signal | id, customerId, type, season, budget, nights, inclusions |
 | `Offer` | Operator response to a request | id, requestId, operatorId, price, nights, inclusions |
 | `BookingIntent` | Pay-operator-direct signal of interest to proceed | id, immutable referenceCode, offerId, customerId, operatorId, status, paymentEvidence metadata, skipProofAcknowledged |
+| `PaymentDetails` | Operator direct-payment bank details captured in controlled onboarding | id, operatorId, account holder, bank name, sort code, account number, status, phoneVerifiedAt |
+| `BankChangeRequest` | Change-control record for bank-detail updates | id, operatorId, proposedDetails, status, reviewedByUserId, activationEligibleAt |
+| `AuditLogEntry` | Append-only sensitive action trail | id, action, actor, operatorId, target, createdAt, metadata |
+
+### Operator eligibility
+
+`OperatorProfile` includes `tier` (`listed`, `verified`, `verified_plus`) and `eligibilityFlags`.
+Existing/legacy operators default to `tier='listed'` and `eligibilityFlags.canReceiveBookings=false`.
+An operator is bookable only when all of these are true:
+
+- `verificationStatus === 'verified'`
+- `tier !== 'listed'`
+- `eligibilityFlags.canReceiveBookings === true`
+- `eligibilityFlags.bankDetailsActive === true`
+- One active `PaymentDetails` record exists
 
 ### RBAC matrix
 
@@ -47,6 +62,7 @@ PUBLIC SIDE                      OPERATOR SIDE
 ### Storage keys (localStorage)
 
 - `kb_requests`, `kb_offers`, `kb_bookings`, `kb_packages`
+- `kb_payment_details`, `kb_bank_change_requests`, `kb_audit_log`
 - `kb_packages_seed_version` (migration trigger)
 - `kb_shortlist_packages` (user's shortlisted IDs)
 - `kb_language` (user's language preference)
@@ -58,6 +74,16 @@ PUBLIC SIDE                      OPERATOR SIDE
 - Evidence upload accepts image/PDF metadata plus optional payer name, operator payment reference, and note. The current MockDB implementation stores metadata only, not file bytes.
 - If payment proof is skipped, `skipProofAcknowledged` is required and `proofSkippedAt` is recorded.
 - Repository access filters BookingIntent records by customer, involved operator, or admin.
+- `Repository.createBookingIntent` refuses non-bookable operators before issuing a BookingIntent.
+
+### Bank details and change control
+
+- `Repository.createPaymentDetails` captures initial operator payment details only for the owning operator and requires a phone-confirmation stub (`confirmed=true`, `phoneLastFour`).
+- Existing active details cannot be edited directly. Operators must use `Repository.createBankChangeRequest`.
+- `Repository.approveBankChangeRequest` and `Repository.rejectBankChangeRequest` are admin-only.
+- Approved bank changes enter a cooling period before activation. `Repository.isOperatorBookable` and `Repository.getPaymentInstructions` run lazy activation when the cooling period has elapsed.
+- `Repository.getPaymentInstructions` is scoped to a BookingIntent and returns bank details only to the owning customer, involved operator, or admin.
+- Audit log writes are created for initial capture, change request creation, approval, rejection, cancellation, and lazy activation.
 
 ## i18n layer
 

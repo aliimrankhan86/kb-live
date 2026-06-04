@@ -1,4 +1,14 @@
-import { QuoteRequest, Offer, OperatorProfile, User, BookingIntent, Package } from '@/lib/types';
+import {
+  AuditLogEntry,
+  BankChangeRequest,
+  BookingIntent,
+  Offer,
+  OperatorProfile,
+  Package,
+  PaymentDetails,
+  QuoteRequest,
+  User,
+} from '@/lib/types';
 
 const STORAGE_KEYS = {
   REQUESTS: 'kb_requests',
@@ -8,6 +18,9 @@ const STORAGE_KEYS = {
   PACKAGES_SEED_VERSION: 'kb_packages_seed_version',
   USERS: 'kb_users',
   OPERATORS: 'kb_operators',
+  PAYMENT_DETAILS: 'kb_payment_details',
+  BANK_CHANGE_REQUESTS: 'kb_bank_change_requests',
+  AUDIT_LOG: 'kb_audit_log',
 };
 
 const PACKAGES_SEED_VERSION = 3;
@@ -23,6 +36,22 @@ const setStorage = <T>(key: string, val: T) => {
   localStorage.setItem(key, JSON.stringify(val));
 };
 
+const listedEligibility = {
+  canReceiveBookings: false,
+  bankDetailsActive: false,
+  onboardingComplete: false,
+};
+
+const normalizeOperator = (operator: OperatorProfile): OperatorProfile => ({
+  ...operator,
+  tier: operator.tier ?? 'listed',
+  eligibilityFlags: {
+    ...listedEligibility,
+    ...operator.eligibilityFlags,
+    canReceiveBookings: operator.eligibilityFlags?.canReceiveBookings ?? false,
+  },
+});
+
 // Seed Data
 const SEED_OPERATORS: OperatorProfile[] = [
   {
@@ -32,6 +61,13 @@ const SEED_OPERATORS: OperatorProfile[] = [
     tradingName: 'Al-Hidayah',
     companyRegistrationNumber: '12345678',
     verificationStatus: 'verified',
+    verifiedAt: '2026-02-15T09:00:00.000Z',
+    tier: 'verified',
+    eligibilityFlags: {
+      canReceiveBookings: true,
+      bankDetailsActive: true,
+      onboardingComplete: true,
+    },
     atolNumber: '11234',
     abtaMemberNumber: 'Y1234',
     contactEmail: 'info@alhidayah.com',
@@ -61,6 +97,13 @@ const SEED_OPERATORS: OperatorProfile[] = [
     tradingName: 'Makkah Tours UK',
     companyRegistrationNumber: '87654321',
     verificationStatus: 'verified',
+    verifiedAt: '2026-02-15T09:00:00.000Z',
+    tier: 'listed',
+    eligibilityFlags: {
+      canReceiveBookings: false,
+      bankDetailsActive: false,
+      onboardingComplete: false,
+    },
     atolNumber: '54321',
     abtaMemberNumber: 'P6789',
     contactEmail: 'sales@makkahtours.com',
@@ -89,6 +132,26 @@ const SEED_OPERATORS: OperatorProfile[] = [
 const SEED_USERS: User[] = [
   { id: 'cust1', email: 'customer@example.com', role: 'customer', name: 'Ali Client' },
   { id: 'op1', email: 'operator@example.com', role: 'operator', name: 'Ahmed Operator' },
+];
+
+const SEED_PAYMENT_DETAILS: PaymentDetails[] = [
+  {
+    id: 'pay_op1_active',
+    operatorId: 'op1',
+    accountHolderName: 'Al-Hidayah Travel Ltd',
+    bankName: 'Example Business Bank',
+    sortCode: '20-00-00',
+    accountNumber: '12345678',
+    currency: 'GBP',
+    country: 'GB',
+    status: 'active',
+    createdAt: '2026-02-15T09:00:00.000Z',
+    updatedAt: '2026-02-15T09:00:00.000Z',
+    activatedAt: '2026-02-15T09:00:00.000Z',
+    createdByUserId: 'op1',
+    phoneVerifiedAt: '2026-02-15T09:00:00.000Z',
+    phoneLastFour: '4567',
+  },
 ];
 
 const SEED_PACKAGES: Package[] = [
@@ -397,13 +460,75 @@ export const MockDB = {
   getOperators: (): OperatorProfile[] => {
     const ops = getStorage<OperatorProfile[]>(STORAGE_KEYS.OPERATORS, []);
     if (ops.length === 0) {
-      setStorage(STORAGE_KEYS.OPERATORS, SEED_OPERATORS);
-      return SEED_OPERATORS;
+      setStorage(STORAGE_KEYS.OPERATORS, SEED_OPERATORS.map(normalizeOperator));
+      return SEED_OPERATORS.map(normalizeOperator);
     }
-    return ops;
+    const normalized = ops.map(normalizeOperator);
+    if (JSON.stringify(normalized) !== JSON.stringify(ops)) {
+      setStorage(STORAGE_KEYS.OPERATORS, normalized);
+    }
+    return normalized;
   },
   
   getOperatorById: (id: string) => MockDB.getOperators().find(o => o.id === id),
+
+  saveOperator: (operator: OperatorProfile) => {
+    const operators = MockDB.getOperators();
+    const normalized = normalizeOperator(operator);
+    const existingIndex = operators.findIndex((existing) => existing.id === normalized.id);
+    if (existingIndex >= 0) {
+      operators[existingIndex] = normalized;
+    } else {
+      operators.push(normalized);
+    }
+    setStorage(STORAGE_KEYS.OPERATORS, operators);
+    return normalized;
+  },
+
+  getPaymentDetails: (): PaymentDetails[] => {
+    const details = getStorage<PaymentDetails[]>(STORAGE_KEYS.PAYMENT_DETAILS, []);
+    if (details.length === 0) {
+      setStorage(STORAGE_KEYS.PAYMENT_DETAILS, SEED_PAYMENT_DETAILS);
+      return SEED_PAYMENT_DETAILS;
+    }
+    return details;
+  },
+
+  savePaymentDetails: (paymentDetails: PaymentDetails) => {
+    const allDetails = MockDB.getPaymentDetails();
+    const existingIndex = allDetails.findIndex((existing) => existing.id === paymentDetails.id);
+    if (existingIndex >= 0) {
+      allDetails[existingIndex] = paymentDetails;
+    } else {
+      allDetails.push(paymentDetails);
+    }
+    setStorage(STORAGE_KEYS.PAYMENT_DETAILS, allDetails);
+    return paymentDetails;
+  },
+
+  getBankChangeRequests: (): BankChangeRequest[] =>
+    getStorage<BankChangeRequest[]>(STORAGE_KEYS.BANK_CHANGE_REQUESTS, []),
+
+  saveBankChangeRequest: (request: BankChangeRequest) => {
+    const requests = MockDB.getBankChangeRequests();
+    const existingIndex = requests.findIndex((existing) => existing.id === request.id);
+    if (existingIndex >= 0) {
+      requests[existingIndex] = request;
+    } else {
+      requests.push(request);
+    }
+    setStorage(STORAGE_KEYS.BANK_CHANGE_REQUESTS, requests);
+    return request;
+  },
+
+  getAuditLog: (): AuditLogEntry[] => getStorage<AuditLogEntry[]>(STORAGE_KEYS.AUDIT_LOG, []),
+
+  saveAuditLogEntry: (entry: AuditLogEntry) => {
+    const entries = MockDB.getAuditLog();
+    entries.push(entry);
+    setStorage(STORAGE_KEYS.AUDIT_LOG, entries);
+    return entry;
+  },
 
   // For simulation
   currentUser: SEED_USERS[0], // Default to customer

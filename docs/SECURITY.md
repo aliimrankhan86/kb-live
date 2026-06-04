@@ -17,6 +17,11 @@ This document outlines the security architecture and assumptions for the KaabaTr
 - RBAC is enforced at the Data Access Layer (`lib/api/repository.ts`).
 - `MockDB` stores all data, but `Repository` filters it based on `RequestContext`.
 - BookingIntent payment evidence is returned only through the BookingIntent RBAC path: owning customer, involved operator, or admin.
+- Payment instructions are returned only through `Repository.getPaymentInstructions(ctx, bookingIntentId)`, scoped to the owning customer, involved operator, or admin.
+- Operators can create their own initial payment details and their own bank change requests only. They cannot approve, reject, or review bank changes.
+- Admin-only review methods are `approveBankChangeRequest`, `rejectBankChangeRequest`, and `getAuditLog`.
+- Bank details are never emailed. Repository responses mark payment instructions as `delivery: 'in_app_only'`.
+- Evidence uploads remain metadata-only; bank-change requests must not store evidence bytes.
 
 ## Input Validation
 
@@ -41,6 +46,11 @@ This document outlines the security architecture and assumptions for the KaabaTr
 - **Threat**: Evidence metadata is visible to an unrelated customer or operator.
 - **Mitigation**: `Repository.getBookingIntents` filters by `customerId` for customers and `operatorId` for operators. `Repository.createBookingIntent` verifies the selected offer belongs to a request owned by the customer and that the operator matches the offer before saving evidence metadata.
 
+### 2b. Bank Detail Leakage or Unauthorized Changes
+
+- **Threat**: A user views bank details without being part of a BookingIntent, or an operator changes payout details without review.
+- **Mitigation**: Payment instructions require BookingIntent-scoped RBAC. Active bank details are immutable through the repository; changes require `BankChangeRequest`, admin review, cooling period, lazy activation, and audit logging.
+
 ### 3. XSS (Cross-Site Scripting)
 
 - **Threat**: Malicious script in "Notes" field.
@@ -49,6 +59,14 @@ This document outlines the security architecture and assumptions for the KaabaTr
 ### 4. Rate Limiting (Stub)
 
 - **Plan**: Implement rate limiting on API routes (Next.js middleware or external gateway like Vercel/Cloudflare) to prevent spam quote requests.
+- **Current sensitive-action placeholders**: bank-detail capture, bank-change request creation, admin approval/rejection, and payment-instruction reads must be rate limited before moving from MockDB to real API routes.
+
+## Audit Log Rules
+
+- Audit logs are append-only through repository writes.
+- Audit log metadata must not contain full account numbers, full sort codes, evidence bytes, or emailed bank details.
+- Log required events: initial payment details capture, bank change requested, approved, rejected, cancelled, and activated.
+- Audit log reads are admin-only.
 
 ## Dependency Hygiene
 

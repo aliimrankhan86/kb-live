@@ -100,6 +100,22 @@
 - [ ] Run `npx playwright test e2e/flow.spec.ts`.
 - [ ] Verify all 3 browsers pass.
 
+## 11. Verified Onboarding Bank Details (MT-1/MT-2)
+
+- [ ] Confirm legacy operators without eligibility fields default to `tier='listed'` and cannot receive bookings.
+- [ ] Confirm the seeded verified operator has active payment details and can receive BookingIntents.
+- [ ] Confirm initial payment details require the operator owner and phone-confirmation stub (`confirmed=true`, `phoneLastFour`).
+- [ ] Confirm active payment details cannot be edited directly; changes must create a bank change request.
+- [ ] Confirm payment instructions are shown only in-app to the owning customer, involved operator, or admin.
+
+## 12. Admin Bank Review Placeholders
+
+- [ ] Confirm admin-only approval sets a cooling-period activation time.
+- [ ] Confirm approved bank changes do not activate before the cooling period.
+- [ ] Confirm lazy activation supersedes old active details after the cooling period.
+- [ ] Confirm rejection and cancellation do not activate proposed details.
+- [ ] Confirm audit log entries exist for create, request, approve, reject, cancel, and activate actions without full bank details in metadata.
+
 ## Phase 1 Regression Checklist (run before Phase 2 work)
 
 Automated
