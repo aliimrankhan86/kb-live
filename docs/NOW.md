@@ -231,9 +231,25 @@ npm run build
 - No localStorage tokens; httpOnly cookies only via Supabase SSR
 - Build: zero errors, 75/75 tests pass
 
+## Phase 1 Persistence Complete (P1A–P1G)
+
+All 7 micro-tasks shipped:
+
+| Task                | Status | Commit  |
+| :------------------ | :----- | :------ |
+| P1A Supabase Setup  | ✅     | (prior) |
+| P1B Prisma Schema   | ✅     | edfec3c |
+| P1C DB Adapter      | ✅     | edfec3c |
+| P1D Auth Middleware | ✅     | 2b52030 |
+| P1E RLS Policies    | ✅     | b652a40 |
+| P1F Storage Buckets | ✅     | d6931f0 |
+| P1G Seed Migration  | ✅     | 2b7c734 |
+
+**Next:** P1H-CUTOVER — remove MockDB fallback, default `FEATURE_USE_REAL_DB=true`, integration tests against real DB.
+
 ## Next step
 
-Next micro-task: **P1E-RLS-POLICIES** — implement deny-by-default Row Level Security on every table with role-based policies.
+Recommended next micro-task: **P1H-CUTOVER** — Remove MockDB fallback, run full test suite against Postgres, update docs.
 
 - `npx playwright test e2e/bank-payment.spec.ts`: 4/4 pass (chromium)
 - `npx playwright test e2e/flow.spec.ts e2e/catalogue.spec.ts e2e/bank-payment.spec.ts`: 18/18 pass (all browsers)
