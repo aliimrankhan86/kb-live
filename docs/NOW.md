@@ -219,9 +219,21 @@ npm run build
 - `pj()` helper for Prisma 7 strict JSON typing
 - Build: zero errors, 75/75 tests pass
 
+## P1D-AUTH-MIDDLEWARE shipped
+
+- **Files:** `lib/auth/session.ts`, `lib/auth/api.ts`, `middleware.ts`, `lib/supabase/middleware.ts`, `app/api/auth/*`
+- `lib/auth/session.ts` — `getSessionUser()` + `requireRole()` for Server Components/Actions
+- `lib/auth/api.ts` — `apiSignUp`, `apiSignIn`, `apiSignOut`, `apiGetUser` for Route Handlers
+- `middleware.ts` — role-based route guards: `/operator/*` requires operator/admin, `/admin/*` requires admin
+- `lib/supabase/middleware.ts` — returns `{ user, response }` with role extraction from user_metadata
+- API routes: `GET /api/auth/me`, `POST /api/auth/sign-in`, `POST /api/auth/sign-up`, `POST /api/auth/sign-out`
+- Public routes preserved: `/umrah`, `/packages`, `/search`, `/quote`, `/operators`, `/showcase`, etc.
+- No localStorage tokens; httpOnly cookies only via Supabase SSR
+- Build: zero errors, 75/75 tests pass
+
 ## Next step
 
-Next micro-task: **P1D-AUTH-MIDDLEWARE** — replace Supabase SSR auth with real auth in `middleware.ts`. Implement role-based route guards for `/operator/*`, `/admin/*`. Create `app/api/auth/me` route.
+Next micro-task: **P1E-RLS-POLICIES** — implement deny-by-default Row Level Security on every table with role-based policies.
 
 - `npx playwright test e2e/bank-payment.spec.ts`: 4/4 pass (chromium)
 - `npx playwright test e2e/flow.spec.ts e2e/catalogue.spec.ts e2e/bank-payment.spec.ts`: 18/18 pass (all browsers)
