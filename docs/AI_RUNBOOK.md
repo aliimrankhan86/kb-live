@@ -355,7 +355,7 @@ docs_to_update:
   - [x] docs/PHASE_2_AUDIT.md
   - [x] docs/NOW.md
 evidence_required: commit hash + QA.md entry + PHASE_2_AUDIT.md entry
-evidence_commit: P0-COMPLAINTS-FLOW
+evidence_commit: be14156
 checks_run: [tsc --noEmit, npm test 55/55, npm run build, playwright 6/6 chromium]
 phase_audit_entry: docs/PHASE_2_AUDIT.md
 docs_updated: [QA.md, docs/SECURITY.md, docs/PHASE_2_AUDIT.md, docs/NOW.md]
