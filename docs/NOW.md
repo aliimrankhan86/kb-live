@@ -19,6 +19,8 @@
 
 ## Shipped
 
+- MT-1/MT-2 verified bank details foundation is now audited in `docs/PHASE_2_AUDIT.md` for `a8eee55`.
+
 ### `c8c1774` - BookingIntent reference and payment evidence
 
 - BookingIntent creation issues `KT-...` reference codes, with uniqueness and immutability enforced in the MockDB/Repository path.

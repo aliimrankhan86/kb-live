@@ -661,3 +661,50 @@ Resolve build-time ESLint warnings without changing behavior.
 
 - Evidence review surfaces for operator/admin are still needed.
 - Bank-detail change-control and eligibility gating are still needed before higher-intent routing.
+
+---
+
+## 2026-06-04 - MT-1/MT-2: Verified bank details foundation + booking eligibility gating (a8eee55)
+
+**Goal:** Add the foundation for controlled operator bank-details capture, bank-change review, audit logging, and booking eligibility gating while keeping the MVP pay-operator-direct posture.
+
+**Acceptance criteria:**
+
+- [x] `OperatorProfile` supports tier and eligibility flags, with legacy/default operators treated as listed and unable to receive bookings.
+- [x] MockDB includes `kb_payment_details`, `kb_bank_change_requests`, and `kb_audit_log` storage keys.
+- [x] One verified mock operator is seeded with active payment details without breaking existing seed/version migration.
+- [x] Repository methods enforce RBAC for payment-details capture, bank-change requests, admin review, payment instructions, audit-log reads, and booking eligibility.
+- [x] BookingIntent creation is blocked for non-bookable operators.
+- [x] Unit tests cover bank-details change control and the operator bookability matrix.
+
+**Result:** PASS
+
+**Files changed:**
+
+- `lib/types.ts`
+- `lib/api/mock-db.ts`
+- `lib/api/repository.ts`
+- `tests/bank-details.test.ts`
+- `tests/operator-eligibility.test.ts`
+- `docs/ARCHITECTURE.md`
+- `docs/SECURITY.md`
+- `docs/NOW.md`
+- `QA.md`
+
+**Commands run (with results):**
+
+- `npx tsc --noEmit` → PASS
+  - Initial run hit pre-existing duplicate generated `.next/types/* 2.ts` and `.next/types/* 3.ts` files. These files were not touched. After `npm run build` regenerated Next types, `npx tsc --noEmit` passed.
+- `npm run test` → PASS (27 tests)
+- `npm run build` → PASS
+
+**Notes / Decisions:**
+
+- No public routes changed; this is repository/data-model foundation work only.
+- MVP remains pay-operator-direct only. KaabaTrip does not collect, hold, or transfer customer funds.
+- No guarantees language was added.
+- Payment instructions remain in-app only and are scoped through BookingIntent RBAC.
+
+**Follow-ups created:**
+
+- Next recommended micro-task: operator onboarding UI plus admin review gate for bank-detail changes.
