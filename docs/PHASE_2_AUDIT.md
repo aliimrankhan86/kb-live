@@ -138,6 +138,52 @@ Allow Playwright webServer to bind to localhost so e2e can run without EPERM.
 
 ---
 
+## 2026-06-04 - MT-7: Bank and Payment E2E Tests (`MT7-E2E-BANK-TESTS`)
+
+**Goal:** Add Playwright E2E coverage for operator bank onboarding, payment instructions gating, admin bank change review, and eligibility gating flows.
+
+**Acceptance criteria:**
+
+- [x] e2e/bank-payment.spec.ts created with 4 serial tests
+- [x] Test 1: operator submits bank change → admin approves → operator sees cooling period state
+- [x] Test 2: BookingIntent creation → payment instructions visible with all required data-testids
+- [x] Test 3: admin rejects with required reason (min 10 chars enforced)
+- [x] Test 4: operator cancels pending change request
+- [x] All tests pass on chromium
+- [x] No regressions on e2e/flow.spec.ts and e2e/catalogue.spec.ts
+- [x] All 18 Playwright tests pass across chromium/firefox/webkit
+
+**Result:** PASS
+
+**Files changed:**
+
+- `e2e/bank-payment.spec.ts` (new)
+
+**Commands run (with results):**
+
+- `npx tsc --noEmit` → PASS
+- `npm test` → PASS (34/34)
+- `npm run build` → PASS
+- `npx playwright test e2e/bank-payment.spec.ts --project=chromium` → PASS (4/4)
+- `npx playwright test e2e/flow.spec.ts e2e/catalogue.spec.ts e2e/bank-payment.spec.ts` → PASS (18/18 across all browsers)
+
+**Notes / Decisions:**
+
+- Tests run in serial mode to avoid localStorage state collisions.
+- Each test clears localStorage at start for deterministic seeded data.
+- Used getByTestId and getByRole with exact match for disambiguation.
+- Timeout increased to 60s for payment instructions test due to quote wizard navigation.
+
+**Risks / Tech debt introduced:**
+
+- None.
+
+**Follow-ups created:**
+
+- None.
+
+---
+
 ## 2026-02-02 - Micro-task 1a: Public Packages Browse (/packages) (initial)
 
 **Goal:**  

@@ -22,6 +22,7 @@
 
 ## Shipped
 
+- MT-7 bank and payment E2E coverage shipped. See `docs/AI_RUNBOOK.md` COMPLETED section for `DONE-E2E-BANK-TESTS`.
 - MT-8 cooling period lazy-activation + operator audit log view shipped. See `docs/AI_RUNBOOK.md` COMPLETED section for `DONE-COOLING-AUDIT-LOG`.
 - MT-4 admin bank change review UI shipped. See `docs/AI_RUNBOOK.md` COMPLETED section for `DONE-ADMIN-BANK-REVIEW`.
 
@@ -111,3 +112,5 @@ npm run build
 - `npx tsc --noEmit`: pass (0 errors)
 - `npm test`: 34/34 pass
 - `npm run build`: pass
+- `npx playwright test e2e/bank-payment.spec.ts`: 4/4 pass (chromium)
+- `npx playwright test e2e/flow.spec.ts e2e/catalogue.spec.ts e2e/bank-payment.spec.ts`: 18/18 pass (all browsers)

@@ -155,10 +155,9 @@ Universal pick rule: scan ACTIVE TASKS top-to-bottom; pick the first READY task 
 
 ### Frontend
 
-1. MT7-E2E-BANK-TESTS (depends on MT4 + MT5 + MT6) ← highest priority READY now
-2. P0-COMPLAINTS-FLOW (depends on [])
-3. P1-SEO-CORRIDORS (depends on [])
-4. P2-PKG-CSV (depends on a8eee55)
+1. P0-COMPLAINTS-FLOW (depends on []) ← highest priority READY now
+2. P1-SEO-CORRIDORS (depends on [])
+3. P2-PKG-CSV (depends on a8eee55)
 
 ### UX
 
@@ -168,8 +167,7 @@ Universal pick rule: scan ACTIVE TASKS top-to-bottom; pick the first READY task 
 ### QA
 
 1. P0-HYGIENE-ARTEFACTS (depends on []) ← do first (unblocks repo cleanliness)
-2. MT7-E2E-BANK-TESTS (depends on MT4 + MT5 + MT6)
-3. P0-COMPLAINTS-FLOW (depends on [])
+2. P0-COMPLAINTS-FLOW (depends on [])
 
 ### SEO
 
@@ -189,7 +187,6 @@ No READY tasks currently. Monitor P0-COMPLAINTS-FLOW for operator routing spec.
 ## 4. PENDING TASKS SUMMARY
 
 ```
-MT7-E2E-BANK-TESTS             Playwright E2E for bank onboarding + payment instruction flows
 P0-COMPLAINTS-FLOW             Complaints routing: customer → operator → admin triage
 P0-HYGIENE-ARTEFACTS           Remove duplicate docs dirs, gitignore .next artefacts
 P1-EVIDENCE-BYTES              Evidence file bytes storage with RBAC + retention
@@ -309,36 +306,6 @@ evidence_required: commit hash + QA.md entry
 evidence_commit: MT6-ELIGIBILITY-GATING
 checks_run: [tsc, npm test 32/32, npm run build]
 date: 2026-06-04
-```
-
-```yaml
-id: MT7-E2E-BANK-TESTS
-priority: P0
-status: READY
-primary_owner_role: QA
-supporting_roles: [Frontend]
-goal: Add Playwright E2E test specs covering bank onboarding, payment instructions access, and change-control cooling flow.
-dependencies:
-  [MT4-ADMIN-BANK-REVIEW, MT5-CUSTOMER-PAYMENT-INSTR, MT6-ELIGIBILITY-GATING]
-allowed_scope:
-  - e2e/bank-onboarding.spec.ts
-  - e2e/payment-instructions.spec.ts
-  - e2e/bank-change-control.spec.ts
-acceptance_criteria:
-  - e2e/bank-onboarding.spec.ts covers operator add flow, phone OTP, admin reject, operator cancel
-  - e2e/payment-instructions.spec.ts covers Verified gate pass, Listed gate block, no-BI block, recently-updated warning
-  - e2e/bank-change-control.spec.ts covers submit change, approve, cooling banner, second change blocked during cooling
-  - All new specs pass on chromium
-  - No regressions on e2e/flow.spec.ts
-  - Selectors use getByTestId or getByRole with name — no brittle CSS selectors
-checks_required:
-  - npx playwright test e2e/bank-onboarding.spec.ts
-  - npx playwright test e2e/payment-instructions.spec.ts
-  - npx playwright test e2e/bank-change-control.spec.ts
-  - npx playwright test e2e/flow.spec.ts
-docs_to_update:
-  - QA.md
-evidence_required: commit hash + all playwright specs passing
 ```
 
 ```yaml
@@ -600,6 +567,16 @@ checks_run: [tsc --noEmit, npm test 34/34, npm run build]
 audit_ref: docs/AI_RUNBOOK.md, docs/ARCHITECTURE.md
 date: 2026-06-04
 summary: MT-8. Cooling period lazy-activation in Repository.getPaymentDetails triggers activateEligibleBankChangeRequests when coolingEndsAt <= now and status=approved. Added Repository.getOperatorAuditLog with RBAC (operator owner or admin). Reusable AuditLogView component with maxEntries prop for operator settings. Operator /settings/payment-details page shows last 5 own bank audit entries. Admin /bank-changes/[id] page uses Repository.getOperatorAuditLog for full operator audit log. 2 new unit tests cover lazy-activation and getOperatorAuditLog RBAC.
+```
+
+```yaml
+id: DONE-E2E-BANK-TESTS
+evidence_commit: MT7-E2E-BANK-TESTS
+checks_run:
+  [tsc --noEmit, npm test 34/34, npm run build, playwright 18/18 all browsers]
+audit_ref: docs/AI_RUNBOOK.md, docs/PHASE_2_AUDIT.md
+date: 2026-06-04
+summary: MT-7. Single E2E spec e2e/bank-payment.spec.ts with 4 serial tests covering operator change request + admin approve + cooling period, payment instructions after BookingIntent creation, admin reject with required reason, and operator cancel. 18/18 Playwright tests pass across chromium/firefox/webkit (flow + catalogue + bank-payment). No regressions. Uses getByTestId and getByRole with exact match for disambiguation. Each test clears localStorage for deterministic seeded state.
 ```
 
 ---
