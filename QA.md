@@ -116,6 +116,21 @@
 - [ ] Confirm rejection and cancellation do not activate proposed details.
 - [ ] Confirm audit log entries exist for create, request, approve, reject, cancel, and activate actions without full bank details in metadata.
 
+## 13. Complaints Flow (P0-COMPLAINTS-FLOW)
+
+- [ ] Customer: On `/requests/[id]`, with an existing BookingIntent, click **Report issue**.
+- [ ] Select category and severity. Enter description (min 10 chars). Submit.
+- [ ] Verify confirmation shows reference code and pay-operator-direct guidance.
+- [ ] Operator: On `/operator/dashboard`, verify complaint appears in **Complaints inbox**.
+- [ ] Click **Respond**, enter response (min 5 chars), submit. Verify status updates.
+- [ ] Change status to **Resolved** via dropdown. Verify status updates.
+- [ ] Admin: On `/admin/complaints`, verify all complaints appear with severity badges.
+- [ ] Use severity/status filters. Verify list updates correctly.
+- [ ] Click **Edit notes / flag**, add internal notes, check **Flag operator internally**, save.
+- [ ] Change status to **Closed** via dropdown. Verify status updates.
+- [ ] Verify customer cannot access `/admin/complaints` (routing or RBAC denial).
+- [ ] Verify operator cannot access `/admin/complaints` (routing or RBAC denial).
+
 ## Phase 1 Regression Checklist (run before Phase 2 work)
 
 Automated

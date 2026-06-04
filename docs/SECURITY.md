@@ -22,6 +22,10 @@ This document outlines the security architecture and assumptions for the KaabaTr
 - Admin-only review methods are `approveBankChangeRequest`, `rejectBankChangeRequest`, and `getAuditLog`.
 - Bank details are never emailed. Repository responses mark payment instructions as `delivery: 'in_app_only'`.
 - Evidence uploads remain metadata-only; bank-change requests must not store evidence bytes.
+- Complaint access is scoped to the owning customer, the involved operator, or admin only. No cross-tenant leakage.
+- Operator status changes on complaints are restricted to `operator_responding`, `resolved`, and `cannot_resolve`.
+- Admin status changes on complaints are restricted to `admin_triage`, `resolved`, and `closed`.
+- Admin notes and operator flag on complaints are internal-only; no public shaming or automated penalties.
 
 ## Input Validation
 
@@ -45,6 +49,11 @@ This document outlines the security architecture and assumptions for the KaabaTr
 
 - **Threat**: Evidence metadata is visible to an unrelated customer or operator.
 - **Mitigation**: `Repository.getBookingIntents` filters by `customerId` for customers and `operatorId` for operators. `Repository.createBookingIntent` verifies the selected offer belongs to a request owned by the customer and that the operator matches the offer before saving evidence metadata.
+
+### 2c. Complaint Leakage
+
+- **Threat**: A customer or operator sees complaints they are not party to.
+- **Mitigation**: `Repository.getComplaints` filters by role (customer own, operator own, admin all). `Repository.getComplaintById` enforces `requireComplaintAccess` before returning the record.
 
 ### 2b. Bank Detail Leakage or Unauthorized Changes
 

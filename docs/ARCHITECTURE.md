@@ -26,17 +26,18 @@ PUBLIC SIDE                      OPERATOR SIDE
 
 ### Core entities
 
-| Entity | Purpose | Key fields |
-|--------|---------|------------|
-| `User` | Customer, Operator, Admin roles | id, email, role |
-| `OperatorProfile` | Operator company details | id, companyName, slug, verificationStatus |
-| `Package` | Structured travel listing | id, operatorId, title, slug, status, pilgrimageType, price, nights, hotels, inclusions |
-| `QuoteRequest` | Customer demand signal | id, customerId, type, season, budget, nights, inclusions |
-| `Offer` | Operator response to a request | id, requestId, operatorId, price, nights, inclusions |
-| `BookingIntent` | Pay-operator-direct signal of interest to proceed | id, immutable referenceCode, offerId, customerId, operatorId, status, paymentEvidence metadata, skipProofAcknowledged |
-| `PaymentDetails` | Operator direct-payment bank details captured in controlled onboarding | id, operatorId, account holder, bank name, sort code, account number, status, phoneVerifiedAt |
-| `BankChangeRequest` | Change-control record for bank-detail updates | id, operatorId, proposedDetails, status, reviewedByUserId, activationEligibleAt |
-| `AuditLogEntry` | Append-only sensitive action trail | id, action, actor, operatorId, target, createdAt, metadata |
+| Entity              | Purpose                                                                | Key fields                                                                                                                                                                    |
+| ------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `User`              | Customer, Operator, Admin roles                                        | id, email, role                                                                                                                                                               |
+| `OperatorProfile`   | Operator company details                                               | id, companyName, slug, verificationStatus                                                                                                                                     |
+| `Package`           | Structured travel listing                                              | id, operatorId, title, slug, status, pilgrimageType, price, nights, hotels, inclusions                                                                                        |
+| `QuoteRequest`      | Customer demand signal                                                 | id, customerId, type, season, budget, nights, inclusions                                                                                                                      |
+| `Offer`             | Operator response to a request                                         | id, requestId, operatorId, price, nights, inclusions                                                                                                                          |
+| `BookingIntent`     | Pay-operator-direct signal of interest to proceed                      | id, immutable referenceCode, offerId, customerId, operatorId, status, paymentEvidence metadata, skipProofAcknowledged                                                         |
+| `PaymentDetails`    | Operator direct-payment bank details captured in controlled onboarding | id, operatorId, account holder, bank name, sort code, account number, status, phoneVerifiedAt                                                                                 |
+| `BankChangeRequest` | Change-control record for bank-detail updates                          | id, operatorId, proposedDetails, status, reviewedByUserId, activationEligibleAt                                                                                               |
+| `AuditLogEntry`     | Append-only sensitive action trail                                     | id, action, actor, operatorId, target, createdAt, metadata                                                                                                                    |
+| `Complaint`         | Customer issue report tied to a BookingIntent                          | id, bookingIntentId, referenceCode, customerId, operatorId, category, severity, status, description, operatorResponse, adminNotes, adminFlaggedOperator, createdAt, updatedAt |
 
 ### Operator eligibility
 
@@ -52,17 +53,19 @@ An operator is bookable only when all of these are true:
 
 ### RBAC matrix
 
-| Resource | Customer | Operator | Public |
-|----------|----------|----------|--------|
-| Requests | Own only | All open + own responses | None |
-| Offers | On own requests | Own only | None |
-| BookingIntents | Own only | Own only, including payment evidence metadata for involved operator | None |
-| Packages | Read published | CRUD own | Read published |
+| Resource       | Customer        | Operator                                                            | Public         |
+| -------------- | --------------- | ------------------------------------------------------------------- | -------------- |
+| Requests       | Own only        | All open + own responses                                            | None           |
+| Offers         | On own requests | Own only                                                            | None           |
+| BookingIntents | Own only        | Own only, including payment evidence metadata for involved operator | None           |
+| Packages       | Read published  | CRUD own                                                            | Read published |
+| Complaints     | Own only        | Own only (involved operator)                                        | Full (triage)  |
 
 ### Storage keys (localStorage)
 
 - `kb_requests`, `kb_offers`, `kb_bookings`, `kb_packages`
 - `kb_payment_details`, `kb_bank_change_requests`, `kb_audit_log`
+- `kb_complaints`
 - `kb_packages_seed_version` (migration trigger)
 - `kb_shortlist_packages` (user's shortlisted IDs)
 - `kb_language` (user's language preference)
@@ -84,6 +87,7 @@ An operator is bookable only when all of these are true:
 - Approved bank changes enter a cooling period before activation. `Repository.isOperatorBookable` and `Repository.getPaymentInstructions` run lazy activation when the cooling period has elapsed.
 - `Repository.getPaymentInstructions` is scoped to a BookingIntent and returns bank details only to the owning customer, involved operator, or admin.
 - Audit log writes are created for initial capture, change request creation, approval, rejection, cancellation, and lazy activation.
+- Complaint records are created by customers, responded to by operators, and triaged by admin. No automated penalties or public shaming.
 
 ## i18n layer
 
@@ -98,6 +102,7 @@ lib/i18n/
 **Current state:** Region detection and currency formatting are built and wired into comparison and package display. Translation files and the hook are planned (see `docs/I18N.md`).
 
 **Key design decisions:**
+
 - Detection: `navigator.language` + `Intl.DateTimeFormat().resolvedOptions().timeZone`
 - Currency: static GBP-based conversion rates (acceptable for MVP)
 - RTL: Arabic layout via `dir="rtl"` on `<html>` + Tailwind `rtl:` variants
