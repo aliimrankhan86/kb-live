@@ -14,6 +14,7 @@ const navItems: NavItem[] = [
   { label: 'Dashboard', href: '/operator/dashboard', enabled: true },
   { label: 'Packages', href: '/operator/packages', enabled: true },
   { label: 'Analytics', href: '/operator/analytics', enabled: true },
+  { label: 'Payment Details', href: '/operator/settings/payment-details', enabled: true },
   { label: 'Leads', href: '/operator/leads', enabled: false },
   { label: 'Profile', href: '/operator/profile', enabled: false },
   { label: 'Onboarding', href: '/operator/onboarding', enabled: false },
