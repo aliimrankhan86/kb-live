@@ -1,4 +1,4 @@
-import type { HTMLAttributes, TableHTMLAttributes } from 'react';
+import type { HTMLAttributes, TableHTMLAttributes, ThHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
 export function TableContainer({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
@@ -14,7 +14,7 @@ export function Table({ className, ...props }: TableHTMLAttributes<HTMLTableElem
   return <table className={cn('w-full min-w-[640px] border-collapse', className)} {...props} />;
 }
 
-export function Th({ className, ...props }: HTMLAttributes<HTMLTableCellElement>) {
+export function Th({ className, ...props }: ThHTMLAttributes<HTMLTableCellElement>) {
   return (
     <th
       className={cn(

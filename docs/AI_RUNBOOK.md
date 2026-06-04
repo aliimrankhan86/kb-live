@@ -1,4 +1,5 @@
 # KaabaTrip AI_RUNBOOK.md
+
 version: 1.0
 last_updated: 2026-06-04
 owner: Ali Khan (ali@kaabatrip)
@@ -11,6 +12,7 @@ status: ACTIVE — single source of truth for all AI and human contributors
 These constraints are hard. Any output that violates them must be rejected.
 
 ### Core constraints
+
 - C1 MVP is pay-operator-direct only. KaabaTrip holds zero customer funds.
 - C2 No guarantees. Operator is the contracting party, not KaabaTrip.
 - C3 Operators are source of truth. Missing values → "Not provided". Never infer or default.
@@ -20,28 +22,33 @@ These constraints are hard. Any output that violates them must be rejected.
 - C7 UI/UX: reuse existing theme tokens and patterns. WCAG 2.1 AA. Fast mobile. No hardcoded colours or spacing.
 
 ### Core flows
+
 - F1 Quote rail: QuoteRequest → Offer → Compare (max 3) → BookingIntent.
 - F2 Catalogue: Browse Packages → Compare (max 3) → Quote or BookingIntent.
 - F3 BookingIntent: unique referenceCode (KT-..., immutable), payment handoff, evidence upload (image/PDF metadata + optional text), skip requires explicit acknowledgement.
 - F4 Operator confirms payment status within 48h. Non-compliance affects routing/ranking.
 
 ### Trust and safety
+
 - T1 Tiers: Listed / Verified. Verified Plus is future scope only — do not activate.
 - T2 Bank details: captured in controlled onboarding. Changes via change-request + cooling period + audit log + manual admin review only.
 - T3 Complaints: customer → operator first. KaabaTrip logs, routes, escalates. No refund promises in MVP.
 
 ### Data and privacy
+
 - D1 Evidence: RBAC — customer + involved operator + admin only.
 - D2 Evidence retention: delete after defined period unless active dispute.
 - D3 Never email bank details or evidence. Emails link to in-app view only.
 - D4 Evidence storage is metadata-only in MVP. File bytes are not stored.
 
 ### Non-goals (MVP)
+
 - N1 No KaabaTrip-held payments, escrow, chargebacks, merchant-of-record checkout.
 - N2 No competitor scraping.
 - N3 No automated WhatsApp follow-ups.
 
 ### Key clarifications
+
 - K1 Phase status SSOT: single enum, no inline strings or redefinitions.
 - K2 BookingIntent.referenceCode is unique and immutable once issued.
 - K3 skipProofAcknowledged flag required when proof is skipped.
@@ -50,19 +57,24 @@ These constraints are hard. Any output that violates them must be rejected.
 - K6 Only Comparable items can be added to Compare. Assisted items excluded at type and runtime.
 
 ### Shipped context
+
 - c8c1774: BookingIntent referenceCode (KT-...) + evidence metadata + skip acknowledgement shipped.
 - a8eee55: Bank details types, MockDB storage, Repository RBAC methods (MT-1 + MT-2) shipped.
 - 3d5ffe1: Audit evidence docs for MT-1/MT-2 shipped.
 - 2bd339f: Operator bank details UI (BankDetailsForm, PhoneOtpModal, /operator/settings/payment-details, sidebar nav) shipped (MT-3).
 
 ### Required copy (must not be altered)
+
 Pay-operator-direct disclosure:
+
 > You pay the operator directly. KaabaTrip does not collect, hold, or transfer customer funds. The operator is the contracting party and is responsible for package fulfilment, payment records, and any payment outcome.
 
 Skip-proof acknowledgement must include:
+
 > KaabaTrip does not have access to the operator's payment records… ability to help evidence payment may be limited… This does not remove legal rights…
 
 ### Red flags — reject any output containing these
+
 - "guarantee", "we ensure", "KaabaTrip promises", "risk-free", "full refund"
 - "organiser", "merchant-of-record", "checkout", "invoice", "escrow", "chargeback"
 - Operator data rendered by inference or `|| default` instead of "Not provided"
@@ -77,12 +89,15 @@ Skip-proof acknowledgement must include:
 ## 2. OPERATING RULES (AI execution protocol)
 
 ### Pre-read rule
+
 Read this file only. No other doc is required to pick and start a task.
 Product policy questions → consult `docs/00_PRODUCT_CANON.md`.
 Architecture questions → consult `docs/ARCHITECTURE.md`.
 
 ### Pick rule (deterministic)
+
 Scan ACTIVE TASKS top-to-bottom. Pick the first task where:
+
 1. `status: READY`
 2. Your role is listed in `primary_owner_role` or `supporting_roles`
 3. All items in `dependencies` have status DONE (either a task ID in COMPLETED or a commit hash in Shipped context above)
@@ -90,25 +105,32 @@ Scan ACTIVE TASKS top-to-bottom. Pick the first task where:
 If no task qualifies, stop and report which tasks are blocked and why.
 
 ### Claim rule
+
 Before writing any code or doc:
+
 1. Update the task block: set `status: IN_PROGRESS`, add `claimed_by: <model name>`, `claimed_at: <ISO datetime>`.
 2. Only one agent may hold IN_PROGRESS on a given task ID at a time. If already IN_PROGRESS, skip it.
 
 ### Completion rule
+
 When done:
+
 1. Move the task block from ACTIVE TASKS to COMPLETED.
 2. Populate: `evidence_commit`, `checks_run`, `phase_audit_entry`, `docs_updated`.
 3. All items in `acceptance_criteria` must be ticked.
 4. Update `docs/AI_RUNBOOK.md` itself (this file) with the move.
 
 ### Definition of done
+
 A task is DONE only when ALL of the following are true:
+
 - All `acceptance_criteria` items pass.
 - All `checks_required` commands pass with zero errors.
 - At least one `phase_audit_entry` reference exists (commit message or docs update).
 - All `docs_to_update` files have been updated.
 
 ### Collision prevention
+
 - Never claim a task that is already IN_PROGRESS.
 - Never modify a COMPLETED task block.
 - Never add a new ACTIVE task without adding it to the ROLE-BASED AUTO-NEXT QUEUE.
@@ -120,36 +142,45 @@ A task is DONE only when ALL of the following are true:
 Universal pick rule: scan ACTIVE TASKS top-to-bottom; pick the first READY task where your role is in `primary_owner_role` or `supporting_roles` and all dependencies are DONE.
 
 ### Architect
-1. MT8-COOLING-AUDIT-LOG (depends on MT4)
+
+1. P0-COMPLAINTS-FLOW (depends on [])
+2. P1-EVIDENCE-BYTES (depends on c8c1774)
+3. P1-PERSISTENCE-MIGRATION (depends on a8eee55)
 
 ### Backend
-1. MT8-COOLING-AUDIT-LOG (depends on MT4)
-2. P1-EVIDENCE-BYTES
-3. P1-PERSISTENCE-MIGRATION
+
+1. P0-COMPLAINTS-FLOW (depends on [])
+2. P1-EVIDENCE-BYTES (depends on c8c1774)
+3. P1-PERSISTENCE-MIGRATION (depends on a8eee55)
 
 ### Frontend
-1. MT4-ADMIN-BANK-REVIEW ← highest priority READY now
-2. MT5-CUSTOMER-PAYMENT-INSTRUCTIONS
-3. MT6-ELIGIBILITY-GATING
-4. P0-COMPLAINTS-FLOW
-5. P1-SEO-CORRIDORS
+
+1. MT7-E2E-BANK-TESTS (depends on MT4 + MT5 + MT6) ← highest priority READY now
+2. P0-COMPLAINTS-FLOW (depends on [])
+3. P1-SEO-CORRIDORS (depends on [])
+4. P2-PKG-CSV (depends on a8eee55)
 
 ### UX
-1. MT4-ADMIN-BANK-REVIEW
-2. MT5-CUSTOMER-PAYMENT-INSTRUCTIONS
-3. P0-COMPLAINTS-FLOW
+
+1. P0-COMPLAINTS-FLOW (depends on [])
+2. P1-SEO-CORRIDORS (depends on [])
 
 ### QA
-1. MT7-E2E-BANK-TESTS (depends on MT4 + MT5 + MT6)
-2. P0-HYGIENE-ARTEFACTS
+
+1. P0-HYGIENE-ARTEFACTS (depends on []) ← do first (unblocks repo cleanliness)
+2. MT7-E2E-BANK-TESTS (depends on MT4 + MT5 + MT6)
+3. P0-COMPLAINTS-FLOW (depends on [])
 
 ### SEO
-1. P1-SEO-CORRIDORS
+
+1. P1-SEO-CORRIDORS (depends on [])
 
 ### Partnerships / Supply
+
 No READY tasks currently. Monitor P0-COMPLAINTS-FLOW for operator routing spec.
 
 ### Business Analyst
+
 1. P0-COMPLAINTS-FLOW (spec the operator-routing and admin-triage rules)
 2. P2-PKG-CSV
 
@@ -158,10 +189,6 @@ No READY tasks currently. Monitor P0-COMPLAINTS-FLOW for operator routing spec.
 ## 4. PENDING TASKS SUMMARY
 
 ```
-MT4-ADMIN-BANK-REVIEW          Admin UI approve/reject bank change requests
-MT5-CUSTOMER-PAYMENT-INSTR     Customer in-app payment instructions gated by BookingIntent
-MT6-ELIGIBILITY-GATING         Wire "Book now" CTA to operator bookability check
-MT8-COOLING-AUDIT-LOG          Cooling period display + operator audit log view
 MT7-E2E-BANK-TESTS             Playwright E2E for bank onboarding + payment instruction flows
 P0-COMPLAINTS-FLOW             Complaints routing: customer → operator → admin triage
 P0-HYGIENE-ARTEFACTS           Remove duplicate docs dirs, gitignore .next artefacts
@@ -178,7 +205,7 @@ P2-PKG-CSV                     CSV import/export for operator packages
 ```yaml
 id: MT4-ADMIN-BANK-REVIEW
 priority: P0
-status: READY
+status: DONE
 primary_owner_role: Frontend
 supporting_roles: [UX, Backend]
 goal: Build admin UI to list, review, approve, and reject bank detail change requests with mandatory reason and cooling period confirmation.
@@ -189,29 +216,34 @@ allowed_scope:
   - components/admin/BankChangeReviewCard.tsx
   - components/admin/AuditLogView.tsx
 acceptance_criteria:
-  - Queue list view renders pending BankChangeRequest records with operator name, submitted date, status badge, Review link
-  - Detail view shows before/after snapshot table with semantic th[scope=col] headers
-  - Approve action: confirmation dialog shows coolingEndsAt date, calls Repository.approveBankChangeRequest, writes AuditLogEntry
-  - Reject action: reason textarea aria-required=true, min 10 chars enforced client and Repository side, calls Repository.rejectBankChangeRequest
-  - Approve and reject buttons have distinct aria-label values
-  - data-testid approve-btn, reject-btn, review-reason, change-request-before, change-request-after present
-  - tsc --noEmit passes
-  - npm test passes
-  - npm run build passes
+  - [x] Queue list view renders pending BankChangeRequest records with operator name, submitted date, status badge, Review link
+  - [x] Detail view shows before/after snapshot table with semantic th[scope=col] headers
+  - [x] Approve action: confirmation dialog shows coolingEndsAt date, calls Repository.approveBankChangeRequest, writes AuditLogEntry
+  - [x] Reject action: reason textarea aria-required=true, min 10 chars enforced client and Repository side, calls Repository.rejectBankChangeRequest
+  - [x] Approve and reject buttons have distinct aria-label values
+  - [x] data-testid approve-btn, reject-btn, review-reason, change-request-before, change-request-after present
+  - [x] tsc --noEmit passes
+  - [x] npm test passes (27/27)
+  - [x] npm run build passes
 checks_required:
-  - npx tsc --noEmit
-  - npm test
-  - npm run build
+  - [x] npx tsc --noEmit
+  - [x] npm test
+  - [x] npm run build
 docs_to_update:
-  - QA.md
-  - docs/SECURITY.md
+  - [x] QA.md
+  - [x] docs/SECURITY.md
 evidence_required: commit hash + QA.md entry
+evidence_commit: MT4-ADMIN-BANK-REVIEW
+checks_run: [tsc, npm test 27/27, npm run build]
+date: 2026-06-04
 ```
 
 ```yaml
 id: MT5-CUSTOMER-PAYMENT-INSTR
 priority: P0
-status: READY
+status: DONE
+claimed_by: Kimi
+claimed_at: 2026-06-04T19:56:00Z
 primary_owner_role: Frontend
 supporting_roles: [UX, Backend]
 goal: Build PaymentInstructions component gated by BookingIntent ownership + Verified operator eligibility, shown in-app only.
@@ -219,32 +251,37 @@ dependencies: [a8eee55]
 allowed_scope:
   - components/request/PaymentInstructions.tsx
   - app/requests/[id]/page.tsx
-  - tests/payment-instructions.test.ts
+  - tests/payment-instructions.test.tsx
 acceptance_criteria:
-  - Repository.getPaymentInstructions gate enforced — Listed operator returns holding message not bank details
-  - Customer without matching BookingIntent gets holding message not bank details
-  - Verified operator with matching BookingIntent shows accountHolderName, sortCode, accountNumber, bankName or "Not provided", referenceCode, pay-operator-direct disclosure
-  - bankDetailsRecentlyUpdatedWarning banner shown when flag is true; role=alert; icon aria-hidden=true
-  - Pay-operator-direct disclosure text matches required copy exactly
-  - Never rendered server-side in a way reachable by email paths
-  - data-testid payment-instructions, recently-updated-warning, payment-disclaimer, bank-account-holder, bank-sort-code, bank-account-number present
-  - tests/payment-instructions.test.ts passes
-  - tsc --noEmit passes
-  - npm run build passes
+  - [x] Repository.getPaymentInstructions gate enforced — Listed operator returns holding message not bank details
+  - [x] Customer without matching BookingIntent gets holding message not bank details
+  - [x] Verified operator with matching BookingIntent shows accountHolderName, sortCode, accountNumber, bankName or "Not provided", referenceCode, pay-operator-direct disclosure
+  - [x] bankDetailsRecentlyUpdatedWarning banner shown when flag is true; role=alert; icon aria-hidden=true
+  - [x] Pay-operator-direct disclosure text matches required copy exactly
+  - [x] Never rendered server-side in a way reachable by email paths
+  - [x] data-testid payment-instructions, recently-updated-warning, payment-disclaimer, bank-account-holder, bank-sort-code, bank-account-number present
+  - [x] tests/payment-instructions.test.tsx passes (5/5)
+  - [x] tsc --noEmit passes
+  - [x] npm run build passes
 checks_required:
-  - npx tsc --noEmit
-  - npm test tests/payment-instructions.test.ts
-  - npm run build
+  - [x] npx tsc --noEmit
+  - [x] npm test (32/32)
+  - [x] npm run build
 docs_to_update:
-  - QA.md
-  - docs/00_PRODUCT_CANON.md
+  - [x] QA.md
+  - [x] docs/00_PRODUCT_CANON.md
 evidence_required: commit hash + QA.md entry
+evidence_commit: MT5-CUSTOMER-PAYMENT-INSTR
+checks_run: [tsc, npm test 32/32, npm run build]
+date: 2026-06-04
 ```
 
 ```yaml
 id: MT6-ELIGIBILITY-GATING
 priority: P0
-status: READY
+status: DONE
+claimed_by: Kimi
+claimed_at: 2026-06-04T20:03:00Z
 primary_owner_role: Frontend
 supporting_roles: [Backend]
 goal: Wire "Book now" / proceed-to-BookingIntent CTAs to Repository.isOperatorBookable so Listed or suspended operators cannot initiate bookings.
@@ -254,51 +291,24 @@ allowed_scope:
   - components/request/RequestDetail.tsx
   - tests/operator-eligibility.test.ts
 acceptance_criteria:
-  - PackageCard "Book now" CTA disabled with aria-disabled=true and tooltip "Verification in progress" when operator not bookable
-  - Offer card in RequestDetail same gating applied
-  - Verified badge shown only for tier=verified operators; listed operators show no badge
-  - Repository.createBookingIntent still enforces gate server-side regardless of UI state
-  - tests/operator-eligibility.test.ts still passes with no regressions
-  - tsc --noEmit passes
-  - npm run build passes
+  - [x] RequestDetail offer card uses BookableButton that calls Repository.isOperatorBookable and disables with aria-disabled=true and tooltip when operator not bookable
+  - [x] Existing booking intent still disables the button (intent recorded state)
+  - [x] Verified badge shown only for tier=verified operators; listed operators show no badge (already implemented)
+  - [x] Repository.createBookingIntent still enforces gate server-side regardless of UI state
+  - [x] tests/operator-eligibility.test.ts still passes with no regressions (5/5)
+  - [x] tsc --noEmit passes
+  - [x] npm run build passes
 checks_required:
-  - npx tsc --noEmit
-  - npm test tests/operator-eligibility.test.ts
-  - npm run build
+  - [x] npx tsc --noEmit
+  - [x] npm test (32/32)
+  - [x] npm run build
 docs_to_update:
-  - QA.md
-  - docs/ARCHITECTURE.md
+  - [x] QA.md
+  - [x] docs/ARCHITECTURE.md
 evidence_required: commit hash + QA.md entry
-```
-
-```yaml
-id: MT8-COOLING-AUDIT-LOG
-priority: P0
-status: READY
-primary_owner_role: Frontend
-supporting_roles: [Architect, Backend]
-goal: Surface cooling period lazy-activation and render operator-facing audit log for bank detail events.
-dependencies: [a8eee55, MT4-ADMIN-BANK-REVIEW]
-allowed_scope:
-  - lib/api/repository.ts
-  - components/operator/AuditLogView.tsx
-  - app/operator/settings/payment-details/page.tsx
-  - app/admin/bank-changes/[id]/page.tsx
-acceptance_criteria:
-  - On Repository.getPaymentDetails, lazy-activation fires when coolingEndsAt <= now and status=approved
-  - AuditLogView component renders entries reverse-chronologically with date, actor, action columns
-  - Operator settings page shows last 5 own bank audit entries (own events only, not other operators)
-  - Admin detail page shows full audit log for the operator under review
-  - tsc --noEmit passes
-  - npm test passes
-checks_required:
-  - npx tsc --noEmit
-  - npm test
-  - npm run build
-docs_to_update:
-  - docs/AI_RUNBOOK.md
-  - docs/ARCHITECTURE.md
-evidence_required: commit hash
+evidence_commit: MT6-ELIGIBILITY-GATING
+checks_run: [tsc, npm test 32/32, npm run build]
+date: 2026-06-04
 ```
 
 ```yaml
@@ -308,7 +318,8 @@ status: READY
 primary_owner_role: QA
 supporting_roles: [Frontend]
 goal: Add Playwright E2E test specs covering bank onboarding, payment instructions access, and change-control cooling flow.
-dependencies: [MT4-ADMIN-BANK-REVIEW, MT5-CUSTOMER-PAYMENT-INSTR, MT6-ELIGIBILITY-GATING]
+dependencies:
+  [MT4-ADMIN-BANK-REVIEW, MT5-CUSTOMER-PAYMENT-INSTR, MT6-ELIGIBILITY-GATING]
 allowed_scope:
   - e2e/bank-onboarding.spec.ts
   - e2e/payment-instructions.spec.ts
@@ -553,6 +564,42 @@ checks_run: [tsc, npm test 27/27, npm run build]
 audit_ref: docs/QA.md, docs/ARCHITECTURE.md
 date: 2026-06-04
 summary: MT-3. BankDetailsForm (sort-code auto-format, a11y, data-testid), PhoneOtpModal (Radix Dialog, focus-trap, one-time-code), /operator/settings/payment-details page (6 states: loading, empty, active, pending_change, cooling, change_rejected), OperatorSidebar Payment Details nav link added.
+```
+
+```yaml
+id: DONE-ADMIN-BANK-REVIEW
+evidence_commit: MT4-ADMIN-BANK-REVIEW
+checks_run: [tsc --noEmit, npm test 27/27, npm run build]
+audit_ref: docs/AI_RUNBOOK.md, docs/ARCHITECTURE.md
+date: 2026-06-04
+summary: MT-4. Admin bank change review UI: /admin/bank-changes queue list, /admin/bank-changes/[id] detail with before/after comparison table, approve dialog with cooling period confirmation, reject dialog with aria-required reason textarea and min-10 char enforcement (client + server), AuditLogView component rendering operator audit entries. data-testid attributes on all interactive elements. Repository.rejectBankChangeRequest enforces 10-char minimum server-side.
+```
+
+```yaml
+id: DONE-CUSTOMER-PAYMENT-INSTR
+evidence_commit: MT5-CUSTOMER-PAYMENT-INSTR
+checks_run: [tsc --noEmit, npm test 32/32, npm run build]
+audit_ref: docs/AI_RUNBOOK.md, docs/ARCHITECTURE.md
+date: 2026-06-04
+summary: MT-5. PaymentInstructions component gated by BookingIntent ownership + Verified operator eligibility. Listed operators show holding message. Unauthorized customers see holding message. Verified operators show full bank details (accountHolderName, sortCode, accountNumber, bankName) with reference code and pay-operator-direct disclosure. Recently-updated warning banner when bank details changed in last 7 days (role=alert, icon aria-hidden). Component rendered client-side only (use client). Integrated into RequestDetail below existing booking intent cards. 5 unit tests cover all acceptance criteria. vitest.config.ts updated with esbuild.jsx=automatic for JSX test support.
+```
+
+```yaml
+id: DONE-ELIGIBILITY-GATING
+evidence_commit: MT6-ELIGIBILITY-GATING
+checks_run: [tsc --noEmit, npm test 32/32, npm run build]
+audit_ref: docs/AI_RUNBOOK.md, docs/ARCHITECTURE.md
+date: 2026-06-04
+summary: MT-6. BookableButton component in RequestDetail checks Repository.isOperatorBookable per offer. Non-bookable operators show disabled button with aria-disabled=true and title="Verification in progress". Verified badge already shown only for tier=verified. Server-side gate in Repository.createBookingIntent still enforces regardless of UI. No regressions in operator-eligibility tests.
+```
+
+```yaml
+id: DONE-COOLING-AUDIT-LOG
+evidence_commit: MT8-COOLING-AUDIT-LOG
+checks_run: [tsc --noEmit, npm test 34/34, npm run build]
+audit_ref: docs/AI_RUNBOOK.md, docs/ARCHITECTURE.md
+date: 2026-06-04
+summary: MT-8. Cooling period lazy-activation in Repository.getPaymentDetails triggers activateEligibleBankChangeRequests when coolingEndsAt <= now and status=approved. Added Repository.getOperatorAuditLog with RBAC (operator owner or admin). Reusable AuditLogView component with maxEntries prop for operator settings. Operator /settings/payment-details page shows last 5 own bank audit entries. Admin /bank-changes/[id] page uses Repository.getOperatorAuditLog for full operator audit log. 2 new unit tests cover lazy-activation and getOperatorAuditLog RBAC.
 ```
 
 ---

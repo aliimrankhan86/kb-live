@@ -14,6 +14,7 @@ import {
 import { Button, Checkbox, Input } from '@/components/ui';
 import { Textarea } from '@/components/ui/Textarea';
 import { ComparisonTable } from './ComparisonTable';
+import { PaymentInstructions } from './PaymentInstructions';
 import { handleOfferSelection } from '@/lib/comparison';
 import { Repository, RequestContext } from '@/lib/api/repository';
 import { formatMoney } from '@/lib/i18n/format';
@@ -35,6 +36,68 @@ const isAcceptedEvidenceFile = (file: File) => file.type.startsWith('image/') ||
 
 const getEvidenceFileKind = (file: File): BookingPaymentEvidenceFile['kind'] =>
   file.type === 'application/pdf' ? 'pdf' : 'image';
+
+export function BookableButton({
+  operatorId,
+  existingIntent,
+  onProceed,
+}: {
+  operatorId: string;
+  existingIntent: boolean;
+  onProceed: () => void;
+}) {
+  const [bookable, setBookable] = useState(true);
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    setBookable(Repository.isOperatorBookable(operatorId));
+    setChecking(false);
+  }, [operatorId]);
+
+  if (existingIntent) {
+    return (
+      <Button type="button" size="sm" disabled className="flex-1" data-testid="book-now-btn">
+        Intent recorded
+      </Button>
+    );
+  }
+
+  if (checking) {
+    return (
+      <Button type="button" size="sm" disabled className="flex-1" data-testid="book-now-btn">
+        Checking...
+      </Button>
+    );
+  }
+
+  if (!bookable) {
+    return (
+      <Button
+        type="button"
+        size="sm"
+        disabled
+        aria-disabled="true"
+        className="flex-1"
+        data-testid="book-now-btn"
+        title="Verification in progress"
+      >
+        Verification in progress
+      </Button>
+    );
+  }
+
+  return (
+    <Button
+      type="button"
+      size="sm"
+      onClick={onProceed}
+      className="flex-1"
+      data-testid="book-now-btn"
+    >
+      Proceed direct
+    </Button>
+  );
+}
 
 export function RequestDetail({ id }: { id: string }) {
   const router = useRouter();
@@ -309,35 +372,34 @@ export function RequestDetail({ id }: { id: string }) {
                     <p>{distanceToHaram === 'Not provided' ? distanceToHaram : `${distanceToHaram} to Haram`}</p>
                   </div>
                   {existingIntent ? (
-                    <div className="mt-5 rounded-md border border-[var(--borderSubtle)] bg-[rgba(255,255,255,0.04)] p-3 text-sm">
-                      <p className="font-medium text-[var(--text)]">Booking intent recorded</p>
-                      <p className="mt-1 text-[var(--textMuted)]">
-                        Reference:{' '}
-                        <span data-testid="booking-intent-reference-code" className="font-mono text-[var(--yellow)]">
-                          {displayValue(existingIntent.referenceCode)}
-                        </span>
-                      </p>
-                      <p className="mt-1 text-xs text-[var(--textMuted)]">
-                        Evidence is visible only to you, the involved operator, and KaabaTrip admin.
-                      </p>
+                    <div className="mt-5 space-y-4">
+                      <div className="rounded-md border border-[var(--borderSubtle)] bg-[rgba(255,255,255,0.04)] p-3 text-sm">
+                        <p className="font-medium text-[var(--text)]">Booking intent recorded</p>
+                        <p className="mt-1 text-[var(--textMuted)]">
+                          Reference:{' '}
+                          <span data-testid="booking-intent-reference-code" className="font-mono text-[var(--yellow)]">
+                            {displayValue(existingIntent.referenceCode)}
+                          </span>
+                        </p>
+                        <p className="mt-1 text-xs text-[var(--textMuted)]">
+                          Evidence is visible only to you, the involved operator, and KaabaTrip admin.
+                        </p>
+                      </div>
+                      <PaymentInstructions bookingIntent={existingIntent} />
                     </div>
                   ) : null}
                   <div className="mt-6 flex gap-2">
                     <Button type="button" variant="secondary" size="sm" className="flex-1">
                       View Details
                     </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={() => {
+                    <BookableButton
+                      operatorId={offer.operatorId}
+                      existingIntent={Boolean(existingIntent)}
+                      onProceed={() => {
                         resetBookingForm();
                         setActiveOfferForBooking(offer);
                       }}
-                      disabled={Boolean(existingIntent)}
-                      className="flex-1"
-                    >
-                      {existingIntent ? 'Intent recorded' : 'Proceed direct'}
-                    </Button>
+                    />
                   </div>
                 </div>
               );

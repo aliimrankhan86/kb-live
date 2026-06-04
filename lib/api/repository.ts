@@ -46,6 +46,12 @@ const requireOperatorOwner = (ctx: RequestContext, operatorId: string) => {
   if (ctx.role !== 'operator' || ctx.userId !== operatorId) throw new Error('Unauthorized');
 };
 
+const requireOperatorOwnerOrAdmin = (ctx: RequestContext, operatorId: string) => {
+  if (ctx.role === 'admin') return;
+  if (ctx.role === 'operator' && ctx.userId === operatorId) return;
+  throw new Error('Unauthorized');
+};
+
 const normalizeSortCode = (sortCode: string) => {
   const trimmed = sortCode.trim();
   if (!/^\d{2}-?\d{2}-?\d{2}$/.test(trimmed)) throw new Error('Sort code must be 6 digits');
@@ -490,6 +496,11 @@ export const Repository = {
     if (!request) throw new Error('Bank change request not found');
     if (request.status !== 'pending_review') throw new Error('Only pending bank change requests can be rejected');
 
+    const trimmedNotes = reviewNotes?.trim();
+    if (!trimmedNotes || trimmedNotes.length < 10) {
+      throw new Error('Rejection reason must be at least 10 characters');
+    }
+
     const rejected: BankChangeRequest = {
       ...request,
       status: 'rejected',
@@ -567,6 +578,19 @@ export const Repository = {
       disclosure: PAY_OPERATOR_DIRECT_DISCLOSURE,
       delivery: 'in_app_only',
     };
+  },
+
+  getPaymentDetails: (ctx: RequestContext, operatorId: string): PaymentDetails | undefined => {
+    requireOperatorOwnerOrAdmin(ctx, operatorId);
+    activateEligibleBankChangeRequests(operatorId);
+    return getActivePaymentDetails(operatorId);
+  },
+
+  getOperatorAuditLog: (ctx: RequestContext, operatorId: string): AuditLogEntry[] => {
+    requireOperatorOwnerOrAdmin(ctx, operatorId);
+    return MockDB.getAuditLog()
+      .filter((entry) => entry.operatorId === operatorId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   },
 
   getAuditLog: (ctx: RequestContext): AuditLogEntry[] => {

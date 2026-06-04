@@ -16,10 +16,45 @@
 - BookingIntent creation now issues a unique immutable reference code.
 - Request detail payment handoff now supports image/PDF evidence metadata, optional text fields, and explicit skip-proof acknowledgement.
 - Operator payment details now have MockDB storage keys, seeded active details for one verified operator, bank-change requests, audit logs, and repository-level eligibility checks.
+- Cooling period lazy-activation fires on `Repository.getPaymentDetails` and `isOperatorBookableById` when `activationEligibleAt <= now`.
+- Operator settings page shows last 5 own bank audit entries via `AuditLogView`.
+- Admin bank change detail page shows full operator audit log via `Repository.getOperatorAuditLog`.
 
 ## Shipped
 
-- MT-1/MT-2 verified bank details foundation is now audited in `docs/PHASE_2_AUDIT.md` for `a8eee55`.
+- MT-8 cooling period lazy-activation + operator audit log view shipped. See `docs/AI_RUNBOOK.md` COMPLETED section for `DONE-COOLING-AUDIT-LOG`.
+- MT-4 admin bank change review UI shipped. See `docs/AI_RUNBOOK.md` COMPLETED section for `DONE-ADMIN-BANK-REVIEW`.
+
+### `MT5-CUSTOMER-PAYMENT-INSTR` — Customer payment instructions
+
+- Created `components/request/PaymentInstructions.tsx` gated by `Repository.getPaymentInstructions` RBAC.
+- Listed operators and unauthorized customers see holding message, not bank details.
+- Verified operators with matching BookingIntent show full bank details (accountHolderName, sortCode, accountNumber, bankName, currency) plus reference code and pay-operator-direct disclosure.
+- Recently-updated warning banner (`role=alert`, icon `aria-hidden=true`) shown when bank details changed in last 7 days.
+- All required `data-testid` attributes present.
+- 5 unit tests in `tests/payment-instructions.test.tsx` covering all acceptance criteria.
+- Fixed `vitest.config.ts` with `esbuild.jsx: 'automatic'` for React 19 JSX test support.
+
+### `MT6-ELIGIBILITY-GATING` — Wire "Book now" CTA to operator bookability check
+
+- Added `BookableButton` component inside `RequestDetail.tsx` that calls `Repository.isOperatorBookable(offer.operatorId)`.
+- Non-bookable operators show disabled button with `aria-disabled="true"` and `title="Verification in progress"`.
+- Existing booking intent still shows "Intent recorded" disabled state.
+- Verified badge already shown only for `tier=verified` operators; listed operators show no badge.
+- Server-side gate in `Repository.createBookingIntent` still enforces regardless of UI state.
+- No regressions in `tests/operator-eligibility.test.ts` (5/5 pass).
+
+### `MT4-ADMIN-BANK-REVIEW` — Admin bank change review
+
+- Created `/admin/bank-changes` queue page listing pending `BankChangeRequest` records with operator name, submitted date, status badge, and Review link.
+- Created `/admin/bank-changes/[id]` detail page with `BankChangeReviewCard` component.
+- Before/after snapshot comparison table with semantic `th[scope=col]` headers showing all bank detail fields.
+- Approve action: confirmation dialog displays cooling period end date; calls `Repository.approveBankChangeRequest`; audit log entry written automatically.
+- Reject action: `Textarea` with `aria-required=true`, min-10 chars enforced client-side and server-side in `Repository.rejectBankChangeRequest`.
+- Approve and reject buttons have distinct `aria-label` values.
+- All required `data-testid` attributes present: `approve-btn`, `reject-btn`, `review-reason`, `change-request-before`, `change-request-after`.
+- Created reusable `AuditLogView` component rendering entries reverse-chronologically with date, actor, action columns.
+- Fixed `components/ui/Table.tsx` `Th` to accept `scope` attribute via `ThHTMLAttributes`.
 
 ### `c8c1774` - BookingIntent reference and payment evidence
 
@@ -35,9 +70,13 @@
 - Added MockDB keys: `kb_payment_details`, `kb_bank_change_requests`, and `kb_audit_log`.
 - Seeded `op1` as a verified/bookable operator with active payment details; legacy operators normalise to `tier='listed'` and `canReceiveBookings=false`.
 - Added repository methods for initial payment-details capture, bookability checks, bank-change request create/approve/reject/cancel, payment instructions, audit-log reads, and lazy activation after cooling period.
+- Added `Repository.getPaymentDetails` with lazy-activation trigger and `Repository.getOperatorAuditLog` with RBAC (operator owner or admin).
+- Added `requireOperatorOwnerOrAdmin` helper for shared RBAC patterns.
 - Added BookingIntent eligibility gating so non-bookable operators cannot receive high-intent bookings.
 - Added unit tests for bank details/change-control and operator eligibility matrix.
 - Updated architecture, security, and QA docs for the new data model, RBAC, audit, and admin-review placeholders.
+- Operator settings `/operator/settings/payment-details` now renders `AuditLogView` with `maxEntries={5}` showing own bank audit activity.
+- Admin detail `/admin/bank-changes/[id]` now uses `Repository.getOperatorAuditLog` for full operator-scoped audit log.
 
 ## Current journey (as implemented now)
 
@@ -66,3 +105,9 @@ npx playwright test e2e/flow.spec.ts
 npx playwright test e2e/catalogue.spec.ts
 npm run build
 ```
+
+## Last verified
+
+- `npx tsc --noEmit`: pass (0 errors)
+- `npm test`: 34/34 pass
+- `npm run build`: pass

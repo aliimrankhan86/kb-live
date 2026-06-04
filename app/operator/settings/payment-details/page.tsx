@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { MockDB } from '@/lib/api/mock-db';
 import { Repository } from '@/lib/api/repository';
-import type { BankChangeRequest, PaymentDetails, PaymentDetailsInput } from '@/lib/types';
+import type { AuditLogEntry, BankChangeRequest, PaymentDetails, PaymentDetailsInput } from '@/lib/types';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import {
@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/Overlay';
 import { BankDetailsForm } from '@/components/operator/BankDetailsForm';
 import { PhoneOtpModal } from '@/components/operator/PhoneOtpModal';
+import { AuditLogView } from '@/components/admin/AuditLogView';
 
 const OPERATOR_ID = 'op1';
 const operatorCtx = { userId: OPERATOR_ID, role: 'operator' as const };
@@ -81,12 +82,14 @@ export default function PaymentDetailsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const [auditEntries, setAuditEntries] = useState<AuditLogEntry[]>([]);
 
   const refresh = useCallback(() => {
     MockDB.setCurrentUser('operator');
     const next = loadData();
     setData(next);
     setPageState(deriveState(next));
+    setAuditEntries(Repository.getOperatorAuditLog(operatorCtx, OPERATOR_ID));
   }, []);
 
   useEffect(() => {
@@ -352,6 +355,13 @@ export default function PaymentDetailsPage() {
           </OverlayFooter>
         </OverlayContent>
       </Dialog>
+
+      {/* AUDIT LOG SECTION */}
+      <div className="space-y-2 pt-6 border-t border-[var(--borderSubtle)]" data-testid="operator-audit-log">
+        <h3 className="text-sm font-semibold text-[var(--text)]">Bank details activity</h3>
+        <p className="text-xs text-[var(--textMuted)]">Recent changes and reviews for your account.</p>
+        <AuditLogView entries={auditEntries} maxEntries={5} />
+      </div>
 
       {/* PHONE OTP MODAL */}
       <PhoneOtpModal

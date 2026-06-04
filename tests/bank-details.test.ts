@@ -159,7 +159,7 @@ describe('bank details repository methods', () => {
       proposedDetails: paymentDetails({ accountNumber: '11112222' }),
       phoneConfirmation: { confirmed: true, phoneLastFour: '4567' },
     });
-    expect(Repository.rejectBankChangeRequest(adminCtx, rejectedRequest.id, 'Mismatch').status).toBe('rejected');
+    expect(Repository.rejectBankChangeRequest(adminCtx, rejectedRequest.id, 'Sort code mismatch').status).toBe('rejected');
 
     const cancelledRequest = Repository.createBankChangeRequest(operatorCtx, {
       operatorId: 'op1',
@@ -168,5 +168,56 @@ describe('bank details repository methods', () => {
     });
     expect(() => Repository.cancelBankChangeRequest(otherOperatorCtx, cancelledRequest.id)).toThrow('Unauthorized');
     expect(Repository.cancelBankChangeRequest(operatorCtx, cancelledRequest.id).status).toBe('cancelled');
+  });
+
+  it('getPaymentDetails triggers lazy-activation and is RBAC-gated', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-06-01T10:00:00.000Z'));
+
+    const request = Repository.createBankChangeRequest(operatorCtx, {
+      operatorId: 'op1',
+      proposedDetails: paymentDetails({ accountNumber: '55556666', bankName: 'Lazy Bank' }),
+      phoneConfirmation: { confirmed: true, phoneLastFour: '4567' },
+    });
+    Repository.approveBankChangeRequest(adminCtx, request.id);
+
+    // Before cooling — still old details
+    expect(Repository.getPaymentDetails(operatorCtx, 'op1')?.accountNumber).toBe('12345678');
+
+    // After cooling — lazy-activated
+    vi.setSystemTime(new Date('2026-06-02T10:00:01.000Z'));
+    const activated = Repository.getPaymentDetails(operatorCtx, 'op1');
+    expect(activated?.accountNumber).toBe('55556666');
+    expect(activated?.bankName).toBe('Lazy Bank');
+
+    // RBAC: other operator denied
+    expect(() => Repository.getPaymentDetails(otherOperatorCtx, 'op1')).toThrow('Unauthorized');
+    // RBAC: admin allowed
+    expect(Repository.getPaymentDetails(adminCtx, 'op1')?.accountNumber).toBe('55556666');
+  });
+
+  it('getOperatorAuditLog returns operator-scoped entries reverse-chronologically with RBAC', () => {
+    // Generate an audit entry first
+    Repository.createBankChangeRequest(operatorCtx, {
+      operatorId: 'op1',
+      proposedDetails: paymentDetails({ accountNumber: '77778888' }),
+      phoneConfirmation: { confirmed: true, phoneLastFour: '4567' },
+    });
+
+    const entries = Repository.getOperatorAuditLog(operatorCtx, 'op1');
+    expect(entries.length).toBeGreaterThan(0);
+    expect(entries.every((e) => e.operatorId === 'op1')).toBe(true);
+
+    // Reverse chronological
+    for (let i = 1; i < entries.length; i += 1) {
+      expect(new Date(entries[i - 1].createdAt).getTime()).toBeGreaterThanOrEqual(
+        new Date(entries[i].createdAt).getTime()
+      );
+    }
+
+    // RBAC: other operator denied
+    expect(() => Repository.getOperatorAuditLog(otherOperatorCtx, 'op1')).toThrow('Unauthorized');
+    // RBAC: admin allowed
+    expect(Repository.getOperatorAuditLog(adminCtx, 'op1').length).toBeGreaterThan(0);
   });
 });

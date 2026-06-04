@@ -708,3 +708,135 @@ Resolve build-time ESLint warnings without changing behavior.
 **Follow-ups created:**
 
 - Next recommended micro-task: operator onboarding UI plus admin review gate for bank-detail changes.
+
+---
+
+## 2026-06-04 - MT-5: Customer Payment Instructions (`MT5-CUSTOMER-PAYMENT-INSTR`)
+
+**Goal:** Build PaymentInstructions component gated by BookingIntent ownership + Verified operator eligibility, shown in-app only.
+
+**Acceptance criteria:**
+
+- [x] Repository.getPaymentInstructions gate enforced — Listed operator returns holding message not bank details
+- [x] Customer without matching BookingIntent gets holding message not bank details
+- [x] Verified operator with matching BookingIntent shows full bank details with reference code and pay-operator-direct disclosure
+- [x] Recently-updated warning banner shown when flag is true
+- [x] Pay-operator-direct disclosure text matches required copy exactly
+- [x] data-testid attributes present
+- [x] tests/payment-instructions.test.tsx passes (5/5)
+
+**Result:** PASS
+
+**Files changed:**
+
+- `components/request/PaymentInstructions.tsx`
+- `app/requests/[id]/page.tsx`
+- `tests/payment-instructions.test.tsx`
+- `vitest.config.ts`
+
+**Commands run (with results):**
+
+- `npx tsc --noEmit` → PASS
+- `npm test` → PASS (32/32)
+- `npm run build` → PASS
+- `npx playwright test e2e/flow.spec.ts` → PASS (3 browsers)
+- `npx playwright test e2e/catalogue.spec.ts` → PASS (3 browsers)
+
+**Notes / Decisions:**
+
+- Component is client-side only (`'use client'`) to prevent server-side leakage.
+- Disclosure text matches required copy verbatim.
+
+**Risks / Tech debt introduced:**
+
+- None.
+
+**Follow-ups created:**
+
+- None.
+
+---
+
+## 2026-06-04 - MT-6: Eligibility Gating (`MT6-ELIGIBILITY-GATING`)
+
+**Goal:** Wire "Book now" / proceed-to-BookingIntent CTAs to Repository.isOperatorBookable so Listed or suspended operators cannot initiate bookings.
+
+**Acceptance criteria:**
+
+- [x] RequestDetail offer card uses BookableButton that calls Repository.isOperatorBookable
+- [x] Non-bookable operators show disabled button with aria-disabled=true
+- [x] Verified badge shown only for tier=verified
+- [x] Repository.createBookingIntent enforces gate server-side regardless of UI state
+- [x] tests/operator-eligibility.test.ts passes (5/5)
+
+**Result:** PASS
+
+**Files changed:**
+
+- `components/request/RequestDetail.tsx`
+- `tests/operator-eligibility.test.ts`
+
+**Commands run (with results):**
+
+- `npx tsc --noEmit` → PASS
+- `npm test` → PASS (32/32)
+- `npm run build` → PASS
+- `npx playwright test e2e/flow.spec.ts` → PASS (3 browsers)
+- `npx playwright test e2e/catalogue.spec.ts` → PASS (3 browsers)
+
+**Notes / Decisions:**
+
+- Server-side gate remains the enforcement layer; UI gating is defence-in-depth.
+
+**Risks / Tech debt introduced:**
+
+- None.
+
+**Follow-ups created:**
+
+- None.
+
+---
+
+## 2026-06-04 - MT-8: Cooling Period + Operator Audit Log (`MT8-COOLING-AUDIT-LOG`)
+
+**Goal:** Surface cooling period lazy-activation and render operator-facing audit log for bank detail events.
+
+**Acceptance criteria:**
+
+- [x] Repository.getPaymentDetails triggers lazy-activation when coolingEndsAt <= now and status=approved
+- [x] AuditLogView component renders entries reverse-chronologically
+- [x] Operator settings page shows last 5 own bank audit entries
+- [x] Admin detail page shows full audit log for the operator under review
+- [x] Repository.getOperatorAuditLog RBAC-gated to operator owner or admin
+- [x] tsc, tests, build pass
+
+**Result:** PASS
+
+**Files changed:**
+
+- `lib/api/repository.ts`
+- `app/operator/settings/payment-details/page.tsx`
+- `app/admin/bank-changes/[id]/page.tsx`
+- `tests/bank-details.test.ts`
+
+**Commands run (with results):**
+
+- `npx tsc --noEmit` → PASS
+- `npm test` → PASS (34/34)
+- `npm run build` → PASS
+- `npx playwright test e2e/flow.spec.ts` → PASS (3 browsers)
+- `npx playwright test e2e/catalogue.spec.ts` → PASS (3 browsers)
+
+**Notes / Decisions:**
+
+- Added `requireOperatorOwnerOrAdmin` RBAC helper for shared access patterns.
+- AuditLogView accepts `maxEntries` prop for operator-scoped limiting.
+
+**Risks / Tech debt introduced:**
+
+- None.
+
+**Follow-ups created:**
+
+- None.
