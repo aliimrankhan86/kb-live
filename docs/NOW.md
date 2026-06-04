@@ -12,7 +12,7 @@
 - Package detail to quote prefill flow is functioning end-to-end with query-based prefill.
 - `/quote` and `/requests/[id]` now use the shared header, so logo/navigation are consistent with the rest of the app.
 - Quote journey now exposes a clear "Back to previous page" action in wizard and request detail views.
-- Header now includes a design-system currency dropdown (`GBP`, `USD`, `EUR`) that updates displayed package rates client-side.
+- **Currency:** MVP shows GBP (£) only. Multi-currency display is future scope. The i18n infra (`lib/i18n/region.ts`, `lib/i18n/format.ts`) is built and ready but the UI selector is hidden until post-MVP. See `docs/AI_RUNBOOK.md` C8.
 - BookingIntent creation now issues a unique immutable reference code.
 - Request detail payment handoff now supports image/PDF evidence metadata, optional text fields, and explicit skip-proof acknowledgement.
 - Operator payment details now have MockDB storage keys, seeded active details for one verified operator, bank-change requests, audit logs, and repository-level eligibility checks.
@@ -43,7 +43,7 @@
 
 ### `P2-PKG-CSV` — CSV import/export for operator packages
 
-- `Repository.exportPackagesAsCsv` exports all operator-owned packages as RFC 4180 CSV with full field coverage (title, slug, status, pilgrimageType, seasonLabel, dateWindow, price, currency, nights, hotels, distances, airline, inclusions, occupancy, notes).
+- `Repository.exportPackagesAsCsv` exports all operator-owned packages as RFC 4180 CSV with full field coverage (title, slug, status, pilgrimageType, seasonLabel, dateWindow, price, currency, nights, hotels, distances, airline, inclusions, occupancy, notes). Note: MVP currency is GBP only; `currency` field in CSV is reserved for future multi-currency support.
 - `Repository.importPackagesFromCsv` parses CSV with quoted field support, validates each row against required columns (title, pricePerPerson, currency, totalNights, pilgrimageType), and reports invalid rows with row number and reason.
 - `PackageCsvExport` component triggers browser download of `.csv` file via Blob + anchor click.
 - `PackageCsvImport` component with hidden file input, import button, and result panel showing success count + per-row error report with `role=status` and `aria-live=polite`.

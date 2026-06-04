@@ -53,20 +53,28 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
           className={styles.header__navigation}
           aria-label="Main menu"
         >
-          <div className={styles.header__currency}>
-            <Select
-              id="header-currency-select"
-              aria-label="Display currency"
-              value={currency}
-              options={DISPLAY_CURRENCY_OPTIONS}
-              onChange={(event) => {
-                const next = event.target.value as DisplayCurrency
-                setCurrency(next)
-                setPreferredCurrency(next)
-              }}
-              selectClassName={styles.header__currencySelect}
-            />
-          </div>
+          {/*
+            Currency selector hidden for MVP — UK/GBP only.
+            Multi-currency is future scope (see docs/AI_RUNBOOK.md).
+            To re-enable: uncomment this block. The i18n infra
+            (lib/i18n/region.ts, lib/i18n/format.ts) remains in place.
+          */}
+          {false && (
+            <div className={styles.header__currency}>
+              <Select
+                id="header-currency-select"
+                aria-label="Display currency"
+                value={currency}
+                options={DISPLAY_CURRENCY_OPTIONS}
+                onChange={(event) => {
+                  const next = event.target.value as DisplayCurrency
+                  setCurrency(next)
+                  setPreferredCurrency(next)
+                }}
+                selectClassName={styles.header__currencySelect}
+              />
+            </div>
+          )}
           <Link 
             href="/quote" 
             className={styles.header__navLink}

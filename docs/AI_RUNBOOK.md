@@ -20,6 +20,7 @@ These constraints are hard. Any output that violates them must be rejected.
 - C5 Verified claims require evidence. No implied guarantees, no "fully vetted" language.
 - C6 Marketing: explicit opt-in only. Service messages: zero promos.
 - C7 UI/UX: reuse existing theme tokens and patterns. WCAG 2.1 AA. Fast mobile. No hardcoded colours or spacing.
+- C8 Currency: MVP shows GBP only. Multi-currency display is future scope (infra ready in lib/i18n/). Do not render currency selectors or converted prices in public UI.
 
 ### Core flows
 
