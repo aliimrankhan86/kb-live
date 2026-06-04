@@ -118,7 +118,7 @@ const SEED_PACKAGES: Package[] = [
     flightType: 'direct',
     depositAmount: 450,
     paymentPlanAvailable: true,
-    cancellationPolicy: 'Cancel 45+ days before departure for full refund minus admin fee; 30-44 days 50% refund; under 30 days non-refundable.',
+    cancellationPolicy: 'Cancel 45+ days before departure: operator admin fee applies; 30-44 days 50% refund; under 30 days non-refundable.',
     highlights: ['Last 10 nights in Ramadan', '5-star Makkah stay', 'Direct Saudia flights'],
     groupType: 'small-group',
     createdAt: '2025-11-01T09:00:00.000Z',
@@ -323,10 +323,45 @@ export const MockDB = {
   getOffersByRequestId: (requestId: string) =>
     MockDB.getOffers().filter((o) => o.requestId === requestId),
 
-  getBookingIntents: (): BookingIntent[] => getStorage(STORAGE_KEYS.BOOKING_INTENTS, []),
+  getBookingIntents: (): BookingIntent[] =>
+    getStorage<BookingIntent[]>(STORAGE_KEYS.BOOKING_INTENTS, []).map((booking) => ({
+      ...booking,
+      referenceCode: booking.referenceCode ?? `KT-LEGACY-${booking.id.slice(0, 8).toUpperCase()}`,
+      skipProofAcknowledged: booking.skipProofAcknowledged ?? false,
+    })),
   saveBookingIntent: (booking: BookingIntent) => {
+    if (!booking.referenceCode) {
+      throw new Error('Reference code is required');
+    }
+
     const bookings = MockDB.getBookingIntents();
-    bookings.push(booking);
+    const existingIndex = bookings.findIndex((existing) => existing.id === booking.id);
+    const duplicateReference = bookings.find(
+      (existing) => existing.referenceCode === booking.referenceCode && existing.id !== booking.id
+    );
+
+    if (duplicateReference) {
+      throw new Error('Reference code must be unique');
+    }
+
+    if (existingIndex >= 0) {
+      const existing = bookings[existingIndex];
+      if (existing.referenceCode !== booking.referenceCode) {
+        throw new Error('Reference code cannot be changed');
+      }
+
+      bookings[existingIndex] = {
+        ...booking,
+        id: existing.id,
+        referenceCode: existing.referenceCode,
+        offerId: existing.offerId,
+        customerId: existing.customerId,
+        operatorId: existing.operatorId,
+        createdAt: existing.createdAt,
+      };
+    } else {
+      bookings.push(booking);
+    }
     setStorage(STORAGE_KEYS.BOOKING_INTENTS, bookings);
     return booking;
   },

@@ -93,14 +93,39 @@ export interface QuoteRequest {
 
 export type BookingStatus = 'started' | 'contacted' | 'confirmed' | 'closed';
 
+export type BookingPaymentEvidenceFileKind = 'image' | 'pdf';
+
+export interface BookingPaymentEvidenceFile {
+  id: string;
+  name: string;
+  mimeType: string;
+  sizeBytes: number;
+  kind: BookingPaymentEvidenceFileKind;
+  lastModified?: number;
+  uploadedAt: string;
+}
+
+export interface BookingPaymentEvidence {
+  files: BookingPaymentEvidenceFile[];
+  payerName?: string;
+  paymentReference?: string;
+  notes?: string;
+  submittedAt: string;
+  storageStatus: 'metadata-only';
+}
+
 export interface BookingIntent {
   id: string;
+  referenceCode?: string; // Required for new records; legacy MockDB records are normalised on read.
   offerId: string;
   customerId: string;
   operatorId: string;
   status: BookingStatus;
   createdAt: string;
   updatedAt: string;
+  paymentEvidence?: BookingPaymentEvidence;
+  skipProofAcknowledged?: boolean; // Required when proof is skipped.
+  proofSkippedAt?: string;
   notes?: string;
 }
 

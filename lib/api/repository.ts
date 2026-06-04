@@ -1,5 +1,14 @@
 import { MockDB } from './mock-db';
-import { BookingIntent, Offer, OperatorProfile, Package, QuoteRequest, UserRole } from '@/lib/types';
+import {
+  BookingIntent,
+  BookingPaymentEvidence,
+  BookingPaymentEvidenceFile,
+  Offer,
+  OperatorProfile,
+  Package,
+  QuoteRequest,
+  UserRole,
+} from '@/lib/types';
 import { generateSlug } from '@/lib/slug';
 
 // Simulate a secure context from the server (e.g. session)
@@ -7,6 +16,47 @@ export interface RequestContext {
   userId: string;
   role: UserRole;
 }
+
+const REFERENCE_CODE_PREFIX = 'KT';
+const MAX_REFERENCE_CODE_ATTEMPTS = 10;
+const isAcceptedEvidenceFile = (file: BookingPaymentEvidenceFile) =>
+  (file.kind === 'image' && file.mimeType.startsWith('image/')) ||
+  (file.kind === 'pdf' && file.mimeType === 'application/pdf');
+
+const cleanOptionalText = (value?: string) => {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : undefined;
+};
+
+const generateReferenceCode = (existingCodes: Set<string>) => {
+  for (let attempt = 0; attempt < MAX_REFERENCE_CODE_ATTEMPTS; attempt += 1) {
+    const code = `${REFERENCE_CODE_PREFIX}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+    if (!existingCodes.has(code)) return code;
+  }
+
+  throw new Error('Unable to generate unique reference code');
+};
+
+const preparePaymentEvidence = (paymentEvidence?: BookingPaymentEvidence): BookingPaymentEvidence | undefined => {
+  if (!paymentEvidence) return undefined;
+
+  const files = paymentEvidence.files ?? [];
+  if (files.length === 0) return undefined;
+
+  const invalidFile = files.find((file) => !isAcceptedEvidenceFile(file));
+  if (invalidFile) throw new Error('Payment evidence must be an image or PDF');
+
+  const submittedAt = paymentEvidence.submittedAt || new Date().toISOString();
+
+  return {
+    files,
+    payerName: cleanOptionalText(paymentEvidence.payerName),
+    paymentReference: cleanOptionalText(paymentEvidence.paymentReference),
+    notes: cleanOptionalText(paymentEvidence.notes),
+    submittedAt,
+    storageStatus: 'metadata-only',
+  };
+};
 
 export const Repository = {
   // Quote Requests
@@ -63,20 +113,50 @@ export const Repository = {
   // Booking Intents
   createBookingIntent: (ctx: RequestContext, intent: Partial<BookingIntent>): BookingIntent => {
     if (ctx.role !== 'customer') throw new Error('Unauthorized');
+    if (!intent.offerId) throw new Error('Offer is required');
+    if (!intent.operatorId) throw new Error('Operator is required');
+
+    const offer = MockDB.getOffers().find((candidate) => candidate.id === intent.offerId);
+    if (!offer) throw new Error('Offer not found');
+    if (offer.operatorId !== intent.operatorId) throw new Error('Operator does not match offer');
+
+    const request = MockDB.getRequestById(offer.requestId);
+    if (!request || request.customerId !== ctx.userId) throw new Error('Unauthorized');
+
+    const paymentEvidence = preparePaymentEvidence(intent.paymentEvidence);
+    const hasEvidence = Boolean(paymentEvidence?.files.length);
+    const skipProofAcknowledged = intent.skipProofAcknowledged === true;
+
+    if (!hasEvidence && !skipProofAcknowledged) {
+      throw new Error('Payment evidence or skip acknowledgement is required');
+    }
+
+    if (hasEvidence && skipProofAcknowledged) {
+      throw new Error('Choose either payment evidence or skip proof acknowledgement');
+    }
+
+    const existingCodes = new Set(
+      MockDB.getBookingIntents()
+        .map((booking) => booking.referenceCode)
+        .filter((referenceCode): referenceCode is string => Boolean(referenceCode))
+    );
+    const now = new Date().toISOString();
     
     const newIntent: BookingIntent = {
       id: crypto.randomUUID(),
-      offerId: intent.offerId!,
+      referenceCode: generateReferenceCode(existingCodes),
+      offerId: offer.id,
       customerId: ctx.userId,
-      operatorId: intent.operatorId!,
+      operatorId: offer.operatorId,
       status: 'started',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      notes: intent.notes,
+      createdAt: now,
+      updatedAt: now,
+      paymentEvidence,
+      skipProofAcknowledged,
+      proofSkippedAt: skipProofAcknowledged ? now : undefined,
+      notes: cleanOptionalText(intent.notes),
     };
     
-    // In a real DB we would save this.
-    // I'll add booking intents to MockDB
     MockDB.saveBookingIntent(newIntent);
     return newIntent;
   },

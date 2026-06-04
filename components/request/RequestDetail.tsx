@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { QuoteRequest, Offer, OperatorProfile } from '@/lib/types';
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+import { BookingIntent, BookingPaymentEvidenceFile, QuoteRequest, Offer, OperatorProfile } from '@/lib/types';
 import { MockDB } from '@/lib/api/mock-db';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -11,14 +11,30 @@ import {
   OverlayHeader,
   OverlayTitle,
 } from '@/components/ui/Overlay';
-import { Button } from '@/components/ui';
+import { Button, Checkbox, Input } from '@/components/ui';
+import { Textarea } from '@/components/ui/Textarea';
 import { ComparisonTable } from './ComparisonTable';
 import { handleOfferSelection } from '@/lib/comparison';
 import { Repository, RequestContext } from '@/lib/api/repository';
-import { formatMoney, getCurrencySymbol } from '@/lib/i18n/format';
+import { formatMoney } from '@/lib/i18n/format';
 import { CURRENCY_CHANGE_EVENT, getRegionSettings } from '@/lib/i18n/region';
 
 const customerContext: RequestContext = { userId: 'cust1', role: 'customer' };
+const PAYMENT_EVIDENCE_ACCEPT = 'image/*,application/pdf';
+const PAY_OPERATOR_DIRECT_DISCLOSURE =
+  'You pay the operator directly. KaabaTrip does not collect, hold, or transfer customer funds. The operator is the contracting party and is responsible for package fulfilment, payment records, and any payment outcome.';
+const SKIP_PROOF_ACKNOWLEDGEMENT =
+  'KaabaTrip does not have access to the operator’s payment records… ability to help evidence payment may be limited… This does not remove legal rights…';
+
+const displayValue = (value?: string | null) => {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : 'Not provided';
+};
+
+const isAcceptedEvidenceFile = (file: File) => file.type.startsWith('image/') || file.type === 'application/pdf';
+
+const getEvidenceFileKind = (file: File): BookingPaymentEvidenceFile['kind'] =>
+  file.type === 'application/pdf' ? 'pdf' : 'image';
 
 export function RequestDetail({ id }: { id: string }) {
   const router = useRouter();
@@ -30,6 +46,17 @@ export function RequestDetail({ id }: { id: string }) {
   const [selectedOffers, setSelectedOffers] = useState<string[]>([]);
   const [showComparison, setShowComparison] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState<string | null>(null);
+  const [bookingIntents, setBookingIntents] = useState<BookingIntent[]>([]);
+  const [activeOfferForBooking, setActiveOfferForBooking] = useState<Offer | null>(null);
+  const [evidenceFiles, setEvidenceFiles] = useState<BookingPaymentEvidenceFile[]>([]);
+  const [evidenceInputKey, setEvidenceInputKey] = useState(0);
+  const [payerName, setPayerName] = useState('');
+  const [paymentReference, setPaymentReference] = useState('');
+  const [evidenceNotes, setEvidenceNotes] = useState('');
+  const [skipProof, setSkipProof] = useState(false);
+  const [skipProofAcknowledged, setSkipProofAcknowledged] = useState(false);
+  const [bookingError, setBookingError] = useState<string | null>(null);
+  const bookingErrorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Simulate API fetch
@@ -40,6 +67,7 @@ export function RequestDetail({ id }: { id: string }) {
       setOffers(offs);
       const ops = MockDB.getOperators();
       setOperators(ops);
+      setBookingIntents(Repository.getBookingIntents(customerContext));
     }
     setLoading(false);
   }, [id]);
@@ -50,17 +78,94 @@ export function RequestDetail({ id }: { id: string }) {
     return () => window.removeEventListener(CURRENCY_CHANGE_EVENT, updateSettings);
   }, []);
 
-  const handleBooking = (offer: Offer) => {
+  useEffect(() => {
+    if (bookingError) bookingErrorRef.current?.focus();
+  }, [bookingError]);
+
+  const resetBookingForm = () => {
+    setEvidenceFiles([]);
+    setEvidenceInputKey((current) => current + 1);
+    setPayerName('');
+    setPaymentReference('');
+    setEvidenceNotes('');
+    setSkipProof(false);
+    setSkipProofAcknowledged(false);
+    setBookingError(null);
+  };
+
+  const handleEvidenceChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? []);
+    const invalidFile = files.find((file) => !isAcceptedEvidenceFile(file));
+
+    if (invalidFile) {
+      setEvidenceFiles([]);
+      setEvidenceInputKey((current) => current + 1);
+      setBookingError('Payment evidence must be an image or PDF.');
+      return;
+    }
+
+    const uploadedAt = new Date().toISOString();
+    setEvidenceFiles(
+      files.map((file) => ({
+        id: crypto.randomUUID(),
+        name: file.name,
+        mimeType: file.type,
+        sizeBytes: file.size,
+        kind: getEvidenceFileKind(file),
+        lastModified: file.lastModified,
+        uploadedAt,
+      }))
+    );
+
+    if (files.length > 0) {
+      setSkipProof(false);
+      setSkipProofAcknowledged(false);
+      setBookingError(null);
+    }
+  };
+
+  const handleBookingSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!activeOfferForBooking) return;
+
+    const hasEvidence = evidenceFiles.length > 0;
+
+    if (!hasEvidence && !skipProof) {
+      setBookingError('Upload payment evidence or choose Skip proof before continuing.');
+      return;
+    }
+
+    if (skipProof && !skipProofAcknowledged) {
+      setBookingError('Confirm the skip-proof acknowledgement before continuing.');
+      return;
+    }
+
     try {
-      Repository.createBookingIntent(customerContext, {
-        offerId: offer.id,
-        operatorId: offer.operatorId,
-        notes: 'Customer clicked Proceed',
+      const submittedAt = new Date().toISOString();
+      const newIntent = Repository.createBookingIntent(customerContext, {
+        offerId: activeOfferForBooking.id,
+        operatorId: activeOfferForBooking.operatorId,
+        notes: evidenceNotes,
+        paymentEvidence: hasEvidence
+          ? {
+              files: evidenceFiles,
+              payerName,
+              paymentReference,
+              notes: evidenceNotes,
+              submittedAt,
+              storageStatus: 'metadata-only',
+            }
+          : undefined,
+        skipProofAcknowledged: !hasEvidence && skipProofAcknowledged,
       });
-      setBookingSuccess(offer.id);
+      setBookingIntents((current) => [newIntent, ...current.filter((intent) => intent.id !== newIntent.id)]);
+      if (!newIntent.referenceCode) throw new Error('Reference code was not issued.');
+      setBookingSuccess(newIntent.referenceCode);
+      setActiveOfferForBooking(null);
+      resetBookingForm();
       setTimeout(() => setBookingSuccess(null), 3000);
-    } catch {
-      alert('Failed to create booking intent');
+    } catch (error) {
+      setBookingError(error instanceof Error ? error.message : 'Failed to create booking intent.');
     }
   };
 
@@ -68,6 +173,9 @@ export function RequestDetail({ id }: { id: string }) {
   if (!request) return <div className="p-8 text-center text-[#FFFFFF]">Request not found.</div>;
 
   const getOperator = (opId: string) => operators.find((o) => o.id === opId);
+  const activeBookingOperatorName = activeOfferForBooking
+    ? displayValue(getOperator(activeOfferForBooking.operatorId)?.companyName)
+    : 'Not provided';
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
@@ -93,6 +201,18 @@ export function RequestDetail({ id }: { id: string }) {
         </span>
       </div>
 
+      {bookingSuccess ? (
+        <div
+          role="status"
+          className="mb-6 rounded-md border border-[var(--borderSubtle)] bg-[rgba(34,197,94,0.1)] p-4 text-sm text-[var(--text)]"
+        >
+          Booking intent recorded. Reference{' '}
+          <span data-testid="booking-intent-reference-code" className="font-mono text-[var(--yellow)]">
+            {bookingSuccess}
+          </span>
+        </div>
+      ) : null}
+
       {/* Request Summary */}
       <div className="mb-8 rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] p-6">
         <div className="grid grid-cols-2 gap-4 text-sm text-[#FFFFFF] sm:grid-cols-4">
@@ -106,7 +226,7 @@ export function RequestDetail({ id }: { id: string }) {
           </div>
           <div>
             <p className="text-[rgba(255,255,255,0.4)]">Departure</p>
-            <p>{request.departureCity || '-'}</p>
+            <p>{displayValue(request.departureCity)}</p>
           </div>
           <div>
             <p className="text-[rgba(255,255,255,0.4)]">Budget</p>
@@ -124,12 +244,13 @@ export function RequestDetail({ id }: { id: string }) {
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-semibold text-[#FFFFFF]">Offers Received ({offers.length})</h2>
           {selectedOffers.length > 1 && (
-            <button
+            <Button
+              type="button"
+              size="sm"
               onClick={() => setShowComparison(true)}
-              className="rounded-lg bg-[#FFD31D] px-4 py-2 text-sm font-medium text-[#000000] hover:bg-[#E5BD1A]"
             >
               Compare ({selectedOffers.length})
-            </button>
+            </Button>
           )}
         </div>
         
@@ -142,6 +263,9 @@ export function RequestDetail({ id }: { id: string }) {
             {offers.map((offer) => {
               const op = getOperator(offer.operatorId);
               const isSelected = selectedOffers.includes(offer.id);
+              const existingIntent = bookingIntents.find((intent) => intent.offerId === offer.id);
+              const operatorName = displayValue(op?.companyName);
+              const distanceToHaram = displayValue(offer.distanceToHaram);
               
               return (
                 <div 
@@ -154,6 +278,7 @@ export function RequestDetail({ id }: { id: string }) {
                   <div className="mb-4 flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <input
+                        id={`compare-offer-${offer.id}`}
                         type="checkbox"
                         data-testid="offer-compare-checkbox"
                         checked={isSelected}
@@ -166,33 +291,53 @@ export function RequestDetail({ id }: { id: string }) {
                           }
                         }}
                         className="h-4 w-4 rounded border-[rgba(255,255,255,0.3)] bg-transparent text-[#FFD31D] focus:ring-[#FFD31D]"
+                        aria-label={`Compare offer from ${operatorName}`}
                       />
-                      <span className="font-medium text-[#FFFFFF]">{op?.companyName || 'Unknown Operator'}</span>
+                      <span className="font-medium text-[#FFFFFF]">{operatorName}</span>
                     </div>
                     {op?.verificationStatus === 'verified' && (
                       <span className="text-xs text-[#FFD31D]">Verified</span>
                     )}
                   </div>
                   <div className="mb-4 text-2xl font-bold text-[#FFD31D]">
-                    {getCurrencySymbol(offer.currency)}{offer.pricePerPerson}
+                    {formatMoney(offer.pricePerPerson, offer.currency, regionSettings.locale)}
                     <span className="text-sm font-normal text-[rgba(255,255,255,0.64)]">/person</span>
                   </div>
                   <div className="space-y-2 text-sm text-[rgba(255,255,255,0.64)]">
                     <p>{offer.totalNights} Nights Total</p>
                     <p>{offer.hotelStars} Star Hotels</p>
-                    <p>{offer.distanceToHaram} to Haram</p>
+                    <p>{distanceToHaram === 'Not provided' ? distanceToHaram : `${distanceToHaram} to Haram`}</p>
                   </div>
+                  {existingIntent ? (
+                    <div className="mt-5 rounded-md border border-[var(--borderSubtle)] bg-[rgba(255,255,255,0.04)] p-3 text-sm">
+                      <p className="font-medium text-[var(--text)]">Booking intent recorded</p>
+                      <p className="mt-1 text-[var(--textMuted)]">
+                        Reference:{' '}
+                        <span data-testid="booking-intent-reference-code" className="font-mono text-[var(--yellow)]">
+                          {displayValue(existingIntent.referenceCode)}
+                        </span>
+                      </p>
+                      <p className="mt-1 text-xs text-[var(--textMuted)]">
+                        Evidence is visible only to you, the involved operator, and KaabaTrip admin.
+                      </p>
+                    </div>
+                  ) : null}
                   <div className="mt-6 flex gap-2">
-                    <button className="flex-1 rounded-lg bg-[rgba(255,255,255,0.1)] py-2 text-sm font-medium text-[#FFFFFF] hover:bg-[rgba(255,255,255,0.2)]">
+                    <Button type="button" variant="secondary" size="sm" className="flex-1">
                       View Details
-                    </button>
-                    <button 
-                      onClick={() => handleBooking(offer)}
-                      disabled={bookingSuccess === offer.id}
-                      className="flex-1 rounded-lg bg-[#FFD31D] py-2 text-sm font-medium text-[#000000] hover:bg-[#E5BD1A] disabled:opacity-50"
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => {
+                        resetBookingForm();
+                        setActiveOfferForBooking(offer);
+                      }}
+                      disabled={Boolean(existingIntent)}
+                      className="flex-1"
                     >
-                      {bookingSuccess === offer.id ? 'Requested!' : 'Book Now'}
-                    </button>
+                      {existingIntent ? 'Intent recorded' : 'Proceed direct'}
+                    </Button>
                   </div>
                 </div>
               );
@@ -209,6 +354,144 @@ export function RequestDetail({ id }: { id: string }) {
           <div className="mt-4">
             <ComparisonTable offers={offers.filter(o => selectedOffers.includes(o.id))} />
           </div>
+        </OverlayContent>
+      </Dialog>
+
+      <Dialog
+        open={Boolean(activeOfferForBooking)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setActiveOfferForBooking(null);
+            resetBookingForm();
+          }
+        }}
+      >
+        <OverlayContent className="max-w-2xl">
+          <OverlayHeader>
+            <OverlayTitle>Proceed direct with operator</OverlayTitle>
+          </OverlayHeader>
+
+          <form className="mt-5 space-y-5" onSubmit={handleBookingSubmit}>
+            <section
+              aria-labelledby="pay-operator-direct-heading"
+              className="rounded-md border border-[var(--borderSubtle)] bg-[rgba(255,211,29,0.08)] p-4"
+            >
+              <h3 id="pay-operator-direct-heading" className="text-sm font-semibold text-[var(--text)]">
+                Pay operator direct
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-[var(--textMuted)]">{PAY_OPERATOR_DIRECT_DISCLOSURE}</p>
+              <p className="mt-2 text-sm leading-6 text-[var(--textMuted)]">
+                Selected operator: <span className="font-medium text-[var(--text)]">{activeBookingOperatorName}</span>
+              </p>
+            </section>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Input
+                label="Payer name (optional)"
+                value={payerName}
+                onChange={(event) => setPayerName(event.target.value)}
+                autoComplete="name"
+              />
+              <Input
+                label="Operator payment reference (optional)"
+                value={paymentReference}
+                onChange={(event) => setPaymentReference(event.target.value)}
+                autoComplete="off"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="payment-evidence-upload" className="block text-sm font-medium text-[var(--text)]">
+                Upload payment evidence
+              </label>
+              <input
+                key={evidenceInputKey}
+                id="payment-evidence-upload"
+                type="file"
+                accept={PAYMENT_EVIDENCE_ACCEPT}
+                multiple
+                data-testid="payment-evidence-upload"
+                aria-describedby="payment-evidence-help"
+                onChange={handleEvidenceChange}
+                className="block min-h-11 w-full rounded-md border border-[var(--borderSubtle)] bg-[var(--surfaceDark)] px-3 py-2 text-sm text-[var(--text)] file:mr-4 file:rounded-md file:border-0 file:bg-[var(--yellow)] file:px-3 file:py-2 file:text-sm file:font-medium file:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focusRing)]"
+              />
+              <p id="payment-evidence-help" className="text-xs text-[var(--textMuted)]">
+                Accepted formats: images and PDF. This local MVP stores file metadata only.
+              </p>
+              {evidenceFiles.length > 0 ? (
+                <ul className="space-y-1 text-xs text-[var(--textMuted)]" aria-label="Selected evidence files">
+                  {evidenceFiles.map((file) => (
+                    <li key={file.id}>
+                      {file.name} ({file.kind.toUpperCase()})
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+
+            <Textarea
+              label="Payment note (optional)"
+              value={evidenceNotes}
+              onChange={(event) => setEvidenceNotes(event.target.value)}
+              placeholder="Add optional context for the operator or admin."
+            />
+
+            <div className="space-y-3 rounded-md border border-[var(--borderSubtle)] bg-[rgba(255,255,255,0.04)] p-4">
+              <Checkbox
+                id="skip-payment-proof"
+                data-testid="payment-proof-skip-checkbox"
+                label="Skip proof for now"
+                helperText="Use this only if you cannot upload payment evidence at this step."
+                checked={skipProof}
+                onChange={(event) => {
+                  const checked = event.target.checked;
+                  setSkipProof(checked);
+                  setSkipProofAcknowledged(false);
+                  if (checked) {
+                    setEvidenceFiles([]);
+                    setEvidenceInputKey((current) => current + 1);
+                  }
+                }}
+              />
+              {skipProof ? (
+                <Checkbox
+                  id="skip-payment-proof-acknowledgement"
+                  data-testid="payment-proof-acknowledgement-checkbox"
+                  label="I understand the limitation"
+                  helperText={SKIP_PROOF_ACKNOWLEDGEMENT}
+                  checked={skipProofAcknowledged}
+                  onChange={(event) => setSkipProofAcknowledged(event.target.checked)}
+                />
+              ) : null}
+            </div>
+
+            {bookingError ? (
+              <div
+                ref={bookingErrorRef}
+                role="alert"
+                tabIndex={-1}
+                className="rounded-md border border-[var(--danger)] bg-[rgba(239,68,68,0.12)] p-3 text-sm text-[var(--text)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--danger)]"
+              >
+                {bookingError}
+              </div>
+            ) : null}
+
+            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  setActiveOfferForBooking(null);
+                  resetBookingForm();
+                }}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" data-testid="booking-intent-submit">
+                Record booking intent
+              </Button>
+            </div>
+          </form>
         </OverlayContent>
       </Dialog>
 

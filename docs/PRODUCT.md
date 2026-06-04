@@ -33,6 +33,16 @@ No payment gateway yet. Success means:
 2. Operator lists packages → packages appear in search → operator sees leads
 3. Lead captured with package context attached
 
+### Pay-operator-direct disclosure SSOT
+
+User-facing payment handoff surfaces must use this disclosure wording:
+
+> You pay the operator directly. KaabaTrip does not collect, hold, or transfer customer funds. The operator is the contracting party and is responsible for package fulfilment, payment records, and any payment outcome.
+
+If a traveller skips payment proof, the acknowledgement must include:
+
+> KaabaTrip does not have access to the operator’s payment records… ability to help evidence payment may be limited… This does not remove legal rights…
+
 ## Localisation (new requirement)
 
 - **Currency:** Based on user's detected location. UK = GBP, France = EUR, UAE = AED.
@@ -61,6 +71,7 @@ No payment gateway yet. Success means:
 ### Out of scope
 
 - Payment gateway
+- KaabaTrip-held customer funds
 - Scraping competitor sites
 - WhatsApp/phone automation
 - Self-serve operator verification (manual review first)

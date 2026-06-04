@@ -16,6 +16,7 @@ This document outlines the security architecture and assumptions for the KaabaTr
 
 - RBAC is enforced at the Data Access Layer (`lib/api/repository.ts`).
 - `MockDB` stores all data, but `Repository` filters it based on `RequestContext`.
+- BookingIntent payment evidence is returned only through the BookingIntent RBAC path: owning customer, involved operator, or admin.
 
 ## Input Validation
 
@@ -34,6 +35,11 @@ This document outlines the security architecture and assumptions for the KaabaTr
 
 - **Threat**: User accesses `/requests/[id]` for a request they don't own.
 - **Mitigation**: `Repository.getRequestById` verifies `customerId` matches `ctx.userId`.
+
+### 2a. Payment Evidence Leakage
+
+- **Threat**: Evidence metadata is visible to an unrelated customer or operator.
+- **Mitigation**: `Repository.getBookingIntents` filters by `customerId` for customers and `operatorId` for operators. `Repository.createBookingIntent` verifies the selected offer belongs to a request owned by the customer and that the operator matches the offer before saving evidence metadata.
 
 ### 3. XSS (Cross-Site Scripting)
 

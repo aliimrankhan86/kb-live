@@ -65,7 +65,7 @@ test('End-to-end Quote -> Offer -> Compare Flow', async ({ page }) => {
   await page.waitForLoadState('domcontentloaded');
   
   // Verify Offer
-  await expect(page.locator('text=1500')).toBeVisible();
+  await expect(page.locator('text=£1,500')).toBeVisible();
   await expect(page.locator('text=Al-Hidayah Travel')).toBeVisible(); // Mock operator
   
   // 4. Comparison
@@ -100,4 +100,23 @@ test('End-to-end Quote -> Offer -> Compare Flow', async ({ page }) => {
   await expect(priceCell).toBeVisible();
   await expect(priceCell).not.toHaveText('');
   await expect(priceCell).toContainText(/[£$€]|AED|USD|GBP|EUR|CAD/);
+
+  // 5. Payment handoff requires evidence or explicit skip acknowledgement.
+  await page.keyboard.press('Escape');
+  await expect(page.locator('text=Compare Offers')).not.toBeVisible();
+
+  await page.getByRole('button', { name: 'Proceed direct' }).first().click();
+  await expect(page.getByText('Pay operator direct')).toBeVisible();
+  await expect(page.getByTestId('payment-evidence-upload')).toHaveAttribute('accept', /image\/\*,application\/pdf/);
+
+  await page.getByTestId('booking-intent-submit').click();
+  await expect(page.getByRole('alert')).toContainText('Upload payment evidence or choose Skip proof');
+
+  await page.getByTestId('payment-proof-skip-checkbox').check();
+  await page.getByTestId('booking-intent-submit').click();
+  await expect(page.getByRole('alert')).toContainText('Confirm the skip-proof acknowledgement');
+
+  await page.getByTestId('payment-proof-acknowledgement-checkbox').check();
+  await page.getByTestId('booking-intent-submit').click();
+  await expect(page.getByTestId('booking-intent-reference-code').first()).toContainText(/^KT-/);
 });
