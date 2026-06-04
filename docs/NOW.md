@@ -170,5 +170,18 @@ npm run build
 - `npm run build`: pass
 - `npm test`: 75/75 pass
 - `npm run build`: pass
+
+## Persistence decision (2026-06-04)
+
+**Chosen stack:** Supabase (London eu-west-2) + Prisma ORM + Row Level Security + Supabase Storage
+
+**Rationale:** Single provider reduces integration surface and misconfiguration risk. London region aligns with UK-first posture and GDPR data residency. Prisma provides mature Next.js integration, type-safe queries, and migration tooling. RLS gives deny-by-default row security without extra middleware. Free tier acceptable for dev/early validation; Pro planned for live beta.
+
+**See:** `docs/PHASE_2_AUDIT.md` persistence decision record, `docs/AI_RUNBOOK.md` P1A–P1H micro-tasks.
+
+## Next step
+
+Next micro-task: **P1A-SUPABASE-SETUP** — create Supabase project, install deps, configure env.
+
 - `npx playwright test e2e/bank-payment.spec.ts`: 4/4 pass (chromium)
 - `npx playwright test e2e/flow.spec.ts e2e/catalogue.spec.ts e2e/bank-payment.spec.ts`: 18/18 pass (all browsers)
