@@ -138,6 +138,49 @@ Allow Playwright webServer to bind to localhost so e2e can run without EPERM.
 
 ---
 
+## 2026-06-04 - Persistence Decision: Supabase London + Prisma + RLS
+
+**Goal:** Unblock P1-PERSISTENCE-MIGRATION by choosing a persistence stack that is secure, GDPR-friendly, cheap, and light to integrate.
+
+**Decision:** Supabase (London eu-west-2) + Prisma ORM + Row Level Security + Supabase Storage
+
+**Rationale:**
+
+| Factor              | Supabase                               | Alternative (Neon + separate auth/storage)                       |
+| ------------------- | -------------------------------------- | ---------------------------------------------------------------- |
+| Integration surface | Single provider, single SDK            | Three providers, three SDKs, more misconfiguration risk          |
+| UK/GDPR             | London region available                | London available but auth/storage still need EU residency checks |
+| Auth                | Built-in, JWT-based, RLS-aware         | Requires separate auth provider (Clerk/Auth0/next-auth)          |
+| Storage             | Built-in, private buckets, signed URLs | Requires separate provider (S3/R2/Cloudflare)                    |
+| Cost                | Free tier for dev; Pro ~$25/mo         | Free tier for dev; Pro ~$19/mo + auth costs + storage costs      |
+| Next.js integration | @supabase/ssr for cookie-based SSR     | Varies by auth choice                                            |
+| Type safety         | Prisma generates types from schema     | Prisma still works but auth/storage are untyped                  |
+| RLS                 | Native Postgres RLS, deny-by-default   | Native Postgres RLS but auth context harder to wire              |
+
+**Security guardrails:**
+
+- Anon key: client-side safe, cannot bypass RLS
+- Service role key: server-side only, never in client bundle
+- RLS: deny-by-default on every table; explicit policies per role
+- Storage: private buckets only; signed URLs generated server-side
+- Evidence: file bytes in Storage bucket, metadata in DB, 90-day retention
+- Bank details: never in Storage; never emailed; in-app only
+- MFA: required for Supabase org access
+
+**Free-tier caveat:**
+
+- Supabase Free projects pause after 7 days of inactivity.
+- Acceptable for development and early validation.
+- Plan to move to Pro before private beta goes live.
+
+**Rejected alternative:** Neon + separate Auth + separate Storage. Viable but higher integration complexity and misconfiguration risk for a small team.
+
+**Next steps:** See `docs/AI_RUNBOOK.md` ACTIVE TASKS for P1A–P1H micro-task breakdown.
+
+**Result:** APPROVED — proceed to implementation
+
+---
+
 ## 2026-06-04 - P2-PKG-CSV
 
 **Goal:** Add CSV import and export for operator packages to speed up bulk onboarding.

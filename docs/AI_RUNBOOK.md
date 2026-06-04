@@ -63,6 +63,7 @@ These constraints are hard. Any output that violates them must be rejected.
 - a8eee55: Bank details types, MockDB storage, Repository RBAC methods (MT-1 + MT-2) shipped.
 - 3d5ffe1: Audit evidence docs for MT-1/MT-2 shipped.
 - 2bd339f: Operator bank details UI (BankDetailsForm, PhoneOtpModal, /operator/settings/payment-details, sidebar nav) shipped (MT-3).
+- Supabase decision: London (eu-west-2) + Prisma + RLS + Storage. See docs/PHASE_2_AUDIT.md persistence decision record.
 
 ### Required copy (must not be altered)
 
@@ -144,15 +145,25 @@ Universal pick rule: scan ACTIVE TASKS top-to-bottom; pick the first READY task 
 
 ### Architect
 
-1. P0-COMPLAINTS-FLOW (depends on [])
-2. P1-EVIDENCE-BYTES (depends on c8c1774)
-3. P1-PERSISTENCE-MIGRATION (depends on a8eee55)
+1. P1A-SUPABASE-SETUP (depends on [])
+2. P1B-PRISMA-SCHEMA (depends on P1A)
+3. P1C-DB-ADAPTER (depends on P1B)
+4. P1D-AUTH-MIDDLEWARE (depends on P1A)
+5. P1E-RLS-POLICIES (depends on P1B)
+6. P1F-STORAGE-BUCKETS (depends on P1A)
+7. P1G-SEED-MIGRATION (depends on P1C, P1E)
+8. P1H-CUTOVER (depends on P1G)
 
 ### Backend
 
-1. P0-COMPLAINTS-FLOW (depends on [])
-2. P1-EVIDENCE-BYTES (depends on c8c1774)
-3. P1-PERSISTENCE-MIGRATION (depends on a8eee55)
+1. P1A-SUPABASE-SETUP (depends on [])
+2. P1B-PRISMA-SCHEMA (depends on P1A)
+3. P1C-DB-ADAPTER (depends on P1B)
+4. P1D-AUTH-MIDDLEWARE (depends on P1A)
+5. P1E-RLS-POLICIES (depends on P1B)
+6. P1F-STORAGE-BUCKETS (depends on P1A)
+7. P1G-SEED-MIGRATION (depends on P1C, P1E)
+8. P1H-CUTOVER (depends on P1G)
 
 ### Frontend
 
@@ -191,7 +202,14 @@ No READY tasks currently. Monitor P0-COMPLAINTS-FLOW for operator routing spec.
 P0-COMPLAINTS-FLOW             Complaints routing: customer → operator → admin triage
 P0-HYGIENE-ARTEFACTS           Remove duplicate docs dirs, gitignore .next artefacts
 P1-EVIDENCE-BYTES              Evidence file bytes storage with RBAC + retention
-P1-PERSISTENCE-MIGRATION       Replace localStorage with server persistence for beta
+P1A-SUPABASE-SETUP             Create Supabase project (London), install deps, env config
+P1B-PRISMA-SCHEMA              Design Prisma schema matching existing types
+P1C-DB-ADAPTER                 Build DB adapter layer (Repository interface unchanged)
+P1D-AUTH-MIDDLEWARE            Next.js middleware + session strategy
+P1E-RLS-POLICIES               Row Level Security policies for all tables
+P1F-STORAGE-BUCKETS            Supabase Storage: evidence (private), exports (private)
+P1G-SEED-MIGRATION             Migrate seed data; SQL seed script
+P1H-CUTOVER                    Remove MockDB fallback; all tests against Postgres
 P1-SEO-CORRIDORS               Budget Umrah corridor pages (London / Birmingham / Manchester)
 P2-PKG-CSV                     CSV import/export for operator packages
 ```
@@ -437,22 +455,142 @@ docs_updated: [docs/ARCHITECTURE.md, docs/SECURITY.md, docs/NOW.md]
 ```yaml
 id: P1-PERSISTENCE-MIGRATION
 priority: P1
-status: BLOCKED
+status: READY
 primary_owner_role: Backend
 supporting_roles: [Architect]
-goal: Replace localStorage-based MockDB with a server-side persistence layer (Postgres or similar) suitable for private beta.
-dependencies: [a8eee55]
+goal: Replace localStorage-based MockDB with server-side persistence (Supabase London + Prisma + RLS).
+decision: Supabase (London eu-west-2) + Prisma ORM + Row Level Security + Supabase Storage
+decision_date: 2026-06-04
+decision_rationale: |
+  Single provider (Postgres + Auth + Storage) reduces integration surface and misconfiguration risk.
+  London region aligns with UK-first posture and GDPR data residency.
+  Prisma provides mature Next.js integration, type-safe queries, and migration tooling.
+  RLS gives deny-by-default row security without extra middleware.
+  Free tier acceptable for dev/early validation; Pro planned for live beta.
+micro_tasks:
+  - P1A-SUPABASE-SETUP
+  - P1B-PRISMA-SCHEMA
+  - P1C-DB-ADAPTER
+  - P1D-AUTH-MIDDLEWARE
+  - P1E-RLS-POLICIES
+  - P1F-STORAGE-BUCKETS
+  - P1G-SEED-MIGRATION
+  - P1H-CUTOVER
+```
+
+```yaml
+id: P1A-SUPABASE-SETUP
+priority: P1
+status: READY
+primary_owner_role: Backend
+supporting_roles: [Architect]
+goal: Create Supabase project, install SDK/Prisma, configure environment variables.
+dependencies: []
 allowed_scope:
-  - lib/api/mock-db.ts
-  - lib/api/repository.ts
-  - lib/api/db/ (new)
-  - app/api/ (new route handlers)
+  - package.json
+  - .env / .env.example
+  - lib/supabase/ (new)
 acceptance_criteria:
-  - Repository interface unchanged — only lib/api/ internals change
-  - All existing unit tests pass against the new persistence layer
-  - Auth middleware wired to operator and customer routes
-  - Server-side sessions replace localStorage session simulation
-  - Seed data migrated to a SQL seed script
+  - Supabase project created in London (eu-west-2) region
+  - @supabase/supabase-js and @supabase/ssr installed
+  - prisma and @prisma/client installed
+  - DATABASE_URL and DIRECT_URL in .env.example (no real keys committed)
+  - Supabase URL and anon key in .env.example
+  - lib/supabase/client.ts exports createClient for browser
+  - lib/supabase/server.ts exports createClient for server (reads cookies)
+  - lib/supabase/middleware.ts exports updateSession for Next.js middleware
+  - tsc --noEmit passes
+  - npm run build passes
+checks_required:
+  - npx tsc --noEmit
+  - npm run build
+docs_to_update:
+  - docs/ARCHITECTURE.md
+  - docs/SECURITY.md
+evidence_required: commit hash + env.example updated
+```
+
+```yaml
+id: P1B-PRISMA-SCHEMA
+priority: P1
+status: READY
+primary_owner_role: Backend
+supporting_roles: [Architect]
+goal: Design Prisma schema that maps 1:1 to existing TypeScript types in lib/types.ts.
+dependencies: [P1A]
+allowed_scope:
+  - prisma/schema.prisma
+  - prisma/migrations/ (new)
+acceptance_criteria:
+  - Every entity in lib/types.ts has a matching Prisma model
+  - Enums use native Prisma enum (mapped to PostgreSQL enum)
+  - JSON fields used for nested objects (inclusions, roomOccupancyOptions, eligibilityFlags)
+  - Decimal used for monetary fields (pricePerPerson, depositAmount)
+  - UUID used for all id fields (default uuid())
+  - createdAt/updatedAt use @default(now()) / @updatedAt
+  - Unique constraints on slug, referenceCode, (operatorId + status=active) for payment details
+  - Relation fields named clearly (operator packages, operator bank changes, etc.)
+  - First migration generated: npx prisma migrate dev --name init
+  - tsc --noEmit passes
+checks_required:
+  - npx tsc --noEmit
+  - npx prisma validate
+  - npx prisma migrate dev
+docs_to_update:
+  - docs/ARCHITECTURE.md
+evidence_required: commit hash + schema.prisma file
+```
+
+```yaml
+id: P1C-DB-ADAPTER
+priority: P1
+status: READY
+primary_owner_role: Backend
+supporting_roles: [Architect]
+goal: Build a DB adapter layer that implements the same interface as MockDB so Repository methods work unchanged.
+dependencies: [P1B]
+allowed_scope:
+  - lib/api/db/adapter.ts (new)
+  - lib/api/db/ (new)
+acceptance_criteria:
+  - Adapter exports same method signatures as MockDB (getRequests, saveRequest, etc.)
+  - All reads use Prisma findMany/findUnique with proper include
+  - All writes use Prisma create/update with proper connect/disconnect
+  - Transaction support for multi-table operations (Prisma $transaction)
+  - Type-safe: no any types; Prisma-generated types used throughout
+  - Adapter can be swapped with MockDB via environment flag (FEATURE_USE_REAL_DB)
+  - Unit tests run against MockDB (fast); integration tests against real DB (optional)
+  - tsc --noEmit passes
+  - npm test passes
+checks_required:
+  - npx tsc --noEmit
+  - npm test
+docs_to_update:
+  - docs/ARCHITECTURE.md
+evidence_required: commit hash + adapter.ts
+```
+
+```yaml
+id: P1D-AUTH-MIDDLEWARE
+priority: P1
+status: READY
+primary_owner_role: Backend
+supporting_roles: [Architect, Frontend]
+goal: Replace localStorage session simulation with Supabase Auth + Next.js middleware.
+dependencies: [P1A]
+allowed_scope:
+  - middleware.ts (new or update)
+  - app/api/auth/ (new route handlers)
+  - lib/api/repository.ts (context change)
+acceptance_criteria:
+  - middleware.ts validates JWT on every request to /operator/*, /admin/*, /api/*
+  - Anonymous users can access public routes (/umrah, /packages, /search, /quote)
+  - Sign-up flow: operator vs customer role selection
+  - Sign-in flow: email + password (MVP; magic link future scope)
+  - RequestContext.userId comes from Supabase auth.getUser() (server-side)
+  - RequestContext.role comes from user metadata (role field)
+  - No localStorage session tokens stored in browser (httpOnly cookies only)
+  - Sign-out clears cookies and redirects to /
   - tsc --noEmit passes
   - npm test passes
 checks_required:
@@ -462,15 +600,133 @@ checks_required:
 docs_to_update:
   - docs/ARCHITECTURE.md
   - docs/SECURITY.md
-evidence_required: commit hash + ARCHITECTURE.md migration section updated
-blocked_reason: |
-  Requires infrastructure decisions before implementation:
-  1. ORM choice (Prisma vs Drizzle vs Kysely) — affects schema definition and type generation
-  2. Database connection strategy (connection pool, environment variables, local dev setup)
-  3. Auth middleware design (Next.js middleware vs API route guards, session strategy)
-  4. Migration strategy — unit tests import MockDB directly; need abstraction layer or test doubles
-  5. Seed data approach — SQL scripts vs TypeScript seeders
-  Smallest decision needed: Choose ORM and confirm DB provider (Neon/Supabase/Railway/local Docker).
+evidence_required: commit hash + middleware.ts
+```
+
+```yaml
+id: P1E-RLS-POLICIES
+priority: P1
+status: READY
+primary_owner_role: Backend
+supporting_roles: [Architect, Security]
+goal: Implement deny-by-default Row Level Security on every table with role-based policies.
+dependencies: [P1B]
+allowed_scope:
+  - prisma/schema.prisma (RLS enable flags)
+  - supabase/migrations/rls_*.sql
+  - docs/SECURITY.md
+acceptance_criteria:
+  - Every table has ENABLE ROW LEVEL SECURITY
+  - Default: no unauthenticated access (anon key cannot read/write)
+  - Customer policy: can read own quote requests, booking intents, complaints; cannot read others
+  - Operator policy: can read own profile, packages, bank changes, complaints, booking intents where operatorId matches
+  - Admin policy: can read all tables (bypass RLS via service role)
+  - Package policy: published packages readable by everyone; draft packages only by owning operator
+  - Audit log: insert-only for operators; read by admin and owning operator
+  - Policies tested with Prisma + Supabase integration tests
+  - No cross-tenant data leakage in test assertions
+  - tsc --noEmit passes
+checks_required:
+  - npx tsc --noEmit
+  - npm test
+docs_to_update:
+  - docs/SECURITY.md
+evidence_required: commit hash + SQL policy files + SECURITY.md RLS section
+```
+
+```yaml
+id: P1F-STORAGE-BUCKETS
+priority: P1
+status: READY
+primary_owner_role: Backend
+supporting_roles: [Architect, Security]
+goal: Configure Supabase Storage buckets for evidence files and CSV exports with private access.
+dependencies: [P1A]
+allowed_scope:
+  - supabase/migrations/storage_*.sql
+  - lib/api/storage.ts (new)
+acceptance_criteria:
+  - Bucket evidence-files: private, no public access
+  - Bucket operator-exports: private, no public access
+  - Upload via signed URL (time-limited, single-use where possible)
+  - Download via signed URL (time-limited, RBAC-checked before generation)
+  - Evidence file bytes stored in evidence-files bucket; metadata (filename, mimeType, size) in DB
+  - File types restricted to image/* and application/pdf
+  - Max file size: 5MB per file
+  - Never email file URLs; always generate fresh signed URL in-app
+  - tsc --noEmit passes
+checks_required:
+  - npx tsc --noEmit
+  - npm run build
+docs_to_update:
+  - docs/SECURITY.md
+evidence_required: commit hash + storage bucket config + storage.ts
+```
+
+```yaml
+id: P1G-SEED-MIGRATION
+priority: P1
+status: READY
+primary_owner_role: Backend
+supporting_roles: [Architect]
+goal: Migrate MockDB seed data to a Prisma seed script + SQL seed for reference.
+dependencies: [P1C, P1E]
+allowed_scope:
+  - prisma/seed.ts
+  - supabase/seed.sql
+acceptance_criteria:
+  - prisma/seed.ts creates all seed operators, packages, users with correct IDs
+  - Seed script is idempotent (upsert, not insert)
+  - Verified operator (op1) has active payment details seeded
+  - At least one published package per operator seeded
+  - Seed data matches existing MockDB seed exactly (same IDs, same values)
+  - npx prisma db seed runs successfully
+  - SQL seed script (supabase/seed.sql) provided for manual Supabase dashboard import
+  - tsc --noEmit passes
+checks_required:
+  - npx tsc --noEmit
+  - npx prisma db seed
+docs_to_update:
+  - docs/ARCHITECTURE.md
+evidence_required: commit hash + seed.ts + seed.sql
+```
+
+```yaml
+id: P1H-CUTOVER
+priority: P1
+status: READY
+primary_owner_role: Backend
+supporting_roles: [Architect, QA]
+goal: Remove MockDB fallback, run full test suite against Postgres, update docs.
+dependencies: [P1G]
+allowed_scope:
+  - lib/api/mock-db.ts
+  - lib/api/repository.ts
+  - tests/
+acceptance_criteria:
+  - FEATURE_USE_REAL_DB defaults to true in production
+  - MockDB still available for unit tests via explicit flag (fast, no DB needed)
+  - All 75+ unit tests pass (MockDB mode)
+  - Integration tests pass (real DB mode, run in CI)
+  - Playwright E2E passes against real DB (no localStorage state dependencies)
+  - docs/ARCHITECTURE.md updated: data model section references Prisma schema
+  - docs/SECURITY.md updated: auth flow, RLS policies, storage security
+  - docs/NOW.md updated: persistence migration shipped
+  - No references to localStorage as primary storage in docs
+  - tsc --noEmit passes
+  - npm test passes
+  - npm run build passes
+  - Playwright passes
+checks_required:
+  - npx tsc --noEmit
+  - npm test
+  - npm run build
+  - npx playwright test
+docs_to_update:
+  - docs/ARCHITECTURE.md
+  - docs/SECURITY.md
+  - docs/NOW.md
+evidence_required: commit hash + all docs updated + test results
 ```
 
 ```yaml
