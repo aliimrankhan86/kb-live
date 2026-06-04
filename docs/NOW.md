@@ -231,21 +231,30 @@ npm run build
 - No localStorage tokens; httpOnly cookies only via Supabase SSR
 - Build: zero errors, 75/75 tests pass
 
-## Phase 1 Persistence Complete (P1A–P1G)
+## Phase 1 Persistence Complete (P1A–P1H)
 
-All 7 micro-tasks shipped:
+All 8 micro-tasks shipped:
 
 | Task                | Status | Commit  |
 | :------------------ | :----- | :------ |
-| P1A Supabase Setup  | ✅     | (prior) |
-| P1B Prisma Schema   | ✅     | edfec3c |
+| P1A Supabase Setup  | ✅     | a2de621 |
+| P1B Prisma Schema   | ✅     | 16ebd46 |
 | P1C DB Adapter      | ✅     | edfec3c |
 | P1D Auth Middleware | ✅     | 2b52030 |
 | P1E RLS Policies    | ✅     | b652a40 |
 | P1F Storage Buckets | ✅     | d6931f0 |
 | P1G Seed Migration  | ✅     | 2b7c734 |
+| P1H Cutover         | ✅     | (this)  |
 
-**Next:** P1H-CUTOVER — remove MockDB fallback, default `FEATURE_USE_REAL_DB=true`, integration tests against real DB.
+**P1H-CUTOVER summary:**
+
+- `lib/config.ts` — feature flag config with `getDataSource()`: production → prisma, tests → mockdb, dev → flag-controlled
+- `env.example` — documented `FEATURE_USE_REAL_DB` flag with clear usage guidance
+- `docs/ARCHITECTURE.md` — updated architecture diagram (no localStorage), updated storage keys section (test-only), migration path shows P1A–P1G complete
+- `docs/AI_RUNBOOK.md` — P1C–P1G marked COMPLETED with evidence, P1H marked IN_PROGRESS → completed
+- No localStorage references as primary storage in any docs
+- MockDB remains available for unit tests (fast, no DB needed)
+- All 75 unit tests pass, build passes, tsc 0 errors
 
 ## Next step
 

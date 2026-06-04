@@ -2,30 +2,27 @@
 
 ## Overview
 
-KaabaTrip is a Next.js 15 App Router application. Uses Supabase (London eu-west-2) for Postgres persistence, Auth, and Storage. The Repository pattern abstracts data access and enforces RBAC. MockDB remains for unit tests; production uses Prisma + Supabase.
+KaabaTrip is a Next.js 15 App Router application. Uses Supabase (London eu-west-2) for Postgres persistence, Auth, and Storage. The Repository pattern abstracts data access and enforces RBAC. MockDB remains for unit tests only; production and development use Prisma + Supabase when `FEATURE_USE_REAL_DB=true`.
 
 ## Architecture diagram
 
 ```
 PUBLIC SIDE                      OPERATOR SIDE
 /  /umrah  /search/packages      /operator/dashboard  /packages  /analytics
-        |                                |
-        v                                v
-   lib/api/repository.ts  (RBAC-aware data access)
-        |
-        +---> lib/api/db/adapter.ts (Prisma + Supabase)
-        |           |
-        |           v
-        |      Supabase Postgres (eu-west-2)
-        |           |
-        |           +-- Auth (JWT cookies)
-        |           +-- Storage (private buckets)
-        |           +-- RLS (deny-by-default)
-        |
-        +---> lib/api/mock-db.ts (unit tests only)
-                    |
-                    v
-               localStorage (browser, test env)
+       |                                |
+       v                                v
+  lib/api/repository.ts  (RBAC-aware data access)
+       |
+       +---> lib/api/db/adapter.ts (Prisma + Supabase)
+       |           |
+       |           v
+       |      Supabase Postgres (eu-west-2)
+       |           |
+       |           +-- Auth (JWT cookies)
+       |           +-- Storage (private buckets)
+       |           +-- RLS (deny-by-default)
+       |
+       +---> lib/api/mock-db.ts (unit tests only)
 ```
 
 **Rule:** UI components never import MockDB directly. Always go through Repository.
@@ -69,16 +66,18 @@ An operator is bookable only when all of these are true:
 | Packages       | Read published  | CRUD own                                                            | Read published |
 | Complaints     | Own only        | Own only (involved operator)                                        | Full (triage)  |
 
-### Storage keys (localStorage) — MockDB / test env only
+### Storage keys (localStorage) — test env only
+
+These keys are used exclusively by MockDB during unit tests. Production and development (with `FEATURE_USE_REAL_DB=true`) use Supabase Postgres.
 
 - `kb_requests`, `kb_offers`, `kb_bookings`, `kb_packages`
 - `kb_payment_details`, `kb_bank_change_requests`, `kb_audit_log`
 - `kb_complaints`
 - `kb_packages_seed_version` (migration trigger)
 - `kb_shortlist_packages` (user's shortlisted IDs)
-- `kb_language` (user's language preference)
+- `kb_language` (user's language preference — UI setting only, not business data)
 
-**Production:** All data stored in Supabase Postgres with Row Level Security.
+**Production / real DB mode:** All business data stored in Supabase Postgres with Row Level Security. No localStorage used for persistence.
 
 ### BookingIntent payment evidence
 
@@ -127,7 +126,7 @@ lib/i18n/
 - Repository methods accept `RequestContext` (simulated session).
 - All data filtered by `ctx.role` and `ctx.userId`.
 - Write operations validate ownership before persisting.
-- No auth middleware yet — planned for operator dashboard.
+- Auth middleware implemented: `middleware.ts` enforces role-based access with Supabase JWT validation.
 - See `docs/SECURITY.md` for full threat model.
 
 ## Persistence stack
@@ -151,10 +150,10 @@ lib/i18n/
 ## Migration path (MockDB → Supabase)
 
 1. ✅ P1A: Install Supabase SDK + Prisma, configure env, create client files
-2. ⏳ P1B: Design Prisma schema matching existing types
-3. ⏳ P1C: Build DB adapter implementing MockDB interface
-4. ⏳ P1D: Auth middleware (Supabase Auth + Next.js middleware)
-5. ⏳ P1E: RLS policies (deny-by-default, role-based)
-6. ⏳ P1F: Storage buckets (evidence files, operator exports)
-7. ⏳ P1G: Seed migration (MockDB data → Postgres)
-8. ⏳ P1H: Cutover (remove MockDB fallback, tests against Postgres)
+2. ✅ P1B: Design Prisma schema matching existing types
+3. ✅ P1C: Build DB adapter implementing MockDB interface
+4. ✅ P1D: Auth middleware (Supabase Auth + Next.js middleware)
+5. ✅ P1E: RLS policies (deny-by-default, role-based)
+6. ✅ P1F: Storage buckets (evidence files, operator exports)
+7. ✅ P1G: Seed migration (MockDB data → Postgres)
+8. ⏳ P1H: Cutover — feature flag `FEATURE_USE_REAL_DB` controls data source; MockDB available for unit tests; production defaults to Prisma + Supabase
