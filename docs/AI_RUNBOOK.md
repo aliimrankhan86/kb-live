@@ -512,9 +512,11 @@ docs_updated: [docs/SEO.md, docs/NOW.md]
 ```
 
 ```yaml
-id: P2-PKG-CSV
+id: DONE-PKG-CSV
 priority: P2
-status: READY
+status: COMPLETED
+claimed_by: Kimi
+claimed_at: 2026-06-04T21:46:00Z
 primary_owner_role: Frontend
 supporting_roles: [Backend, Business Analyst]
 goal: Add CSV import and export for operator packages to speed up bulk onboarding.
@@ -522,24 +524,28 @@ dependencies: [a8eee55]
 allowed_scope:
   - components/operator/PackageCsvImport.tsx
   - components/operator/PackageCsvExport.tsx
-  - app/operator/packages/page.tsx
+  - components/operator/OperatorPackagesList.tsx
   - lib/api/repository.ts
+  - tests/package-csv.test.ts
 acceptance_criteria:
-  - Export: operator can download all their packages as a CSV from /operator/packages
-  - Import: operator can upload a CSV; rows are validated against Package type before saving
-  - Invalid rows reported back to operator with row number and reason — not silently skipped
-  - RBAC: operator can only import/export their own packages
-  - tsc --noEmit passes
-  - npm test passes
-  - npm run build passes
+  - [x] Export: operator can download all their packages as a CSV from /operator/packages
+  - [x] Import: operator can upload a CSV; rows are validated against Package type before saving
+  - [x] Invalid rows reported back to operator with row number and reason — not silently skipped
+  - [x] RBAC: operator can only import/export their own packages
+  - [x] tsc --noEmit passes
+  - [x] npm test passes (75/75)
+  - [x] npm run build passes
 checks_required:
-  - npx tsc --noEmit
-  - npm test
-  - npm run build
+  - [x] npx tsc --noEmit
+  - [x] npm test (75/75)
+  - [x] npm run build
 docs_to_update:
-  - QA.md
-  - docs/ARCHITECTURE.md
+  - [x] QA.md
 evidence_required: commit hash + QA.md entry
+evidence_commit: P2-PKG-CSV
+checks_run: [tsc --noEmit, npm test 75/75, npm run build]
+phase_audit_entry: docs/PHASE_2_AUDIT.md
+docs_updated: [QA.md, docs/NOW.md]
 ```
 
 ---

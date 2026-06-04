@@ -732,6 +732,186 @@ export const Repository = {
     return MockDB.getPackages().filter(p => p.operatorId === operatorId);
   },
 
+  exportPackagesAsCsv: (ctx: RequestContext): string => {
+    if (ctx.role !== 'operator') throw new Error('Unauthorized');
+    const packages = MockDB.getPackages().filter(p => p.operatorId === ctx.userId);
+    if (packages.length === 0) return '';
+
+    const headers = [
+      'title', 'slug', 'status', 'pilgrimageType', 'seasonLabel', 'dateWindowStart', 'dateWindowEnd',
+      'priceType', 'pricePerPerson', 'currency', 'totalNights', 'nightsMakkah', 'nightsMadinah',
+      'hotelMakkahStars', 'hotelMadinahStars', 'hotelMakkahName', 'hotelMadinahName',
+      'distanceToHaramMakkahMetres', 'distanceToHaramMadinahMetres',
+      'distanceBandMakkah', 'distanceBandMadinah', 'airline', 'departureAirport', 'flightType',
+      'depositAmount', 'paymentPlanAvailable', 'cancellationPolicy', 'groupType',
+      'visa', 'flights', 'transfers', 'meals',
+      'single', 'double', 'triple', 'quad',
+      'notes',
+    ];
+
+    const escapeCsv = (value: string | number | boolean | undefined) => {
+      if (value === undefined || value === null) return '';
+      const str = String(value);
+      if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+        return `"${str.replace(/"/g, '""')}"`;
+      }
+      return str;
+    };
+
+    const rows = packages.map((pkg) => [
+      pkg.title, pkg.slug, pkg.status, pkg.pilgrimageType, pkg.seasonLabel ?? '',
+      pkg.dateWindow?.start ?? '', pkg.dateWindow?.end ?? '',
+      pkg.priceType, pkg.pricePerPerson, pkg.currency, pkg.totalNights,
+      pkg.nightsMakkah, pkg.nightsMadinah,
+      pkg.hotelMakkahStars ?? '', pkg.hotelMadinahStars ?? '',
+      pkg.hotelMakkahName ?? '', pkg.hotelMadinahName ?? '',
+      pkg.distanceToHaramMakkahMetres ?? '', pkg.distanceToHaramMadinahMetres ?? '',
+      pkg.distanceBandMakkah, pkg.distanceBandMadinah,
+      pkg.airline ?? '', pkg.departureAirport ?? '', pkg.flightType ?? '',
+      pkg.depositAmount ?? '', pkg.paymentPlanAvailable ?? '',
+      pkg.cancellationPolicy ?? '', pkg.groupType ?? '',
+      pkg.inclusions.visa, pkg.inclusions.flights, pkg.inclusions.transfers, pkg.inclusions.meals,
+      pkg.roomOccupancyOptions.single, pkg.roomOccupancyOptions.double,
+      pkg.roomOccupancyOptions.triple, pkg.roomOccupancyOptions.quad,
+      pkg.notes ?? '',
+    ]);
+
+    return [headers.join(','), ...rows.map((r) => r.map(escapeCsv).join(','))].join('\n');
+  },
+
+  importPackagesFromCsv: (ctx: RequestContext, csvText: string): { saved: Package[]; errors: { row: number; reason: string }[] } => {
+    if (ctx.role !== 'operator') throw new Error('Unauthorized');
+
+    const lines = csvText.trim().split(/\r?\n/);
+    if (lines.length < 2) throw new Error('CSV must contain a header row and at least one data row');
+
+    const headers = lines[0].split(',').map((h) => h.trim());
+    const requiredColumns = ['title', 'pricePerPerson', 'currency', 'totalNights', 'pilgrimageType'];
+    const missing = requiredColumns.filter((c) => !headers.includes(c));
+    if (missing.length > 0) throw new Error(`Missing required columns: ${missing.join(', ')}`);
+
+    const getValue = (row: string[], col: string): string => {
+      const idx = headers.indexOf(col);
+      return idx >= 0 ? row[idx]?.trim() ?? '' : '';
+    };
+
+    const saved: Package[] = [];
+    const errors: { row: number; reason: string }[] = [];
+
+    for (let i = 1; i < lines.length; i += 1) {
+      const line = lines[i].trim();
+      if (!line) continue;
+
+      const cells: string[] = [];
+      let current = '';
+      let inQuotes = false;
+      for (let j = 0; j < line.length; j += 1) {
+        const char = line[j];
+        if (char === '"') {
+          if (inQuotes && line[j + 1] === '"') {
+            current += '"';
+            j += 1;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (char === ',' && !inQuotes) {
+          cells.push(current);
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      cells.push(current);
+
+      const title = getValue(cells, 'title');
+      const pricePerPerson = Number(getValue(cells, 'pricePerPerson'));
+      const currency = getValue(cells, 'currency');
+      const totalNights = Number(getValue(cells, 'totalNights'));
+      const pilgrimageType = getValue(cells, 'pilgrimageType') as 'umrah' | 'hajj';
+
+      if (!title) {
+        errors.push({ row: i + 1, reason: 'Title is required' });
+        continue;
+      }
+      if (Number.isNaN(pricePerPerson) || pricePerPerson <= 0) {
+        errors.push({ row: i + 1, reason: 'Price per person must be a positive number' });
+        continue;
+      }
+      if (!currency) {
+        errors.push({ row: i + 1, reason: 'Currency is required' });
+        continue;
+      }
+      if (Number.isNaN(totalNights) || totalNights <= 0) {
+        errors.push({ row: i + 1, reason: 'Total nights must be a positive number' });
+        continue;
+      }
+      if (pilgrimageType !== 'umrah' && pilgrimageType !== 'hajj') {
+        errors.push({ row: i + 1, reason: 'Pilgrimage type must be umrah or hajj' });
+        continue;
+      }
+
+      const status = getValue(cells, 'status') as 'draft' | 'published';
+      const validStatus = status === 'published' ? 'published' : 'draft';
+
+      const pkg: Package = {
+        id: crypto.randomUUID(),
+        operatorId: ctx.userId,
+        title,
+        slug: generateSlug(title) + '-' + Math.random().toString(36).substring(7),
+        status: validStatus,
+        pilgrimageType,
+        seasonLabel: getValue(cells, 'seasonLabel') || undefined,
+        dateWindow: getValue(cells, 'dateWindowStart')
+          ? {
+              start: getValue(cells, 'dateWindowStart'),
+              end: getValue(cells, 'dateWindowEnd') || getValue(cells, 'dateWindowStart'),
+            }
+          : undefined,
+        priceType: (getValue(cells, 'priceType') as Package['priceType']) || 'exact',
+        pricePerPerson,
+        currency,
+        totalNights,
+        nightsMakkah: Number(getValue(cells, 'nightsMakkah')) || totalNights,
+        nightsMadinah: Number(getValue(cells, 'nightsMadinah')) || 0,
+        hotelMakkahStars: Number(getValue(cells, 'hotelMakkahStars')) as 3 | 4 | 5 || undefined,
+        hotelMadinahStars: Number(getValue(cells, 'hotelMadinahStars')) as 3 | 4 | 5 || undefined,
+        hotelMakkahName: getValue(cells, 'hotelMakkahName') || undefined,
+        hotelMadinahName: getValue(cells, 'hotelMadinahName') || undefined,
+        distanceToHaramMakkahMetres: Number(getValue(cells, 'distanceToHaramMakkahMetres')) || undefined,
+        distanceToHaramMadinahMetres: Number(getValue(cells, 'distanceToHaramMadinahMetres')) || undefined,
+        distanceBandMakkah: (getValue(cells, 'distanceBandMakkah') as Package['distanceBandMakkah']) || 'unknown',
+        distanceBandMadinah: (getValue(cells, 'distanceBandMadinah') as Package['distanceBandMadinah']) || 'unknown',
+        airline: getValue(cells, 'airline') || undefined,
+        departureAirport: getValue(cells, 'departureAirport') || undefined,
+        flightType: (getValue(cells, 'flightType') as Package['flightType']) || undefined,
+        depositAmount: Number(getValue(cells, 'depositAmount')) || undefined,
+        paymentPlanAvailable: getValue(cells, 'paymentPlanAvailable') === 'true',
+        cancellationPolicy: getValue(cells, 'cancellationPolicy') || undefined,
+        groupType: (getValue(cells, 'groupType') as Package['groupType']) || undefined,
+        roomOccupancyOptions: {
+          single: getValue(cells, 'single') === 'true',
+          double: getValue(cells, 'double') === 'true',
+          triple: getValue(cells, 'triple') === 'true',
+          quad: getValue(cells, 'quad') === 'true',
+        },
+        inclusions: {
+          visa: getValue(cells, 'visa') === 'true',
+          flights: getValue(cells, 'flights') === 'true',
+          transfers: getValue(cells, 'transfers') === 'true',
+          meals: getValue(cells, 'meals') === 'true',
+        },
+        notes: getValue(cells, 'notes') || undefined,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      MockDB.savePackage(pkg);
+      saved.push(pkg);
+    }
+
+    return { saved, errors };
+  },
+
   getOperatorBySlug: (slug: string): OperatorProfile | undefined => {
     return MockDB.getOperators().find((operator) => operator.slug === slug);
   },

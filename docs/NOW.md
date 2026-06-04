@@ -22,6 +22,7 @@
 
 ## Shipped
 
+- P2-PKG-CSV shipped. CSV import/export for operator packages. See `docs/AI_RUNBOOK.md` COMPLETED section for `DONE-PKG-CSV`.
 - P1-SEO-CORRIDORS shipped. Three city corridor pages: `/umrah/london`, `/umrah/birmingham`, `/umrah/manchester`. See `docs/AI_RUNBOOK.md` COMPLETED section for `DONE-SEO-CORRIDORS`.
 - P1-EVIDENCE-BYTES shipped. See `docs/AI_RUNBOOK.md` COMPLETED section for `DONE-EVIDENCE-BYTES`.
 - P0-HYGIENE-ARTEFACTS closed out. Duplicate `docs/_archive 2/` and `docs/skills 2/` dirs removed; `.gitignore` verified with `.next/`.
@@ -39,6 +40,17 @@
 - All required `data-testid` attributes present.
 - 5 unit tests in `tests/payment-instructions.test.tsx` covering all acceptance criteria.
 - Fixed `vitest.config.ts` with `esbuild.jsx: 'automatic'` for React 19 JSX test support.
+
+### `P2-PKG-CSV` — CSV import/export for operator packages
+
+- `Repository.exportPackagesAsCsv` exports all operator-owned packages as RFC 4180 CSV with full field coverage (title, slug, status, pilgrimageType, seasonLabel, dateWindow, price, currency, nights, hotels, distances, airline, inclusions, occupancy, notes).
+- `Repository.importPackagesFromCsv` parses CSV with quoted field support, validates each row against required columns (title, pricePerPerson, currency, totalNights, pilgrimageType), and reports invalid rows with row number and reason.
+- `PackageCsvExport` component triggers browser download of `.csv` file via Blob + anchor click.
+- `PackageCsvImport` component with hidden file input, import button, and result panel showing success count + per-row error report with `role=status` and `aria-live=polite`.
+- Both components wired into `OperatorPackagesList` action bar alongside Create Package button.
+- RBAC enforced: both methods require operator role; customer blocked with `Unauthorized`.
+- 10 unit tests covering export, import, validation, RBAC, empty state, quoted fields with commas, quoted fields with escaped quotes.
+- All 75 unit tests pass; build passes with zero errors.
 
 ### `P1-SEO-CORRIDORS` — SEO corridor pages for London, Birmingham, Manchester
 
@@ -156,7 +168,7 @@ npm run build
 - `npx tsc --noEmit`: pass (0 errors)
 - `npm test`: 34/34 pass
 - `npm run build`: pass
-- `npm test`: 65/65 pass
+- `npm test`: 75/75 pass
 - `npm run build`: pass
 - `npx playwright test e2e/bank-payment.spec.ts`: 4/4 pass (chromium)
 - `npx playwright test e2e/flow.spec.ts e2e/catalogue.spec.ts e2e/bank-payment.spec.ts`: 18/18 pass (all browsers)

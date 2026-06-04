@@ -138,6 +138,57 @@ Allow Playwright webServer to bind to localhost so e2e can run without EPERM.
 
 ---
 
+## 2026-06-04 - P2-PKG-CSV
+
+**Goal:** Add CSV import and export for operator packages to speed up bulk onboarding.
+
+**Acceptance criteria:**
+
+- [x] `Repository.exportPackagesAsCsv` exports all operator packages as CSV with full field coverage
+- [x] `Repository.importPackagesFromCsv` validates each row against Package type before saving
+- [x] Invalid rows reported with row number and reason — not silently skipped
+- [x] RBAC: both methods require operator role; customer blocked
+- [x] CSV parsing handles quoted fields with commas and escaped quotes
+- [x] `PackageCsvExport` component triggers browser download of `.csv` file
+- [x] `PackageCsvImport` component shows success count and per-row error report
+- [x] Both components wired into `OperatorPackagesList` action bar
+- [x] 10 unit tests covering export, import, validation, RBAC, edge cases
+- [x] All 75 unit tests pass; build passes with zero errors
+
+**Result:** PASS
+
+**Files changed:**
+
+- `lib/api/repository.ts`
+- `components/operator/PackageCsvExport.tsx` (new)
+- `components/operator/PackageCsvImport.tsx` (new)
+- `components/operator/OperatorPackagesList.tsx`
+- `tests/package-csv.test.ts` (new)
+
+**Commands run (with results):**
+
+- `npx tsc --noEmit` → PASS
+- `npm test` → PASS (75/75)
+- `npm run build` → PASS
+
+**Notes / Decisions:**
+
+- Export uses RFC 4180-style CSV escaping (double quotes around fields containing commas/quotes/newlines; double-double-quote for literal quotes).
+- Import parser handles quoted fields with embedded commas and escaped quotes.
+- Required columns enforced: title, pricePerPerson, currency, totalNights, pilgrimageType.
+- Status defaults to 'draft' unless explicitly 'published'.
+- Invalid rows are collected and returned; valid rows are saved as they are validated.
+
+**Risks / Tech debt introduced:**
+
+- None.
+
+**Follow-ups created:**
+
+- None.
+
+---
+
 ## 2026-06-04 - P1-SEO-CORRIDORS
 
 **Goal:** Create SEO corridor pages for high-intent search terms Budget Umrah from London, Birmingham, and Manchester.

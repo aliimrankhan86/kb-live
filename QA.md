@@ -131,6 +131,19 @@
 - [ ] Verify customer cannot access `/admin/complaints` (routing or RBAC denial).
 - [ ] Verify operator cannot access `/admin/complaints` (routing or RBAC denial).
 
+## 14. Package CSV Import/Export (P2-PKG-CSV)
+
+- [ ] Operator: On `/operator/packages`, click **Export CSV**.
+- [ ] Verify a `.csv` file downloads with headers matching Package fields.
+- [ ] Verify operator sees only their own packages in the export.
+- [ ] Click **Import CSV**, select a valid CSV with required columns (title, pricePerPerson, currency, totalNights, pilgrimageType).
+- [ ] Verify success message shows count of imported packages.
+- [ ] Verify packages appear in the list immediately after import.
+- [ ] Select a CSV with invalid rows (missing title, bad price, zero nights, invalid type).
+- [ ] Verify error report lists each invalid row with row number and reason.
+- [ ] Verify no invalid rows were saved.
+- [ ] Verify customer cannot access export/import (blocked by RBAC).
+
 ## Phase 1 Regression Checklist (run before Phase 2 work)
 
 Automated

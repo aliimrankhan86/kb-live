@@ -1,6 +1,8 @@
 'use client';
 
 import { Package } from '@/lib/types';
+import { PackageCsvExport } from './PackageCsvExport';
+import { PackageCsvImport } from './PackageCsvImport';
 
 interface OperatorPackagesListProps {
   packages: Package[];
@@ -65,7 +67,9 @@ export function OperatorPackagesList({
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
+            <PackageCsvImport onImport={onCreate} />
+            <PackageCsvExport />
             <button
               type="button"
               onClick={onCreate}
