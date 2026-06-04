@@ -76,6 +76,9 @@ This document outlines the security architecture and assumptions for the KaabaTr
 - Audit log metadata must not contain full account numbers, full sort codes, evidence bytes, or emailed bank details.
 - Log required events: initial payment details capture, bank change requested, approved, rejected, cancelled, and activated.
 - Audit log reads are admin-only.
+- Evidence bytes access is restricted to the owning customer, involved operator, and admin via `Repository.getEvidenceBytes`. Throws if bytes have been purged.
+- Evidence retention: 90 days default. Admin can flag for retention via `Repository.flagEvidenceForRetention` to preserve bytes beyond retention period.
+- Evidence bytes are never emailed. Only metadata may appear in notifications; full bytes require in-app access.
 
 ## Dependency Hygiene
 

@@ -138,6 +138,54 @@ Allow Playwright webServer to bind to localhost so e2e can run without EPERM.
 
 ---
 
+## 2026-06-04 - P1-EVIDENCE-BYTES
+
+**Goal:** Implement actual file byte storage for payment evidence uploads with RBAC enforcement and a defined retention policy.
+
+**Acceptance criteria:**
+
+- [x] `BookingPaymentEvidenceFile` supports optional `base64Data` field
+- [x] `BookingPaymentEvidence` has `storageStatus` (metadata-only | bytes-stored), `disputeFlag`, `retentionExpiresAt`
+- [x] `Repository.preparePaymentEvidence` auto-detects bytes presence and sets `storageStatus` + 90-day `retentionExpiresAt`
+- [x] `Repository.getEvidenceBytes` returns full evidence with bytes only to customer/operator/admin; throws if purged
+- [x] `Repository.flagEvidenceForRetention` requires admin; sets `disputeFlag` to preserve bytes
+- [x] `pruneExpiredEvidence` strips `base64Data` after `retentionExpiresAt` unless `disputeFlag` is true
+- [x] `getBookingIntents` auto-prunes expired evidence on every read
+- [x] RBAC enforced: unrelated operator blocked
+- [x] 10 unit tests covering all scenarios
+- [x] No regressions in existing tests (65/65 pass) or E2E (6/6 chromium)
+
+**Result:** PASS
+
+**Files changed:**
+
+- `lib/types.ts`
+- `lib/api/repository.ts`
+- `tests/evidence-bytes.test.ts` (new)
+
+**Commands run (with results):**
+
+- `npx tsc --noEmit` → PASS
+- `npm test` → PASS (65/65)
+- `npm run build` → PASS
+- `npx playwright test e2e/flow.spec.ts e2e/catalogue.spec.ts e2e/bank-payment.spec.ts --project=chromium` → PASS (6/6)
+
+**Notes / Decisions:**
+
+- 90-day retention is a constant (`EVIDENCE_RETENTION_MS`) that can be adjusted.
+- `getBookingIntents` now auto-prunes on every read — this is a "lazy cleanup" pattern suitable for MockDB. A real backend would use a scheduled job.
+- Evidence bytes are never emailed; `getEvidenceBytes` is in-app only.
+
+**Risks / Tech debt introduced:**
+
+- None.
+
+**Follow-ups created:**
+
+- None.
+
+---
+
 ## 2026-06-04 - P0-HYGIENE-ARTEFACTS
 
 **Goal:** Remove duplicate docs directories and ensure .next build artefacts are gitignored.

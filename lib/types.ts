@@ -201,7 +201,10 @@ export interface BookingPaymentEvidenceFile {
   kind: BookingPaymentEvidenceFileKind;
   lastModified?: number;
   uploadedAt: string;
+  base64Data?: string;
 }
+
+export type EvidenceStorageStatus = 'metadata-only' | 'bytes-stored';
 
 export interface BookingPaymentEvidence {
   files: BookingPaymentEvidenceFile[];
@@ -209,7 +212,9 @@ export interface BookingPaymentEvidence {
   paymentReference?: string;
   notes?: string;
   submittedAt: string;
-  storageStatus: 'metadata-only';
+  storageStatus: EvidenceStorageStatus;
+  disputeFlag?: boolean;
+  retentionExpiresAt?: string;
 }
 
 export interface BookingIntent {

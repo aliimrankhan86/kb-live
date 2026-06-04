@@ -261,6 +261,8 @@ const normalizeComplaintDescription = (description: string) => {
   return trimmed;
 };
 
+const EVIDENCE_RETENTION_MS = 90 * 24 * 60 * 60 * 1000;
+
 const preparePaymentEvidence = (paymentEvidence?: BookingPaymentEvidence): BookingPaymentEvidence | undefined => {
   if (!paymentEvidence) return undefined;
 
@@ -271,6 +273,8 @@ const preparePaymentEvidence = (paymentEvidence?: BookingPaymentEvidence): Booki
   if (invalidFile) throw new Error('Payment evidence must be an image or PDF');
 
   const submittedAt = paymentEvidence.submittedAt || new Date().toISOString();
+  const hasBytes = files.some((f) => typeof f.base64Data === 'string' && f.base64Data.length > 0);
+  const retentionExpiresAt = new Date(Date.now() + EVIDENCE_RETENTION_MS).toISOString();
 
   return {
     files,
@@ -278,8 +282,39 @@ const preparePaymentEvidence = (paymentEvidence?: BookingPaymentEvidence): Booki
     paymentReference: cleanOptionalText(paymentEvidence.paymentReference),
     notes: cleanOptionalText(paymentEvidence.notes),
     submittedAt,
-    storageStatus: 'metadata-only',
+    storageStatus: hasBytes ? 'bytes-stored' : 'metadata-only',
+    disputeFlag: paymentEvidence.disputeFlag ?? false,
+    retentionExpiresAt,
   };
+};
+
+const pruneExpiredEvidence = (bookingIntent: BookingIntent): BookingIntent => {
+  if (!bookingIntent.paymentEvidence) return bookingIntent;
+  const now = Date.now();
+  const expires = bookingIntent.paymentEvidence.retentionExpiresAt
+    ? new Date(bookingIntent.paymentEvidence.retentionExpiresAt).getTime()
+    : 0;
+  const isDisputed = bookingIntent.paymentEvidence.disputeFlag === true;
+
+  if (!isDisputed && expires > 0 && expires <= now) {
+    const pruned: BookingPaymentEvidence = {
+      ...bookingIntent.paymentEvidence,
+      storageStatus: 'metadata-only',
+      files: bookingIntent.paymentEvidence.files.map((f) => ({
+        ...f,
+        base64Data: undefined,
+      })),
+    };
+    return { ...bookingIntent, paymentEvidence: pruned };
+  }
+  return bookingIntent;
+};
+
+const requireBookingIntentEvidenceAccess = (ctx: RequestContext, bookingIntent: BookingIntent) => {
+  if (ctx.role === 'admin') return;
+  if (ctx.role === 'customer' && ctx.userId === bookingIntent.customerId) return;
+  if (ctx.role === 'operator' && ctx.userId === bookingIntent.operatorId) return;
+  throw new Error('Unauthorized');
 };
 
 export const Repository = {
@@ -387,10 +422,47 @@ export const Repository = {
   },
 
   getBookingIntents: (ctx: RequestContext): BookingIntent[] => {
-    const all = MockDB.getBookingIntents();
+    const all = MockDB.getBookingIntents().map(pruneExpiredEvidence);
     if (ctx.role === 'customer') return all.filter(b => b.customerId === ctx.userId);
     if (ctx.role === 'operator') return all.filter(b => b.operatorId === ctx.userId);
     return all;
+  },
+
+  getEvidenceBytes: (ctx: RequestContext, bookingIntentId: string): BookingPaymentEvidence | undefined => {
+    const bookingIntent = MockDB.getBookingIntents().find((b) => b.id === bookingIntentId);
+    if (!bookingIntent) throw new Error('Booking intent not found');
+    requireBookingIntentEvidenceAccess(ctx, bookingIntent);
+
+    const pruned = pruneExpiredEvidence(bookingIntent);
+    if (pruned.id !== bookingIntent.id) {
+      MockDB.saveBookingIntent(pruned);
+    }
+
+    const evidence = pruned.paymentEvidence;
+    if (!evidence) return undefined;
+    if (evidence.storageStatus !== 'bytes-stored') {
+      throw new Error('Evidence bytes have been purged or were never stored');
+    }
+
+    return evidence;
+  },
+
+  flagEvidenceForRetention: (ctx: RequestContext, bookingIntentId: string): BookingIntent => {
+    requireAdmin(ctx);
+    const bookingIntent = MockDB.getBookingIntents().find((b) => b.id === bookingIntentId);
+    if (!bookingIntent) throw new Error('Booking intent not found');
+    if (!bookingIntent.paymentEvidence) throw new Error('No payment evidence to flag');
+
+    const updated: BookingIntent = {
+      ...bookingIntent,
+      paymentEvidence: {
+        ...bookingIntent.paymentEvidence,
+        disputeFlag: true,
+      },
+      updatedAt: new Date().toISOString(),
+    };
+    MockDB.saveBookingIntent(updated);
+    return updated;
   },
 
   // Operator payment details and eligibility

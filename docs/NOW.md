@@ -22,6 +22,7 @@
 
 ## Shipped
 
+- P1-EVIDENCE-BYTES shipped. See `docs/AI_RUNBOOK.md` COMPLETED section for `DONE-EVIDENCE-BYTES`.
 - P0-HYGIENE-ARTEFACTS closed out. Duplicate `docs/_archive 2/` and `docs/skills 2/` dirs removed; `.gitignore` verified with `.next/`.
 - P0-COMPLAINTS-FLOW shipped. See `docs/AI_RUNBOOK.md` COMPLETED section for `DONE-COMPLAINTS-FLOW`.
 - MT-7 bank and payment E2E coverage shipped. See `docs/AI_RUNBOOK.md` COMPLETED section for `DONE-E2E-BANK-TESTS`.
@@ -37,6 +38,18 @@
 - All required `data-testid` attributes present.
 - 5 unit tests in `tests/payment-instructions.test.tsx` covering all acceptance criteria.
 - Fixed `vitest.config.ts` with `esbuild.jsx: 'automatic'` for React 19 JSX test support.
+
+### `P1-EVIDENCE-BYTES` — Evidence file bytes storage with RBAC + retention
+
+- Added `base64Data` optional field to `BookingPaymentEvidenceFile` for inline base64 byte storage.
+- Added `EvidenceStorageStatus` type (`metadata-only` | `bytes-stored`), `disputeFlag`, and `retentionExpiresAt` to `BookingPaymentEvidence`.
+- `Repository.preparePaymentEvidence` auto-detects bytes presence and sets `storageStatus` + 90-day `retentionExpiresAt`.
+- `Repository.getEvidenceBytes` returns full evidence with bytes only to owning customer, involved operator, or admin. Throws with clear error if bytes have been purged.
+- `Repository.flagEvidenceForRetention` requires admin role; sets `disputeFlag` to preserve bytes beyond retention.
+- `pruneExpiredEvidence` helper strips `base64Data` after `retentionExpiresAt` unless `disputeFlag` is true.
+- `getBookingIntents` auto-prunes expired evidence on every read (lazy cleanup pattern for MockDB).
+- 10 unit tests in `tests/evidence-bytes.test.ts` covering metadata-only, bytes-stored, RBAC, purge, and flag scenarios.
+- All 65 unit tests pass; 6/6 Playwright E2E pass (no regressions).
 
 ### `P0-COMPLAINTS-FLOW` — Complaints routing: customer → operator → admin triage
 
@@ -129,7 +142,7 @@ npm run build
 - `npx tsc --noEmit`: pass (0 errors)
 - `npm test`: 34/34 pass
 - `npm run build`: pass
-- `npm test`: 55/55 pass
+- `npm test`: 65/65 pass
 - `npm run build`: pass
 - `npx playwright test e2e/bank-payment.spec.ts`: 4/4 pass (chromium)
 - `npx playwright test e2e/flow.spec.ts e2e/catalogue.spec.ts e2e/bank-payment.spec.ts`: 18/18 pass (all browsers)
