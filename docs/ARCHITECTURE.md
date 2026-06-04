@@ -2,7 +2,7 @@
 
 ## Overview
 
-KaabaTrip is a Next.js 15 App Router application. Currently uses a client-side MockDB (localStorage) to simulate backend persistence. The Repository pattern abstracts data access and enforces RBAC. When a real backend is added, only `lib/api/` changes.
+KaabaTrip is a Next.js 15 App Router application. Uses Supabase (London eu-west-2) for Postgres persistence, Auth, and Storage. The Repository pattern abstracts data access and enforces RBAC. MockDB remains for unit tests; production uses Prisma + Supabase.
 
 ## Architecture diagram
 
@@ -13,11 +13,19 @@ PUBLIC SIDE                      OPERATOR SIDE
         v                                v
    lib/api/repository.ts  (RBAC-aware data access)
         |
-        v
-   lib/api/mock-db.ts  -->  future: API/Postgres
+        +---> lib/api/db/adapter.ts (Prisma + Supabase)
+        |           |
+        |           v
+        |      Supabase Postgres (eu-west-2)
+        |           |
+        |           +-- Auth (JWT cookies)
+        |           +-- Storage (private buckets)
+        |           +-- RLS (deny-by-default)
         |
-        v
-   localStorage (browser)
+        +---> lib/api/mock-db.ts (unit tests only)
+                    |
+                    v
+               localStorage (browser, test env)
 ```
 
 **Rule:** UI components never import MockDB directly. Always go through Repository.
@@ -61,7 +69,7 @@ An operator is bookable only when all of these are true:
 | Packages       | Read published  | CRUD own                                                            | Read published |
 | Complaints     | Own only        | Own only (involved operator)                                        | Full (triage)  |
 
-### Storage keys (localStorage)
+### Storage keys (localStorage) — MockDB / test env only
 
 - `kb_requests`, `kb_offers`, `kb_bookings`, `kb_packages`
 - `kb_payment_details`, `kb_bank_change_requests`, `kb_audit_log`
@@ -69,6 +77,8 @@ An operator is bookable only when all of these are true:
 - `kb_packages_seed_version` (migration trigger)
 - `kb_shortlist_packages` (user's shortlisted IDs)
 - `kb_language` (user's language preference)
+
+**Production:** All data stored in Supabase Postgres with Row Level Security.
 
 ### BookingIntent payment evidence
 
@@ -120,10 +130,31 @@ lib/i18n/
 - No auth middleware yet — planned for operator dashboard.
 - See `docs/SECURITY.md` for full threat model.
 
-## Migration path (MockDB → real backend)
+## Persistence stack
 
-1. Replace `lib/api/mock-db.ts` with API client calls.
-2. `Repository` interface stays the same.
-3. Add auth middleware for operator routes.
-4. Move from localStorage to server-side sessions.
-5. Replace static exchange rates with API-based rates.
+| Layer    | Technology                    | Purpose                                         |
+| -------- | ----------------------------- | ----------------------------------------------- |
+| Database | Supabase Postgres (eu-west-2) | Primary data store, GDPR-aligned                |
+| ORM      | Prisma                        | Type-safe queries, migrations, seeding          |
+| Auth     | Supabase Auth                 | JWT-based, cookie-only sessions                 |
+| Storage  | Supabase Storage              | Private buckets for evidence files, CSV exports |
+| Security | PostgreSQL RLS                | Deny-by-default row-level policies              |
+| Client   | `@supabase/ssr`               | Next.js App Router cookie handling              |
+
+## Supabase clients
+
+- `lib/supabase/client.ts` — Browser client (`createBrowserClient`)
+- `lib/supabase/server.ts` — Server client (`createServerClient`, reads cookies)
+- `lib/supabase/middleware.ts` — Session refresh middleware (`updateSession`)
+- `middleware.ts` (root) — Applies `updateSession` to all routes
+
+## Migration path (MockDB → Supabase)
+
+1. ✅ P1A: Install Supabase SDK + Prisma, configure env, create client files
+2. ⏳ P1B: Design Prisma schema matching existing types
+3. ⏳ P1C: Build DB adapter implementing MockDB interface
+4. ⏳ P1D: Auth middleware (Supabase Auth + Next.js middleware)
+5. ⏳ P1E: RLS policies (deny-by-default, role-based)
+6. ⏳ P1F: Storage buckets (evidence files, operator exports)
+7. ⏳ P1G: Seed migration (MockDB data → Postgres)
+8. ⏳ P1H: Cutover (remove MockDB fallback, tests against Postgres)

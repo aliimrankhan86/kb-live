@@ -14,8 +14,9 @@ This document outlines the security architecture and assumptions for the KaabaTr
 
 **Enforcement**:
 
-- RBAC is enforced at the Data Access Layer (`lib/api/repository.ts`).
-- `MockDB` stores all data, but `Repository` filters it based on `RequestContext`.
+- RBAC is enforced at the Data Access Layer (`lib/api/repository.ts`) and at the database layer via PostgreSQL Row Level Security (RLS).
+- `MockDB` stores all data in test environments; production uses Supabase Postgres with RLS policies.
+- `Repository` filters data based on `RequestContext`; RLS provides a second line of defence.
 - BookingIntent payment evidence is returned only through the BookingIntent RBAC path: owning customer, involved operator, or admin.
 - Payment instructions are returned only through `Repository.getPaymentInstructions(ctx, bookingIntentId)`, scoped to the owning customer, involved operator, or admin.
 - Operators can create their own initial payment details and their own bank change requests only. They cannot approve, reject, or review bank changes.
@@ -64,6 +65,21 @@ This document outlines the security architecture and assumptions for the KaabaTr
 
 - **Threat**: Malicious script in "Notes" field.
 - **Mitigation**: React automatically escapes content in JSX. We do not use `dangerouslySetInnerHTML`.
+
+## Supabase Auth & Session Security
+
+- **Session strategy**: JWT stored in httpOnly cookies via `@supabase/ssr`. No tokens in `localStorage`.
+- **Middleware**: `middleware.ts` refreshes expired JWTs on every request. Session cookies are automatically rotated.
+- **Anon key**: Public (client-side) — used for auth and public data reads. Cannot bypass RLS.
+- **Service role key**: Server-only, never exposed to client. Used for admin operations and seeding.
+- **Environment variables**:
+  - `NEXT_PUBLIC_SUPABASE_URL` — public, safe for client
+  - `NEXT_PUBLIC_SUPABASE_ANON_KEY` — public, safe for client
+  - `SUPABASE_SERVICE_ROLE_KEY` — server-only, injected at build/runtime, never in client bundle
+  - `DATABASE_URL` — server-only, Prisma connection string with PgBouncer
+  - `DIRECT_URL` — server-only, direct Postgres connection for migrations
+- **RLS**: Deny-by-default. Every table has `ENABLE ROW LEVEL SECURITY`. Anonymous users have zero access unless explicitly granted.
+- **Storage buckets**: `evidence-files` and `operator-exports` are private. No public URLs. Signed URLs are time-limited and RBAC-checked before generation.
 
 ### 4. Rate Limiting (Stub)
 

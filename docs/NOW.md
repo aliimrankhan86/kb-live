@@ -179,9 +179,27 @@ npm run build
 
 **See:** `docs/PHASE_2_AUDIT.md` persistence decision record, `docs/AI_RUNBOOK.md` P1A–P1H micro-tasks.
 
+## P1A-SUPABASE-SETUP shipped
+
+- Installed `@supabase/supabase-js`, `@supabase/ssr`, `prisma`, `@prisma/client`
+- Created `lib/supabase/client.ts` — browser client with env validation (anon key only, never service role)
+- Created `lib/supabase/server.ts` — server client reading cookies via `next/headers`
+- Created `lib/supabase/middleware.ts` — session refresh middleware with graceful fallback for dev
+- Created `middleware.ts` (root) — applies `updateSession` to all routes except static assets
+- Updated `env.example` with Supabase + Prisma placeholders (no real credentials):
+  - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+  - `DATABASE_URL` (PgBouncer connection for Prisma client)
+  - `DIRECT_URL` (direct connection for migrations)
+  - `SUPABASE_SERVICE_ROLE_KEY` (server-only)
+  - `FEATURE_USE_REAL_DB=false`
+- Updated `docs/ARCHITECTURE.md`: persistence stack table, Supabase client docs, migration path checklist
+- Updated `docs/SECURITY.md`: Supabase Auth & Session Security section (cookie strategy, key rules, RLS, storage)
+
+**Checks:** `npx tsc --noEmit` pass (0 errors), `npm run build` pass (0 errors)
+
 ## Next step
 
-Next micro-task: **P1A-SUPABASE-SETUP** — create Supabase project, install deps, configure env.
+Next micro-task: **P1B-PRISMA-SCHEMA** — design Prisma schema matching existing TypeScript types in `lib/types.ts`.
 
 - `npx playwright test e2e/bank-payment.spec.ts`: 4/4 pass (chromium)
 - `npx playwright test e2e/flow.spec.ts e2e/catalogue.spec.ts e2e/bank-payment.spec.ts`: 18/18 pass (all browsers)

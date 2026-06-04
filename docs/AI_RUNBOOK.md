@@ -481,7 +481,9 @@ micro_tasks:
 ```yaml
 id: P1A-SUPABASE-SETUP
 priority: P1
-status: READY
+status: IN_PROGRESS
+claimed_by: Kimi
+claimed_at: 2026-06-04T22:13:00Z
 primary_owner_role: Backend
 supporting_roles: [Architect]
 goal: Create Supabase project, install SDK/Prisma, configure environment variables.
