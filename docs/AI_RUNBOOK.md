@@ -427,7 +427,7 @@ docs_to_update:
   - [x] docs/ARCHITECTURE.md
   - [x] docs/SECURITY.md
 evidence_required: commit hash + ARCHITECTURE.md + SECURITY.md updates
-evidence_commit: P1-EVIDENCE-BYTES
+evidence_commit: e12a8c8
 checks_run: [tsc --noEmit, npm test 65/65, npm run build, playwright 6/6 chromium]
 phase_audit_entry: docs/PHASE_2_AUDIT.md
 docs_updated: [docs/ARCHITECTURE.md, docs/SECURITY.md, docs/NOW.md]
@@ -436,7 +436,7 @@ docs_updated: [docs/ARCHITECTURE.md, docs/SECURITY.md, docs/NOW.md]
 ```yaml
 id: P1-PERSISTENCE-MIGRATION
 priority: P1
-status: READY
+status: BLOCKED
 primary_owner_role: Backend
 supporting_roles: [Architect]
 goal: Replace localStorage-based MockDB with a server-side persistence layer (Postgres or similar) suitable for private beta.
@@ -462,6 +462,14 @@ docs_to_update:
   - docs/ARCHITECTURE.md
   - docs/SECURITY.md
 evidence_required: commit hash + ARCHITECTURE.md migration section updated
+blocked_reason: |
+  Requires infrastructure decisions before implementation:
+  1. ORM choice (Prisma vs Drizzle vs Kysely) — affects schema definition and type generation
+  2. Database connection strategy (connection pool, environment variables, local dev setup)
+  3. Auth middleware design (Next.js middleware vs API route guards, session strategy)
+  4. Migration strategy — unit tests import MockDB directly; need abstraction layer or test doubles
+  5. Seed data approach — SQL scripts vs TypeScript seeders
+  Smallest decision needed: Choose ORM and confirm DB provider (Neon/Supabase/Railway/local Docker).
 ```
 
 ```yaml
