@@ -10,26 +10,26 @@ KaabaTrip targets high-intent pilgrimage travellers searching for packages. Keyw
 
 ### Top-of-funnel (awareness)
 
-| Keyword cluster | Example queries | Target page |
-|----------------|----------------|-------------|
-| Umrah packages | "umrah packages 2026", "cheap umrah packages from UK" | `/umrah` |
-| Hajj packages | "hajj packages 2026 UK", "5 star hajj packages" | `/hajj` |
-| Ramadan Umrah | "ramadan umrah 2026", "umrah during ramadan" | `/umrah/ramadan` |
+| Keyword cluster          | Example queries                                            | Target page                   |
+| ------------------------ | ---------------------------------------------------------- | ----------------------------- |
+| Umrah packages           | "umrah packages 2026", "cheap umrah packages from UK"      | `/umrah`                      |
+| Hajj packages            | "hajj packages 2026 UK", "5 star hajj packages"            | `/hajj`                       |
+| Ramadan Umrah            | "ramadan umrah 2026", "umrah during ramadan"               | `/umrah/ramadan`              |
 | Makkah hotels near Haram | "hotels near haram makkah", "walking distance haram hotel" | `/search/packages` (filtered) |
 
 ### Mid-funnel (comparison)
 
-| Keyword cluster | Example queries | Target page |
-|----------------|----------------|-------------|
-| Compare Umrah packages | "compare umrah packages UK", "best umrah deals" | `/search/packages` |
-| Umrah operator reviews | "[operator name] umrah reviews" | `/operators/[slug]` |
-| Umrah package details | "[operator] ramadan umrah package 2026" | `/packages/[slug]` |
+| Keyword cluster        | Example queries                                 | Target page         |
+| ---------------------- | ----------------------------------------------- | ------------------- |
+| Compare Umrah packages | "compare umrah packages UK", "best umrah deals" | `/search/packages`  |
+| Umrah operator reviews | "[operator name] umrah reviews"                 | `/operators/[slug]` |
+| Umrah package details  | "[operator] ramadan umrah package 2026"         | `/packages/[slug]`  |
 
 ### Bottom-funnel (action)
 
-| Keyword cluster | Example queries | Target page |
-|----------------|----------------|-------------|
-| Book Umrah | "book umrah package", "request umrah quote" | `/quote` |
+| Keyword cluster   | Example queries                              | Target page                         |
+| ----------------- | -------------------------------------------- | ----------------------------------- |
+| Book Umrah        | "book umrah package", "request umrah quote"  | `/quote`                            |
 | Umrah from [city] | "umrah from london", "umrah from manchester" | `/search/packages?departure=[city]` |
 
 ---
@@ -40,21 +40,24 @@ Every route must export Next.js `Metadata` with these fields. Use the `generateM
 
 ### Static routes
 
-| Route | Title | Description | Keywords |
-|-------|-------|-------------|----------|
-| `/` | `KaabaTrip – Compare Hajj & Umrah Packages` | `Compare verified Hajj and Umrah packages from trusted UK travel operators. Find the best prices, hotels near Haram, and inclusive deals.` | hajj packages, umrah packages, compare, UK |
-| `/umrah` | `Umrah Packages 2026 – Compare & Book \| KaabaTrip` | `Browse and compare Umrah packages from verified UK operators. Filter by budget, hotel rating, and distance to Haram.` | umrah packages 2026, umrah from UK |
-| `/hajj` | `Hajj Packages 2026 – Compare & Book \| KaabaTrip` | `Find and compare Hajj packages from ATOL-protected UK operators. 5-star hotels, direct flights, all-inclusive options.` | hajj packages 2026, hajj from UK |
-| `/umrah/ramadan` | `Ramadan Umrah 2026 – Special Packages \| KaabaTrip` | `Ramadan Umrah packages from UK operators. Hotels near Haram, flights included, group and family options.` | ramadan umrah 2026, umrah ramadan packages |
-| `/packages` | `All Pilgrimage Packages – Browse & Compare \| KaabaTrip` | `Browse all Hajj and Umrah packages. Filter, shortlist, and compare side by side.` | pilgrimage packages, hajj umrah compare |
-| `/search/packages` | `Search Results – Umrah & Hajj Packages \| KaabaTrip` | Dynamic: `Found N packages matching your criteria` | (use query params) |
+| Route               | Title                                                               | Description                                                                                                                                | Keywords                                         |
+| ------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------ |
+| `/`                 | `KaabaTrip – Compare Hajj & Umrah Packages`                         | `Compare verified Hajj and Umrah packages from trusted UK travel operators. Find the best prices, hotels near Haram, and inclusive deals.` | hajj packages, umrah packages, compare, UK       |
+| `/umrah`            | `Umrah Packages 2026 – Compare & Book \| KaabaTrip`                 | `Browse and compare Umrah packages from verified UK operators. Filter by budget, hotel rating, and distance to Haram.`                     | umrah packages 2026, umrah from UK               |
+| `/hajj`             | `Hajj Packages 2026 – Compare & Book \| KaabaTrip`                  | `Find and compare Hajj packages from ATOL-protected UK operators. 5-star hotels, direct flights, all-inclusive options.`                   | hajj packages 2026, hajj from UK                 |
+| `/umrah/ramadan`    | `Ramadan Umrah 2026 – Special Packages \| KaabaTrip`                | `Ramadan Umrah packages from UK operators. Hotels near Haram, flights included, group and family options.`                                 | ramadan umrah 2026, umrah ramadan packages       |
+| `/packages`         | `All Pilgrimage Packages – Browse & Compare \| KaabaTrip`           | `Browse all Hajj and Umrah packages. Filter, shortlist, and compare side by side.`                                                         | pilgrimage packages, hajj umrah compare          |
+| `/search/packages`  | `Search Results – Umrah & Hajj Packages \| KaabaTrip`               | Dynamic: `Found N packages matching your criteria`                                                                                         | (use query params)                               |
+| `/umrah/london`     | `Umrah Packages from London 2026 – Compare & Book \| KaabaTrip`     | `Browse and compare Umrah packages departing from London. Verified UK operators, hotels near Haram, flights included.`                     | umrah from london, umrah packages london         |
+| `/umrah/birmingham` | `Umrah Packages from Birmingham 2026 – Compare & Book \| KaabaTrip` | `Browse and compare Umrah packages departing from Birmingham. Verified UK operators, hotels near Haram, flights included.`                 | umrah from birmingham, umrah packages birmingham |
+| `/umrah/manchester` | `Umrah Packages from Manchester 2026 – Compare & Book \| KaabaTrip` | `Browse and compare Umrah packages departing from Manchester. Verified UK operators, hotels near Haram, flights included.`                 | umrah from manchester, umrah packages manchester |
 
 ### Dynamic routes
 
-| Route | Title template | Description template |
-|-------|---------------|---------------------|
-| `/packages/[slug]` | `{title} – {type} Package \| KaabaTrip` | `{title} by {operatorName}. {nights} nights, {stars}★ hotels, {distance} from Haram. {price} per person.` |
-| `/operators/[slug]` | `{companyName} – Verified Operator \| KaabaTrip` | `Browse packages from {companyName}. {verificationStatus} operator with {packageCount} active packages.` |
+| Route               | Title template                                   | Description template                                                                                      |
+| ------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `/packages/[slug]`  | `{title} – {type} Package \| KaabaTrip`          | `{title} by {operatorName}. {nights} nights, {stars}★ hotels, {distance} from Haram. {price} per person.` |
+| `/operators/[slug]` | `{companyName} – Verified Operator \| KaabaTrip` | `Browse packages from {companyName}. {verificationStatus} operator with {packageCount} active packages.`  |
 
 ---
 
@@ -127,8 +130,18 @@ Structured data helps Google show rich snippets. Add JSON-LD to each page type.
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://kaabatrip.com/" },
-    { "@type": "ListItem", "position": 2, "name": "Umrah", "item": "https://kaabatrip.com/umrah" },
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://kaabatrip.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Umrah",
+      "item": "https://kaabatrip.com/umrah"
+    },
     { "@type": "ListItem", "position": 3, "name": "{packageTitle}" }
   ]
 }
@@ -146,16 +159,16 @@ Structured data helps Google show rich snippets. Add JSON-LD to each page type.
 
 Clean, meaningful URLs improve SEO and shareability.
 
-| Pattern | Example | Notes |
-|---------|---------|-------|
-| `/umrah` | Landing page | Static |
-| `/hajj` | Landing page | Static |
-| `/umrah/ramadan` | Season landing | Static |
-| `/packages` | Browse all | Static |
-| `/packages/{slug}` | Package detail | Slug from: `{operator-slug}-{type}-{season}-{id-suffix}` |
-| `/operators/{slug}` | Operator profile | Slug from `operatorProfile.slug` |
-| `/search/packages` | Search results | Query params: `?type=umrah&budget=1000-2000&stars=5` |
-| `/quote` | Request form | No-index (robots.txt) |
+| Pattern             | Example          | Notes                                                    |
+| ------------------- | ---------------- | -------------------------------------------------------- |
+| `/umrah`            | Landing page     | Static                                                   |
+| `/hajj`             | Landing page     | Static                                                   |
+| `/umrah/ramadan`    | Season landing   | Static                                                   |
+| `/packages`         | Browse all       | Static                                                   |
+| `/packages/{slug}`  | Package detail   | Slug from: `{operator-slug}-{type}-{season}-{id-suffix}` |
+| `/operators/{slug}` | Operator profile | Slug from `operatorProfile.slug`                         |
+| `/search/packages`  | Search results   | Query params: `?type=umrah&budget=1000-2000&stars=5`     |
+| `/quote`            | Request form     | No-index (robots.txt)                                    |
 
 ### Slug generation rules
 
@@ -177,31 +190,31 @@ The sitemap at `app/sitemap.ts` must include:
 
 ### Update frequency
 
-| Page type | `changeFrequency` | `priority` |
-|-----------|-------------------|-----------|
-| Landing pages | `weekly` | `1.0` |
-| Package detail | `daily` | `0.8` |
-| Operator profile | `weekly` | `0.7` |
-| Browse/search | `daily` | `0.6` |
+| Page type        | `changeFrequency` | `priority` |
+| ---------------- | ----------------- | ---------- |
+| Landing pages    | `weekly`          | `1.0`      |
+| Package detail   | `daily`           | `0.8`      |
+| Operator profile | `weekly`          | `0.7`      |
+| Browse/search    | `daily`           | `0.6`      |
 
 ---
 
 ## 6. Technical SEO checklist
 
-| Item | Status | Notes |
-|------|--------|-------|
-| Canonical URLs on every page | ✅ Done | Via `alternates.canonical` in metadata |
-| Open Graph tags | ✅ Done | Via `openGraph` in metadata |
-| Twitter card tags | ✅ Done | Via `twitter` in metadata |
-| robots.txt | ✅ Done | Disallow `/quote`, `/requests`, `/operator`, `/kanban` |
-| sitemap.xml | ⚠️ Partial | Needs dynamic package + operator pages |
-| JSON-LD structured data | ❌ Todo | Product, Organization, BreadcrumbList |
-| Image alt text | ✅ Done | All images have descriptive alt |
-| Semantic HTML | ✅ Done | Proper heading hierarchy, landmarks |
-| Page speed (LCP < 2.5s) | ⚠️ Monitor | Server Components help; monitor with Lighthouse |
-| Mobile friendly | ✅ Done | Responsive down to 320px |
-| `hreflang` for languages | ❌ Todo | Required when i18n is implemented (en, fr, ar) |
-| Avoid duplicate content | ⚠️ Monitor | Canonicals prevent issues from search params |
+| Item                         | Status     | Notes                                                  |
+| ---------------------------- | ---------- | ------------------------------------------------------ |
+| Canonical URLs on every page | ✅ Done    | Via `alternates.canonical` in metadata                 |
+| Open Graph tags              | ✅ Done    | Via `openGraph` in metadata                            |
+| Twitter card tags            | ✅ Done    | Via `twitter` in metadata                              |
+| robots.txt                   | ✅ Done    | Disallow `/quote`, `/requests`, `/operator`, `/kanban` |
+| sitemap.xml                  | ⚠️ Partial | Needs dynamic package + operator pages                 |
+| JSON-LD structured data      | ❌ Todo    | Product, Organization, BreadcrumbList                  |
+| Image alt text               | ✅ Done    | All images have descriptive alt                        |
+| Semantic HTML                | ✅ Done    | Proper heading hierarchy, landmarks                    |
+| Page speed (LCP < 2.5s)      | ⚠️ Monitor | Server Components help; monitor with Lighthouse        |
+| Mobile friendly              | ✅ Done    | Responsive down to 320px                               |
+| `hreflang` for languages     | ❌ Todo    | Required when i18n is implemented (en, fr, ar)         |
+| Avoid duplicate content      | ⚠️ Monitor | Canonicals prevent issues from search params           |
 
 ---
 

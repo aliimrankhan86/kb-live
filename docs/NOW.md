@@ -22,6 +22,7 @@
 
 ## Shipped
 
+- P1-SEO-CORRIDORS shipped. Three city corridor pages: `/umrah/london`, `/umrah/birmingham`, `/umrah/manchester`. See `docs/AI_RUNBOOK.md` COMPLETED section for `DONE-SEO-CORRIDORS`.
 - P1-EVIDENCE-BYTES shipped. See `docs/AI_RUNBOOK.md` COMPLETED section for `DONE-EVIDENCE-BYTES`.
 - P0-HYGIENE-ARTEFACTS closed out. Duplicate `docs/_archive 2/` and `docs/skills 2/` dirs removed; `.gitignore` verified with `.next/`.
 - P0-COMPLAINTS-FLOW shipped. See `docs/AI_RUNBOOK.md` COMPLETED section for `DONE-COMPLAINTS-FLOW`.
@@ -38,6 +39,19 @@
 - All required `data-testid` attributes present.
 - 5 unit tests in `tests/payment-instructions.test.tsx` covering all acceptance criteria.
 - Fixed `vitest.config.ts` with `esbuild.jsx: 'automatic'` for React 19 JSX test support.
+
+### `P1-SEO-CORRIDORS` — SEO corridor pages for London, Birmingham, Manchester
+
+- Created shared `CityCorridor` component for consistent city-specific landing pages.
+- Three static Next.js pages: `/umrah/london`, `/umrah/birmingham`, `/umrah/manchester`.
+- Each page exports unique `Metadata` with city-specific title and description.
+- CTA links to `/search/packages` with pre-filled `type=umrah&departureCity={city}` query params.
+- Content uses product-owned copy only — no scraped operator data, no fabricated prices.
+- Pay-operator-direct disclosure included; no "best price" or "guaranteed availability" language.
+- All pages statically prerendered at build time (no client JS on public pages).
+- Sitemap updated with all 3 new routes.
+- `docs/SEO.md` updated with new route entries in meta tags table.
+- All 65 unit tests pass; build passes with zero errors.
 
 ### `P1-EVIDENCE-BYTES` — Evidence file bytes storage with RBAC + retention
 

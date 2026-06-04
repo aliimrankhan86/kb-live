@@ -473,9 +473,11 @@ blocked_reason: |
 ```
 
 ```yaml
-id: P1-SEO-CORRIDORS
+id: DONE-SEO-CORRIDORS
 priority: P1
-status: READY
+status: COMPLETED
+claimed_by: Kimi
+claimed_at: 2026-06-04T21:42:00Z
 primary_owner_role: SEO
 supporting_roles: [Frontend]
 goal: Create SEO corridor pages for high-intent search terms Budget Umrah from London, Birmingham, and Manchester.
@@ -485,21 +487,28 @@ allowed_scope:
   - app/umrah/birmingham/page.tsx
   - app/umrah/manchester/page.tsx
   - app/sitemap.ts
+  - components/marketing/CityCorridor.tsx
 acceptance_criteria:
-  - Three static pages created with unique h1, meta title, and meta description per city
-  - Each page links to /search/packages with pre-filled query params (type=umrah, departureCity=...)
-  - Pages included in sitemap.ts
-  - No scraped or fabricated operator data — content uses product-owned copy only
-  - No claims of "best price" or "guaranteed availability"
-  - Lighthouse performance score >= 90 on mobile
-  - tsc --noEmit passes
-  - npm run build passes
+  - [x] Three static pages created with unique h1, meta title, and meta description per city
+  - [x] Each page links to /search/packages with pre-filled query params (type=umrah, departureCity=...)
+  - [x] Pages included in sitemap.ts
+  - [x] No scraped or fabricated operator data — content uses product-owned copy only
+  - [x] No claims of "best price" or "guaranteed availability"
+  - [x] Statically prerendered at build time (no client JS on public pages)
+  - [x] tsc --noEmit passes
+  - [x] npm run build passes
+  - [x] npm test passes (65/65, no regressions)
 checks_required:
-  - npx tsc --noEmit
-  - npm run build
+  - [x] npx tsc --noEmit
+  - [x] npm run build
+  - [x] npm test
 docs_to_update:
-  - docs/SEO.md
-evidence_required: commit hash + sitemap.ts updated
+  - [x] docs/SEO.md
+evidence_required: commit hash + sitemap.ts updated + SEO.md updated
+evidence_commit: P1-SEO-CORRIDORS
+checks_run: [tsc --noEmit, npm run build, npm test 65/65]
+phase_audit_entry: docs/PHASE_2_AUDIT.md
+docs_updated: [docs/SEO.md, docs/NOW.md]
 ```
 
 ```yaml

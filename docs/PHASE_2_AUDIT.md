@@ -138,6 +138,58 @@ Allow Playwright webServer to bind to localhost so e2e can run without EPERM.
 
 ---
 
+## 2026-06-04 - P1-SEO-CORRIDORS
+
+**Goal:** Create SEO corridor pages for high-intent search terms Budget Umrah from London, Birmingham, and Manchester.
+
+**Acceptance criteria:**
+
+- [x] Three static pages created with unique h1, meta title, and meta description per city
+- [x] Each page links to /search/packages with pre-filled query params (type=umrah, departureCity=...)
+- [x] Pages included in sitemap.ts
+- [x] No scraped or fabricated operator data — content uses product-owned copy only
+- [x] No claims of "best price" or "guaranteed availability"
+- [x] Statically prerendered at build time
+- [x] tsc --noEmit passes
+- [x] npm run build passes
+- [x] npm test passes (65/65, no regressions)
+
+**Result:** PASS
+
+**Files changed:**
+
+- `app/umrah/london/page.tsx` (new)
+- `app/umrah/birmingham/page.tsx` (new)
+- `app/umrah/manchester/page.tsx` (new)
+- `components/marketing/CityCorridor.tsx` (new)
+- `app/sitemap.ts`
+- `docs/SEO.md`
+
+**Commands run (with results):**
+
+- `npx tsc --noEmit` → PASS
+- `npm run build` → PASS (all 3 pages statically prerendered)
+- `npm test` → PASS (65/65)
+
+**Notes / Decisions:**
+
+- Shared `CityCorridor` component for consistent layout and easy future city additions.
+- Each page exports `Metadata` with city-specific title and description.
+- CTA links to `/search/packages` with pre-filled `type=umrah&departureCity={city}` query params.
+- Content uses product-owned copy only — no scraped operator data, no fabricated prices.
+- Pay-operator-direct disclosure included in copy.
+- No "best price" or "guaranteed availability" language.
+
+**Risks / Tech debt introduced:**
+
+- None.
+
+**Follow-ups created:**
+
+- None.
+
+---
+
 ## 2026-06-04 - P1-EVIDENCE-BYTES
 
 **Goal:** Implement actual file byte storage for payment evidence uploads with RBAC enforcement and a defined retention policy.

@@ -8,6 +8,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/umrah`, lastModified: new Date() },
     { url: `${baseUrl}/hajj`, lastModified: new Date() },
     { url: `${baseUrl}/umrah/ramadan`, lastModified: new Date() },
+    { url: `${baseUrl}/umrah/london`, lastModified: new Date() },
+    { url: `${baseUrl}/umrah/birmingham`, lastModified: new Date() },
+    { url: `${baseUrl}/umrah/manchester`, lastModified: new Date() },
     { url: `${baseUrl}/packages`, lastModified: new Date() },
   ]
 }
