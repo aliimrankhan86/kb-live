@@ -505,7 +505,7 @@ checks_required:
 docs_to_update:
   - [x] docs/SEO.md
 evidence_required: commit hash + sitemap.ts updated + SEO.md updated
-evidence_commit: P1-SEO-CORRIDORS
+evidence_commit: bb50910
 checks_run: [tsc --noEmit, npm run build, npm test 65/65]
 phase_audit_entry: docs/PHASE_2_AUDIT.md
 docs_updated: [docs/SEO.md, docs/NOW.md]
