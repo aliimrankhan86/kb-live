@@ -195,11 +195,26 @@ npm run build
 - Updated `docs/ARCHITECTURE.md`: persistence stack table, Supabase client docs, migration path checklist
 - Updated `docs/SECURITY.md`: Supabase Auth & Session Security section (cookie strategy, key rules, RLS, storage)
 
-**Checks:** `npx tsc --noEmit` pass (0 errors), `npm run build` pass (0 errors)
+## P1B-PRISMA-SCHEMA shipped
+
+- Initialized Prisma with `npx prisma init --datasource-provider postgresql`
+- Created `prisma/schema.prisma` with complete data model matching `lib/types.ts`:
+  - 12 enums: UserRole, VerificationStatus, OperatorTier, PaymentDetailsStatus, BankChangeRequestStatus, AuditLogAction, Season, BookingStatus, EvidenceStorageStatus, ComplaintCategory, ComplaintSeverity, ComplaintStatus
+  - 11 models: User, OperatorProfile, PaymentDetails, BankChangeRequest, AuditLogEntry, QuoteRequest, Offer, BookingIntent, Package, Complaint
+  - All fields mapped with `@@map` for snake_case table names
+  - Relations defined with explicit relation names where ambiguous
+  - Decimal types for monetary fields (`pricePerPerson`, `depositAmount`)
+  - Json fields for flexible shapes (`officeAddress`, `budgetRange`, `inclusions`, `occupancy`, etc.)
+  - Index on `AuditLogEntry(operatorId, createdAt)` for audit log queries
+- Created `prisma.config.ts` with datasource URL from `DATABASE_URL` env (Prisma 7 config pattern)
+- Added Prisma scripts to `package.json`: `db:generate`, `db:migrate`, `db:push`, `db:studio`, `db:validate`
+- tsconfig `paths` already covers `@/lib/generated/prisma` via `"@/*": ["./*"]`
+
+**Checks:** `npx prisma validate` pass, `npx tsc --noEmit` pass (0 errors), `npm test` 75/75 pass, `npm run build` pass (0 errors)
 
 ## Next step
 
-Next micro-task: **P1B-PRISMA-SCHEMA** — design Prisma schema matching existing TypeScript types in `lib/types.ts`.
+Next micro-task: **P1C-PRISMA-CLIENT-SINGLETON** — create a type-safe PrismaClient singleton with connection pooling for server-side usage.
 
 - `npx playwright test e2e/bank-payment.spec.ts`: 4/4 pass (chromium)
 - `npx playwright test e2e/flow.spec.ts e2e/catalogue.spec.ts e2e/bank-payment.spec.ts`: 18/18 pass (all browsers)

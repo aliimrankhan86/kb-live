@@ -15,7 +15,12 @@
     "test:ci": "vitest run --reporter=verbose",
     "e2e": "playwright test",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "db:validate": "prisma validate"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
