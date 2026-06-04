@@ -138,6 +138,46 @@ Allow Playwright webServer to bind to localhost so e2e can run without EPERM.
 
 ---
 
+## 2026-06-04 - P0-HYGIENE-ARTEFACTS
+
+**Goal:** Remove duplicate docs directories and ensure .next build artefacts are gitignored.
+
+**Acceptance criteria:**
+
+- [x] docs/\_archive 2/ removed from repo
+- [x] docs/skills 2/ removed from repo
+- [x] .gitignore includes .next/ entry
+- [x] git status clean after removal
+- [x] npm run build passes after cleanup
+
+**Result:** PASS
+
+**Files changed:**
+
+- `docs/_archive 2/` (removed)
+- `docs/skills 2/` (removed)
+- `.gitignore` (verified .next/ present)
+
+**Commands run (with results):**
+
+- `git status` → clean
+- `npm run build` → PASS
+
+**Notes / Decisions:**
+
+- Duplicate directories were already removed in a prior session; this is a formal close-out with audit evidence.
+- .gitignore already contained .next/ entry.
+
+**Risks / Tech debt introduced:**
+
+- None.
+
+**Follow-ups created:**
+
+- None.
+
+---
+
 ## 2026-06-04 - P0-COMPLAINTS-FLOW
 
 **Goal:**  

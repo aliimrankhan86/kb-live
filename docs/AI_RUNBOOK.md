@@ -362,9 +362,9 @@ docs_updated: [QA.md, docs/SECURITY.md, docs/PHASE_2_AUDIT.md, docs/NOW.md]
 ```
 
 ```yaml
-id: P0-HYGIENE-ARTEFACTS
+id: DONE-HYGIENE-ARTEFACTS
 priority: P0
-status: READY
+status: COMPLETED
 primary_owner_role: QA
 supporting_roles: []
 goal: Remove duplicate docs/_archive 2 and docs/skills 2 directories from the repo and ensure .next build artefacts are gitignored.
@@ -374,16 +374,20 @@ allowed_scope:
   - docs/skills 2/
   - .gitignore
 acceptance_criteria:
-  - docs/_archive 2/ removed from repo (git rm -r)
-  - docs/skills 2/ removed from repo (git rm -r)
-  - .gitignore includes .next/ entry (add if absent)
-  - git status shows clean working tree after removal
-  - npm run build passes after cleanup
+  - [x] docs/_archive 2/ removed from repo (git rm -r)
+  - [x] docs/skills 2/ removed from repo (git rm -r)
+  - [x] .gitignore includes .next/ entry (already present)
+  - [x] git status shows clean working tree after removal
+  - [x] npm run build passes after cleanup
 checks_required:
-  - git status
-  - npm run build
+  - [x] git status
+  - [x] npm run build
 docs_to_update: []
 evidence_required: commit hash
+evidence_commit: 57d84f1
+checks_run: [git status clean, npm run build PASS]
+phase_audit_entry: docs/PHASE_2_AUDIT.md
+date: 2026-06-04
 ```
 
 ```yaml
