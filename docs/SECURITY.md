@@ -28,6 +28,27 @@ This document outlines the security architecture and assumptions for the KaabaTr
 - Admin status changes on complaints are restricted to `admin_triage`, `resolved`, and `closed`.
 - Admin notes and operator flag on complaints are internal-only; no public shaming or automated penalties.
 
+## Row Level Security (RLS) Policies
+
+All tables have `ENABLE ROW LEVEL SECURITY` with deny-by-default. Policies are defined in `supabase/migrations/001_enable_rls.sql`.
+
+| Table                    | Read Policy                        | Write Policy                 | Notes                                       |
+| :----------------------- | :--------------------------------- | :--------------------------- | :------------------------------------------ |
+| **users**                | Own record only                    | Own record only              | auth.uid() = id                             |
+| **operator_profiles**    | Public read                        | Own profile update           | Published data readable by all              |
+| **payment_details**      | Own operator only                  | —                            | No direct insert via app (seeded/onboarded) |
+| **bank_change_requests** | Own operator only                  | Own operator only            | Insert + update scoped to operator_id       |
+| **audit_log_entries**    | Own operator only                  | System insert                | Insert via Repository only                  |
+| **quote_requests**       | Own customer only                  | Own customer only            | Customer scoped by customer_id              |
+| **offers**               | All (public)                       | —                            | Insert via operator API route (future)      |
+| **booking_intents**      | Customer OR operator               | Own customer insert          | Both parties can update                     |
+| **packages**             | Published (public) OR own operator | Own operator CRUD            | Drafts hidden from public                   |
+| **complaints**           | Customer OR operator               | Customer insert, both update | Scoped by customer_id / operator_id         |
+
+**Admin bypass**: Service role key bypasses all RLS (for admin dashboard and audit operations).
+
+**Policy file**: `supabase/migrations/001_enable_rls.sql`
+
 ## Input Validation
 
 - **Client-side**: HTML5 validation (required, type="number").
