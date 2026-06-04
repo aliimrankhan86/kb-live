@@ -5,6 +5,10 @@ import {
   BookingIntent,
   BookingPaymentEvidence,
   BookingPaymentEvidenceFile,
+  Complaint,
+  ComplaintCategory,
+  ComplaintSeverity,
+  ComplaintStatus,
   Offer,
   OperatorProfile,
   Package,
@@ -226,6 +230,35 @@ const generateReferenceCode = (existingCodes: Set<string>) => {
   }
 
   throw new Error('Unable to generate unique reference code');
+};
+
+const requireComplaintAccess = (ctx: RequestContext, complaint: Complaint) => {
+  if (ctx.role === 'admin') return;
+  if (ctx.role === 'customer' && ctx.userId === complaint.customerId) return;
+  if (ctx.role === 'operator' && ctx.userId === complaint.operatorId) return;
+  throw new Error('Unauthorized');
+};
+
+const requireComplaintOperatorAccess = (ctx: RequestContext, complaint: Complaint) => {
+  if (ctx.role === 'operator' && ctx.userId === complaint.operatorId) return;
+  throw new Error('Unauthorized');
+};
+
+const VALID_COMPLAINT_CATEGORIES: ComplaintCategory[] = [
+  'payment_issue',
+  'service_quality',
+  'package_description',
+  'booking_problem',
+  'other',
+];
+
+const VALID_COMPLAINT_SEVERITIES: ComplaintSeverity[] = ['low', 'medium', 'high'];
+
+const normalizeComplaintDescription = (description: string) => {
+  const trimmed = description.trim();
+  if (!trimmed) throw new Error('Description is required');
+  if (trimmed.length < 10) throw new Error('Description must be at least 10 characters');
+  return trimmed;
 };
 
 const preparePaymentEvidence = (paymentEvidence?: BookingPaymentEvidence): BookingPaymentEvidence | undefined => {
@@ -654,5 +687,129 @@ export const Repository = {
     }
 
     MockDB.deletePackage(id);
-  }
+  },
+
+  // Complaints
+  createComplaint: (
+    ctx: RequestContext,
+    input: {
+      bookingIntentId: string;
+      category: ComplaintCategory;
+      severity: ComplaintSeverity;
+      description: string;
+    }
+  ): Complaint => {
+    if (ctx.role !== 'customer') throw new Error('Unauthorized');
+
+    const bookingIntent = MockDB.getBookingIntents().find((b) => b.id === input.bookingIntentId);
+    if (!bookingIntent) throw new Error('Booking intent not found');
+    if (bookingIntent.customerId !== ctx.userId) throw new Error('Unauthorized');
+
+    if (!VALID_COMPLAINT_CATEGORIES.includes(input.category)) {
+      throw new Error('Invalid complaint category');
+    }
+    if (!VALID_COMPLAINT_SEVERITIES.includes(input.severity)) {
+      throw new Error('Invalid complaint severity');
+    }
+
+    const now = new Date().toISOString();
+    const complaint: Complaint = {
+      id: crypto.randomUUID(),
+      bookingIntentId: input.bookingIntentId,
+      referenceCode: bookingIntent.referenceCode ?? 'UNKNOWN',
+      customerId: ctx.userId,
+      operatorId: bookingIntent.operatorId,
+      category: input.category,
+      severity: input.severity,
+      description: normalizeComplaintDescription(input.description),
+      status: 'submitted',
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    MockDB.saveComplaint(complaint);
+    return complaint;
+  },
+
+  getComplaints: (ctx: RequestContext): Complaint[] => {
+    const all = MockDB.getComplaints();
+    if (ctx.role === 'customer') return all.filter((c) => c.customerId === ctx.userId);
+    if (ctx.role === 'operator') return all.filter((c) => c.operatorId === ctx.userId);
+    return all;
+  },
+
+  getComplaintById: (ctx: RequestContext, id: string): Complaint | undefined => {
+    const complaint = MockDB.getComplaints().find((c) => c.id === id);
+    if (!complaint) return undefined;
+    requireComplaintAccess(ctx, complaint);
+    return complaint;
+  },
+
+  updateComplaintStatus: (ctx: RequestContext, id: string, status: ComplaintStatus): Complaint => {
+    const complaint = MockDB.getComplaints().find((c) => c.id === id);
+    if (!complaint) throw new Error('Complaint not found');
+    requireComplaintAccess(ctx, complaint);
+
+    const allowedOperatorStatuses: ComplaintStatus[] = [
+      'operator_responding',
+      'resolved',
+      'cannot_resolve',
+    ];
+    const allowedAdminStatuses: ComplaintStatus[] = ['admin_triage', 'resolved', 'closed'];
+
+    if (ctx.role === 'operator') {
+      if (!allowedOperatorStatuses.includes(status)) throw new Error('Operator cannot set this status');
+    } else if (ctx.role === 'admin') {
+      if (!allowedAdminStatuses.includes(status)) throw new Error('Admin cannot set this status');
+    } else {
+      throw new Error('Unauthorized');
+    }
+
+    const updated: Complaint = {
+      ...complaint,
+      status,
+      updatedAt: new Date().toISOString(),
+    };
+    MockDB.saveComplaint(updated);
+    return updated;
+  },
+
+  updateComplaintOperatorResponse: (ctx: RequestContext, id: string, response: string): Complaint => {
+    const complaint = MockDB.getComplaints().find((c) => c.id === id);
+    if (!complaint) throw new Error('Complaint not found');
+    requireComplaintOperatorAccess(ctx, complaint);
+
+    const trimmed = response.trim();
+    if (!trimmed || trimmed.length < 5) throw new Error('Response must be at least 5 characters');
+
+    const updated: Complaint = {
+      ...complaint,
+      operatorResponse: trimmed,
+      operatorRespondedAt: new Date().toISOString(),
+      status: complaint.status === 'submitted' ? 'operator_responding' : complaint.status,
+      updatedAt: new Date().toISOString(),
+    };
+    MockDB.saveComplaint(updated);
+    return updated;
+  },
+
+  updateComplaintAdminNotes: (
+    ctx: RequestContext,
+    id: string,
+    notes: string,
+    flagOperator?: boolean
+  ): Complaint => {
+    requireAdmin(ctx);
+    const complaint = MockDB.getComplaints().find((c) => c.id === id);
+    if (!complaint) throw new Error('Complaint not found');
+
+    const updated: Complaint = {
+      ...complaint,
+      adminNotes: notes.trim() || undefined,
+      adminFlaggedOperator: flagOperator ?? complaint.adminFlaggedOperator,
+      updatedAt: new Date().toISOString(),
+    };
+    MockDB.saveComplaint(updated);
+    return updated;
+  },
 };

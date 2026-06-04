@@ -138,6 +138,69 @@ Allow Playwright webServer to bind to localhost so e2e can run without EPERM.
 
 ---
 
+## 2026-06-04 - P0-COMPLAINTS-FLOW
+
+**Goal:**  
+Implement complaints flow end-to-end: customer submits complaint tied to BookingIntent → routed to operator → admin triage. No refund promises.
+
+**Acceptance criteria:**
+
+- [x] Complaint type added to lib/types.ts with category, severity, status enums
+- [x] Repository.createComplaint enforces customer-only + valid category/severity + 10-char description min
+- [x] Repository.getComplaints/getComplaintById RBAC: customer sees own, operator sees own, admin sees all
+- [x] Repository.updateComplaintStatus RBAC: operator can set operator_responding/resolved/cannot_resolve; admin can set admin_triage/resolved/closed
+- [x] Repository.updateComplaintOperatorResponse requires operator owner, min 5 chars, auto-sets operator_responding
+- [x] Repository.updateComplaintAdminNotes requires admin, supports internal flag (no public shaming)
+- [x] Customer ComplaintForm integrated into RequestDetail below PaymentInstructions for existing BookingIntents
+- [x] Operator ComplaintsInbox on /operator/dashboard with respond + status change
+- [x] Admin ComplaintsTriage on /admin/complaints with severity/status filters, internal notes, flag operator
+- [x] Required UX copy blocks present: pay-operator-direct, contract with operator, KaabaTrip logs/routes only
+- [x] 21 unit tests covering all Repository RBAC rules
+- [x] No regressions in existing tests (55/55 pass) or E2E (6/6 chromium)
+
+**Result:** PASS
+
+**Files changed:**
+
+- `lib/types.ts`
+- `lib/api/mock-db.ts`
+- `lib/api/repository.ts`
+- `components/request/ComplaintForm.tsx` (new)
+- `components/request/RequestDetail.tsx`
+- `components/operator/ComplaintsInbox.tsx` (new)
+- `components/admin/ComplaintsTriage.tsx` (new)
+- `app/operator/dashboard/page.tsx`
+- `app/admin/complaints/page.tsx` (new)
+- `tests/complaints.test.ts` (new)
+
+**Commands run (with results):**
+
+- `npx tsc --noEmit` → PASS
+- `npm test` → PASS (55/55)
+- `npm run build` → PASS
+- `npx playwright test e2e/flow.spec.ts e2e/catalogue.spec.ts e2e/bank-payment.spec.ts --project=chromium` → PASS (6/6)
+
+**Manual smoke steps (if applicable):**
+
+- N/A
+
+**Notes / Decisions:**
+
+- Seed complaint added for op1 to populate operator inbox and admin triage on first load
+- ComplaintForm uses closed/open state pattern (not a dialog) to keep UI simple
+- All new components reuse existing Select, Textarea, Button, Badge, Checkbox UI primitives
+- Admin flag is internal only; no automated penalties or public shaming in MVP
+
+**Risks / Tech debt introduced:**
+
+- None.
+
+**Follow-ups created:**
+
+- None.
+
+---
+
 ## 2026-06-04 - MT-7: Bank and Payment E2E Tests (`MT7-E2E-BANK-TESTS`)
 
 **Goal:** Add Playwright E2E coverage for operator bank onboarding, payment instructions gating, admin bank change review, and eligibility gating flows.

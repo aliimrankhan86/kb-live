@@ -22,6 +22,7 @@
 
 ## Shipped
 
+- P0-COMPLAINTS-FLOW shipped. See `docs/AI_RUNBOOK.md` COMPLETED section for `DONE-COMPLAINTS-FLOW`.
 - MT-7 bank and payment E2E coverage shipped. See `docs/AI_RUNBOOK.md` COMPLETED section for `DONE-E2E-BANK-TESTS`.
 - MT-8 cooling period lazy-activation + operator audit log view shipped. See `docs/AI_RUNBOOK.md` COMPLETED section for `DONE-COOLING-AUDIT-LOG`.
 - MT-4 admin bank change review UI shipped. See `docs/AI_RUNBOOK.md` COMPLETED section for `DONE-ADMIN-BANK-REVIEW`.
@@ -35,6 +36,21 @@
 - All required `data-testid` attributes present.
 - 5 unit tests in `tests/payment-instructions.test.tsx` covering all acceptance criteria.
 - Fixed `vitest.config.ts` with `esbuild.jsx: 'automatic'` for React 19 JSX test support.
+
+### `P0-COMPLAINTS-FLOW` — Complaints routing: customer → operator → admin triage
+
+- Added `Complaint` type with `category`, `severity`, `status` enums; `referenceCode` autofilled from BookingIntent.
+- `Repository.createComplaint` enforces customer-only, valid enums, 10-char description minimum.
+- `Repository.getComplaints` / `getComplaintById` RBAC: customer own, operator own, admin all.
+- `Repository.updateComplaintStatus` role-gated status transitions (operator: responding/resolved/cannot_resolve; admin: triage/resolved/closed).
+- `Repository.updateComplaintOperatorResponse` requires operator owner, min 5 chars, auto-advances status.
+- `Repository.updateComplaintAdminNotes` requires admin; supports internal operator flag (no public shaming).
+- `ComplaintForm` component in `RequestDetail` below `PaymentInstructions` for existing BookingIntents.
+- Required copy blocks: pay-operator-direct disclosure, contract with operator, KaabaTrip logs/routes only (not adjudicator).
+- `ComplaintsInbox` on `/operator/dashboard` with respond + status change UI.
+- `ComplaintsTriage` on `/admin/complaints` with severity/status filters, internal notes, flag operator.
+- 21 unit tests in `tests/complaints.test.ts` covering all RBAC rules.
+- All 55 unit tests pass; 6/6 Playwright E2E pass (no regressions).
 
 ### `MT6-ELIGIBILITY-GATING` — Wire "Book now" CTA to operator bookability check
 
@@ -111,6 +127,8 @@ npm run build
 
 - `npx tsc --noEmit`: pass (0 errors)
 - `npm test`: 34/34 pass
+- `npm run build`: pass
+- `npm test`: 55/55 pass
 - `npm run build`: pass
 - `npx playwright test e2e/bank-payment.spec.ts`: 4/4 pass (chromium)
 - `npx playwright test e2e/flow.spec.ts e2e/catalogue.spec.ts e2e/bank-payment.spec.ts`: 18/18 pass (all browsers)

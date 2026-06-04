@@ -15,6 +15,7 @@ import { Button, Checkbox, Input } from '@/components/ui';
 import { Textarea } from '@/components/ui/Textarea';
 import { ComparisonTable } from './ComparisonTable';
 import { PaymentInstructions } from './PaymentInstructions';
+import { ComplaintForm } from './ComplaintForm';
 import { handleOfferSelection } from '@/lib/comparison';
 import { Repository, RequestContext } from '@/lib/api/repository';
 import { formatMoney } from '@/lib/i18n/format';
@@ -386,6 +387,7 @@ export function RequestDetail({ id }: { id: string }) {
                         </p>
                       </div>
                       <PaymentInstructions bookingIntent={existingIntent} />
+                      <ComplaintForm bookingIntent={existingIntent} />
                     </div>
                   ) : null}
                   <div className="mt-6 flex gap-2">

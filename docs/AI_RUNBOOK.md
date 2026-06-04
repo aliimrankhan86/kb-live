@@ -309,9 +309,11 @@ date: 2026-06-04
 ```
 
 ```yaml
-id: P0-COMPLAINTS-FLOW
+id: DONE-COMPLAINTS-FLOW
 priority: P0
-status: READY
+status: COMPLETED
+claimed_by: Kimi
+claimed_at: 2026-06-04T21:06:00Z
 primary_owner_role: Frontend
 supporting_roles: [UX, Business Analyst, Backend]
 goal: Add a basic complaints/dispute routing flow — customer submits complaint, system routes to operator, admin can triage — with no refund promises anywhere in copy or logic.
@@ -321,28 +323,42 @@ allowed_scope:
   - lib/api/mock-db.ts
   - lib/api/repository.ts
   - components/request/ComplaintForm.tsx
+  - components/operator/ComplaintsInbox.tsx
+  - components/admin/ComplaintsTriage.tsx
   - app/requests/[id]/page.tsx
   - app/operator/dashboard/page.tsx
+  - app/admin/complaints/page.tsx
+  - tests/complaints.test.ts
 acceptance_criteria:
-  - Complaint type added to lib/types.ts with fields id, bookingIntentId, customerId, operatorId, status, description, createdAt
-  - Status enum: submitted, operator_notified, admin_triage, resolved, closed
-  - Customer can submit complaint from their BookingIntent detail view
-  - Operator sees complaints on their dashboard (own only — RBAC enforced)
-  - Admin sees all complaints (future admin panel stub acceptable in MVP)
-  - No copy contains "refund", "guarantee", "KaabaTrip will resolve", or similar
-  - Copy must state customer should contact operator directly and KaabaTrip will log and escalate if unresolved
-  - tsc --noEmit passes
-  - npm test passes
-  - npm run build passes
+  - [x] Complaint type added to lib/types.ts with fields id, bookingIntentId, referenceCode, customerId, operatorId, category, severity, status, description, createdAt, updatedAt
+  - [x] Status enum: submitted, operator_notified, operator_responding, admin_triage, resolved, closed, cannot_resolve
+  - [x] Category enum: payment_issue, service_quality, package_description, booking_problem, other
+  - [x] Severity enum: low, medium, high
+  - [x] Customer can submit complaint from BookingIntent detail view via ComplaintForm component
+  - [x] Operator sees complaints on dashboard via ComplaintsInbox (own only — RBAC enforced)
+  - [x] Operator can respond (min 5 chars) and update status (operator_responding, resolved, cannot_resolve)
+  - [x] Admin sees all complaints via /admin/complaints with ComplaintsTriage component
+  - [x] Admin can add internal notes, flag operator internally, update status (admin_triage, resolved, closed)
+  - [x] No copy contains "refund", "guarantee", "KaabaTrip will resolve", or similar
+  - [x] Copy states customer should contact operator directly and KaabaTrip logs/routes only
+  - [x] tsc --noEmit passes
+  - [x] npm test passes (55/55)
+  - [x] npm run build passes
+  - [x] Playwright E2E passes (6/6 chromium, no regressions)
 checks_required:
-  - npx tsc --noEmit
-  - npm test
-  - npm run build
+  - [x] npx tsc --noEmit
+  - [x] npm test (55/55)
+  - [x] npm run build
 docs_to_update:
-  - QA.md
-  - docs/SECURITY.md
-  - docs/00_PRODUCT_CANON.md
-evidence_required: commit hash + QA.md entry
+  - [x] QA.md
+  - [x] docs/SECURITY.md
+  - [x] docs/PHASE_2_AUDIT.md
+  - [x] docs/NOW.md
+evidence_required: commit hash + QA.md entry + PHASE_2_AUDIT.md entry
+evidence_commit: P0-COMPLAINTS-FLOW
+checks_run: [tsc --noEmit, npm test 55/55, npm run build, playwright 6/6 chromium]
+phase_audit_entry: docs/PHASE_2_AUDIT.md
+docs_updated: [QA.md, docs/SECURITY.md, docs/PHASE_2_AUDIT.md, docs/NOW.md]
 ```
 
 ```yaml

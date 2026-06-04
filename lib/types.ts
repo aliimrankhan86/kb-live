@@ -322,6 +322,42 @@ export interface Package {
   images?: string[];
 }
 
+export type ComplaintCategory =
+  | 'payment_issue'
+  | 'service_quality'
+  | 'package_description'
+  | 'booking_problem'
+  | 'other';
+
+export type ComplaintSeverity = 'low' | 'medium' | 'high';
+
+export type ComplaintStatus =
+  | 'submitted'
+  | 'operator_notified'
+  | 'operator_responding'
+  | 'admin_triage'
+  | 'resolved'
+  | 'closed'
+  | 'cannot_resolve';
+
+export interface Complaint {
+  id: string;
+  bookingIntentId: string;
+  referenceCode: string;
+  customerId: string;
+  operatorId: string;
+  category: ComplaintCategory;
+  severity: ComplaintSeverity;
+  description: string;
+  status: ComplaintStatus;
+  operatorResponse?: string;
+  operatorRespondedAt?: string;
+  adminNotes?: string;
+  adminFlaggedOperator?: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // Unified shape for comparison
 export interface ComparisonItem {
   id: string;

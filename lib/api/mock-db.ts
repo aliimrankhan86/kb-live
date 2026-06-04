@@ -2,6 +2,7 @@ import {
   AuditLogEntry,
   BankChangeRequest,
   BookingIntent,
+  Complaint,
   Offer,
   OperatorProfile,
   Package,
@@ -21,6 +22,7 @@ const STORAGE_KEYS = {
   PAYMENT_DETAILS: 'kb_payment_details',
   BANK_CHANGE_REQUESTS: 'kb_bank_change_requests',
   AUDIT_LOG: 'kb_audit_log',
+  COMPLAINTS: 'kb_complaints',
 };
 
 const PACKAGES_SEED_VERSION = 3;
@@ -132,6 +134,22 @@ const SEED_OPERATORS: OperatorProfile[] = [
 const SEED_USERS: User[] = [
   { id: 'cust1', email: 'customer@example.com', role: 'customer', name: 'Ali Client' },
   { id: 'op1', email: 'operator@example.com', role: 'operator', name: 'Ahmed Operator' },
+];
+
+const SEED_COMPLAINTS: Complaint[] = [
+  {
+    id: 'complaint-1',
+    bookingIntentId: 'bi-demo-1',
+    referenceCode: 'KT-DEMO-001',
+    customerId: 'cust1',
+    operatorId: 'op1',
+    category: 'booking_problem',
+    severity: 'medium',
+    description: 'I was told the hotel was closer to Haram than stated in the package.',
+    status: 'operator_notified',
+    createdAt: '2026-05-20T10:00:00.000Z',
+    updatedAt: '2026-05-20T10:00:00.000Z',
+  },
 ];
 
 const SEED_PAYMENT_DETAILS: PaymentDetails[] = [
@@ -528,6 +546,27 @@ export const MockDB = {
     entries.push(entry);
     setStorage(STORAGE_KEYS.AUDIT_LOG, entries);
     return entry;
+  },
+
+  getComplaints: (): Complaint[] => {
+    const complaints = getStorage<Complaint[]>(STORAGE_KEYS.COMPLAINTS, []);
+    if (complaints.length === 0) {
+      setStorage(STORAGE_KEYS.COMPLAINTS, SEED_COMPLAINTS);
+      return SEED_COMPLAINTS;
+    }
+    return complaints;
+  },
+
+  saveComplaint: (complaint: Complaint) => {
+    const complaints = MockDB.getComplaints();
+    const existingIndex = complaints.findIndex((c) => c.id === complaint.id);
+    if (existingIndex >= 0) {
+      complaints[existingIndex] = complaint;
+    } else {
+      complaints.push(complaint);
+    }
+    setStorage(STORAGE_KEYS.COMPLAINTS, complaints);
+    return complaint;
   },
 
   // For simulation
