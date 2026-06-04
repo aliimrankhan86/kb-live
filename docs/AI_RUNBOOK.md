@@ -542,7 +542,7 @@ checks_required:
 docs_to_update:
   - [x] QA.md
 evidence_required: commit hash + QA.md entry
-evidence_commit: P2-PKG-CSV
+evidence_commit: 272713e
 checks_run: [tsc --noEmit, npm test 75/75, npm run build]
 phase_audit_entry: docs/PHASE_2_AUDIT.md
 docs_updated: [QA.md, docs/NOW.md]
