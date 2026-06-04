@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Hajj Packages',
-  description: 'Discover the best Hajj packages for your spiritual journey to the Holy Land.',
+  description: 'Discover Hajj packages and compare trusted operators.',
 }
 
 export default function HajjPage() {

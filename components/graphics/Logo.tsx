@@ -19,6 +19,7 @@ export const Logo: React.FC<LogoProps> = ({
       width={size}
       height={size}
       className={className}
+      style={{ width: 'auto', height: 'auto' }}
       aria-label={ariaLabel}
       role="img"
     />

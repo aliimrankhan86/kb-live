@@ -1,9 +1,16 @@
 'use client'
 
-import React from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Logo } from '@/components/graphics/Logo'
+import { Select } from '@/components/ui/Select'
+import {
+  DISPLAY_CURRENCY_OPTIONS,
+  getPreferredCurrency,
+  setPreferredCurrency,
+  type DisplayCurrency,
+} from '@/lib/i18n/region'
 import styles from './header.module.css'
 
 interface HeaderProps {
@@ -11,10 +18,16 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
+  const [currency, setCurrency] = useState<DisplayCurrency>('GBP')
+
+  useEffect(() => {
+    const preferred = getPreferredCurrency()
+    if (preferred) setCurrency(preferred)
+  }, [])
+
   return (
     <header 
       className={`${styles.header} ${className}`}
-      role="banner"
       aria-label="Main navigation"
     >
       <div className={styles.header__container}>
@@ -31,26 +44,50 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
             className={styles.header__textLogo}
             width={108}
             height={45}
+            priority
           />
         </Link>
 
         {/* Navigation */}
         <nav 
           className={styles.header__navigation}
-          role="navigation"
           aria-label="Main menu"
         >
+          <div className={styles.header__currency}>
+            <Select
+              id="header-currency-select"
+              aria-label="Display currency"
+              value={currency}
+              options={DISPLAY_CURRENCY_OPTIONS}
+              onChange={(event) => {
+                const next = event.target.value as DisplayCurrency
+                setCurrency(next)
+                setPreferredCurrency(next)
+              }}
+              selectClassName={styles.header__currencySelect}
+            />
+          </div>
           <Link 
-            href="/partner" 
+            href="/quote" 
             className={styles.header__navLink}
-            aria-label="Become a partner with KaabaTrip"
           >
-            Become A Partner
+            Get a Quote
+          </Link>
+          <Link 
+            href="/operator/dashboard" 
+            className={styles.header__navLink}
+          >
+            Operator Dashboard
+          </Link>
+          <Link 
+            href="/kanban" 
+            className={styles.header__navLink}
+          >
+            Kanban
           </Link>
           <Link 
             href="/login" 
             className={styles.header__navLink}
-            aria-label="Login to your account"
           >
             Login
           </Link>
