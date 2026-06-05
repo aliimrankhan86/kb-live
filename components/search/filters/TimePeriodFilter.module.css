@@ -51,7 +51,7 @@
   position: absolute;
   top: 50%;
   height: 4px;
-  background: var(--yellow);
+  background: #4A9EFF;
   border-radius: 999px;
   transform: translateY(-50%);
   z-index: 2;

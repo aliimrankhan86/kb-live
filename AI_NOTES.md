@@ -32,6 +32,9 @@ P0: Wire Repository → `getDataSource()` cutover — Production DB built but un
 | Hotel rating plural             | ✅     | `HotelRatingsFilter.tsx`: aria-label always "stars"                               |
 | TypeScript fixes                | ✅     | `PackageList.tsx` import conflict, `SortDropdown.tsx` ref type error              |
 | Update AI_NOTES.md              | ✅     | Historical log + current objective updated                                        |
+| Fix Umrah slider                | ✅     | Removed duplicate track/activeTrack CSS, fixed positioning                        |
+| Fix Umrah budget slider         | ✅     | Fixed positioning (absolute top:50% + transform)                                  |
+| Blue slider tracks app-wide     | ✅     | BudgetFilter, DistanceFilter, TimePeriodFilter → #4A9EFF                          |
 
 ## 🔄 PENDING (next session)
 
@@ -154,6 +157,18 @@ P0: Wire Repository → `getDataSource()` cutover — Production DB built but un
 - **Date validation**: Client-side validation on form submit: departure cannot be past, return must be after departure, minimum 7 days (Umrah), maximum 60 days. Errors rendered with `role="alert"` and `data-testid`.
 - **Copy fix**: All em dashes (`\u2013`) replaced with regular hyphens (`-`) in quick-select labels, budget display, child age options to avoid AI-generated appearance.
 - **Branch**: `current-branch` created from `main` after committing all prior work. `main` remains safe backup.
+- **Build**: 0 errors | **Tests**: 95/95 | **tsc**: 0 errors
+
+### 2026-06-05 — Session: Slider Fix + Blue Active Tracks App-Wide
+
+- **Umrah slider broken**: Removed duplicate `.searchForm__track` and `.searchForm__activeTrack` definitions in `umrah-search-form.module.css` (two conflicting blocks overwrote each other). Fixed positioning: `top: 50%; transform: translateY(-50%)` for both track and activeTrack. Fixed slider input: `top:0; left:0; width:100%; height:100%` for proper full-area hit testing.
+- **Umrah budget slider broken**: Same fix applied to `.searchForm__budgetTrack` and `.searchForm__budgetActiveTrack` — changed from `position: relative` to `position: absolute` with proper centering.
+- **Blue active tracks app-wide**: Changed all slider `.activeTrack` backgrounds from `var(--yellow)` to `#4A9EFF` (bright blue) for better visibility and consistency:
+  - `BudgetFilter.module.css` active track
+  - `DistanceFilter.module.css` active track
+  - `TimePeriodFilter.module.css` active track
+  - `umrah-search-form.module.css` already had blue — now consistent with filters
+- Thumb handles remain yellow (`var(--yellow)` / `#D4AF37`) for contrast and brand consistency.
 - **Build**: 0 errors | **Tests**: 95/95 | **tsc**: 0 errors
 
 ### 2026-06-05 — Session: Filter Overlay Consistency + GBP Currency + Bug Fixes
