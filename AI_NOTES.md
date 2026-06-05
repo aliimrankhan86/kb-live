@@ -40,6 +40,7 @@ P0: Wire Repository → `getDataSource()` cutover — Production DB built but un
 | Footer logo + structure         | ✅     | Smaller Logo(28px) + text-logo, structured sections, copyright row                |
 | Unified RangeSlider component   | ✅     | Single shared component for ALL sliders app-wide                                  |
 | Slider consistency verified     | ✅     | All sliders: 8px blue track, 24px gold thumb, 40px touch area                     |
+| Mobile drawer fallback colors   | ✅     | All drawer CSS vars now have solid hex fallbacks (#111111, #ffffff, #FFD31D)      |
 
 ## 🔄 PENDING (next session)
 
@@ -211,6 +212,20 @@ P0: Wire Repository → `getDataSource()` cutover — Production DB built but un
   - `umrah-search-form.module.css` → all budget slider CSS deleted
 - **Verified**: Build 0 errors, 95/95 tests pass, no visual regressions
 - **Result**: Every slider in the app now renders identically — same track height, same thumb size, same blue active track, same gold thumb, same touch behaviour
+
+### 2026-06-05 — Session: Mobile Drawer Invisible Nav Links Fix
+
+- **Root cause**: The mobile navigation drawer rendered with `background: var(--surfaceDark)` and `color: var(--text)` — when CSS custom properties failed to resolve (browser cache mismatch, late CSS injection, or race condition), the drawer appeared completely black with invisible text. The nav links were always present in the DOM but invisible against the default black background.
+- **Fix**: Added explicit solid-color fallbacks to ALL mobile drawer CSS properties:
+  - Drawer background: `#111111` fallback before `var(--surfaceDark)`
+  - Nav link text: `#ffffff` fallback before `var(--text)`
+  - Hover/focus states: `#FFD31D` fallback before `var(--yellow)`
+  - Divider: `rgba(255,255,255,0.08)` fallback before `var(--borderSubtle)`
+  - User label: `rgba(255,255,255,0.64)` fallback before `var(--textMuted)`
+  - Border radius: `8px` fallback before `var(--radiusMd)`
+- **Also added**: Guardrails to `.clinerules` — "CRITICAL EXECUTION GUARDRAILS & QUALITY MANDATE" section with Zero-Trust Confirmation, Production-Ready Standards, and Cross-AI Quality Audit Warning.
+- **Verified**: Compiled CSS output confirmed `background:#111111;background:var(--surfaceDark,#111111)` pattern. Build 0 errors.
+- **Note**: Dev server cache was stale from prior builds — required `rm -rf .next` and full rebuild for CSS changes to appear. Browser also needs hard-refresh (`Cmd+Shift+R`) to clear old CSS.
 
 ### 2026-06-05 — Session: Slider Fix + Blue Active Tracks App-Wide
 
