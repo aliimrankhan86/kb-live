@@ -1,0 +1,284 @@
+/* Sort Dropdown Styles - Following KaabaTrip Design System */
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  max-width: 280px;
+}
+
+/* Dropdown Button */
+.button {
+  width: 100%;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text);
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: var(--font-exo2, inherit);
+  text-align: left;
+  min-height: 44px; /* Touch-friendly minimum height */
+}
+
+.button:hover:not(.buttonDisabled) {
+  border-color: var(--yellow);
+  color: var(--yellow);
+  background: rgba(255, 211, 29, 0.05);
+}
+
+.button:focus {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+}
+
+.buttonOpen {
+  border-color: var(--yellow);
+  color: var(--yellow);
+  background: rgba(255, 211, 29, 0.1);
+}
+
+.buttonDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.buttonContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 0.5rem;
+}
+
+.buttonText {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0; /* Allow text truncation */
+}
+
+.buttonIcon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.chevron {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+  color: var(--textMuted);
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+  color: var(--yellow);
+}
+
+/* Dropdown Options */
+.options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg);
+  border: 1px solid var(--yellow);
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  margin-top: 0.25rem;
+  overflow: hidden;
+  animation: slideDown 0.2s ease-out;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* Scrollbar styling for options */
+.options::-webkit-scrollbar {
+  width: 6px;
+}
+
+.options::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.options::-webkit-scrollbar-thumb {
+  background: var(--yellow);
+  border-radius: 3px;
+}
+
+.options::-webkit-scrollbar-thumb:hover {
+  background: #e6c200;
+}
+
+/* Individual Option */
+.option {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.option:last-child {
+  border-bottom: none;
+}
+
+.option:hover {
+  background: rgba(255, 211, 29, 0.1);
+  color: var(--yellow);
+}
+
+.option:focus {
+  outline: 2px solid var(--yellow);
+  outline-offset: -2px;
+  background: rgba(255, 211, 29, 0.15);
+  color: var(--yellow);
+}
+
+.optionSelected {
+  background: rgba(255, 211, 29, 0.15);
+  color: var(--yellow);
+  border-left: 3px solid var(--yellow);
+}
+
+.optionFocused {
+  background: rgba(255, 211, 29, 0.1);
+  color: var(--yellow);
+}
+
+.optionContent {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.optionHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.optionIcon {
+  font-size: 1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.optionLabel {
+  flex: 1;
+  min-width: 0; /* Allow text truncation */
+}
+
+.checkIcon {
+  flex-shrink: 0;
+  color: var(--yellow);
+}
+
+.optionDescription {
+  font-size: 0.75rem;
+  color: var(--textMuted);
+  line-height: 1.3;
+  margin-top: 0.125rem;
+}
+
+/* Animations */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dropdown {
+    max-width: 100%;
+  }
+  
+  .button {
+    padding: 0.875rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .optionContent {
+    padding: 1.25rem;
+  }
+  
+  .optionHeader {
+    font-size: 0.9rem;
+  }
+  
+  .optionDescription {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .button {
+    padding: 1rem;
+    min-height: 48px; /* Larger touch targets on mobile */
+  }
+  
+  .optionContent {
+    padding: 1.5rem;
+  }
+  
+  .options {
+    max-height: 250px; /* Prevent overflow on small screens */
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .button {
+    border-width: 2px;
+  }
+  
+  .button:focus {
+    outline-width: 3px;
+  }
+  
+  .option:focus {
+    outline-width: 3px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .button,
+  .option,
+  .chevron {
+    transition: none;
+  }
+  
+  .options {
+    animation: none;
+  }
+}
+
+/* Dark mode optimizations (already dark, but ensuring consistency) */
+@media (prefers-color-scheme: dark) {
+  .options {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  }
+}

@@ -136,7 +136,7 @@
 
 .resetButton:hover {
   border-color: var(--yellow);
-  color: var(--yellow);
+  color: #D4AF37; /* Medium yellow - Gold */
 }
 
 .resetButton:focus-visible {

@@ -37,10 +37,19 @@
   flex-wrap: wrap;
   gap: 0.75rem;
   align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.statusContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .filterButton,
-.sortButton {
+.sortButton,
+.resetButton {
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: var(--text);
@@ -56,13 +65,15 @@
 }
 
 .filterButton:hover,
-.sortButton:hover {
+.sortButton:hover,
+.resetButton:hover {
   border-color: var(--yellow);
   color: var(--yellow);
 }
 
 .filterButton:focus,
-.sortButton:focus {
+.sortButton:focus,
+.resetButton:focus {
   outline: 2px solid var(--yellow);
   outline-offset: 2px;
 }
@@ -89,6 +100,85 @@
   border-radius: 0.5rem;
   color: var(--text);
   font-size: 0.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.basketContent {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.basketIconContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.basketIcon {
+  width: 16px;
+  height: 16px;
+  color: var(--text);
+  flex-shrink: 0;
+}
+
+.basketBadge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--yellow);
+  color: var(--bg);
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  border: 2px solid var(--surfaceDark);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  animation: bounceIn 0.3s ease-out;
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Highlight compare count when packages are selected */
+.shortlistCount.hasPackages {
+  background: var(--yellow);
+  border-color: var(--yellow);
+  color: var(--bg);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.shortlistCount.hasPackages:hover {
+  background: #e6c200;
+  border-color: #e6c200;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 211, 29, 0.3);
+}
+
+.compareHint {
+  color: var(--yellow);
+  font-size: 0.75rem;
+  font-weight: 500;
 }
 
 .compareButton {
@@ -476,6 +566,11 @@
   
   .searchControls {
     justify-content: space-between;
+  }
+  
+  .statusContainer {
+    flex-direction: row;
+    gap: 1rem;
   }
   
   .hotelsColumn {
