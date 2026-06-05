@@ -35,6 +35,9 @@ P0: Wire Repository → `getDataSource()` cutover — Production DB built but un
 | Fix Umrah slider                | ✅     | Removed duplicate track/activeTrack CSS, fixed positioning                        |
 | Fix Umrah budget slider         | ✅     | Fixed positioning (absolute top:50% + transform)                                  |
 | Blue slider tracks app-wide     | ✅     | BudgetFilter, DistanceFilter, TimePeriodFilter → #4A9EFF                          |
+| Mobile header hamburger         | ✅     | Full mobile drawer (320px slide-in), overlay, focus trap, Escape/click-outside    |
+| Touch targets fixed             | ✅     | All buttons/links min 44px-52px, `-webkit-tap-highlight-color: transparent`       |
+| Footer logo + structure         | ✅     | Smaller Logo(28px) + text-logo, structured sections, copyright row                |
 
 ## 🔄 PENDING (next session)
 
@@ -157,6 +160,33 @@ P0: Wire Repository → `getDataSource()` cutover — Production DB built but un
 - **Date validation**: Client-side validation on form submit: departure cannot be past, return must be after departure, minimum 7 days (Umrah), maximum 60 days. Errors rendered with `role="alert"` and `data-testid`.
 - **Copy fix**: All em dashes (`\u2013`) replaced with regular hyphens (`-`) in quick-select labels, budget display, child age options to avoid AI-generated appearance.
 - **Branch**: `current-branch` created from `main` after committing all prior work. `main` remains safe backup.
+- **Build**: 0 errors | **Tests**: 95/95 | **tsc**: 0 errors
+
+### 2026-06-05 — Session: Mobile Header + Touch Targets + Footer
+
+- **Mobile header hamburger menu**: Complete rewrite of `Header.tsx` + `header.module.css`:
+  - Hamburger button (48px touch target) on mobile, desktop nav hidden
+  - Slide-in drawer (320px, right side) with smooth CSS transition
+  - Backdrop overlay with blur + fade animation
+  - Focus trap inside drawer (Tab/Shift+Tab cycles)
+  - Close on Escape key, click outside, or route change
+  - `aria-expanded`, `aria-controls`, `aria-label` on hamburger
+  - Drawer: `role="dialog"`, `aria-modal="true"`
+  - All mobile nav links: min-height 52px for touch
+- **Touch optimisation app-wide**:
+  - All interactive elements: `min-height: 44px` minimum (`.clinerules` §8.1)
+  - Buttons: `-webkit-tap-highlight-color: transparent; touch-action: manipulation`
+  - Mobile drawer links: 52px tall (iOS comfortable tap)
+  - Hamburger: 48px, close button: 44px
+- **Footer restructured**:
+  - Added smaller `Logo` (28px) + text-logo at top with tagline
+  - Three-column grid: Company Info, Legal, Platform
+  - Company info: Address, email, Company Reg, VAT (structured fields)
+  - Legal: Terms, Privacy, Cookie, Complaints links
+  - Platform: Get Quote, Search Packages, For Partners
+  - Disclaimer section with ATOL/ABTA verify links
+  - Copyright row: year + governing law, separated by border
+  - All footer links: `min-h-[24px]` for touch compliance
 - **Build**: 0 errors | **Tests**: 95/95 | **tsc**: 0 errors
 
 ### 2026-06-05 — Session: Slider Fix + Blue Active Tracks App-Wide
