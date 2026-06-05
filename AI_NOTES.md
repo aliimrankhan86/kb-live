@@ -8,23 +8,30 @@ Single source of truth. Ultra-dense. Archive completed work to Historical Log.
 
 ### 🎯 Current Objective
 
-Filter overlay & Umrah search form UX overhaul — consistent app styling, GBP currency, working sliders, real date picker with visible calendar icon, date validation, copy fixes (no em dashes).
+P0: Wire Repository → `getDataSource()` cutover — Production DB built but unused; MockDB hardcoded in all Repository methods.
 
 ---
 
 ## ✅ DONE (this session)
 
-| Task                                | Status | Evidence                                                                          |
-| ----------------------------------- | ------ | --------------------------------------------------------------------------------- |
-| Commit all work to `main`           | ✅     | `6ed2f5d` on GitHub                                                               |
-| Create `current-branch` from `main` | ✅     | `git checkout -b current-branch`                                                  |
-| Calendar icon on date inputs        | ✅     | `components/umrah/UmrahSearchForm.tsx` - clickable SVG wrapper, `showPicker()`    |
-| Date validation                     | ✅     | Departure not past, return after departure, 7-60 day range, `role="alert"` errors |
-| Em dashes removed                   | ✅     | All `\u2013` replaced with `-` in labels, budget, child ages                      |
-| Update README.md                    | ✅     | Comprehensive project overview, tech stack, features, roadmap                     |
-| Push `main` to GitHub               | ✅     | `ddc7f87..6ed2f5d`                                                                |
-| Push `current-branch` to GitHub     | ✅     | New branch created on remote                                                      |
-| Delete extra branches               | ✅     | 16 old branches removed, only `main` + `current-branch` remain                    |
+| Task                            | Status | Evidence                                                                          |
+| ------------------------------- | ------ | --------------------------------------------------------------------------------- |
+| Commit all work to `main`       | ✅     | `6ed2f5d` on GitHub                                                               |
+| Create `dev` from merged `main` | ✅     | `git checkout -b dev`                                                             |
+| Calendar icon on date inputs    | ✅     | `components/umrah/UmrahSearchForm.tsx` - clickable SVG wrapper, `showPicker()`    |
+| Date validation                 | ✅     | Departure not past, return after departure, 7-60 day range, `role="alert"` errors |
+| Em dashes removed               | ✅     | All `\u2013` replaced with `-` in labels, budget, child ages                      |
+| Update README.md                | ✅     | Comprehensive project overview, tech stack, features, roadmap                     |
+| Push `main` to GitHub           | ✅     | `ddc7f87..6ed2f5d`                                                                |
+| Push `dev` to GitHub            | ✅     | `5212a12` on `dev` branch                                                         |
+| Delete extra branches           | ✅     | 16 old branches removed, only `main` + `dev` remain                               |
+| GBP-only currency               | ✅     | `PackageForm.tsx`, `OfferForm.tsx` — `GBP (£)` only                               |
+| FilterOverlay CSS fix           | ✅     | Added `@keyframes slideIn`, removed duplicate `@keyframes slideUp`                |
+| Slider CSS cleanup              | ✅     | Removed duplicate `::-moz-range-thumb` blocks in BudgetFilter + DistanceFilter    |
+| UK English distance             | ✅     | `DistanceFilter.tsx`: "50 m" → "50 metres"                                        |
+| Hotel rating plural             | ✅     | `HotelRatingsFilter.tsx`: aria-label always "stars"                               |
+| TypeScript fixes                | ✅     | `PackageList.tsx` import conflict, `SortDropdown.tsx` ref type error              |
+| Update AI_NOTES.md              | ✅     | Historical log + current objective updated                                        |
 
 ## 🔄 PENDING (next session)
 
