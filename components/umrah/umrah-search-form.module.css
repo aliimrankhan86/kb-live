@@ -98,13 +98,34 @@
   letter-spacing: 0.03em;
 }
 
-.searchForm__dateInput {
-  width: 100%;
-  padding: 0.625rem 0.875rem;
-  font-size: 0.9375rem;
+.searchForm__dateInputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 0.5rem;
   background: rgba(17, 17, 17, 0.6);
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.searchForm__dateInputWrapper:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.searchForm__dateInputWrapper:focus-within {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+  border-color: var(--yellow);
+}
+
+.searchForm__dateInput {
+  flex: 1;
+  width: 100%;
+  padding: 0.625rem 0 0.625rem 0.875rem;
+  font-size: 0.9375rem;
+  border: none;
+  background: transparent;
   color: var(--text);
   font-family: var(--font-exo2);
   min-height: 44px;
@@ -113,26 +134,31 @@
   -webkit-appearance: none;
 }
 
+/* Hide the browser default calendar icon so we use our own */
 .searchForm__dateInput::-webkit-calendar-picker-indicator {
-  filter: invert(1);
-  opacity: 0.6;
-  cursor: pointer;
+  display: none;
 }
 
-.searchForm__dateInput::-webkit-calendar-picker-indicator:hover {
-  opacity: 1;
-}
-
-.searchForm__dateInput:focus {
-  outline: 2px solid var(--yellow);
-  outline-offset: 2px;
-  border-color: var(--yellow);
+.searchForm__dateIcon {
+  color: var(--yellow);
+  flex-shrink: 0;
+  margin-right: 0.75rem;
+  pointer-events: none;
 }
 
 .searchForm__dateDisplay {
   font-size: 0.875rem;
   color: var(--textMuted);
   font-family: var(--font-exo2);
+}
+
+/* Date validation error */
+.searchForm__dateError {
+  display: block;
+  margin-top: 0.375rem;
+  font-size: 0.8125rem;
+  color: #ff6b6b;
+  line-height: 1.4;
 }
 
 /* Keep selectedPeriod for backward compat / quick select fallback */

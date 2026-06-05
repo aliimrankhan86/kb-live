@@ -46,29 +46,29 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
 
   const nextYear = currentYear + 1
 
-  // Quick select options with real date ranges
+  // Quick select options with real date ranges (use hyphens, not em dashes)
   const quickSelectOptions = useMemo(() => [
     { 
       id: 'christmas', 
-      label: `Christmas: Dec ${currentYear} – Jan ${nextYear}`, 
+      label: `Christmas: Dec ${currentYear} - Jan ${nextYear}`, 
       season: 'school-holidays',
       getDates: () => ({ start: `${currentYear}-12-20`, end: `${nextYear}-01-05` })
     },
     { 
       id: 'easter', 
-      label: `Easter: Mar – Apr ${nextYear}`, 
+      label: `Easter: Mar - Apr ${nextYear}`, 
       season: 'school-holidays',
       getDates: () => ({ start: `${nextYear}-03-20`, end: `${nextYear}-04-10` })
     },
     { 
       id: 'ramadan', 
-      label: `Ramadan: May – Jun ${nextYear}`, 
+      label: `Ramadan: May - Jun ${nextYear}`, 
       season: 'ramadan',
       getDates: () => ({ start: `${nextYear}-05-01`, end: `${nextYear}-06-15` })
     },
     { 
       id: 'summer', 
-      label: `Summer: Jul – Sep ${nextYear}`, 
+      label: `Summer: Jul - Sep ${nextYear}`, 
       season: 'flexible',
       getDates: () => ({ start: `${nextYear}-07-01`, end: `${nextYear}-09-15` })
     }
@@ -166,6 +166,57 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
     return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
   }
 
+  // Refs for calendar icon clicks
+  const departureInputRef = React.useRef<HTMLInputElement>(null)
+  const returnInputRef = React.useRef<HTMLInputElement>(null)
+
+  // Validation state
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
+  const validateDates = useCallback(() => {
+    const newErrors: Record<string, string> = {}
+    const dep = parseInputDate(departureDate)
+    const ret = parseInputDate(returnDate)
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+
+    if (dep < todayStart) {
+      newErrors.departureDate = 'Departure date cannot be in the past'
+    }
+    if (ret <= dep) {
+      newErrors.returnDate = 'Return date must be after the departure date'
+    } else {
+      const diffMs = ret.getTime() - dep.getTime()
+      const diffDays = diffMs / (1000 * 60 * 60 * 24)
+      if (diffDays < 7) {
+        newErrors.returnDate = 'Umrah trips require at least 7 days'
+      }
+      if (diffDays > 60) {
+        newErrors.returnDate = 'Return date cannot be more than 60 days after departure'
+      }
+    }
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }, [departureDate, returnDate])
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    if (!validateDates()) {
+      e.preventDefault()
+    }
+  }
+
+  const openDatePicker = (ref: React.RefObject<HTMLInputElement | null>) => {
+    if (ref.current) {
+      if (typeof ref.current.showPicker === 'function') {
+        ref.current.showPicker()
+      } else {
+        ref.current.click()
+      }
+    }
+  }
+
+  // Replace em dashes with regular hyphens to avoid AI-generated look
+  const toHyphen = (s: string) => s.replace(/\u2013/g, '-')
+
   return (
     <div className={`${styles.searchForm} ${className}`}>
       <form
@@ -173,6 +224,7 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
         method="get"
         className={styles.searchForm__card}
         noValidate
+        onSubmit={handleFormSubmit}
       >
         <input type="hidden" name="type" value="umrah" />
         <input type="hidden" name="season" value={seasonParam} />
@@ -215,37 +267,79 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
               <label htmlFor="departure-date" className={styles.searchForm__dateLabel}>
                 Departure
               </label>
-              <input
-                id="departure-date"
-                type="date"
-                value={departureDate}
-                onChange={(e) => handleDepartureChange(e.target.value)}
-                min={formatISODate(today)}
-                className={styles.searchForm__dateInput}
-                aria-label="Departure date"
-                data-testid="departure-date-input"
-              />
+              <div
+                className={styles.searchForm__dateInputWrapper}
+                onClick={() => openDatePicker(departureInputRef)}
+                role="button"
+                tabIndex={0}
+                aria-label="Open departure date picker"
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDatePicker(departureInputRef) } }}
+              >
+                <input
+                  ref={departureInputRef}
+                  id="departure-date"
+                  type="date"
+                  value={departureDate}
+                  onChange={(e) => handleDepartureChange(e.target.value)}
+                  min={formatISODate(today)}
+                  className={styles.searchForm__dateInput}
+                  aria-label="Departure date"
+                  data-testid="departure-date-input"
+                />
+                <svg className={styles.searchForm__dateIcon} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+              </div>
               <span className={styles.searchForm__dateDisplay} aria-hidden="true">
                 {formatDisplayDate(departureDate)}
               </span>
+              {errors.departureDate && (
+                <span className={styles.searchForm__dateError} role="alert" data-testid="departure-date-error">
+                  {errors.departureDate}
+                </span>
+              )}
             </div>
             <div className={styles.searchForm__dateField}>
               <label htmlFor="return-date" className={styles.searchForm__dateLabel}>
                 Return
               </label>
-              <input
-                id="return-date"
-                type="date"
-                value={returnDate}
-                onChange={(e) => handleReturnChange(e.target.value)}
-                min={departureDate}
-                className={styles.searchForm__dateInput}
-                aria-label="Return date"
-                data-testid="return-date-input"
-              />
+              <div
+                className={styles.searchForm__dateInputWrapper}
+                onClick={() => openDatePicker(returnInputRef)}
+                role="button"
+                tabIndex={0}
+                aria-label="Open return date picker"
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDatePicker(returnInputRef) } }}
+              >
+                <input
+                  ref={returnInputRef}
+                  id="return-date"
+                  type="date"
+                  value={returnDate}
+                  onChange={(e) => handleReturnChange(e.target.value)}
+                  min={departureDate}
+                  className={styles.searchForm__dateInput}
+                  aria-label="Return date"
+                  data-testid="return-date-input"
+                />
+                <svg className={styles.searchForm__dateIcon} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+              </div>
               <span className={styles.searchForm__dateDisplay} aria-hidden="true">
                 {formatDisplayDate(returnDate)}
               </span>
+              {errors.returnDate && (
+                <span className={styles.searchForm__dateError} role="alert" data-testid="return-date-error">
+                  {errors.returnDate}
+                </span>
+              )}
             </div>
           </div>
 
@@ -357,7 +451,7 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
                   >
                     {Array.from({ length: MAX_CHILD_AGE + 1 }, (_, i) => i).map((age) => (
                       <option key={age} value={age}>
-                        {age === 0 ? '0 — Infant' : age === 1 ? '1 — Infant' : `${age} — Child`}
+                        {age === 0 ? '0 - Infant' : age === 1 ? '1 - Infant' : `${age} - Child`}
                       </option>
                     ))}
                   </select>
@@ -425,7 +519,7 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
           {budgetEnabled && (
             <div className={styles.searchForm__budgetSection}>
               <div className={styles.searchForm__selectedBudget}>
-                £{minBudget.toLocaleString('en-GB')} — £{maxBudget.toLocaleString('en-GB')} <span className={styles.searchForm__budgetUnit}>per person</span>
+                £{minBudget.toLocaleString('en-GB')} - £{maxBudget.toLocaleString('en-GB')} <span className={styles.searchForm__budgetUnit}>per person</span>
               </div>
               <div className={styles.searchForm__budgetSliderContainer}>
                 <div className={styles.searchForm__track}>

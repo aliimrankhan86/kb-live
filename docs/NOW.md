@@ -365,6 +365,28 @@ npm run build
 - `npm audit`: 6 moderate (nested in dev tooling only — no critical/high)
 - Manual smoke: `/` (Hero with trust bar), `/umrah` (4-step form), `/hajj` (coming soon), `/search/packages` (sort + cards) at 320px and 1280px
 
+## What changed this session (2026-06-05)
+
+### Branch: `current-branch` (all new work here; `main` is safe backup)
+
+### UmrahSearchForm date picker enhancements
+
+- **Visible calendar icon**: Each date field now has a clickable wrapper with a prominent calendar SVG icon (right side, `var(--yellow)`). The native browser calendar icon is hidden via CSS; our custom icon triggers `showPicker()` on click/tap/Enter/Space for consistent UX across browsers.
+- **Date validation**: Full client-side validation on submit:
+  - Departure cannot be in the past
+  - Return must be after departure
+  - Minimum 7-day trip duration (Umrah requirement)
+  - Maximum 60-day trip duration
+  - Errors rendered below each field with `role="alert"` and `data-testid`
+- **Copy fix**: All em dashes (`\u2013`) replaced with regular hyphens (`-`) in quick-select labels, budget display, and child age options to avoid AI-generated appearance.
+- **Accessibility**: Calendar wrapper is keyboard-focusable with `tabIndex={0}`, `role="button"`, and Enter/Space handlers.
+
+### Verification
+
+- `npx tsc --noEmit`: pass (0 errors)
+- `npm test`: 95/95 pass
+- `npm run build`: pass (0 errors, 0 warnings)
+
 ## Persistence decision (2026-06-04)
 
 **Chosen stack:** Supabase (London eu-west-2) + Prisma ORM + Row Level Security + Supabase Storage

@@ -8,7 +8,7 @@ Single source of truth. Ultra-dense. Archive completed work to Historical Log.
 
 ### 🎯 Current Objective
 
-Filter overlay & Umrah search form UX overhaul — consistent app styling, GBP currency, working sliders, real date picker.
+Filter overlay & Umrah search form UX overhaul — consistent app styling, GBP currency, working sliders, real date picker with visible calendar icon, date validation, copy fixes (no em dashes).
 
 ---
 
@@ -126,6 +126,14 @@ Filter overlay & Umrah search form UX overhaul — consistent app styling, GBP c
 ---
 
 ## Historical Log
+
+### 2026-06-05 — Session: Calendar Icon, Date Validation, Copy Fixes
+
+- **Visible calendar icon**: Each date field has clickable wrapper with SVG calendar icon (`var(--yellow)`). Native browser icon hidden via CSS. Icon triggers `showPicker()` on click/tap/Enter/Space. Keyboard-accessible (`tabIndex={0}`, `role="button"`, Enter/Space handlers).
+- **Date validation**: Client-side validation on form submit: departure cannot be past, return must be after departure, minimum 7 days (Umrah), maximum 60 days. Errors rendered with `role="alert"` and `data-testid`.
+- **Copy fix**: All em dashes (`\u2013`) replaced with regular hyphens (`-`) in quick-select labels, budget display, child age options to avoid AI-generated appearance.
+- **Branch**: `current-branch` created from `main` after committing all prior work. `main` remains safe backup.
+- **Build**: 0 errors | **Tests**: 95/95 | **tsc**: 0 errors
 
 ### 2026-06-05 — Session: Filter Overlay & Umrah Search UX Overhaul
 
