@@ -1,0 +1,411 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────
+
+enum UserRole {
+  customer
+  operator
+  admin
+
+  @@map("user_role")
+}
+
+enum VerificationStatus {
+  pending
+  verified
+  rejected
+
+  @@map("verification_status")
+}
+
+enum OperatorTier {
+  listed
+  verified
+  verified_plus
+
+  @@map("operator_tier")
+}
+
+enum PaymentDetailsStatus {
+  active
+  superseded
+  disabled
+
+  @@map("payment_details_status")
+}
+
+enum BankChangeRequestStatus {
+  pending_review
+  approved
+  rejected
+  cancelled
+  activated
+
+  @@map("bank_change_request_status")
+}
+
+enum AuditLogAction {
+  payment_details_created
+  bank_change_requested
+  bank_change_approved
+  bank_change_rejected
+  bank_change_cancelled
+  bank_change_activated
+
+  @@map("audit_log_action")
+}
+
+enum Season {
+  ramadan
+  hajj
+  school_holidays
+  flexible
+  custom
+
+  @@map("season")
+}
+
+enum BookingStatus {
+  started
+  contacted
+  confirmed
+  closed
+
+  @@map("booking_status")
+}
+
+enum EvidenceStorageStatus {
+  metadata_only
+  bytes_stored
+
+  @@map("evidence_storage_status")
+}
+
+enum ComplaintCategory {
+  payment_issue
+  service_quality
+  package_description
+  booking_problem
+  other
+
+  @@map("complaint_category")
+}
+
+enum ComplaintSeverity {
+  low
+  medium
+  high
+
+  @@map("complaint_severity")
+}
+
+enum ComplaintStatus {
+  submitted
+  operator_notified
+  operator_responding
+  admin_triage
+  resolved
+  closed
+  cannot_resolve
+
+  @@map("complaint_status")
+}
+
+// ─── Models ──────────────────────────────────────────────────────────
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  role      UserRole
+  name      String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // UK GDPR / PECR Marketing Consent
+  marketingConsent       Boolean?  @map("marketing_consent")
+  marketingConsentAt     DateTime? @map("marketing_consent_at")
+  marketingConsentSource String?   @map("marketing_consent_source")
+
+  // UK GDPR / ePrivacy Cookie Consent
+  cookieConsentEssential Boolean   @default(true) @map("cookie_consent_essential")
+  cookieConsentAnalytics Boolean   @default(false) @map("cookie_consent_analytics")
+  cookieConsentAt        DateTime? @map("cookie_consent_at")
+
+  // Relations
+  operatorProfile       OperatorProfile?
+  quoteRequests         QuoteRequest[]
+  bookingIntents        BookingIntent[]      @relation("CustomerBookingIntents")
+  complaints            Complaint[]          @relation("CustomerComplaints")
+  auditLogEntries       AuditLogEntry[]      @relation("ActorAuditLogEntries")
+  createdPaymentDetails PaymentDetails[]     @relation("CreatedPaymentDetails")
+  createdBankChanges    BankChangeRequest[]  @relation("CreatedBankChanges")
+  reviewedBankChanges   BankChangeRequest[]  @relation("ReviewedBankChanges")
+  cancelledBankChanges  BankChangeRequest[]  @relation("CancelledBankChanges")
+
+  @@map("users")
+}
+
+model OperatorProfile {
+  id                        String             @id // Same as User.id
+  companyName               String             @map("company_name")
+  tradingName               String?            @map("trading_name")
+  slug                      String?            @unique
+  companyRegistrationNumber String?            @map("company_registration_number")
+  verificationStatus        VerificationStatus @default(pending) @map("verification_status")
+  verifiedAt                DateTime?          @map("verified_at")
+  tier                      OperatorTier       @default(listed)
+  atolNumber                String?            @map("atol_number")
+  abtaMemberNumber          String?            @map("abta_member_number")
+  contactEmail              String             @map("contact_email")
+  contactPhone              String?            @map("contact_phone")
+  officeAddress             Json?              @map("office_address")
+  websiteUrl                String?            @map("website_url")
+  servingRegions            String[]           @map("serving_regions")
+  departureAirports         String[]           @map("departure_airports")
+  yearsInBusiness           Int?               @map("years_in_business")
+  pilgrimageTypesOffered    String[]           @map("pilgrimage_types_offered")
+  branding                  Json?
+  createdAt                 DateTime           @default(now()) @map("created_at")
+  updatedAt                 DateTime           @updatedAt @map("updated_at")
+
+  // Eligibility flags (flattened for queryability)
+  canReceiveBookings Boolean @default(false) @map("can_receive_bookings")
+  bankDetailsActive  Boolean @default(false) @map("bank_details_active")
+  onboardingComplete Boolean @default(false) @map("onboarding_complete")
+  paymentSlaFlagged  Boolean @default(false) @map("payment_sla_flagged")
+
+  // Relations
+  user               User                @relation(fields: [id], references: [id])
+  paymentDetails     PaymentDetails[]
+  bankChangeRequests BankChangeRequest[]
+  auditLogEntries    AuditLogEntry[]
+  offers             Offer[]
+  packages           Package[]
+  bookingIntents     BookingIntent[]     @relation("OperatorBookingIntents")
+  complaints         Complaint[]         @relation("OperatorComplaints")
+
+  @@map("operator_profiles")
+}
+
+model PaymentDetails {
+  id                String               @id @default(uuid())
+  operatorId        String               @map("operator_id")
+  accountHolderName String               @map("account_holder_name")
+  bankName          String               @map("bank_name")
+  sortCode          String               @map("sort_code")
+  accountNumber     String               @map("account_number")
+  currency          String
+  country           String
+  status            PaymentDetailsStatus @default(active)
+  createdAt         DateTime             @default(now()) @map("created_at")
+  updatedAt         DateTime             @updatedAt @map("updated_at")
+  activatedAt       DateTime?            @map("activated_at")
+  supersededAt      DateTime?            @map("superseded_at")
+  createdByUserId   String               @map("created_by_user_id")
+  phoneVerifiedAt   DateTime             @map("phone_verified_at")
+  phoneLastFour     String               @map("phone_last_four")
+
+  // Relations
+  operator                    OperatorProfile     @relation(fields: [operatorId], references: [id])
+  createdBy                   User                @relation(fields: [createdByUserId], references: [id], name: "CreatedPaymentDetails")
+  bankChangeRequestsAsCurrent BankChangeRequest[] @relation("CurrentPaymentDetails")
+
+  @@map("payment_details")
+}
+
+model BankChangeRequest {
+  id                    String                  @id @default(uuid())
+  operatorId            String                  @map("operator_id")
+  currentPaymentDetailsId String?               @map("current_payment_details_id")
+  proposedDetails       Json                    @map("proposed_details")
+  status                BankChangeRequestStatus @default(pending_review)
+  requestedByUserId     String                  @map("requested_by_user_id")
+  requestedAt           DateTime                @default(now()) @map("requested_at")
+  reason                String?
+  reviewedByUserId      String?                 @map("reviewed_by_user_id")
+  reviewedAt            DateTime?               @map("reviewed_at")
+  reviewNotes           String?                 @map("review_notes")
+  activationEligibleAt  DateTime?               @map("activation_eligible_at")
+  activatedAt           DateTime?               @map("activated_at")
+  cancelledByUserId     String?                 @map("cancelled_by_user_id")
+  cancelledAt           DateTime?               @map("cancelled_at")
+  phoneVerifiedAt       DateTime                @map("phone_verified_at")
+  phoneLastFour         String                  @map("phone_last_four")
+
+  // Relations
+  operator              OperatorProfile  @relation(fields: [operatorId], references: [id])
+  currentPaymentDetails PaymentDetails?  @relation(fields: [currentPaymentDetailsId], references: [id], name: "CurrentPaymentDetails")
+  requestedBy           User             @relation(fields: [requestedByUserId], references: [id], name: "CreatedBankChanges")
+  reviewedBy            User?            @relation(fields: [reviewedByUserId], references: [id], name: "ReviewedBankChanges")
+  cancelledBy           User?            @relation(fields: [cancelledByUserId], references: [id], name: "CancelledBankChanges")
+
+  @@map("bank_change_requests")
+}
+
+model AuditLogEntry {
+  id         String       @id @default(uuid())
+  action     AuditLogAction
+  actorUserId String      @map("actor_user_id")
+  actorRole  UserRole     @map("actor_role")
+  operatorId String       @map("operator_id")
+  targetType String       @map("target_type")
+  targetId   String       @map("target_id")
+  createdAt  DateTime     @default(now()) @map("created_at")
+  metadata   Json?
+
+  // Relations
+  actor    User            @relation(fields: [actorUserId], references: [id], name: "ActorAuditLogEntries")
+  operator OperatorProfile @relation(fields: [operatorId], references: [id])
+
+  @@index([operatorId, createdAt])
+  @@map("audit_log_entries")
+}
+
+model QuoteRequest {
+  id                 String   @id @default(uuid())
+  customerId         String   @map("customer_id")
+  status             String   @default("open")
+  createdAt          DateTime @default(now()) @map("created_at")
+  type               String
+  season             Season
+  dateWindow         Json?    @map("date_window")
+  departureCity      String?  @map("departure_city")
+  totalNights        Int      @map("total_nights")
+  nightsMakkah       Int      @map("nights_makkah")
+  nightsMadinah      Int      @map("nights_madinah")
+  hotelStars         Int      @map("hotel_stars")
+  distancePreference String   @map("distance_preference")
+  budgetRange        Json?    @map("budget_range")
+  occupancy          Json
+  inclusions         Json
+  notes              String?
+
+  // Relations
+  customer User    @relation(fields: [customerId], references: [id])
+  offers   Offer[]
+
+  @@map("quote_requests")
+}
+
+model Offer {
+  id              String   @id @default(uuid())
+  requestId       String   @map("request_id")
+  operatorId      String   @map("operator_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+  pricePerPerson  Decimal  @map("price_per_person") @db.Decimal(10, 2)
+  currency        String
+  totalNights     Int      @map("total_nights")
+  nightsMakkah    Int      @map("nights_makkah")
+  nightsMadinah   Int      @map("nights_madinah")
+  hotelStars      Int      @map("hotel_stars")
+  distanceToHaram String   @map("distance_to_haram")
+  roomOccupancy   Json     @map("room_occupancy")
+  inclusions      Json
+  notes           String?
+
+  // Relations
+  request        QuoteRequest     @relation(fields: [requestId], references: [id])
+  operator       OperatorProfile  @relation(fields: [operatorId], references: [id])
+  bookingIntents BookingIntent[]
+
+  @@map("offers")
+}
+
+model BookingIntent {
+  id                    String        @id @default(uuid())
+  referenceCode         String?       @unique @map("reference_code")
+  offerId               String        @map("offer_id")
+  customerId            String        @map("customer_id")
+  operatorId            String        @map("operator_id")
+  status                BookingStatus @default(started)
+  createdAt             DateTime      @default(now()) @map("created_at")
+  updatedAt             DateTime      @updatedAt @map("updated_at")
+  paymentEvidence       Json?         @map("payment_evidence")
+  skipProofAcknowledged Boolean?      @map("skip_proof_acknowledged")
+  proofSkippedAt        DateTime?     @map("proof_skipped_at")
+  notes                 String?
+
+  // Relations
+  offer      Offer       @relation(fields: [offerId], references: [id])
+  customer   User        @relation(fields: [customerId], references: [id], name: "CustomerBookingIntents")
+  operator   OperatorProfile @relation(fields: [operatorId], references: [id], name: "OperatorBookingIntents")
+  complaints Complaint[]
+
+  @@map("booking_intents")
+}
+
+model Package {
+  id                         String   @id @default(uuid())
+  operatorId                 String   @map("operator_id")
+  title                      String
+  slug                       String   @unique
+  status                     String   @default("draft")
+  pilgrimageType             String   @map("pilgrimage_type")
+  seasonLabel                String?  @map("season_label")
+  dateWindow                 Json?    @map("date_window")
+  priceType                  String   @map("price_type")
+  pricePerPerson             Decimal  @map("price_per_person") @db.Decimal(10, 2)
+  currency                   String
+  totalNights                Int      @map("total_nights")
+  nightsMakkah               Int      @map("nights_makkah")
+  nightsMadinah              Int      @map("nights_madinah")
+  hotelMakkahStars           Int?     @map("hotel_makkah_stars")
+  hotelMadinahStars          Int?     @map("hotel_madinah_stars")
+  hotelMakkahName            String?  @map("hotel_makkah_name")
+  hotelMadinahName           String?  @map("hotel_madinah_name")
+  distanceToHaramMakkahMetres  Int?   @map("distance_to_haram_makkah_metres")
+  distanceToHaramMadinahMetres Int?   @map("distance_to_haram_madinah_metres")
+  distanceBandMakkah         String   @map("distance_band_makkah")
+  distanceBandMadinah        String   @map("distance_band_madinah")
+  airline                    String?
+  departureAirport           String?  @map("departure_airport")
+  flightType                 String?  @map("flight_type")
+  depositAmount              Decimal? @map("deposit_amount") @db.Decimal(10, 2)
+  paymentPlanAvailable       Boolean? @map("payment_plan_available")
+  cancellationPolicy         String?  @map("cancellation_policy")
+  highlights                 String[]
+  groupType                  String?  @map("group_type")
+  createdAt                  DateTime @default(now()) @map("created_at")
+  updatedAt                  DateTime @updatedAt @map("updated_at")
+  roomOccupancyOptions       Json     @map("room_occupancy_options")
+  inclusions                 Json
+  notes                      String?
+  images                     String[]
+
+  // Relations
+  operator OperatorProfile @relation(fields: [operatorId], references: [id])
+
+  @@map("packages")
+}
+
+model Complaint {
+  id                   String            @id @default(uuid())
+  bookingIntentId      String            @map("booking_intent_id")
+  referenceCode        String            @map("reference_code")
+  customerId           String            @map("customer_id")
+  operatorId           String            @map("operator_id")
+  category             ComplaintCategory
+  severity             ComplaintSeverity
+  description          String
+  status               ComplaintStatus   @default(submitted)
+  operatorResponse     String?           @map("operator_response")
+  operatorRespondedAt  DateTime?         @map("operator_responded_at")
+  adminNotes           String?           @map("admin_notes")
+  adminFlaggedOperator Boolean?          @map("admin_flagged_operator")
+  createdAt            DateTime          @default(now()) @map("created_at")
+  updatedAt            DateTime          @updatedAt @map("updated_at")
+
+  // Relations
+  bookingIntent BookingIntent   @relation(fields: [bookingIntentId], references: [id])
+  customer      User            @relation(fields: [customerId], references: [id], name: "CustomerComplaints")
+  operator      OperatorProfile @relation(fields: [operatorId], references: [id], name: "OperatorComplaints")
+
+  @@map("complaints")
+}

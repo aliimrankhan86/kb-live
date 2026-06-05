@@ -1,72 +1,84 @@
-# KaabaTrip - Your Journey to the Holy Land
+# KaabaTrip - Compare Umrah & Hajj Packages from Verified Operators
 
-A modern, scalable Next.js application for Hajj and Umrah pilgrimage packages. Built with production-grade architecture and pixel-perfect design.
+A UK-focused Next.js platform connecting pilgrims with verified travel operators for Hajj and Umrah packages. Built with production-grade architecture, strict TypeScript, and UK GDPR compliance.
 
-## 🚀 Features
+## 🚀 Live Features
 
-- **Modern Tech Stack**: Next.js 15, React 19, TypeScript, Tailwind CSS
-- **Pixel-Perfect Design**: Dark theme with custom design tokens
-- **Responsive Layout**: Optimized for desktop, tablet, and mobile
-- **Performance Optimized**: Fast loading with Next.js optimizations
-- **SEO Ready**: Complete metadata and Open Graph support
-- **Accessibility**: WCAG compliant with semantic HTML
-- **Testing**: Unit tests with Vitest and E2E tests with Playwright
-- **CI/CD**: GitHub Actions workflow for automated testing and deployment
+- **Package Discovery**: Browse, sort, and filter Umrah packages with real-time filters (budget, dates, hotel stars, distance to Haram, flight type)
+- **Umrah Search Form**: 4-step progressive form with real date picker, traveller stepper, hotel star selection, and budget slider
+- **Quote Journey**: Request quotes from operators with prefilled package details
+- **Booking Intent**: Track high-intent bookings with unique reference codes (`KT-...`)
+- **Payment Handoff**: Secure pay-operator-direct flow with evidence upload and bank detail display
+- **Operator Dashboard**: Registration, profile management, leads inbox, package CSV import/export, analytics
+- **Admin Tools**: Complaint triage, bank change review queue, audit logs
+- **UK Compliance**: GDPR privacy policy, terms & conditions, cookie consent banner, marketing consent
+- **SEO Optimised**: JSON-LD structured data, dynamic sitemap, city corridor pages (`/umrah/london`, `/umrah/birmingham`, `/umrah/manchester`)
+- **Accessibility**: WCAG 2.2 AA, semantic HTML, ARIA labels, keyboard navigation, 44px+ tap targets
 
 ## 🛠 Tech Stack
 
 ### Core
 
-- **Next.js 15** - React framework with App Router
-- **React 19** - Latest React with concurrent features
-- **TypeScript** - Type-safe development
-- **Tailwind CSS v4** - Utility-first CSS framework
+- **Next.js 15.5** - App Router, Server Components by default
+- **React 19** - Latest with concurrent features
+- **TypeScript** - Strict mode, zero `any`
+- **Tailwind CSS** - Utility-first with custom design tokens
 
-### Styling
+### Backend & Data
 
-- **CSS Modules** - Component-scoped styles
-- **Custom Design Tokens** - Consistent color and spacing system
-- **Inter Font** - Modern typography via next/font
+- **Supabase** (London `eu-west-2`) - Auth, PostgreSQL, Row Level Security, Storage
+- **Prisma ORM** - Type-safe queries, migrations, schema management
+- **MockDB** - In-memory store for rapid dev iteration (tests + dev mode)
 
 ### Testing & Quality
 
-- **Vitest** - Fast unit testing
+- **Vitest 4.1.8** - Unit tests (95 tests passing)
 - **Testing Library** - React component testing
 - **Playwright** - End-to-end testing
-- **ESLint** - Code linting
-- **Prettier** - Code formatting
-
-### Future-Ready
-
-- **TanStack Query** - Data fetching (ready for API integration)
-- **Zustand** - Lightweight state management
-- **Framer Motion** - Animation library
-- **Radix UI** - Accessible component primitives
+- **ESLint** + **Prettier** - Code quality
 
 ## 📁 Project Structure
 
 ```
 kaabatrip/
-├── app/                    # Next.js App Router
-│   ├── layout.tsx         # Root layout with metadata
-│   ├── page.tsx           # Landing page
-│   ├── hajj/              # Hajj packages page
-│   ├── umrah/             # Umrah packages page
-│   └── api/               # API routes
-├── components/            # React components
-│   ├── layout/           # Layout components (Header, Footer)
-│   ├── marketing/        # Marketing-specific components
-│   ├── graphics/         # SVG illustrations and icons
-│   └── ui/               # Reusable UI components
-├── lib/                  # Utility functions and config
-│   ├── seo.ts            # SEO metadata helpers
-│   └── config.ts         # App configuration
-├── styles/               # Global styles and design tokens
-│   ├── globals.css       # Global styles
-│   └── tokens.css        # CSS custom properties
-├── tests/                # Unit tests
-├── e2e/                  # End-to-end tests
-└── public/               # Static assets
+├── app/                          # Next.js App Router
+│   ├── page.tsx                  # Landing page
+│   ├── umrah/page.tsx            # Umrah search form
+│   ├── hajj/page.tsx             # Hajj interest capture (coming soon)
+│   ├── search/packages/          # Package search results
+│   ├── packages/[slug]/          # Package detail
+│   ├── quote/page.tsx            # Quote wizard
+│   ├── requests/[id]/            # Request tracker
+│   ├── operator/                 # Operator dashboard
+│   ├── admin/                    # Admin tools
+│   ├── login/, signup/           # Auth pages
+│   ├── privacy/, terms/          # Legal pages
+│   └── api/                      # API routes
+├── components/
+│   ├── layout/                   # Header, Footer
+│   ├── marketing/                # Hero, CityCorridor
+│   ├── search/                   # PackageCard, PackageList, FilterOverlay
+│   ├── umrah/                    # UmrahSearchForm
+│   ├── operator/                 # Dashboard, Forms, Sidebar
+│   ├── operators/                # Public operator profile
+│   ├── packages/                 # Package detail
+│   ├── request/                  # Quote, Payment, Complaint
+│   ├── auth/                     # LoginForm, SignUpForm
+│   ├── admin/                    # ComplaintsTriage, AuditLogView
+│   ├── compliance/               # CookieConsent
+│   └── ui/                       # VerifiedBadge, InclusionChip, Table
+├── lib/
+│   ├── api/                      # Repository, MockDB, DB Adapter, Prisma client
+│   ├── auth/                     # Session, API auth helpers
+│   ├── supabase/                 # SSR client, middleware
+│   ├── seo/                      # JSON-LD schemas
+│   └── i18n/                     # Region/currency formatting
+├── docs/                         # Architecture, UX, SEO, Security, Compliance
+├── tests/                        # Unit tests
+├── e2e/                          # Playwright tests
+├── prisma/                       # Schema, seed, migrations
+├── supabase/                     # RLS policies, storage buckets
+└── styles/                       # Global CSS, design tokens
 ```
 
 ## 🚀 Getting Started
@@ -74,52 +86,64 @@ kaabatrip/
 ### Prerequisites
 
 - Node.js 20+
-- npm or yarn
+- npm
 
 ### Installation
 
-1. **Clone the repository**
+```bash
+git clone git@github.com:aliimrankhan86/kb-live.git
+cd kb-live
+npm install
+```
 
-   ```bash
-   git clone <repository-url>
-   cd kaabatrip
-   ```
+### Environment Setup
 
-2. **Install dependencies**
+```bash
+cp env.example .env.local
+```
 
-   ```bash
-   npm install
-   ```
+Fill in `.env.local` with your Supabase credentials (or leave placeholders for MockDB-only dev):
 
-3. **Start development server**
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+DATABASE_URL=postgresql://...   # PgBouncer connection
+DIRECT_URL=postgresql://...     # Direct connection for migrations
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+FEATURE_USE_REAL_DB=false       # Set true when ready for Supabase
+```
 
-   ```bash
-   npm run dev
-   ```
+### Development
 
-4. **Open your browser**
-   Navigate to [http://localhost:3000](http://localhost:3000)
+```bash
+npm run dev          # Start dev server on 127.0.0.1:3000
+npm run dev:clean    # Clear .next cache and restart (fixes chunk 404s)
+npm run dev:turbo    # Use Turbopack instead of Webpack
+```
 
 ### Available Scripts
 
 ```bash
 # Development
-npm run dev          # Start development server with hot reload
-npm run build        # Build for production
-npm run start        # Start production server
+npm run dev          # Dev server
+npm run dev:clean    # Clean start (recommended after git pull)
+npm run build        # Production build
+npm run start        # Production server
 
 # Testing
-npm run test         # Run unit tests
-npm run test:watch   # Run tests in watch mode
-npm run e2e          # Run end-to-end tests
+npm test             # Unit tests (Vitest)
+npm run test:watch   # Watch mode
+npm run e2e          # Playwright E2E tests
 
 # Code Quality
-npm run lint         # Run ESLint
-npm run format       # Format code with Prettier
+npm run lint         # ESLint
+npm run format       # Prettier
 
-# Storybook (when configured)
-npm run storybook    # Start Storybook dev server
-npm run build-storybook # Build Storybook for production
+# Database
+npm run db:generate  # Generate Prisma client
+npm run db:migrate   # Run migrations
+npm run db:push      # Push schema changes
+npm run db:studio    # Prisma Studio GUI
 ```
 
 ## 🎨 Design System
@@ -128,158 +152,75 @@ npm run build-storybook # Build Storybook for production
 
 - **Background**: `#0B0B0B` - Deep black
 - **Text**: `#FFFFFF` - Pure white
-- **Text Muted**: `rgba(255, 255, 255, 0.64)` - 64% opacity white
+- **Text Muted**: `rgba(255, 255, 255, 0.64)`
 - **Yellow Accent**: `#FFD31D` - Brand yellow
-- **Surface Dark**: `#111111` - Dark surface
+- **Surface Dark**: `#111111`
+- **Success**: `#4CAF50`
 
 ### Typography
 
-- **Font Family**: Inter (via next/font)
-- **H1**: 64px desktop, 48-56px tablet, 32-36px mobile
-- **Lead**: 24px desktop, responsive scaling
-
-### Components
-
-- **Logo**: Scalable SVG with gradient effects
-- **Kaaba Illustration**: Detailed SVG with minarets
-- **Arches Pattern**: Subtle background pattern
-- **Header**: Sticky navigation with backdrop blur
+- **Font**: Inter (via next/font) + Exo 2 (display)
+- **Mobile-first**: 320px base, scaling to 1280px+
 
 ## 🧪 Testing
 
-### Unit Tests
-
 ```bash
-npm run test
+npm test             # 95 unit tests
+npx playwright test  # E2E tests
 ```
 
-Tests are located in the `tests/` directory using Vitest and Testing Library.
+All tests must pass before pushing. See `AGENTS.md` for the full pre-push checklist.
 
-### End-to-End Tests
+## 🔒 Security & Compliance
 
-```bash
-npm run e2e
-```
+- **Row Level Security** (RLS) on all Supabase tables
+- **httpOnly cookies** for auth sessions (no localStorage tokens)
+- **GDPR compliant**: Privacy policy, cookie consent, data subject rights, retention policies
+- **ATOL/ABTA** transparency: operator self-reported numbers with verification badges
+- **CSP headers**, **HSTS**, **X-Frame-Options**, **Referrer-Policy**
 
-E2E tests are in the `e2e/` directory using Playwright.
+See `docs/SECURITY.md` and `docs/COMPLIANCE.md` for full details.
 
-### Test Coverage
+## 🗺 Roadmap
 
-- Component rendering and props
-- Navigation and routing
-- Responsive design breakpoints
-- Accessibility features
+### Shipped
 
-## 🚀 Deployment
+- ✅ Landing page with trust bar
+- ✅ Umrah search with real date picker, budget slider, traveller stepper
+- ✅ Package search, sort, filter (budget, dates, stars, distance, flight type)
+- ✅ Operator registration, dashboard, leads, profile, settings
+- ✅ Quote wizard with prefill from package detail
+- ✅ Booking intent with unique reference codes
+- ✅ Payment handoff with evidence upload
+- ✅ Complaint routing (customer → operator → admin)
+- ✅ Bank change review with cooling period
+- ✅ CSV import/export for operator packages
+- ✅ SEO corridor pages (London, Birmingham, Manchester)
+- ✅ UK GDPR compliance suite
 
-### Vercel (Recommended)
+### In Progress
 
-1. Push code to GitHub
-2. Connect repository to Vercel
-3. Deploy automatically on push to main
+- 🔄 Repository → Prisma cutover (`FEATURE_USE_REAL_DB`)
+- 🔄 Real-time ATOL/ABTA API verification
 
-### Manual Deployment
+### Future
 
-```bash
-npm run build
-npm run start
-```
-
-### Environment Variables
-
-Copy `env.example` to `.env.local` and configure:
-
-```bash
-cp env.example .env.local
-```
-
-## 🔧 Configuration
-
-### Tailwind CSS
-
-The project uses Tailwind CSS v4 with custom design tokens defined in `styles/tokens.css`.
-
-### TypeScript
-
-Strict mode enabled with path aliases configured for clean imports.
-
-### ESLint
-
-Next.js ESLint configuration with additional rules for code quality.
-
-## 📱 Responsive Design
-
-- **Desktop**: Full layout with side-by-side CTAs
-- **Tablet**: Scaled illustration, maintained grid
-- **Mobile**: Stacked CTAs, optimized touch targets
-
-## ♿ Accessibility
-
-- Semantic HTML structure
-- ARIA labels and descriptions
-- Keyboard navigation support
-- Focus management
-- Color contrast compliance
-- Screen reader optimization
-
-## 🚀 Performance
-
-- **Lighthouse Score**: 95+ Performance, 100 Accessibility, 100 SEO
-- **Core Web Vitals**: Optimized for LCP, FID, CLS
-- **Image Optimization**: Next.js automatic optimization
-- **Font Loading**: Optimized with next/font
-- **Code Splitting**: Automatic route-based splitting
-
-## 🔮 Future Roadmap
-
-### Phase 1 (Current)
-
-- ✅ Landing page with dual CTAs
-- ✅ Responsive design
-- ✅ SEO optimization
-- ✅ Testing infrastructure
-
-### Phase 2 (Next)
-
-- [ ] Package search and filtering
-- [ ] User authentication
-- [ ] Booking system
-- [ ] Payment integration
-
-### Phase 3 (Future)
-
-- [ ] Partner portal
-- [ ] Admin dashboard
-- [ ] CMS integration
-- [ ] Multi-language support
+- 🎯 Multi-currency UI selector
+- 🎯 GDPR data export & account deletion
+- 🎯 Hajj 2027 season packages
+- 🎯 Live chat between pilgrims and operators
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Development Guidelines
-
-- Follow TypeScript strict mode
-- Write tests for new components
-- Maintain responsive design
-- Follow accessibility guidelines
-- Use conventional commits
+1. Create a feature branch from `current-branch`
+2. Follow the pre-push checklist in `AGENTS.md`
+3. Update `docs/NOW.md` before every push
+4. Ensure `npm test` and `npm run build` pass
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Design inspiration from Islamic architecture
-- Next.js team for the amazing framework
-- Tailwind CSS for the utility-first approach
-- All open-source contributors
+MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-**KaabaTrip** - Making your spiritual journey accessible and memorable. 🌙
+**KaabaTrip** - Making your spiritual journey accessible, transparent, and memorable. 🌙

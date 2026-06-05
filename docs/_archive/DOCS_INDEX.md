@@ -1,0 +1,45 @@
+# Docs Index (Authoritative Map)
+
+## How to use this
+
+- **Entry point for AI agents:** Read `docs/README_AI.md` first, then `docs/skills/*`, then this index for deep dives.
+- Each doc below has:
+  - Purpose
+  - Owner (role)
+  - Update triggers (when it must be updated)
+
+## Mandatory rule
+
+Any change to code, UX, tests, or workflow must include a docs update per this index.  
+If a task changes behaviour and docs are not updated, the task is not complete.
+
+## Canonical docs
+
+| File                 | Purpose                                             | Owner                 | Update triggers                                                              |
+| -------------------- | --------------------------------------------------- | --------------------- | ---------------------------------------------------------------------------- |
+| 00_PRODUCT_CANON.md  | Product truth: goals, scope, non-goals, policies    | Ali + Tuffy Architect | Any scope change, pricing policy, onboarding policy, legal stance, geography |
+| 00_AGENT_HANDOVER.md | How any agent must work, including doc update rules | Tuffy Architect       | Any workflow/tooling change, Definition of Done, checks, model routing       |
+| ARCHITECTURE.md      | System design, domain entities, repo boundaries     | Tuffy Architect       | Any change to types, repo pattern, storage, auth/RBAC                        |
+| SECURITY.md          | Threat model, RBAC rules, data handling             | Tuffy Architect       | Any data model change, auth/RBAC change, new endpoints, new storage          |
+| ACCESSIBILITY.md     | A11y rules and checklist                            | Tuffy QA              | Any new UI component, overlay, form, navigation changes                      |
+| QA.md                | QA checklists and test matrix                       | Tuffy QA              | Any feature added/changed, any bug fixed, any test added                     |
+| NOW.md               | Current session state, branch, next tasks            | Any agent             | Every commit (mandatory)                                                     |
+| README_AI.md         | Canonical AI onboarding (single source of truth)     | Tuffy Architect       | Any route, key code, or dev routine change                                   |
+| CURSOR_CONTEXT.md    | Cursor-specific session rules and file map           | Tuffy Architect       | Architecture changes, scope changes, new files                               |
+
+## Supporting docs
+
+| File                   | Purpose                                   | Owner           | Update triggers                               |
+| ---------------------- | ----------------------------------------- | --------------- | --------------------------------------------- |
+| 01_MODEL_ROUTING.md    | Which model does what, token control      | Tuffy Architect | Provider changes, quota limits, routing rules |
+| 02_REPO_MAP.md         | Where things live, key files              | Tuffy Dev       | Structural refactors, new feature folders     |
+| 09_KANBAN_WORKFLOW.md  | Kanban rules, roles, DoD                  | Ali             | Any process change                            |
+| 10_PROMPT_TEMPLATES.md | Reusable prompts and micro-task templates | Ali + Architect | Prompt improvements, new workflow patterns    |
+
+## Aliases / Pointer files
+
+These files are intentionally lightweight pointers. Update the canonical doc instead.
+
+- `docs/05_SECURITY.md` → `docs/SECURITY.md`
+- `docs/06_ACCESSIBILITY.md` → `docs/ACCESSIBILITY.md`
+- `docs/07_QA.md` → `QA.md` (repo root)

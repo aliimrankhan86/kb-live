@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { TimePeriodFilter } from './filters/TimePeriodFilter';
 import { BudgetFilter } from './filters/BudgetFilter';
 import { FlightTypeFilter } from './filters/FlightTypeFilter';
@@ -42,7 +42,7 @@ const defaultFilters: FilterState = {
     start: 'Jan',
     end: 'May'
   },
-  specialOccasion: 'Ramadan',
+  specialOccasion: null,
   budget: {
     min: 1000,
     max: 3000
@@ -80,6 +80,16 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({
     };
   }, []);
 
+  // Prevent body scroll when open
+  useEffect(() => {
+    if (!isOpen) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isOpen]);
+
   // Handle click outside to close
   useEffect(() => {
     if (!isOpen) return;
@@ -90,22 +100,9 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({
       }
     };
 
-    try {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.body.style.overflow = 'hidden';
-    } catch (error) {
-      console.warn('Error setting up filter overlay:', error);
-    }
-
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      if (isMountedRef.current) {
-        try {
-          document.removeEventListener('mousedown', handleClickOutside);
-          document.body.style.overflow = 'unset';
-        } catch (error) {
-          console.warn('Error cleaning up filter overlay:', error);
-        }
-      }
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isOpen, onClose]);
 
@@ -119,57 +116,68 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({
       }
     };
 
-    try {
-      document.addEventListener('keydown', handleEscape);
-    } catch (error) {
-      console.warn('Error setting up escape handler:', error);
-    }
-
+    document.addEventListener('keydown', handleEscape);
     return () => {
-      if (isMountedRef.current) {
-        try {
-          document.removeEventListener('keydown', handleEscape);
-        } catch (error) {
-          console.warn('Error cleaning up escape handler:', error);
-        }
-      }
+      document.removeEventListener('keydown', handleEscape);
     };
   }, [isOpen, onClose]);
 
-  const handleFilterChange = (filterType: keyof FilterState, value: FilterState[keyof FilterState]) => {
+  const handleFilterChange = useCallback((filterType: keyof FilterState, value: FilterState[keyof FilterState]) => {
     setFilters(prev => ({
       ...prev,
       [filterType]: value
     }));
-  };
+  }, []);
 
-  const handleApply = () => {
+  const handleApply = useCallback(() => {
     onApply(filters);
     onClose();
-  };
+  }, [filters, onApply, onClose]);
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     setFilters(defaultFilters);
     onReset();
-  };
+  }, [onReset]);
 
   if (!isOpen) return null;
 
+  const activeFilterCount = [
+    filters.specialOccasion !== null,
+    filters.budget.min !== defaultFilters.budget.min || filters.budget.max !== defaultFilters.budget.max,
+    filters.flightType.direct !== defaultFilters.flightType.direct || filters.flightType.stopover !== defaultFilters.flightType.stopover,
+    filters.hotelRatings !== defaultFilters.hotelRatings,
+    filters.distance.min !== defaultFilters.distance.min || filters.distance.max !== defaultFilters.distance.max
+  ].filter(Boolean).length;
+
   return (
-    <div className={styles.backdrop} role="dialog" aria-modal="true" aria-labelledby="filter-title">
+    <div 
+      className={styles.backdrop} 
+      role="dialog" 
+      aria-modal="true" 
+      aria-labelledby="filter-title"
+      data-testid="filter-overlay"
+    >
       <div 
         ref={overlayRef}
         className={styles.overlay}
         role="document"
       >
         <div className={styles.header}>
-          <h2 id="filter-title" className={styles.title}>Filter Packages</h2>
+          <div className={styles.headerTitleRow}>
+            <h2 id="filter-title" className={styles.title}>Filter Packages</h2>
+            {activeFilterCount > 0 && (
+              <span className={styles.activeCount} aria-live="polite">
+                {activeFilterCount} active
+              </span>
+            )}
+          </div>
           <button
             onClick={onClose}
             className={styles.closeButton}
             aria-label="Close filter overlay"
+            data-testid="filter-close-btn"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
@@ -177,34 +185,44 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({
         </div>
 
         <div className={styles.content}>
-          <TimePeriodFilter
-            value={filters.timePeriod}
-            specialOccasion={filters.specialOccasion}
-            onChange={(timePeriod, specialOccasion) => {
-              handleFilterChange('timePeriod', timePeriod);
-              handleFilterChange('specialOccasion', specialOccasion);
-            }}
-          />
+          <section className={styles.filterSection}>
+            <TimePeriodFilter
+              value={filters.timePeriod}
+              specialOccasion={filters.specialOccasion}
+              onChange={(timePeriod, specialOccasion) => {
+                handleFilterChange('timePeriod', timePeriod);
+                handleFilterChange('specialOccasion', specialOccasion);
+              }}
+            />
+          </section>
 
-          <BudgetFilter
-            value={filters.budget}
-            onChange={(budget) => handleFilterChange('budget', budget)}
-          />
+          <section className={styles.filterSection}>
+            <BudgetFilter
+              value={filters.budget}
+              onChange={(budget) => handleFilterChange('budget', budget)}
+            />
+          </section>
 
-          <FlightTypeFilter
-            value={filters.flightType}
-            onChange={(flightType) => handleFilterChange('flightType', flightType)}
-          />
+          <section className={styles.filterSection}>
+            <FlightTypeFilter
+              value={filters.flightType}
+              onChange={(flightType) => handleFilterChange('flightType', flightType)}
+            />
+          </section>
 
-          <HotelRatingsFilter
-            value={filters.hotelRatings}
-            onChange={(rating) => handleFilterChange('hotelRatings', rating)}
-          />
+          <section className={styles.filterSection}>
+            <HotelRatingsFilter
+              value={filters.hotelRatings}
+              onChange={(rating) => handleFilterChange('hotelRatings', rating)}
+            />
+          </section>
 
-          <DistanceFilter
-            value={filters.distance}
-            onChange={(distance) => handleFilterChange('distance', distance)}
-          />
+          <section className={styles.filterSection}>
+            <DistanceFilter
+              value={filters.distance}
+              onChange={(distance) => handleFilterChange('distance', distance)}
+            />
+          </section>
         </div>
 
         <div className={styles.footer}>
@@ -212,6 +230,7 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({
             onClick={handleReset}
             className={styles.resetButton}
             type="button"
+            data-testid="filter-reset-btn"
           >
             Reset Filters
           </button>
@@ -219,6 +238,7 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({
             onClick={handleApply}
             className={styles.applyButton}
             type="button"
+            data-testid="filter-apply-btn"
           >
             Apply Filters
           </button>

@@ -41,6 +41,7 @@ export const exo2Font = localFont({
   ],
   variable: '--font-exo2',
   display: 'swap',
+  preload: false,
 })
 
 // Export the font variable for use in CSS

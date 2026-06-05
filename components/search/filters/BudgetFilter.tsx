@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import styles from './BudgetFilter.module.css';
 
 interface BudgetFilterProps {
@@ -11,67 +11,84 @@ interface BudgetFilterProps {
   onChange: (budget: { min: number; max: number }) => void;
 }
 
-const minBudget = 500;
-const maxBudget = 5000;
+const MIN_BUDGET = 500;
+const MAX_BUDGET = 5000;
+const STEP = 100;
+const MIN_GAP = 200;
 
 export const BudgetFilter: React.FC<BudgetFilterProps> = ({
   value,
   onChange
 }) => {
-  const handleMinChange = (min: number) => {
-    onChange({ ...value, min: Math.min(min, value.max) });
+  const clamp = useCallback((v: number) => Math.max(MIN_BUDGET, Math.min(MAX_BUDGET, Math.round(v / STEP) * STEP)), []);
+
+  const handleMinChange = useCallback((min: number) => {
+    const clamped = clamp(min);
+    onChange({ min: Math.min(clamped, value.max - MIN_GAP), max: value.max });
+  }, [clamp, onChange, value.max]);
+
+  const handleMaxChange = useCallback((max: number) => {
+    const clamped = clamp(max);
+    onChange({ min: value.min, max: Math.max(clamped, value.min + MIN_GAP) });
+  }, [clamp, onChange, value.min]);
+
+  const getPercentage = useCallback((amount: number) => {
+    return ((amount - MIN_BUDGET) / (MAX_BUDGET - MIN_BUDGET)) * 100;
+  }, []);
+
+  const formatCurrency = (amount: number) => {
+    return `£${amount.toLocaleString('en-GB')}`;
   };
 
-  const handleMaxChange = (max: number) => {
-    onChange({ ...value, max: Math.max(max, value.min) });
-  };
-
-  const getPercentage = (amount: number) => {
-    return ((amount - minBudget) / (maxBudget - minBudget)) * 100;
-  };
+  const leftPercent = getPercentage(value.min);
+  const rightPercent = getPercentage(value.max);
+  const activeWidth = rightPercent - leftPercent;
 
   return (
     <div className={styles.container}>
-      <h3 className={styles.label}>Budget:</h3>
+      <h3 className={styles.label}>Budget</h3>
       
-      <div className={styles.selectedBudget}>
-        ${value.min.toLocaleString()} - ${value.max.toLocaleString()}
+      <div className={styles.selectedBudget} aria-live="polite">
+        {formatCurrency(value.min)} — {formatCurrency(value.max)}
       </div>
 
       <div className={styles.sliderContainer}>
-        <div className={styles.track}>
+        <div className={styles.trackWrapper}>
+          <div className={styles.track} />
           <div 
             className={styles.activeTrack}
             style={{
-              left: `${getPercentage(value.min)}%`,
-              width: `${getPercentage(value.max) - getPercentage(value.min)}%`
+              left: `${leftPercent}%`,
+              width: `${activeWidth}%`
             }}
           />
           <input
             type="range"
-            min={minBudget}
-            max={maxBudget}
-            step="100"
+            min={MIN_BUDGET}
+            max={MAX_BUDGET}
+            step={STEP}
             value={value.min}
             onChange={(e) => handleMinChange(parseInt(e.target.value))}
             className={styles.rangeInput}
             aria-label="Minimum budget"
+            data-testid="budget-min-slider"
           />
           <input
             type="range"
-            min={minBudget}
-            max={maxBudget}
-            step="100"
+            min={MIN_BUDGET}
+            max={MAX_BUDGET}
+            step={STEP}
             value={value.max}
             onChange={(e) => handleMaxChange(parseInt(e.target.value))}
             className={styles.rangeInput}
             aria-label="Maximum budget"
+            data-testid="budget-max-slider"
           />
         </div>
         
         <div className={styles.labels}>
-          <span className={styles.minLabel}>${minBudget.toLocaleString()}</span>
-          <span className={styles.maxLabel}>${maxBudget.toLocaleString()}</span>
+          <span className={styles.minLabel}>{formatCurrency(MIN_BUDGET)}</span>
+          <span className={styles.maxLabel}>{formatCurrency(MAX_BUDGET)}</span>
         </div>
       </div>
     </div>

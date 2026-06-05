@@ -1,16 +1,25 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { baseMetadata } from "@/lib/seo";
 import { exo2Font } from "@/lib/fonts";
+import { Footer } from "@/components/layout/Footer";
+import { CookieConsent } from "@/components/compliance/CookieConsent";
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = baseMetadata;
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#0B0B0B",
+};
 
 export default function RootLayout({
   children,
@@ -19,12 +28,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${exo2Font.variable} ${inter.variable}`}>
-      <head>
-        <meta name="theme-color" content="#0B0B0B" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-      </head>
-      <body className="antialiased">
-        {children}
+      <body className="antialiased min-h-screen flex flex-col">
+        <div className="flex-1">
+          {children}
+        </div>
+        <Footer />
+        <CookieConsent />
       </body>
     </html>
   );
