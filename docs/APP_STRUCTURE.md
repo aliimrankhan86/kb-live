@@ -14,14 +14,14 @@ Complete map of every screen, route, and user flow in the KaabaTrip application.
 │                                                                     │
 │  PUBLIC SIDE (travellers)          OPERATOR SIDE (travel agents)     │
 │  ─────────────────────────        ──────────────────────────────    │
-│  /                   [DONE]        /operator/onboarding     [TODO]  │
-│  /umrah              [DONE]        /operator/dashboard       [PARTIAL]│
-│  /hajj               [DONE]        /operator/packages        [PARTIAL]│
+│  /                   [DONE]        /operator/onboarding      [DONE]  │
+│  /umrah              [DONE]        /operator/dashboard       [DONE]  │
+│  /hajj               [DONE]        /operator/packages        [DONE]  │
 │  /umrah/ramadan      [DONE]        /operator/packages/new    [TODO]  │
-│  /search/packages    [DONE]        /operator/leads           [TODO]  │
+│  /search/packages    [DONE]        /operator/leads           [DONE]  │
 │  /packages           [DONE]        /operator/analytics       [PARTIAL]│
-│  /packages/[slug]    [DONE]        /operator/profile         [TODO]  │
-│  /operators/[slug]   [DONE]        /operator/settings        [TODO]  │
+│  /packages/[slug]    [DONE]        /operator/profile         [DONE]  │
+│  /operators/[slug]   [DONE]        /operator/settings        [DONE]  │
 │  /quote              [DONE]                                          │
 │  /requests/[id]      [DONE]                                          │
 │  /showcase           [DONE]                                          │
@@ -108,16 +108,16 @@ START
 
 ### Key files per screen (public)
 
-| Screen | Route file | Component(s) |
-|--------|-----------|--------------|
-| Landing | `app/page.tsx` | `Header`, `Hero` |
-| Umrah search | `app/umrah/page.tsx` | `UmrahSearchForm` |
-| Hajj search | `app/hajj/page.tsx` | — (placeholder) |
-| Search results | `app/search/packages/page.tsx` | `PackageList`, `PackageCard`, `FilterOverlay`, `ComparisonTable` |
-| Package detail | `app/packages/[slug]/page.tsx` | `PackageDetail` |
-| Operator profile | `app/operators/[slug]/page.tsx` | `OperatorProfileDetail` |
-| Quote wizard | `app/quote/page.tsx` | `QuoteRequestWizard`, Steps 1-5 |
-| Request detail | `app/requests/[id]/page.tsx` | `RequestDetail` |
+| Screen           | Route file                      | Component(s)                                                     |
+| ---------------- | ------------------------------- | ---------------------------------------------------------------- |
+| Landing          | `app/page.tsx`                  | `Header`, `Hero`                                                 |
+| Umrah search     | `app/umrah/page.tsx`            | `UmrahSearchForm`                                                |
+| Hajj search      | `app/hajj/page.tsx`             | — (placeholder)                                                  |
+| Search results   | `app/search/packages/page.tsx`  | `PackageList`, `PackageCard`, `FilterOverlay`, `ComparisonTable` |
+| Package detail   | `app/packages/[slug]/page.tsx`  | `PackageDetail`                                                  |
+| Operator profile | `app/operators/[slug]/page.tsx` | `OperatorProfileDetail`                                          |
+| Quote wizard     | `app/quote/page.tsx`            | `QuoteRequestWizard`, Steps 1-5                                  |
+| Request detail   | `app/requests/[id]/page.tsx`    | `RequestDetail`                                                  |
 
 ---
 
@@ -130,24 +130,24 @@ START (operator visits site)
   │
   ▼
 ┌──────────────────────────────┐
-│  /operator/onboarding  [TODO]│  Registration form
+│  /operator/onboarding  [DONE]│  Registration form
 │                              │  Fields: company name, reg #, ATOL, ABTA,
 │                              │    contact email, phone, address, serving
 │                              │    regions, departure airports, logo
 │                              │  CTA: [Submit for Verification]
 └──────────┬───────────────────┘
-           │ submitted → status: 'pending'
-           ▼
+            │ submitted → status: 'pending'
+            ▼
 ┌──────────────────────────────────────┐
-│  /operator/onboarding/status  [TODO] │  Verification waiting screen
+│  /operator/onboarding/status  [DONE] │  Verification waiting screen
 │                                      │  "We're reviewing your application"
 │                                      │  "Create draft packages while you wait"
 │                                      │  CTA: [Go to Dashboard]
 └──────────┬───────────────────────────┘
-           │ (verification approved or navigates)
-           ▼
+            │ (verification approved or navigates)
+            ▼
 ┌──────────────────────────────────────────┐
-│  /operator/dashboard  [PARTIAL]          │  HOME for operators
+│  /operator/dashboard  [DONE]             │  HOME for operators
 │                                          │
 │  ┌─ Sidebar ─────────────────────────┐   │
 │  │ Logo                              │   │
@@ -183,7 +183,7 @@ START (operator visits site)
            │ operator clicks [My Packages]
            ▼
 ┌──────────────────────────────────────────┐
-│  /operator/packages  [PARTIAL]           │
+│  /operator/packages  [DONE]              │
 │                                          │
 │  Table: title, type, season, price,      │
 │    nights, status, completeness, actions │
@@ -217,9 +217,8 @@ START (operator visits site)
            │ operator clicks [Leads / Enquiries]
            ▼
 ┌──────────────────────────────────────────┐
-│  /operator/leads  [TODO]                 │
-│  (currently: /operator/dashboard shows   │
-│   these inline — needs dedicated page)   │
+│  /operator/leads  [DONE]                 │
+│                                          │
 │                                          │
 │  List of incoming quote requests:        │
 │  - Type, season, dates, budget range     │
@@ -254,7 +253,7 @@ START (operator visits site)
            │ operator clicks [Profile & Settings]
            ▼
 ┌──────────────────────────────────────────┐
-│  /operator/profile  [TODO]               │
+│  /operator/profile  [DONE]               │
 │                                          │
 │  Edit company details:                   │
 │  - Company name, trading name            │
@@ -277,16 +276,16 @@ START (operator visits site)
 
 ### Key files per screen (operator)
 
-| Screen | Route file | Component(s) | Status |
-|--------|-----------|--------------|--------|
-| Onboarding form | `app/operator/onboarding/page.tsx` | `OperatorRegistrationForm` | TODO |
-| Verification status | `app/operator/onboarding/status/page.tsx` | `VerificationStatus` | TODO |
-| Dashboard home | `app/operator/dashboard/page.tsx` | `OperatorDashboard` | PARTIAL — needs layout, stats, activity feed |
-| Package list | `app/operator/packages/page.tsx` | `OperatorPackagesList` | PARTIAL — empty props, no real data |
-| Package wizard | `app/operator/packages/new/page.tsx` | `PackageWizard` | TODO — currently `PackageForm` is flat |
-| Leads/enquiries | `app/operator/leads/page.tsx` | `LeadsList`, `OfferForm` | TODO — currently inline in dashboard |
-| Analytics | `app/operator/analytics/page.tsx` | `AnalyticsDashboard` | PARTIAL — 3 basic stat cards |
-| Profile | `app/operator/profile/page.tsx` | `OperatorProfileForm` | TODO |
+| Screen              | Route file                                | Component(s)               | Status                                 |
+| ------------------- | ----------------------------------------- | -------------------------- | -------------------------------------- |
+| Onboarding form     | `app/operator/onboarding/page.tsx`        | `OperatorRegistrationForm` | DONE                                   |
+| Verification status | `app/operator/onboarding/status/page.tsx` | `VerificationStatus`       | DONE                                   |
+| Dashboard home      | `app/operator/dashboard/page.tsx`         | `OperatorDashboard`        | DONE                                   |
+| Package list        | `app/operator/packages/page.tsx`          | `OperatorPackagesList`     | DONE                                   |
+| Package wizard      | `app/operator/packages/new/page.tsx`      | `PackageWizard`            | TODO — currently `PackageForm` is flat |
+| Leads/enquiries     | `app/operator/leads/page.tsx`             | `LeadsList`, `OfferForm`   | DONE                                   |
+| Analytics           | `app/operator/analytics/page.tsx`         | `AnalyticsDashboard`       | PARTIAL — 3 basic stat cards           |
+| Profile             | `app/operator/profile/page.tsx`           | `OperatorProfileForm`      | DONE                                   |
 
 ---
 
@@ -360,27 +359,27 @@ Components must **never** call `MockDB` directly (except `MockDB.setCurrentUser`
 
 ### Must-have (MVP for merge to main-v2)
 
-| # | Feature | Route | Est. complexity |
-|---|---------|-------|----------------|
-| 1 | Operator layout (sidebar) | `app/operator/layout.tsx` | Small |
-| 2 | Evolve types (OperatorProfile + Package) | `lib/types.ts` | Small |
-| 3 | Update MockDB seed data | `lib/api/mock-db.ts` | Small |
-| 4 | Operator registration form | `/operator/onboarding` | Medium |
-| 5 | Verification status screen | `/operator/onboarding/status` | Small |
-| 6 | Dashboard home (enhanced) | `/operator/dashboard` | Medium |
-| 7 | Package list (wired to real data) | `/operator/packages` | Medium |
-| 8 | Package creation wizard | `/operator/packages/new` | Large |
-| 9 | Leads page | `/operator/leads` | Medium |
-| 10 | Operator profile editor | `/operator/profile` | Medium |
+| #   | Feature                                  | Route                         | Est. complexity |
+| --- | ---------------------------------------- | ----------------------------- | --------------- |
+| 1   | Operator layout (sidebar)                | `app/operator/layout.tsx`     | Small           |
+| 2   | Evolve types (OperatorProfile + Package) | `lib/types.ts`                | Small           |
+| 3   | Update MockDB seed data                  | `lib/api/mock-db.ts`          | Small           |
+| 4   | Operator registration form               | `/operator/onboarding`        | Medium          |
+| 5   | Verification status screen               | `/operator/onboarding/status` | Small           |
+| 6   | Dashboard home (enhanced)                | `/operator/dashboard`         | Medium          |
+| 7   | Package list (wired to real data)        | `/operator/packages`          | Medium          |
+| 8   | Package creation wizard                  | `/operator/packages/new`      | Large           |
+| 9   | Leads page                               | `/operator/leads`             | Medium          |
+| 10  | Operator profile editor                  | `/operator/profile`           | Medium          |
 
 ### Nice-to-have (post-MVP)
 
-| # | Feature | Route | Est. complexity |
-|---|---------|-------|----------------|
-| 11 | Enhanced analytics | `/operator/analytics` | Medium |
-| 12 | Package cards with operator info | `/search/packages` | Small |
-| 13 | SEO structured data (JSON-LD) | All public pages | Medium |
-| 14 | Public operator profile enhanced | `/operators/[slug]` | Small |
-| 15 | Package completeness scoring | operator dashboard | Small |
+| #   | Feature                          | Route                 | Est. complexity |
+| --- | -------------------------------- | --------------------- | --------------- |
+| 11  | Enhanced analytics               | `/operator/analytics` | Medium          |
+| 12  | Package cards with operator info | `/search/packages`    | Small           |
+| 13  | SEO structured data (JSON-LD)    | All public pages      | Medium          |
+| 14  | Public operator profile enhanced | `/operators/[slug]`   | Small           |
+| 15  | Package completeness scoring     | operator dashboard    | Small           |
 
 See `docs/EXECUTION_QUEUE.md` for the exact build order with specs for each task.

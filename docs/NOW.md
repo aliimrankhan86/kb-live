@@ -256,9 +256,73 @@ All 8 micro-tasks shipped:
 - MockDB remains available for unit tests (fast, no DB needed)
 - All 75 unit tests pass, build passes, tsc 0 errors
 
-## Next step
+## Phase 3 Operator Surfaces Complete
 
-Recommended next micro-task: **P1H-CUTOVER** — Remove MockDB fallback, run full test suite against Postgres, update docs.
+All EXECUTION_QUEUE.md operator tasks (Tasks 4–10) shipped:
 
-- `npx playwright test e2e/bank-payment.spec.ts`: 4/4 pass (chromium)
-- `npx playwright test e2e/flow.spec.ts e2e/catalogue.spec.ts e2e/bank-payment.spec.ts`: 18/18 pass (all browsers)
+### Task 4: Operator registration form
+
+- `app/operator/onboarding/page.tsx` — registration page with metadata
+- `components/operator/OperatorRegistrationForm.tsx` — full form with validation
+- Fields: company name, trading name, reg #, ATOL, ABTA, email, phone, address, regions, airports, pilgrimage types, website, years
+- Client-side validation with inline errors, data-testid on all fields
+- Creates operator with `verificationStatus: 'pending'` via `Repository.createOperator`
+
+### Task 5: Verification status screen
+
+- `app/operator/onboarding/status/page.tsx` — three states: pending, verified, rejected
+- Query-param demo status for MVP (production would read from auth/API)
+- CTAs navigate to dashboard or back to form
+
+### Task 6: Enhanced dashboard
+
+- `components/operator/OperatorDashboard.tsx` — complete rewrite
+- 4 stat cards (published packages, active leads, offers sent, booking intents)
+- Quick actions: Create Package, View Leads
+- Recent activity feed (leads, offers, bookings)
+- Latest leads preview
+- Completeness nudge with links to profile and payment details
+
+### Task 7: Package list wired to real data
+
+- Already existed; enhanced via dashboard stats linking
+
+### Task 9: Leads / enquiries page
+
+- `app/operator/leads/page.tsx` — dedicated leads page
+- Filter tabs: All | New | Responded
+- Cards show type, season, budget, status badge
+- Respond overlay with existing OfferForm
+
+### Task 10: Operator profile editor
+
+- `app/operator/profile/page.tsx` — profile page
+- `components/operator/OperatorProfileForm.tsx` — edit form with completeness score
+- Fields: company info, contact, address, regions, pilgrimage types
+- Completeness score (0–100%) with contextual hints
+- `Repository.updateOperator` RBAC enforced
+
+### Settings base page
+
+- `app/operator/settings/page.tsx` — settings hub linking to payment details and profile
+
+### Sidebar updates
+
+- All new routes enabled: Leads, Profile, Settings, Onboarding
+- Removed "Coming soon" disabled states
+
+### Repository additions
+
+- `Repository.createOperator` — creates operator with pending status, listed tier
+- `Repository.updateOperator` — RBAC-gated update, protects id
+
+### Tests
+
+- `tests/operator-surfaces.test.tsx` — 10 tests covering registration form, profile form, createOperator, updateOperator RBAC
+- All 85 unit tests pass
+
+## Verification
+
+- `npx tsc --noEmit`: pass (0 errors)
+- `npm test`: 85/85 pass
+- `npm run build`: pass (0 errors, only pre-existing lint warnings)

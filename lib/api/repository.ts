@@ -703,6 +703,46 @@ export const Repository = {
     return MockDB.getAuditLog();
   },
 
+  // Operators
+  createOperator: (ctx: RequestContext, input: Partial<OperatorProfile>): OperatorProfile => {
+    // Only authenticated users can create operators; typically a user creates their own operator profile
+    if (!ctx.userId) throw new Error('Unauthorized');
+
+    const now = new Date().toISOString();
+    const operator: OperatorProfile = {
+      ...input,
+      id: ctx.userId,
+      slug: input.companyName ? generateSlug(input.companyName) : `operator-${Date.now()}`,
+      verificationStatus: 'pending',
+      tier: 'listed',
+      eligibilityFlags: {
+        canReceiveBookings: false,
+        bankDetailsActive: false,
+        onboardingComplete: false,
+      },
+      createdAt: now,
+      updatedAt: now,
+    } as OperatorProfile;
+
+    MockDB.saveOperator(operator);
+    return operator;
+  },
+
+  updateOperator: (ctx: RequestContext, id: string, updates: Partial<OperatorProfile>): OperatorProfile => {
+    requireOperatorOwnerOrAdmin(ctx, id);
+    const existing = MockDB.getOperatorById(id);
+    if (!existing) throw new Error('Operator not found');
+
+    const operator: OperatorProfile = {
+      ...existing,
+      ...updates,
+      id, // protect id
+      updatedAt: new Date().toISOString(),
+    };
+    MockDB.saveOperator(operator);
+    return operator;
+  },
+
   // Packages
   createPackage: (ctx: RequestContext, pkg: Partial<Package>): Package => {
     if (ctx.role !== 'operator') throw new Error('Unauthorized');

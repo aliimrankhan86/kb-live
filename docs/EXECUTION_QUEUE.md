@@ -43,6 +43,7 @@ Ordered list of tasks for building the operator dashboard and enhancing the plat
 Add new **optional** fields to the existing interfaces. This is backward-compatible — no existing code breaks.
 
 Add to `OperatorProfile`:
+
 ```typescript
   tradingName?: string;
   companyRegistrationNumber?: string;
@@ -66,6 +67,7 @@ Add to `OperatorProfile`:
 ```
 
 Add to `Package`:
+
 ```typescript
   hotelMakkahName?: string;
   hotelMadinahName?: string;
@@ -84,6 +86,7 @@ Add to `Package`:
 ```
 
 **Verify:**
+
 - `npm run test` passes (no existing code affected).
 - `npm run build` passes (TypeScript compiles).
 
@@ -99,6 +102,7 @@ Add to `Package`:
 **What to do:**
 
 1. Update `SEED_OPERATORS` to include new fields:
+
 ```typescript
 {
   id: 'op1',
@@ -118,6 +122,7 @@ Add to `Package`:
   pilgrimageTypesOffered: ['umrah', 'hajj'],
 }
 ```
+
 Do the same for `op2` (Makkah Tours) with different realistic data.
 
 2. Update `SEED_PACKAGES` to include hotel names, airline, departure airport, and cancellation policy for all 5 seed packages.
@@ -125,6 +130,7 @@ Do the same for `op2` (Makkah Tours) with different realistic data.
 3. Bump `PACKAGES_SEED_VERSION` to `3` so existing localStorage gets refreshed.
 
 **Verify:**
+
 - `npm run test` passes.
 - `npm run build` passes.
 - `npm run dev` → open `/packages` → confirm packages load (localStorage refreshed).
@@ -160,12 +166,14 @@ Do the same for `op2` (Makkah Tours) with different realistic data.
    - Each page just renders its content component.
 
 **Design:**
+
 - Background: `#0B0B0B` (page), `#111111` (sidebar).
 - Border between sidebar and content: `rgba(255,255,255,0.1)`.
 - Nav items: 44px min height, `--textMuted` default, `--text` on hover, `--yellow` active indicator.
 - Mobile breakpoint: below `768px` sidebar collapses to hamburger.
 
 **Verify:**
+
 - All 3 operator routes render with sidebar.
 - Active nav item highlights correctly.
 - Mobile: hamburger toggles sidebar.
@@ -177,7 +185,7 @@ Do the same for `op2` (Makkah Tours) with different realistic data.
 
 ### Task 4: Operator registration form
 
-**Status:** `[ ]`
+**Status:** `[x] 2026-06-05`
 **Complexity:** Medium
 **Files to create:** `app/operator/onboarding/page.tsx`, `components/operator/OperatorRegistrationForm.tsx`
 **Files to modify:** `lib/api/repository.ts`, `lib/api/mock-db.ts`
@@ -202,16 +210,19 @@ Do the same for `op2` (Makkah Tours) with different realistic data.
 5. Redirect to `/operator/onboarding/status`.
 
 **Validation:**
+
 - Client-side: all mandatory fields filled, email format, phone format.
 - Show inline error messages below each field.
 - Disable submit until form is valid.
 - All inputs need `<label>`, `data-testid`, `aria-required`.
 
 **Repository changes:**
+
 - Add `Repository.createOperator(profile: Partial<OperatorProfile>): OperatorProfile`.
 - Add `MockDB.saveOperator(op: OperatorProfile)`.
 
 **Verify:**
+
 - Form renders with all fields.
 - Validation shows errors for empty/invalid fields.
 - Submit creates operator in MockDB.
@@ -222,7 +233,7 @@ Do the same for `op2` (Makkah Tours) with different realistic data.
 
 ### Task 5: Verification status screen
 
-**Status:** `[ ]`
+**Status:** `[x] 2026-06-05`
 **Complexity:** Small
 **Files to create:** `app/operator/onboarding/status/page.tsx`, `components/operator/VerificationStatus.tsx`
 
@@ -236,6 +247,7 @@ Do the same for `op2` (Makkah Tours) with different realistic data.
 3. Read operator status from MockDB.
 
 **Verify:**
+
 - All 3 states render correctly.
 - CTAs navigate correctly.
 - `npm run test` + `npm run build` pass.
@@ -246,7 +258,7 @@ Do the same for `op2` (Makkah Tours) with different realistic data.
 
 ### Task 6: Dashboard home — enhanced
 
-**Status:** `[ ]`
+**Status:** `[x] 2026-06-05`
 **Complexity:** Medium
 **Files to modify:** `app/operator/dashboard/page.tsx`, `components/operator/OperatorDashboard.tsx`
 **Read first:** `docs/APP_STRUCTURE.md` §3 (dashboard wireframe), `docs/UX_GUIDELINES.md` §6 (trust signals)
@@ -268,6 +280,7 @@ Do the same for `op2` (Makkah Tours) with different realistic data.
    - Booking intents: from MockDB bookingIntents filtered by operatorId
 
 **Verify:**
+
 - Dashboard shows 4 stat cards with correct numbers.
 - Activity feed shows recent items.
 - Quick actions navigate correctly.
@@ -278,7 +291,7 @@ Do the same for `op2` (Makkah Tours) with different realistic data.
 
 ### Task 7: Package list — wired to real data
 
-**Status:** `[ ]`
+**Status:** `[x] 2026-06-05`
 **Complexity:** Medium
 **Files to modify:** `app/operator/packages/page.tsx`, `components/operator/OperatorPackagesList.tsx`
 **Files to modify (maybe):** `components/operator/PackageForm.tsx`
@@ -287,8 +300,9 @@ Do the same for `op2` (Makkah Tours) with different realistic data.
 **What to do:**
 
 1. Wire `OperatorPackagesList` to real data from Repository:
+
    ```typescript
-   const packages = Repository.getPackagesByOperator(ctx.userId);
+   const packages = Repository.getPackagesByOperator(ctx.userId)
    ```
 
 2. Add filter tabs: All | Published | Draft.
@@ -299,6 +313,7 @@ Do the same for `op2` (Makkah Tours) with different realistic data.
 7. Wire Create → opens PackageForm in overlay (empty).
 
 **Verify:**
+
 - Seed packages appear in list.
 - Edit pre-fills form and saves.
 - Delete removes with confirmation.
@@ -321,6 +336,7 @@ Do the same for `op2` (Makkah Tours) with different realistic data.
 Replace the flat `PackageForm` with a multi-step wizard.
 
 **Steps:**
+
 1. **Basic info:** Title, type (umrah/hajj), season label, date range.
 2. **Pricing:** Price per person, price type (from/exact), currency, deposit amount, payment plan toggle.
 3. **Hotels:** Makkah hotel (name, stars, distance in metres, image URL, nights). Madinah hotel (same). Total nights auto-computed.
@@ -331,12 +347,14 @@ Replace the flat `PackageForm` with a multi-step wizard.
 8. **Review:** Summary of all sections. Expandable/collapsible. [Save as Draft] or [Publish] (only if operator is verified and all publish-required fields are filled).
 
 **UX:**
+
 - Progress bar at top showing step N of 8.
 - [Back] [Next] buttons. [Next] validates current step before proceeding.
 - Each step saves to form state (not to DB until final submit).
 - If operator is not verified, [Publish] is disabled with tooltip: "Complete verification first."
 
 **Validation per step:**
+
 - Step 1: title required (5-120 chars), type required, at least one date.
 - Step 2: price required (> 0), currency required.
 - Step 3: hotel names required (for publish), stars required, distance required, nights > 0.
@@ -347,6 +365,7 @@ Replace the flat `PackageForm` with a multi-step wizard.
 - Step 8: review only.
 
 **Verify:**
+
 - All 8 steps navigate correctly.
 - Validation blocks [Next] with inline errors.
 - Save as Draft works (creates package with status 'draft').
@@ -358,7 +377,7 @@ Replace the flat `PackageForm` with a multi-step wizard.
 
 ### Task 9: Leads / enquiries page
 
-**Status:** `[ ]`
+**Status:** `[x] 2026-06-05`
 **Complexity:** Medium
 **Files to create:** `app/operator/leads/page.tsx`, `components/operator/LeadsList.tsx`
 **Files to modify:** `components/operator/OfferForm.tsx` (enhance)
@@ -382,6 +401,7 @@ Replace the flat `PackageForm` with a multi-step wizard.
    - Pre-fill from request preferences.
 
 **Verify:**
+
 - Leads page shows requests.
 - Filter/sort work.
 - Respond flow creates offer in MockDB.
@@ -392,7 +412,7 @@ Replace the flat `PackageForm` with a multi-step wizard.
 
 ### Task 10: Operator profile editor
 
-**Status:** `[ ]`
+**Status:** `[x] 2026-06-05`
 **Complexity:** Medium
 **Files to create:** `app/operator/profile/page.tsx`, `components/operator/OperatorProfileForm.tsx`
 **Files to modify:** `lib/api/repository.ts`
@@ -415,6 +435,7 @@ Replace the flat `PackageForm` with a multi-step wizard.
 7. Repository: add `Repository.updateOperator(ctx, id, updates)`.
 
 **Verify:**
+
 - Form pre-fills with operator data.
 - Save updates MockDB.
 - Completeness score reflects filled fields.
@@ -440,6 +461,7 @@ Replace the flat `PackageForm` with a multi-step wizard.
 5. Follow card layout from UX_GUIDELINES.md.
 
 **Verify:**
+
 - Cards show operator name + verified badge.
 - Hotel names display.
 - `npm run test` + `npm run build` pass.
@@ -461,6 +483,7 @@ Replace the flat `PackageForm` with a multi-step wizard.
 4. Improve meta tags with `generateMetadata`.
 
 **Verify:**
+
 - Profile shows all available operator info.
 - JSON-LD renders in page source.
 - `npm run test` + `npm run build` pass.
@@ -486,6 +509,7 @@ Replace the flat `PackageForm` with a multi-step wizard.
 3. Update sitemap to include dynamic package + operator pages.
 
 **Verify:**
+
 - View page source on `/packages/[slug]` → JSON-LD present.
 - Run Google Structured Data Testing Tool.
 - `npm run test` + `npm run build` pass.
@@ -513,6 +537,7 @@ Replace the flat `PackageForm` with a multi-step wizard.
 2. Unit tests for all validators.
 
 **Verify:**
+
 - All validators have tests.
 - `npm run test` passes.
 
@@ -533,6 +558,7 @@ Replace the flat `PackageForm` with a multi-step wizard.
 5. Test validation functions from `lib/validation.ts`.
 
 **Verify:**
+
 - All new tests pass.
 - No existing tests break.
 
@@ -551,6 +577,7 @@ Replace the flat `PackageForm` with a multi-step wizard.
 3. E2E test: navigate to `/operator/dashboard` → see stats.
 
 **Verify:**
+
 - `npx playwright test e2e/operator.spec.ts` passes.
 
 ---
