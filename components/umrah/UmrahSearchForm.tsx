@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useCallback, useMemo } from 'react'
+import { RangeSlider } from '@/components/ui/RangeSlider'
 import styles from './umrah-search-form.module.css'
 
 interface ChildInfo {
@@ -41,9 +42,6 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
   const maxBudgetValue = 2000
   const minBudget = Math.min(budgetRange[0], budgetRange[1])
   const maxBudget = Math.max(budgetRange[0], budgetRange[1])
-  const budgetRangeStart = ((minBudget - minBudgetValue) / (maxBudgetValue - minBudgetValue)) * 100
-  const budgetRangeWidth = ((maxBudget - minBudgetValue) / (maxBudgetValue - minBudgetValue)) * 100 - budgetRangeStart
-
   const nextYear = currentYear + 1
 
   // Quick select options with real date ranges (use hyphens, not em dashes)
@@ -102,15 +100,9 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
 
   const seasonParam = quickSelectOptions.find((o) => o.id === selectedQuickPick)?.season ?? 'flexible'
 
-  const handleBudgetRangeChange = useCallback((index: number, value: number) => {
-    const newRange = [...budgetRange]
-    if (index === 0) {
-      newRange[0] = Math.min(value, newRange[1] - 50)
-    } else {
-      newRange[1] = Math.max(value, newRange[0] + 50)
-    }
-    setBudgetRange(newRange)
-  }, [budgetRange])
+  const handleBudgetChange = useCallback(([newMin, newMax]: [number, number]) => {
+    setBudgetRange([newMin, newMax])
+  }, [])
 
   const starsOptions = [
     { value: null, label: 'Any' },
@@ -521,36 +513,18 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
               <div className={styles.searchForm__selectedBudget}>
                 £{minBudget.toLocaleString('en-GB')} - £{maxBudget.toLocaleString('en-GB')} <span className={styles.searchForm__budgetUnit}>per person</span>
               </div>
-              <div className={styles.searchForm__budgetSliderContainer}>
-                <div className={styles.searchForm__track}>
-                  <div
-                    className={styles.searchForm__activeTrack}
-                    style={{ left: `${budgetRangeStart}%`, width: `${budgetRangeWidth}%` }}
-                  />
-                </div>
-                <input
-                  type="range"
-                  min={minBudgetValue}
-                  max={maxBudgetValue}
-                  step="50"
-                  value={budgetRange[0]}
-                  onChange={(e) => handleBudgetRangeChange(0, parseInt(e.target.value))}
-                  className={styles.searchForm__budgetSlider}
-                  aria-label="Minimum budget"
-                  data-testid="budget-min-slider"
-                />
-                <input
-                  type="range"
-                  min={minBudgetValue}
-                  max={maxBudgetValue}
-                  step="50"
-                  value={budgetRange[1]}
-                  onChange={(e) => handleBudgetRangeChange(1, parseInt(e.target.value))}
-                  className={styles.searchForm__budgetSlider}
-                  aria-label="Maximum budget"
-                  data-testid="budget-max-slider"
-                />
-              </div>
+              <RangeSlider
+                min={minBudgetValue}
+                max={maxBudgetValue}
+                value={[budgetRange[0], budgetRange[1]]}
+                step={50}
+                minGap={100}
+                onChange={handleBudgetChange}
+                aria-label-min="Minimum budget"
+                aria-label-max="Maximum budget"
+                data-testid-min="budget-min-slider"
+                data-testid-max="budget-max-slider"
+              />
             </div>
           )}
         </div>

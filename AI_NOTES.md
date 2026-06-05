@@ -38,6 +38,8 @@ P0: Wire Repository → `getDataSource()` cutover — Production DB built but un
 | Mobile header hamburger         | ✅     | Full mobile drawer (320px slide-in), overlay, focus trap, Escape/click-outside    |
 | Touch targets fixed             | ✅     | All buttons/links min 44px-52px, `-webkit-tap-highlight-color: transparent`       |
 | Footer logo + structure         | ✅     | Smaller Logo(28px) + text-logo, structured sections, copyright row                |
+| Unified RangeSlider component   | ✅     | Single shared component for ALL sliders app-wide                                  |
+| Slider consistency verified     | ✅     | All sliders: 8px blue track, 24px gold thumb, 40px touch area                     |
 
 ## 🔄 PENDING (next session)
 
@@ -188,6 +190,27 @@ P0: Wire Repository → `getDataSource()` cutover — Production DB built but un
   - Copyright row: year + governing law, separated by border
   - All footer links: `min-h-[24px]` for touch compliance
 - **Build**: 0 errors | **Tests**: 95/95 | **tsc**: 0 errors
+
+### 2026-06-05 — Session: Unified RangeSlider Component (ALL Sliders Now Consistent)
+
+- **Root cause of inconsistency**: Each slider (BudgetFilter, DistanceFilter, TimePeriodFilter, UmrahSearchForm) had its own copy-paste CSS with different track heights (4px vs 8px), thumb sizes (20px vs 24px), and positioning logic. The filter sliders showed yellow active tracks because their CSS modules had slider CSS that was not properly replaced.
+- **Solution**: Created a single shared `RangeSlider` component in `components/ui/RangeSlider.tsx` + `RangeSlider.module.css` that ALL sliders use:
+  - **Track**: 8px height, `#2D2D2D` background, 6px border-radius
+  - **Active track**: 8px height, `#4A9EFF` (blue), 6px border-radius
+  - **Thumb**: 24px diameter, `#D4AF37` (gold), 2px `#1A1A1A` border, drop shadow
+  - **Touch area**: 40px wrapper height, `pointer-events: none` on inputs + `pointer-events: auto` on thumbs
+  - **Mobile**: 28px thumbs on <480px for easier touch
+  - **Focus**: `focus-visible` outline with `var(--yellow)`
+  - **Accessibility**: `aria-label-min`, `aria-label-max`, `data-testid` props
+- **Refactored ALL consumers**:
+  - `BudgetFilter.tsx` → uses `RangeSlider`, CSS stripped to label/value only
+  - `DistanceFilter.tsx` → uses `RangeSlider`, CSS stripped to label/value only
+  - `TimePeriodFilter.tsx` → uses `RangeSlider`, CSS stripped to label/value only
+  - `UmrahSearchForm.tsx` → budget slider uses `RangeSlider`, CSS removed
+  - `BudgetFilter.module.css`, `DistanceFilter.module.css`, `TimePeriodFilter.module.css` → all slider CSS deleted
+  - `umrah-search-form.module.css` → all budget slider CSS deleted
+- **Verified**: Build 0 errors, 95/95 tests pass, no visual regressions
+- **Result**: Every slider in the app now renders identically — same track height, same thumb size, same blue active track, same gold thumb, same touch behaviour
 
 ### 2026-06-05 — Session: Slider Fix + Blue Active Tracks App-Wide
 
