@@ -3,29 +3,46 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import type { UserRole } from '@/lib/types';
 
 type NavItem = {
   label: string;
   href: string;
-  enabled: boolean;
+  adminOnly?: boolean;
 };
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard', href: '/operator/dashboard', enabled: true },
-  { label: 'Packages', href: '/operator/packages', enabled: true },
-  { label: 'Leads', href: '/operator/leads', enabled: true },
-  { label: 'Analytics', href: '/operator/analytics', enabled: true },
-  { label: 'Profile', href: '/operator/profile', enabled: true },
-  { label: 'Settings', href: '/operator/settings', enabled: true },
-  { label: 'Onboarding', href: '/operator/onboarding', enabled: true },
+  { label: 'Dashboard', href: '/operator/dashboard' },
+  { label: 'Packages', href: '/operator/packages' },
+  { label: 'Leads', href: '/operator/leads' },
+  { label: 'Analytics', href: '/operator/analytics' },
+  { label: 'Profile', href: '/operator/profile' },
+  { label: 'Settings', href: '/operator/settings' },
 ];
 
 const navItemClasses =
   'flex min-h-11 items-center justify-between rounded-md border px-3 py-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFD31D]';
 
-export function OperatorSidebar() {
+interface OperatorSidebarProps {
+  operatorName: string;
+  verificationStatus?: 'pending' | 'verified' | 'rejected';
+  userRole: UserRole;
+  userName: string;
+}
+
+export function OperatorSidebar({ operatorName, verificationStatus, userRole, userName }: OperatorSidebarProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const statusBadge = verificationStatus === 'verified'
+    ? { text: 'Verified', color: 'text-emerald-400' }
+    : verificationStatus === 'pending'
+    ? { text: 'Pending', color: 'text-amber-400' }
+    : verificationStatus === 'rejected'
+    ? { text: 'Rejected', color: 'text-red-400' }
+    : { text: 'Unverified', color: 'text-[rgba(255,255,255,0.5)]' };
+
+  const visibleNavItems = navItems.filter((item) => !item.adminOnly || userRole === 'admin');
 
   return (
     <>
@@ -71,22 +88,8 @@ export function OperatorSidebar() {
         </div>
 
         <nav className="space-y-2" aria-label="Operator sections">
-          {navItems.map((item) => {
-            const active = item.enabled && pathname === item.href;
-
-            if (!item.enabled) {
-              return (
-                <div
-                  key={item.href}
-                  className={`${navItemClasses} cursor-not-allowed border-[rgba(255,255,255,0.08)] bg-transparent text-[rgba(255,255,255,0.4)]`}
-                  aria-disabled="true"
-                >
-                  <span>{item.label}</span>
-                  <span className="text-xs uppercase text-[rgba(255,255,255,0.45)]">Coming soon</span>
-                </div>
-              );
-            }
-
+          {visibleNavItems.map((item) => {
+            const active = pathname === item.href;
             return (
               <Link
                 key={item.href}
@@ -105,9 +108,10 @@ export function OperatorSidebar() {
           })}
         </nav>
 
-        <div className="mt-6 border-t border-[rgba(255,255,255,0.1)] pt-4 text-xs text-[rgba(255,255,255,0.64)]">
-          <p className="text-sm font-medium text-[#FFFFFF]">Al-Hidayah Travel</p>
-          <p className="mt-1">Status: Verified</p>
+        <div className="mt-6 border-t border-[rgba(255,255,255,0.1)] pt-4">
+          <p className="text-sm font-medium text-[#FFFFFF]">{operatorName}</p>
+          <p className={`mt-1 text-xs ${statusBadge.color}`}>{statusBadge.text}</p>
+          <p className="mt-2 text-xs text-[rgba(255,255,255,0.5)]">{userName}</p>
         </div>
       </aside>
     </>

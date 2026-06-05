@@ -321,8 +321,50 @@ All EXECUTION_QUEUE.md operator tasks (Tasks 4–10) shipped:
 - `tests/operator-surfaces.test.tsx` — 10 tests covering registration form, profile form, createOperator, updateOperator RBAC
 - All 85 unit tests pass
 
+## Auth improvements (post-operator-surfaces)
+
+### Purged /kanban
+
+- Deleted: `app/kanban/page.tsx`, `components/kanban/*`, `lib/store/kanban-store.ts`, `docs/09_KANBAN_WORKFLOW.md`
+- Removed `/kanban` from `app/robots.ts` disallow list
+
+### Login & sign-up pages
+
+- `app/login/page.tsx` — centered card with `LoginForm`
+- `app/signup/page.tsx` — centered card with `SignUpForm`
+- `components/auth/LoginForm.tsx` — email/password, role-based redirect (operator→dashboard, admin→complaints), links to `/signup`
+- `components/auth/SignUpForm.tsx` — traveller/partner role toggle, name, email, password, links to `/login`
+
+### Header auth wiring
+
+- `components/layout/Header.tsx` — full auth state via Supabase browser client
+- Shows: "Get a Quote", "For Partners", "Partner Login" for guests
+- Shows: user email/name dropdown with logout for logged-in users
+- Shows: Dashboard link for operators, Admin link for admins
+- Hidden on `/operator/*` and `/admin/*` pages (they have their own nav)
+
+### Operator sidebar dynamic data
+
+- `app/operator/layout.tsx` — server-side auth guard, redirects to `/login?redirect=/operator/dashboard`
+- Fetches operator profile via `Repository.getOperatorById` for sidebar data
+- `components/operator/OperatorSidebar.tsx` — accepts props: `operatorName`, `verificationStatus`, `userRole`, `userName`
+
+### Partner CTA on landing page
+
+- `components/marketing/Hero.tsx` — added "Are you a travel agent? → BECOME A PARTNER" CTA linking to `/operator/onboarding`
+
+### Repository additions
+
+- `Repository.getOperators` — admin sees all, operator sees own
+- `Repository.getOperatorById` — direct lookup
+
+### Auth tests
+
+- `tests/auth-components.test.tsx` — 9 tests covering LoginForm, SignUpForm, OperatorSidebar
+- All 94 unit tests pass
+
 ## Verification
 
 - `npx tsc --noEmit`: pass (0 errors)
-- `npm test`: 85/85 pass
+- `npm test`: 94/94 pass
 - `npm run build`: pass (0 errors, only pre-existing lint warnings)

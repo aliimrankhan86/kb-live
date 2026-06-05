@@ -952,6 +952,17 @@ export const Repository = {
     return { saved, errors };
   },
 
+  getOperators: (ctx: RequestContext): OperatorProfile[] => {
+    const all = MockDB.getOperators();
+    if (ctx.role === 'operator') return all.filter((o) => o.id === ctx.userId);
+    if (ctx.role === 'admin') return all;
+    return [];
+  },
+
+  getOperatorById: (id: string): OperatorProfile | undefined => {
+    return MockDB.getOperatorById(id);
+  },
+
   getOperatorBySlug: (slug: string): OperatorProfile | undefined => {
     return MockDB.getOperators().find((operator) => operator.slug === slug);
   },

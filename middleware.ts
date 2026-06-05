@@ -12,10 +12,10 @@ const PUBLIC_PREFIXES = [
   '/quote',
   '/operators',
   '/showcase',
-  '/kanban',
   '/requests',
   '/robots.txt',
   '/sitemap.xml',
+  '/login',
 ];
 
 /**

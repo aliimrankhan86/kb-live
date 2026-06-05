@@ -51,6 +51,11 @@ export const Hero: React.FC<HeroProps> = ({ className = '' }) => {
         buttonText="UMRAH"
         href="/umrah"
       />
+      <CTASection
+        title="Are you a travel agent?"
+        buttonText="BECOME A PARTNER"
+        href="/operator/onboarding"
+      />
     </div>
     </main>
   )
