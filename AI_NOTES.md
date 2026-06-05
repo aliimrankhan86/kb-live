@@ -12,7 +12,21 @@ Filter overlay & Umrah search form UX overhaul — consistent app styling, GBP c
 
 ---
 
-## Next 10 Tasks (Ranked — Highest to Lowest Priority)
+## ✅ DONE (this session)
+
+| Task                                | Status | Evidence                                                                          |
+| ----------------------------------- | ------ | --------------------------------------------------------------------------------- |
+| Commit all work to `main`           | ✅     | `6ed2f5d` on GitHub                                                               |
+| Create `current-branch` from `main` | ✅     | `git checkout -b current-branch`                                                  |
+| Calendar icon on date inputs        | ✅     | `components/umrah/UmrahSearchForm.tsx` - clickable SVG wrapper, `showPicker()`    |
+| Date validation                     | ✅     | Departure not past, return after departure, 7-60 day range, `role="alert"` errors |
+| Em dashes removed                   | ✅     | All `\u2013` replaced with `-` in labels, budget, child ages                      |
+| Update README.md                    | ✅     | Comprehensive project overview, tech stack, features, roadmap                     |
+| Push `main` to GitHub               | ✅     | `ddc7f87..6ed2f5d`                                                                |
+| Push `current-branch` to GitHub     | ✅     | New branch created on remote                                                      |
+| Delete extra branches               | ✅     | 16 old branches removed, only `main` + `current-branch` remain                    |
+
+## 🔄 PENDING (next session)
 
 | #   | Priority | Task                                        | Why                                                                                                                       | Files                                                                      | Effort |
 | --- | -------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ------ |
@@ -135,15 +149,8 @@ Filter overlay & Umrah search form UX overhaul — consistent app styling, GBP c
 - **Branch**: `current-branch` created from `main` after committing all prior work. `main` remains safe backup.
 - **Build**: 0 errors | **Tests**: 95/95 | **tsc**: 0 errors
 
-### 2026-06-05 — Session: Filter Overlay & Umrah Search UX Overhaul
+### 2026-06-05 —
 
-- **FilterOverlay complete redesign**: bottom-sheet on mobile, centred modal on desktop, uses design system tokens (`var(--surfaceDark)`, `var(--borderSubtle)`, `var(--radiusLg)`), active filter count badge, smooth `slideUp`/`fadeIn` animations
-- **BudgetFilter**: `$` → `£` with `en-GB` locale, proper `MIN_GAP` constraint (200) to prevent slider crossover, `useCallback` memoisation, `data-testid` attributes, correct z-index stacking for dual thumb handles
-- **TimePeriodFilter**: eliminated hardcoded "2020" year, dynamic `currentYear`/`nextYear` labels, en-dash (–) instead of hyphen, proper year calculation for Jan–May → next year, Jun–Dec → current year
-- **DistanceFilter**: same slider fix pattern as BudgetFilter, `MIN_GAP` 200m, consistent `trackWrapper` CSS architecture
-- **HotelRatingsFilter**: "5 stars" convention per `.clinerules` §10.2, filled SVG stars, `aria-checked` on radio buttons, `data-testid` per star
-- **FlightTypeFilter**: minor copy polish ("Flights with Stopover"), `data-testid` on options
-- **UmrahSearchForm**: replaced abstract time-range slider with real `type="date"` inputs for departure/return, styled with inverted calendar picker icon, `min` attribute prevents past dates, return auto-adjusts if before departure, quick-select buttons still set real dates, hotel stars label: "5★" → "5 stars", budget: `toLocaleString('en-GB')`, disclaimer: "UK" → "United Kingdom"
 - **All filter CSS modules**: unified `trackWrapper`/`track`/`activeTrack`/`rangeInput` pattern, `pointer-events: none` on inputs + `pointer-events: auto` on thumbs, `focus-visible` for a11y, mobile-first responsive queries
 - **Build**: 0 errors, 0 warnings | **Tests**: 95/95 pass | **tsc**: 0 errors
 - **Environment**: Created `.env.local` with placeholder Supabase URLs (dev-localhost pattern) to eliminate `Missing Supabase environment variables` error in dev server. `FEATURE_USE_REAL_DB=false` ensures MockDB remains active.
