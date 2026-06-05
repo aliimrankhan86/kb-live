@@ -80,11 +80,19 @@ describe('SignUpForm', () => {
     fireEvent.change(screen.getByTestId('signup-name'), { target: { value: 'Test User' } });
     fireEvent.change(screen.getByTestId('signup-email'), { target: { value: 'test@example.com' } });
     fireEvent.change(screen.getByTestId('signup-password'), { target: { value: 'password123' } });
+    fireEvent.click(screen.getByTestId('signup-terms-checkbox'));
     fireEvent.click(screen.getByTestId('signup-submit'));
 
     await waitFor(() => {
       expect(screen.getByTestId('signup-error')).toHaveTextContent('Email already registered');
     });
+  });
+
+  it('requires terms agreement before enabling submit', () => {
+    render(<SignUpForm />);
+    expect(screen.getByTestId('signup-terms-checkbox')).toBeInTheDocument();
+    expect(screen.getByTestId('signup-marketing-checkbox')).toBeInTheDocument();
+    expect(screen.getByTestId('signup-submit')).toBeDisabled();
   });
 });
 

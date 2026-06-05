@@ -13,7 +13,6 @@ interface CityCorridorProps {
 
 export function CityCorridor({
   city,
-  region,
   h1,
   intro,
   queryParams,

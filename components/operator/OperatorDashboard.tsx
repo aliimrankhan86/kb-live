@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { MockDB } from '@/lib/api/mock-db';
 import { Repository } from '@/lib/api/repository';
 import { QuoteRequest, Offer } from '@/lib/types';
-import { ComplaintsInbox } from './ComplaintsInbox';
 
 type DashboardStats = {
   publishedPackages: number;

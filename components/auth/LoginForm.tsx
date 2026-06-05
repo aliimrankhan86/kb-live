@@ -96,7 +96,7 @@ export function LoginForm() {
       </Button>
 
       <p className="text-center text-sm text-[var(--textMuted)]">
-        Don't have a partner account?{' '}
+        Don{'\''}t have a partner account?{' '}
         <Link href="/signup" className="text-[var(--yellow)] hover:underline">
           Register your company
         </Link>

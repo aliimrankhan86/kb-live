@@ -146,11 +146,19 @@ export function PaymentInstructions({ bookingIntent }: PaymentInstructionsProps)
         className="rounded-md border border-[var(--borderSubtle)] bg-[rgba(255,211,29,0.06)] p-3 text-sm"
         data-testid="payment-disclaimer"
       >
-        <p className="font-medium text-[var(--text)]">Important</p>
+        <p className="font-medium text-[var(--text)]">Important — Use your reference</p>
         <p className="mt-1 leading-relaxed text-[var(--textMuted)]">{PAY_OPERATOR_DIRECT_DISCLOSURE}</p>
-        <p className="mt-2 text-xs text-[var(--textMuted)]">
-          Use reference <strong className="text-[var(--text)]">{bookingIntent.referenceCode}</strong> when making your transfer so the operator can match your payment.
-        </p>
+        <div className="mt-2 rounded-md border border-[var(--yellow)]/30 bg-[var(--surfaceDark)] p-2">
+          <p className="text-xs text-[var(--text)]">
+            <strong>Reference code:</strong>{' '}
+            <span className="font-mono text-[var(--yellow)]">{bookingIntent.referenceCode}</span>
+          </p>
+          <p className="mt-1 text-xs text-[var(--textMuted)]">
+            You must provide this reference when making payment. Without it, we cannot verify
+            that your booking originated through KaabaTrip and will be unable to assist with
+            any disputes or complaints.
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -5,6 +5,14 @@ export interface User {
   email: string;
   role: UserRole;
   name?: string;
+  marketingConsent?: boolean;
+  marketingConsentAt?: string;
+  marketingConsentSource?: string;
+  cookieConsent?: {
+    essential: boolean;
+    analytics: boolean;
+    timestamp: string;
+  };
 }
 
 export type VerificationStatus = 'pending' | 'verified' | 'rejected';

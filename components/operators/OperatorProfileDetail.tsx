@@ -28,6 +28,33 @@ export function OperatorProfileDetail({ operator, packages }: OperatorProfileDet
         <p data-testid="operator-status" className="mt-2 text-sm text-[var(--textMuted)]">
           Status: {formatStatus(operator.verificationStatus)}
         </p>
+
+        {/* ATOL/ABTA Protection Badges */}
+        <div className="mt-3 flex flex-wrap gap-2" data-testid="operator-protection-badges">
+          {operator.atolNumber && (
+            <div className="inline-flex items-center gap-2 rounded-md border border-green-500/30 bg-green-500/10 px-3 py-1.5 text-sm">
+              <span aria-hidden="true" className="text-green-400 font-bold">✓</span>
+              <span className="text-green-300">ATOL {operator.atolNumber}</span>
+            </div>
+          )}
+          {operator.abtaMemberNumber && (
+            <div className="inline-flex items-center gap-2 rounded-md border border-green-500/30 bg-green-500/10 px-3 py-1.5 text-sm">
+              <span aria-hidden="true" className="text-green-400 font-bold">✓</span>
+              <span className="text-green-300">ABTA {operator.abtaMemberNumber}</span>
+            </div>
+          )}
+          {!operator.atolNumber && !operator.abtaMemberNumber && (
+            <div
+              className="inline-flex items-center gap-2 rounded-md border border-[var(--danger)]/30 bg-[var(--danger)]/10 px-3 py-1.5 text-sm"
+              role="alert"
+            >
+              <span aria-hidden="true" className="text-[var(--danger)] font-bold">⚠</span>
+              <span className="text-[var(--danger)]">
+                No ATOL/ABTA protection listed — verify directly before booking
+              </span>
+            </div>
+          )}
+        </div>
       </header>
 
       <section className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-5">

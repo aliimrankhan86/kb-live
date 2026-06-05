@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { Header } from '@/components/layout/Header'
 import { PackageDetail } from '@/components/packages/PackageDetail'
 import { Repository } from '@/lib/api/repository'
-import type { Package } from '@/lib/types'
+import type { Package, OperatorProfile } from '@/lib/types'
 
 export async function generateMetadata({
   params,
@@ -45,9 +45,13 @@ export default async function PackageDetailPage({
   const { slug } = await params
   let pkg: Package | undefined
   let error: string | undefined
+  let operator: OperatorProfile | undefined
 
   try {
     pkg = Repository.getPackageBySlug(slug)
+    if (pkg) {
+      operator = Repository.getOperatorById(pkg.operatorId)
+    }
   } catch (err) {
     error = err instanceof Error ? err.message : 'Unable to load this package right now.'
   }
@@ -76,7 +80,7 @@ export default async function PackageDetailPage({
     <>
       <Header />
       <main className="min-h-screen bg-[var(--background)]">
-        <PackageDetail pkg={pkg} />
+        <PackageDetail pkg={pkg} operator={operator} />
       </main>
     </>
   )

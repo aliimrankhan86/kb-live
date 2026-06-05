@@ -49,6 +49,7 @@ interface FormErrors {
   officeAddressCountry?: string;
   servingRegions?: string;
   pilgrimageTypes?: string;
+  atolAbtaAcknowledged?: string;
 }
 
 export function OperatorRegistrationForm() {
@@ -73,6 +74,7 @@ export function OperatorRegistrationForm() {
     pilgrimageTypes: [] as ('umrah' | 'hajj')[],
     websiteUrl: '',
     yearsInBusiness: '',
+    atolAbtaAcknowledged: false,
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -107,6 +109,9 @@ export function OperatorRegistrationForm() {
     }
     if (form.pilgrimageTypes.length === 0) {
       next.pilgrimageTypes = 'Select at least one pilgrimage type';
+    }
+    if (!form.atolAbtaAcknowledged) {
+      next.atolAbtaAcknowledged = 'You must acknowledge the ATOL/ABTA protection status';
     }
     setErrors(next);
     return Object.keys(next).length === 0;
@@ -385,6 +390,66 @@ export function OperatorRegistrationForm() {
             </label>
           ))}
         </div>
+      </section>
+
+      <section className="space-y-4 rounded-md border border-[var(--borderSubtle)] bg-[rgba(255,211,29,0.04)] p-4">
+        <h2 className="text-lg font-semibold text-[var(--text)]">Financial Protection Disclosure</h2>
+        <p className="text-sm text-[var(--textMuted)]">
+          UK law requires travel organisers selling package holidays to provide financial protection for customers.
+          ATOL (Air Travel Organiser{'\''}s Licence) and ABTA membership are the primary forms of protection for UK travellers.
+        </p>
+
+        <div className="space-y-3 text-sm text-[var(--textMuted)]">
+          <div className="flex items-start gap-2">
+            <span aria-hidden="true" className="text-[var(--success)] font-bold">✓</span>
+            <span>
+              <strong className="text-[var(--text)]">ATOL protected</strong> — Customers receive a certificate and are protected if the company fails.
+              Required if selling flights plus accommodation/transport.
+            </span>
+          </div>
+          <div className="flex items-start gap-2">
+            <span aria-hidden="true" className="text-[var(--success)] font-bold">✓</span>
+            <span>
+              <strong className="text-[var(--text)]">ABTA member</strong> — Customers can book with confidence and access dispute resolution.
+              Covers non-flight packages and Linked Travel Arrangements.
+            </span>
+          </div>
+          <div className="flex items-start gap-2">
+            <span aria-hidden="true" className="text-[var(--danger)] font-bold">✗</span>
+            <span>
+              <strong className="text-[var(--text)]">No protection</strong> — If you do not hold ATOL or ABTA, you must clearly state this.
+              KaabaTrip will display a prominent warning on your listings so travellers can make an informed choice.
+            </span>
+          </div>
+        </div>
+
+        <div className="rounded-md border border-[var(--borderSubtle)] bg-[var(--surfaceDark)] p-3 text-xs text-[var(--textMuted)]">
+          <p className="font-medium text-[var(--text)]">Your responsibility</p>
+          <p className="mt-1">
+            You are solely responsible for ensuring your business holds appropriate financial protection for the services you offer.
+            KaabaTrip displays the information you provide for traveller transparency only.
+            We are not responsible for verifying the validity of your ATOL or ABTA credentials,
+            nor are we liable if your protection status changes or lapses.
+          </p>
+        </div>
+
+        <label className="flex cursor-pointer items-start gap-3">
+          <input
+            type="checkbox"
+            className="mt-0.5 h-4 w-4 accent-[var(--yellow)]"
+            checked={form.atolAbtaAcknowledged}
+            onChange={(e) => setForm((p) => ({ ...p, atolAbtaAcknowledged: e.target.checked }))}
+            data-testid="reg-atol-abta-ack"
+          />
+          <span className="text-sm text-[var(--textMuted)]">
+            I confirm that I understand ATOL/ABTA requirements and that KaabaTrip will display my protection status
+            (or lack thereof) prominently to travellers. I accept that KaabaTrip is not responsible for verifying
+            my credentials or for any claims arising from my financial protection status.
+          </span>
+        </label>
+        {errors.atolAbtaAcknowledged && (
+          <p className="text-xs text-[var(--danger)]" role="alert">{errors.atolAbtaAcknowledged}</p>
+        )}
       </section>
 
       <div className="pt-4">

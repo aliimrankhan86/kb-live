@@ -1,20 +1,34 @@
 'use client'
 
-import React from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { Package } from '@/lib/mock-packages';
-import { CURRENCY_CHANGE_EVENT, getRegionSettings } from '@/lib/i18n/region';
-import { formatPriceForRegion } from '@/lib/i18n/format';
-import styles from './packages.module.css';
+import React from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
+import { Package } from '@/lib/mock-packages'
+import type { OperatorProfile } from '@/lib/types'
+import { CURRENCY_CHANGE_EVENT, getRegionSettings } from '@/lib/i18n/region'
+import { formatPriceForRegion } from '@/lib/i18n/format'
+import { VerifiedBadge } from '@/components/ui/VerifiedBadge'
+import { InclusionChip } from '@/components/ui/InclusionChip'
+import styles from './packages.module.css'
+
+interface InclusionChip {
+  label: string
+  included: boolean
+}
 
 interface PackageCardProps {
-  package: Package & { slug?: string };
-  isShortlisted?: boolean;
-  isCompareSelected?: boolean;
-  onAddToShortlist: (packageId: string) => void;
-  onToggleCompare: (id: string) => void;
+  package: Package & { slug?: string }
+  isShortlisted?: boolean
+  isCompareSelected?: boolean
+  onAddToShortlist: (packageId: string) => void
+  onToggleCompare: (id: string) => void
+  operator?: OperatorProfile
+  inclusions?: InclusionChip[]
+  nightsMakkah?: number
+  nightsMadinah?: number
+  priceType?: 'from' | 'exact' | 'fixed'
 }
+
 
 const PackageCard: React.FC<PackageCardProps> = ({
   package: pkg,
@@ -22,22 +36,27 @@ const PackageCard: React.FC<PackageCardProps> = ({
   isCompareSelected = false,
   onAddToShortlist,
   onToggleCompare,
+  operator,
+  inclusions,
+  nightsMakkah,
+  nightsMadinah,
+  priceType = 'from',
 }) => {
-  const [regionSettings, setRegionSettings] = React.useState(() => getRegionSettings());
+  const [regionSettings, setRegionSettings] = React.useState(() => getRegionSettings())
 
   React.useEffect(() => {
-    const updateSettings = () => setRegionSettings(getRegionSettings());
-    window.addEventListener(CURRENCY_CHANGE_EVENT, updateSettings);
-    return () => window.removeEventListener(CURRENCY_CHANGE_EVENT, updateSettings);
-  }, []);
+    const updateSettings = () => setRegionSettings(getRegionSettings())
+    window.addEventListener(CURRENCY_CHANGE_EVENT, updateSettings)
+    return () => window.removeEventListener(CURRENCY_CHANGE_EVENT, updateSettings)
+  }, [])
 
   const priceInfo = React.useMemo(
     () => formatPriceForRegion(pkg.price, pkg.currency, regionSettings),
     [pkg.currency, pkg.price, regionSettings]
-  );
+  )
 
   const renderStars = (rating: number) => {
-    const stars = [];
+    const stars = []
     for (let i = 1; i <= 5; i++) {
       stars.push(
         <svg
@@ -48,140 +67,203 @@ const PackageCard: React.FC<PackageCardProps> = ({
         >
           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
         </svg>
-      );
+      )
     }
-    return stars;
-  };
+    return stars
+  }
+
+  const totalNights = (nightsMakkah ?? 0) + (nightsMadinah ?? 0)
+  const nightsLabel = nightsMakkah && nightsMadinah
+    ? `${nightsMakkah} Makkah / ${nightsMadinah} Madinah`
+    : totalNights > 0
+      ? `${totalNights} nights total`
+      : null
 
   return (
-    <article className={styles.packageCard}>
-      {/* Flight Column */}
-      <div className={styles.flightColumn}>
-        <div className={styles.flightSegment}>
-          <div className={styles.flightHeader}>
-            <svg 
-              className={styles.planeIcon} 
-              viewBox="0 0 24 24" 
-              aria-hidden="true"
+    <article className={styles.packageCard} data-testid={`package-card-${pkg.id}`}>
+      {/* Operator header */}
+      {operator && (
+        <div className={styles.cardHeader}>
+          <span className={styles.operatorName} title={operator.companyName}>
+            {operator.companyName}
+          </span>
+          {operator.verificationStatus === 'verified' && <VerifiedBadge />}
+          {operator.atolNumber && (
+            <span className={styles.atolBadge}>ATOL {operator.atolNumber}</span>
+          )}
+        </div>
+      )}
+
+      <div className={styles.cardBody}>
+        {/* Flight Column */}
+        <div className={styles.flightColumn}>
+          <div className={styles.flightSegment}>
+            <div className={styles.flightHeader}>
+              <svg
+                className={styles.planeIcon}
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
+              </svg>
+              <span>Departure</span>
+            </div>
+            <div className={styles.flightDate}>{pkg.departure.date}</div>
+            <div className={styles.flightDuration}>{pkg.departure.duration}</div>
+            <div className={styles.flightRoute}>{pkg.departure.route}</div>
+          </div>
+
+          <div className={styles.flightSegment}>
+            <div className={styles.flightHeader}>
+              <svg
+                className={styles.planeIcon}
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
+              </svg>
+              <span>Return</span>
+            </div>
+            <div className={styles.flightDate}>{pkg.return.date}</div>
+            <div className={styles.flightDuration}>{pkg.return.duration}</div>
+            <div className={styles.flightRoute}>{pkg.return.route}</div>
+          </div>
+        </div>
+
+        {/* Hotels Column */}
+        <div className={styles.hotelsColumn}>
+          <div className={styles.hotelBlock}>
+            <Image
+              src={pkg.makkahHotel.image}
+              alt={`${pkg.makkahHotel.name} in ${pkg.makkahHotel.location}`}
+              width={120}
+              height={80}
+              className={styles.hotelImage}
+              style={{ width: 'auto', height: 'auto' }}
+            />
+            <div className={styles.hotelLocation}>{pkg.makkahHotel.location}</div>
+            <div className={styles.hotelName}>{pkg.makkahHotel.name}</div>
+            <div className={styles.hotelRating}>
+              {renderStars(pkg.makkahHotel.rating)}
+              <span className={styles.ratingText} aria-label={`${pkg.makkahHotel.rating} out of 5 stars`}>
+                {pkg.makkahHotel.rating}/5
+              </span>
+            </div>
+            <div className={styles.hotelDistance}>{pkg.makkahHotel.distance}</div>
+          </div>
+
+          <div className={styles.hotelBlock}>
+            <Image
+              src={pkg.madinaHotel.image}
+              alt={`${pkg.madinaHotel.name} in ${pkg.madinaHotel.location}`}
+              width={120}
+              height={80}
+              className={styles.hotelImage}
+              style={{ width: 'auto', height: 'auto' }}
+            />
+            <div className={styles.hotelLocation}>{pkg.madinaHotel.location}</div>
+            <div className={styles.hotelName}>{pkg.madinaHotel.name}</div>
+            <div className={styles.hotelRating}>
+              {renderStars(pkg.madinaHotel.rating)}
+              <span className={styles.ratingText} aria-label={`${pkg.madinaHotel.rating} out of 5 stars`}>
+                {pkg.madinaHotel.rating}/5
+              </span>
+            </div>
+            <div className={styles.hotelDistance}>{pkg.madinaHotel.distance}</div>
+          </div>
+        </div>
+
+        {/* Price & Details Column */}
+        <div className={styles.priceColumn}>
+          <div className={styles.price}>
+            <div className={styles.priceAmount}>
+              {priceInfo.formatted}
+            </div>
+            <div className={styles.priceMeta}>
+              {priceType === 'from' && <span className={styles.priceFrom}>from</span>}
+              <span className={styles.priceNote}>{pkg.priceNote}</span>
+            </div>
+          </div>
+
+          {nightsLabel && (
+            <div className={styles.nightsBadge}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+              {nightsLabel}
+            </div>
+          )}
+
+          {/* Inclusion chips */}
+          {inclusions && inclusions.length > 0 && (
+            <div className={styles.inclusionsRow} aria-label="Package inclusions">
+              {inclusions.map((chip) => (
+                <InclusionChip key={chip.label} chip={chip} />
+              ))}
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className={styles.packageActions}>
+            <button
+              type="button"
+              className={`${styles.actionButton} ${isShortlisted ? styles.actionButtonActive : ''}`}
+              data-testid={`shortlist-toggle-${pkg.id}`}
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                onAddToShortlist(pkg.id)
+              }}
+              aria-pressed={isShortlisted}
+              aria-label={isShortlisted ? 'Remove from shortlist' : 'Add to shortlist'}
+              title={isShortlisted ? 'Shortlisted' : 'Shortlist'}
             >
-              <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
-            </svg>
-            <span>Departure</span>
-          </div>
-          <div className={styles.flightDate}>{pkg.departure.date}</div>
-          <div className={styles.flightDuration}>{pkg.departure.duration}</div>
-          <div className={styles.flightRoute}>{pkg.departure.route}</div>
-        </div>
-        
-        <div className={styles.flightSegment}>
-          <div className={styles.flightHeader}>
-            <svg 
-              className={styles.planeIcon} 
-              viewBox="0 0 24 24" 
-              aria-hidden="true"
+              <svg width="16" height="16" viewBox="0 0 24 24" fill={isShortlisted ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
+              <span className={styles.actionButtonText}>
+                {isShortlisted ? 'Saved' : 'Save'}
+              </span>
+            </button>
+            <button
+              type="button"
+              className={`${styles.actionButton} ${isCompareSelected ? styles.actionButtonActive : ''}`}
+              data-testid={`package-compare-toggle-${pkg.id}`}
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                onToggleCompare(pkg.id)
+              }}
+              aria-pressed={isCompareSelected}
+              aria-label={isCompareSelected ? 'Remove from comparison' : 'Add to comparison'}
+              title={isCompareSelected ? 'Comparing' : 'Compare'}
             >
-              <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
-            </svg>
-            <span>Return</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <rect x="3" y="3" width="7" height="7" />
+                <rect x="14" y="3" width="7" height="7" />
+                <rect x="14" y="14" width="7" height="7" />
+                <rect x="3" y="14" width="7" height="7" />
+              </svg>
+              <span className={styles.actionButtonText}>
+                {isCompareSelected ? 'Added' : 'Compare'}
+              </span>
+            </button>
+            <Link
+              href={`/packages/${pkg.slug ?? pkg.id}`}
+              className={styles.primaryAction}
+              aria-label={`View full details for ${pkg.makkahHotel.name} and ${pkg.madinaHotel.name} package`}
+            >
+              View
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </Link>
           </div>
-          <div className={styles.flightDate}>{pkg.return.date}</div>
-          <div className={styles.flightDuration}>{pkg.return.duration}</div>
-          <div className={styles.flightRoute}>{pkg.return.route}</div>
-        </div>
-      </div>
-
-      {/* Hotels Column */}
-      <div className={styles.hotelsColumn}>
-        <div className={styles.hotelBlock}>
-          <Image
-            src={pkg.makkahHotel.image}
-            alt={`${pkg.makkahHotel.name} in ${pkg.makkahHotel.location}`}
-            width={120}
-            height={80}
-            className={styles.hotelImage}
-            style={{ width: 'auto', height: 'auto' }}
-          />
-          <div className={styles.hotelLocation}>{pkg.makkahHotel.location}</div>
-          <div className={styles.hotelName}>{pkg.makkahHotel.name}</div>
-          <div className={styles.hotelRating}>
-            {renderStars(pkg.makkahHotel.rating)}
-            <span className={styles.ratingText} aria-label={`${pkg.makkahHotel.rating} out of 5 stars`}>
-              {pkg.makkahHotel.rating}/5
-            </span>
-          </div>
-          <div className={styles.hotelDistance}>{pkg.makkahHotel.distance}</div>
-        </div>
-
-        <div className={styles.hotelBlock}>
-          <Image
-            src={pkg.madinaHotel.image}
-            alt={`${pkg.madinaHotel.name} in ${pkg.madinaHotel.location}`}
-            width={120}
-            height={80}
-            className={styles.hotelImage}
-            style={{ width: 'auto', height: 'auto' }}
-          />
-          <div className={styles.hotelLocation}>{pkg.madinaHotel.location}</div>
-          <div className={styles.hotelName}>{pkg.madinaHotel.name}</div>
-          <div className={styles.hotelRating}>
-            {renderStars(pkg.madinaHotel.rating)}
-            <span className={styles.ratingText} aria-label={`${pkg.madinaHotel.rating} out of 5 stars`}>
-              {pkg.madinaHotel.rating}/5
-            </span>
-          </div>
-          <div className={styles.hotelDistance}>{pkg.madinaHotel.distance}</div>
-        </div>
-      </div>
-
-      {/* Price Column */}
-      <div className={styles.priceColumn}>
-        <div className={styles.price}>
-          <div className={styles.priceAmount}>
-            {priceInfo.formatted}
-          </div>
-          <div className={styles.priceNote}>{pkg.priceNote}</div>
-        </div>
-
-        <div className={styles.packageActions}>
-          <button
-            type="button"
-            className={styles.secondaryAction}
-            data-testid={`shortlist-toggle-${pkg.id}`}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onAddToShortlist(pkg.id);
-            }}
-            aria-pressed={isShortlisted}
-            aria-label={isShortlisted ? `Remove from shortlist` : `Add ${pkg.makkahHotel.name} and ${pkg.madinaHotel.name} to shortlist`}
-          >
-            {isShortlisted ? 'Shortlisted' : 'Add to Shortlist'}
-          </button>
-          <button
-            type="button"
-            className={styles.secondaryAction}
-            data-testid={`package-compare-toggle-${pkg.id}`}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onToggleCompare(pkg.id);
-            }}
-            aria-pressed={isCompareSelected}
-            aria-label={isCompareSelected ? `Remove from comparison` : `Add ${pkg.makkahHotel.name} and ${pkg.madinaHotel.name} to compare`}
-          >
-            {isCompareSelected ? 'Added for comparison' : 'Add to Compare'}
-          </button>
-          <Link
-            href={`/packages/${pkg.slug ?? pkg.id}`}
-            className={styles.primaryAction}
-            aria-label={`View full details for ${pkg.makkahHotel.name} and ${pkg.madinaHotel.name} package`}
-          >
-            See full package detail
-          </Link>
         </div>
       </div>
     </article>
-  );
-};
+  )
+}
 
-export default PackageCard;
+export default PackageCard

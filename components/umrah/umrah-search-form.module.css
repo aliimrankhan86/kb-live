@@ -18,37 +18,124 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
-.searchForm__title {
-  font-size: 1.5rem;
-  font-weight: 400;
-  color: var(--text);
+.searchForm__header {
   text-align: center;
   margin-bottom: 2rem;
-  line-height: 1.4;
+}
+
+.searchForm__title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+
+.searchForm__subtitle {
+  font-size: 0.9375rem;
+  color: var(--textMuted);
+  line-height: 1.5;
 }
 
 .searchForm__section {
-  margin-bottom: 2rem;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.searchForm__section:last-of-type {
+  border-bottom: none;
+}
+
+.searchForm__sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin-bottom: 0.875rem;
+}
+
+.searchForm__stepNumber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--yellow);
+  color: var(--bg);
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
 .searchForm__label {
   display: block;
-  font-size: 1rem;
-  font-weight: 400;
+  font-size: 0.9375rem;
+  font-weight: 500;
   color: var(--text);
-  margin-bottom: 0.75rem;
+  margin-bottom: 0;
 }
 
-.searchForm__input {
-  width: 5rem;
-  padding: 0.5rem;
-  font-size: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+/* Date picker inputs */
+.searchForm__dateInputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.searchForm__dateField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.searchForm__dateLabel {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--textMuted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.searchForm__dateInput {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.9375rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 0.5rem;
   background: rgba(17, 17, 17, 0.6);
   color: var(--text);
+  font-family: var(--font-exo2);
+  min-height: 44px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
+.searchForm__dateInput::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.searchForm__dateInput::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+.searchForm__dateInput:focus {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+  border-color: var(--yellow);
+}
+
+.searchForm__dateDisplay {
+  font-size: 0.875rem;
+  color: var(--textMuted);
+  font-family: var(--font-exo2);
+}
+
+/* Keep selectedPeriod for backward compat / quick select fallback */
 .searchForm__selectedPeriod {
   font-size: 1rem;
   font-weight: 500;
@@ -147,26 +234,259 @@
   background: rgba(255, 211, 29, 0.1);
 }
 
+.searchForm__quickButtonActive {
+  border-color: var(--yellow);
+  background: rgba(255, 211, 29, 0.15);
+  color: var(--yellow);
+}
+
 .searchForm__quickButton:focus {
   outline: 2px solid var(--yellow);
   outline-offset: 2px;
 }
 
-.searchForm__checkboxLabel {
+/* Traveller rows (Adults + Children) */
+.searchForm__travellerRow {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 1rem;
-  color: var(--text);
-  cursor: pointer;
+  justify-content: space-between;
+  gap: 1rem;
   margin-bottom: 1rem;
 }
 
-.searchForm__checkbox {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--yellow);
+.searchForm__travellerRow:last-of-type {
+  margin-bottom: 0;
+}
+
+.searchForm__travellerLabel {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.searchForm__travellerHint {
+  font-size: 0.75rem;
+  color: var(--textMuted);
+  font-weight: 400;
+}
+
+/* Traveller summary */
+.searchForm__travellerSummary {
+  margin-top: 1rem;
+  padding: 0.625rem 0.875rem;
+  background: rgba(255, 211, 29, 0.06);
+  border: 1px solid rgba(255, 211, 29, 0.15);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--yellow);
+}
+
+/* Child age inputs */
+.searchForm__childAges {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.75rem;
+}
+
+.searchForm__childAgesHint {
+  font-size: 0.8125rem;
+  color: var(--textMuted);
+  margin-bottom: 0.875rem;
+  line-height: 1.5;
+}
+
+.searchForm__childAgeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.625rem;
+}
+
+.searchForm__childAgeRow:last-child {
+  margin-bottom: 0;
+}
+
+.searchForm__childAgeLabel {
+  font-size: 0.875rem;
+  color: var(--text);
+}
+
+.searchForm__childAgeSelect {
+  width: auto;
+  min-width: 120px;
+  min-height: 40px;
+  padding: 0.375rem 2rem 0.375rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 0.5rem;
+  background: rgba(17, 17, 17, 0.6);
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2.5 4.5L6 8L9.5 4.5' stroke='%23FFD31D' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.625rem center;
+}
+
+.searchForm__childAgeSelect:focus {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+  border-color: var(--yellow);
+}
+
+/* Ensure dropdown options are readable in dark mode */
+.searchForm__childAgeSelect option {
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.875rem;
+  padding: 0.5rem;
+}
+
+/* Stepper for travellers */
+.searchForm__stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  padding: 0.375rem;
+}
+
+.searchForm__stepperBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 0.5rem;
+  background: var(--surfaceDark);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text);
+  font-size: 1.125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 36px;
+}
+
+.searchForm__stepperBtn:hover:not(:disabled) {
+  border-color: var(--yellow);
+  color: var(--yellow);
+}
+
+.searchForm__stepperBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.searchForm__stepperValue {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text);
+  min-width: 100px;
+  text-align: center;
+}
+
+/* Hotel star chips */
+.searchForm__chipGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.searchForm__chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.searchForm__chip:hover {
+  border-color: var(--yellow);
+}
+
+.searchForm__chipActive {
+  background: rgba(255, 211, 29, 0.12);
+  border-color: var(--yellow);
+  color: var(--yellow);
+}
+
+/* Budget toggle */
+.searchForm__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+}
+
+.searchForm__toggleInput {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.searchForm__toggleTrack {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+}
+
+.searchForm__toggleInput:checked + .searchForm__toggleTrack {
+  background: var(--yellow);
+}
+
+.searchForm__toggleThumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--text);
+  transition: transform 0.2s ease;
+}
+
+.searchForm__toggleInput:checked + .searchForm__toggleTrack .searchForm__toggleThumb {
+  transform: translateX(20px);
+  background: var(--bg);
+}
+
+.searchForm__toggleLabel {
+  font-size: 0.875rem;
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* Budget section */
+.searchForm__budgetSection {
+  margin-top: 1rem;
+}
+
+.searchForm__budgetUnit {
+  font-size: 0.75rem;
+  color: var(--textMuted);
+  font-weight: 400;
 }
 
 .searchForm__selectedBudget {
@@ -231,19 +551,22 @@
 }
 
 .searchForm__searchButton {
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   width: 100%;
-  min-height: 44px;
+  min-height: 52px;
   background: var(--yellow);
   color: var(--bg);
   border: none;
-  border-radius: 0.5rem;
-  padding: 1rem 2rem;
-  font-size: 1.1rem;
-  font-weight: 500;
+  border-radius: 0.75rem;
+  padding: 0.875rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin: 2rem 0 1rem 0;
+  margin: 1.5rem 0 1rem 0;
   box-shadow: 0 4px 16px rgba(255, 211, 29, 0.3);
   text-decoration: none;
   text-align: center;
@@ -260,6 +583,29 @@
   outline-offset: 2px;
 }
 
+/* Trust row */
+.searchForm__trustRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.25rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 0;
+}
+
+.searchForm__trustItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  color: var(--textMuted);
+}
+
+.searchForm__trustItem svg {
+  color: var(--success);
+  flex-shrink: 0;
+}
+
 .searchForm__disclaimer {
   text-align: center;
   font-size: 0.875rem;
@@ -270,6 +616,10 @@
 
 /* Responsive styles */
 @media (max-width: 768px) {
+  .searchForm__dateInputs {
+    grid-template-columns: 1fr;
+  }
+  
   .searchForm__card {
     padding: 2rem 1.5rem;
   }

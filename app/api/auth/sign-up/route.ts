@@ -7,7 +7,7 @@ const VALID_ROLES: UserRole[] = ['customer', 'operator', 'admin'];
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { email, password, role, name } = body;
+    const { email, password, role, name, marketingConsent } = body;
 
     if (!email || !password || !role) {
       return NextResponse.json(
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const data = await apiSignUp({ email, password, role, name });
+    const data = await apiSignUp({ email, password, role, name, marketingConsent });
     return NextResponse.json({ user: data.user, session: data.session }, { status: 201 });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Sign up failed';

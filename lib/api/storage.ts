@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server';
-import { createClient as createBrowserClient } from '@/lib/supabase/client';
 
 const BUCKETS = {
   evidence: 'evidence-files',
@@ -22,8 +21,7 @@ export async function createSignedUploadUrl(
   bucket: BucketName,
   userId: string,
   contextId: string,
-  filename: string,
-  expirySeconds = 60
+  filename: string
 ) {
   const supabase = await createClient();
   const path = buildPath(userId, contextId, filename);

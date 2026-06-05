@@ -12,6 +12,8 @@ export function SignUpForm() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [role, setRole] = useState<'customer' | 'operator'>('operator');
+  const [marketingConsent, setMarketingConsent] = useState(false);
+  const [termsAgreed, setTermsAgreed] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -24,7 +26,7 @@ export function SignUpForm() {
       const res = await fetch('/api/auth/sign-up', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, role, name }),
+        body: JSON.stringify({ email, password, role, name, marketingConsent }),
       });
 
       const data = await res.json();
@@ -119,7 +121,50 @@ export function SignUpForm() {
         data-testid="signup-password"
       />
 
-      <Button type="submit" disabled={loading} className="w-full" data-testid="signup-submit">
+      <div className="space-y-3">
+        <label className="flex items-start gap-2 text-xs text-[var(--textMuted)] cursor-pointer">
+          <input
+            type="checkbox"
+            checked={termsAgreed}
+            onChange={(e) => setTermsAgreed(e.target.checked)}
+            required
+            className="mt-0.5 h-4 w-4 accent-[var(--accent)]"
+            data-testid="signup-terms-checkbox"
+          />
+          <span>
+            I agree to the{' '}
+            <Link href="/terms" target="_blank" className="underline text-[var(--accent)]">
+              Terms & Conditions
+            </Link>{' '}
+            and{' '}
+            <Link href="/privacy" target="_blank" className="underline text-[var(--accent)]">
+              Privacy Policy
+            </Link>
+            . I confirm I am at least 16 years old.
+          </span>
+        </label>
+
+        <label className="flex items-start gap-2 text-xs text-[var(--textMuted)] cursor-pointer">
+          <input
+            type="checkbox"
+            checked={marketingConsent}
+            onChange={(e) => setMarketingConsent(e.target.checked)}
+            className="mt-0.5 h-4 w-4 accent-[var(--accent)]"
+            data-testid="signup-marketing-checkbox"
+          />
+          <span>
+            I consent to receiving marketing emails about new packages, deals, and platform
+            updates. You can unsubscribe at any time. (Optional)
+          </span>
+        </label>
+      </div>
+
+      <Button
+        type="submit"
+        disabled={loading || !termsAgreed}
+        className="w-full"
+        data-testid="signup-submit"
+      >
         {loading ? 'Creating account…' : 'Create Account'}
       </Button>
 

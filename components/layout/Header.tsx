@@ -25,6 +25,11 @@ export function Header({ className = '' }: { className?: string }) {
 
   useEffect(() => {
     const supabase = createClient();
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
+
     supabase.auth.getUser().then(({ data: { user: u } }) => {
       if (u) {
         setUser({
@@ -78,18 +83,26 @@ export function Header({ className = '' }: { className?: string }) {
           <Image src="/text-logo.svg" alt="KaabaTrip" className={styles.header__textLogo} width={108} height={45} priority />
         </Link>
 
+
+
         <nav className={styles.header__navigation} aria-label="Main menu">
-          <Link href="/quote" className={styles.header__navLink}>
+          <Link href="/umrah" className={styles.header__navLink} data-testid="nav-umrah">
+            Umrah
+          </Link>
+          <Link href="/hajj" className={styles.header__navLink} data-testid="nav-hajj">
+            Hajj
+          </Link>
+          <Link href="/quote" className={styles.header__navLink} data-testid="nav-quote">
             Get a Quote
           </Link>
 
           {!loading && !user && (
             <>
-              <Link href="/operator/onboarding" className={styles.header__navLink}>
+              <Link href="/partner" className={styles.header__navLink} data-testid="nav-partners">
                 For Partners
               </Link>
-              <Link href="/login" className={styles.header__navLink}>
-                Partner Login
+              <Link href="/login" className={styles.header__navLink} data-testid="nav-login">
+                Login
               </Link>
             </>
           )}

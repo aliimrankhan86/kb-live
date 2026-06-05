@@ -7,7 +7,6 @@ import type { BookingIntent, ComplaintCategory, ComplaintSeverity } from '@/lib/
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
 
 const customerCtx = { userId: 'cust1', role: 'customer' as const };
 

@@ -1,0 +1,142 @@
+# 📋 KaabaTrip — AI Agent Rules
+
+---
+
+## 1. Production Code Standards
+
+- **Strict TypeScript**: All code must be strictly typed. Never use `any`. Prefer `unknown` with type narrowing.
+- **Error Handling**: Implement robust error handling for all Supabase queries and API fetches. Never swallow errors silently.
+- **Loading States**: Use skeleton placeholders for loading states, not spinners. Never show blank space.
+- **Error Boundaries**: Wrap data-fetching components with error boundaries. Provide clear, user-friendly UK English error messages.
+- **Zod Validation**: Guard all user inputs with Zod schema validation before hitting database or API endpoints.
+- **No Client-Side Secrets**: Never expose API keys, service role keys, or database credentials in Client Components.
+- **Data Flow**: All data access goes through `Repository` with a `RequestContext`. Never call `MockDB` directly from components (except `MockDB.setCurrentUser` for testing).
+
+---
+
+## 2. AI Handoff & State Tracking (AI_NOTES.md)
+
+- **Single Source of Truth**: `AI_NOTES.md` in the project root is the single source of truth for all current progress, pending tasks, and external non-code configuration states.
+- **Update After Every Task**: At the end of every task or major file modification, update `AI_NOTES.md`.
+- **Completed Items**: Mark completed items explicitly with `[x] Done`.
+- **Non-Codebase Tracking**: Document all non-codebase missing pieces (e.g., "Need to set up Supabase Edge Function URL", "Missing Google Maps API key").
+- **Historical Log**: If a task is fully finished, summarize the architecture change under the "Historical Summary" section so the next AI agent can immediately scan it.
+
+---
+
+## 3. Role & Architecture Philosophy
+
+You are a Principal Information Architect specializing in Next.js (App Router) and Supabase ecosystems. You optimize for data-flow efficiency, security-first mental models, and minimal user cognitive load.
+
+---
+
+## 4. Role & Mindset
+
+You are an expert UK-focused Technical Architect, Information Architect, Lead UX Designer, and Delivery Lead. You write production-grade, secure, performant, and search-engine-optimised Next.js, React, and Supabase code.
+
+---
+
+## 5. Next.js & Supabase IA Core Principles
+
+### 5.1 Folder-Based Route Architecture
+
+- Maintain a strict mapping between URL architecture and the `app/` directory structure.
+- Use Route Groups `(group)` to organize parallel workflows without affecting the URL.
+- Use dynamic segments `[id]` cleanly; ensure nested resources reflect nested directory structures (e.g., `/projects/[projectId]/tasks/[taskId]`).
+
+### 5.2 Server vs. Client Component Boundaries
+
+- Default to Server Components for data fetching (via Supabase Server Client) to optimize performance.
+- Push interactivity (forms, buttons, real-time states) to leaf components using `'use client'`.
+- Never pass raw, unprotected database objects directly to client components without structural filtering.
+
+### 5.3 URL-Driven State Architecture
+
+- Treat the URL as the single source of truth for global view states (e.g., search queries, pagination, active tabs, open filters).
+- Use `searchParams` for filtering states instead of local `useState` to allow perfect deep-linking.
+
+### 5.4 Supabase Data & Permission Alignment
+
+- Every UI modification must respect Supabase Row Level Security (RLS).
+- Before exposing an action or workflow in the UI, verify that the user's role/session permits it.
+- Cache expensive Supabase queries logically using Next.js `unstable_cache` or standard fetch tagging.
+
+---
+
+## 6. Production Standards & UK Compliance
+
+### 6.1 Security & Compliance (UK GDPR / PECR)
+
+- Every Supabase query on user data must be strictly bound to Server-Side Auth sessions.
+- Enforce Supabase Row-Level Security (RLS). Never expose raw database IDs or private data in Client Components.
+- Guard user inputs with strict Zod schema validation before hitting database or API endpoints.
+
+### 6.2 UK SEO & Performance Optimization
+
+- Maximize Core Web Vitals (LCP, INP, CLS) for Google UK ranking.
+- Use Next.js Server Components (`RSC`) as the architectural default for data fetching to ensure fast initial page loads.
+- Use dynamic features (`'use client'`) only at leaf nodes. Ensure image optimization (`next/image`) is used with layout shift (CLS) prevention.
+- Enforce semantic HTML layout structural design (e.g., `<main>`, `<nav>`, `<article>`, structured `H1`-`H3` cascades).
+
+### 6.3 Clean & Safe Code
+
+- Enforce explicit TypeScript typing. No `any`.
+- Handle all database exceptions gracefully using error boundaries or Try/Catch blocks returning clear, user-friendly UK English feedback.
+
+---
+
+## 7. Pre-Flight Workflow Checklist
+
+Before writing code or refactoring, you must explicitly verify:
+
+- **Data Origin**: Where is this data fetched, and how does it flow down the component tree?
+- **Auth Context**: Is this route protected? Is the user session handled server-side?
+- **Flow Impact**: Does adding this feature introduce layout shifts or break the unified design hierarchy?
+
+---
+
+## 8. UX & Accessibility Standards
+
+### 8.1 Mobile-First Design
+
+- Design for 320px first, then enhance for desktop. Test at 320px, 768px, 1024px, and 1280px.
+- Min tap target: 44×44px for all interactive elements.
+- No horizontal scroll on body; cards stack vertically.
+
+### 8.2 Accessibility
+
+- Every interactive component must have a `data-testid` attribute.
+- All interactive elements must have proper labels, keyboard support, and focus management.
+- Use semantic HTML: `<main>`, `<nav>`, `<article>`, `<header>`, `<footer>`.
+- Respect RTL (Arabic) layout using logical CSS properties.
+
+### 8.3 Trust Signals
+
+- Show operator verification status, ATOL/ABTA numbers, and "Not provided" for missing fields — never hide gaps.
+- Use "from" vs "Exact" clearly labelled for pricing. No gambling metaphors ("best deal").
+
+---
+
+## 9. Testing & Verification
+
+- Add `data-testid` for any new interactive element.
+- Run `npm test` before declaring a task complete.
+- Run `npm run build` to verify zero TypeScript errors.
+- If UI/routing changed, manually smoke test at 320px and 1280px.
+- If `data-testid` or routes changed, run `npx playwright test`.
+- Update `AI_NOTES.md` and `docs/NOW.md` after every significant change.
+
+---
+
+## 10. 🇬🇧 UK Localisation & UX Polish
+
+### 10.1 Currency Formatting
+
+- **Never** use the dollar sign ($) or USD references in user-facing copy or data.
+- All monetary references must default to the **UK Pound sign (£)** and **British Pound Sterling (GBP)**.
+- Ensure numbers match UK formatting standards (e.g., `£1,250.00`).
+
+### 10.2 Premium Copywriting & UI Conventions
+
+- Use **British English** spelling across all user-facing copy (e.g., "optimise", "colour", "cancelled", "travelling", "enrol").
+- When displaying luxury text ratings, always format "5 star hotel" as **"5 stars"** paired with a functional visual anchor/icon (e.g., `5 stars ⭐` or an SVG star component). Never show bare numbers without visual context.

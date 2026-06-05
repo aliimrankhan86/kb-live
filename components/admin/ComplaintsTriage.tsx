@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { MockDB } from '@/lib/api/mock-db';
 import { Repository } from '@/lib/api/repository';
-import type { Complaint, ComplaintSeverity, ComplaintStatus } from '@/lib/types';
+import type { Complaint, ComplaintStatus } from '@/lib/types';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Textarea } from '@/components/ui/Textarea';

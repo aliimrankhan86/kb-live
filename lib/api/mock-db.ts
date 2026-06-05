@@ -23,6 +23,7 @@ const STORAGE_KEYS = {
   BANK_CHANGE_REQUESTS: 'kb_bank_change_requests',
   AUDIT_LOG: 'kb_audit_log',
   COMPLAINTS: 'kb_complaints',
+  INTERESTS: 'kb_interests',
 };
 
 const PACKAGES_SEED_VERSION = 3;
@@ -567,6 +568,16 @@ export const MockDB = {
     }
     setStorage(STORAGE_KEYS.COMPLAINTS, complaints);
     return complaint;
+  },
+
+  getInterests: (): { email: string; type: string; createdAt: string }[] =>
+    getStorage<{ email: string; type: string; createdAt: string }[]>(STORAGE_KEYS.INTERESTS, []),
+
+  saveInterest: (email: string, type: string) => {
+    const interests = MockDB.getInterests();
+    interests.push({ email, type, createdAt: new Date().toISOString() });
+    setStorage(STORAGE_KEYS.INTERESTS, interests);
+    return { email, type, createdAt: new Date().toISOString() };
   },
 
   // For simulation

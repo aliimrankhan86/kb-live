@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MockDB } from '@/lib/api/mock-db';
 import { Repository } from '@/lib/api/repository';
 import type { Complaint, ComplaintStatus } from '@/lib/types';

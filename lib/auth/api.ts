@@ -6,6 +6,7 @@ export interface SignUpInput {
   password: string;
   role: UserRole;
   name?: string;
+  marketingConsent?: boolean;
 }
 
 export interface SignInInput {
@@ -22,10 +23,13 @@ export async function apiSignUp(input: SignUpInput) {
     email: input.email,
     password: input.password,
     options: {
-      data: {
-        role: input.role,
-        name: input.name || input.email.split('@')[0],
-      },
+        data: {
+          role: input.role,
+          name: input.name || input.email.split('@')[0],
+          marketingConsent: input.marketingConsent ?? false,
+          marketingConsentAt: input.marketingConsent ? new Date().toISOString() : null,
+          marketingConsentSource: 'signup_form',
+        },
     },
   });
   if (error) throw new Error(error.message);

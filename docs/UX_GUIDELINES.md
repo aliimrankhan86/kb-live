@@ -20,14 +20,14 @@ The package card is the core decision unit. Users scan 5-15 cards before shortli
 
 ### The 6 questions a card must answer at a glance
 
-| Question | What to show | Priority |
-|----------|-------------|----------|
-| How much? | Price + "from" indicator + currency | Highest — top-right, large font |
-| Who's selling? | Operator name + verified badge | High — visible without scrolling |
-| Where do I stay? | Hotel name, star rating, distance to Haram | High — the #1 concern for pilgrims |
-| What's included? | Visa, flights, transfers, meals as icon chips | Medium — scannable icons |
-| When? | Date range or "Flexible" | Medium |
-| How long? | Total nights (split: Makkah/Madinah) | Medium |
+| Question         | What to show                                  | Priority                           |
+| ---------------- | --------------------------------------------- | ---------------------------------- |
+| How much?        | Price + "from" indicator + currency           | Highest — top-right, large font    |
+| Who's selling?   | Operator name + verified badge                | High — visible without scrolling   |
+| Where do I stay? | Hotel name, star rating, distance to Haram    | High — the #1 concern for pilgrims |
+| What's included? | Visa, flights, transfers, meals as icon chips | Medium — scannable icons           |
+| When?            | Date range or "Flexible"                      | Medium                             |
+| How long?        | Total nights (split: Makkah/Madinah)          | Medium                             |
 
 ### Card layout (mobile-first)
 
@@ -65,17 +65,17 @@ The compare modal is the decision moment. Users have narrowed to 2-3 options and
 
 ### Comparison rows (ordered by decision impact)
 
-| Row | Why it matters | Display format |
-|-----|---------------|----------------|
-| **Price** | #1 decision factor | Converted to user's currency, formatted with locale |
-| **Operator** | Trust | Name + verified badge + ATOL if available |
-| **Hotel (Makkah)** | Proximity to worship | Name, stars, exact distance |
-| **Hotel (Madinah)** | Same | Name, stars, exact distance |
-| **Nights split** | Duration balance | "5 Makkah / 3 Madinah" |
-| **Flights** | Convenience | Departure airport, airline if available |
-| **Inclusions** | Hidden costs | Checkmarks for each item |
-| **Cancellation** | Risk comfort | Policy summary or "Not provided" |
-| **Notes** | Differentiators | Operator's own pitch, max 2 lines |
+| Row                 | Why it matters       | Display format                                      |
+| ------------------- | -------------------- | --------------------------------------------------- |
+| **Price**           | #1 decision factor   | Converted to user's currency, formatted with locale |
+| **Operator**        | Trust                | Name + verified badge + ATOL if available           |
+| **Hotel (Makkah)**  | Proximity to worship | Name, stars, exact distance                         |
+| **Hotel (Madinah)** | Same                 | Name, stars, exact distance                         |
+| **Nights split**    | Duration balance     | "5 Makkah / 3 Madinah"                              |
+| **Flights**         | Convenience          | Departure airport, airline if available             |
+| **Inclusions**      | Hidden costs         | Checkmarks for each item                            |
+| **Cancellation**    | Risk comfort         | Policy summary or "Not provided"                    |
+| **Notes**           | Differentiators      | Operator's own pitch, max 2 lines                   |
 
 ### Comparison UX rules
 
@@ -91,15 +91,15 @@ The compare modal is the decision moment. Users have narrowed to 2-3 options and
 
 All UI must use these shared components. Never create one-off equivalents.
 
-| Component | Location | Use for |
-|-----------|----------|---------|
-| `Overlay` (Dialog) | `components/ui/Overlay.tsx` | All modals: compare, filters, forms |
-| `Slider` | `components/ui/Slider.tsx` | Budget range, distance range |
-| `cn()` | `lib/utils.ts` | All class merging (Tailwind + conditional) |
-| Star rating | Extract from `PackageCard` into shared | Hotel ratings everywhere |
-| Inclusion chips | Create shared component | Cards, detail, comparison |
-| Verified badge | Create shared component | Cards, detail, operator profile |
-| Price display | Create shared component | Cards, detail, comparison |
+| Component          | Location                               | Use for                                    |
+| ------------------ | -------------------------------------- | ------------------------------------------ |
+| `Overlay` (Dialog) | `components/ui/Overlay.tsx`            | All modals: compare, filters, forms        |
+| `Slider`           | `components/ui/Slider.tsx`             | Budget range, distance range               |
+| `cn()`             | `lib/utils.ts`                         | All class merging (Tailwind + conditional) |
+| Star rating        | Extract from `PackageCard` into shared | Hotel ratings everywhere                   |
+| Inclusion chips    | Create shared component                | Cards, detail, comparison                  |
+| Verified badge     | Create shared component                | Cards, detail, operator profile            |
+| Price display      | Create shared component                | Cards, detail, comparison                  |
 
 ### Component rules
 
@@ -156,49 +156,87 @@ All UI must use these shared components. Never create one-off equivalents.
 
 Users are spending £1,000-£5,000+ on pilgrimage. Trust is non-negotiable.
 
-| Signal | Where to show | Implementation |
-|--------|--------------|----------------|
-| **Verified operator badge** | Card, detail, comparison | Green checkmark + "Verified" text |
-| **ATOL number** | Card (subtle), detail (prominent) | "ATOL protected: 12345" |
-| **ABTA membership** | Detail page | "ABTA member: Y1234" |
-| **Years in business** | Detail page, operator profile | "Serving pilgrims since 2010" |
-| **Package count** | Operator profile | "15 active packages" |
-| **Response time** | Future: operator profile | "Usually responds within 2 hours" |
-| **Price transparency** | Everywhere | "From" vs "Exact" clearly labelled |
-| **Inclusion clarity** | Cards + detail | Explicit included/not-included for every item |
+| Signal                      | Where to show                     | Implementation                                |
+| --------------------------- | --------------------------------- | --------------------------------------------- |
+| **Verified operator badge** | Card, detail, comparison          | Green checkmark + "Verified" text             |
+| **ATOL number**             | Card (subtle), detail (prominent) | "ATOL protected: 12345"                       |
+| **ABTA membership**         | Detail page                       | "ABTA member: Y1234"                          |
+| **Years in business**       | Detail page, operator profile     | "Serving pilgrims since 2010"                 |
+| **Package count**           | Operator profile                  | "15 active packages"                          |
+| **Response time**           | Future: operator profile          | "Usually responds within 2 hours"             |
+| **Price transparency**      | Everywhere                        | "From" vs "Exact" clearly labelled            |
+| **Inclusion clarity**       | Cards + detail                    | Explicit included/not-included for every item |
 
 ---
 
 ## 7. Mobile-specific rules
 
-| Rule | Specification |
-|------|--------------|
-| Min tap target | 44x44px for all interactive elements |
-| No horizontal scroll | `overflow-x: hidden` on body; cards stack vertically |
-| Viewport support | 320px minimum width |
-| Compare modal | Max-height 90vh, body scrollable, close always visible |
-| Font size | Min 14px for body text, 12px for captions |
-| Touch-friendly filters | Bottom sheet pattern, not sidebar |
-| Sticky elements | Search header (filter/sort/compare) sticks on scroll |
+| Rule                   | Specification                                          |
+| ---------------------- | ------------------------------------------------------ |
+| Min tap target         | 44x44px for all interactive elements                   |
+| No horizontal scroll   | `overflow-x: hidden` on body; cards stack vertically   |
+| Viewport support       | 320px minimum width                                    |
+| Compare modal          | Max-height 90vh, body scrollable, close always visible |
+| Font size              | Min 14px for body text, 12px for captions              |
+| Touch-friendly filters | Bottom sheet pattern, not sidebar                      |
+| Sticky elements        | Search header (filter/sort/compare) sticks on scroll   |
 
 ---
 
 ## 8. Colour semantics
 
-| Token | Value | Use |
-|-------|-------|-----|
-| `--bg` | `#0B0B0B` | Page background |
-| `--text` | `#FFFFFF` | Primary text |
-| `--textMuted` | `rgba(255,255,255,0.64)` | Secondary text, labels |
-| `--yellow` | `#FFD31D` | Primary actions, prices, accents |
-| `--surfaceDark` | `#111111` | Card backgrounds, panels |
-| `--success` | `#22C55E` | Verified badge, included items |
-| `--danger` | `#EF4444` | Delete, errors, not-included items |
-| `--border` | `rgba(255,255,255,0.1)` | Card borders, dividers |
+| Token           | Value                    | Use                                |
+| --------------- | ------------------------ | ---------------------------------- |
+| `--bg`          | `#0B0B0B`                | Page background                    |
+| `--text`        | `#FFFFFF`                | Primary text                       |
+| `--textMuted`   | `rgba(255,255,255,0.64)` | Secondary text, labels             |
+| `--yellow`      | `#FFD31D`                | Primary actions, prices, accents   |
+| `--surfaceDark` | `#111111`                | Card backgrounds, panels           |
+| `--success`     | `#22C55E`                | Verified badge, included items     |
+| `--danger`      | `#EF4444`                | Delete, errors, not-included items |
+| `--border`      | `rgba(255,255,255,0.1)`  | Card borders, dividers             |
 
 ---
 
-## 9. When AI edits components
+## 9. User journey architecture
+
+### Landing (`/`)
+
+- Hero has clear value proposition + trust bar (verified operators, ATOL protected, transparent pricing, price match)
+- Two CTA cards: Umrah (live) and Hajj (coming soon with badge)
+- Partner CTA below
+- Trust signals reduce friction for first-time visitors
+
+### Umrah search (`/umrah`)
+
+- 4-step progressive disclosure: dates → travellers → hotel stars → budget
+- Each step numbered with visual indicator
+- Quick picks for common date ranges
+- Trust row reinforces safety at decision point
+- CTA: "Find Packages" (not generic "Search")
+
+### Search results (`/search/packages`)
+
+- Results count + sort dropdown (price asc/desc, rating, distance)
+- Filter button opens bottom sheet on mobile
+- Package cards show: operator name, verified badge, ATOL, hotel details, inclusion chips, nights split
+- Shortlist + Compare actions as icon+text buttons (text hidden on mobile)
+- Empty state with reset action
+- Compare enables at 2+ selections
+
+### Hajj (`/hajj`)
+
+- "Coming Soon" page with interest capture form
+- Value props + back-link to Umrah
+- SEO-optimized for "Hajj packages 2027"
+
+### Package detail (`/packages/[slug]`)
+
+- Operator section prominent with verified badge
+- "Prices are indicative" disclaimer
+- Sticky CTA on mobile
+
+## 10. When AI edits components
 
 Before changing any UI component, the AI must:
 

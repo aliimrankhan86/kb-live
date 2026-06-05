@@ -102,6 +102,19 @@ All tables have `ENABLE ROW LEVEL SECURITY` with deny-by-default. Policies are d
 - **RLS**: Deny-by-default. Every table has `ENABLE ROW LEVEL SECURITY`. Anonymous users have zero access unless explicitly granted.
 - **Storage buckets**: `evidence-files` and `operator-exports` are private. No public URLs. Signed URLs are time-limited and RBAC-checked before generation.
 
+### Security Headers
+
+Production deployments enforce these headers via `next.config.ts`:
+
+| Header                      | Value                                                                                                                                                                                                                                 | Purpose                         |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| `X-Frame-Options`           | `DENY`                                                                                                                                                                                                                                | Prevent clickjacking            |
+| `X-Content-Type-Options`    | `nosniff`                                                                                                                                                                                                                             | Prevent MIME sniffing           |
+| `Referrer-Policy`           | `strict-origin-when-cross-origin`                                                                                                                                                                                                     | Limit referrer leakage          |
+| `Permissions-Policy`        | `geolocation=(), camera=(), microphone=(), payment=()`                                                                                                                                                                                | Disable unused browser features |
+| `Strict-Transport-Security` | `max-age=63072000; includeSubDomains; preload`                                                                                                                                                                                        | Enforce HTTPS                   |
+| `Content-Security-Policy`   | `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'` | Mitigate XSS/injection          |
+
 ### 4. Rate Limiting (Stub)
 
 - **Plan**: Implement rate limiting on API routes (Next.js middleware or external gateway like Vercel/Cloudflare) to prevent spam quote requests.

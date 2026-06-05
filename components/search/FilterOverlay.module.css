@@ -1,30 +1,26 @@
-/* Filter Overlay Styles */
+/* Filter Overlay Styles — Consistent with app design system */
 .backdrop {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
   z-index: 1000;
   display: flex;
-  align-items: flex-start;
+  align-items: flex-end;
   justify-content: center;
-  padding: 2rem;
-  animation: fadeIn 0.3s ease-out;
+  animation: fadeIn 0.25s ease-out;
 }
 
 .overlay {
-  background: var(--bg);
-  border: 1px solid var(--yellow);
-  border-radius: 1rem;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  max-width: 600px;
+  background: var(--surfaceDark);
+  border: 1px solid var(--borderSubtle);
+  border-radius: var(--radiusLg) var(--radiusLg) 0 0;
+  box-shadow: var(--shadowSoft);
+  max-width: 640px;
   width: 100%;
-  max-height: calc(100vh - 4rem);
+  max-height: calc(100vh - 2rem);
   overflow: hidden;
-  animation: slideIn 0.3s ease-out;
+  animation: slideUp 0.3s ease-out;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -34,71 +30,108 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.25rem 1.75rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--borderSubtle);
+  flex-shrink: 0;
+}
+
+.headerTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .title {
-  color: var(--text);
-  font-size: 1.5rem;
+  color: var(--yellow);
+  font-size: 1.125rem;
   font-weight: 600;
   margin: 0;
+  font-family: var(--font-exo2);
+  line-height: 1.3;
+}
+
+.activeCount {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(255, 211, 29, 0.12);
+  color: var(--yellow);
+  font-size: 0.75rem;
+  font-weight: 600;
   font-family: var(--font-exo2);
 }
 
 .closeButton {
-  background: none;
-  border: none;
-  color: var(--text);
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 0.5rem;
-  transition: all 0.2s ease;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 36px;
+  height: 36px;
+  min-height: 36px;
+  background: transparent;
+  border: 1px solid var(--borderSubtle);
+  color: var(--textMuted);
+  cursor: pointer;
+  border-radius: var(--radiusMd);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .closeButton:hover {
-  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--yellow);
   color: var(--yellow);
+  background: rgba(255, 211, 29, 0.06);
 }
 
-.closeButton:focus {
+.closeButton:focus-visible {
   outline: 2px solid var(--yellow);
   outline-offset: 2px;
 }
 
 .content {
-  padding: 1.5rem 1.75rem;
+  padding: 1.25rem 1.5rem;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
   flex: 1;
   min-height: 0;
 }
 
+.filterSection {
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--borderSubtle);
+}
+
+.filterSection:last-child {
+  padding-bottom: 0;
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
 .footer {
   display: flex;
-  gap: 1rem;
-  padding: 1.25rem 1.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--borderSubtle);
   background: rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
 }
 
 .resetButton {
   flex: 1;
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1.5px solid var(--borderStrong);
   color: var(--text);
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  font-size: 1rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radiusMd);
+  font-size: 0.9375rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: var(--font-exo2);
+  min-height: 44px;
 }
 
 .resetButton:hover {
@@ -106,7 +139,7 @@
   color: var(--yellow);
 }
 
-.resetButton:focus {
+.resetButton:focus-visible {
   outline: 2px solid var(--yellow);
   outline-offset: 2px;
 }
@@ -116,13 +149,14 @@
   background: var(--yellow);
   border: none;
   color: var(--bg);
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  font-size: 1rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radiusMd);
+  font-size: 0.9375rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: var(--font-exo2);
+  min-height: 44px;
 }
 
 .applyButton:hover {
@@ -131,40 +165,46 @@
   box-shadow: 0 4px 12px rgba(255, 211, 29, 0.3);
 }
 
-.applyButton:focus {
+.applyButton:focus-visible {
   outline: 2px solid var(--yellow);
   outline-offset: 2px;
 }
 
 /* Animations */
 @keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
   from {
     opacity: 0;
+    transform: translateY(40px);
   }
   to {
     opacity: 1;
+    transform: translateY(0);
   }
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px) scale(0.95);
+/* Desktop: centred modal */
+@media (min-width: 769px) {
+  .backdrop {
+    align-items: center;
+    padding: 2rem;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
+  
+  .overlay {
+    border-radius: var(--radiusLg);
+    max-height: calc(100vh - 4rem);
+    animation: slideIn 0.25s ease-out;
   }
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .backdrop {
-    padding: 1rem;
-  }
-  
   .overlay {
-    max-height: calc(100vh - 2rem);
+    max-height: calc(100vh - 1rem);
   }
   
   .header {
@@ -172,12 +212,11 @@
   }
   
   .title {
-    font-size: 1.25rem;
+    font-size: 1rem;
   }
   
   .content {
-    padding: 1.25rem;
-    gap: 1rem;
+    padding: 1rem 1.25rem;
   }
   
   .footer {
@@ -192,20 +231,16 @@
 }
 
 @media (max-width: 480px) {
-  .backdrop {
-    padding: 0.5rem;
-  }
-  
   .header {
     padding: 1rem;
   }
   
   .content {
     padding: 1rem;
-    gap: 1rem;
   }
   
   .footer {
     padding: 1rem;
+    gap: 0.5rem;
   }
 }

@@ -14,14 +14,31 @@
 body {
   background: var(--bg);
   background-image: url('/kaaba-bg2.svg');
-  background-size: 100%;
-  background-position: center center;
+  background-size: 55%;
+  background-position: center 35%;
   background-repeat: no-repeat;
   background-attachment: fixed;
   color: var(--text);
   font-family: var(--font-exo2), system-ui, sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
+  position: relative;
+}
+
+/* Dark overlay subdues the Kaaba background so content remains the focus */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 10, 0.72);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Ensure all direct children sit above the overlay */
+body > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* Consistent scrollbar styling */

@@ -128,6 +128,16 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  // UK GDPR / PECR Marketing Consent
+  marketingConsent       Boolean?  @map("marketing_consent")
+  marketingConsentAt     DateTime? @map("marketing_consent_at")
+  marketingConsentSource String?   @map("marketing_consent_source")
+
+  // UK GDPR / ePrivacy Cookie Consent
+  cookieConsentEssential Boolean   @default(true) @map("cookie_consent_essential")
+  cookieConsentAnalytics Boolean   @default(false) @map("cookie_consent_analytics")
+  cookieConsentAt        DateTime? @map("cookie_consent_at")
+
   // Relations
   operatorProfile       OperatorProfile?
   quoteRequests         QuoteRequest[]

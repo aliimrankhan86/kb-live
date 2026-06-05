@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { baseMetadata } from "@/lib/seo";
 import { exo2Font } from "@/lib/fonts";
+import { Footer } from "@/components/layout/Footer";
+import { CookieConsent } from "@/components/compliance/CookieConsent";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -26,8 +28,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${exo2Font.variable} ${inter.variable}`}>
-      <body className="antialiased">
-        {children}
+      <body className="antialiased min-h-screen flex flex-col">
+        <div className="flex-1">
+          {children}
+        </div>
+        <Footer />
+        <CookieConsent />
       </body>
     </html>
   );

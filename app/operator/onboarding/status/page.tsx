@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { Button } from '@/components/ui/Button';
 import { useSearchParams } from 'next/navigation';
 
 export default function VerificationStatusPage() {
@@ -21,7 +20,7 @@ export default function VerificationStatusPage() {
           </div>
           <h1 className="text-2xl font-semibold text-[var(--text)]">Application Under Review</h1>
           <p className="text-[var(--textMuted)]">
-            We're reviewing your application. This usually takes 1&ndash;2 business days.
+            We{'\''}re reviewing your application. This usually takes 1&ndash;2 business days.
             You can create draft packages while you wait.
           </p>
           <div className="flex justify-center gap-3">

@@ -113,7 +113,7 @@ export function OperatorProfileForm({ operator }: Props) {
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
-    } catch (e) {
+    } catch {
       alert('Failed to save. Please try again.');
     } finally {
       setSaving(false);

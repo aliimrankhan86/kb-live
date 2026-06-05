@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import styles from './FlightTypeFilter.module.css';
 
 interface FlightTypeFilterProps {
@@ -15,26 +15,27 @@ export const FlightTypeFilter: React.FC<FlightTypeFilterProps> = ({
   value,
   onChange
 }) => {
-  const handleDirectChange = (direct: boolean) => {
+  const handleDirectChange = useCallback((direct: boolean) => {
     onChange({ ...value, direct });
-  };
+  }, [value, onChange]);
 
-  const handleStopoverChange = (stopover: boolean) => {
+  const handleStopoverChange = useCallback((stopover: boolean) => {
     onChange({ ...value, stopover });
-  };
+  }, [value, onChange]);
 
   return (
     <div className={styles.container}>
-      <h3 className={styles.label}>Flight type:</h3>
+      <h3 className={styles.label}>Flight Type</h3>
       
       <div className={styles.options}>
-        <label className={styles.option}>
+        <label className={styles.option} data-testid="flight-direct-option">
           <input
             type="checkbox"
             checked={value.direct}
             onChange={(e) => handleDirectChange(e.target.checked)}
             className={styles.checkbox}
             aria-describedby="direct-description"
+            data-testid="flight-direct-checkbox"
           />
           <span className={styles.checkmark} aria-hidden="true">
             {value.direct && (
@@ -48,13 +49,14 @@ export const FlightTypeFilter: React.FC<FlightTypeFilterProps> = ({
           </span>
         </label>
 
-        <label className={styles.option}>
+        <label className={styles.option} data-testid="flight-stopover-option">
           <input
             type="checkbox"
             checked={value.stopover}
             onChange={(e) => handleStopoverChange(e.target.checked)}
             className={styles.checkbox}
             aria-describedby="stopover-description"
+            data-testid="flight-stopover-checkbox"
           />
           <span className={styles.checkmark} aria-hidden="true">
             {value.stopover && (
@@ -64,7 +66,7 @@ export const FlightTypeFilter: React.FC<FlightTypeFilterProps> = ({
             )}
           </span>
           <span className={styles.labelText} id="stopover-description">
-            Stopover Flights
+            Flights with Stopover
           </span>
         </label>
       </div>
