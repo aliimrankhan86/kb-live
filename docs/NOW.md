@@ -147,7 +147,18 @@
 
 ## What changed this session
 
-### Filter Overlay & Umrah Search UX Overhaul
+### Filter Overlay Consistency + GBP Currency + Bug Fixes
+
+- **GBP-only currency**: Removed USD/EUR from `PackageForm.tsx` and `OfferForm.tsx`. Currency dropdown = `GBP (£)` only.
+- **FilterOverlay CSS fix**: Added missing `@keyframes slideIn`. Removed duplicate `@keyframes slideUp`.
+- **Slider CSS cleanup**: Removed duplicate `.rangeInput::-moz-range-thumb` blocks in `BudgetFilter.module.css` and `DistanceFilter.module.css`.
+- **UK English**: Changed `DistanceFilter.tsx` "50 m" → "50 metres".
+- **Hotel rating plural**: Fixed aria-label to always say "stars" per `.clinerules`.
+- **TypeScript fixes**: Fixed `PackageList.tsx` SortOption import conflict; fixed `SortDropdown.tsx` ref callback type error.
+- **Build**: `npm run build` passes (0 errors) | **Tests**: `npm test` passes (95/95)
+- **AI_NOTES.md**: Updated with session summary
+
+### Filter Overlay & Umrah Search UX Overhaul (previous)
 
 **FilterOverlay** (`components/search/FilterOverlay.tsx` + `.module.css`):
 

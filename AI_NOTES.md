@@ -149,6 +149,20 @@ Filter overlay & Umrah search form UX overhaul — consistent app styling, GBP c
 - **Branch**: `current-branch` created from `main` after committing all prior work. `main` remains safe backup.
 - **Build**: 0 errors | **Tests**: 95/95 | **tsc**: 0 errors
 
+### 2026-06-05 — Session: Filter Overlay Consistency + GBP Currency + Bug Fixes
+
+- **GBP-only currency**: Removed USD and EUR options from `PackageForm.tsx` and `OfferForm.tsx`. Currency dropdown now shows only `GBP (£)`. Default remains GBP. Aligns with `.clinerules` Section 10 (UK localisation).
+- **FilterOverlay CSS fix**: Added missing `@keyframes slideIn` animation (referenced in desktop media query but never defined). Removed duplicate `@keyframes slideUp` declaration that was causing CSS parse errors.
+- **Slider CSS cleanup**: Removed duplicate `.rangeInput::-moz-range-thumb` blocks from `BudgetFilter.module.css` and `DistanceFilter.module.css` (exact same rules appeared twice).
+- **Distance unit**: Changed `DistanceFilter.tsx` format from "50 m" to "50 metres" for UK English compliance per `.clinerules`.
+- **Hotel rating plural**: Fixed `HotelRatingsFilter.tsx` aria-label to always say "stars" (plural) per `.clinerules` Section 10.2 ("5 stars" with visual anchor).
+- **TypeScript fixes**:
+  - `PackageList.tsx`: Removed conflicting `SortOption` import from `lib/sort-types` (local type already defined at line 25).
+  - `SortDropdown.tsx`: Fixed ref callback type error (`ref={el => optionRefs.current[index] = el}` → `ref={el => { optionRefs.current[index] = el; }}`).
+- **Filter overlay already consistent**: Uses `--surfaceDark`, `--yellow`, `--borderSubtle`, `--textMuted`, `--font-exo2` throughout. All filter sections use same card-style layout with bottom borders. Already matches app design system.
+- **Date picker already in Umrah journey**: `UmrahSearchForm.tsx` has native `<input type="date">` with clickable calendar icon wrapper, `showPicker()`, validation, and quick-select presets. No changes needed.
+- **Build**: 0 errors | **Tests**: 95/95 | **tsc**: 0 errors
+
 ### 2026-06-05 —
 
 - **All filter CSS modules**: unified `trackWrapper`/`track`/`activeTrack`/`rangeInput` pattern, `pointer-events: none` on inputs + `pointer-events: auto` on thumbs, `focus-visible` for a11y, mobile-first responsive queries

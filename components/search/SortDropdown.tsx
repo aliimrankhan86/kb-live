@@ -211,7 +211,7 @@ export const SortDropdown: React.FC<SortDropdownProps> = ({
           {SORT_OPTIONS.map((option, index) => (
             <button
               key={option.value}
-              ref={el => optionRefs.current[index] = el}
+              ref={el => { optionRefs.current[index] = el; }}
               type="button"
               className={`${styles.option} ${value === option.value ? styles.optionSelected : ''} ${focusedIndex === index ? styles.optionFocused : ''}`}
               onClick={() => handleOptionSelect(option.value)}

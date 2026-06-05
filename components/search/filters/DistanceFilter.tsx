@@ -40,7 +40,7 @@ export const DistanceFilter: React.FC<DistanceFilterProps> = ({
     if (distance >= 1000) {
       return `${(distance / 1000).toFixed(1)} km`;
     }
-    return `${distance} m`;
+    return `${distance} metres`;
   };
 
   const leftPercent = getPercentage(value.min);

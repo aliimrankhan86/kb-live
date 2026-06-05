@@ -12,9 +12,6 @@ import { Dialog, OverlayContent, OverlayHeader, OverlayTitle } from '@/component
 import PackageCard from './PackageCard';
 import { FilterOverlay, FilterState } from './FilterOverlay';
 import SortDropdown from './SortDropdown';
-import { SortOption, sortPackages } from '@/lib/sort-types';
-import { CompareState, isCompareEnabled, getCompareButtonText, getCompareAriaLabel, isCompareDisabled } from '@/lib/compare-types';
-import { getBasketCountText, getBasketCountAriaLabel } from '@/lib/basket-types';
 import styles from './packages.module.css';
 
 const SHORTLIST_STORAGE_KEY = 'kb_shortlist_packages';
