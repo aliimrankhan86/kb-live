@@ -14,6 +14,30 @@
 
 ---
 
+## CRITICAL EXECUTION GUARDRAILS & QUALITY MANDATE
+
+### 1. Mandatory Pre-Verification Protocol (No False Confirmations)
+
+- **Zero-Trust Confirmation:** NEVER state that a task, bug fix, file creation, or modification is complete until you have explicitly verified the output.
+- **Verification Step:** After performing an action, you must use a read/view tool to verify the file contents. If you cannot verify it, state exactly what you did and what remains unverified.
+- **Truthful Reporting:** Do not use placeholder phrases like "I have updated the file" if the file state has not changed. False confirmations will break the integration environment.
+
+### 2. Production-Ready & Optimization Standards
+
+Every line of code written for this web application must meet strict production-grade criteria. Do not write "TODOs" or leave implementation details for later unless explicitly instructed.
+
+- **Code Quality & Architecture:** Clean, modular, type-safe, and self-documenting code. Implement robust error handling and edge-case validation.
+- **Performance Optimization:** Ensure optimal bundle sizes, efficient state management, and minimal re-renders.
+- **SEO & AI Search Optimization:** Structure HTML semantically. Include proper meta tags, Open Graph data, JSON-LD schema, and clean URL structures to ensure the app is highly discoverable by both traditional search engines and modern AI search aggregators.
+- **Testing:** Ensure all critical paths, utility functions, and components are backed by robust, clean tests (unit/integration) before calling a feature complete.
+
+### 3. Cross-AI Quality Audit Warning
+
+- **External Auditing:** Be advised that all code, architecture decisions, and outputs generated in this workspace are continuously audited by Claude and Codex.
+- **Zero-Tolerance for Poor Standards:** The auditing AIs will flag sloppy code, unoptimized assets, or missing tests immediately. Deliver work to the absolute highest tier of engineering excellence to ensure zero compliance flags or complaints from the auditing agents.
+
+---
+
 ## 2. AI Handoff & State Tracking (AI_NOTES.md)
 
 - **Single Source of Truth**: `AI_NOTES.md` in the project root is the single source of truth for all current progress, pending tasks, and external non-code configuration states.
