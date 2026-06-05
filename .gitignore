@@ -46,6 +46,10 @@ next-env.d.ts
 playwright-report/
 test-results/
 
+# macOS Finder duplicate files (auto-created when copying)
+* 2
+* 2.*
+
 
 /lib/generated/prisma
 prisma/.env
