@@ -224,7 +224,7 @@ export function Header({ className = '' }: { className?: string }) {
                   onClick={() => setMenuOpen(!menuOpen)}
                   className={styles.header__navLink}
                   aria-expanded={menuOpen}
-                  aria-haspopup="true"
+                  aria-haspopup="menu"
                   data-testid="user-menu-trigger"
                 >
                   {user?.name || user?.email}
@@ -265,7 +265,7 @@ export function Header({ className = '' }: { className?: string }) {
                   onClick={() => setMenuOpen(!menuOpen)}
                   className={styles.header__navLink}
                   aria-expanded={menuOpen}
-                  aria-haspopup="true"
+                  aria-haspopup="menu"
                   data-testid="user-menu-trigger"
                 >
                   {user?.name || user?.email}
@@ -340,131 +340,136 @@ export function Header({ className = '' }: { className?: string }) {
           aria-hidden="true"
         />
       )}
-      <div
-        ref={mobileDrawerRef}
-        id="mobile-drawer"
-        className={`${styles.header__mobileDrawer} ${mobileDrawerOpen ? styles.header__mobileDrawerOpen : ''}`}
-        aria-label="Mobile navigation"
-        role="dialog"
-        aria-modal="true"
-      >
-        <div className={styles.header__mobileDrawerHeader}>
-          <Link href="/" className={styles.header__mobileBrand} onClick={() => setMobileDrawerOpen(false)}>
-            <Logo size={28} />
-            <Image
-              src="/text-logo.svg"
-              alt="KaabaTrip"
-              width={90}
-              height={38}
-              priority
-            />
-          </Link>
-          <button
-            className={styles.header__mobileClose}
-            onClick={() => setMobileDrawerOpen(false)}
-            aria-label="Close menu"
-            data-testid="mobile-menu-close"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-              <path d="M18 6L6 18M6 6l12 12" />
-            </svg>
-          </button>
+      {mobileDrawerOpen && (
+        <div
+          ref={mobileDrawerRef}
+          id="mobile-drawer"
+          className={`${styles.header__mobileDrawer} ${styles.header__mobileDrawerOpen}`}
+          aria-labelledby="mobile-drawer-title"
+          role="dialog"
+          aria-modal="true"
+        >
+          <h2 id="mobile-drawer-title" className="sr-only">
+            Mobile navigation
+          </h2>
+          <div className={styles.header__mobileDrawerHeader}>
+            <Link href="/" className={styles.header__mobileBrand} onClick={() => setMobileDrawerOpen(false)}>
+              <Logo size={28} />
+              <Image
+                src="/text-logo.svg"
+                alt="KaabaTrip"
+                width={90}
+                height={38}
+                priority
+              />
+            </Link>
+            <button
+              className={styles.header__mobileClose}
+              onClick={() => setMobileDrawerOpen(false)}
+              aria-label="Close menu"
+              data-testid="mobile-menu-close"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <nav className={styles.header__mobileNav} aria-label="Mobile menu">
+            {navLinks.map(link => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={styles.header__mobileNavLink}
+                onClick={() => setMobileDrawerOpen(false)}
+                data-testid={`mobile-${link.testId}`}
+              >
+                {link.label}
+              </Link>
+            ))}
+
+            {!loading && !user && guestLinks.map(link => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={styles.header__mobileNavLink}
+                onClick={() => setMobileDrawerOpen(false)}
+                data-testid={`mobile-${link.testId}`}
+              >
+                {link.label}
+              </Link>
+            ))}
+
+            {!loading && isCustomer && (
+              <>
+                {customerLinks.map(link => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={styles.header__mobileNavLink}
+                    onClick={() => setMobileDrawerOpen(false)}
+                    data-testid={`mobile-${link.testId}`}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+                <div className={styles.header__mobileDivider} />
+                <span className={styles.header__mobileUserLabel}>{user?.name || user?.email}</span>
+                <button
+                  onClick={handleLogout}
+                  className={styles.header__mobileNavLink}
+                  data-testid="mobile-logout-btn"
+                >
+                  Log out
+                </button>
+              </>
+            )}
+
+            {!loading && (isOperator || isAdmin) && (
+              <>
+                {operatorAdminLinks.map(link => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={styles.header__mobileNavLink}
+                    onClick={() => setMobileDrawerOpen(false)}
+                    data-testid={`mobile-${link.testId}`}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+                {!isAdmin && (
+                  <>
+                    <Link
+                      href="/operator/profile"
+                      className={styles.header__mobileNavLink}
+                      onClick={() => setMobileDrawerOpen(false)}
+                    >
+                      Profile
+                    </Link>
+                    <Link
+                      href="/operator/settings"
+                      className={styles.header__mobileNavLink}
+                      onClick={() => setMobileDrawerOpen(false)}
+                    >
+                      Settings
+                    </Link>
+                  </>
+                )}
+                <div className={styles.header__mobileDivider} />
+                <span className={styles.header__mobileUserLabel}>{user?.name || user?.email}</span>
+                <button
+                  onClick={handleLogout}
+                  className={styles.header__mobileNavLink}
+                  data-testid="mobile-logout-btn"
+                >
+                  Log out
+                </button>
+              </>
+            )}
+          </nav>
         </div>
-
-        <nav className={styles.header__mobileNav} aria-label="Mobile menu">
-          {navLinks.map(link => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={styles.header__mobileNavLink}
-              onClick={() => setMobileDrawerOpen(false)}
-              data-testid={`mobile-${link.testId}`}
-            >
-              {link.label}
-            </Link>
-          ))}
-
-          {!loading && !user && guestLinks.map(link => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={styles.header__mobileNavLink}
-              onClick={() => setMobileDrawerOpen(false)}
-              data-testid={`mobile-${link.testId}`}
-            >
-              {link.label}
-            </Link>
-          ))}
-
-          {!loading && isCustomer && (
-            <>
-              {customerLinks.map(link => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={styles.header__mobileNavLink}
-                  onClick={() => setMobileDrawerOpen(false)}
-                  data-testid={`mobile-${link.testId}`}
-                >
-                  {link.label}
-                </Link>
-              ))}
-              <div className={styles.header__mobileDivider} />
-              <span className={styles.header__mobileUserLabel}>{user?.name || user?.email}</span>
-              <button
-                onClick={handleLogout}
-                className={styles.header__mobileNavLink}
-                data-testid="mobile-logout-btn"
-              >
-                Log out
-              </button>
-            </>
-          )}
-
-          {!loading && (isOperator || isAdmin) && (
-            <>
-              {operatorAdminLinks.map(link => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={styles.header__mobileNavLink}
-                  onClick={() => setMobileDrawerOpen(false)}
-                  data-testid={`mobile-${link.testId}`}
-                >
-                  {link.label}
-                </Link>
-              ))}
-              {!isAdmin && (
-                <>
-                  <Link
-                    href="/operator/profile"
-                    className={styles.header__mobileNavLink}
-                    onClick={() => setMobileDrawerOpen(false)}
-                  >
-                    Profile
-                  </Link>
-                  <Link
-                    href="/operator/settings"
-                    className={styles.header__mobileNavLink}
-                    onClick={() => setMobileDrawerOpen(false)}
-                  >
-                    Settings
-                  </Link>
-                </>
-              )}
-              <div className={styles.header__mobileDivider} />
-              <span className={styles.header__mobileUserLabel}>{user?.name || user?.email}</span>
-              <button
-                onClick={handleLogout}
-                className={styles.header__mobileNavLink}
-                data-testid="mobile-logout-btn"
-              >
-                Log out
-              </button>
-            </>
-          )}
-        </nav>
-      </div>
+      )}
     </header>
   );
 }

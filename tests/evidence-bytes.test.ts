@@ -73,8 +73,8 @@ describe('Evidence bytes storage', () => {
   });
 
   describe('preparePaymentEvidence', () => {
-    it('stores metadata-only when no base64 data provided', () => {
-      const bi = Repository.createBookingIntent(customerCtx, {
+    it('stores metadata-only when no base64 data provided', async () => {
+      const bi = await Repository.createBookingIntent(customerCtx, {
         offerId: 'offer-test-1',
         operatorId: 'op1',
         paymentEvidence: {
@@ -98,8 +98,8 @@ describe('Evidence bytes storage', () => {
       expect(bi.paymentEvidence?.disputeFlag).toBe(false);
     });
 
-    it('stores bytes-stored when base64 data provided', () => {
-      const bi = Repository.createBookingIntent(customerCtx, {
+    it('stores bytes-stored when base64 data provided', async () => {
+      const bi = await Repository.createBookingIntent(customerCtx, {
         offerId: 'offer-test-1',
         operatorId: 'op1',
         paymentEvidence: {
@@ -125,8 +125,8 @@ describe('Evidence bytes storage', () => {
   });
 
   describe('getEvidenceBytes', () => {
-    it('returns evidence bytes for owner customer', () => {
-      const bi = Repository.createBookingIntent(customerCtx, {
+    it('returns evidence bytes for owner customer', async () => {
+      const bi = await Repository.createBookingIntent(customerCtx, {
         offerId: 'offer-test-1',
         operatorId: 'op1',
         paymentEvidence: {
@@ -135,13 +135,13 @@ describe('Evidence bytes storage', () => {
           storageStatus: 'metadata-only',
         },
       });
-      const evidence = Repository.getEvidenceBytes(customerCtx, bi.id);
+      const evidence = await Repository.getEvidenceBytes(customerCtx, bi.id);
       expect(evidence).toBeDefined();
       expect(evidence?.files[0].base64Data).toBe('data');
     });
 
-    it('returns evidence bytes for involved operator', () => {
-      const bi = Repository.createBookingIntent(customerCtx, {
+    it('returns evidence bytes for involved operator', async () => {
+      const bi = await Repository.createBookingIntent(customerCtx, {
         offerId: 'offer-test-1',
         operatorId: 'op1',
         paymentEvidence: {
@@ -151,12 +151,12 @@ describe('Evidence bytes storage', () => {
         },
       });
       MockDB.setCurrentUser('operator');
-      const evidence = Repository.getEvidenceBytes(operatorCtx, bi.id);
+      const evidence = await Repository.getEvidenceBytes(operatorCtx, bi.id);
       expect(evidence).toBeDefined();
     });
 
-    it('returns evidence bytes for admin', () => {
-      const bi = Repository.createBookingIntent(customerCtx, {
+    it('returns evidence bytes for admin', async () => {
+      const bi = await Repository.createBookingIntent(customerCtx, {
         offerId: 'offer-test-1',
         operatorId: 'op1',
         paymentEvidence: {
@@ -166,12 +166,12 @@ describe('Evidence bytes storage', () => {
         },
       });
       MockDB.setCurrentUser('operator');
-      const evidence = Repository.getEvidenceBytes(adminCtx, bi.id);
+      const evidence = await Repository.getEvidenceBytes(adminCtx, bi.id);
       expect(evidence).toBeDefined();
     });
 
-    it('blocks unrelated operator', () => {
-      const bi = Repository.createBookingIntent(customerCtx, {
+    it('blocks unrelated operator', async () => {
+      const bi = await Repository.createBookingIntent(customerCtx, {
         offerId: 'offer-test-1',
         operatorId: 'op1',
         paymentEvidence: {
@@ -181,11 +181,11 @@ describe('Evidence bytes storage', () => {
         },
       });
       MockDB.setCurrentUser('operator');
-      expect(() => Repository.getEvidenceBytes(otherOperatorCtx, bi.id)).toThrow('Unauthorized');
+      await expect(Repository.getEvidenceBytes(otherOperatorCtx, bi.id)).rejects.toThrow('Unauthorized');
     });
 
-    it('throws when bytes have been purged (metadata-only)', () => {
-      const bi = Repository.createBookingIntent(customerCtx, {
+    it('throws when bytes have been purged (metadata-only)', async () => {
+      const bi = await Repository.createBookingIntent(customerCtx, {
         offerId: 'offer-test-1',
         operatorId: 'op1',
         paymentEvidence: {
@@ -194,13 +194,13 @@ describe('Evidence bytes storage', () => {
           storageStatus: 'metadata-only',
         },
       });
-      expect(() => Repository.getEvidenceBytes(customerCtx, bi.id)).toThrow('Evidence bytes have been purged or were never stored');
+      await expect(Repository.getEvidenceBytes(customerCtx, bi.id)).rejects.toThrow('Evidence bytes have been purged or were never stored');
     });
   });
 
   describe('flagEvidenceForRetention', () => {
-    it('allows admin to flag evidence for retention', () => {
-      const bi = Repository.createBookingIntent(customerCtx, {
+    it('allows admin to flag evidence for retention', async () => {
+      const bi = await Repository.createBookingIntent(customerCtx, {
         offerId: 'offer-test-1',
         operatorId: 'op1',
         paymentEvidence: {
@@ -210,12 +210,12 @@ describe('Evidence bytes storage', () => {
         },
       });
       MockDB.setCurrentUser('operator');
-      const updated = Repository.flagEvidenceForRetention(adminCtx, bi.id);
+      const updated = await Repository.flagEvidenceForRetention(adminCtx, bi.id);
       expect(updated.paymentEvidence?.disputeFlag).toBe(true);
     });
 
-    it('blocks non-admin from flagging', () => {
-      const bi = Repository.createBookingIntent(customerCtx, {
+    it('blocks non-admin from flagging', async () => {
+      const bi = await Repository.createBookingIntent(customerCtx, {
         offerId: 'offer-test-1',
         operatorId: 'op1',
         paymentEvidence: {
@@ -225,17 +225,17 @@ describe('Evidence bytes storage', () => {
         },
       });
       MockDB.setCurrentUser('operator');
-      expect(() => Repository.flagEvidenceForRetention(operatorCtx, bi.id)).toThrow('Unauthorized');
+      await expect(Repository.flagEvidenceForRetention(operatorCtx, bi.id)).rejects.toThrow('Unauthorized');
     });
 
-    it('throws when no payment evidence exists', () => {
-      const bi = Repository.createBookingIntent(customerCtx, {
+    it('throws when no payment evidence exists', async () => {
+      const bi = await Repository.createBookingIntent(customerCtx, {
         offerId: 'offer-test-1',
         operatorId: 'op1',
         skipProofAcknowledged: true,
       });
       MockDB.setCurrentUser('operator');
-      expect(() => Repository.flagEvidenceForRetention(adminCtx, bi.id)).toThrow('No payment evidence to flag');
+      await expect(Repository.flagEvidenceForRetention(adminCtx, bi.id)).rejects.toThrow('No payment evidence to flag');
     });
   });
 });

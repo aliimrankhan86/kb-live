@@ -325,7 +325,7 @@ Do the same for `op2` (Makkah Tours) with different realistic data.
 
 ### Task 8: Package creation wizard
 
-**Status:** `[ ]`
+**Status:** `[x] 2026-06-06`
 **Complexity:** Large
 **Files to create:** `components/operator/PackageWizard.tsx`, step components
 **Files to modify:** `components/operator/PackageForm.tsx` (replace or enhance)
@@ -447,7 +447,7 @@ Replace the flat `PackageForm` with a multi-step wizard.
 
 ### Task 11: Package cards show operator info
 
-**Status:** `[ ]`
+**Status:** `[x] 2026-06-06`
 **Complexity:** Small
 **Files to modify:** `components/search/PackageCard.tsx`, `components/search/PackageList.tsx`
 **Read first:** `docs/UX_GUIDELINES.md` §2 (card design), §6 (trust signals)
@@ -470,7 +470,7 @@ Replace the flat `PackageForm` with a multi-step wizard.
 
 ### Task 12: Enhanced operator public profile
 
-**Status:** `[ ]`
+**Status:** `[x] 2026-06-06`
 **Complexity:** Small
 **Files to modify:** `components/operators/OperatorProfileDetail.tsx`, `app/operators/[slug]/page.tsx`
 **Read first:** `docs/UX_GUIDELINES.md` §6 (trust signals), `docs/SEO.md` §2 (dynamic meta), §3 (Organization JSON-LD)
@@ -492,11 +492,18 @@ Replace the flat `PackageForm` with a multi-step wizard.
 
 ### Task 13: SEO structured data
 
-**Status:** `[ ]`
+**Status:** `[~] 2026-06-06 — partially implemented`
 **Complexity:** Medium
-**Files to create:** `lib/seo/json-ld.ts`
+**Files created:** `lib/seo/json-ld.ts`
 **Files to modify:** `app/packages/[slug]/page.tsx`, `app/operators/[slug]/page.tsx`, `app/search/packages/page.tsx`
 **Read first:** `docs/SEO.md` §3 (all JSON-LD specs)
+
+**Current state verified 2026-06-06:**
+
+- `lib/seo/json-ld.ts` exists with `packageJsonLd`, `operatorJsonLd`, `searchResultsJsonLd`, `breadcrumbJsonLd`, `organizationJsonLd`, and `websiteJsonLd`.
+- `app/sitemap.ts` includes static pages, corridor pages, published packages, and verified operators.
+- `/packages/[slug]`, `/operators/[slug]`, `/requests/[id]`, `/search/packages`, and root layout render JSON-LD scripts.
+- Remaining cleanup: pages are not consistently using `lib/seo/json-ld.ts`; some still build inline JSON-LD or use component-local helpers (`buildOperatorJsonLd`, `buildBreadcrumbJsonLd`). Consolidate before marking this task done.
 
 **What to do:**
 
@@ -520,9 +527,14 @@ Replace the flat `PackageForm` with a multi-step wizard.
 
 ### Task 14: Validation utility
 
-**Status:** `[ ]`
+**Status:** `[~] 2026-06-06 — partially implemented`
 **Complexity:** Small
-**Files to create:** `lib/validation.ts`
+**Files created:** `lib/validation.ts`
+
+**Current state verified 2026-06-06:**
+
+- `lib/validation.ts` exists and contains Zod schemas for auth and interest API inputs: `signUpSchema`, `signInSchema`, `interestSchema`.
+- Remaining work: the utility functions requested below (`validateEmail`, `validatePhone`, `validateRequired`, `validateLength`, `validateOperatorForPublish`, `validatePackageForDraft`, `validatePackageForPublish`) are not implemented.
 
 **What to do:**
 
@@ -545,7 +557,7 @@ Replace the flat `PackageForm` with a multi-step wizard.
 
 ### Task 15: Unit tests for new components
 
-**Status:** `[ ]`
+**Status:** `[x] 2026-06-06`
 **Complexity:** Medium
 **Files to create:** `tests/operator-*.test.ts`
 
@@ -566,9 +578,16 @@ Replace the flat `PackageForm` with a multi-step wizard.
 
 ### Task 16: E2E smoke test for operator flow
 
-**Status:** `[ ]`
+**Status:** `[~] 2026-06-06 — spec exists but failing`
 **Complexity:** Small
 **Files to create/modify:** `e2e/operator.spec.ts`
+
+**Current state verified 2026-06-06:**
+
+- `e2e/operator.spec.ts` exists.
+- `npx playwright test e2e/operator.spec.ts --reporter=list` failed 30/30.
+- Chromium failure: `/operator/packages` redirects to `/`, so the test never reaches `operator-packages-list`, `operator-packages-empty`, or `package-wizard`.
+- Firefox/WebKit failure: local browser binaries are missing; run `npx playwright install` before full cross-browser verification.
 
 **What to do:**
 
@@ -584,7 +603,7 @@ Replace the flat `PackageForm` with a multi-step wizard.
 
 ### Task 17: Final integration test + push
 
-**Status:** `[ ]`
+**Status:** `[ ] — blocked by Task 16`
 **Complexity:** Small
 
 **What to do:**

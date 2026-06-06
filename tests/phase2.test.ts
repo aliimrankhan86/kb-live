@@ -6,7 +6,7 @@ import { Package } from '../lib/types';
 import { mapPackageToComparison } from '../lib/comparison';
 
 describe('Phase 2 Foundations', () => {
-  
+
   describe('Slug Generation', () => {
     it('creates lowercase hyphenated slugs', () => {
       expect(generateSlug('Umrah Package 2026')).toBe('umrah-package-2026');
@@ -28,12 +28,10 @@ describe('Phase 2 Foundations', () => {
 
     beforeEach(() => {
         // Reset MockDB state if possible, or just rely on isolation
-        // MockDB is a singleton in memory, so state persists across tests in same run.
-        // I should probably clean up created packages.
     });
 
-    it('allows operator to create package', () => {
-      const pkg = Repository.createPackage(operatorCtx, {
+    it('allows operator to create package', async () => {
+      const pkg = await Repository.createPackage(operatorCtx, {
         title: 'Test Package',
         pricePerPerson: 1000,
         status: 'draft',
@@ -42,42 +40,42 @@ describe('Phase 2 Foundations', () => {
       expect(pkg.operatorId).toBe('op1');
     });
 
-    it('denies customer from creating package', () => {
-      expect(() => {
-        Repository.createPackage(customerCtx, { title: 'Hacked', pricePerPerson: 1 });
-      }).toThrow('Unauthorized');
+    it('denies customer from creating package', async () => {
+      await expect(
+        Repository.createPackage(customerCtx, { title: 'Hacked', pricePerPerson: 1 })
+      ).rejects.toThrow('Unauthorized');
     });
 
-    it('only allows owner to update package', () => {
-      const pkg = Repository.createPackage(operatorCtx, {
+    it('only allows owner to update package', async () => {
+      const pkg = await Repository.createPackage(operatorCtx, {
         title: 'My Package',
         pricePerPerson: 1000,
         status: 'draft',
       });
 
       // Owner update
-      const updated = Repository.updatePackage(operatorCtx, pkg.id, { title: 'Updated' });
+      const updated = await Repository.updatePackage(operatorCtx, pkg.id, { title: 'Updated' });
       expect(updated.title).toBe('Updated');
 
       // Other operator update
-      expect(() => {
-        Repository.updatePackage(otherOpCtx, pkg.id, { title: 'Hacked' });
-      }).toThrow('Unauthorized');
+      await expect(
+        Repository.updatePackage(otherOpCtx, pkg.id, { title: 'Hacked' })
+      ).rejects.toThrow('Unauthorized');
     });
 
-    it('listPackages only returns published packages', () => {
-      const draft = Repository.createPackage(operatorCtx, {
+    it('listPackages only returns published packages', async () => {
+      const draft = await Repository.createPackage(operatorCtx, {
         title: 'Draft Pkg',
         pricePerPerson: 1000,
         status: 'draft',
       });
-      const pub = Repository.createPackage(operatorCtx, {
+      const pub = await Repository.createPackage(operatorCtx, {
         title: 'Published Pkg',
         pricePerPerson: 1000,
         status: 'published',
       });
 
-      const list = Repository.listPackages();
+      const list = await Repository.listPackages();
       expect(list.some(p => p.id === draft.id)).toBe(false);
       expect(list.some(p => p.id === pub.id)).toBe(true);
     });

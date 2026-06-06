@@ -23,7 +23,7 @@ export default async function OperatorLayout({ children }: OperatorLayoutProps) 
   let operatorName = 'Operator';
   let verificationStatus: 'pending' | 'verified' | 'rejected' | undefined;
   try {
-    const op = Repository.getOperatorById(user.id);
+    const op = await Repository.getOperatorById(user.id);
     if (op) {
       operatorName = op.companyName || op.tradingName || 'Operator';
       verificationStatus = op.verificationStatus;

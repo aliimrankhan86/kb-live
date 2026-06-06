@@ -52,7 +52,7 @@ export function getCompareAriaLabel(shortlistCount: number): string {
  * Get the compare button disabled state
  * Allow clicking to add packages to compare even when shortlist count is low
  */
-export function isCompareDisabled(shortlistCount: number): boolean {
+export function isCompareDisabled(_shortlistCount: number): boolean {
   return false; // Always allow clicking to add/remove from compare
 }
 

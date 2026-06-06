@@ -166,7 +166,6 @@ const LoginModalComponent: React.FC<LoginModalProps> = ({
   // Handle forgot password
   const handleForgotPassword = useCallback(() => {
     // TODO: Implement forgot password functionality
-    console.log('Forgot password clicked')
   }, [])
 
   // Don't render if not open

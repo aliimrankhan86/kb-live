@@ -169,12 +169,10 @@ const FilterOverlayComponent: React.FC<FilterOverlayProps> = ({
   const handleApply = useCallback(() => {
     // Validate filters before applying
     if (filters.budget.min > filters.budget.max) {
-      console.warn('Invalid budget range: min > max');
       return;
     }
     
     if (filters.distance.min > filters.distance.max) {
-      console.warn('Invalid distance range: min > max');
       return;
     }
 

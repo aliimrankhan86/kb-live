@@ -18,7 +18,7 @@ const paymentDetails = (overrides: Partial<PaymentDetailsInput> = {}): PaymentDe
   ...overrides,
 });
 
-const createBookingIntentForOp1 = () => {
+const createBookingIntentForOp1 = async () => {
   const request: QuoteRequest = {
     id: 'req-bank-1',
     customerId: 'cust1',
@@ -51,9 +51,9 @@ const createBookingIntentForOp1 = () => {
     roomOccupancy: { double: true },
     inclusions: { visa: true, flights: true, transfers: true, meals: false },
   };
-  Repository.createOffer(operatorCtx, offer);
+  await Repository.createOffer(operatorCtx, offer);
 
-  return Repository.createBookingIntent(customerCtx, {
+  return await Repository.createBookingIntent(customerCtx, {
     offerId: offer.id,
     operatorId: 'op1',
     skipProofAcknowledged: true,
@@ -66,10 +66,10 @@ describe('bank details repository methods', () => {
     vi.useRealTimers();
   });
 
-  it('seeds one verified operator with active payment details and exposes instructions only in-app', () => {
-    const intent = createBookingIntentForOp1();
+  it('seeds one verified operator with active payment details and exposes instructions only in-app', async () => {
+    const intent = await createBookingIntentForOp1();
 
-    const instructions = Repository.getPaymentInstructions(customerCtx, intent.id);
+    const instructions = await Repository.getPaymentInstructions(customerCtx, intent.id);
 
     expect(instructions.operatorId).toBe('op1');
     expect(instructions.accountHolderName).toBe('Al-Hidayah Travel Ltd');
@@ -78,33 +78,30 @@ describe('bank details repository methods', () => {
     expect(instructions.disclosure).toContain('KaabaTrip does not collect, hold, or transfer customer funds');
   });
 
-  it('rejects payment instruction access for unrelated customers and operators', () => {
-    const intent = createBookingIntentForOp1();
+  it('rejects payment instruction access for unrelated customers and operators', async () => {
+    const intent = await createBookingIntentForOp1();
 
-    expect(() =>
-      Repository.getPaymentInstructions({ userId: 'cust2', role: 'customer' }, intent.id)
-    ).toThrow('Unauthorized');
-    expect(() => Repository.getPaymentInstructions(otherOperatorCtx, intent.id)).toThrow('Unauthorized');
+    await expect(async () => await Repository.getPaymentInstructions({ userId: 'cust2', role: 'customer' }, intent.id)
+    ).rejects.toThrow('Unauthorized');
+    await expect(async () => await Repository.getPaymentInstructions(otherOperatorCtx, intent.id)).rejects.toThrow('Unauthorized');
   });
 
-  it('requires operator ownership and phone-confirmation stub for initial payment details capture', () => {
-    expect(() =>
-      Repository.createPaymentDetails(customerCtx, {
+  it('requires operator ownership and phone-confirmation stub for initial payment details capture', async () => {
+    await expect(async () => await Repository.createPaymentDetails(customerCtx, {
         operatorId: 'op2',
         details: paymentDetails({ accountNumber: '87654321' }),
         phoneConfirmation: { confirmed: true, phoneLastFour: '7821' },
       })
-    ).toThrow('Unauthorized');
+    ).rejects.toThrow('Unauthorized');
 
-    expect(() =>
-      Repository.createPaymentDetails(otherOperatorCtx, {
+    await expect(async () => await Repository.createPaymentDetails(otherOperatorCtx, {
         operatorId: 'op2',
         details: paymentDetails({ accountNumber: '87654321' }),
         phoneConfirmation: { confirmed: false, phoneLastFour: '7821' },
       })
-    ).toThrow('Phone confirmation is required');
+    ).rejects.toThrow('Phone confirmation is required');
 
-    const created = Repository.createPaymentDetails(otherOperatorCtx, {
+    const created = await Repository.createPaymentDetails(otherOperatorCtx, {
       operatorId: 'op2',
       details: paymentDetails({ accountNumber: '87654321' }),
       phoneConfirmation: { confirmed: true, phoneLastFour: '7821' },
@@ -115,15 +112,15 @@ describe('bank details repository methods', () => {
     expect(created.status).toBe('active');
   });
 
-  it('routes bank changes through admin approval, cooling period, lazy activation, and audit logs', () => {
+  it('routes bank changes through admin approval, cooling period, lazy activation, and audit logs', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-01T10:00:00.000Z'));
 
-    const intent = createBookingIntentForOp1();
-    const before = Repository.getPaymentInstructions(customerCtx, intent.id);
+    const intent = await createBookingIntentForOp1();
+    const before = await Repository.getPaymentInstructions(customerCtx, intent.id);
     expect(before.accountNumber).toBe('12345678');
 
-    const request = Repository.createBankChangeRequest(operatorCtx, {
+    const request = await Repository.createBankChangeRequest(operatorCtx, {
       operatorId: 'op1',
       proposedDetails: paymentDetails({
         bankName: 'New Review Bank',
@@ -134,77 +131,77 @@ describe('bank details repository methods', () => {
       reason: 'Moved business account',
     });
 
-    const approved = Repository.approveBankChangeRequest(adminCtx, request.id, 'Reviewed in admin queue');
+    const approved = await Repository.approveBankChangeRequest(adminCtx, request.id, 'Reviewed in admin queue');
     expect(approved.status).toBe('approved');
     expect(approved.activationEligibleAt).toBe('2026-06-02T10:00:00.000Z');
 
-    expect(Repository.getPaymentInstructions(customerCtx, intent.id).accountNumber).toBe('12345678');
+    expect((await Repository.getPaymentInstructions(customerCtx, intent.id)).accountNumber).toBe('12345678');
 
     vi.setSystemTime(new Date('2026-06-02T10:00:01.000Z'));
-    const after = Repository.getPaymentInstructions(customerCtx, intent.id);
+    const after = await Repository.getPaymentInstructions(customerCtx, intent.id);
 
     expect(after.bankName).toBe('New Review Bank');
     expect(after.accountNumber).toBe('22223333');
     expect(MockDB.getBankChangeRequests().find((candidate) => candidate.id === request.id)?.status).toBe('activated');
-    expect(Repository.getAuditLog(adminCtx).map((entry) => entry.action)).toEqual([
+    expect((await Repository.getAuditLog(adminCtx)).map((entry) => entry.action)).toEqual([
       'bank_change.requested',
       'bank_change.approved',
       'bank_change.activated',
     ]);
   });
 
-  it('supports rejection and cancellation without activating proposed details', () => {
-    const rejectedRequest = Repository.createBankChangeRequest(operatorCtx, {
+  it('supports rejection and cancellation without activating proposed details', async () => {
+    const rejectedRequest = await Repository.createBankChangeRequest(operatorCtx, {
       operatorId: 'op1',
       proposedDetails: paymentDetails({ accountNumber: '11112222' }),
       phoneConfirmation: { confirmed: true, phoneLastFour: '4567' },
     });
-    expect(Repository.rejectBankChangeRequest(adminCtx, rejectedRequest.id, 'Sort code mismatch').status).toBe('rejected');
+    expect((await Repository.rejectBankChangeRequest(adminCtx, rejectedRequest.id, 'Sort code mismatch')).status).toBe('rejected');
 
-    const cancelledRequest = Repository.createBankChangeRequest(operatorCtx, {
+    const cancelledRequest = await Repository.createBankChangeRequest(operatorCtx, {
       operatorId: 'op1',
       proposedDetails: paymentDetails({ accountNumber: '33334444' }),
       phoneConfirmation: { confirmed: true, phoneLastFour: '4567' },
     });
-    expect(() => Repository.cancelBankChangeRequest(otherOperatorCtx, cancelledRequest.id)).toThrow('Unauthorized');
-    expect(Repository.cancelBankChangeRequest(operatorCtx, cancelledRequest.id).status).toBe('cancelled');
+    await expect(async () => await Repository.cancelBankChangeRequest(otherOperatorCtx, cancelledRequest.id)).rejects.toThrow('Unauthorized');
+    expect((await Repository.cancelBankChangeRequest(operatorCtx, cancelledRequest.id)).status).toBe('cancelled');
   });
 
-  it('getPaymentDetails triggers lazy-activation and is RBAC-gated', () => {
+  it('getPaymentDetails triggers lazy-activation and is RBAC-gated', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-01T10:00:00.000Z'));
 
-    const request = Repository.createBankChangeRequest(operatorCtx, {
+    const request = await Repository.createBankChangeRequest(operatorCtx, {
       operatorId: 'op1',
       proposedDetails: paymentDetails({ accountNumber: '55556666', bankName: 'Lazy Bank' }),
       phoneConfirmation: { confirmed: true, phoneLastFour: '4567' },
     });
-    Repository.approveBankChangeRequest(adminCtx, request.id);
+    await Repository.approveBankChangeRequest(adminCtx, request.id);
 
     // Before cooling — still old details
-    expect(Repository.getPaymentDetails(operatorCtx, 'op1')?.accountNumber).toBe('12345678');
+    expect((await Repository.getPaymentDetails(operatorCtx, 'op1'))?.accountNumber).toBe('12345678');
 
     // After cooling — lazy-activated
     vi.setSystemTime(new Date('2026-06-02T10:00:01.000Z'));
-    const activated = Repository.getPaymentDetails(operatorCtx, 'op1');
+    const activated = await Repository.getPaymentDetails(operatorCtx, 'op1');
     expect(activated?.accountNumber).toBe('55556666');
     expect(activated?.bankName).toBe('Lazy Bank');
 
     // RBAC: other operator denied
-    expect(() => Repository.getPaymentDetails(otherOperatorCtx, 'op1')).toThrow('Unauthorized');
+    await expect(Repository.getPaymentDetails(otherOperatorCtx, 'op1')).rejects.toThrow('Unauthorized');
     // RBAC: admin allowed
-    expect(Repository.getPaymentDetails(adminCtx, 'op1')?.accountNumber).toBe('55556666');
+    expect((await Repository.getPaymentDetails(adminCtx, 'op1'))?.accountNumber).toBe('55556666');
   });
 
-  it('getOperatorAuditLog returns operator-scoped entries reverse-chronologically with RBAC', () => {
+  it('getOperatorAuditLog returns operator-scoped entries reverse-chronologically with RBAC', async () => {
     // Generate an audit entry first
-    Repository.createBankChangeRequest(operatorCtx, {
+    await Repository.createBankChangeRequest(operatorCtx, {
       operatorId: 'op1',
       proposedDetails: paymentDetails({ accountNumber: '77778888' }),
       phoneConfirmation: { confirmed: true, phoneLastFour: '4567' },
     });
 
-    const entries = Repository.getOperatorAuditLog(operatorCtx, 'op1');
+    const entries = await Repository.getOperatorAuditLog(operatorCtx, 'op1');
     expect(entries.length).toBeGreaterThan(0);
     expect(entries.every((e) => e.operatorId === 'op1')).toBe(true);
 
@@ -216,8 +213,8 @@ describe('bank details repository methods', () => {
     }
 
     // RBAC: other operator denied
-    expect(() => Repository.getOperatorAuditLog(otherOperatorCtx, 'op1')).toThrow('Unauthorized');
+    await expect(Repository.getOperatorAuditLog(otherOperatorCtx, 'op1')).rejects.toThrow('Unauthorized');
     // RBAC: admin allowed
-    expect(Repository.getOperatorAuditLog(adminCtx, 'op1').length).toBeGreaterThan(0);
+    expect((await Repository.getOperatorAuditLog(adminCtx, 'op1')).length).toBeGreaterThan(0);
   });
 });

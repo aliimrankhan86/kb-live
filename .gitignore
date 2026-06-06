@@ -53,3 +53,4 @@ test-results/
 
 /lib/generated/prisma
 prisma/.env
+docs.zip

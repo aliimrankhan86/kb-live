@@ -1,6 +1,6 @@
 export type Region = 'UK' | 'EU' | 'US' | 'CA' | 'UAE'
 export type DistanceUnit = 'miles' | 'km'
-export type DisplayCurrency = 'GBP' | 'USD' | 'EUR'
+export type DisplayCurrency = 'GBP'
 
 export interface RegionSettings {
   region: Region
@@ -19,8 +19,6 @@ const REGION_SETTINGS: Record<Region, Omit<RegionSettings, 'region'>> = {
 
 const CURRENCY_TO_REGION: Record<DisplayCurrency, Region> = {
   GBP: 'UK',
-  USD: 'US',
-  EUR: 'EU',
 }
 
 export const CURRENCY_STORAGE_KEY = 'kb_display_currency'
@@ -28,8 +26,6 @@ export const CURRENCY_CHANGE_EVENT = 'kb:currency-change'
 
 export const DISPLAY_CURRENCY_OPTIONS: Array<{ value: DisplayCurrency; label: string }> = [
   { value: 'GBP', label: 'GBP (£)' },
-  { value: 'USD', label: 'USD ($)' },
-  { value: 'EUR', label: 'EUR (€)' },
 ]
 
 const normalizeLocale = (locale?: string) => (locale ?? '').trim().toLowerCase()
@@ -48,7 +44,7 @@ export const detectRegion = (locale?: string, timeZone?: string): Region => {
 }
 
 const isDisplayCurrency = (value: string | null | undefined): value is DisplayCurrency =>
-  value === 'GBP' || value === 'USD' || value === 'EUR'
+  value === 'GBP'
 
 export const getPreferredCurrency = (): DisplayCurrency | null => {
   if (typeof window === 'undefined') return null
@@ -67,31 +63,16 @@ export const getRegionSettings = (options?: {
   timeZone?: string
   currency?: DisplayCurrency
 }): RegionSettings => {
-  const preferredCurrency = options?.currency ?? getPreferredCurrency()
-  if (preferredCurrency) {
-    const region = CURRENCY_TO_REGION[preferredCurrency]
-    const settings = REGION_SETTINGS[region]
-    return {
-      region,
-      locale: settings.locale,
-      currency: preferredCurrency,
-      distanceUnit: settings.distanceUnit,
-    }
-  }
-
-  const locale =
-    options?.locale ?? (typeof navigator !== 'undefined' ? navigator.language : undefined)
-  const timeZone =
-    options?.timeZone ??
-    (typeof Intl !== 'undefined'
-      ? Intl.DateTimeFormat().resolvedOptions().timeZone
-      : undefined)
-  const region = detectRegion(locale, timeZone)
+  // MVP is GBP-only. Do not inspect navigator/localStorage here because this
+  // helper is used during SSR and client hydration; browser-only detection can
+  // make the first client render disagree with server HTML.
+  const preferredCurrency = options?.currency ?? 'GBP'
+  const region = CURRENCY_TO_REGION[preferredCurrency]
   const settings = REGION_SETTINGS[region]
   return {
     region,
-    locale: locale ?? settings.locale,
-    currency: settings.currency,
+    locale: settings.locale,
+    currency: preferredCurrency,
     distanceUnit: settings.distanceUnit,
   }
 }

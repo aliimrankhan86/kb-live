@@ -1,7 +1,9 @@
 import type { Metadata } from 'next'
 import { Header } from '@/components/layout/Header'
 import { OperatorProfileDetail } from '@/components/operators/OperatorProfileDetail'
+import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { Repository } from '@/lib/api/repository'
+import { breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, operatorJsonLd } from '@/lib/seo/json-ld'
 import type { OperatorProfile, Package } from '@/lib/types'
 
 interface OperatorPageProps {
@@ -15,11 +17,31 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   try {
     const { slug } = await params
-    const operator = Repository.getOperatorBySlug(slug)
+    const operator = await Repository.getOperatorBySlug(slug)
     if (operator) {
+      const packages = (await Repository.listPackages()).filter(
+        (pkg) => pkg.operatorId === operator.id && pkg.status === 'published'
+      )
+      const statusLabel = operator.verificationStatus === 'verified' ? 'Verified' : 'Listed'
+      const trustParts = [
+        operator.atolNumber ? `ATOL ${operator.atolNumber}` : undefined,
+        operator.abtaMemberNumber ? `ABTA ${operator.abtaMemberNumber}` : undefined,
+      ].filter(Boolean)
+
       return {
-        title: `${operator.companyName} | Operator`,
-        description: `Browse packages and reviews for ${operator.companyName}.`,
+        title: `${operator.companyName} - ${statusLabel} Umrah & Hajj Operator`,
+        description: `View ${operator.companyName}'s public operator profile, ${packages.length} published package${packages.length === 1 ? '' : 's'}, departure airports, contact details${trustParts.length ? `, and ${trustParts.join(' / ')} details` : ''}.`,
+        alternates: {
+          canonical: `/operators/${operator.slug}`,
+        },
+        openGraph: {
+          title: `${operator.companyName} | KaabaTrip operator profile`,
+          description: `Compare published packages, departure airports, and trust signals for ${operator.companyName}.`,
+          url: `https://kaabatrip.com/operators/${operator.slug}`,
+          siteName: 'KaabaTrip',
+          type: 'profile',
+          locale: 'en_GB',
+        },
       }
     }
   } catch {
@@ -48,9 +70,11 @@ export default async function OperatorProfilePage({ params }: OperatorPageProps)
   let error: string | undefined
 
   try {
-    operator = Repository.getOperatorBySlug(slug)
+    operator = await Repository.getOperatorBySlug(slug)
     if (operator) {
-      packages = Repository.listPackages().filter((pkg) => pkg.operatorId === operator?.id)
+      packages = (await Repository.listPackages()).filter(
+        (pkg) => pkg.operatorId === operator?.id && pkg.status === 'published'
+      )
     }
   } catch (err) {
     error = err instanceof Error ? err.message : 'Unable to load this operator right now.'
@@ -76,10 +100,39 @@ export default async function OperatorProfilePage({ params }: OperatorPageProps)
     )
   }
 
+  const breadcrumbItems = [
+    { label: 'Home', href: '/' },
+    { label: 'Search', href: '/search/packages' },
+    { label: operator.companyName },
+  ];
+  const operatorProfileJsonLd = graphJsonLd([
+    operatorJsonLd(operator),
+    breadcrumbJsonLd(breadcrumbItems.map((item) => ({ name: item.label, path: item.href }))),
+    faqPageJsonLd([
+      {
+        question: `What can I verify about ${operator.companyName}?`,
+        answer:
+          'KaabaTrip shows the operator profile details available in the platform, including verification status, ATOL and ABTA details where listed, departure airports, serving regions, contact details, and published packages.',
+      },
+      {
+        question: `Does KaabaTrip publish all packages from ${operator.companyName}?`,
+        answer:
+          'This public profile shows packages currently published on KaabaTrip. Travellers should confirm final availability, itinerary, and payment terms directly with the operator.',
+      },
+    ]),
+  ]);
+
   return (
     <>
       <Header />
       <main className="min-h-screen bg-[var(--background)]">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(operatorProfileJsonLd) }}
+        />
+        <div className="w-full max-w-5xl mx-auto px-4 pt-6">
+          <Breadcrumb items={breadcrumbItems} />
+        </div>
         <OperatorProfileDetail operator={operator} packages={packages} />
       </main>
     </>

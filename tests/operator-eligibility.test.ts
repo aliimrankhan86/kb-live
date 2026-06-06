@@ -65,12 +65,12 @@ describe('operator eligibility gating', () => {
     localStorage.clear();
   });
 
-  it('treats the seeded verified operator with active payment details as bookable', () => {
-    expect(Repository.isOperatorBookable('op1')).toBe(true);
+  it('treats the seeded verified operator with active payment details as bookable', async () => {
+    expect(await Repository.isOperatorBookable('op1')).toBe(true);
   });
 
-  it('defaults listed operators to not bookable even after bank details capture', () => {
-    expect(Repository.isOperatorBookable('op2')).toBe(false);
+  it('defaults listed operators to not bookable even after bank details capture', async () => {
+    expect(await Repository.isOperatorBookable('op2')).toBe(false);
 
     Repository.createPaymentDetails(
       { userId: 'op2', role: 'operator' },
@@ -88,16 +88,16 @@ describe('operator eligibility gating', () => {
       }
     );
 
-    expect(Repository.isOperatorBookable('op2')).toBe(false);
+    expect(await Repository.isOperatorBookable('op2')).toBe(false);
     expect(MockDB.getOperatorById('op2')?.tier).toBe('listed');
     expect(MockDB.getOperatorById('op2')?.eligibilityFlags?.canReceiveBookings).toBe(false);
   });
 
-  it('requires verified tier and active payment details', () => {
+  it('requires verified tier and active payment details', async () => {
     MockDB.saveOperator(verifiedOperator('op3'));
-    expect(Repository.isOperatorBookable('op3')).toBe(false);
+    expect(await Repository.isOperatorBookable('op3')).toBe(false);
 
-    Repository.createPaymentDetails(
+    await Repository.createPaymentDetails(
       { userId: 'op3', role: 'operator' },
       {
         operatorId: 'op3',
@@ -113,10 +113,10 @@ describe('operator eligibility gating', () => {
       }
     );
 
-    expect(Repository.isOperatorBookable('op3')).toBe(true);
+    expect(await Repository.isOperatorBookable('op3')).toBe(true);
   });
 
-  it('blocks operators with payment SLA flags', () => {
+  it('blocks operators with payment SLA flags', async () => {
     MockDB.saveOperator(
       verifiedOperator('op4', {
         eligibilityFlags: {
@@ -144,18 +144,17 @@ describe('operator eligibility gating', () => {
       }
     );
 
-    expect(Repository.isOperatorBookable('op4')).toBe(false);
+    expect(await Repository.isOperatorBookable('op4')).toBe(false);
   });
 
-  it('prevents booking intents for non-bookable operators', () => {
+  it('prevents booking intents for non-bookable operators', async () => {
     const offer = saveRequestAndOffer('op2');
 
-    expect(() =>
-      Repository.createBookingIntent(customerCtx, {
+    await expect(async () => await Repository.createBookingIntent(customerCtx, {
         offerId: offer.id,
         operatorId: 'op2',
         skipProofAcknowledged: true,
       })
-    ).toThrow('Operator is not eligible to receive bookings');
+    ).rejects.toThrow('Operator is not eligible to receive bookings');
   });
 });

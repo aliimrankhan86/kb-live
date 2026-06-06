@@ -206,9 +206,6 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
     }
   }
 
-  // Replace em dashes with regular hyphens to avoid AI-generated look
-  const toHyphen = (s: string) => s.replace(/\u2013/g, '-')
-
   return (
     <div className={`${styles.searchForm} ${className}`}>
       <form
@@ -520,8 +517,8 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
                 step={50}
                 minGap={100}
                 onChange={handleBudgetChange}
-                aria-label-min="Minimum budget"
-                aria-label-max="Maximum budget"
+                ariaLabelMin="Minimum budget"
+                ariaLabelMax="Maximum budget"
                 data-testid-min="budget-min-slider"
                 data-testid-max="budget-max-slider"
               />

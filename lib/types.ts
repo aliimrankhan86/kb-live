@@ -37,7 +37,9 @@ export interface OperatorProfile {
   tier?: OperatorTier;
   eligibilityFlags?: OperatorEligibilityFlags;
   atolNumber?: string;
+  atolVerifiedAt?: string;
   abtaMemberNumber?: string;
+  abtaVerifiedAt?: string;
   contactEmail: string;
   contactPhone?: string;
   officeAddress?: {
@@ -333,6 +335,7 @@ export interface Package {
   
   notes?: string; // sanitized, no HTML
   images?: string[];
+  imageUrl?: string;
 }
 
 export type ComplaintCategory =

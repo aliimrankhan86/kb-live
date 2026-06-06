@@ -164,3 +164,63 @@ Before writing code or refactoring, you must explicitly verify:
 
 - Use **British English** spelling across all user-facing copy (e.g., "optimise", "colour", "cancelled", "travelling", "enrol").
 - When displaying luxury text ratings, always format "5 star hotel" as **"5 stars"** paired with a functional visual anchor/icon (e.g., `5 stars ⭐` or an SVG star component). Never show bare numbers without visual context.
+
+---
+
+## 11. Security & Production Quality Standards
+
+These rules come directly from a full multi-disciplinary security, data layer, accessibility, and quality audit. Violations will be flagged immediately.
+
+### 11.1 No eval, No Webpack Escape Hatches
+
+- **Never** use `eval()`, `new Function()`, `__non_webpack_require__`, or any webpack-internal globals to load modules at runtime.
+- For server-only dynamic module loading use standard `await import('./path')`. This works in all runtimes (Node.js, Edge, Turbopack).
+- If a module must never reach the client bundle, add `import 'server-only'` at the top of that module.
+
+### 11.2 No console.* in Production Components
+
+- **Zero tolerance** for `console.log`, `console.warn`, or `console.error` in React components (client or server) in the `components/` or `app/` directories.
+- In API routes, use `console.error` only for unexpected server-side operational failures — never for user-input validation errors or expected control flow.
+- Use `AppError` + `mapErrorToResponse` from `lib/errors.ts` for all structured error handling in API routes. Repository methods throw typed `AppError`, not plain `new Error('string')`.
+
+### 11.3 Always Await Async Repository Calls
+
+- Every call to a `Repository.*` method that returns a `Promise` **must** be explicitly `await`-ed.
+- Missing `await` silently returns a resolved `Promise` object instead of the value — TypeScript will not catch this if the return type has not been updated yet.
+- Rule of thumb: if `Repository.getXxx()` is called inside an `async` function body, it gets `await`.
+
+### 11.4 Role Enum Hygiene — No Public Admin
+
+- `'admin'` must **never** appear in any public-facing Zod schema, API route validation array, or client-rendered form option.
+- Admin users are promoted via secure server-side tooling only. The sign-up flow is permanently locked to `['customer', 'operator']`.
+- This is a defence-in-depth rule: even if auth middleware fails, the API layer must reject admin self-registration.
+
+### 11.5 Rate Limiting Must Use Shared State on Serverless
+
+- In-memory `Map`-based rate limiters reset on every cold start on Vercel/Lambda. They provide no protection on serverless deployments.
+- Any rate limiter that needs to survive across invocations must use an external shared store (Redis, Upstash, or Supabase KV).
+- The current `lib/rate-limit.ts` in-memory limiter is acceptable only for single-process/local environments. Before production launch, replace with Upstash Redis.
+
+### 11.6 Zod Schemas Must Match Implementation
+
+- Every field defined as `required` in a Zod schema must actually be read and used by the route handler. Orphaned required fields (required in schema, ignored in handler) silently reject valid requests.
+- If a field is experimental or future-use, mark it `.optional()` or remove it from the schema entirely until the handler uses it.
+
+### 11.7 Search and Catalogue Pages Must Be Server Components
+
+- Route-level pages under `/search/`, `/packages/`, `/operators/` must be Server Components (no `'use client'` at the page level).
+- Client-side interactivity (filters, sort dropdowns, compare toggles) lives in leaf `'use client'` components.
+- Reason: search result pages are critical for SEO. A `'use client'` page means the HTML sent to crawlers is an empty shell — zero indexed content.
+
+### 11.8 Auth Routes Return Minimal Data Only
+
+- Sign-up and sign-in API routes must return only `{ user: { id, email, role, name } }` — never the full Supabase session object, JWT access token, or refresh token.
+- The session cookie is set server-side by Supabase SSR. The client does not need the raw token.
+- Leaking JWTs to the client is an unnecessary attack surface even when using httpOnly cookies elsewhere.
+
+### 11.9 CSP Policy Discipline
+
+- `'unsafe-eval'` must never appear in production `script-src`. Conditional on `IS_DEV_ENV` is acceptable.
+- `'unsafe-inline'` in `script-src` is a known temporary limitation of Next.js hydration — tolerated but must not spread to `default-src` or `style-src`.
+- Any addition to `connect-src` must explicitly list only the domains required (e.g., `https://*.supabase.co wss://*.supabase.co`). No wildcards on TLDs.
+- `dangerouslyAllowSVG: true` on `next/image` must always be paired with `contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;"` in the images config.

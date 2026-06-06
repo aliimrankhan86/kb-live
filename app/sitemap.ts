@@ -4,7 +4,7 @@ import type { Package, OperatorProfile } from '@/lib/types';
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kaabatrip.com';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [
     { url: `${baseUrl}/`, lastModified: new Date(), changeFrequency: 'weekly', priority: 1.0 },
@@ -23,7 +23,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Published packages
   let packagePages: MetadataRoute.Sitemap = [];
   try {
-    const packages = Repository.listPackages();
+    const packages = await Repository.listPackages();
     packagePages = packages
       .filter((p: Package) => p.status === 'published')
       .map((p: Package) => ({
@@ -39,7 +39,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Verified operators
   let operatorPages: MetadataRoute.Sitemap = [];
   try {
-    const operators = Repository.getOperators({ userId: 'system', role: 'admin' });
+    const operators = await Repository.getOperators({ userId: 'system', role: 'admin' });
     operatorPages = operators
       .filter((o: OperatorProfile) => o.verificationStatus === 'verified' && o.slug)
       .map((o: OperatorProfile) => ({

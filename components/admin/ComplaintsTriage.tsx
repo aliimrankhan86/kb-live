@@ -55,12 +55,12 @@ function AdminComplaintCard({
   const [submitting, setSubmitting] = useState(false);
   const [editing, setEditing] = useState(false);
 
-  const handleSaveNotes = () => {
+  const handleSaveNotes = async () => {
     setError(null);
     setSubmitting(true);
     try {
       MockDB.setCurrentUser('operator'); // needed for MockDB simulation
-      Repository.updateComplaintAdminNotes(adminCtx, complaint.id, notes, flagged);
+      await Repository.updateComplaintAdminNotes(adminCtx, complaint.id, notes, flagged);
       setEditing(false);
       onUpdate();
     } catch (err) {
@@ -70,10 +70,10 @@ function AdminComplaintCard({
     }
   };
 
-  const handleStatusChange = (status: ComplaintStatus) => {
+  const handleStatusChange = async (status: ComplaintStatus) => {
     try {
       MockDB.setCurrentUser('operator');
-      Repository.updateComplaintStatus(adminCtx, complaint.id, status);
+      await Repository.updateComplaintStatus(adminCtx, complaint.id, status);
       onUpdate();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update status');
@@ -208,7 +208,7 @@ export function ComplaintsTriage() {
 
   const loadComplaints = () => {
     MockDB.setCurrentUser('operator');
-    setComplaints(Repository.getComplaints(adminCtx));
+    Repository.getComplaints(adminCtx).then(setComplaints);
   };
 
   useEffect(() => {

@@ -77,8 +77,8 @@ export const TimePeriodFilter: React.FC<TimePeriodFilterProps> = ({
         step={1}
         minGap={1}
         onChange={handleSliderChange}
-        aria-label-min="Start month"
-        aria-label-max="End month"
+        ariaLabelMin="Start month"
+        ariaLabelMax="End month"
         data-testid-min="time-start-slider"
         data-testid-max="time-end-slider"
       />

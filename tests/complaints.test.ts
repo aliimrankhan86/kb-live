@@ -25,8 +25,8 @@ describe('Complaints repository', () => {
   });
 
   describe('createComplaint', () => {
-    it('creates a complaint with valid input', () => {
-      const complaint = Repository.createComplaint(customerCtx, {
+    it('creates a complaint with valid input', async () => {
+      const complaint = await Repository.createComplaint(customerCtx, {
         bookingIntentId: 'bi-1',
         category: 'booking_problem',
         severity: 'medium',
@@ -40,105 +40,105 @@ describe('Complaints repository', () => {
       expect(complaint.description).toBe('The hotel was much further from Haram than described.');
     });
 
-    it('blocks non-customer roles', () => {
-      expect(() =>
+    it('blocks non-customer roles', async () => {
+      await expect(
         Repository.createComplaint(operatorCtx, {
           bookingIntentId: 'bi-1',
           category: 'booking_problem',
           severity: 'medium',
           description: 'Something is wrong',
         })
-      ).toThrow('Unauthorized');
+      ).rejects.toThrow('Unauthorized');
     });
 
-    it('rejects invalid category', () => {
-      expect(() =>
-      Repository.createComplaint(customerCtx, {
-        bookingIntentId: 'bi-1',
-        category: 'invalid_category' as unknown as 'booking_problem',
+    it('rejects invalid category', async () => {
+      await expect(
+        Repository.createComplaint(customerCtx, {
+          bookingIntentId: 'bi-1',
+          category: 'invalid_category' as unknown as 'booking_problem',
           severity: 'medium',
           description: 'Something is wrong',
         })
-      ).toThrow('Invalid complaint category');
+      ).rejects.toThrow('Invalid complaint category');
     });
 
-    it('rejects invalid severity', () => {
-      expect(() =>
-      Repository.createComplaint(customerCtx, {
-        bookingIntentId: 'bi-1',
-        category: 'booking_problem',
-        severity: 'critical' as unknown as 'medium',
+    it('rejects invalid severity', async () => {
+      await expect(
+        Repository.createComplaint(customerCtx, {
+          bookingIntentId: 'bi-1',
+          category: 'booking_problem',
+          severity: 'critical' as unknown as 'medium',
           description: 'Something is wrong',
         })
-      ).toThrow('Invalid complaint severity');
+      ).rejects.toThrow('Invalid complaint severity');
     });
 
-    it('rejects description under 10 chars', () => {
-      expect(() =>
+    it('rejects description under 10 chars', async () => {
+      await expect(
         Repository.createComplaint(customerCtx, {
           bookingIntentId: 'bi-1',
           category: 'booking_problem',
           severity: 'medium',
           description: 'Short',
         })
-      ).toThrow('Description must be at least 10 characters');
+      ).rejects.toThrow('Description must be at least 10 characters');
     });
 
-    it('rejects empty description', () => {
-      expect(() =>
+    it('rejects empty description', async () => {
+      await expect(
         Repository.createComplaint(customerCtx, {
           bookingIntentId: 'bi-1',
           category: 'booking_problem',
           severity: 'medium',
           description: '   ',
         })
-      ).toThrow('Description is required');
+      ).rejects.toThrow('Description is required');
     });
   });
 
   describe('getComplaints', () => {
-    it('returns only customer complaints for customer role', () => {
-      Repository.createComplaint(customerCtx, {
+    it('returns only customer complaints for customer role', async () => {
+      await Repository.createComplaint(customerCtx, {
         bookingIntentId: 'bi-1',
         category: 'booking_problem',
         severity: 'medium',
         description: 'First complaint from cust1',
       });
 
-      const all = Repository.getComplaints(customerCtx);
+      const all = await Repository.getComplaints(customerCtx);
       expect(all.length).toBeGreaterThanOrEqual(1);
       expect(all.every((c) => c.customerId === 'cust1')).toBe(true);
     });
 
-    it('returns only operator complaints for operator role', () => {
+    it('returns only operator complaints for operator role', async () => {
       MockDB.setCurrentUser('operator');
-      const op1Complaints = Repository.getComplaints(operatorCtx);
+      const op1Complaints = await Repository.getComplaints(operatorCtx);
       expect(op1Complaints.every((c) => c.operatorId === 'op1')).toBe(true);
     });
 
-    it('returns all complaints for admin role', () => {
+    it('returns all complaints for admin role', async () => {
       MockDB.setCurrentUser('operator');
-      const all = Repository.getComplaints(adminCtx);
+      const all = await Repository.getComplaints(adminCtx);
       expect(all.length).toBeGreaterThanOrEqual(1);
     });
   });
 
   describe('getComplaintById', () => {
-    it('returns complaint for owner customer', () => {
-      const created = Repository.createComplaint(customerCtx, {
+    it('returns complaint for owner customer', async () => {
+      const created = await Repository.createComplaint(customerCtx, {
         bookingIntentId: 'bi-1',
         category: 'booking_problem',
         severity: 'medium',
         description: 'Valid complaint for access test',
       });
 
-      const found = Repository.getComplaintById(customerCtx, created.id);
+      const found = await Repository.getComplaintById(customerCtx, created.id);
       expect(found).toBeDefined();
       expect(found?.id).toBe(created.id);
     });
 
-    it('returns complaint for involved operator', () => {
-      const created = Repository.createComplaint(customerCtx, {
+    it('returns complaint for involved operator', async () => {
+      const created = await Repository.createComplaint(customerCtx, {
         bookingIntentId: 'bi-1',
         category: 'booking_problem',
         severity: 'medium',
@@ -146,12 +146,12 @@ describe('Complaints repository', () => {
       });
 
       MockDB.setCurrentUser('operator');
-      const found = Repository.getComplaintById(operatorCtx, created.id);
+      const found = await Repository.getComplaintById(operatorCtx, created.id);
       expect(found).toBeDefined();
     });
 
-    it('blocks unrelated operator', () => {
-      const created = Repository.createComplaint(customerCtx, {
+    it('blocks unrelated operator', async () => {
+      const created = await Repository.createComplaint(customerCtx, {
         bookingIntentId: 'bi-1',
         category: 'booking_problem',
         severity: 'medium',
@@ -159,13 +159,13 @@ describe('Complaints repository', () => {
       });
 
       MockDB.setCurrentUser('operator');
-      expect(() => Repository.getComplaintById(otherOperatorCtx, created.id)).toThrow('Unauthorized');
+      await expect(Repository.getComplaintById(otherOperatorCtx, created.id)).rejects.toThrow('Unauthorized');
     });
   });
 
   describe('updateComplaintStatus', () => {
-    it('allows operator to set operator_responding', () => {
-      const created = Repository.createComplaint(customerCtx, {
+    it('allows operator to set operator_responding', async () => {
+      const created = await Repository.createComplaint(customerCtx, {
         bookingIntentId: 'bi-1',
         category: 'booking_problem',
         severity: 'medium',
@@ -173,12 +173,12 @@ describe('Complaints repository', () => {
       });
 
       MockDB.setCurrentUser('operator');
-      const updated = Repository.updateComplaintStatus(operatorCtx, created.id, 'operator_responding');
+      const updated = await Repository.updateComplaintStatus(operatorCtx, created.id, 'operator_responding');
       expect(updated.status).toBe('operator_responding');
     });
 
-    it('blocks operator from setting admin_triage', () => {
-      const created = Repository.createComplaint(customerCtx, {
+    it('blocks operator from setting admin_triage', async () => {
+      const created = await Repository.createComplaint(customerCtx, {
         bookingIntentId: 'bi-1',
         category: 'booking_problem',
         severity: 'medium',
@@ -186,13 +186,13 @@ describe('Complaints repository', () => {
       });
 
       MockDB.setCurrentUser('operator');
-      expect(() =>
+      await expect(
         Repository.updateComplaintStatus(operatorCtx, created.id, 'admin_triage')
-      ).toThrow('Operator cannot set this status');
+      ).rejects.toThrow('Operator cannot set this status');
     });
 
-    it('allows admin to set resolved', () => {
-      const created = Repository.createComplaint(customerCtx, {
+    it('allows admin to set resolved', async () => {
+      const created = await Repository.createComplaint(customerCtx, {
         bookingIntentId: 'bi-1',
         category: 'booking_problem',
         severity: 'medium',
@@ -200,27 +200,27 @@ describe('Complaints repository', () => {
       });
 
       MockDB.setCurrentUser('operator');
-      const updated = Repository.updateComplaintStatus(adminCtx, created.id, 'resolved');
+      const updated = await Repository.updateComplaintStatus(adminCtx, created.id, 'resolved');
       expect(updated.status).toBe('resolved');
     });
 
-    it('blocks customer from any status change', () => {
-      const created = Repository.createComplaint(customerCtx, {
+    it('blocks customer from any status change', async () => {
+      const created = await Repository.createComplaint(customerCtx, {
         bookingIntentId: 'bi-1',
         category: 'booking_problem',
         severity: 'medium',
         description: 'Customer restriction test',
       });
 
-      expect(() =>
+      await expect(
         Repository.updateComplaintStatus(customerCtx, created.id, 'resolved')
-      ).toThrow('Unauthorized');
+      ).rejects.toThrow('Unauthorized');
     });
   });
 
   describe('updateComplaintOperatorResponse', () => {
-    it('allows operator to respond with min 5 chars', () => {
-      const created = Repository.createComplaint(customerCtx, {
+    it('allows operator to respond with min 5 chars', async () => {
+      const created = await Repository.createComplaint(customerCtx, {
         bookingIntentId: 'bi-1',
         category: 'booking_problem',
         severity: 'medium',
@@ -228,7 +228,7 @@ describe('Complaints repository', () => {
       });
 
       MockDB.setCurrentUser('operator');
-      const updated = Repository.updateComplaintOperatorResponse(
+      const updated = await Repository.updateComplaintOperatorResponse(
         operatorCtx,
         created.id,
         'We are investigating this now.'
@@ -237,8 +237,8 @@ describe('Complaints repository', () => {
       expect(updated.status).toBe('operator_responding');
     });
 
-    it('blocks operator response under 5 chars', () => {
-      const created = Repository.createComplaint(customerCtx, {
+    it('blocks operator response under 5 chars', async () => {
+      const created = await Repository.createComplaint(customerCtx, {
         bookingIntentId: 'bi-1',
         category: 'booking_problem',
         severity: 'medium',
@@ -246,28 +246,28 @@ describe('Complaints repository', () => {
       });
 
       MockDB.setCurrentUser('operator');
-      expect(() =>
+      await expect(
         Repository.updateComplaintOperatorResponse(operatorCtx, created.id, 'Ok')
-      ).toThrow('Response must be at least 5 characters');
+      ).rejects.toThrow('Response must be at least 5 characters');
     });
 
-    it('blocks non-operator from responding', () => {
-      const created = Repository.createComplaint(customerCtx, {
+    it('blocks non-operator from responding', async () => {
+      const created = await Repository.createComplaint(customerCtx, {
         bookingIntentId: 'bi-1',
         category: 'booking_problem',
         severity: 'medium',
         description: 'Response RBAC test',
       });
 
-      expect(() =>
+      await expect(
         Repository.updateComplaintOperatorResponse(customerCtx, created.id, 'Not allowed')
-      ).toThrow('Unauthorized');
+      ).rejects.toThrow('Unauthorized');
     });
   });
 
   describe('updateComplaintAdminNotes', () => {
-    it('allows admin to add notes and flag operator', () => {
-      const created = Repository.createComplaint(customerCtx, {
+    it('allows admin to add notes and flag operator', async () => {
+      const created = await Repository.createComplaint(customerCtx, {
         bookingIntentId: 'bi-1',
         category: 'booking_problem',
         severity: 'medium',
@@ -275,7 +275,7 @@ describe('Complaints repository', () => {
       });
 
       MockDB.setCurrentUser('operator');
-      const updated = Repository.updateComplaintAdminNotes(
+      const updated = await Repository.updateComplaintAdminNotes(
         adminCtx,
         created.id,
         'Operator has multiple similar complaints.',
@@ -285,8 +285,8 @@ describe('Complaints repository', () => {
       expect(updated.adminFlaggedOperator).toBe(true);
     });
 
-    it('blocks non-admin from adding notes', () => {
-      const created = Repository.createComplaint(customerCtx, {
+    it('blocks non-admin from adding notes', async () => {
+      const created = await Repository.createComplaint(customerCtx, {
         bookingIntentId: 'bi-1',
         category: 'booking_problem',
         severity: 'medium',
@@ -294,9 +294,9 @@ describe('Complaints repository', () => {
       });
 
       MockDB.setCurrentUser('operator');
-      expect(() =>
+      await expect(
         Repository.updateComplaintAdminNotes(operatorCtx, created.id, 'Not allowed', false)
-      ).toThrow('Unauthorized');
+      ).rejects.toThrow('Unauthorized');
     });
   });
 });

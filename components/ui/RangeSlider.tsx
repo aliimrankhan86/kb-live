@@ -10,8 +10,8 @@ interface RangeSliderProps {
   onChange: (range: [number, number]) => void;
   minLabel?: string;
   maxLabel?: string;
-  'aria-label-min'?: string;
-  'aria-label-max'?: string;
+  ariaLabelMin?: string;
+  ariaLabelMax?: string;
   'data-testid-min'?: string;
   'data-testid-max'?: string;
 }
@@ -25,8 +25,8 @@ export const RangeSlider: React.FC<RangeSliderProps> = ({
   onChange,
   minLabel,
   maxLabel,
-  'aria-label-min': ariaLabelMin,
-  'aria-label-max': ariaLabelMax,
+  ariaLabelMin,
+  ariaLabelMax,
   'data-testid-min': testIdMin,
   'data-testid-max': testIdMax,
 }) => {

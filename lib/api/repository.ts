@@ -20,6 +20,82 @@ import {
   UserRole,
 } from '@/lib/types';
 import { generateSlug } from '@/lib/slug';
+import { getDataSource } from '@/lib/config';
+import { AppError } from '@/lib/errors';
+
+/**
+ * MockDB wrapper with async interface matching DBAdapter.
+ * Used for tests and client-side fallback.
+ */
+const mockStore = {
+  getPackages: () => Promise.resolve(MockDB.getPackages()),
+  getOperators: () => Promise.resolve(MockDB.getOperators()),
+  getOperatorById: (id: string) => Promise.resolve(MockDB.getOperatorById(id)),
+  getRequests: () => Promise.resolve(MockDB.getRequests()),
+  getRequestById: (id: string) => Promise.resolve(MockDB.getRequestById(id)),
+  getOffers: () => Promise.resolve(MockDB.getOffers()),
+  getOffersByRequestId: (requestId: string) => Promise.resolve(MockDB.getOffersByRequestId(requestId)),
+  getBookingIntents: () => Promise.resolve(MockDB.getBookingIntents()),
+  getPaymentDetails: () => Promise.resolve(MockDB.getPaymentDetails()),
+  getBankChangeRequests: () => Promise.resolve(MockDB.getBankChangeRequests()),
+  getAuditLog: () => Promise.resolve(MockDB.getAuditLog()),
+  getComplaints: () => Promise.resolve(MockDB.getComplaints()),
+  savePackage: (pkg: Package) => Promise.resolve(MockDB.savePackage(pkg)),
+  saveOperator: (op: OperatorProfile) => Promise.resolve(MockDB.saveOperator(op)),
+  saveRequest: (req: QuoteRequest) => Promise.resolve(MockDB.saveRequest(req)),
+  saveOffer: (offer: Offer) => Promise.resolve(MockDB.saveOffer(offer)),
+  saveBookingIntent: (bi: BookingIntent) => Promise.resolve(MockDB.saveBookingIntent(bi)),
+  savePaymentDetails: (pd: PaymentDetails) => Promise.resolve(MockDB.savePaymentDetails(pd)),
+  saveBankChangeRequest: (bcr: BankChangeRequest) => Promise.resolve(MockDB.saveBankChangeRequest(bcr)),
+  saveAuditLogEntry: (entry: AuditLogEntry) => Promise.resolve(MockDB.saveAuditLogEntry(entry)),
+  saveComplaint: (c: Complaint) => Promise.resolve(MockDB.saveComplaint(c)),
+  deletePackage: (id: string) => Promise.resolve(MockDB.deletePackage(id)),
+};
+
+/**
+ * Select the active data store.
+ * - Client-side: always MockDB (Prisma is server-only)
+ * - Production server (getDataSource() === 'prisma'): Prisma/Postgres via DBAdapter
+ * - Tests & dev server (getDataSource() === 'mockdb'): MockDB
+ *
+ * Uses dynamic import() for server-only module loading. The import path
+ * is constructed to prevent webpack from bundling the Prisma client
+ * into client-side code.
+ */
+let prismaAdapter: typeof mockStore | null = null;
+
+async function loadPrismaAdapter(): Promise<typeof mockStore> {
+  if (prismaAdapter) return prismaAdapter;
+  // webpackIgnore prevents webpack from tracing this import into the client bundle.
+  // This path only executes server-side when getDataSource() === 'prisma'.
+  const mod = await import(/* webpackIgnore: true */ './db/adapter' as string);
+  prismaAdapter = (mod as typeof import('./db/adapter')).DBAdapter as unknown as typeof mockStore;
+  return prismaAdapter;
+}
+
+function store(): typeof mockStore {
+  if (typeof window !== 'undefined') {
+    // Client-side: Prisma is not available; always use MockDB
+    return mockStore;
+  }
+  if (getDataSource() === 'prisma') {
+    // Server-side only: lazy-load Prisma adapter via dynamic import
+    // This returns a Promise-like store; callers must await store() calls
+    return new Proxy(mockStore, {
+      get(_target, prop) {
+        return async (...args: unknown[]) => {
+          const adapter = await loadPrismaAdapter();
+          const method = (adapter as Record<string, unknown>)[String(prop)];
+          if (typeof method === 'function') {
+            return (method as (...a: unknown[]) => unknown)(...args);
+          }
+          throw new Error(`DBAdapter method ${String(prop)} not found`);
+        };
+      },
+    }) as unknown as typeof mockStore;
+  }
+  return mockStore;
+}
 
 // Simulate a secure context from the server (e.g. session)
 export interface RequestContext {
@@ -43,17 +119,18 @@ const cleanOptionalText = (value?: string) => {
 };
 
 const requireAdmin = (ctx: RequestContext) => {
-  if (ctx.role !== 'admin') throw new Error('Unauthorized');
+  if (ctx.role !== 'admin') throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
 };
 
 const requireOperatorOwner = (ctx: RequestContext, operatorId: string) => {
-  if (ctx.role !== 'operator' || ctx.userId !== operatorId) throw new Error('Unauthorized');
+  if (ctx.role !== 'operator' || ctx.userId !== operatorId)
+    throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
 };
 
 const requireOperatorOwnerOrAdmin = (ctx: RequestContext, operatorId: string) => {
   if (ctx.role === 'admin') return;
   if (ctx.role === 'operator' && ctx.userId === operatorId) return;
-  throw new Error('Unauthorized');
+  throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
 };
 
 const normalizeSortCode = (sortCode: string) => {
@@ -101,16 +178,16 @@ const requirePhoneConfirmation = (phoneConfirmation: PaymentPhoneConfirmation) =
   };
 };
 
-const getActivePaymentDetails = (operatorId: string) =>
-  MockDB.getPaymentDetails().find(
+const getActivePaymentDetails = async (operatorId: string) =>
+  (await store().getPaymentDetails()).find(
     (paymentDetails) => paymentDetails.operatorId === operatorId && paymentDetails.status === 'active'
   );
 
-const writeAuditLog = (
+const writeAuditLog = async (
   ctx: RequestContext,
   entry: Omit<AuditLogEntry, 'id' | 'actorUserId' | 'actorRole' | 'createdAt'>
 ) =>
-  MockDB.saveAuditLogEntry({
+  store().saveAuditLogEntry({
     ...entry,
     id: crypto.randomUUID(),
     actorUserId: ctx.userId,
@@ -118,11 +195,11 @@ const writeAuditLog = (
     createdAt: new Date().toISOString(),
   });
 
-const updateOperatorEligibility = (operatorId: string) => {
-  const operator = MockDB.getOperatorById(operatorId);
+const updateOperatorEligibility = async (operatorId: string) => {
+  const operator = await store().getOperatorById(operatorId);
   if (!operator) return undefined;
 
-  const activePaymentDetails = getActivePaymentDetails(operatorId);
+  const activePaymentDetails = await getActivePaymentDetails(operatorId);
   const flags = operator.eligibilityFlags ?? {
     canReceiveBookings: false,
     bankDetailsActive: false,
@@ -134,7 +211,7 @@ const updateOperatorEligibility = (operatorId: string) => {
     Boolean(activePaymentDetails) &&
     flags.paymentSlaFlagged !== true;
 
-  return MockDB.saveOperator({
+  return store().saveOperator({
     ...operator,
     eligibilityFlags: {
       ...flags,
@@ -145,8 +222,8 @@ const updateOperatorEligibility = (operatorId: string) => {
   });
 };
 
-const writeSystemAuditLog = (entry: Omit<AuditLogEntry, 'id' | 'actorUserId' | 'actorRole' | 'createdAt'>) =>
-  MockDB.saveAuditLogEntry({
+const writeSystemAuditLog = async (entry: Omit<AuditLogEntry, 'id' | 'actorUserId' | 'actorRole' | 'createdAt'>) =>
+  store().saveAuditLogEntry({
     ...entry,
     id: crypto.randomUUID(),
     actorUserId: 'system',
@@ -154,9 +231,9 @@ const writeSystemAuditLog = (entry: Omit<AuditLogEntry, 'id' | 'actorUserId' | '
     createdAt: new Date().toISOString(),
   });
 
-const activateEligibleBankChangeRequests = (operatorId: string) => {
+const activateEligibleBankChangeRequests = async (operatorId: string) => {
   const now = new Date();
-  const requests = MockDB.getBankChangeRequests().filter(
+  const requests = (await store().getBankChangeRequests()).filter(
     (request) =>
       request.operatorId === operatorId &&
       request.status === 'approved' &&
@@ -164,11 +241,11 @@ const activateEligibleBankChangeRequests = (operatorId: string) => {
       new Date(request.activationEligibleAt) <= now
   );
 
-  requests.forEach((request) => {
+  for (const request of requests) {
     const timestamp = new Date().toISOString();
-    const currentActive = getActivePaymentDetails(operatorId);
+    const currentActive = await getActivePaymentDetails(operatorId);
     if (currentActive) {
-      MockDB.savePaymentDetails({
+      await store().savePaymentDetails({
         ...currentActive,
         status: 'superseded',
         updatedAt: timestamp,
@@ -188,13 +265,13 @@ const activateEligibleBankChangeRequests = (operatorId: string) => {
       phoneVerifiedAt: request.phoneVerifiedAt,
       phoneLastFour: request.phoneLastFour,
     };
-    MockDB.savePaymentDetails(activatedDetails);
-    MockDB.saveBankChangeRequest({
+    await store().savePaymentDetails(activatedDetails);
+    await store().saveBankChangeRequest({
       ...request,
       status: 'activated',
       activatedAt: timestamp,
     });
-    writeSystemAuditLog({
+    await writeSystemAuditLog({
       action: 'bank_change.activated',
       operatorId,
       targetType: 'bank_change_request',
@@ -204,14 +281,14 @@ const activateEligibleBankChangeRequests = (operatorId: string) => {
         previousPaymentDetailsId: currentActive?.id ?? null,
       },
     });
-  });
+  }
 
-  if (requests.length > 0) updateOperatorEligibility(operatorId);
+  if (requests.length > 0) await updateOperatorEligibility(operatorId);
 };
 
-const isOperatorBookableById = (operatorId: string) => {
-  activateEligibleBankChangeRequests(operatorId);
-  const operator = MockDB.getOperatorById(operatorId);
+const isOperatorBookableById = async (operatorId: string) => {
+  await activateEligibleBankChangeRequests(operatorId);
+  const operator = await store().getOperatorById(operatorId);
   if (!operator) return false;
 
   return (
@@ -219,7 +296,7 @@ const isOperatorBookableById = (operatorId: string) => {
     operator.tier !== 'listed' &&
     operator.eligibilityFlags?.canReceiveBookings === true &&
     operator.eligibilityFlags.bankDetailsActive === true &&
-    Boolean(getActivePaymentDetails(operatorId))
+    Boolean(await getActivePaymentDetails(operatorId))
   );
 };
 
@@ -236,12 +313,12 @@ const requireComplaintAccess = (ctx: RequestContext, complaint: Complaint) => {
   if (ctx.role === 'admin') return;
   if (ctx.role === 'customer' && ctx.userId === complaint.customerId) return;
   if (ctx.role === 'operator' && ctx.userId === complaint.operatorId) return;
-  throw new Error('Unauthorized');
+  throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
 };
 
 const requireComplaintOperatorAccess = (ctx: RequestContext, complaint: Complaint) => {
   if (ctx.role === 'operator' && ctx.userId === complaint.operatorId) return;
-  throw new Error('Unauthorized');
+  throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
 };
 
 const VALID_COMPLAINT_CATEGORIES: ComplaintCategory[] = [
@@ -314,74 +391,72 @@ const requireBookingIntentEvidenceAccess = (ctx: RequestContext, bookingIntent: 
   if (ctx.role === 'admin') return;
   if (ctx.role === 'customer' && ctx.userId === bookingIntent.customerId) return;
   if (ctx.role === 'operator' && ctx.userId === bookingIntent.operatorId) return;
-  throw new Error('Unauthorized');
+  throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
 };
 
 export const Repository = {
   // Quote Requests
-  getRequests: (ctx: RequestContext): QuoteRequest[] => {
-    const all = MockDB.getRequests();
+  getRequests: async (ctx: RequestContext): Promise<QuoteRequest[]> => {
+    const all = await store().getRequests();
     if (ctx.role === 'customer') {
       return all.filter((r) => r.customerId === ctx.userId);
     }
     if (ctx.role === 'operator') {
-      // Operators see all open requests to bid on
-      // OR only requests they have already bid on
-      // For MVP marketplace, they see all open requests + requests they responded to.
-      return all.filter(r => r.status === 'open' || MockDB.getOffersByRequestId(r.id).some(o => o.operatorId === ctx.userId));
+      const allOffers = await store().getOffers();
+      return all.filter(
+        (r) => r.status === 'open' || allOffers.some((o) => o.requestId === r.id && o.operatorId === ctx.userId)
+      );
     }
     return all; // Admin
   },
 
-  getRequestById: (ctx: RequestContext, id: string): QuoteRequest | undefined => {
-    const req = MockDB.getRequestById(id);
+  getRequestById: async (ctx: RequestContext, id: string): Promise<QuoteRequest | undefined> => {
+    const req = await store().getRequestById(id);
     if (!req) return undefined;
-    
+
     if (ctx.role === 'customer' && req.customerId !== ctx.userId) return undefined;
-    // Operator can view if it's open or they have an offer
     if (ctx.role === 'operator') {
-        const hasOffer = MockDB.getOffersByRequestId(id).some(o => o.operatorId === ctx.userId);
-        if (req.status !== 'open' && !hasOffer) return undefined;
+      const offers = await store().getOffersByRequestId(id);
+      const hasOffer = offers.some((o) => o.operatorId === ctx.userId);
+      if (req.status !== 'open' && !hasOffer) return undefined;
     }
     return req;
   },
 
   // Offers
-  getOffersForRequest: (ctx: RequestContext, requestId: string): Offer[] => {
-    const all = MockDB.getOffersByRequestId(requestId);
+  getOffersForRequest: async (ctx: RequestContext, requestId: string): Promise<Offer[]> => {
+    const all = await store().getOffersByRequestId(requestId);
     if (ctx.role === 'customer') {
-      // Customer sees all offers for their request
-      const req = MockDB.getRequestById(requestId);
+      const req = await store().getRequestById(requestId);
       if (req?.customerId !== ctx.userId) return [];
       return all;
     }
     if (ctx.role === 'operator') {
-      // Operator sees ONLY their own offers
       return all.filter((o) => o.operatorId === ctx.userId);
     }
     return all;
   },
 
-  createOffer: (ctx: RequestContext, offer: Offer): Offer => {
-    if (ctx.role !== 'operator') throw new Error('Unauthorized');
-    // Enforce operatorId
+  createOffer: async (ctx: RequestContext, offer: Offer): Promise<Offer> => {
+    if (ctx.role !== 'operator') throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
     const secureOffer = { ...offer, operatorId: ctx.userId };
-    return MockDB.saveOffer(secureOffer);
+    return store().saveOffer(secureOffer);
   },
 
   // Booking Intents
-  createBookingIntent: (ctx: RequestContext, intent: Partial<BookingIntent>): BookingIntent => {
-    if (ctx.role !== 'customer') throw new Error('Unauthorized');
+  createBookingIntent: async (ctx: RequestContext, intent: Partial<BookingIntent>): Promise<BookingIntent> => {
+    if (ctx.role !== 'customer') throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
     if (!intent.offerId) throw new Error('Offer is required');
     if (!intent.operatorId) throw new Error('Operator is required');
 
-    const offer = MockDB.getOffers().find((candidate) => candidate.id === intent.offerId);
+    const allOffers = await store().getOffers();
+    const offer = allOffers.find((candidate) => candidate.id === intent.offerId);
     if (!offer) throw new Error('Offer not found');
     if (offer.operatorId !== intent.operatorId) throw new Error('Operator does not match offer');
-    if (!isOperatorBookableById(offer.operatorId)) throw new Error('Operator is not eligible to receive bookings');
+    if (!await isOperatorBookableById(offer.operatorId)) throw new Error('Operator is not eligible to receive bookings');
 
-    const request = MockDB.getRequestById(offer.requestId);
-    if (!request || request.customerId !== ctx.userId) throw new Error('Unauthorized');
+    const request = await store().getRequestById(offer.requestId);
+    if (!request || request.customerId !== ctx.userId) throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
 
     const paymentEvidence = preparePaymentEvidence(intent.paymentEvidence);
     const hasEvidence = Boolean(paymentEvidence?.files.length);
@@ -395,13 +470,14 @@ export const Repository = {
       throw new Error('Choose either payment evidence or skip proof acknowledgement');
     }
 
+    const existingIntents = await store().getBookingIntents();
     const existingCodes = new Set(
-      MockDB.getBookingIntents()
+      existingIntents
         .map((booking) => booking.referenceCode)
         .filter((referenceCode): referenceCode is string => Boolean(referenceCode))
     );
     const now = new Date().toISOString();
-    
+
     const newIntent: BookingIntent = {
       id: crypto.randomUUID(),
       referenceCode: generateReferenceCode(existingCodes),
@@ -416,26 +492,29 @@ export const Repository = {
       proofSkippedAt: skipProofAcknowledged ? now : undefined,
       notes: cleanOptionalText(intent.notes),
     };
-    
-    MockDB.saveBookingIntent(newIntent);
+
+    await store().saveBookingIntent(newIntent);
     return newIntent;
   },
 
-  getBookingIntents: (ctx: RequestContext): BookingIntent[] => {
-    const all = MockDB.getBookingIntents().map(pruneExpiredEvidence);
-    if (ctx.role === 'customer') return all.filter(b => b.customerId === ctx.userId);
-    if (ctx.role === 'operator') return all.filter(b => b.operatorId === ctx.userId);
+  getBookingIntents: async (ctx: RequestContext): Promise<BookingIntent[]> => {
+    const all = (await store().getBookingIntents()).map(pruneExpiredEvidence);
+    if (ctx.role === 'customer') return all.filter((b) => b.customerId === ctx.userId);
+    if (ctx.role === 'operator') return all.filter((b) => b.operatorId === ctx.userId);
     return all;
   },
 
-  getEvidenceBytes: (ctx: RequestContext, bookingIntentId: string): BookingPaymentEvidence | undefined => {
-    const bookingIntent = MockDB.getBookingIntents().find((b) => b.id === bookingIntentId);
+  getEvidenceBytes: async (ctx: RequestContext, bookingIntentId: string): Promise<BookingPaymentEvidence | undefined> => {
+    const bookingIntents = await store().getBookingIntents();
+    const bookingIntent = bookingIntents.find((b) => b.id === bookingIntentId);
     if (!bookingIntent) throw new Error('Booking intent not found');
     requireBookingIntentEvidenceAccess(ctx, bookingIntent);
 
     const pruned = pruneExpiredEvidence(bookingIntent);
-    if (pruned.id !== bookingIntent.id) {
-      MockDB.saveBookingIntent(pruned);
+    // Check if evidence was actually pruned (storageStatus changed)
+    const wasPruned = pruned.paymentEvidence?.storageStatus !== bookingIntent.paymentEvidence?.storageStatus;
+    if (wasPruned) {
+      await store().saveBookingIntent(pruned);
     }
 
     const evidence = pruned.paymentEvidence;
@@ -447,9 +526,10 @@ export const Repository = {
     return evidence;
   },
 
-  flagEvidenceForRetention: (ctx: RequestContext, bookingIntentId: string): BookingIntent => {
+  flagEvidenceForRetention: async (ctx: RequestContext, bookingIntentId: string): Promise<BookingIntent> => {
     requireAdmin(ctx);
-    const bookingIntent = MockDB.getBookingIntents().find((b) => b.id === bookingIntentId);
+    const bookingIntents = await store().getBookingIntents();
+    const bookingIntent = bookingIntents.find((b) => b.id === bookingIntentId);
     if (!bookingIntent) throw new Error('Booking intent not found');
     if (!bookingIntent.paymentEvidence) throw new Error('No payment evidence to flag');
 
@@ -461,24 +541,24 @@ export const Repository = {
       },
       updatedAt: new Date().toISOString(),
     };
-    MockDB.saveBookingIntent(updated);
+    await store().saveBookingIntent(updated);
     return updated;
   },
 
   // Operator payment details and eligibility
-  createPaymentDetails: (
+  createPaymentDetails: async (
     ctx: RequestContext,
     input: {
       operatorId: string;
       details: PaymentDetailsInput;
       phoneConfirmation: PaymentPhoneConfirmation;
     }
-  ): PaymentDetails => {
+  ): Promise<PaymentDetails> => {
     requireOperatorOwner(ctx, input.operatorId);
 
-    const operator = MockDB.getOperatorById(input.operatorId);
+    const operator = await store().getOperatorById(input.operatorId);
     if (!operator) throw new Error('Operator not found');
-    if (getActivePaymentDetails(input.operatorId)) {
+    if (await getActivePaymentDetails(input.operatorId)) {
       throw new Error('Active payment details already exist; use a bank change request');
     }
 
@@ -497,9 +577,9 @@ export const Repository = {
       phoneLastFour: phone.phoneLastFour,
     };
 
-    MockDB.savePaymentDetails(paymentDetails);
-    updateOperatorEligibility(input.operatorId);
-    writeAuditLog(ctx, {
+    await store().savePaymentDetails(paymentDetails);
+    await updateOperatorEligibility(input.operatorId);
+    await writeAuditLog(ctx, {
       action: 'payment_details.created',
       operatorId: input.operatorId,
       targetType: 'payment_details',
@@ -513,9 +593,9 @@ export const Repository = {
     return paymentDetails;
   },
 
-  isOperatorBookable: (operatorId: string): boolean => isOperatorBookableById(operatorId),
+  isOperatorBookable: async (operatorId: string): Promise<boolean> => isOperatorBookableById(operatorId),
 
-  createBankChangeRequest: (
+  createBankChangeRequest: async (
     ctx: RequestContext,
     input: {
       operatorId: string;
@@ -523,13 +603,14 @@ export const Repository = {
       phoneConfirmation: PaymentPhoneConfirmation;
       reason?: string;
     }
-  ): BankChangeRequest => {
+  ): Promise<BankChangeRequest> => {
     requireOperatorOwner(ctx, input.operatorId);
 
-    const currentPaymentDetails = getActivePaymentDetails(input.operatorId);
+    const currentPaymentDetails = await getActivePaymentDetails(input.operatorId);
     if (!currentPaymentDetails) throw new Error('Active payment details are required before requesting a change');
 
-    const pendingRequest = MockDB.getBankChangeRequests().find(
+    const allRequests = await store().getBankChangeRequests();
+    const pendingRequest = allRequests.find(
       (request) => request.operatorId === input.operatorId && request.status === 'pending_review'
     );
     if (pendingRequest) throw new Error('A bank change request is already pending review');
@@ -548,8 +629,8 @@ export const Repository = {
       phoneLastFour: phone.phoneLastFour,
     };
 
-    MockDB.saveBankChangeRequest(request);
-    writeAuditLog(ctx, {
+    await store().saveBankChangeRequest(request);
+    await writeAuditLog(ctx, {
       action: 'bank_change.requested',
       operatorId: input.operatorId,
       targetType: 'bank_change_request',
@@ -563,10 +644,11 @@ export const Repository = {
     return request;
   },
 
-  approveBankChangeRequest: (ctx: RequestContext, requestId: string, reviewNotes?: string): BankChangeRequest => {
+  approveBankChangeRequest: async (ctx: RequestContext, requestId: string, reviewNotes?: string): Promise<BankChangeRequest> => {
     requireAdmin(ctx);
 
-    const request = MockDB.getBankChangeRequests().find((candidate) => candidate.id === requestId);
+    const allRequests = await store().getBankChangeRequests();
+    const request = allRequests.find((candidate) => candidate.id === requestId);
     if (!request) throw new Error('Bank change request not found');
     if (request.status !== 'pending_review') throw new Error('Only pending bank change requests can be approved');
 
@@ -580,8 +662,8 @@ export const Repository = {
       activationEligibleAt: new Date(Date.now() + BANK_CHANGE_COOLING_PERIOD_MS).toISOString(),
     };
 
-    MockDB.saveBankChangeRequest(approved);
-    writeAuditLog(ctx, {
+    await store().saveBankChangeRequest(approved);
+    await writeAuditLog(ctx, {
       action: 'bank_change.approved',
       operatorId: approved.operatorId,
       targetType: 'bank_change_request',
@@ -594,10 +676,11 @@ export const Repository = {
     return approved;
   },
 
-  rejectBankChangeRequest: (ctx: RequestContext, requestId: string, reviewNotes: string): BankChangeRequest => {
+  rejectBankChangeRequest: async (ctx: RequestContext, requestId: string, reviewNotes: string): Promise<BankChangeRequest> => {
     requireAdmin(ctx);
 
-    const request = MockDB.getBankChangeRequests().find((candidate) => candidate.id === requestId);
+    const allRequests = await store().getBankChangeRequests();
+    const request = allRequests.find((candidate) => candidate.id === requestId);
     if (!request) throw new Error('Bank change request not found');
     if (request.status !== 'pending_review') throw new Error('Only pending bank change requests can be rejected');
 
@@ -614,8 +697,8 @@ export const Repository = {
       reviewNotes: cleanOptionalText(reviewNotes),
     };
 
-    MockDB.saveBankChangeRequest(rejected);
-    writeAuditLog(ctx, {
+    await store().saveBankChangeRequest(rejected);
+    await writeAuditLog(ctx, {
       action: 'bank_change.rejected',
       operatorId: rejected.operatorId,
       targetType: 'bank_change_request',
@@ -625,8 +708,9 @@ export const Repository = {
     return rejected;
   },
 
-  cancelBankChangeRequest: (ctx: RequestContext, requestId: string): BankChangeRequest => {
-    const request = MockDB.getBankChangeRequests().find((candidate) => candidate.id === requestId);
+  cancelBankChangeRequest: async (ctx: RequestContext, requestId: string): Promise<BankChangeRequest> => {
+    const allRequests = await store().getBankChangeRequests();
+    const request = allRequests.find((candidate) => candidate.id === requestId);
     if (!request) throw new Error('Bank change request not found');
     requireOperatorOwner(ctx, request.operatorId);
     if (request.status !== 'pending_review' && request.status !== 'approved') {
@@ -640,8 +724,8 @@ export const Repository = {
       cancelledAt: new Date().toISOString(),
     };
 
-    MockDB.saveBankChangeRequest(cancelled);
-    writeAuditLog(ctx, {
+    await store().saveBankChangeRequest(cancelled);
+    await writeAuditLog(ctx, {
       action: 'bank_change.cancelled',
       operatorId: cancelled.operatorId,
       targetType: 'bank_change_request',
@@ -651,22 +735,23 @@ export const Repository = {
     return cancelled;
   },
 
-  getPaymentInstructions: (ctx: RequestContext, bookingIntentId: string): PaymentInstructions => {
-    const bookingIntent = MockDB.getBookingIntents().find((booking) => booking.id === bookingIntentId);
+  getPaymentInstructions: async (ctx: RequestContext, bookingIntentId: string): Promise<PaymentInstructions> => {
+    const bookingIntents = await store().getBookingIntents();
+    const bookingIntent = bookingIntents.find((booking) => booking.id === bookingIntentId);
     if (!bookingIntent) throw new Error('Booking intent not found');
 
     const hasAccess =
       ctx.role === 'admin' ||
       (ctx.role === 'customer' && bookingIntent.customerId === ctx.userId) ||
       (ctx.role === 'operator' && bookingIntent.operatorId === ctx.userId);
-    if (!hasAccess) throw new Error('Unauthorized');
+    if (!hasAccess) throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
 
-    if (!isOperatorBookableById(bookingIntent.operatorId)) {
+    if (!await isOperatorBookableById(bookingIntent.operatorId)) {
       throw new Error('Operator is not eligible to receive bookings');
     }
 
-    const paymentDetails = getActivePaymentDetails(bookingIntent.operatorId);
-    const operator = MockDB.getOperatorById(bookingIntent.operatorId);
+    const paymentDetails = await getActivePaymentDetails(bookingIntent.operatorId);
+    const operator = await store().getOperatorById(bookingIntent.operatorId);
     if (!paymentDetails || !operator) throw new Error('Payment instructions are unavailable');
 
     return {
@@ -685,28 +770,27 @@ export const Repository = {
     };
   },
 
-  getPaymentDetails: (ctx: RequestContext, operatorId: string): PaymentDetails | undefined => {
+  getPaymentDetails: async (ctx: RequestContext, operatorId: string): Promise<PaymentDetails | undefined> => {
     requireOperatorOwnerOrAdmin(ctx, operatorId);
-    activateEligibleBankChangeRequests(operatorId);
+    await activateEligibleBankChangeRequests(operatorId);
     return getActivePaymentDetails(operatorId);
   },
 
-  getOperatorAuditLog: (ctx: RequestContext, operatorId: string): AuditLogEntry[] => {
+  getOperatorAuditLog: async (ctx: RequestContext, operatorId: string): Promise<AuditLogEntry[]> => {
     requireOperatorOwnerOrAdmin(ctx, operatorId);
-    return MockDB.getAuditLog()
+    return (await store().getAuditLog())
       .filter((entry) => entry.operatorId === operatorId)
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   },
 
-  getAuditLog: (ctx: RequestContext): AuditLogEntry[] => {
+  getAuditLog: async (ctx: RequestContext): Promise<AuditLogEntry[]> => {
     requireAdmin(ctx);
-    return MockDB.getAuditLog();
+    return store().getAuditLog();
   },
 
   // Operators
-  createOperator: (ctx: RequestContext, input: Partial<OperatorProfile>): OperatorProfile => {
-    // Only authenticated users can create operators; typically a user creates their own operator profile
-    if (!ctx.userId) throw new Error('Unauthorized');
+  createOperator: async (ctx: RequestContext, input: Partial<OperatorProfile>): Promise<OperatorProfile> => {
+    if (!ctx.userId) throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
 
     const now = new Date().toISOString();
     const operator: OperatorProfile = {
@@ -724,13 +808,13 @@ export const Repository = {
       updatedAt: now,
     } as OperatorProfile;
 
-    MockDB.saveOperator(operator);
+    await store().saveOperator(operator);
     return operator;
   },
 
-  updateOperator: (ctx: RequestContext, id: string, updates: Partial<OperatorProfile>): OperatorProfile => {
+  updateOperator: async (ctx: RequestContext, id: string, updates: Partial<OperatorProfile>): Promise<OperatorProfile> => {
     requireOperatorOwnerOrAdmin(ctx, id);
-    const existing = MockDB.getOperatorById(id);
+    const existing = await store().getOperatorById(id);
     if (!existing) throw new Error('Operator not found');
 
     const operator: OperatorProfile = {
@@ -739,42 +823,70 @@ export const Repository = {
       id, // protect id
       updatedAt: new Date().toISOString(),
     };
-    MockDB.saveOperator(operator);
+    await store().saveOperator(operator);
+    return operator;
+  },
+
+  verifyOperatorAtol: async (ctx: RequestContext, operatorId: string): Promise<OperatorProfile> => {
+    requireAdmin(ctx);
+    const existing = await store().getOperatorById(operatorId);
+    if (!existing) throw new Error('Operator not found');
+    const operator: OperatorProfile = {
+      ...existing,
+      atolVerifiedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    await store().saveOperator(operator);
+    return operator;
+  },
+
+  verifyOperatorAbta: async (ctx: RequestContext, operatorId: string): Promise<OperatorProfile> => {
+    requireAdmin(ctx);
+    const existing = await store().getOperatorById(operatorId);
+    if (!existing) throw new Error('Operator not found');
+    const operator: OperatorProfile = {
+      ...existing,
+      abtaVerifiedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    await store().saveOperator(operator);
     return operator;
   },
 
   // Packages
-  createPackage: (ctx: RequestContext, pkg: Partial<Package>): Package => {
-    if (ctx.role !== 'operator') throw new Error('Unauthorized');
-    
-    // Validate required fields (basic check)
+  createPackage: async (ctx: RequestContext, pkg: Partial<Package>): Promise<Package> => {
+    if (ctx.role !== 'operator') throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
+
     if (!pkg.title || !pkg.pricePerPerson) throw new Error('Missing required fields');
 
     const newPackage: Package = {
       ...pkg as Package,
       id: crypto.randomUUID(),
-      operatorId: ctx.userId, // Enforce ownership
-      slug: generateSlug(pkg.title) + '-' + Math.random().toString(36).substring(7), // Ensure unique
+      operatorId: ctx.userId,
+      slug: generateSlug(pkg.title) + '-' + Math.random().toString(36).substring(7),
     };
-    
-    return MockDB.savePackage(newPackage);
+
+    return store().savePackage(newPackage);
   },
 
-  listPackages: (): Package[] => {
-    return MockDB.getPackages().filter(p => p.status === 'published'); // Public read: only published
+  listPackages: async (): Promise<Package[]> => {
+    const all = await store().getPackages();
+    return all.filter((p) => p.status === 'published');
   },
 
-  getPackageBySlug: (slug: string): Package | undefined => {
-    return MockDB.getPackages().find(p => p.slug === slug);
+  getPackageBySlug: async (slug: string): Promise<Package | undefined> => {
+    const all = await store().getPackages();
+    return all.find((p) => p.slug === slug);
   },
 
-  getPackagesByOperator: (operatorId: string): Package[] => {
-    return MockDB.getPackages().filter(p => p.operatorId === operatorId);
+  getPackagesByOperator: async (operatorId: string): Promise<Package[]> => {
+    const all = await store().getPackages();
+    return all.filter((p) => p.operatorId === operatorId);
   },
 
-  exportPackagesAsCsv: (ctx: RequestContext): string => {
-    if (ctx.role !== 'operator') throw new Error('Unauthorized');
-    const packages = MockDB.getPackages().filter(p => p.operatorId === ctx.userId);
+  exportPackagesAsCsv: async (ctx: RequestContext): Promise<string> => {
+    if (ctx.role !== 'operator') throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
+    const packages = (await store().getPackages()).filter((p) => p.operatorId === ctx.userId);
     if (packages.length === 0) return '';
 
     const headers = [
@@ -819,8 +931,8 @@ export const Repository = {
     return [headers.join(','), ...rows.map((r) => r.map(escapeCsv).join(','))].join('\n');
   },
 
-  importPackagesFromCsv: (ctx: RequestContext, csvText: string): { saved: Package[]; errors: { row: number; reason: string }[] } => {
-    if (ctx.role !== 'operator') throw new Error('Unauthorized');
+  importPackagesFromCsv: async (ctx: RequestContext, csvText: string): Promise<{ saved: Package[]; errors: { row: number; reason: string }[] }> => {
+    if (ctx.role !== 'operator') throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
 
     const lines = csvText.trim().split(/\r?\n/);
     if (lines.length < 2) throw new Error('CSV must contain a header row and at least one data row');
@@ -913,8 +1025,14 @@ export const Repository = {
         totalNights,
         nightsMakkah: Number(getValue(cells, 'nightsMakkah')) || totalNights,
         nightsMadinah: Number(getValue(cells, 'nightsMadinah')) || 0,
-        hotelMakkahStars: Number(getValue(cells, 'hotelMakkahStars')) as 3 | 4 | 5 || undefined,
-        hotelMadinahStars: Number(getValue(cells, 'hotelMadinahStars')) as 3 | 4 | 5 || undefined,
+        hotelMakkahStars: ((): 3 | 4 | 5 | undefined => {
+          const n = Number(getValue(cells, 'hotelMakkahStars'));
+          return [3, 4, 5].includes(n) ? (n as 3 | 4 | 5) : undefined;
+        })(),
+        hotelMadinahStars: ((): 3 | 4 | 5 | undefined => {
+          const n = Number(getValue(cells, 'hotelMadinahStars'));
+          return [3, 4, 5].includes(n) ? (n as 3 | 4 | 5) : undefined;
+        })(),
         hotelMakkahName: getValue(cells, 'hotelMakkahName') || undefined,
         hotelMadinahName: getValue(cells, 'hotelMadinahName') || undefined,
         distanceToHaramMakkahMetres: Number(getValue(cells, 'distanceToHaramMakkahMetres')) || undefined,
@@ -945,55 +1063,55 @@ export const Repository = {
         updatedAt: new Date().toISOString(),
       };
 
-      MockDB.savePackage(pkg);
+      await store().savePackage(pkg);
       saved.push(pkg);
     }
 
     return { saved, errors };
   },
 
-  getOperators: (ctx: RequestContext): OperatorProfile[] => {
-    const all = MockDB.getOperators();
+  getOperators: async (ctx: RequestContext): Promise<OperatorProfile[]> => {
+    const all = await store().getOperators();
     if (ctx.role === 'operator') return all.filter((o) => o.id === ctx.userId);
     if (ctx.role === 'admin') return all;
     return [];
   },
 
-  getOperatorById: (id: string): OperatorProfile | undefined => {
-    return MockDB.getOperatorById(id);
+  getOperatorById: async (id: string): Promise<OperatorProfile | undefined> => {
+    return store().getOperatorById(id);
   },
 
-  getOperatorBySlug: (slug: string): OperatorProfile | undefined => {
-    return MockDB.getOperators().find((operator) => operator.slug === slug);
+  getOperatorBySlug: async (slug: string): Promise<OperatorProfile | undefined> => {
+    return (await store().getOperators()).find((operator) => operator.slug === slug);
   },
 
-  updatePackage: (ctx: RequestContext, id: string, updates: Partial<Package>): Package => {
-    const existing = MockDB.getPackages().find(p => p.id === id);
+  updatePackage: async (ctx: RequestContext, id: string, updates: Partial<Package>): Promise<Package> => {
+    const all = await store().getPackages();
+    const existing = all.find((p) => p.id === id);
     if (!existing) throw new Error('Not found');
-    
-    // RBAC: Only owner can update
+
     if (ctx.role !== 'operator' || existing.operatorId !== ctx.userId) {
-      throw new Error('Unauthorized');
+      throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
     }
 
-    const updated = { ...existing, ...updates, id, operatorId: existing.operatorId }; // Protect id/operatorId
-    return MockDB.savePackage(updated);
+    const updated = { ...existing, ...updates, id, operatorId: existing.operatorId };
+    return store().savePackage(updated);
   },
 
-  deletePackage: (ctx: RequestContext, id: string): void => {
-    const existing = MockDB.getPackages().find(p => p.id === id);
+  deletePackage: async (ctx: RequestContext, id: string): Promise<void> => {
+    const all = await store().getPackages();
+    const existing = all.find((p) => p.id === id);
     if (!existing) return;
 
-    // RBAC: Only owner can delete
     if (ctx.role !== 'operator' || existing.operatorId !== ctx.userId) {
-      throw new Error('Unauthorized');
+      throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
     }
 
-    MockDB.deletePackage(id);
+    await store().deletePackage(id);
   },
 
   // Complaints
-  createComplaint: (
+  createComplaint: async (
     ctx: RequestContext,
     input: {
       bookingIntentId: string;
@@ -1001,12 +1119,14 @@ export const Repository = {
       severity: ComplaintSeverity;
       description: string;
     }
-  ): Complaint => {
-    if (ctx.role !== 'customer') throw new Error('Unauthorized');
+  ): Promise<Complaint> => {
+    if (ctx.role !== 'customer') throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
 
-    const bookingIntent = MockDB.getBookingIntents().find((b) => b.id === input.bookingIntentId);
+    const bookingIntents = await store().getBookingIntents();
+    const bookingIntent = bookingIntents.find((b) => b.id === input.bookingIntentId);
     if (!bookingIntent) throw new Error('Booking intent not found');
-    if (bookingIntent.customerId !== ctx.userId) throw new Error('Unauthorized');
+    if (bookingIntent.customerId !== ctx.userId)
+      throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
 
     if (!VALID_COMPLAINT_CATEGORIES.includes(input.category)) {
       throw new Error('Invalid complaint category');
@@ -1030,26 +1150,28 @@ export const Repository = {
       updatedAt: now,
     };
 
-    MockDB.saveComplaint(complaint);
+    await store().saveComplaint(complaint);
     return complaint;
   },
 
-  getComplaints: (ctx: RequestContext): Complaint[] => {
-    const all = MockDB.getComplaints();
+  getComplaints: async (ctx: RequestContext): Promise<Complaint[]> => {
+    const all = await store().getComplaints();
     if (ctx.role === 'customer') return all.filter((c) => c.customerId === ctx.userId);
     if (ctx.role === 'operator') return all.filter((c) => c.operatorId === ctx.userId);
     return all;
   },
 
-  getComplaintById: (ctx: RequestContext, id: string): Complaint | undefined => {
-    const complaint = MockDB.getComplaints().find((c) => c.id === id);
+  getComplaintById: async (ctx: RequestContext, id: string): Promise<Complaint | undefined> => {
+    const complaints = await store().getComplaints();
+    const complaint = complaints.find((c) => c.id === id);
     if (!complaint) return undefined;
     requireComplaintAccess(ctx, complaint);
     return complaint;
   },
 
-  updateComplaintStatus: (ctx: RequestContext, id: string, status: ComplaintStatus): Complaint => {
-    const complaint = MockDB.getComplaints().find((c) => c.id === id);
+  updateComplaintStatus: async (ctx: RequestContext, id: string, status: ComplaintStatus): Promise<Complaint> => {
+    const complaints = await store().getComplaints();
+    const complaint = complaints.find((c) => c.id === id);
     if (!complaint) throw new Error('Complaint not found');
     requireComplaintAccess(ctx, complaint);
 
@@ -1065,7 +1187,7 @@ export const Repository = {
     } else if (ctx.role === 'admin') {
       if (!allowedAdminStatuses.includes(status)) throw new Error('Admin cannot set this status');
     } else {
-      throw new Error('Unauthorized');
+      throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
     }
 
     const updated: Complaint = {
@@ -1073,12 +1195,13 @@ export const Repository = {
       status,
       updatedAt: new Date().toISOString(),
     };
-    MockDB.saveComplaint(updated);
+    await store().saveComplaint(updated);
     return updated;
   },
 
-  updateComplaintOperatorResponse: (ctx: RequestContext, id: string, response: string): Complaint => {
-    const complaint = MockDB.getComplaints().find((c) => c.id === id);
+  updateComplaintOperatorResponse: async (ctx: RequestContext, id: string, response: string): Promise<Complaint> => {
+    const complaints = await store().getComplaints();
+    const complaint = complaints.find((c) => c.id === id);
     if (!complaint) throw new Error('Complaint not found');
     requireComplaintOperatorAccess(ctx, complaint);
 
@@ -1092,18 +1215,19 @@ export const Repository = {
       status: complaint.status === 'submitted' ? 'operator_responding' : complaint.status,
       updatedAt: new Date().toISOString(),
     };
-    MockDB.saveComplaint(updated);
+    await store().saveComplaint(updated);
     return updated;
   },
 
-  updateComplaintAdminNotes: (
+  updateComplaintAdminNotes: async (
     ctx: RequestContext,
     id: string,
     notes: string,
     flagOperator?: boolean
-  ): Complaint => {
+  ): Promise<Complaint> => {
     requireAdmin(ctx);
-    const complaint = MockDB.getComplaints().find((c) => c.id === id);
+    const complaints = await store().getComplaints();
+    const complaint = complaints.find((c) => c.id === id);
     if (!complaint) throw new Error('Complaint not found');
 
     const updated: Complaint = {
@@ -1112,7 +1236,7 @@ export const Repository = {
       adminFlaggedOperator: flagOperator ?? complaint.adminFlaggedOperator,
       updatedAt: new Date().toISOString(),
     };
-    MockDB.saveComplaint(updated);
+    await store().saveComplaint(updated);
     return updated;
   },
 };

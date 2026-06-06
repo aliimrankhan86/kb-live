@@ -12,7 +12,7 @@ describe('Package CSV import/export', () => {
   });
 
   describe('exportPackagesAsCsv', () => {
-    it('exports operator packages as CSV', () => {
+    it('exports operator packages as CSV', async () => {
       MockDB.savePackage({
         id: 'pkg-export-1',
         operatorId: 'op1',
@@ -36,7 +36,7 @@ describe('Package CSV import/export', () => {
         createdAt: '2026-01-01T00:00:00.000Z',
         updatedAt: '2026-01-01T00:00:00.000Z',
       });
-      const csv = Repository.exportPackagesAsCsv(operatorCtx);
+      const csv = await Repository.exportPackagesAsCsv(operatorCtx);
       expect(csv).toContain('title,slug,status,pilgrimageType');
       expect(csv).toContain('Test Package');
       expect(csv).toContain('test-package-abc');
@@ -46,26 +46,26 @@ describe('Package CSV import/export', () => {
       expect(csv).toContain('GBP');
     });
 
-    it('returns empty string when no packages', () => {
+    it('returns empty string when no packages', async () => {
       localStorage.clear();
       MockDB.setCurrentUser('operator');
       // Remove all seeded packages
       MockDB.getPackages().forEach((p) => {
         if (p.operatorId === 'op1') MockDB.deletePackage(p.id);
       });
-      const csv = Repository.exportPackagesAsCsv(operatorCtx);
+      const csv = await Repository.exportPackagesAsCsv(operatorCtx);
       expect(csv).toBe('');
     });
 
-    it('blocks customer from exporting', () => {
-      expect(() => Repository.exportPackagesAsCsv(customerCtx)).toThrow('Unauthorized');
+    it('blocks customer from exporting', async () => {
+      await expect(Repository.exportPackagesAsCsv(customerCtx)).rejects.toThrow('Unauthorized');
     });
   });
 
   describe('importPackagesFromCsv', () => {
-    it('imports valid packages from CSV', () => {
+    it('imports valid packages from CSV', async () => {
       const csv = `title,pricePerPerson,currency,totalNights,pilgrimageType\n"New Package",1500,GBP,12,umrah\n"Second Package",2000,USD,7,hajj`;
-      const result = Repository.importPackagesFromCsv(operatorCtx, csv);
+      const result = await Repository.importPackagesFromCsv(operatorCtx, csv);
       expect(result.saved.length).toBe(2);
       expect(result.errors.length).toBe(0);
       expect(result.saved[0].title).toBe('New Package');
@@ -79,9 +79,9 @@ describe('Package CSV import/export', () => {
       expect(all.length).toBeGreaterThanOrEqual(2); // at least 2 imported
     });
 
-    it('reports errors for invalid rows without saving them', () => {
+    it('reports errors for invalid rows without saving them', async () => {
       const csv = `title,pricePerPerson,currency,totalNights,pilgrimageType\nValid,1000,GBP,10,umrah\n,500,GBP,5,umrah\nBadPrice,abc,GBP,5,umrah\nNoCurrency,500,,5,umrah\nZeroNights,500,GBP,0,umrah\nBadType,500,GBP,5,cruise`;
-      const result = Repository.importPackagesFromCsv(operatorCtx, csv);
+      const result = await Repository.importPackagesFromCsv(operatorCtx, csv);
       expect(result.saved.length).toBe(1);
       expect(result.saved[0].title).toBe('Valid');
       expect(result.errors.length).toBe(5);
@@ -92,31 +92,31 @@ describe('Package CSV import/export', () => {
       expect(result.errors[4].reason).toContain('Pilgrimage type');
     });
 
-    it('rejects CSV without required columns', () => {
+    it('rejects CSV without required columns', async () => {
       const csv = `title,pricePerPerson,currency\nOnly,1000,GBP`;
-      expect(() => Repository.importPackagesFromCsv(operatorCtx, csv)).toThrow('Missing required columns: totalNights, pilgrimageType');
+      await expect(Repository.importPackagesFromCsv(operatorCtx, csv)).rejects.toThrow('Missing required columns: totalNights, pilgrimageType');
     });
 
-    it('rejects CSV with only header', () => {
+    it('rejects CSV with only header', async () => {
       const csv = `title,pricePerPerson,currency,totalNights,pilgrimageType`;
-      expect(() => Repository.importPackagesFromCsv(operatorCtx, csv)).toThrow('CSV must contain a header row and at least one data row');
+      await expect(Repository.importPackagesFromCsv(operatorCtx, csv)).rejects.toThrow('CSV must contain a header row and at least one data row');
     });
 
-    it('blocks customer from importing', () => {
+    it('blocks customer from importing', async () => {
       const csv = `title,pricePerPerson,currency,totalNights,pilgrimageType\nTest,1000,GBP,10,umrah`;
-      expect(() => Repository.importPackagesFromCsv(customerCtx, csv)).toThrow('Unauthorized');
+      await expect(Repository.importPackagesFromCsv(customerCtx, csv)).rejects.toThrow('Unauthorized');
     });
 
-    it('handles quoted fields with commas', () => {
+    it('handles quoted fields with commas', async () => {
       const csv = `title,pricePerPerson,currency,totalNights,pilgrimageType\n"Package, with comma",1000,GBP,10,umrah`;
-      const result = Repository.importPackagesFromCsv(operatorCtx, csv);
+      const result = await Repository.importPackagesFromCsv(operatorCtx, csv);
       expect(result.saved.length).toBe(1);
       expect(result.saved[0].title).toBe('Package, with comma');
     });
 
-    it('handles quoted fields with quotes', () => {
+    it('handles quoted fields with quotes', async () => {
       const csv = `title,pricePerPerson,currency,totalNights,pilgrimageType\n"Package with ""quotes""",1000,GBP,10,umrah`;
-      const result = Repository.importPackagesFromCsv(operatorCtx, csv);
+      const result = await Repository.importPackagesFromCsv(operatorCtx, csv);
       expect(result.saved.length).toBe(1);
       expect(result.saved[0].title).toBe('Package with "quotes"');
     });

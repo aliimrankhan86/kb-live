@@ -34,6 +34,40 @@ KaabaTrip targets high-intent pilgrimage travellers searching for packages. Keyw
 
 ---
 
+## 1.1 AEO, GEO, entity SEO & reputation SEO
+
+Public pages must work for classic search crawlers, answer engines, and generative search systems.
+
+### AEO / conversation SEO
+
+- Add concise, extractable answer blocks for common traveller questions about comparison, operator checks, pricing, inclusions, and the pay-operator-direct flow.
+- Back answer blocks with `FAQPage` JSON-LD only when the answer is visible on the page or directly represented by platform policy.
+- Use plain UK travel language. Avoid unsupported claims such as "guaranteed", "best", "cheapest", "price match", or fabricated review/ranking signals.
+
+### GEO / AI citation readiness
+
+- Each public page should have a clear page entity: KaabaTrip, package, operator, city corridor, or search result list.
+- Keep facts source-backed from package/operator fields: price, nights, hotels, ATOL/ABTA details, serving regions, and departure airports.
+- Prefer specific comparison facts over generic marketing copy, because AI summaries need short, attributable statements.
+
+### Entity SEO
+
+- Homepage: `Organization`, `WebSite`, `WebPage`, and relevant FAQ schema.
+- `/umrah`: `WebPage` and FAQ schema for UK Umrah package comparison.
+- `/search/packages`: `WebPage`, `ItemList`, and FAQ schema for result comparison.
+- `/packages/[slug]`: `Product`, `Offer`, `BreadcrumbList`, and package FAQ schema.
+- `/operators/[slug]`: `TravelAgency`, `BreadcrumbList`, and operator FAQ schema.
+- Use `@id` values for durable graph identity where helpers provide them.
+
+### Reputation SEO
+
+- Show trust signals only when stored in operator data: verification status, ATOL number, ABTA membership, years in business, office/contact details.
+- Show missing protection fields honestly instead of hiding them.
+- Do not imply KaabaTrip collects payment. Public copy must preserve the pay-operator-direct disclosure.
+- Avoid fake review, rating, backlink, guarantee, or removal claims.
+
+---
+
 ## 2. Meta tags per route
 
 Every route must export Next.js `Metadata` with these fields. Use the `generateMetadata` function for dynamic routes.
@@ -42,13 +76,13 @@ Every route must export Next.js `Metadata` with these fields. Use the `generateM
 
 | Route               | Title                                                               | Description                                                                                                                                | Keywords                                         |
 | ------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------ |
-| `/`                 | `KaabaTrip – Compare Hajj & Umrah Packages`                         | `Compare verified Hajj and Umrah packages from trusted UK travel operators. Find the best prices, hotels near Haram, and inclusive deals.` | hajj packages, umrah packages, compare, UK       |
-| `/umrah`            | `Umrah Packages 2026 – Compare & Book \| KaabaTrip`                 | `Browse and compare Umrah packages from verified UK operators. Filter by budget, hotel rating, and distance to Haram.`                     | umrah packages 2026, umrah from UK               |
+| `/`                 | `KaabaTrip - Compare Hajj & Umrah Packages from UK Operators`       | `Compare Hajj and Umrah packages from UK travel operators. Review prices, hotels near Haram, inclusions, ATOL/ABTA details, and operator profiles before requesting a quote.` | hajj packages, umrah packages, compare, UK       |
+| `/umrah`            | `Umrah Packages 2026 from the UK - Compare Operators \| KaabaTrip`  | `Compare Umrah packages from UK travel operators by budget, hotel rating, distance to Haram, traveller count, and included services before requesting a quote.` | umrah packages 2026, umrah from UK               |
 | `/hajj`             | `Hajj Packages 2026 – Compare & Book \| KaabaTrip`                  | `Find and compare Hajj packages from ATOL-protected UK operators. 5-star hotels, direct flights, all-inclusive options.`                   | hajj packages 2026, hajj from UK                 |
 | `/partner`          | `Partner with KaabaTrip — List Your Packages`                       | `Join KaabaTrip as a verified operator. Reach thousands of UK Muslims planning Umrah and Hajj. No upfront fees, transparent commission.`   | umrah operator, list umrah packages, partner     |
 | `/umrah/ramadan`    | `Ramadan Umrah 2026 – Special Packages \| KaabaTrip`                | `Ramadan Umrah packages from UK operators. Hotels near Haram, flights included, group and family options.`                                 | ramadan umrah 2026, umrah ramadan packages       |
 | `/packages`         | `All Pilgrimage Packages – Browse & Compare \| KaabaTrip`           | `Browse all Hajj and Umrah packages. Filter, shortlist, and compare side by side.`                                                         | pilgrimage packages, hajj umrah compare          |
-| `/search/packages`  | `Search Results – Umrah & Hajj Packages \| KaabaTrip`               | Dynamic: `Found N packages matching your criteria`                                                                                         | (use query params)                               |
+| `/search/packages`  | Dynamic: `{N} {type} Packages - Compare UK Operators \| KaabaTrip`  | Dynamic: `Compare {N} packages by price, hotels, distance to Haram, inclusions, and operator trust signals.`                               | (use query params)                               |
 | `/umrah/london`     | `Umrah Packages from London 2026 – Compare & Book \| KaabaTrip`     | `Browse and compare Umrah packages departing from London. Verified UK operators, hotels near Haram, flights included.`                     | umrah from london, umrah packages london         |
 | `/umrah/birmingham` | `Umrah Packages from Birmingham 2026 – Compare & Book \| KaabaTrip` | `Browse and compare Umrah packages departing from Birmingham. Verified UK operators, hotels near Haram, flights included.`                 | umrah from birmingham, umrah packages birmingham |
 | `/umrah/manchester` | `Umrah Packages from Manchester 2026 – Compare & Book \| KaabaTrip` | `Browse and compare Umrah packages departing from Manchester. Verified UK operators, hotels near Haram, flights included.`                 | umrah from manchester, umrah packages manchester |
@@ -57,8 +91,8 @@ Every route must export Next.js `Metadata` with these fields. Use the `generateM
 
 | Route               | Title template                                   | Description template                                                                                      |
 | ------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
-| `/packages/[slug]`  | `{title} – {type} Package \| KaabaTrip`          | `{title} by {operatorName}. {nights} nights, {stars}★ hotels, {distance} from Haram. {price} per person.` |
-| `/operators/[slug]` | `{companyName} – Verified Operator \| KaabaTrip` | `Browse packages from {companyName}. {verificationStatus} operator with {packageCount} active packages.`  |
+| `/packages/[slug]`  | `{title} – {type} Package \| KaabaTrip`          | `{title} by {operatorName}. {nights} nights, {stars} star hotels, {price} per person. Compare inclusions and request a quote.` |
+| `/operators/[slug]` | `{companyName} – {Verified/Listed} Umrah & Hajj Operator \| KaabaTrip` | `View {companyName}'s public operator profile, published packages, departure airports, contact details, and ATOL/ABTA details where listed.` |
 
 ---
 
@@ -150,8 +184,8 @@ Structured data helps Google show rich snippets. Add JSON-LD to each page type.
 
 ### Implementation
 
-- Create a `lib/seo/json-ld.ts` utility with functions: `packageJsonLd(pkg, operator)`, `operatorJsonLd(operator)`, `searchResultsJsonLd(results)`, `breadcrumbJsonLd(items[])`.
-- Render as `<script type="application/ld+json">` in each page's `<head>` (use Next.js metadata API or direct injection).
+- Use `lib/seo/json-ld.ts` helpers: `packageJsonLd(pkg, operatorName)`, `operatorJsonLd(operator)`, `searchResultsJsonLd(results)`, `breadcrumbJsonLd(items[])`, `faqPageJsonLd(items[])`, `webPageJsonLd(page)`, and `graphJsonLd(nodes[])`.
+- Render as `<script type="application/ld+json">` in the page markup or via Next.js metadata-managed head. Avoid manually adding root-layout JSON-LD inside `<head>`; browser extensions can inject head scripts before hydration and cause attribute mismatch warnings.
 - Never include user-generated content without sanitisation.
 
 ---
@@ -209,7 +243,7 @@ The sitemap at `app/sitemap.ts` must include:
 | Twitter card tags            | ✅ Done    | Via `twitter` in metadata                              |
 | robots.txt                   | ✅ Done    | Disallow `/quote`, `/requests`, `/operator`, `/kanban` |
 | sitemap.xml                  | ⚠️ Partial | Needs dynamic package + operator pages                 |
-| JSON-LD structured data      | ❌ Todo    | Product, Organization, BreadcrumbList                  |
+| JSON-LD structured data      | ✅ Done    | Shared Product, TravelAgency, ItemList, BreadcrumbList, Organization, WebSite, WebPage, and FAQPage helpers |
 | Image alt text               | ✅ Done    | All images have descriptive alt                        |
 | Semantic HTML                | ✅ Done    | Proper heading hierarchy, landmarks                    |
 | Page speed (LCP < 2.5s)      | ⚠️ Monitor | Server Components help; monitor with Lighthouse        |

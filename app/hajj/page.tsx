@@ -21,9 +21,11 @@ export default function HajjPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-dedupe-key': crypto.randomUUID(),
         },
-        body: JSON.stringify({ email: email.trim(), type: 'hajj' }),
+        body: JSON.stringify({
+          email: email.trim(),
+          type: 'hajj',
+        }),
       })
 
       const data = await res.json()

@@ -1,7 +1,7 @@
 # KaabaTrip AI_RUNBOOK.md
 
-version: 1.0
-last_updated: 2026-06-04
+version: 1.1
+last_updated: 2026-06-06
 owner: Ali Khan (ali@kaabatrip)
 status: ACTIVE — single source of truth for all AI and human contributors
 
@@ -40,7 +40,7 @@ These constraints are hard. Any output that violates them must be rejected.
 - D1 Evidence: RBAC — customer + involved operator + admin only.
 - D2 Evidence retention: delete after defined period unless active dispute.
 - D3 Never email bank details or evidence. Emails link to in-app view only.
-- D4 Evidence storage is metadata-only in MVP. File bytes are not stored.
+- D4 Evidence storage supports metadata and optional inline base64 bytes with strict RBAC and retention pruning. Never email bank details or evidence; emails must link to in-app views only.
 
 ### Non-goals (MVP)
 
@@ -199,24 +199,18 @@ No READY tasks currently. Monitor P0-COMPLAINTS-FLOW for operator routing spec.
 ## 4. PENDING TASKS SUMMARY
 
 ```
-P0-COMPLAINTS-FLOW             Complaints routing: customer → operator → admin triage
-P0-HYGIENE-ARTEFACTS           Remove duplicate docs dirs, gitignore .next artefacts
-P1-EVIDENCE-BYTES              Evidence file bytes storage with RBAC + retention
-P1A-SUPABASE-SETUP             Create Supabase project (London), install deps, env config
-P1B-PRISMA-SCHEMA              Design Prisma schema matching existing types
-P1C-DB-ADAPTER                 Build DB adapter layer (Repository interface unchanged)
-P1D-AUTH-MIDDLEWARE            Next.js middleware + session strategy
-P1E-RLS-POLICIES               Row Level Security policies for all tables
-P1F-STORAGE-BUCKETS            Supabase Storage: evidence (private), exports (private)
-P1G-SEED-MIGRATION             Migrate seed data; SQL seed script
-P1H-CUTOVER                    Remove MockDB fallback; all tests against Postgres
-P1-SEO-CORRIDORS               Budget Umrah corridor pages (London / Birmingham / Manchester)
-P2-PKG-CSV                     CSV import/export for operator packages
+T13-SEO-STRUCTURED-DATA        Partial: helpers exist and JSON-LD renders, but pages still mix inline/component-local JSON-LD with lib/seo/json-ld.ts.
+T14-VALIDATION-UTILITY         Partial: lib/validation.ts has Zod API schemas only; queue-requested utility validators are missing.
+T16-OPERATOR-E2E               Partial/failing: e2e/operator.spec.ts exists, but the suite failed 30/30 on 2026-06-06.
+T17-FINAL-INTEGRATION          Blocked by T16 and missing manual smoke evidence.
+P1H-REAL-DB-E2E                Not verified: MockDB/unit/build are clean; real DB integration/E2E remains separate CI/manual work.
 ```
 
 ---
 
 ## 5. ACTIVE TASKS
+
+**Current note (2026-06-06):** This section contains historical task blocks, many already marked `DONE`/`COMPLETED`. Use the pending summary above plus `docs/EXECUTION_QUEUE.md` for the current next work. Do not treat completed blocks below as currently active.
 
 ```yaml
 id: MT4-ADMIN-BANK-REVIEW

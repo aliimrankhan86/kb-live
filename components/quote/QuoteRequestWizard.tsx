@@ -29,8 +29,8 @@ export function QuoteRequestWizard() {
       if (Object.keys(prefill).length > 0) {
         setDraft(prefill);
       }
-    } catch (error) {
-      console.warn('Failed to parse quote prefill params', error);
+    } catch {
+      // Prefill params are URL-sourced best-effort; ignore parse failures
     } finally {
       if (typeof window !== 'undefined') {
         window.history.replaceState({}, '', '/quote');

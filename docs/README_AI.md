@@ -10,19 +10,21 @@ A two-sided marketplace for Umrah/Hajj pilgrimage packages. Travellers search, c
 
 ## Current state
 
-- **Branch:** `ux-option-a`
-- **Stack:** Next.js 15.5.3 (App Router), React 19, Tailwind v4, TypeScript strict, Vitest, Playwright
-- **Build:** Passes. 17 unit tests green. Console clean.
-- **Data:** MockDB (localStorage-backed). No real backend yet.
-- **Auth:** None. MockDB.currentUser is simulated. No protected routes.
-- **Operator side:** Shells exist for dashboard/packages/analytics. Full build plan in `docs/EXECUTION_QUEUE.md`.
+- **Branch:** `dev`
+- **Stack:** Next.js 15.5.19 (App Router), React 19, Tailwind v4, TypeScript strict, Vitest 4.1.8, Playwright
+- **Verified 2026-06-06:** `npm run test` passes (183/183). `npm run build` passes (43 app routes generated, 0 build/type errors).
+- **E2E 2026-06-06:** `npx playwright test e2e/operator.spec.ts --reporter=list` fails. Chromium is redirected from `/operator/packages` to `/`, so the operator wizard assertions do not run. Firefox/WebKit browser binaries are missing locally and require `npx playwright install`.
+- **Data:** Repository layer is async. MockDB remains the default for dev/tests; Prisma/Supabase paths exist behind config and migrations.
+- **Auth:** Supabase SSR/auth endpoints and middleware are wired; several dev/operator UI flows still rely on MockDB's simulated current user.
+- **Operator side:** Onboarding, dashboard, leads, profile, payment settings, bank-review admin, complaints, package CSV, and the 8-step package wizard exist. Operator package E2E is pending because route auth/test setup is not aligned.
 
 ## Localisation
 
-- Currency, distance units, and language adapt to the user's location (detected via `navigator.language` + `Intl.DateTimeFormat().resolvedOptions().timeZone`).
+- MVP public pricing is GBP-only. Do not convert visible package prices from browser locale, timezone, or localStorage during SSR/client hydration.
+- Region and currency infrastructure exists in `lib/i18n/region.ts` and `lib/i18n/format.ts`, but browser-based currency selection is future scope.
 - Supported languages: English (default), French, Arabic. Language switcher in header.
-- UK user sees GBP + UK airports + miles. French user sees EUR + km. UAE user sees AED + km.
-- Implementation: `lib/i18n/region.ts` (detection), `lib/i18n/format.ts` (formatting + conversion).
+- Current display settings are deterministic: `en-GB`, GBP, miles. This prevents hydration mismatches where the server renders GBP and the browser rerenders USD/EUR.
+- Implementation: `lib/i18n/region.ts` (future detection + deterministic MVP settings), `lib/i18n/format.ts` (formatting + conversion utilities).
 - Full spec: `docs/I18N.md`.
 
 ## Routes
@@ -35,17 +37,30 @@ See `docs/APP_STRUCTURE.md` for full journey maps and wireframes.
 | `/umrah` | Search preferences form. Submits to `/search/packages`. | Done |
 | `/hajj` | Hajj landing. | Done |
 | `/umrah/ramadan` | Ramadan landing. | Done |
+| `/umrah/london` | London SEO corridor page. | Done |
+| `/umrah/birmingham` | Birmingham SEO corridor page. | Done |
+| `/umrah/manchester` | Manchester SEO corridor page. | Done |
 | `/search/packages` | Results + shortlist + compare. | Done |
+| `/packages` | Package browse page. | Done |
 | `/packages/[slug]` | Package detail page. | Done |
 | `/operators/[slug]` | Operator public profile. | Done |
 | `/quote` | 5-step quote wizard. | Done |
 | `/requests/[id]` | Request tracker + offers. | Done |
-| `/operator/onboarding` | Operator registration form. | TODO |
-| `/operator/dashboard` | Operator home with stats. | Partial |
-| `/operator/packages` | Package CRUD. | Partial |
-| `/operator/leads` | Lead/enquiry management. | TODO |
+| `/settings` | Customer GDPR export/delete settings. | Done |
+| `/privacy` | UK GDPR privacy policy. | Done |
+| `/terms` | Platform terms and conditions. | Done |
+| `/operator/onboarding` | Operator registration form. | Done |
+| `/operator/onboarding/status` | Operator verification status screen. | Done |
+| `/operator/dashboard` | Operator home with stats, activity, quick actions. | Done |
+| `/operator/packages` | Package list, CSV import/export, 8-step wizard. | Implemented; E2E pending |
+| `/operator/leads` | Lead/enquiry management and offer response flow. | Done |
 | `/operator/analytics` | Stats dashboard. | Partial |
-| `/operator/profile` | Profile editor. | TODO |
+| `/operator/profile` | Profile editor. | Done |
+| `/operator/settings` | Operator settings index. | Done |
+| `/operator/settings/payment-details` | Bank details with change request, cooling period, audit log. | Done |
+| `/admin/bank-changes` | Admin bank change review queue. | Done |
+| `/admin/bank-changes/[id]` | Admin bank change review detail. | Done |
+| `/admin/complaints` | Admin complaints triage. | Done |
 
 ## Key code locations
 

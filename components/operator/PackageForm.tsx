@@ -23,13 +23,13 @@ export function PackageForm({ initialData, onSuccess, onCancel }: PackageFormPro
     ...initialData,
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       if (initialData && initialData.id) {
-        Repository.updatePackage(context, initialData.id, formData);
+        await Repository.updatePackage(context, initialData.id, formData);
       } else {
-        Repository.createPackage(context, formData);
+        await Repository.createPackage(context, formData);
       }
       onSuccess();
     } catch (err) {

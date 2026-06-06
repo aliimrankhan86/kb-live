@@ -44,8 +44,8 @@ export const BudgetFilter: React.FC<BudgetFilterProps> = ({
         onChange={handleChange}
         minLabel={formatCurrency(MIN_BUDGET)}
         maxLabel={formatCurrency(MAX_BUDGET)}
-        aria-label-min="Minimum budget"
-        aria-label-max="Maximum budget"
+        ariaLabelMin="Minimum budget"
+        ariaLabelMax="Maximum budget"
         data-testid-min="budget-min-slider"
         data-testid-max="budget-max-slider"
       />

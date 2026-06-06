@@ -12,22 +12,21 @@ export function AnalyticsDashboard() {
   });
 
   useEffect(() => {
-    // Mock operator login
-    MockDB.setCurrentUser('operator');
-    const ctx = { userId: 'op1', role: 'operator' as const }; // Explicit type match
+    const load = async () => {
+      MockDB.setCurrentUser('operator');
+      const ctx = { userId: 'op1', role: 'operator' as const };
 
-    const allOffers = MockDB.getOffers().filter(o => o.operatorId === 'op1');
-    const allBookings = MockDB.getBookingIntents().filter(b => b.operatorId === 'op1');
-    
-    // Total requests received = Requests where I have visibility.
-    // Repository.getRequests(ctx) returns all open + responded.
-    const requests = Repository.getRequests(ctx).length;
+      const allOffers = MockDB.getOffers().filter(o => o.operatorId === 'op1');
+      const allBookings = MockDB.getBookingIntents().filter(b => b.operatorId === 'op1');
+      const reqs = await Repository.getRequests(ctx);
 
-    setStats({
-      requests,
-      offers: allOffers.length,
-      bookings: allBookings.length,
-    });
+      setStats({
+        requests: reqs.length,
+        offers: allOffers.length,
+        bookings: allBookings.length,
+      });
+    };
+    load();
   }, []);
 
   return (

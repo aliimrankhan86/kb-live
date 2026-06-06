@@ -47,8 +47,8 @@ export const DistanceFilter: React.FC<DistanceFilterProps> = ({
         onChange={handleChange}
         minLabel={formatDistance(MIN_DISTANCE)}
         maxLabel={formatDistance(MAX_DISTANCE)}
-        aria-label-min="Minimum distance"
-        aria-label-max="Maximum distance"
+        ariaLabelMin="Minimum distance"
+        ariaLabelMax="Maximum distance"
         data-testid-min="distance-min-slider"
         data-testid-max="distance-max-slider"
       />
