@@ -14,6 +14,21 @@ export interface AuthResult {
 export async function updateSession(request: NextRequest): Promise<AuthResult> {
   let supabaseResponse = NextResponse.next({ request });
 
+  // E2E test bypass — only active when E2E_TESTING=1 (set by playwright webServer env).
+  // next.config.ts forwards this into Edge Runtime at build time; production builds
+  // compile it to '' so the condition is never true in real deployments.
+  if (process.env.E2E_TESTING === '1') {
+    const e2eCookie = request.cookies.get('__e2e_user');
+    if (e2eCookie?.value) {
+      try {
+        const u = JSON.parse(e2eCookie.value) as { id: string; email: string; role: string };
+        if (u?.id && u?.email && u?.role) {
+          return { user: u, response: supabaseResponse };
+        }
+      } catch { /* invalid JSON — fall through to Supabase */ }
+    }
+  }
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 

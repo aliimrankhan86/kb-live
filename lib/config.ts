@@ -25,6 +25,9 @@ export const IS_PROD_ENV = process.env.NODE_ENV === 'production';
  */
 export function getDataSource(): 'prisma' | 'mockdb' {
   if (IS_TEST_ENV) return 'mockdb';
+  // E2E tests run in production mode (next build + next start) but must use MockDB
+  // because test users only exist in MockDB, not in the real database.
+  if (process.env.E2E_TESTING === '1') return 'mockdb';
   if (IS_PROD_ENV) return 'prisma';
   return FEATURE_USE_REAL_DB ? 'prisma' : 'mockdb';
 }

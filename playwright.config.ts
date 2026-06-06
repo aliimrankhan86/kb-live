@@ -32,5 +32,8 @@ export default defineConfig({
     url: 'http://127.0.0.1:3001',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
+    // E2E_TESTING is set during BOTH npm run build AND next start.
+    // next.config.ts forwards it into the Edge Runtime so middleware can read it.
+    env: { E2E_TESTING: '1' },
   },
 })

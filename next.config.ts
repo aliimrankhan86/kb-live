@@ -5,6 +5,13 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
 
+  // Forward E2E_TESTING into Edge Runtime (middleware) — compiled at build time.
+  // Only truthy when Playwright webServer injects E2E_TESTING=1.
+  // Production deployments never set this, so the bypass compiles to false.
+  env: {
+    E2E_TESTING: process.env.E2E_TESTING || '',
+  },
+
   images: {
     dangerouslyAllowSVG: true,
     contentDispositionType: "attachment",

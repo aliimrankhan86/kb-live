@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { setTestUser } from './helpers/auth';
 
 /**
  * E2E tests for the operator package management flow:
@@ -21,7 +22,11 @@ import { test, expect } from '@playwright/test';
  * Without auth, middleware redirects /operator/* → / and all selectors timeout.
  */
 
-test.describe.skip('Operator packages page', () => {
+test.describe('Operator packages page', () => {
+  test.beforeEach(async ({ page }) => {
+    await setTestUser(page, 'operator');
+  });
+
   test('loads packages page', async ({ page }) => {
     await page.goto('/operator/packages');
     await page.waitForLoadState('domcontentloaded');
@@ -43,8 +48,9 @@ test.describe.skip('Operator packages page', () => {
   });
 });
 
-test.describe.skip('PackageWizard — step navigation', () => {
+test.describe('PackageWizard — step navigation', () => {
   test.beforeEach(async ({ page }) => {
+    await setTestUser(page, 'operator');
     await page.goto('/operator/packages');
     await page.waitForLoadState('domcontentloaded');
     await page.getByRole('button', { name: /create package/i }).first().click();
@@ -53,7 +59,8 @@ test.describe.skip('PackageWizard — step navigation', () => {
 
   test('Step 1: shows validation error for empty title', async ({ page }) => {
     await page.getByTestId('wizard-next-btn').click();
-    await expect(page.getByRole('alert')).toBeVisible();
+    // Use .first() to avoid strict-mode violation with Next.js __next-route-announcer__
+    await expect(page.getByRole('alert').first()).toBeVisible();
     // Still on step 1
     await expect(page.getByTestId('wizard-title')).toBeVisible();
   });
@@ -73,7 +80,8 @@ test.describe.skip('PackageWizard — step navigation', () => {
 
     // Try to advance with no price
     await page.getByTestId('wizard-next-btn').click();
-    await expect(page.getByRole('alert')).toBeVisible();
+    // Use .first() to avoid strict-mode violation with Next.js __next-route-announcer__
+    await expect(page.getByRole('alert').first()).toBeVisible();
   });
 
   test('Step 2 → 3: advances with valid price', async ({ page }) => {
@@ -106,7 +114,11 @@ test.describe.skip('PackageWizard — step navigation', () => {
   });
 });
 
-test.describe.skip('PackageWizard — full flow to review', () => {
+test.describe('PackageWizard — full flow to review', () => {
+  test.beforeEach(async ({ page }) => {
+    await setTestUser(page, 'operator');
+  });
+
   test('walks through all 8 steps to review screen', async ({ page }) => {
     await page.goto('/operator/packages');
     await page.waitForLoadState('domcontentloaded');

@@ -1,8 +1,15 @@
 import { test, expect } from '@playwright/test';
+import { setTestUser } from './helpers/auth';
 
 test.describe.configure({ mode: 'serial' });
 
 test.describe('Bank onboarding and payment flows', () => {
+  test.beforeEach(async ({ page }) => {
+    // operatorAdmin: id=op1 (has seeded payment details) + role=admin (accesses /admin/bank-changes)
+    // Admin role passes both /operator/* and /admin/* route guards per middleware ROLE_PROTECTED map
+    await setTestUser(page, 'operatorAdmin');
+  });
+
   test('operator creates change, admin approves, operator sees cooling', async ({ page }) => {
     // Clear localStorage so seeded data is fresh
     await page.goto('/');
@@ -78,8 +85,11 @@ test.describe('Bank onboarding and payment flows', () => {
 
     // Create quote request
     await page.goto('/quote');
-    await page.click('text=Umrah');
-    await page.click('text=Flexible Dates');
+    // Use getByRole('button') to avoid matching the header nav "Umrah" link
+    await page.getByRole('button', { name: /^Umrah$/i }).click();
+    // Wait for React state update (type → season section re-renders)
+    await page.waitForTimeout(300);
+    await page.getByRole('button', { name: /Flexible Dates/i }).click();
     await page.click('text=Next Step');
     await page.fill('input[placeholder="e.g. London, Manchester"]', 'London');
     await page.click('text=Next Step');
@@ -96,11 +106,11 @@ test.describe('Bank onboarding and payment flows', () => {
 
     const requestUrl = page.url();
 
-    // Operator submits offer
-    await page.goto('/operator/dashboard');
+    // Operator submits offer via leads page (reply overlay is on /operator/leads)
+    await page.goto('/operator/leads');
     await page.waitForLoadState('domcontentloaded');
-    await expect(page.locator('text=London').first()).toBeVisible({ timeout: 10000 });
-    await page.locator('text=London').first().click();
+    await expect(page.locator('[data-testid^="lead-card-"]').first()).toBeVisible({ timeout: 10000 });
+    await page.locator('[data-testid^="lead-respond-"]').first().click();
     await expect(page.getByText('Reply to Quote Request')).toBeVisible();
     await page.fill('input[type="number"] >> nth=0', '1500');
     await page.click('text=Send Offer');

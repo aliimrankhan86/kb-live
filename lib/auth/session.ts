@@ -1,3 +1,4 @@
+import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
 import type { UserRole } from '@/lib/types';
 
@@ -13,6 +14,18 @@ export interface SessionUser {
  * Returns null if no session or invalid token.
  */
 export async function getSessionUser(): Promise<SessionUser | null> {
+  // E2E test bypass — only active when E2E_TESTING=1 (set by playwright webServer env).
+  if (process.env.E2E_TESTING === '1') {
+    try {
+      const cookieStore = await cookies();
+      const e2eCookie = cookieStore.get('__e2e_user');
+      if (e2eCookie?.value) {
+        const u = JSON.parse(e2eCookie.value);
+        if (u?.id && u?.email && u?.role) return u as SessionUser;
+      }
+    } catch { /* fall through to Supabase */ }
+  }
+
   const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();
 

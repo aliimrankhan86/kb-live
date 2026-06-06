@@ -1,12 +1,21 @@
 import { test, expect } from '@playwright/test';
+import { setTestUser } from './helpers/auth';
+
+test.beforeEach(async ({ page }) => {
+  // Operator auth needed for /operator/dashboard — public routes ignore this cookie
+  await setTestUser(page, 'operator');
+});
 
 test('End-to-end Quote -> Offer -> Compare Flow', async ({ page }) => {
   // 1. Submit Quote Request
   await page.goto('/quote');
   
   // Step 1: Type/Season
-  await page.click('text=Umrah');
-  await page.click('text=Flexible Dates');
+  // Use getByRole('button') to avoid matching the header nav "Umrah" link
+  await page.getByRole('button', { name: /^Umrah$/i }).click();
+  // Wait for React state update (type → season section re-renders)
+  await page.waitForTimeout(300);
+  await page.getByRole('button', { name: /Flexible Dates/i }).click();
   await page.click('text=Next Step');
   
   // Step 2: Location
@@ -39,24 +48,24 @@ test('End-to-end Quote -> Offer -> Compare Flow', async ({ page }) => {
   // Verify status Open
   await expect(page.locator('text=open')).toBeVisible();
   
-  // 2. Operator Dashboard
-  await page.goto('/operator/dashboard');
+  // 2. Operator Leads — navigate to leads page where reply overlay lives
+  await page.goto('/operator/leads');
   await page.waitForLoadState('domcontentloaded');
-  
-  // Find request (it might take a moment to poll, but initial load should have it)
-  // Dashboard shows Type, Season, Departure City
-  await expect(page.locator('text=London')).toBeVisible({ timeout: 10000 });
-  
-  await page.click('text=London');
-  
+
+  // Lead card must be visible (quote request was just created)
+  await expect(page.locator('[data-testid^="lead-card-"]').first()).toBeVisible({ timeout: 10000 });
+
+  // Click "View & Respond" button to open reply overlay
+  await page.locator('[data-testid^="lead-respond-"]').first().click();
+
   // Overlay opens
   await expect(page.locator('text=Reply to Quote Request')).toBeVisible();
-  
+
   // Fill Offer
   await page.fill('input[type="number"] >> nth=0', '1500'); // Price
   // Submit
   await page.click('text=Send Offer');
-  
+
   // Overlay closes
   await expect(page.locator('text=Reply to Quote Request')).not.toBeVisible();
   
@@ -70,9 +79,9 @@ test('End-to-end Quote -> Offer -> Compare Flow', async ({ page }) => {
   
   // 4. Comparison
   // Create second offer to enable comparison
-  await page.goto('/operator/dashboard');
+  await page.goto('/operator/leads');
   await page.waitForLoadState('domcontentloaded');
-  await page.click('text=London');
+  await page.locator('[data-testid^="lead-respond-"]').first().click();
   await expect(page.locator('text=Reply to Quote Request')).toBeVisible();
   await page.fill('input[type="number"] >> nth=0', '2000');
   await page.click('text=Send Offer');
