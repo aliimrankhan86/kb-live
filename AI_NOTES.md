@@ -23,6 +23,23 @@
 | OP-PERSIST | Operator package persistence wiring                          | ✅ COMPLETE — GET/DELETE added to `/api/operator/packages/route.ts`; page fetches on load, wires POST/PATCH/DELETE; loading + error states | `/operator/packages`, `app/api/operator/packages/route.ts`                         |
 | T18        | Claude local Chrome SEO/AEO QA                               | ⏳ PENDING — requires local Chrome access; not executable headless                                                                         | Public routes, rendered HTML, JSON-LD, mobile/desktop Chrome checks                |
 
+---
+
+## §9 — What's Left To Do (Next AI Handoff)
+
+These items are **intentionally not yet done** and must be picked up by the next session:
+
+| #   | Task                               | Why pending                                                                                                                                          | What the next agent needs to do                                                                                                                                                                                                                                            |
+| --- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **T18 — Local Chrome SEO/AEO QA**  | Requires a browser-capable agent with local Chrome access to render pages and inspect metadata, JSON-LD, headings, responsive layout, console errors | Run the checklist in §2.7 of this file against `/`, `/umrah`, `/search/packages`, `/packages/[slug]`, `/operators/[slug]`, `/robots.txt`, `/sitemap.xml`. Fix any defects in allowed public SEO/UI files.                                                                  |
+| 2   | **T16 RE-ENABLE — Operator E2E**   | Operator E2E requires a Supabase auth session. The spec is skipped with documented setup instructions.                                               | 1. Seed a test operator in MockDB/Supabase. 2. Add a `test.beforeEach` that signs in via `/api/auth/sign-in` and sets the session cookie. 3. Remove `test.describe.skip` from `e2e/operator.spec.ts`. 4. Run `npx playwright test e2e/operator.spec.ts` until all 10 pass. |
+| 3   | **E2E auth infrastructure**        | 4 pre-existing E2E specs fail because they also need auth (`bank-payment`, `catalogue`, `flow`, `slider-consistency`)                                | Build a shared Playwright auth fixture (seed user + sign-in + cookie injection) that all E2E specs can use. Re-run full E2E suite.                                                                                                                                         |
+| 4   | **Rate limiter production switch** | `lib/rate-limit.ts` uses an in-memory `Map` fallback when `UPSTASH_REDIS_REST_URL` is missing. This resets on every cold start on Vercel/Lambda.     | Add `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` to production env. Verify the Upstash path is hit in staging.                                                                                                                                                  |
+| 5   | **Prisma cutover end-to-end**      | `FEATURE_USE_REAL_DB` flag exists but has not been enabled and verified end-to-end. MockDB is still the active data source in dev/tests.             | Set `FEATURE_USE_REAL_DB=true` in a staging environment. Run the full test suite against Prisma + Supabase. Fix any adapter/RLS issues.                                                                                                                                    |
+| 6   | **Console.log audit**              | `.clinerules` §11.2 bans `console.*` in `components/` and `app/`. A full sweep has not been run since the rule was added.                            | `grep -rn "console\." components/ app/` — remove or replace any production-facing logs with proper error handling.                                                                                                                                                         |
+
+**Branch state:** `dev` is clean and pushed to `origin/dev` (commit `1786fa8`). No uncommitted changes.
+
 ### Current Codex task handoff note (2026-06-06)
 
 User asked Codex to complete all pending tasks except T18 to a high quality level. If work stops mid-task, continue from this note:

@@ -64,13 +64,25 @@
 
 ## Pending / not verified
 
-- **T13 is complete:** `/requests/[id]` now uses `breadcrumbJsonLd` from `lib/seo/json-ld.ts`; `buildBreadcrumbJsonLd` removed from `components/ui/Breadcrumb.tsx`.
-- **T14 is complete:** `lib/validation.ts` now has 7 reusable validators (`validateEmail`, `validatePhone`, `validateRequired`, `validateLength`, `validateOperatorForPublish`, `validatePackageForDraft`, `validatePackageForPublish`) with 39 focused tests in `tests/validation.test.ts`.
-- **T16 is documented:** `e2e/operator.spec.ts` updated with `test.describe.skip` and auth setup instructions. Operator E2E requires Supabase auth session to access `/operator/*` routes; this is an infrastructure dependency, not a code bug.
-- **T17 is complete:** Full integration sign-off — 222/222 unit tests pass; `npm run build` 0 errors; 2 E2E pass (`signup-password-mismatch`, `smoke.e2e`), 12 operator tests skipped, 4 pre-existing auth-related E2E failures.
-- **Operator package persistence is wired:** `/api/operator/packages/route.ts` now supports GET/POST/PATCH/DELETE; `/operator/packages` page fetches on load via `useEffect`, wires create/update/delete through API, with loading skeleton and error state per `.clinerules`.
-- **Root `AI_NOTES.md` is current for handoff:** T11/T12/T13/T16/T17 status and Beyond SEO remediation are reflected as of 2026-06-06.
-- **Claude local Chrome SEO QA is pending:** `AI_NOTES.md` now includes T18 with a rendered-page SEO/AEO checklist for Claude/local Chrome. This verifies implementation quality, not rankings/backlinks/live SERP data.
+- **T18 — Local Chrome SEO/AEO QA** ⏳ PENDING. Requires a browser-capable agent with local Chrome access. `AI_NOTES.md` §2.7 has the full checklist. This is implementation-quality verification only — not rankings/backlinks/live SERP data.
+- **T16 RE-ENABLE — Operator E2E** ⏳ PENDING. `e2e/operator.spec.ts` is skipped. Needs: (1) seed test operator, (2) Playwright auth fixture to sign in and set session cookie, (3) remove `test.describe.skip`, (4) run until 10/10 pass.
+- **E2E auth infrastructure** ⏳ PENDING. 4 pre-existing E2E specs fail due to missing auth (`bank-payment`, `catalogue`, `flow`, `slider-consistency`). Needs a shared Playwright auth fixture.
+- **Rate limiter production switch** ⏳ PENDING. `lib/rate-limit.ts` uses in-memory `Map` fallback. Needs `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` in production env.
+- **Prisma cutover end-to-end** ⏳ PENDING. `FEATURE_USE_REAL_DB` exists but never enabled. Needs staging verification with `FEATURE_USE_REAL_DB=true`.
+- **Console.log audit** ⏳ PENDING. `.clinerules` §11.2 bans `console.*` in `components/` and `app/`. Full `grep` sweep not yet run.
+
+### Completed in this session (T13/T14/T16/T17/OP-PERSIST)
+
+| Task       | What                                                                                                                            | Files                                                                              |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| T13        | `/requests/[id]` breadcrumb JSON-LD consolidated to `lib/seo/json-ld.ts`; `buildBreadcrumbJsonLd` removed from `Breadcrumb.tsx` | `app/requests/[id]/page.tsx`, `components/ui/Breadcrumb.tsx`, `lib/seo/json-ld.ts` |
+| T14        | 7 reusable validators + 39 tests. Fixed UK landline regex edge case.                                                            | `lib/validation.ts`, `tests/validation.test.ts` (new)                              |
+| OP-PERSIST | `/api/operator/packages` GET/POST/PATCH/DELETE; page fetches on load with loading/error states                                  | `app/api/operator/packages/route.ts`, `app/operator/packages/page.tsx`             |
+| T16        | Operator E2E spec documented with auth setup instructions and `test.describe.skip`                                              | `e2e/operator.spec.ts`                                                             |
+| T17        | Full integration sign-off — 222/222 tests, 0 build errors                                                                       | —                                                                                  |
+
+**Verification:** `npm test` 222/222 pass | `npm run build` 0 errors | E2E: 2 pass, 12 skipped, 4 pre-existing failures
+**Branch:** `dev` clean, committed as `1786fa8`, pushed to `origin/dev`
 
 ## What changed this session (2026-06-06 — Beyond SEO audit/remediation)
 
