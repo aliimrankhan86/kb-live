@@ -147,6 +147,19 @@
 
 ## What changed this session
 
+### Fix: Signup Internal Server Error + Playwright headed-mode fix
+
+- **Root cause**: `lib/auth/api.ts` had corrupted first line `mentimport` (typo/merge artifact) causing a build syntax error. The `/signup` page imported `SignUpForm` which depended on `lib/auth/api.ts` transitively via `app/api/auth/me/route.ts`, so the entire page threw an Internal Server Error.
+- **Fix**: Removed `ment` prefix from line 1 → `import { createClient } from '@/lib/supabase/server';`
+- **E2E test fix**: `e2e/signup-password-mismatch.spec.ts` was using hardcoded `http://localhost:3000/signup` instead of Playwright's `baseURL`. Changed to relative `/signup`.
+- **Removed unnecessary MCP servers**: Cleared `.vscode/mcp.json` — removed `playwright` and `chrome-devtools` MCP entries that were causing double browser windows during test runs.
+- **Playwright headed-mode documentation**: Added `headless: true` default to `playwright.config.ts` with comment explaining `--headed` CLI flag for visible browser testing.
+- **Verification**:
+  - `npm run build`: pass (0 errors)
+  - `npm test`: 96/96 pass
+  - `npx playwright test e2e/signup-password-mismatch.spec.ts --project=chromium --headed --reporter=list`: pass (1/1, visible browser)
+- **Files changed**: `lib/auth/api.ts`, `e2e/signup-password-mismatch.spec.ts`, `.vscode/mcp.json`, `playwright.config.ts`
+
 ### Filter Overlay Consistency + GBP Currency + Bug Fixes
 
 - **GBP-only currency**: Removed USD/EUR from `PackageForm.tsx` and `OfferForm.tsx`. Currency dropdown = `GBP (£)` only.
@@ -371,10 +384,11 @@ npm run build
 ## Last verified
 
 - `npx tsc --noEmit`: pass (0 errors)
-- `npm test`: 95/95 pass
+- `npm test`: 96/96 pass
 - `npm run build`: pass (0 errors, 0 warnings)
+- `npx playwright test e2e/signup-password-mismatch.spec.ts --project=chromium --headed --reporter=list`: pass (1/1, visible browser)
 - `npm audit`: 6 moderate (nested in dev tooling only — no critical/high)
-- Manual smoke: `/` (Hero with trust bar), `/umrah` (4-step form), `/hajj` (coming soon), `/search/packages` (sort + cards) at 320px and 1280px
+- Manual smoke: `/` (Hero with trust bar), `/umrah` (4-step form), `/hajj` (coming soon), `/search/packages` (sort + cards), `/signup` (no longer throws Internal Server Error) at 320px and 1280px
 
 ## What changed this session (2026-06-05)
 

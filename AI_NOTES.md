@@ -14,33 +14,23 @@ P0: Wire Repository → `getDataSource()` cutover — Production DB built but un
 
 ## ✅ DONE (this session)
 
-| Task                            | Status | Evidence                                                                          |
-| ------------------------------- | ------ | --------------------------------------------------------------------------------- |
-| Commit all work to `main`       | ✅     | `6ed2f5d` on GitHub                                                               |
-| Create `dev` from merged `main` | ✅     | `git checkout -b dev`                                                             |
-| Calendar icon on date inputs    | ✅     | `components/umrah/UmrahSearchForm.tsx` - clickable SVG wrapper, `showPicker()`    |
-| Date validation                 | ✅     | Departure not past, return after departure, 7-60 day range, `role="alert"` errors |
-| Em dashes removed               | ✅     | All `\u2013` replaced with `-` in labels, budget, child ages                      |
-| Update README.md                | ✅     | Comprehensive project overview, tech stack, features, roadmap                     |
-| Push `main` to GitHub           | ✅     | `ddc7f87..6ed2f5d`                                                                |
-| Push `dev` to GitHub            | ✅     | `5212a12` on `dev` branch                                                         |
-| Delete extra branches           | ✅     | 16 old branches removed, only `main` + `dev` remain                               |
-| GBP-only currency               | ✅     | `PackageForm.tsx`, `OfferForm.tsx` — `GBP (£)` only                               |
-| FilterOverlay CSS fix           | ✅     | Added `@keyframes slideIn`, removed duplicate `@keyframes slideUp`                |
-| Slider CSS cleanup              | ✅     | Removed duplicate `::-moz-range-thumb` blocks in BudgetFilter + DistanceFilter    |
-| UK English distance             | ✅     | `DistanceFilter.tsx`: "50 m" → "50 metres"                                        |
-| Hotel rating plural             | ✅     | `HotelRatingsFilter.tsx`: aria-label always "stars"                               |
-| TypeScript fixes                | ✅     | `PackageList.tsx` import conflict, `SortDropdown.tsx` ref type error              |
-| Update AI_NOTES.md              | ✅     | Historical log + current objective updated                                        |
-| Fix Umrah slider                | ✅     | Removed duplicate track/activeTrack CSS, fixed positioning                        |
-| Fix Umrah budget slider         | ✅     | Fixed positioning (absolute top:50% + transform)                                  |
-| Blue slider tracks app-wide     | ✅     | BudgetFilter, DistanceFilter, TimePeriodFilter → #4A9EFF                          |
-| Mobile header hamburger         | ✅     | Full mobile drawer (320px slide-in), overlay, focus trap, Escape/click-outside    |
-| Touch targets fixed             | ✅     | All buttons/links min 44px-52px, `-webkit-tap-highlight-color: transparent`       |
-| Footer logo + structure         | ✅     | Smaller Logo(28px) + text-logo, structured sections, copyright row                |
-| Unified RangeSlider component   | ✅     | Single shared component for ALL sliders app-wide                                  |
-| Slider consistency verified     | ✅     | All sliders: 8px blue track, 24px gold thumb, 40px touch area                     |
-| Mobile drawer fallback colors   | ✅     | All drawer CSS vars now have solid hex fallbacks (#111111, #ffffff, #FFD31D)      |
+| Task                     | Status | Evidence                                                              |
+| ------------------------ | ------ | --------------------------------------------------------------------- |
+| Fix signup 500 error     | ✅     | `lib/auth/api.ts` — removed `ment` prefix from corrupted import       |
+| Fix e2e test URL         | ✅     | `e2e/signup-password-mismatch.spec.ts` — relative `/signup`           |
+| Remove MCP servers       | ✅     | `.vscode/mcp.json` — cleared playwright + chrome-devtools entries     |
+| Document headed mode     | ✅     | `playwright.config.ts` — `headless: true` with `--headed` comment     |
+| Add filter button testid | ✅     | `PackageList.tsx` — `data-testid="filter-button"`                     |
+| Slider consistency e2e   | ✅     | `e2e/slider-consistency.spec.ts` — screenshots all 4 slider instances |
+| Update docs              | ✅     | `docs/NOW.md`, `AI_NOTES.md`                                          |
+
+### Verification
+
+- `npm run build`: 0 errors
+- `npm test`: 96/96 pass
+- `npx playwright test e2e/signup-password-mismatch.spec.ts --headed`: 1/1 pass
+- `npx playwright test e2e/slider-consistency.spec.ts --headed`: 2/2 pass
+- Dev server: `http://127.0.0.1:3000` — `/signup`, `/umrah`, `/search/packages` all load
 
 ## 🔄 PENDING (next session)
 
@@ -157,6 +147,19 @@ P0: Wire Repository → `getDataSource()` cutover — Production DB built but un
 
 ## Historical Log
 
+### 2026-06-06 — Session: Fix Signup Internal Server Error + Playwright Cleanup
+
+- **Root cause of Internal Server Error on `/signup`**: `lib/auth/api.ts` line 1 was corrupted as `mentimport { createClient }...` — a merge/typo artifact. This caused `next build` to fail with a syntax error. Since `app/api/auth/me/route.ts` imports from `lib/auth/api.ts`, and the `/signup` page renders `SignUpForm` inside a Server Component, the entire page threw an Internal Server Error at runtime.
+- **Fix**: Removed `ment` prefix → `import { createClient } from '@/lib/supabase/server';`
+- **E2E test fix**: `e2e/signup-password-mismatch.spec.ts` was using hardcoded `http://localhost:3000/signup` instead of Playwright's configured `baseURL` (`http://127.0.0.1:3001`). Changed to relative `/signup`.
+- **Removed unnecessary MCP servers**: Cleared `.vscode/mcp.json` — removed `@playwright/mcp` and `chrome-devtools-mcp` entries that were spawning extra browser windows and interfering with normal Playwright test runs.
+- **Playwright headed-mode documentation**: Added `headless: true` default to `playwright.config.ts` with inline comment: "Run `npx playwright test --headed` to see the browser window".
+- **Verification**:
+  - `npm run build`: pass (0 errors)
+  - `npm test`: 96/96 pass
+  - `npx playwright test e2e/signup-password-mismatch.spec.ts --project=chromium --headed --reporter=list`: pass (1/1, visible browser confirmed)
+- **Files changed**: `lib/auth/api.ts`, `e2e/signup-password-mismatch.spec.ts`, `.vscode/mcp.json`, `playwright.config.ts`, `docs/NOW.md`
+
 ### 2026-06-05 — Session: Calendar Icon, Date Validation, Copy Fixes
 
 - **Visible calendar icon**: Each date field has clickable wrapper with SVG calendar icon (`var(--yellow)`). Native browser icon hidden via CSS. Icon triggers `showPicker()` on click/tap/Enter/Space. Keyboard-accessible (`tabIndex={0}`, `role="button"`, Enter/Space handlers).
@@ -212,20 +215,6 @@ P0: Wire Repository → `getDataSource()` cutover — Production DB built but un
   - `umrah-search-form.module.css` → all budget slider CSS deleted
 - **Verified**: Build 0 errors, 95/95 tests pass, no visual regressions
 - **Result**: Every slider in the app now renders identically — same track height, same thumb size, same blue active track, same gold thumb, same touch behaviour
-
-### 2026-06-05 — Session: Mobile Drawer Invisible Nav Links Fix
-
-- **Root cause**: The mobile navigation drawer rendered with `background: var(--surfaceDark)` and `color: var(--text)` — when CSS custom properties failed to resolve (browser cache mismatch, late CSS injection, or race condition), the drawer appeared completely black with invisible text. The nav links were always present in the DOM but invisible against the default black background.
-- **Fix**: Added explicit solid-color fallbacks to ALL mobile drawer CSS properties:
-  - Drawer background: `#111111` fallback before `var(--surfaceDark)`
-  - Nav link text: `#ffffff` fallback before `var(--text)`
-  - Hover/focus states: `#FFD31D` fallback before `var(--yellow)`
-  - Divider: `rgba(255,255,255,0.08)` fallback before `var(--borderSubtle)`
-  - User label: `rgba(255,255,255,0.64)` fallback before `var(--textMuted)`
-  - Border radius: `8px` fallback before `var(--radiusMd)`
-- **Also added**: Guardrails to `.clinerules` — "CRITICAL EXECUTION GUARDRAILS & QUALITY MANDATE" section with Zero-Trust Confirmation, Production-Ready Standards, and Cross-AI Quality Audit Warning.
-- **Verified**: Compiled CSS output confirmed `background:#111111;background:var(--surfaceDark,#111111)` pattern. Build 0 errors.
-- **Note**: Dev server cache was stale from prior builds — required `rm -rf .next` and full rebuild for CSS changes to appear. Browser also needs hard-refresh (`Cmd+Shift+R`) to clear old CSS.
 
 ### 2026-06-05 — Session: Slider Fix + Blue Active Tracks App-Wide
 

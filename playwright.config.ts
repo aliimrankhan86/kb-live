@@ -10,6 +10,8 @@ export default defineConfig({
   use: {
     baseURL: 'http://127.0.0.1:3001',
     trace: 'on-first-retry',
+    // Run `npx playwright test --headed` to see the browser window
+    headless: true,
   },
   projects: [
     {
