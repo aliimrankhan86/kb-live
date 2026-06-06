@@ -1,8 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { MockDB } from '@/lib/api/mock-db';
 import { interestSchema } from '@/lib/validation';
+import { checkRateLimit, getRateLimitIdentifier } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
+  // Rate limiting — prevent interest-list spam
+  const rateLimitId = getRateLimitIdentifier(request);
+  const rateLimit = await checkRateLimit(rateLimitId);
+  if (rateLimit.limited) {
+    return NextResponse.json(
+      { error: 'Too many attempts. Please try again later.' },
+      {
+        status: 429,
+        headers: { 'Retry-After': String(rateLimit.retryAfter) },
+      }
+    );
+  }
+
   try {
     const body = await request.json();
 

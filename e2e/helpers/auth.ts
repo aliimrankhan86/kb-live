@@ -8,7 +8,7 @@ import type { Page } from '@playwright/test';
  *  - lib/supabase/middleware.ts  (route guard bypass)
  *  - lib/auth/session.ts         (server API/RSC auth bypass)
  *
- * Only active when NODE_ENV !== 'production'.
+ * Only active when E2E_TESTING=1 (set by playwright.config.ts webServer env).
  */
 export const TEST_USERS = {
   /** Operator with seeded packages and payment details (id: op1) */

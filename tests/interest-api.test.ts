@@ -14,8 +14,19 @@ vi.mock('next/server', () => {
   return { NextResponse, NextRequest: class {} };
 });
 
+// Mock rate-limit so tests don't require Upstash or real IP headers
+vi.mock('../lib/rate-limit', async () => {
+  const actual = await vi.importActual<typeof import('../lib/rate-limit')>('../lib/rate-limit');
+  return {
+    ...actual,
+    checkRateLimit: vi.fn(() => ({ limited: false })),
+    getRateLimitIdentifier: vi.fn(() => 'test-identifier'),
+  };
+});
+
 const makeRequest = (body: unknown) => ({
   json: async () => body,
+  headers: { get: () => null },
 });
 
 async function callRoute(body: unknown) {

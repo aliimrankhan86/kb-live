@@ -54,9 +54,9 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
-        <div id="main-content" className="flex-1">
+        <main id="main-content" className="flex-1">
           {children}
-        </div>
+        </main>
         <Footer />
         <CookieConsent />
       </body>
