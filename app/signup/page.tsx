@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { SignUpForm } from '@/components/auth/SignUpForm';
 
 export const metadata = {
-  title: 'Create Account — KaabaTrip',
+  title: 'Create Account',
   description: 'Sign up for a KaabaTrip traveller or partner account',
 };
 

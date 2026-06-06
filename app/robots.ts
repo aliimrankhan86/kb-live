@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/quote', '/requests', '/operator'],
+        disallow: ['/quote', '/requests', '/operator', '/admin', '/settings'],
       },
     ],
   }

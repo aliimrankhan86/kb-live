@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
 
 // ─── GET — list operator packages ─────────────────────────────────────────────
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const user = await getSessionUser();
     if (!user || user.role !== 'operator') {

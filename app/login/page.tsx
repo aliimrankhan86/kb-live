@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { LoginForm } from '@/components/auth/LoginForm';
 
 export const metadata = {
-  title: 'Partner Login — KaabaTrip',
+  title: 'Partner Login',
   description: 'Sign in to your KaabaTrip partner dashboard',
 };
 
