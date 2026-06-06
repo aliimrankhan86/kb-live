@@ -6,7 +6,7 @@
 
 ## §1 — Current Status
 
-**Date:** 2026-06-06 | **Branch:** `dev` | **Build:** ✅ 0 errors, 0 warnings | **Tests:** ✅ 222/222 unit | **E2E:** ✅ 19/21 chromium pass (2 skipped, 0 fail) | **Git:** 🔄 uncommitted E2E auth changes pending
+**Date:** 2026-06-06 | **Branch:** `dev` | **Build:** ✅ 0 errors, 0 warnings | **Tests:** ✅ 222/222 unit | **E2E:** ✅ 19/21 chromium pass (2 skipped, 0 fail) | **Git:** ✅ pushed — `bfec19b` (master audit fixes)
 
 ### 🔄 Active work (highest → lowest priority)
 
@@ -35,12 +35,13 @@ These items are **intentionally not yet done** and must be picked up by the next
 | 1   | **T18 — SEO/AEO QA**               | ✅ DONE 2026-06-06 (server-side curl audit). Fixed: robots.txt missing /admin & /settings; 8 page titles doubled `\| KaabaTrip` via template; `console.error` in route; unused `_request` param lint warning. | — |
 | 2   | **T16 RE-ENABLE — Operator E2E**   | ✅ DONE 2026-06-06 — `__e2e_user` cookie bypass (two-level: middleware.ts + session.ts), `E2E_TESTING=1` env var forwarded to Edge via `next.config.ts`; MockDB forced in production builds via `getDataSource()`. All 10 operator tests now pass. | — |
 | 3   | **E2E auth infrastructure**        | ✅ DONE 2026-06-06 — `e2e/helpers/auth.ts` created with `TEST_USERS` + `setTestUser`/`clearTestUser`. All affected specs (`operator`, `bank-payment`, `flow`, `catalogue`) updated. 19/21 chromium tests pass, 0 fail. | — |
+| 8   | **Master Audit (Security/A11y/Perf/Quality)** | ✅ DONE 2026-06-06 — Security: rate limit added to `/api/interest`, brace-expansion vuln patched, all auth endpoints return minimal data, admin never in public schemas, CSP headers configured. A11y: `<main>` landmark for skip link, label/htmlFor bindings on 3 inputs in Step2. Perf: no `next/dynamic` code-split needed (only 5 framer-motion uses, optimizePackageImports configured). Code quality: 0 `any`, 0 `console.log`, 222/222 tests, 0 build errors/warnings. Remaining: 5 moderate npm vulns (PostCSS in Next.js internals — not actionable without breaking Next; Prisma dev dep — dev only). | — |
 | 4   | **Rate limiter production switch** | `lib/rate-limit.ts` uses an in-memory `Map` fallback when `UPSTASH_REDIS_REST_URL` is missing. This resets on every cold start on Vercel/Lambda.     | **INFRA TASK:** Add `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` to production env. Verify the Upstash path is hit in staging.                                                                                                                                  |
 | 5   | **Prisma cutover end-to-end**      | `FEATURE_USE_REAL_DB` flag exists but has not been enabled and verified end-to-end. MockDB is still the active data source in dev/tests.             | **INFRA TASK:** Set `FEATURE_USE_REAL_DB=true` in a staging environment. Run the full test suite against Prisma + Supabase. Fix any adapter/RLS issues.                                                                                                                    |
 | 6   | **Console.log audit**              | ✅ DONE 2026-06-06 — `grep -rn "console\." components/ app/` found only `error.tsx`, `global-error.tsx` (error boundaries, allowed), and one route `console.error` that was removed. | — |
 | 7   | **SEO/AEO content expansion (T19)** | ✅ DONE 2026-06-06 — AI crawlers in robots.txt; `personJsonLd`, `touristTripJsonLd`, `dateModified` in json-ld.ts; TouristTrip on package pages; cost FAQ on /umrah; corridor links on homepage; /umrah/ramadan full expansion; /umrah/cost new page; sitemap updated. | See T19 row in §1 |
 
-**Branch state:** `dev` — T19 committed as `10cad73`. E2E auth fix uncommitted (pending commit). Not pushed to remote.
+**Branch state:** `dev` pushed — latest commit `bfec19b` (master audit). All changes pushed to remote.
 
 ### Current Codex task handoff note (2026-06-06)
 
