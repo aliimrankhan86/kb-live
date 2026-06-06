@@ -1,7 +1,17 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { Header } from '@/components/layout/Header'
 import { Hero } from '@/components/marketing/Hero'
 import { faqPageJsonLd, graphJsonLd, organizationJsonLd, webPageJsonLd, websiteJsonLd } from '@/lib/seo/json-ld'
+
+const corridorLinks = [
+  { label: 'Umrah from London', href: '/umrah/london' },
+  { label: 'Umrah from Birmingham', href: '/umrah/birmingham' },
+  { label: 'Umrah from Manchester', href: '/umrah/manchester' },
+  { label: 'Ramadan Umrah 2027', href: '/umrah/ramadan' },
+  { label: 'Umrah cost guide', href: '/umrah/cost' },
+  { label: 'Hajj packages 2027', href: '/hajj' },
+]
 
 export const metadata: Metadata = {
   title: 'KaabaTrip - Compare Hajj & Umrah Packages from UK Operators',
@@ -60,6 +70,23 @@ export default function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd) }}
       />
       <Hero />
+      {/* Internal navigation — links homepage to corridor and guide pages for SEO and user discovery */}
+      <section className="mx-auto max-w-4xl px-4 py-8 border-t border-[var(--border)]">
+        <h2 className="text-sm font-semibold text-[var(--textMuted)] uppercase tracking-wide mb-4">
+          Popular routes and guides
+        </h2>
+        <nav aria-label="Popular Umrah routes" className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {corridorLinks.map(({ label, href }) => (
+            <Link
+              key={href}
+              href={href}
+              className="rounded-lg border border-[var(--border)] bg-[var(--surfaceDark)] px-4 py-3 text-sm font-medium text-[var(--text)] hover:border-[var(--yellow)]/40 hover:text-[var(--yellow)] transition-colors text-center"
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
+      </section>
     </>
   )
 }

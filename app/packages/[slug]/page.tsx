@@ -3,7 +3,7 @@ import { Header } from '@/components/layout/Header'
 import { PackageDetail } from '@/components/packages/PackageDetail'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { Repository } from '@/lib/api/repository'
-import { breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, packageJsonLd } from '@/lib/seo/json-ld'
+import { breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, packageJsonLd, touristTripJsonLd } from '@/lib/seo/json-ld'
 import type { Package, OperatorProfile } from '@/lib/types'
 
 export async function generateMetadata({
@@ -112,6 +112,7 @@ export default async function PackageDetailPage({
   ];
   const packageDetailJsonLd = graphJsonLd([
     packageJsonLd(pkg, operator?.companyName ?? 'KaabaTrip'),
+    touristTripJsonLd(pkg, operator?.companyName ?? 'KaabaTrip'),
     breadcrumbJsonLd(breadcrumbItems.map((item) => ({ name: item.label, path: item.href }))),
     faqPageJsonLd([
       {

@@ -6,7 +6,7 @@
 
 ## §1 — Current Status
 
-**Date:** 2026-06-06 | **Branch:** `dev` | **Build:** ✅ 0 errors, 0 warnings | **Tests:** ✅ 222/222 | **Git:** ✅ clean — pushed to `origin/dev` as `b3f4db1`
+**Date:** 2026-06-06 | **Branch:** `dev` | **Build:** ✅ 0 errors, 0 warnings | **Tests:** ✅ 222/222 | **Git:** ⚠️ uncommitted — 7 modified + 1 new file (SEO/AEO content expansion)
 
 ### 🔄 Active work (highest → lowest priority)
 
@@ -22,6 +22,7 @@
 | T17        | Final smoke + integration check                              | ✅ COMPLETE — 222/222 unit tests pass; build 0 errors; 2 E2E pass, 12 operator skipped, 4 pre-existing auth-related failures               | —                                                                                  |
 | OP-PERSIST | Operator package persistence wiring                          | ✅ COMPLETE — GET/DELETE added to `/api/operator/packages/route.ts`; page fetches on load, wires POST/PATCH/DELETE; loading + error states | `/operator/packages`, `app/api/operator/packages/route.ts`                         |
 | T18        | Chrome SEO/AEO QA                                            | ✅ DONE (server-side curl audit) — fixed robots.txt missing /admin+/settings, fixed duplicate title suffix on 8 pages, removed console.error from route, removed unused `request` param warning | `app/robots.ts`, 8 page files, `app/packages/[slug]/page.tsx`, `app/api/operator/packages/route.ts` |
+| T19        | SEO/AEO content expansion (seo-aeo-best-practices skill)     | ✅ DONE — AI crawler rules in robots.txt; `personJsonLd`, `touristTripJsonLd`, `dateModified` in json-ld.ts; TouristTrip wired to packages page; cost FAQ on /umrah; corridor links on homepage; /umrah/ramadan full expansion; /umrah/cost new pricing guide page | `app/robots.ts`, `lib/seo/json-ld.ts`, `app/page.tsx`, `app/umrah/page.tsx`, `app/umrah/ramadan/page.tsx`, `app/umrah/cost/page.tsx`, `app/packages/[slug]/page.tsx`, `app/sitemap.ts` |
 
 ---
 
@@ -37,8 +38,9 @@ These items are **intentionally not yet done** and must be picked up by the next
 | 4   | **Rate limiter production switch** | `lib/rate-limit.ts` uses an in-memory `Map` fallback when `UPSTASH_REDIS_REST_URL` is missing. This resets on every cold start on Vercel/Lambda.     | **INFRA TASK:** Add `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` to production env. Verify the Upstash path is hit in staging.                                                                                                                                  |
 | 5   | **Prisma cutover end-to-end**      | `FEATURE_USE_REAL_DB` flag exists but has not been enabled and verified end-to-end. MockDB is still the active data source in dev/tests.             | **INFRA TASK:** Set `FEATURE_USE_REAL_DB=true` in a staging environment. Run the full test suite against Prisma + Supabase. Fix any adapter/RLS issues.                                                                                                                    |
 | 6   | **Console.log audit**              | ✅ DONE 2026-06-06 — `grep -rn "console\." components/ app/` found only `error.tsx`, `global-error.tsx` (error boundaries, allowed), and one route `console.error` that was removed. | — |
+| 7   | **SEO/AEO content expansion (T19)** | ✅ DONE 2026-06-06 — AI crawlers in robots.txt; `personJsonLd`, `touristTripJsonLd`, `dateModified` in json-ld.ts; TouristTrip on package pages; cost FAQ on /umrah; corridor links on homepage; /umrah/ramadan full expansion; /umrah/cost new page; sitemap updated. | See T19 row in §1 |
 
-**Branch state:** `dev` is clean and pushed to `origin/dev` (commit `1786fa8`). No uncommitted changes.
+**Branch state:** `dev` has uncommitted T19 changes. Commit with: `git add app/robots.ts lib/seo/json-ld.ts app/page.tsx app/sitemap.ts app/umrah/page.tsx app/umrah/ramadan/page.tsx app/packages/\\[slug\\]/page.tsx app/umrah/cost/ AI_NOTES.md`
 
 ### Current Codex task handoff note (2026-06-06)
 
@@ -200,7 +202,7 @@ Next.js 15.5.19 (App Router) · React 19 · TypeScript strict · Tailwind CSS v4
 | `lib/errors.ts`                     | `AppError`, `ErrorCode`, `mapErrorToResponse`                                                                      |
 | `lib/rate-limit.ts`                 | Upstash Redis sliding window (5 req / 15 min). In-memory fallback for dev.                                         |
 | `lib/supabase/service-role.ts`      | Admin Supabase client for account deletion                                                                         |
-| `lib/seo/json-ld.ts`                | Shared Product, TravelAgency, ItemList, BreadcrumbList, Organization, WebSite, WebPage, FAQPage, and graph helpers |
+| `lib/seo/json-ld.ts`                | Shared Product, TravelAgency, ItemList, BreadcrumbList, Organization, WebSite, WebPage, FAQPage, TouristTrip, Person, and graph helpers |
 | `components/search/search-utils.ts` | `filterByParams`, `toSearchDisplay` — server+client safe (no `'use client'`)                                       |
 | `components/ui/Breadcrumb.tsx`      | `<Breadcrumb items>` — JSON-LD helper removed (use `lib/seo/json-ld.ts`)                                           |
 
@@ -210,7 +212,8 @@ Next.js 15.5.19 (App Router) · React 19 · TypeScript strict · Tailwind CSS v4
 | ---------------------------- | -------------- | --------------------------------------------------- |
 | `/`                          | Server         | Landing                                             |
 | `/umrah`                     | Server         | 4-step search form (client component inside)        |
-| `/hajj`                      | Client         | Hajj interest capture                               |
+| `/hajj`                      | Server         | Hajj interest capture (server component + HajjInterestForm client child) |
+| `/umrah/cost`                | Server         | Pricing guide — 4 tiers, seasonal pricing, FAQs, JSON-LD |
 | `/search/packages`           | Server         | SSR packages + `<SearchPackagesClient>` in Suspense |
 | `/packages/[slug]`           | Server         | Package detail + JSON-LD                            |
 | `/operators/[slug]`          | Server         | Operator profile                                    |
@@ -260,7 +263,7 @@ Run: `npm test` (Vitest). E2E: `npx playwright test`.
 ```bash
 npm run dev         # Dev server (http://127.0.0.1:3000)
 npm run build       # Production build — must stay at 0 errors
-npm test            # Unit tests — must stay at 183/183
+npm test            # Unit tests — must stay at 222/222
 npx tsc --noEmit    # Type check
 ```
 
@@ -284,6 +287,7 @@ npx tsc --noEmit    # Type check
 
 | Date       | What                                                                                                                                                                                                      |
 | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-06 | **SEO/AEO content expansion (T19)**: Added AI crawler allow rules (GPTBot, ClaudeBot, PerplexityBot, Google-Extended) to robots.ts. Added `personJsonLd`, `touristTripJsonLd`, `dateModified` support to json-ld.ts. Wired TouristTrip schema alongside Product on package detail pages. Added cost FAQ to /umrah. Expanded /umrah/ramadan from 29-line stub to full corridor page (2027 dates, FAQs, AEO details). Created /umrah/cost pricing guide (4 tiers, seasonal pricing, 4 FAQs, JSON-LD). Added sitemap entry for /umrah/cost. Added corridor links section to homepage and /umrah page. Tests: 222/222, build: 0 errors, 0 warnings. |
 | 2026-06-06 | **Beyond SEO audit + fixes**: Fixed critical canonical bug — 8 pages pointed canonical at homepage. Fixed hajj page (was `'use client'` with no metadata, inheriting homepage title/canonical). Added FAQPage+WebPage+BreadcrumbList JSON-LD to all corridor pages. Rewrote CityCorridor with design tokens (was using `text-slate-900` invisible on dark bg). Added city-specific FAQ blocks for AEO. Commit `78d72f5`. |
 | 2026-06-06 | **T18 SEO/AEO QA**: robots.txt added /admin+/settings disallow; stripped duplicate `\| KaabaTrip` title suffix from 8 pages (template was appending it twice); removed `console.error` from packages route; fixed unused `request` param lint warning. Tests: 222/222; build: 0 errors, 0 warnings. |
 | 2026-06-06 | **MAJOR SESSION**: P0-P2 audit remediation. AppError, Upstash rate limiter, GDPR routes, Server Component search, JSON-LD, breadcrumbs, CSP headers, auth hardening, 14 ESLint fixes. Tests: 136→183.     |

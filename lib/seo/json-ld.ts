@@ -238,10 +238,13 @@ export function webPageJsonLd({
   path,
   name,
   description,
+  dateModified,
 }: {
   path: string;
   name: string;
   description: string;
+  /** ISO 8601 date string — surfaces freshness signal in AI and search results. */
+  dateModified?: string;
 }): Record<string, unknown> {
   const url = `${BASE_URL}${path}`;
   return {
@@ -254,6 +257,74 @@ export function webPageJsonLd({
     isPartOf: { '@id': `${BASE_URL}/#website` },
     publisher: { '@id': `${BASE_URL}/#organization` },
     inLanguage: 'en-GB',
+    ...(dateModified ? { dateModified } : {}),
+  };
+}
+
+export interface PersonData {
+  name: string;
+  url?: string;
+  sameAs?: string[];
+  jobTitle?: string;
+  description?: string;
+}
+
+/** Person schema for E-E-A-T author attribution and entity disambiguation. */
+export function personJsonLd({ name, url, sameAs, jobTitle, description }: PersonData): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name,
+    ...(url ? { url } : {}),
+    ...(sameAs?.length ? { sameAs } : {}),
+    ...(jobTitle ? { jobTitle } : {}),
+    ...(description ? { description } : {}),
+  };
+}
+
+/**
+ * TouristTrip schema for pilgrimage package pages.
+ * Use alongside `packageJsonLd` inside `graphJsonLd` — adds itinerary, destination,
+ * and traveller-type signals that help AI engines classify and cite the package.
+ */
+export function touristTripJsonLd(pkg: Package, operatorName: string): Record<string, unknown> {
+  const packageUrl = `${BASE_URL}/packages/${pkg.slug}`;
+  const nightsMakkah = pkg.nightsMakkah ?? Math.ceil((pkg.totalNights ?? 0) / 2);
+  const nightsMadinah = pkg.nightsMadinah ?? Math.floor((pkg.totalNights ?? 0) / 2);
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'TouristTrip',
+    '@id': `${packageUrl}#touristtrip`,
+    name: pkg.title,
+    description: `${pkg.pilgrimageType === 'hajj' ? 'Hajj' : 'Umrah'} package from the UK – ${pkg.totalNights ?? nightsMakkah + nightsMadinah} nights (${nightsMakkah} in Makkah, ${nightsMadinah} in Madinah).`,
+    url: packageUrl,
+    touristType: {
+      '@type': 'Audience',
+      audienceType: 'Muslim pilgrims from the United Kingdom',
+    },
+    provider: {
+      '@type': 'TravelAgency',
+      name: operatorName,
+    },
+    offers: {
+      '@type': 'Offer',
+      priceCurrency: pkg.currency ?? 'GBP',
+      price: String(pkg.pricePerPerson ?? 0),
+      availability: 'https://schema.org/InStock',
+      url: packageUrl,
+    },
+    itinerary: compact([
+      nightsMakkah > 0
+        ? { '@type': 'TouristDestination', name: 'Makkah', description: `${nightsMakkah} nights near the Grand Mosque` }
+        : null,
+      nightsMadinah > 0
+        ? { '@type': 'TouristDestination', name: 'Madinah', description: `${nightsMadinah} nights near the Prophet's Mosque` }
+        : null,
+    ]),
+    ...(pkg.dateWindow?.start ? { startDate: pkg.dateWindow.start } : {}),
+    ...(pkg.dateWindow?.end ? { endDate: pkg.dateWindow.end } : {}),
+    ...(pkg.departureAirport ? { departureLocation: { '@type': 'Airport', name: pkg.departureAirport } } : {}),
   };
 }
 

@@ -1,7 +1,8 @@
 import { Metadata } from 'next'
 import { Header } from '@/components/layout/Header'
 import { UmrahSearchForm } from '@/components/umrah/UmrahSearchForm'
-import { faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
+import Link from 'next/link'
+import { breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
 
 export const metadata: Metadata = {
   title: 'Umrah Packages 2026 from the UK - Compare Operators',
@@ -38,6 +39,11 @@ const umrahFaqs = [
     answer:
       'Prices are indicative package prices shown for comparison. Final availability, itinerary, inclusions, and payment terms are confirmed by the travel operator.',
   },
+  {
+    question: 'How much does an Umrah package from the UK cost?',
+    answer:
+      'Umrah packages from the UK start from around £800 per person for budget off-peak departures. Mid-range 4-star packages typically cost £1,200–£2,500. Premium 5-star packages near the Grand Mosque in Makkah range from £2,500 to over £5,000. Ramadan and school holiday departures are 20–40% higher. See our Umrah cost guide for a full breakdown.',
+  },
 ]
 
 const umrahJsonLd = graphJsonLd([
@@ -47,6 +53,10 @@ const umrahJsonLd = graphJsonLd([
     description:
       'Compare UK Umrah packages by travel dates, budget, hotel rating, distance to Haram, and operator trust signals.',
   }),
+  breadcrumbJsonLd([
+    { name: 'Home', path: '/' },
+    { name: 'Umrah Packages', path: '/umrah' },
+  ]),
   faqPageJsonLd(umrahFaqs),
 ])
 
@@ -67,7 +77,7 @@ export default function UmrahPage() {
           <h2 id="umrah-seo-faq" className="text-lg font-semibold text-[var(--text)]">
             Comparing Umrah packages from the UK
           </h2>
-          <div className="mt-4 grid gap-4 text-sm text-[var(--textMuted)] md:grid-cols-3">
+          <div className="mt-4 grid gap-4 text-sm text-[var(--textMuted)] sm:grid-cols-2">
             {umrahFaqs.map((item) => (
               <article key={item.question}>
                 <h3 className="font-semibold text-[var(--text)]">{item.question}</h3>
@@ -75,6 +85,22 @@ export default function UmrahPage() {
               </article>
             ))}
           </div>
+          {/* Internal links — cost guide and city corridors */}
+          <nav aria-label="Related guides" className="mt-6 pt-5 border-t border-[var(--border)] flex flex-wrap gap-2">
+            <Link href="/umrah/cost" className="rounded-lg border border-[var(--yellow)]/30 bg-[var(--yellow)]/5 px-3 py-1.5 text-xs font-medium text-[var(--yellow)] hover:bg-[var(--yellow)]/10 transition-colors">
+              Umrah cost guide →
+            </Link>
+            {[
+              { label: 'From London', href: '/umrah/london' },
+              { label: 'From Birmingham', href: '/umrah/birmingham' },
+              { label: 'From Manchester', href: '/umrah/manchester' },
+              { label: 'Ramadan Umrah 2027', href: '/umrah/ramadan' },
+            ].map(({ label, href }) => (
+              <Link key={href} href={href} className="rounded-lg border border-[var(--border)] bg-[var(--surfaceDark)] px-3 py-1.5 text-xs font-medium text-[var(--textMuted)] hover:text-[var(--text)] hover:border-[var(--yellow)]/40 transition-colors">
+                {label}
+              </Link>
+            ))}
+          </nav>
         </section>
       </main>
     </>
