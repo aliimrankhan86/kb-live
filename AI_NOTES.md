@@ -6,7 +6,7 @@
 
 ## §1 — Current Status
 
-**Date:** 2026-06-06 | **Branch:** `dev` | **Build:** ✅ 0 errors, 0 warnings | **Tests:** ✅ 222/222 | **Git:** ⚠️ uncommitted — 7 modified + 1 new file (SEO/AEO content expansion)
+**Date:** 2026-06-06 | **Branch:** `dev` | **Build:** ✅ 0 errors, 0 warnings | **Tests:** ✅ 222/222 | **Git:** ✅ clean — `10cad73` committed (not yet pushed)
 
 ### 🔄 Active work (highest → lowest priority)
 
@@ -40,7 +40,7 @@ These items are **intentionally not yet done** and must be picked up by the next
 | 6   | **Console.log audit**              | ✅ DONE 2026-06-06 — `grep -rn "console\." components/ app/` found only `error.tsx`, `global-error.tsx` (error boundaries, allowed), and one route `console.error` that was removed. | — |
 | 7   | **SEO/AEO content expansion (T19)** | ✅ DONE 2026-06-06 — AI crawlers in robots.txt; `personJsonLd`, `touristTripJsonLd`, `dateModified` in json-ld.ts; TouristTrip on package pages; cost FAQ on /umrah; corridor links on homepage; /umrah/ramadan full expansion; /umrah/cost new page; sitemap updated. | See T19 row in §1 |
 
-**Branch state:** `dev` has uncommitted T19 changes. Commit with: `git add app/robots.ts lib/seo/json-ld.ts app/page.tsx app/sitemap.ts app/umrah/page.tsx app/umrah/ramadan/page.tsx app/packages/\\[slug\\]/page.tsx app/umrah/cost/ AI_NOTES.md`
+**Branch state:** `dev` clean — T19 committed as `10cad73`. Not yet pushed to remote.
 
 ### Current Codex task handoff note (2026-06-06)
 
