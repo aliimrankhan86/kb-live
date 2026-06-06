@@ -105,6 +105,48 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// ─── GET — list operator packages ─────────────────────────────────────────────
+
+export async function GET(request: NextRequest) {
+  try {
+    const user = await getSessionUser();
+    if (!user || user.role !== 'operator') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    const packages = await Repository.getPackagesByOperator(user.id);
+    return NextResponse.json({ packages });
+  } catch (err) {
+    const { body, status } = mapErrorToResponse(err);
+    return NextResponse.json(body, { status });
+  }
+}
+
+// ─── DELETE — remove operator package ─────────────────────────────────────────
+
+export async function DELETE(_request: NextRequest) {
+  try {
+    const user = await getSessionUser();
+    if (!user || user.role !== 'operator') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    const { searchParams } = new URL(_request.url);
+    const id = searchParams.get('id');
+    if (!id) {
+      return NextResponse.json({ error: 'Package ID required' }, { status: 400 });
+    }
+
+    const ctx = { userId: user.id, role: user.role };
+    await Repository.deletePackage(ctx, id);
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    const { body, status } = mapErrorToResponse(err);
+    return NextResponse.json(body, { status });
+  }
+}
+
 // ─── PATCH — update package ───────────────────────────────────────────────────
 
 const updateSchema = packageSchema.partial().extend({
