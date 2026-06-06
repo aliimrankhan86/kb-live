@@ -248,7 +248,12 @@ const PackageList: React.FC<PackageListProps> = ({
             data-testid="search-compare-button"
             className={styles.compareButton}
             onClick={() => {
-              if (selectedCompareIds.length >= 2) setShowComparison(true);
+              // Defer past current event tick so Radix DismissableLayer
+              // doesn't treat this button's click as an "outside" click
+              // and immediately close the dialog it just opened.
+              if (selectedCompareIds.length >= 2) {
+                setTimeout(() => setShowComparison(true), 0);
+              }
             }}
             disabled={compareDisabled}
             aria-disabled={compareDisabled}

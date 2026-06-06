@@ -2,9 +2,8 @@ import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { Header } from '@/components/layout/Header';
 import { SearchPackagesClient } from '@/components/search/SearchPackagesClient';
-import { filterByParams, toSearchDisplay } from '@/components/search/search-utils';
+import { filterByParams } from '@/components/search/search-utils';
 import { Repository } from '@/lib/api/repository';
-import PackageList from '@/components/search/PackageList';
 import { faqPageJsonLd, graphJsonLd, searchResultsJsonLd, webPageJsonLd } from '@/lib/seo/json-ld';
 import styles from '@/components/search/packages.module.css';
 
@@ -54,10 +53,9 @@ export default async function SearchPackagesPage({ searchParams }: SearchPackage
   const params = await searchParams;
   const allPackages = await Repository.listPackages();
 
-  // Pre-filter server-side for SEO — initial HTML contains real package data.
+  // Pre-filter server-side for SEO — count and JSON-LD use real package data.
   const urlParams = buildUrlParams(params);
   const initialFiltered = filterByParams(allPackages, urlParams);
-  const initialDisplay = initialFiltered.map(toSearchDisplay);
   const type = urlParams.get('type');
   const packageType = type === 'hajj' ? 'Hajj' : type === 'umrah' ? 'Umrah' : 'Hajj and Umrah';
   const searchJsonLd = graphJsonLd([
@@ -93,7 +91,26 @@ export default async function SearchPackagesPage({ searchParams }: SearchPackage
         fallback={
           <main className={styles.searchPage}>
             <h1 className="sr-only">Search Results - Hajj and Umrah Packages</h1>
-            <PackageList packages={initialDisplay} cataloguePackages={initialFiltered} />
+            <div className={styles.searchContainer}>
+              <div className={styles.searchHeader}>
+                <div className={styles.searchResults}>
+                  Found {initialFiltered.length} packages matching your criteria
+                </div>
+              </div>
+              {/* Non-interactive skeleton — avoids state loss when Suspense resolves */}
+              <div aria-busy="true" aria-label="Loading packages">
+                {initialFiltered.map((pkg) => (
+                  <div
+                    key={pkg.id}
+                    className="mb-4 rounded-lg border border-[var(--borderSubtle)] bg-[var(--surfaceDark)] p-5 opacity-60"
+                    aria-hidden="true"
+                  >
+                    <div className="h-5 w-40 rounded bg-[rgba(255,255,255,0.08)]" />
+                    <div className="mt-3 h-4 w-24 rounded bg-[rgba(255,255,255,0.05)]" />
+                  </div>
+                ))}
+              </div>
+            </div>
           </main>
         }
       >

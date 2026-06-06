@@ -34,10 +34,14 @@ body::before {
   pointer-events: none;
 }
 
-/* Ensure all direct children sit above the overlay */
-body > * {
-  position: relative;
-  z-index: 1;
+/* Ensure all direct children sit above the overlay.
+   Must be in @layer base so Tailwind utility classes (e.g. .fixed) in the
+   utilities layer can override position on portaled elements (Radix dialogs). */
+@layer base {
+  body > * {
+    position: relative;
+    z-index: 1;
+  }
 }
 
 /* Consistent scrollbar styling */

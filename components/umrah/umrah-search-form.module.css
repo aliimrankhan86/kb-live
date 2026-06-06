@@ -7,6 +7,7 @@
   z-index: 10;
   padding: 0 0.5rem;
   box-sizing: border-box;
+  margin: 0 auto;
 }
 
 .searchForm__card {
