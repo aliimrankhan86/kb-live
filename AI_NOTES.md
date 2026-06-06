@@ -19,6 +19,7 @@
 | T15 | Unit tests: wizard full integration                          | ✅ COMPLETE (47/47 pass, part of T8)  | `tests/operator-wizard.test.tsx`                                 |
 | T16 | E2E: onboarding → packages → dashboard                       | ⚠️ SPEC EXISTS, NOT PASSING           | `e2e/operator.spec.ts`                                           |
 | T17 | Final smoke + integration check                              | ⚠️ PUBLIC SMOKE PASSED; operator E2E still blocks full sign-off | —                                                                |
+| T18 | Claude local Chrome SEO/AEO QA                               | ⏳ PENDING — run with local Chrome access | Public routes, rendered HTML, JSON-LD, mobile/desktop Chrome checks |
 
 ### ✅ Completed in this session (uncommitted on `dev`)
 
@@ -101,6 +102,44 @@ These rules exist because violations caused actual audit findings. Do not break 
 - AEO/GEO copy must be source-backed, concise, and visible when backed by `FAQPage` schema.
 - Reputation/trust copy must only use stored facts. Do not claim "best", "cheapest", "guaranteed", "price match", fake reviews, or unsupported rankings.
 - `searchParams` passed through server-side so initial HTML has real data.
+
+### 2.7 Claude local Chrome SEO QA brief
+
+When Claude or another browser-capable agent has local Chrome access, run this as a follow-up technical SEO/AEO audit.
+
+**Mode:** Local Chrome / rendered-page audit. This validates implementation quality, not live ranking data.
+
+**Routes to check first:**
+
+- `/`
+- `/umrah`
+- `/search/packages`
+- `/packages/[slug]` using a published package slug from MockDB/repository data
+- `/operators/[slug]` using a public operator slug
+- `/umrah/london`, `/umrah/birmingham`, `/umrah/manchester`
+- `/robots.txt`, `/sitemap.xml`
+
+**Chrome checks:**
+
+- Rendered title, meta description, canonical, Open Graph, and robots/indexability state.
+- Exactly one sensible H1 per public page; H2/H3 hierarchy supports the page intent.
+- Key comparison copy is visible in rendered HTML, not hidden behind client-only state.
+- JSON-LD scripts exist, parse as valid JSON, and use page-appropriate schema types.
+- Package/operator facts in schema match visible page content; no fabricated reviews, ratings, rankings, or guarantees.
+- Internal links support search journeys: homepage → Umrah/search/corridors, search → package detail, package detail → operator/quote where available.
+- Mobile and desktop Chrome smoke at 320px and 1280px: no horizontal overflow, visible CTA, no overlapping text, no console/hydration errors.
+- Basic asset checks: logo/images load, meaningful alt text where images are visible.
+- If Lighthouse/DevTools is available, capture performance/accessibility/SEO signals and note blockers only when reproducible.
+
+**If defects are found:**
+
+- Make small, scoped fixes in the allowed public SEO/UI files.
+- Update `docs/NOW.md` with what changed and what remains unverified.
+- Run `npm run test`, `npm run build`, and repeat Chrome smoke for affected public routes.
+
+**Do not claim from local Chrome alone:**
+
+- Google rankings, search volume, backlink count/authority, Core Web Vitals field data, Google Business Profile performance, competitor keyword footprint, or AI Overview/Gemini/Perplexity citation visibility.
 
 ---
 

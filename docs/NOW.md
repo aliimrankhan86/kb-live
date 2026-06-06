@@ -71,6 +71,7 @@
 - **Task 14 is partially complete:** `lib/validation.ts` exists for Zod API schemas (`signUpSchema`, `signInSchema`, `interestSchema`), but the queue's requested utility validators (`validateEmail`, `validatePhone`, `validateOperatorForPublish`, package publish/draft validators) are not implemented.
 - **Operator package persistence is thin in the page UI:** `/operator/packages` stores newly-created wizard packages in page state for the current session; repository-backed CRUD/API paths exist but the page is not fully wired end-to-end.
 - **Root `AI_NOTES.md` is current for handoff:** T11/T12/T13/T16/T17 status and Beyond SEO remediation are reflected as of 2026-06-06.
+- **Claude local Chrome SEO QA is pending:** `AI_NOTES.md` now includes T18 with a rendered-page SEO/AEO checklist for Claude/local Chrome. This verifies implementation quality, not rankings/backlinks/live SERP data.
 
 ## What changed this session (2026-06-06 — Beyond SEO audit/remediation)
 
@@ -108,6 +109,12 @@
 **Not verified from available data:**
 
 - Live rankings, search volumes, indexed page counts, backlinks/authority metrics, Core Web Vitals field data, Google Business Profile signals, third-party review footprint, and AI Overview/GEO citation visibility. These require GSC/GA4 exports, backlink tooling, GBP access, PageSpeed/CrUX/Lighthouse data, or an Apify/SEO crawl/SERP data source.
+
+## What changed this session (2026-06-06 — Claude SEO QA handoff)
+
+- Added `AI_NOTES.md` T18: Claude local Chrome SEO/AEO QA.
+- Documented the exact Chrome-rendered checks for public routes, JSON-LD, metadata, headings, visible content, internal links, mobile/desktop smoke, console/hydration errors, and Lighthouse/DevTools checks when available.
+- Documented limits of local Chrome-only validation: no claims about rankings, search volume, backlinks, Core Web Vitals field data, Google Business Profile performance, competitor keyword footprint, or AI citation visibility.
 
 ### `MT5-CUSTOMER-PAYMENT-INSTR` — Customer payment instructions
 
