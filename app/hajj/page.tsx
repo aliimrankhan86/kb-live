@@ -1,53 +1,73 @@
-'use client'
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { Header } from '@/components/layout/Header';
+import { HajjInterestForm } from '@/components/hajj/HajjInterestForm';
+import { breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld';
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { Header } from '@/components/layout/Header'
+export const metadata: Metadata = {
+  title: 'Hajj Packages 2027 from the UK – Coming Soon',
+  description:
+    'Compare Hajj packages for 2027 from verified UK operators. ATOL and ABTA protected. Register your interest and be first to know when packages go live.',
+  keywords: ['Hajj packages 2027', 'Hajj packages UK', 'Hajj 2027', 'ATOL Hajj packages', 'UK Hajj operators'],
+  alternates: {
+    canonical: '/hajj',
+  },
+  openGraph: {
+    title: 'Hajj Packages 2027 – Coming Soon | KaabaTrip',
+    description:
+      'Register interest for Hajj 2027 packages from verified UK operators. Compare prices, hotels, and inclusions when packages go live.',
+    url: 'https://kaabatrip.com/hajj',
+    siteName: 'KaabaTrip',
+    type: 'website',
+    locale: 'en_GB',
+  },
+};
+
+const hajjFaqs = [
+  {
+    question: 'When will Hajj 2027 packages be available on KaabaTrip?',
+    answer:
+      'We expect Hajj 2027 packages from verified UK operators to go live in late 2026. Register your interest to be notified first.',
+  },
+  {
+    question: 'What should I look for in a Hajj package?',
+    answer:
+      'Look for operators with ATOL or ABTA protection, hotel distance to the Grand Mosque in Makkah, included flights, visa assistance, and group or private travel options.',
+  },
+  {
+    question: 'How much does a Hajj package from the UK cost?',
+    answer:
+      'Hajj packages from the UK typically range from £5,000 to £15,000 per person depending on accommodation grade, group size, and included services. Prices vary each year based on government quota allocations.',
+  },
+  {
+    question: 'Is KaabaTrip ATOL protected?',
+    answer:
+      'KaabaTrip is a comparison and enquiry platform — we do not sell packages directly. All operators listed on KaabaTrip are required to declare their ATOL and ABTA status. Always verify this directly with the operator before booking.',
+  },
+];
+
+const hajjPageJsonLd = graphJsonLd([
+  webPageJsonLd({
+    path: '/hajj',
+    name: 'Hajj Packages 2027 from the UK – Coming Soon | KaabaTrip',
+    description:
+      'Compare Hajj packages for 2027 from verified UK operators with ATOL and ABTA protection.',
+  }),
+  breadcrumbJsonLd([
+    { name: 'Home', path: '/' },
+    { name: 'Hajj Packages 2027', path: '/hajj' },
+  ]),
+  faqPageJsonLd(hajjFaqs),
+]);
 
 export default function HajjPage() {
-  const [email, setEmail] = useState('')
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
-  const [message, setMessage] = useState('')
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!email.trim()) return
-
-    setStatus('loading')
-    setMessage('')
-
-    try {
-      const res = await fetch('/api/interest', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email.trim(),
-          type: 'hajj',
-        }),
-      })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        setStatus('error')
-        setMessage(data.error ?? 'Something went wrong. Please try again.')
-        return
-      }
-
-      setStatus('success')
-      setMessage('Thank you! We will notify you when Hajj packages are available.')
-      setEmail('')
-    } catch {
-      setStatus('error')
-      setMessage('Unable to submit right now. Please check your connection and try again.')
-    }
-  }
-
   return (
     <>
       <Header />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(hajjPageJsonLd) }}
+      />
       <main className="min-h-screen flex items-center justify-center px-4 py-20">
         <div className="max-w-lg w-full text-center">
           {/* Badge */}
@@ -66,7 +86,8 @@ export default function HajjPage() {
             Hajj Packages for 2027
           </h1>
           <p className="text-[var(--textMuted)] text-lg mb-8 leading-relaxed">
-            We are working with verified operators to bring you the best Hajj packages for the 2027 season. Register your interest and be the first to know when packages are available.
+            We are working with verified UK operators to bring you the best Hajj packages for the
+            2027 season. Register your interest and be the first to know when packages are available.
           </p>
 
           {/* Value props */}
@@ -103,50 +124,22 @@ export default function HajjPage() {
             </div>
           </div>
 
-          {/* Interest form */}
-          <form
-            onSubmit={handleSubmit}
-            className="flex flex-col sm:flex-row gap-3 mb-6"
-            aria-label="Register interest for Hajj packages"
-            noValidate
-          >
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="Enter your email address"
-              className="flex-1 px-4 py-3 rounded-lg bg-[var(--surfaceDark)] border border-[var(--border)] text-[var(--text)] placeholder:text-[var(--textMuted)] focus:outline-none focus:border-[var(--yellow)] transition-colors"
-              aria-label="Email address for notifications"
-              aria-invalid={status === 'error'}
-              aria-describedby={status === 'error' || status === 'success' ? 'hajj-form-status' : undefined}
-              data-testid="hajj-email-input"
-            />
-            <button
-              type="submit"
-              disabled={status === 'loading'}
-              className="px-6 py-3 rounded-lg bg-[var(--yellow)] text-[var(--bg)] font-semibold hover:opacity-90 transition-opacity whitespace-nowrap disabled:opacity-60 disabled:cursor-not-allowed"
-              aria-label="Register interest for Hajj packages"
-              data-testid="hajj-submit-btn"
-            >
-              {status === 'loading' ? 'Registering...' : 'Notify Me'}
-            </button>
-          </form>
+          {/* FAQ answer blocks for AEO */}
+          <section className="text-left mb-10 space-y-4">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--textMuted)] mb-3">
+              Frequently asked questions
+            </h2>
+            {hajjFaqs.map((faq, i) => (
+              <details key={i} className="rounded-lg border border-[var(--border)] bg-[var(--surfaceDark)] px-4 py-3">
+                <summary className="cursor-pointer text-sm font-medium text-[var(--text)]">
+                  {faq.question}
+                </summary>
+                <p className="mt-2 text-sm text-[var(--textMuted)] leading-relaxed">{faq.answer}</p>
+              </details>
+            ))}
+          </section>
 
-          {message && (
-            <p
-              id="hajj-form-status"
-              role={status === 'error' ? 'alert' : 'status'}
-              className={`text-sm mb-6 ${status === 'error' ? 'text-[var(--danger)]' : 'text-green-400'}`}
-              data-testid="hajj-form-message"
-            >
-              {message}
-            </p>
-          )}
-
-          <p className="text-xs text-[var(--textMuted)] mb-10">
-            We will only email you when Hajj packages are available. No spam.
-          </p>
+          <HajjInterestForm />
 
           {/* Back to Umrah CTA */}
           <div className="pt-6 border-t border-[var(--border)]">
@@ -167,5 +160,5 @@ export default function HajjPage() {
         </div>
       </main>
     </>
-  )
+  );
 }

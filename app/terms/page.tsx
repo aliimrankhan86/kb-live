@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: 'Terms & Conditions',
   description:
     'KaabaTrip Terms and Conditions. UK travel comparison platform terms covering booking, payments, ATOL/ABTA, consumer rights, and data protection.',
+  alternates: { canonical: '/terms' },
   robots: { index: true, follow: true },
 };
 

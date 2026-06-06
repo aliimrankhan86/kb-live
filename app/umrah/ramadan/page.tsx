@@ -1,8 +1,20 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Ramadan Umrah Packages',
-  description: 'Browse Ramadan Umrah packages and compare verified operators.',
+  title: 'Ramadan Umrah Packages 2026 from the UK',
+  description:
+    'Compare Ramadan Umrah packages from verified UK operators. Book your spiritual journey during the holy month of Ramadan with ATOL and ABTA protected operators.',
+  alternates: {
+    canonical: '/umrah/ramadan',
+  },
+  openGraph: {
+    title: 'Ramadan Umrah Packages 2026 | KaabaTrip',
+    description: 'Find Ramadan Umrah packages from verified UK operators with ATOL protection.',
+    url: 'https://kaabatrip.com/umrah/ramadan',
+    siteName: 'KaabaTrip',
+    type: 'website',
+    locale: 'en_GB',
+  },
 }
 
 export default function RamadanUmrahPage() {
