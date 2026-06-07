@@ -9,6 +9,7 @@ import { CURRENCY_CHANGE_EVENT, getRegionSettings } from '@/lib/i18n/region'
 import { formatPriceForRegion } from '@/lib/i18n/format'
 import { buttonVariants } from '@/components/ui/Button'
 import { InclusionChipList } from '@/components/ui/InclusionChip'
+import { TierExplanation } from '@/components/operators/TierExplanation'
 
 interface PackageDetailProps {
   pkg: Package
@@ -123,6 +124,12 @@ export function PackageDetail({ pkg, operator }: PackageDetailProps) {
             </div>
           )}
         </div>
+
+        {operator?.tier && (
+          <div className="mt-3">
+            <TierExplanation tier={operator.tier} />
+          </div>
+        )}
       </header>
 
       <section className="grid gap-6 md:grid-cols-2">
