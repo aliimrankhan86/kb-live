@@ -66,9 +66,9 @@ let prismaAdapter: typeof mockStore | null = null;
 
 async function loadPrismaAdapter(): Promise<typeof mockStore> {
   if (prismaAdapter) return prismaAdapter;
-  // webpackIgnore prevents webpack from tracing this import into the client bundle.
   // This path only executes server-side when getDataSource() === 'prisma'.
-  const mod = await import(/* webpackIgnore: true */ './db/adapter' as string);
+  // Let Next bundle the module so SSR chunks resolve the adapter path correctly.
+  const mod = await import('./db/adapter');
   prismaAdapter = (mod as typeof import('./db/adapter')).DBAdapter as unknown as typeof mockStore;
   return prismaAdapter;
 }
@@ -1079,6 +1079,12 @@ export const Repository = {
 
   getOperatorById: async (id: string): Promise<OperatorProfile | undefined> => {
     return store().getOperatorById(id);
+  },
+
+  /** Server-only: fetch a single booking intent by ID without auth filtering. */
+  getBookingIntentById: async (id: string): Promise<BookingIntent | undefined> => {
+    const all = await store().getBookingIntents();
+    return all.find((b) => b.id === id);
   },
 
   getOperatorBySlug: async (slug: string): Promise<OperatorProfile | undefined> => {

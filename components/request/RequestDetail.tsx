@@ -116,7 +116,6 @@ export function RequestDetail({ id }: { id: string }) {
   const [loading, setLoading] = useState(true);
   const [selectedOffers, setSelectedOffers] = useState<string[]>([]);
   const [showComparison, setShowComparison] = useState(false);
-  const [bookingSuccess, setBookingSuccess] = useState<string | null>(null);
   const [bookingIntents, setBookingIntents] = useState<BookingIntent[]>([]);
   const [activeOfferForBooking, setActiveOfferForBooking] = useState<Offer | null>(null);
   const [evidenceFiles, setEvidenceFiles] = useState<BookingPaymentEvidenceFile[]>([]);
@@ -233,10 +232,9 @@ export function RequestDetail({ id }: { id: string }) {
       });
       setBookingIntents((current) => [newIntent, ...current.filter((intent) => intent.id !== newIntent.id)]);
       if (!newIntent.referenceCode) throw new Error('Reference code was not issued.');
-      setBookingSuccess(newIntent.referenceCode);
       setActiveOfferForBooking(null);
       resetBookingForm();
-      setTimeout(() => setBookingSuccess(null), 3000);
+      router.push(`/requests/${newIntent.id}/confirmation`);
     } catch (error) {
       setBookingError(error instanceof Error ? error.message : 'Failed to create booking intent.');
     }
@@ -274,17 +272,6 @@ export function RequestDetail({ id }: { id: string }) {
         </span>
       </div>
 
-      {bookingSuccess ? (
-        <div
-          role="status"
-          className="mb-6 rounded-md border border-[var(--borderSubtle)] bg-[rgba(34,197,94,0.1)] p-4 text-sm text-[var(--text)]"
-        >
-          Booking intent recorded. Reference{' '}
-          <span data-testid="booking-intent-reference-code" className="font-mono text-[var(--yellow)]">
-            {bookingSuccess}
-          </span>
-        </div>
-      ) : null}
 
       {/* Request Summary */}
       <div className="mb-8 rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] p-6">
