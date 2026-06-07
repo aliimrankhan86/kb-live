@@ -3,6 +3,8 @@ import {
   AuditLogEntry,
   BankChangeRequest,
   BookingIntent,
+  BookingOutcome,
+  BookingOutcomeType,
   BookingPaymentEvidence,
   BookingPaymentEvidenceFile,
   Complaint,
@@ -50,6 +52,8 @@ const mockStore = {
   saveAuditLogEntry: (entry: AuditLogEntry) => Promise.resolve(MockDB.saveAuditLogEntry(entry)),
   saveComplaint: (c: Complaint) => Promise.resolve(MockDB.saveComplaint(c)),
   deletePackage: (id: string) => Promise.resolve(MockDB.deletePackage(id)),
+  getBookingOutcomes: () => Promise.resolve(MockDB.getBookingOutcomes()),
+  saveBookingOutcome: (bo: BookingOutcome) => Promise.resolve(MockDB.saveBookingOutcome(bo)),
 };
 
 /**
@@ -1249,5 +1253,52 @@ export const Repository = {
     };
     await store().saveComplaint(updated);
     return updated;
+  },
+
+  createBookingOutcome: async (
+    ctx: RequestContext,
+    bookingIntentId: string,
+    outcome: BookingOutcomeType,
+    notes?: string
+  ): Promise<BookingOutcome> => {
+    if (ctx.role !== 'operator') throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
+
+    const allIntents = await store().getBookingIntents();
+    const intent = allIntents.find((b) => b.id === bookingIntentId);
+    if (!intent) throw new Error('Booking intent not found');
+    if (intent.operatorId !== ctx.userId)
+      throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
+    if (intent.status !== 'confirmed' && intent.status !== 'closed')
+      throw new Error('Outcome can only be reported for confirmed or closed bookings');
+
+    const existing = (await store().getBookingOutcomes()).find((o) => o.bookingIntentId === bookingIntentId);
+    if (existing) throw new Error('Outcome already reported for this booking');
+
+    const newOutcome: BookingOutcome = {
+      id: crypto.randomUUID(),
+      bookingIntentId,
+      outcome,
+      reportedAt: new Date().toISOString(),
+      notes: cleanOptionalText(notes),
+    };
+    await store().saveBookingOutcome(newOutcome);
+    return newOutcome;
+  },
+
+  getBookingOutcome: async (
+    ctx: RequestContext,
+    bookingIntentId: string
+  ): Promise<BookingOutcome | undefined> => {
+    const allIntents = await store().getBookingIntents();
+    const intent = allIntents.find((b) => b.id === bookingIntentId);
+    if (!intent) throw new Error('Booking intent not found');
+
+    if (ctx.role === 'operator' && ctx.userId !== intent.operatorId)
+      throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
+    if (ctx.role === 'customer' && ctx.userId !== intent.customerId)
+      throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
+
+    const outcomes = await store().getBookingOutcomes();
+    return outcomes.find((o) => o.bookingIntentId === bookingIntentId);
   },
 };

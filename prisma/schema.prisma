@@ -88,6 +88,16 @@ enum EvidenceStorageStatus {
   @@map("evidence_storage_status")
 }
 
+enum BookingOutcomeType {
+  travelled
+  cancelled_operator
+  cancelled_customer
+  no_show
+  disputed
+
+  @@map("booking_outcome_type")
+}
+
 enum ComplaintCategory {
   payment_issue
   service_quality
@@ -337,8 +347,22 @@ model BookingIntent {
   customer   User        @relation(fields: [customerId], references: [id], name: "CustomerBookingIntents")
   operator   OperatorProfile @relation(fields: [operatorId], references: [id], name: "OperatorBookingIntents")
   complaints Complaint[]
+  outcome    BookingOutcome?
 
   @@map("booking_intents")
+}
+
+model BookingOutcome {
+  id              String             @id @default(uuid())
+  bookingIntentId String             @unique @map("booking_intent_id")
+  outcome         BookingOutcomeType
+  reportedAt      DateTime           @default(now()) @map("reported_at")
+  notes           String?
+
+  // Relations
+  bookingIntent BookingIntent @relation(fields: [bookingIntentId], references: [id])
+
+  @@map("booking_outcomes")
 }
 
 model Package {

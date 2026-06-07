@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { MockDB } from '@/lib/api/mock-db';
-import { QuoteRequest } from '@/lib/types';
+import { BookingIntent, BookingOutcome, QuoteRequest } from '@/lib/types';
 import { OfferForm } from '@/components/operator/OfferForm';
+import { OutcomeForm } from '@/components/operator/OutcomeForm';
 import {
   Dialog,
   OverlayContent,
@@ -21,17 +22,28 @@ export function OperatorLeadsClient({ operatorId }: OperatorLeadsClientProps) {
   const [requests, setRequests] = useState<QuoteRequest[]>([]);
   const [filter, setFilter] = useState<'all' | 'new' | 'responded'>('all');
   const [selectedRequest, setSelectedRequest] = useState<QuoteRequest | null>(null);
+  const [bookings, setBookings] = useState<BookingIntent[]>([]);
+  const [outcomes, setOutcomes] = useState<BookingOutcome[]>([]);
 
-  const loadRequests = () => {
+  const loadRequests = useCallback(() => {
     const all = MockDB.getRequests();
     setRequests(all.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
-  };
+  }, []);
+
+  const loadBookings = useCallback(() => {
+    const all = MockDB.getBookingIntents().filter(
+      (b) => b.operatorId === operatorId && (b.status === 'confirmed' || b.status === 'closed')
+    );
+    setBookings(all.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()));
+    setOutcomes(MockDB.getBookingOutcomes());
+  }, [operatorId]);
 
   useEffect(() => {
     loadRequests();
-    const interval = setInterval(loadRequests, 5000);
+    loadBookings();
+    const interval = setInterval(() => { loadRequests(); loadBookings(); }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [loadRequests, loadBookings]);
 
   const filtered = requests.filter((req) => {
     const hasOffer = MockDB.getOffersByRequestId(req.id).some((o) => o.operatorId === operatorId);
@@ -130,6 +142,41 @@ export function OperatorLeadsClient({ operatorId }: OperatorLeadsClientProps) {
           )}
         </OverlayContent>
       </Dialog>
+
+      {bookings.length > 0 && (
+        <section aria-labelledby="bookings-heading" className="space-y-4 pt-4 border-t border-[var(--borderSubtle)]">
+          <div>
+            <h2 id="bookings-heading" className="text-xl font-semibold text-[var(--text)]">Confirmed Bookings</h2>
+            <p className="mt-1 text-sm text-[var(--textMuted)]">Report what happened with each confirmed booking.</p>
+          </div>
+          <div className="grid gap-4">
+            {bookings.map((booking) => {
+              const existingOutcome = outcomes.find((o) => o.bookingIntentId === booking.id);
+              return (
+                <div
+                  key={booking.id}
+                  className="rounded-lg border border-[var(--borderSubtle)] bg-[var(--surfaceDark)] p-4 space-y-3"
+                  data-testid={`booking-card-${booking.id}`}
+                >
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-[var(--text)] text-sm">
+                      Ref: {booking.referenceCode ?? booking.id.slice(0, 8).toUpperCase()}
+                    </h3>
+                    <Badge variant={booking.status === 'confirmed' ? 'success' : 'default'}>
+                      {booking.status}
+                    </Badge>
+                  </div>
+                  <OutcomeForm
+                    bookingIntentId={booking.id}
+                    existingOutcome={existingOutcome}
+                    onSuccess={(outcome) => setOutcomes((prev) => [...prev.filter((o) => o.bookingIntentId !== booking.id), outcome])}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

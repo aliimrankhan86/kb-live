@@ -201,6 +201,21 @@ export interface QuoteRequest {
 
 export type BookingStatus = 'started' | 'contacted' | 'confirmed' | 'closed';
 
+export type BookingOutcomeType =
+  | 'travelled'
+  | 'cancelled_operator'
+  | 'cancelled_customer'
+  | 'no_show'
+  | 'disputed';
+
+export interface BookingOutcome {
+  id: string;
+  bookingIntentId: string;
+  outcome: BookingOutcomeType;
+  reportedAt: string;
+  notes?: string;
+}
+
 export type BookingPaymentEvidenceFileKind = 'image' | 'pdf';
 
 export interface BookingPaymentEvidenceFile {
