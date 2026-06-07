@@ -2,10 +2,9 @@
 
 import { useState, useRef } from 'react';
 import { Repository } from '@/lib/api/repository';
-import { MockDB } from '@/lib/api/mock-db';
 import type { Package } from '@/lib/types';
 
-export function PackageCsvImport({ onImport }: { onImport?: () => void }) {
+export function PackageCsvImport({ operatorId, onImport }: { operatorId: string; onImport?: () => void }) {
   const [importing, setImporting] = useState(false);
   const [result, setResult] = useState<{ saved: Package[]; errors: { row: number; reason: string }[] } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -14,15 +13,13 @@ export function PackageCsvImport({ onImport }: { onImport?: () => void }) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const user = MockDB.currentUser;
-    if (!user || user.role !== 'operator') return;
-
     setImporting(true);
     setResult(null);
 
     try {
+      const ctx = { userId: operatorId, role: 'operator' as const };
       const text = await file.text();
-      const importResult = await Repository.importPackagesFromCsv({ userId: user.id, role: user.role }, text);
+      const importResult = await Repository.importPackagesFromCsv(ctx, text);
       setResult(importResult);
       if (importResult.saved.length > 0 && onImport) {
         onImport();

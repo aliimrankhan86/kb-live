@@ -13,18 +13,12 @@ type DashboardStats = {
   bookingIntents: number;
 };
 
-function getOperatorId(): string {
-  MockDB.setCurrentUser('operator');
-  return MockDB.currentUser.id;
-}
-
-function useDashboardData() {
+function useDashboardData(operatorId: string) {
   const [stats, setStats] = useState<DashboardStats>({ publishedPackages: 0, activeLeads: 0, offersSent: 0, bookingIntents: 0 });
   const [requests, setRequests] = useState<QuoteRequest[]>([]);
   const [activity, setActivity] = useState<{ title: string; date: string; type: 'lead' | 'offer' | 'booking' }[]>([]);
 
   useEffect(() => {
-    const operatorId = getOperatorId();
     const ctx = { userId: operatorId, role: 'operator' as const };
 
     const load = async () => {
@@ -54,13 +48,13 @@ function useDashboardData() {
     load();
     const interval = setInterval(load, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [operatorId]);
 
   return { stats, requests, activity };
 }
 
-export function OperatorDashboard() {
-  const { stats, requests, activity } = useDashboardData();
+export function OperatorDashboard({ operatorId }: { operatorId: string }) {
+  const { stats, requests, activity } = useDashboardData(operatorId);
 
   return (
     <div className="space-y-8" data-testid="operator-dashboard">

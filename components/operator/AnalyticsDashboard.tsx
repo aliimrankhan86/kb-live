@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { MockDB } from '@/lib/api/mock-db';
 import { Repository } from '@/lib/api/repository';
 
-export function AnalyticsDashboard() {
+export function AnalyticsDashboard({ operatorId }: { operatorId: string }) {
   const [stats, setStats] = useState({
     requests: 0,
     offers: 0,
@@ -13,11 +13,10 @@ export function AnalyticsDashboard() {
 
   useEffect(() => {
     const load = async () => {
-      MockDB.setCurrentUser('operator');
-      const ctx = { userId: 'op1', role: 'operator' as const };
+      const ctx = { userId: operatorId, role: 'operator' as const };
 
-      const allOffers = MockDB.getOffers().filter(o => o.operatorId === 'op1');
-      const allBookings = MockDB.getBookingIntents().filter(b => b.operatorId === 'op1');
+      const allOffers = MockDB.getOffers().filter(o => o.operatorId === operatorId);
+      const allBookings = MockDB.getBookingIntents().filter(b => b.operatorId === operatorId);
       const reqs = await Repository.getRequests(ctx);
 
       setStats({
@@ -27,7 +26,7 @@ export function AnalyticsDashboard() {
       });
     };
     load();
-  }, []);
+  }, [operatorId]);
 
   return (
     <div className="grid gap-6 sm:grid-cols-3">

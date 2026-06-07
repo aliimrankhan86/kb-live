@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { MockDB } from '@/lib/api/mock-db';
 import { Repository } from '@/lib/api/repository';
 import type { Complaint, ComplaintStatus } from '@/lib/types';
 import { Badge } from '@/components/ui/Badge';
@@ -9,7 +8,6 @@ import { Button } from '@/components/ui/Button';
 import { Textarea } from '@/components/ui/Textarea';
 import { Select } from '@/components/ui/Select';
 
-const operatorCtx = { userId: 'op1', role: 'operator' as const };
 
 const SEVERITY_STYLES: Record<string, string> = {
   low: 'bg-[rgba(34,197,94,0.12)] text-[var(--success)]',
@@ -25,11 +23,14 @@ const STATUS_OPTIONS: { label: string; value: ComplaintStatus }[] = [
 
 function ComplaintCard({
   complaint,
+  operatorId,
   onUpdate,
 }: {
   complaint: Complaint;
+  operatorId: string;
   onUpdate: () => void;
 }) {
+  const operatorCtx = { userId: operatorId, role: 'operator' as const };
   const [responding, setResponding] = useState(false);
   const [response, setResponse] = useState('');
   const [status, setStatus] = useState<ComplaintStatus>(complaint.status);
@@ -45,7 +46,6 @@ function ComplaintCard({
     }
     setSubmitting(true);
     try {
-      MockDB.setCurrentUser('operator');
       await Repository.updateComplaintOperatorResponse(operatorCtx, complaint.id, trimmed);
       setResponding(false);
       setResponse('');
@@ -60,7 +60,6 @@ function ComplaintCard({
   const handleStatusChange = async (newStatus: ComplaintStatus) => {
     setStatus(newStatus);
     try {
-      MockDB.setCurrentUser('operator');
       await Repository.updateComplaintStatus(operatorCtx, complaint.id, newStatus);
       onUpdate();
     } catch (err) {
@@ -177,11 +176,11 @@ function ComplaintCard({
   );
 }
 
-export function ComplaintsInbox() {
+export function ComplaintsInbox({ operatorId }: { operatorId: string }) {
   const [complaints, setComplaints] = useState<Complaint[]>([]);
+  const operatorCtx = { userId: operatorId, role: 'operator' as const };
 
   const loadComplaints = () => {
-    MockDB.setCurrentUser('operator');
     Repository.getComplaints(operatorCtx).then(setComplaints);
   };
 
@@ -206,7 +205,7 @@ export function ComplaintsInbox() {
   return (
     <div className="space-y-4" data-testid="complaints-inbox">
       {complaints.map((c) => (
-        <ComplaintCard key={c.id} complaint={c} onUpdate={loadComplaints} />
+        <ComplaintCard key={c.id} complaint={c} operatorId={operatorId} onUpdate={loadComplaints} />
       ))}
     </div>
   );

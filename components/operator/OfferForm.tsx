@@ -2,14 +2,14 @@
 
 import { useState } from 'react';
 import { QuoteRequest, Offer } from '@/lib/types';
-import { MockDB } from '@/lib/api/mock-db';
 
 interface OfferFormProps {
   request: QuoteRequest;
+  operatorId: string;
   onSuccess: () => void;
 }
 
-export function OfferForm({ request, onSuccess }: OfferFormProps) {
+export function OfferForm({ request, operatorId, onSuccess }: OfferFormProps) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<Partial<Offer>>({
     pricePerPerson: 0,
@@ -37,7 +37,7 @@ export function OfferForm({ request, onSuccess }: OfferFormProps) {
       ...formData as Offer,
       id: crypto.randomUUID(),
       requestId: request.id,
-      operatorId: MockDB.currentUser.id, // Current mocked operator
+      operatorId,
       createdAt: new Date().toISOString(),
       // Ensure required fields
       roomOccupancy: formData.roomOccupancy || { single: false, double: true, triple: false, quad: false },

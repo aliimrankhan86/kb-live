@@ -1,21 +1,26 @@
-'use client';
-
-import { useEffect, useState } from 'react';
+import { redirect } from 'next/navigation';
+import { getSessionUser } from '@/lib/auth/session';
+import { Repository } from '@/lib/api/repository';
 import { OperatorProfileForm } from '@/components/operator/OperatorProfileForm';
-import { OperatorProfile } from '@/lib/types';
-import { MockDB } from '@/lib/api/mock-db';
 
-export default function OperatorProfilePage() {
-  const [operator, setOperator] = useState<OperatorProfile | null>(null);
+export default async function OperatorProfilePage() {
+  const user = await getSessionUser();
+  if (!user) redirect('/login?redirect=/operator/profile');
 
-  useEffect(() => {
-    MockDB.setCurrentUser('operator');
-    const op = MockDB.getOperators()[0];
-    if (op) setOperator(op);
-  }, []);
+  const operator = await Repository.getOperatorById(user.id);
 
   if (!operator) {
-    return <div className="text-[var(--textMuted)]">Loading profile…</div>;
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-semibold text-[var(--text)]">Profile & Settings</h1>
+          <p className="mt-1 text-sm text-[var(--textMuted)]">Manage your company information and preferences.</p>
+        </div>
+        <div className="text-[var(--textMuted)]">
+          Operator profile not found. Contact support to set up your account.
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -1,4 +1,6 @@
 import { Suspense } from 'react';
+import { redirect } from 'next/navigation';
+import { getSessionUser } from '@/lib/auth/session';
 import { OperatorDashboard } from '@/components/operator/OperatorDashboard';
 import { ComplaintsInbox } from '@/components/operator/ComplaintsInbox';
 
@@ -15,17 +17,20 @@ function DashboardSkeleton() {
   );
 }
 
-export default function OperatorPage() {
+export default async function OperatorPage() {
+  const user = await getSessionUser();
+  if (!user) redirect('/login?redirect=/operator/dashboard');
+
   return (
     <div className="space-y-8">
       <Suspense fallback={<DashboardSkeleton />}>
-        <OperatorDashboard />
+        <OperatorDashboard operatorId={user.id} />
       </Suspense>
       <section aria-labelledby="complaints-heading">
         <h2 id="complaints-heading" className="mb-4 text-lg font-semibold text-[var(--text)]">
           Complaints inbox
         </h2>
-        <ComplaintsInbox />
+        <ComplaintsInbox operatorId={user.id} />
       </section>
     </div>
   );

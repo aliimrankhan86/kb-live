@@ -6,6 +6,7 @@ import { PackageCsvImport } from './PackageCsvImport';
 
 interface OperatorPackagesListProps {
   packages: Package[];
+  operatorId: string;
   isLoading?: boolean;
   error?: string;
   onCreate: () => void;
@@ -26,6 +27,7 @@ const getSeasonOrDateWindow = (pkg: Package) => {
 
 export function OperatorPackagesList({
   packages,
+  operatorId,
   isLoading = false,
   error,
   onCreate,
@@ -68,8 +70,8 @@ export function OperatorPackagesList({
       ) : (
         <div className="space-y-4">
           <div className="flex justify-end gap-2">
-            <PackageCsvImport onImport={onCreate} />
-            <PackageCsvExport />
+            <PackageCsvImport operatorId={operatorId} onImport={onCreate} />
+            <PackageCsvExport operatorId={operatorId} />
             <button
               type="button"
               onClick={onCreate}
