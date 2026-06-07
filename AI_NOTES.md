@@ -6,7 +6,7 @@
 
 ## §1 — Current Status
 
-**Date:** 2026-06-06 | **Branch:** `dev` | **Build:** ✅ 0 errors, 0 warnings | **Tests:** ✅ 222/222 unit | **E2E:** ✅ 19/21 chromium pass (2 skipped, 0 fail) | **Git:** ✅ pushed — `bfec19b` (master audit fixes)
+**Date:** 2026-06-07 | **Branch:** `dev` | **Build:** ✅ 0 errors, 0 warnings | **Tests:** ✅ 222/222 unit | **E2E:** ✅ 19/21 chromium pass (2 skipped, 0 fail) | **Git:** ✅ pushed — `6459e14` (overlay consistency + Prisma config)
 
 ### 🔄 Active work (highest → lowest priority)
 
@@ -37,11 +37,24 @@ These items are **intentionally not yet done** and must be picked up by the next
 | 3   | **E2E auth infrastructure**        | ✅ DONE 2026-06-06 — `e2e/helpers/auth.ts` created with `TEST_USERS` + `setTestUser`/`clearTestUser`. All affected specs (`operator`, `bank-payment`, `flow`, `catalogue`) updated. 19/21 chromium tests pass, 0 fail. | — |
 | 8   | **Master Audit (Security/A11y/Perf/Quality)** | ✅ DONE 2026-06-06 — Security: rate limit added to `/api/interest`, brace-expansion vuln patched, all auth endpoints return minimal data, admin never in public schemas, CSP headers configured. A11y: `<main>` landmark for skip link, label/htmlFor bindings on 3 inputs in Step2. Perf: no `next/dynamic` code-split needed (only 5 framer-motion uses, optimizePackageImports configured). Code quality: 0 `any`, 0 `console.log`, 222/222 tests, 0 build errors/warnings. Remaining: 5 moderate npm vulns (PostCSS in Next.js internals — not actionable without breaking Next; Prisma dev dep — dev only). | — |
 | 4   | **Rate limiter production switch** | `lib/rate-limit.ts` uses an in-memory `Map` fallback when `UPSTASH_REDIS_REST_URL` is missing. This resets on every cold start on Vercel/Lambda.     | **INFRA TASK:** Add `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` to production env. Verify the Upstash path is hit in staging.                                                                                                                                  |
-| 5   | **Prisma cutover end-to-end**      | `FEATURE_USE_REAL_DB` flag exists but has not been enabled and verified end-to-end. MockDB is still the active data source in dev/tests.             | **INFRA TASK:** Set `FEATURE_USE_REAL_DB=true` in a staging environment. Run the full test suite against Prisma + Supabase. Fix any adapter/RLS issues.                                                                                                                    |
+| 5   | **Prisma cutover end-to-end**      | `FEATURE_USE_REAL_DB=true` is set in `.env.local`. Real Supabase project wired (`nzvepuzzxjoxvpcrlozx`). `prisma.config.ts` loads `.env.local` via dotenv and spreads `directUrl` for DDL. `db push` in progress — may need `npx prisma db push` to complete (was hanging on pgBouncer before directUrl fix). Once schema is pushed, run `npx prisma db seed` then verify. | **INFRA TASK (IN PROGRESS):** Confirm `npx prisma db push` completes cleanly. Then `npx prisma db seed`. Then smoke-test the app with `FEATURE_USE_REAL_DB=true`. Fix any RLS/adapter issues. |
 | 6   | **Console.log audit**              | ✅ DONE 2026-06-06 — `grep -rn "console\." components/ app/` found only `error.tsx`, `global-error.tsx` (error boundaries, allowed), and one route `console.error` that was removed. | — |
 | 7   | **SEO/AEO content expansion (T19)** | ✅ DONE 2026-06-06 — AI crawlers in robots.txt; `personJsonLd`, `touristTripJsonLd`, `dateModified` in json-ld.ts; TouristTrip on package pages; cost FAQ on /umrah; corridor links on homepage; /umrah/ramadan full expansion; /umrah/cost new page; sitemap updated. | See T19 row in §1 |
 
-**Branch state:** `dev` pushed — latest commit `bfec19b` (master audit). All changes pushed to remote.
+**Branch state:** `dev` pushed — latest commit `6459e14` (overlay consistency + Prisma config). All changes pushed to remote.
+
+### 2026-06-07 session changes
+
+| What | Files | Commit |
+|---|---|---|
+| Overlay restructure: close button moved into `OverlayHeader` flex row (title left / X right) — fixes Compare modal close at bottom-right | `components/ui/Overlay.tsx` | `6459e14` |
+| New `OverlayBody` component (`flex-1 overflow-y-auto p-5`) for correct scroll regions | `components/ui/Overlay.tsx` | `6459e14` |
+| `OverlayFooter` now has `border-t` and `flex-shrink-0` | `components/ui/Overlay.tsx` | `6459e14` |
+| RangeSlider active track: `#4A9EFF` (blue) → `var(--yellow)` | `components/ui/RangeSlider.module.css` | `6459e14` |
+| LoginModal: title white→yellow, close button `×`→SVG X, border/shadow/radius use design tokens | `components/auth/LoginModal.tsx`, `LoginModal.module.css` | `6459e14` |
+| PhoneOtpModal: body wrapped in `OverlayBody` | `components/operator/PhoneOtpModal.tsx` | `6459e14` |
+| Compare dialog: removed redundant `overflow-hidden flex flex-col` override | `components/search/PackageList.tsx` | `6459e14` |
+| `prisma.config.ts`: load `.env.local` via dotenv; spread `directUrl` for DDL (bypasses pgBouncer) | `prisma.config.ts` | `6459e14` |
 
 ### Current Codex task handoff note (2026-06-06)
 
@@ -240,6 +253,58 @@ Next.js 15.5.19 (App Router) · React 19 · TypeScript strict · Tailwind CSS v4
 | `Breadcrumb`        | `items: BreadcrumbItem[], className?`           | packages/[slug], operators/[slug], requests/[id]                |
 | `RangeSlider`       | `min, max, value, onChange, aria-label-min/max` | BudgetFilter, DistanceFilter, TimePeriodFilter, UmrahSearchForm |
 
+### Overlay system (`components/ui/Overlay.tsx`)
+
+All modals/dialogs must use this system. Do **not** create custom `position: fixed` dialogs.
+
+```
+OverlayContent          — Radix Portal wrapper. flex-col overflow-hidden. No padding.
+  OverlayHeader         — ALWAYS first child. flex row: title content left, close ✕ right.
+                          Has px-5 py-4 + border-b. Close button built-in (no prop needed).
+  OverlayBody           — Scrollable middle section. flex-1 overflow-y-auto p-5.
+                          Use for any content that may overflow.
+  OverlayFooter         — ALWAYS last child (if buttons needed). border-t px-5 py-4 flex-shrink-0.
+```
+
+**Correct usage pattern:**
+```tsx
+<Dialog open={open} onOpenChange={setOpen}>
+  <OverlayContent className="max-w-lg">          {/* width override OK */}
+    <OverlayHeader>
+      <OverlayTitle>Title here</OverlayTitle>    {/* yellow, semibold */}
+    </OverlayHeader>
+    <OverlayBody>
+      {/* scrollable content */}
+    </OverlayBody>
+    <OverlayFooter>
+      <Button variant="secondary">Cancel</Button>
+      <Button>Confirm</Button>
+    </OverlayFooter>
+  </OverlayContent>
+</Dialog>
+```
+
+**Rules:**
+- Close button is always top-right, 36×36 px, `var(--borderSubtle)` border, yellow on hover. Never add a second one.
+- `OverlayBody` is required when content may scroll. Without it, content sits in the flex column with no scroll.
+- Do **not** add `position: absolute` children inside `OverlayContent` — the flex+overflow-hidden layout will clip or misplace them.
+- `OverlayContent` className overrides (e.g. `max-w-4xl`, `max-h-[90vh]`) are fine — they extend the base class.
+
+### FilterOverlay (`components/search/FilterOverlay.tsx`)
+
+Separate custom component (not Radix-based). Bottom-sheet on mobile, centred modal on desktop (`@media (min-width: 769px)`). Has its own backdrop, header (flex row with close button), scrollable content, and footer. Uses `FilterOverlay.module.css`. **Do not** replace with Overlay.tsx — this component handles complex filter state internally.
+
+### Close button standard (all overlays)
+
+| Property | Value |
+|---|---|
+| Size | 36 × 36 px |
+| Border | `1px solid var(--borderSubtle)` |
+| Default colour | `var(--textMuted)` |
+| Hover | border + text → `var(--yellow)`, bg → `rgba(255,211,29,0.06)` |
+| Focus | `focus-visible` ring, `var(--yellow)` |
+| Icon | SVG X, 16 × 16 px, `strokeWidth="2"` |
+
 ---
 
 ## §5 — Test Coverage
@@ -281,6 +346,12 @@ npx tsc --noEmit    # Type check
 | Admin role in public Zod schema                             | Security: users can self-register as admin              | `VALID_ROLES = ['customer', 'operator']` only     |
 | Full session in auth response                               | JWT/tokens exposed to client JS                         | Return only `{ user: { id, email, role, name } }` |
 | Missing `await` on Repository call                          | Stale data / silent failure                             | All 84 Repository methods are async               |
+| Prisma 7 — `url`/`directUrl` in `schema.prisma`            | `P1012` validation error on any Prisma CLI command      | Prisma 7 removed these from schema; put them in `prisma.config.ts` only |
+| `directUrl` missing from `prisma.config.ts`                | `migrate deploy` / `db push` hangs forever              | pgBouncer (port 6543) blocks DDL advisory locks; `directUrl` (port 5432) bypasses it |
+| `dotenv/config` default in `prisma.config.ts`              | `DATABASE_URL` undefined → "datasource.url required"   | Next.js uses `.env.local`; dotenv defaults to `.env`. Use `config({ path: '.env.local' })` |
+| `@` in Postgres password without URL-encoding              | TCP connection hangs (wrong host parsed from URL)       | URL-encode `@` as `%40` in `DATABASE_URL` and `DIRECT_URL` |
+| Absolute `position` child inside `flex overflow-hidden`    | Element clipped or mis-positioned (e.g. close button at bottom) | Use flex row layout with close button as a sibling, not absolute |
+| `OverlayContent` without `OverlayBody`                     | Content doesn't scroll; layout breaks on tall modals    | Always wrap scrollable content in `<OverlayBody>` |
 
 ---
 
@@ -288,6 +359,7 @@ npx tsc --noEmit    # Type check
 
 | Date       | What                                                                                                                                                                                                      |
 | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-07 | **Overlay consistency + Prisma config**: Redesigned `Overlay.tsx` — close button moved from `absolute` into `OverlayHeader` flex row (fixes Compare modal close at bottom-right). Added `OverlayBody` + updated `OverlayFooter`. Fixed RangeSlider active track blue→yellow. LoginModal title/close/border/shadow aligned to design tokens. `prisma.config.ts` now loads `.env.local` via dotenv; `directUrl` spread for DDL (bypasses pgBouncer port 6543 advisory lock hang). Password `@` URL-encoded as `%40`. Build 0 errors, tests 222/222. Commit `6459e14`. |
 | 2026-06-06 | **SEO/AEO content expansion (T19)**: Added AI crawler allow rules (GPTBot, ClaudeBot, PerplexityBot, Google-Extended) to robots.ts. Added `personJsonLd`, `touristTripJsonLd`, `dateModified` support to json-ld.ts. Wired TouristTrip schema alongside Product on package detail pages. Added cost FAQ to /umrah. Expanded /umrah/ramadan from 29-line stub to full corridor page (2027 dates, FAQs, AEO details). Created /umrah/cost pricing guide (4 tiers, seasonal pricing, 4 FAQs, JSON-LD). Added sitemap entry for /umrah/cost. Added corridor links section to homepage and /umrah page. Tests: 222/222, build: 0 errors, 0 warnings. |
 | 2026-06-06 | **Beyond SEO audit + fixes**: Fixed critical canonical bug — 8 pages pointed canonical at homepage. Fixed hajj page (was `'use client'` with no metadata, inheriting homepage title/canonical). Added FAQPage+WebPage+BreadcrumbList JSON-LD to all corridor pages. Rewrote CityCorridor with design tokens (was using `text-slate-900` invisible on dark bg). Added city-specific FAQ blocks for AEO. Commit `78d72f5`. |
 | 2026-06-06 | **T18 SEO/AEO QA**: robots.txt added /admin+/settings disallow; stripped duplicate `\| KaabaTrip` title suffix from 8 pages (template was appending it twice); removed `console.error` from packages route; fixed unused `request` param lint warning. Tests: 222/222; build: 0 errors, 0 warnings. |
