@@ -8,10 +8,9 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
-    // directUrl routes DDL (migrate/db push) through the direct connection,
-    // bypassing pgBouncer which doesn't support advisory locks.
-    // Type stubs for Prisma 7.8 are behind the runtime — cast to suppress.
-    ...(process.env["DIRECT_URL"] ? { directUrl: process.env["DIRECT_URL"] } : {}),
+    // DIRECT_URL (port 5432) used for all CLI operations (db push, migrate, db pull).
+    // pgBouncer pooler (port 6543) blocks advisory locks and prepared statements in the
+    // schema engine — CLI must bypass it. Runtime PrismaClient reads DATABASE_URL from env.
+    url: process.env["DIRECT_URL"],
   } as { url?: string },
 });
