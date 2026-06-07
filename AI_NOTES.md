@@ -43,6 +43,8 @@ These items are **intentionally not yet done** and must be picked up by the next
 
 **Branch state:** `dev` is ahead of `origin/dev`; not all local work has been pushed.
 
+**Local tooling files:** `.agents/`, `.claude/`, and `scripts/_upstash_check.mjs` are intentionally untracked local/tooling artifacts. Do not push them unless the user explicitly chooses to version project skills or a reusable Redis connectivity utility. `.claude/` is machine-specific and should stay untracked.
+
 ### 2026-06-07 session changes
 
 | What | Files | Commit |

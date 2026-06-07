@@ -73,6 +73,12 @@
 - **Prisma cutover end-to-end** ⏳ PENDING. `FEATURE_USE_REAL_DB` exists but never enabled. Needs staging verification with `FEATURE_USE_REAL_DB=true`.
 - **Console.log audit** ⏳ PENDING. `.clinerules` §11.2 bans `console.*` in `components/` and `app/`. Full `grep` sweep not yet run.
 
+## Local tooling note
+
+- `.agents/`, `.claude/`, and `scripts/_upstash_check.mjs` are intentionally untracked local/tooling artifacts. Do not push them by default.
+- `.claude/` is machine-specific local settings. Keep it untracked.
+- Only version `.agents/` or `scripts/_upstash_check.mjs` if the user explicitly wants project-scoped skills or a reusable Redis connectivity script committed.
+
 ### Completed in this session (2026-06-07 — Overlay consistency refresh)
 
 | Task | What | Files |
