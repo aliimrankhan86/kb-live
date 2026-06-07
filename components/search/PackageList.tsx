@@ -335,11 +335,11 @@ const PackageList: React.FC<PackageListProps> = ({
         initialFilters={appliedFilters || undefined}
       />
       <Dialog open={showComparison} onOpenChange={setShowComparison}>
-        <OverlayContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+        <OverlayContent className="max-w-4xl max-h-[90vh]">
           <OverlayHeader>
             <OverlayTitle>Compare Packages</OverlayTitle>
           </OverlayHeader>
-          <div className={`mt-4 ${styles.comparisonModalBody}`}>
+          <div className={styles.comparisonModalBody}>
             <ComparisonTable rows={comparisonRows} />
           </div>
         </OverlayContent>

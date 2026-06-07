@@ -7,6 +7,7 @@ import {
   OverlayContent,
   OverlayHeader,
   OverlayTitle,
+  OverlayBody,
   OverlayFooter,
 } from '@/components/ui/Overlay';
 
@@ -51,6 +52,7 @@ export function PhoneOtpModal({
           <OverlayTitle>Confirm with your phone</OverlayTitle>
         </OverlayHeader>
 
+        <OverlayBody className="flex flex-col gap-4">
         <p className="text-sm text-[var(--textMuted)]">
           To protect your payment details, confirm the last 4 digits of the phone number registered
           to your account.
@@ -92,6 +94,7 @@ export function PhoneOtpModal({
         <p className="text-xs text-[var(--textMuted)]">
           This confirmation is recorded as part of the change audit log.
         </p>
+        </OverlayBody>
 
         <OverlayFooter>
           <Button
