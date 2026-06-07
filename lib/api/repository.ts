@@ -62,19 +62,16 @@ const mockStore = {
  * - Production server (getDataSource() === 'prisma'): Prisma/Postgres via DBAdapter
  * - Tests & dev server (getDataSource() === 'mockdb'): MockDB
  *
- * Uses dynamic import() for server-only module loading. The import path
- * is constructed to prevent webpack from bundling the Prisma client
- * into client-side code.
+ * Uses dynamic import() for server-only module loading. The production
+ * webpack client build aliases this repo-local adapter to an empty module;
+ * server builds keep the literal import so Next emits valid chunk paths.
  */
 let prismaAdapter: typeof mockStore | null = null;
 
 async function loadPrismaAdapter(): Promise<typeof mockStore> {
   if (prismaAdapter) return prismaAdapter;
   // This path only executes server-side when getDataSource() === 'prisma'.
-  // webpackIgnore prevents pg/Prisma (Node-only) from being pulled into the
-  // client bundle. The typeof window guard above ensures this is never called
-  // in the browser; Node resolves the path natively at runtime.
-  const mod = await import(/* webpackIgnore: true */ './db/adapter');
+  const mod = await import('./db/adapter');
   prismaAdapter = (mod as typeof import('./db/adapter')).DBAdapter as unknown as typeof mockStore;
   return prismaAdapter;
 }

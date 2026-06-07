@@ -12,9 +12,9 @@ A two-sided marketplace for Umrah/Hajj pilgrimage packages. Travellers search, c
 
 - **Branch:** `dev`
 - **Stack:** Next.js 15.5.19 (App Router), React 19, Tailwind v4, TypeScript strict, Vitest 4.1.8, Playwright
-- **Verified 2026-06-06:** `npm run test` passes (183/183). `npm run build` passes (43 app routes generated, 0 build/type errors).
-- **E2E 2026-06-06:** `npx playwright test e2e/operator.spec.ts --reporter=list` fails. Chromium is redirected from `/operator/packages` to `/`, so the operator wizard assertions do not run. Firefox/WebKit browser binaries are missing locally and require `npx playwright install`.
-- **Data:** Repository layer is async. MockDB remains the default for dev/tests; Prisma/Supabase paths exist behind config and migrations.
+- **Verified 2026-06-07:** `npm run test` passes (17 files, 222/222). `npm run build` passes with 0 errors; known warning remains from `@supabase/supabase-js` using `process.version` in Edge middleware via `@supabase/ssr`.
+- **E2E 2026-06-07:** Last recorded chromium run in `AI_NOTES.md` is 19/21 pass, 2 skipped, 0 fail. Full cross-browser Playwright status still depends on local browser binary availability.
+- **Data:** Repository layer is async. MockDB remains the default for tests and E2E; Prisma/Supabase paths exist behind `FEATURE_USE_REAL_DB=true`. The Prisma adapter loader is production-chunk safe: server builds import `./db/adapter` literally, while client webpack aliases that adapter out so `pg`/Prisma do not enter browser bundles.
 - **Auth:** Supabase SSR/auth endpoints and middleware are wired; several dev/operator UI flows still rely on MockDB's simulated current user.
 - **Operator side:** Onboarding, dashboard, leads, profile, payment settings, bank-review admin, complaints, package CSV, and the 8-step package wizard exist. Operator package E2E is pending because route auth/test setup is not aligned.
 

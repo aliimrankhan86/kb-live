@@ -1,3 +1,4 @@
+import path from "node:path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -56,6 +57,17 @@ const nextConfig: NextConfig = {
   // not exist in the browser or Edge Runtime.
   serverExternalPackages: ['pg', '@prisma/adapter-pg', '@prisma/client'],
 
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.alias = {
+        ...(config.resolve.alias ?? {}),
+        [path.resolve(process.cwd(), 'lib/api/db/adapter.ts')]: false,
+      };
+    }
+
+    return config;
+  },
+
   // Tree-shake barrel imports from heavy dependencies. Works with both
   // Turbopack (dev) and webpack (production build).
   experimental: {
@@ -68,10 +80,9 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  // No custom webpack config. Development uses Turbopack (--turbopack flag
-  // in npm run dev), which has its own Rust-based module system and does not
-  // suffer from the __webpack_modules__[moduleId] HMR bug. Production builds
-  // use webpack with default settings, which are stable for one-shot builds.
+  // Development uses Turbopack (--turbopack flag in npm run dev). Production
+  // webpack keeps a small client-only alias above so Repository can remain
+  // usable in MockDB-era client components without bundling pg/Prisma.
 };
 
 export default nextConfig;

@@ -6,7 +6,7 @@
 
 ## §1 — Current Status
 
-**Date:** 2026-06-07 | **Branch:** `dev` | **Build:** ✅ 0 errors, 0 warnings | **Tests:** ✅ 222/222 unit | **E2E:** ✅ 19/21 chromium pass (2 skipped, 0 fail) | **Git:** ✅ pushed — `6459e14` (overlay consistency + Prisma config)
+**Date:** 2026-06-07 | **Branch:** `dev` | **Build:** ✅ 0 errors, known Supabase Edge-runtime warning | **Tests:** ✅ 222/222 unit | **E2E:** ✅ 19/21 chromium pass (2 skipped, 0 fail) | **Git:** local branch ahead of `origin/dev`; latest local commit is the Prisma adapter server chunk loading fix
 
 ### 🔄 Active work (highest → lowest priority)
 
@@ -41,7 +41,7 @@ These items are **intentionally not yet done** and must be picked up by the next
 | 6   | **Console.log audit**              | ✅ DONE 2026-06-06 — `grep -rn "console\." components/ app/` found only `error.tsx`, `global-error.tsx` (error boundaries, allowed), and one route `console.error` that was removed. | — |
 | 7   | **SEO/AEO content expansion (T19)** | ✅ DONE 2026-06-06 — AI crawlers in robots.txt; `personJsonLd`, `touristTripJsonLd`, `dateModified` in json-ld.ts; TouristTrip on package pages; cost FAQ on /umrah; corridor links on homepage; /umrah/ramadan full expansion; /umrah/cost new page; sitemap updated. | See T19 row in §1 |
 
-**Branch state:** `dev` pushed — latest commit `6459e14` (overlay consistency + Prisma config). All changes pushed to remote.
+**Branch state:** `dev` is ahead of `origin/dev`; not all local work has been pushed.
 
 ### 2026-06-07 session changes
 
@@ -55,6 +55,16 @@ These items are **intentionally not yet done** and must be picked up by the next
 | PhoneOtpModal: body wrapped in `OverlayBody` | `components/operator/PhoneOtpModal.tsx` | `6459e14` |
 | Compare dialog: removed redundant `overflow-hidden flex flex-col` override | `components/search/PackageList.tsx` | `6459e14` |
 | `prisma.config.ts`: load `.env.local` via dotenv; spread `directUrl` for DDL (bypasses pgBouncer) | `prisma.config.ts` | `6459e14` |
+| CSP hardening: script CSP now uses a per-request middleware nonce and removes `unsafe-inline`; JSON-LD scripts use the shared nonce-aware helper | `middleware.ts`, `next.config.ts`, `lib/seo/json-ld.ts`, public JSON-LD pages | `ab246cb` |
+| Overlay standardisation: package filter and comparison overlays use shared overlay primitives with stable close placement and table sizing | `components/search/FilterOverlay.tsx`, `components/search/PackageList.tsx`, `components/request/ComparisonTable.tsx`, `components/ui/Overlay.tsx` | `f3e98c0` |
+| Prisma adapter route fix: `Repository` now uses a literal dynamic import for `./db/adapter` so server chunks resolve correctly, while `next.config.ts` aliases the adapter to `false` in client webpack builds to keep `pg`/Prisma out of browser bundles | `lib/api/repository.ts`, `next.config.ts` | latest local commit |
+
+### 2026-06-07 Prisma adapter verification
+
+- Fixed `/operators/al-hidayah-travel` production runtime error: `Cannot find module '.next/server/chunks/db/adapter'`.
+- Exact URL verification: `http://127.0.0.1:3000/operators/al-hidayah-travel` returns the operator page with H1 `Al-Hidayah Travel(Al-Hidayah)`; response no longer contains `Operator not found` or `Cannot find module`.
+- `npm run build`: passes with 0 errors. Known warning remains from `@supabase/supabase-js` using `process.version` in Edge middleware via `@supabase/ssr`.
+- `npm run test`: 17 files, 222/222 tests pass.
 
 ### Current Codex task handoff note (2026-06-06)
 
@@ -127,7 +137,7 @@ These rules exist because violations caused actual audit findings. Do not break 
 
 - `'admin'` role MUST NOT appear in public Zod schemas, `VALID_ROLES` arrays, or client-rendered form options.
 - Auth endpoints return ONLY `{ user: { id, email, role, name } }` — never session object, JWT, or refresh token.
-- No `eval()`, `__non_webpack_require__`, or webpack globals. Dynamic server-only modules: `await import(/* webpackIgnore: true */ 'path')`.
+- No `eval()`, `__non_webpack_require__`, or webpack globals. For repo-local server modules, use normal dynamic imports such as `await import('./db/adapter')` so Next can bundle valid server chunk paths. If shared client/server modules expose that import, add a client-only webpack alias for the server module rather than hiding the import with `webpackIgnore`. Use `webpackIgnore` only for external Node-only package imports when a normal import would incorrectly bundle code into the client or Edge path.
 - In-memory rate limiters are **not** acceptable in production serverless. Upstash Redis required.
 
 ### 2.4 Error handling
@@ -342,7 +352,8 @@ npx tsc --noEmit    # Type check
 | Utility function in `'use client'` file, called from server | `"Attempted to call X() from the server"` runtime crash | Extract to `.ts` file without `'use client'`      |
 | `params` not awaited in Next.js 15                          | `TypeError: Cannot destructure property 'slug' of...`   | `const { slug } = await params`                   |
 | In-memory rate limiter in serverless                        | Zero protection after cold start                        | Use Upstash Redis (see §2.3)                      |
-| `eval('require')` for server-only modules                   | Webpack bundles fail / `no-require-imports` lint        | `await import(/* webpackIgnore: true */ '...')`   |
+| `eval('require')` for server-only modules                   | Webpack bundles fail / `no-require-imports` lint        | Prefer normal dynamic import for repo-local modules (`await import('./db/adapter')`); reserve `webpackIgnore` for external Node-only packages when needed |
+| `webpackIgnore` on repo-local relative imports              | Next production chunks resolve `./...` relative to `.next/server/chunks`, causing `Cannot find module '.next/server/chunks/db/adapter'` | Remove `webpackIgnore` from repo-local imports so Next bundles the module into server chunks |
 | Admin role in public Zod schema                             | Security: users can self-register as admin              | `VALID_ROLES = ['customer', 'operator']` only     |
 | Full session in auth response                               | JWT/tokens exposed to client JS                         | Return only `{ user: { id, email, role, name } }` |
 | Missing `await` on Repository call                          | Stale data / silent failure                             | All 84 Repository methods are async               |

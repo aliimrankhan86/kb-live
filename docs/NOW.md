@@ -13,7 +13,7 @@
 ## What works (verified)
 
 - **Tests**: `npm run test` passes (17 files, 222/222 tests) — verified 2026-06-07.
-- **Build**: `npm run build` compiles the app successfully, then fails type checking on a pre-existing issue in `lib/api/db/prisma.ts` (`Unused '@ts-expect-error' directive` on the Prisma adapter constructor). Not introduced by the overlay work.
+- **Build**: `npm run build` passes with 0 errors — verified 2026-06-07. Known warning remains from `@supabase/supabase-js` using `process.version` in Edge middleware via `@supabase/ssr`.
 - **TypeScript**: covered by `npm run build` validity checks. `npx tsc --noEmit` was not rerun in this audit pass.
 - **Security audit**: Down from 17 vulnerabilities to 6 moderate (nested in dev tooling)
 - **Dead code**: Removed `@dnd-kit/*` unused dependencies, 9 unused import/variable warnings
@@ -66,7 +66,6 @@
 
 ## Pending / not verified
 
-- **Build blocker** ⏳ PENDING. `npm run build` fails after compilation on `lib/api/db/prisma.ts:13` because an `@ts-expect-error` is now unused. This file was outside the allowed public-flow overlay scope for the 2026-06-07 UI pass.
 - **T18 — Local Chrome SEO/AEO QA** ⏳ PENDING. Requires a browser-capable agent with local Chrome access. `AI_NOTES.md` §2.7 has the full checklist. This is implementation-quality verification only — not rankings/backlinks/live SERP data.
 - **T16 RE-ENABLE — Operator E2E** ⏳ PENDING. `e2e/operator.spec.ts` is skipped. Needs: (1) seed test operator, (2) Playwright auth fixture to sign in and set session cookie, (3) remove `test.describe.skip`, (4) run until 10/10 pass.
 - **E2E auth infrastructure** ⏳ PENDING. 4 pre-existing E2E specs fail due to missing auth (`bank-payment`, `catalogue`, `flow`, `slider-consistency`). Needs a shared Playwright auth fixture.
@@ -87,7 +86,7 @@
 - `git fetch --prune`: branch `dev` is current with `origin/dev` (`0 0` ahead/behind).
 - `npm run test`: 222/222 pass.
 - `git diff --check`: pass.
-- `npm run build`: fails after app compilation on pre-existing `lib/api/db/prisma.ts:13` unused `@ts-expect-error`.
+- `npm run build`: passes with 0 errors. Known Supabase Edge-runtime warning remains.
 - Playwright visual smoke on mock data server: `/`, `/umrah`, `/search/packages?type=umrah` return 200 at 320px and 1280px, each with one `h1`, no horizontal overflow.
 - Overlay visual captures: filter and comparison overlays render at 320px and 1280px with visible close controls and no browser console warnings/errors. Evidence saved under `/tmp/kb-live-overlay-visual-confirmation/`.
 
@@ -95,13 +94,17 @@
 
 | Task | What | Files |
 | ---- | ---- | ----- |
-| ROUTE-FIX | Fixed the Prisma adapter loader by removing the `webpackIgnore` dynamic import. Turbopack SSR chunks were resolving `./db/adapter` relative to `.next/server/chunks/ssr/`, which caused `/search/packages` to throw `Cannot find module .../.next/server/chunks/ssr/db/adapter` when `FEATURE_USE_REAL_DB=true`. | `lib/api/repository.ts` |
+| ROUTE-FIX | Fixed the Prisma adapter loader for production chunks. `Repository` now uses a literal dynamic import for `./db/adapter` so server chunks resolve correctly, while `next.config.ts` aliases the adapter to `false` in client webpack builds to keep `pg`/Prisma out of browser bundles. | `lib/api/repository.ts`, `next.config.ts` |
+| DOCS | Updated the AI handoff notes with the corrected dynamic-import rule and the latest local commit/build/test state. | `AI_NOTES.md`, `docs/NOW.md` |
 
 **Verification:**
 
 - Exact reported URL returns HTTP 200 locally and renders 2 matching packages: `/search/packages?type=umrah&season=flexible&adults=2&departureDate=2026-08-31&returnDate=2026-09-14&budgetMin=500&budgetMax=1000`.
 - Screenshot evidence saved at `/tmp/kb-live-exact-url-after-adapter-fix.png`.
-- `npm run test`: 222/222 pass.
+- Exact current error URL returns HTTP 200 locally and renders the operator page: `/operators/al-hidayah-travel` has H1 `Al-Hidayah Travel(Al-Hidayah)` and no longer contains `Operator not found` or `Cannot find module`.
+- In-app browser refresh of `/operators/al-hidayah-travel`: page title `Al-Hidayah Travel - Verified Umrah & Hajj Operator | KaabaTrip`, no CSP refusal logs.
+- `npm run build`: passes with 0 errors. Known warning remains from `@supabase/supabase-js` using `process.version` in Edge middleware via `@supabase/ssr`.
+- `npm run test`: 17 files, 222/222 tests pass.
 
 ### Completed in this session (UI consistency — Filter Overlay + Comparison Table)
 
