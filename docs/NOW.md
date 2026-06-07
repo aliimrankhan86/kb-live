@@ -10,8 +10,10 @@
 
 ## What works (verified)
 
-- **Tests**: `npm run test` passes (16 files, 183/183 tests) — verified 2026-06-06.
-- **Build**: `npm run build` passes with Next.js 15.5.19 (43 app routes generated, 0 build/type errors) — verified 2026-06-06.
+## What works (verified)
+
+- **Tests**: `npm run test` passes (17 files, 222/222 tests) — verified 2026-06-07.
+- **Build**: `npm run build` compiles successfully (43 app routes). Pre-existing TypeScript error in `prisma.config.ts` (`directUrl` not in Prisma 7 `datasource` type) blocks full build — not introduced by this change.
 - **TypeScript**: covered by `npm run build` validity checks. `npx tsc --noEmit` was not rerun in this audit pass.
 - **Security audit**: Down from 17 vulnerabilities to 6 moderate (nested in dev tooling)
 - **Dead code**: Removed `@dnd-kit/*` unused dependencies, 9 unused import/variable warnings
@@ -71,7 +73,19 @@
 - **Prisma cutover end-to-end** ⏳ PENDING. `FEATURE_USE_REAL_DB` exists but never enabled. Needs staging verification with `FEATURE_USE_REAL_DB=true`.
 - **Console.log audit** ⏳ PENDING. `.clinerules` §11.2 bans `console.*` in `components/` and `app/`. Full `grep` sweep not yet run.
 
-### Completed in this session (T13/T14/T16/T17/OP-PERSIST)
+### Completed in this session (UI consistency — Filter Overlay + Comparison Table)
+
+| Task           | What                                                                                                                                                                                                                                   | Files                                    |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| UI-CONSISTENCY | `OverlayContent` close button: moved from `sticky top-0 ml-auto` (broke when consumer set `flex flex-col overflow-hidden`) to `absolute right-4 top-4 z-10`. Now always sits at top-right regardless of parent layout.                 | `components/ui/Overlay.tsx`              |
+| UI-CONSISTENCY | `ComparisonTable` colour tokens: replaced all hardcoded `#FFFFFF`, `#FFD31D`, `rgba(255,255,255,0.1)` etc. with `var(--text)`, `var(--yellow)`, `var(--borderSubtle)`, `var(--textMuted)`, `var(--surfaceDark)` for theme consistency. | `components/request/ComparisonTable.tsx` |
+
+**Verification:**
+
+- `npm run test`: 222/222 pass
+- `npm run build`: compiles successfully (pre-existing `prisma.config.ts` type error unrelated)
+
+## Completed in this session (T13/T14/T16/T17/OP-PERSIST)
 
 | Task       | What                                                                                                                            | Files                                                                              |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |

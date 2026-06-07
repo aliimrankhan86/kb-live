@@ -29,11 +29,7 @@ export const OverlayContent = React.forwardRef<
       )}
       {...props}
     >
-      <DialogPrimitive.Description className="sr-only">
-        Dialog content
-      </DialogPrimitive.Description>
-      {children}
-      <DialogPrimitive.Close className="sticky top-0 ml-auto inline-flex h-10 min-w-10 items-center justify-center rounded-md border border-[var(--borderSubtle)] bg-[var(--surfaceDark)] text-[var(--textMuted)] transition-colors hover:text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--focusRing)] focus:ring-offset-2 focus:ring-offset-[var(--surfaceDark)] disabled:pointer-events-none">
+      <DialogPrimitive.Close className="absolute right-4 top-4 z-10 inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--borderSubtle)] bg-[var(--surfaceDark)] text-[var(--textMuted)] transition-colors hover:border-[var(--yellow)] hover:text-[var(--yellow)] focus:outline-none focus:ring-2 focus:ring-[var(--focusRing)] focus:ring-offset-2 focus:ring-offset-[var(--surfaceDark)] disabled:pointer-events-none">
         <span className="sr-only">Close</span>
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -51,6 +47,10 @@ export const OverlayContent = React.forwardRef<
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
       </DialogPrimitive.Close>
+      <DialogPrimitive.Description className="sr-only">
+        Dialog content
+      </DialogPrimitive.Description>
+      {children}
     </DialogPrimitive.Content>
   </DialogPrimitive.Portal>
 ));
