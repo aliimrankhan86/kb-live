@@ -35,11 +35,14 @@ export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
 
   return (
     <div className="overflow-x-auto" data-testid="comparison-table">
-      <table className="w-full min-w-[600px] border-collapse text-left text-sm text-[var(--text)]">
+      <table className="w-full min-w-[42rem] border-collapse text-left text-sm text-[var(--text)] sm:min-w-[48rem]">
         <caption className="sr-only">Package comparison</caption>
         <thead>
           <tr>
-            <th className="border-b border-[var(--borderSubtle)] py-4 pl-4 font-medium text-[var(--textMuted)]">
+            <th
+              scope="col"
+              className="sticky left-0 top-0 z-30 w-36 border-b border-[var(--borderSubtle)] bg-[var(--surfaceDark)] px-5 py-4 text-xs font-semibold uppercase text-[var(--textMuted)] sm:w-48 sm:px-6"
+            >
               Feature
             </th>
             {comparisonRows.map((row) => {
@@ -48,7 +51,12 @@ export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
                   ? row.operatorName
                   : 'Travel agent (name TBC)';
               return (
-                <th key={row.id} className="border-b border-[var(--borderSubtle)] p-4 font-semibold text-[var(--yellow)]" title={headerLabel}>
+                <th
+                  key={row.id}
+                  scope="col"
+                  className="sticky top-0 z-20 min-w-56 border-b border-[var(--borderSubtle)] bg-[var(--surfaceDark)] px-5 py-4 text-base font-semibold text-[var(--yellow)] sm:px-6"
+                  title={headerLabel}
+                >
                   {headerLabel}
                 </th>
               );
@@ -56,16 +64,29 @@ export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
           </tr>
         </thead>
         <tbody>
-          {features.map((feature, i) => (
-            <tr key={i} className="border-b border-[var(--borderSubtle)] hover:bg-[var(--surfaceDark)]">
-              <td className="py-4 pl-4 font-medium text-[var(--textMuted)]">
+          {features.map((feature) => (
+            <tr key={feature.key} className="border-b border-[var(--borderSubtle)] last:border-b-0 hover:bg-[rgba(255,255,255,0.03)]">
+              <th
+                scope="row"
+                className="sticky left-0 z-10 w-36 bg-[var(--surfaceDark)] px-5 py-5 align-top font-semibold text-[var(--textMuted)] sm:w-48 sm:px-6"
+              >
                 {feature.label}
-              </td>
-              {comparisonRows.map((row) => (
-                <td key={row.id} className="p-4">
-                  {row[feature.key]}
-                </td>
-              ))}
+              </th>
+              {comparisonRows.map((row) => {
+                const value = row[feature.key];
+                const isMissing = value === 'Not provided';
+
+                return (
+                  <td
+                    key={`${row.id}-${feature.key}`}
+                    className={`min-w-56 px-5 py-5 align-top leading-relaxed sm:px-6 ${
+                      isMissing ? 'text-[var(--textMuted)]' : 'text-[var(--text)]'
+                    } ${feature.key === 'price' ? 'font-semibold tabular-nums' : ''}`}
+                  >
+                    {value}
+                  </td>
+                );
+              })}
             </tr>
           ))}
         </tbody>

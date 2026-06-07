@@ -8,7 +8,14 @@ import { Package } from '@/lib/mock-packages';
 import { MockDB } from '@/lib/api/mock-db';
 import { mapPackageToComparison, handleComparisonSelection } from '@/lib/comparison';
 import { ComparisonTable } from '@/components/request/ComparisonTable';
-import { Dialog, OverlayContent, OverlayHeader, OverlayTitle } from '@/components/ui/Overlay';
+import {
+  Dialog,
+  OverlayBody,
+  OverlayContent,
+  OverlayDescription,
+  OverlayHeader,
+  OverlayTitle,
+} from '@/components/ui/Overlay';
 import PackageCard from './PackageCard';
 import { FilterOverlay, FilterState } from './FilterOverlay';
 import styles from './packages.module.css';
@@ -335,13 +342,16 @@ const PackageList: React.FC<PackageListProps> = ({
         initialFilters={appliedFilters || undefined}
       />
       <Dialog open={showComparison} onOpenChange={setShowComparison}>
-        <OverlayContent className="max-w-4xl max-h-[90vh]">
-          <OverlayHeader>
+        <OverlayContent className="max-h-[min(92dvh,56rem)] w-[min(calc(100vw-1rem),68rem)] sm:w-[min(calc(100vw-2rem),68rem)]">
+          <OverlayHeader closeButtonTestId="comparison-close-btn">
             <OverlayTitle>Compare Packages</OverlayTitle>
+            <OverlayDescription>
+              Review selected packages side by side across price, operator, hotels, and inclusions.
+            </OverlayDescription>
           </OverlayHeader>
-          <div className={styles.comparisonModalBody}>
+          <OverlayBody className="p-0">
             <ComparisonTable rows={comparisonRows} />
-          </div>
+          </OverlayBody>
         </OverlayContent>
       </Dialog>
     </div>

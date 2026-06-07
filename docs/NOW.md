@@ -13,7 +13,7 @@
 ## What works (verified)
 
 - **Tests**: `npm run test` passes (17 files, 222/222 tests) — verified 2026-06-07.
-- **Build**: `npm run build` compiles successfully (43 app routes). Pre-existing TypeScript error in `prisma.config.ts` (`directUrl` not in Prisma 7 `datasource` type) blocks full build — not introduced by this change.
+- **Build**: `npm run build` compiles the app successfully, then fails type checking on a pre-existing issue in `lib/api/db/prisma.ts` (`Unused '@ts-expect-error' directive` on the Prisma adapter constructor). Not introduced by the overlay work.
 - **TypeScript**: covered by `npm run build` validity checks. `npx tsc --noEmit` was not rerun in this audit pass.
 - **Security audit**: Down from 17 vulnerabilities to 6 moderate (nested in dev tooling)
 - **Dead code**: Removed `@dnd-kit/*` unused dependencies, 9 unused import/variable warnings
@@ -66,12 +66,42 @@
 
 ## Pending / not verified
 
+- **Build blocker** ⏳ PENDING. `npm run build` fails after compilation on `lib/api/db/prisma.ts:13` because an `@ts-expect-error` is now unused. This file was outside the allowed public-flow overlay scope for the 2026-06-07 UI pass.
 - **T18 — Local Chrome SEO/AEO QA** ⏳ PENDING. Requires a browser-capable agent with local Chrome access. `AI_NOTES.md` §2.7 has the full checklist. This is implementation-quality verification only — not rankings/backlinks/live SERP data.
 - **T16 RE-ENABLE — Operator E2E** ⏳ PENDING. `e2e/operator.spec.ts` is skipped. Needs: (1) seed test operator, (2) Playwright auth fixture to sign in and set session cookie, (3) remove `test.describe.skip`, (4) run until 10/10 pass.
 - **E2E auth infrastructure** ⏳ PENDING. 4 pre-existing E2E specs fail due to missing auth (`bank-payment`, `catalogue`, `flow`, `slider-consistency`). Needs a shared Playwright auth fixture.
 - **Rate limiter production switch** ⏳ PENDING. `lib/rate-limit.ts` uses in-memory `Map` fallback. Needs `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` in production env.
 - **Prisma cutover end-to-end** ⏳ PENDING. `FEATURE_USE_REAL_DB` exists but never enabled. Needs staging verification with `FEATURE_USE_REAL_DB=true`.
 - **Console.log audit** ⏳ PENDING. `.clinerules` §11.2 bans `console.*` in `components/` and `app/`. Full `grep` sweep not yet run.
+
+### Completed in this session (2026-06-07 — Overlay consistency refresh)
+
+| Task | What | Files |
+| ---- | ---- | ----- |
+| UI-CONSISTENCY | Rebuilt `FilterOverlay` on shared Radix overlay primitives so filter and compare dialogs share focus handling, Escape/outside dismissal, scroll locking, header/body/footer structure, close placement, border treatment, theme tokens, and responsive sizing. | `components/search/FilterOverlay.tsx`, `components/ui/Overlay.tsx` |
+| UI-CONSISTENCY | Updated comparison modal composition to use shared overlay body/header and refreshed comparison table styling with sticky feature labels, sticky column headers, tokenized dark/yellow theme, muted missing values, and consistent row spacing. | `components/search/PackageList.tsx`, `components/request/ComparisonTable.tsx` |
+| UI-CONSISTENCY | Pinned the shared overlay close control to the top-right of the overlay header with a 44px target so filter and comparison modals cannot drift when header copy wraps. | `components/ui/Overlay.tsx` |
+
+**Verification:**
+
+- `git fetch --prune`: branch `dev` is current with `origin/dev` (`0 0` ahead/behind).
+- `npm run test`: 222/222 pass.
+- `git diff --check`: pass.
+- `npm run build`: fails after app compilation on pre-existing `lib/api/db/prisma.ts:13` unused `@ts-expect-error`.
+- Playwright visual smoke on mock data server: `/`, `/umrah`, `/search/packages?type=umrah` return 200 at 320px and 1280px, each with one `h1`, no horizontal overflow.
+- Overlay visual captures: filter and comparison overlays render at 320px and 1280px with visible close controls and no browser console warnings/errors. Evidence saved under `/tmp/kb-live-overlay-visual-confirmation/`.
+
+### Completed in this session (2026-06-07 — Prisma adapter route fix)
+
+| Task | What | Files |
+| ---- | ---- | ----- |
+| ROUTE-FIX | Fixed the Prisma adapter loader by removing the `webpackIgnore` dynamic import. Turbopack SSR chunks were resolving `./db/adapter` relative to `.next/server/chunks/ssr/`, which caused `/search/packages` to throw `Cannot find module .../.next/server/chunks/ssr/db/adapter` when `FEATURE_USE_REAL_DB=true`. | `lib/api/repository.ts` |
+
+**Verification:**
+
+- Exact reported URL returns HTTP 200 locally and renders 2 matching packages: `/search/packages?type=umrah&season=flexible&adults=2&departureDate=2026-08-31&returnDate=2026-09-14&budgetMin=500&budgetMax=1000`.
+- Screenshot evidence saved at `/tmp/kb-live-exact-url-after-adapter-fix.png`.
+- `npm run test`: 222/222 pass.
 
 ### Completed in this session (UI consistency — Filter Overlay + Comparison Table)
 

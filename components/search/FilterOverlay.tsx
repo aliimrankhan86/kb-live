@@ -1,12 +1,20 @@
 'use client'
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { TimePeriodFilter } from './filters/TimePeriodFilter';
 import { BudgetFilter } from './filters/BudgetFilter';
 import { FlightTypeFilter } from './filters/FlightTypeFilter';
 import { HotelRatingsFilter } from './filters/HotelRatingsFilter';
 import { DistanceFilter } from './filters/DistanceFilter';
-import styles from './FilterOverlay.module.css';
+import {
+  Dialog,
+  OverlayBody,
+  OverlayContent,
+  OverlayDescription,
+  OverlayFooter,
+  OverlayHeader,
+  OverlayTitle,
+} from '@/components/ui/Overlay';
 
 export interface FilterState {
   timePeriod: {
@@ -69,85 +77,6 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({
     ...defaultFilters,
     ...initialFilters
   });
-  
-  const overlayRef = useRef<HTMLDivElement>(null);
-  const isMountedRef = useRef(true);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
-
-  // Prevent body scroll when open
-  useEffect(() => {
-    if (!isOpen) return;
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = originalOverflow;
-    };
-  }, [isOpen]);
-
-  // Handle click outside to close
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (isMountedRef.current && overlayRef.current && !overlayRef.current.contains(event.target as Node)) {
-        onClose();
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isOpen, onClose]);
-
-  // Handle escape key
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleEscape = (event: KeyboardEvent) => {
-      if (isMountedRef.current && event.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    document.addEventListener('keydown', handleEscape);
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, [isOpen, onClose]);
-
-  // Focus trap
-  useEffect(() => {
-    if (!isOpen) return;
-    const overlay = overlayRef.current;
-    if (!overlay) return;
-
-    const focusableElements = overlay.querySelectorAll<HTMLElement>(
-      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-    );
-    const first = focusableElements[0];
-    const last = focusableElements[focusableElements.length - 1];
-    first?.focus();
-
-    const handleTab = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return;
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last?.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first?.focus();
-      }
-    };
-    overlay.addEventListener('keydown', handleTab);
-    return () => overlay.removeEventListener('keydown', handleTab);
-  }, [isOpen]);
 
   const handleFilterChange = useCallback((filterType: keyof FilterState, value: FilterState[keyof FilterState]) => {
     setFilters(prev => ({
@@ -166,8 +95,6 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({
     onReset();
   }, [onReset]);
 
-  if (!isOpen) return null;
-
   const activeFilterCount = [
     filters.specialOccasion !== null,
     filters.budget.min !== defaultFilters.budget.min || filters.budget.max !== defaultFilters.budget.max,
@@ -177,42 +104,35 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({
   ].filter(Boolean).length;
 
   return (
-    <div 
-      className={styles.backdrop} 
-      role="dialog" 
-      aria-modal="true" 
-      aria-labelledby="filter-title"
-      data-testid="filter-overlay"
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
     >
-      <div 
-        ref={overlayRef}
-        className={styles.overlay}
-        role="document"
+      <OverlayContent
+        className="max-h-[min(92dvh,56rem)] w-[min(calc(100vw-1rem),56rem)] sm:w-[min(calc(100vw-2rem),56rem)]"
+        data-testid="filter-overlay"
       >
-        <div className={styles.header}>
-          <div className={styles.headerTitleRow}>
-            <h2 id="filter-title" className={styles.title}>Filter Packages</h2>
-            {activeFilterCount > 0 && (
-              <span className={styles.activeCount} aria-live="polite">
+        <OverlayHeader closeButtonTestId="filter-close-btn">
+          <div className="flex flex-wrap items-center gap-3">
+            <OverlayTitle>Filter Packages</OverlayTitle>
+            {activeFilterCount > 0 ? (
+              <span
+                className="rounded-md border border-[rgba(255,211,29,0.35)] bg-[rgba(255,211,29,0.08)] px-2.5 py-1 text-xs font-semibold text-[var(--yellow)]"
+                aria-live="polite"
+              >
                 {activeFilterCount} active
               </span>
-            )}
+            ) : null}
           </div>
-          <button
-            onClick={onClose}
-            className={styles.closeButton}
-            aria-label="Close filter overlay"
-            data-testid="filter-close-btn"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        </div>
+          <OverlayDescription>
+            Refine packages by dates, budget, flights, hotels, and distance.
+          </OverlayDescription>
+        </OverlayHeader>
 
-        <div className={styles.content}>
-          <section className={styles.filterSection}>
+        <OverlayBody className="space-y-6 px-5 py-5 sm:px-6">
+          <section className="border-b border-[var(--borderSubtle)] pb-6">
             <TimePeriodFilter
               value={filters.timePeriod}
               specialOccasion={filters.specialOccasion}
@@ -223,39 +143,39 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({
             />
           </section>
 
-          <section className={styles.filterSection}>
+          <section className="border-b border-[var(--borderSubtle)] pb-6">
             <BudgetFilter
               value={filters.budget}
               onChange={(budget) => handleFilterChange('budget', budget)}
             />
           </section>
 
-          <section className={styles.filterSection}>
+          <section className="border-b border-[var(--borderSubtle)] pb-6">
             <FlightTypeFilter
               value={filters.flightType}
               onChange={(flightType) => handleFilterChange('flightType', flightType)}
             />
           </section>
 
-          <section className={styles.filterSection}>
+          <section className="border-b border-[var(--borderSubtle)] pb-6">
             <HotelRatingsFilter
               value={filters.hotelRatings}
               onChange={(rating) => handleFilterChange('hotelRatings', rating)}
             />
           </section>
 
-          <section className={styles.filterSection}>
+          <section>
             <DistanceFilter
               value={filters.distance}
               onChange={(distance) => handleFilterChange('distance', distance)}
             />
           </section>
-        </div>
+        </OverlayBody>
 
-        <div className={styles.footer}>
+        <OverlayFooter className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:justify-stretch">
           <button
             onClick={handleReset}
-            className={styles.resetButton}
+            className="min-h-11 rounded-md border border-[var(--borderStrong)] bg-transparent px-5 py-3 text-base font-semibold text-[var(--text)] transition-colors hover:border-[var(--yellow)] hover:bg-[rgba(255,211,29,0.06)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focusRing)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surfaceDark)]"
             type="button"
             data-testid="filter-reset-btn"
           >
@@ -263,14 +183,14 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({
           </button>
           <button
             onClick={handleApply}
-            className={styles.applyButton}
+            className="min-h-11 rounded-md bg-[var(--yellow)] px-5 py-3 text-base font-semibold text-black transition-colors hover:bg-[#ffe36b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focusRing)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surfaceDark)]"
             type="button"
             data-testid="filter-apply-btn"
           >
             Apply Filters
           </button>
-        </div>
-      </div>
-    </div>
+        </OverlayFooter>
+      </OverlayContent>
+    </Dialog>
   );
 };
