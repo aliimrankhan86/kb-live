@@ -78,9 +78,7 @@ export function OfferForm({ request, onSuccess }: OfferFormProps) {
               onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
               className="rounded border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] px-2 py-2 focus:border-[#FFD31D] focus:outline-none"
             >
-              <option value="GBP">GBP</option>
-              <option value="USD">USD</option>
-              <option value="EUR">EUR</option>
+              <option value="GBP">GBP (£)</option>
             </select>
           </div>
         </div>

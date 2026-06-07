@@ -21,7 +21,7 @@ export const baseMetadata: Metadata = {
   },
   openGraph: {
     type: 'website',
-    locale: 'en_US',
+    locale: 'en_GB',
     url: 'https://kaabatrip.com',
     title: 'KaabaTrip - Your Journey to the Holy Land',
     description: 'Discover the best Hajj and Umrah packages for your spiritual journey to the Holy Land.',

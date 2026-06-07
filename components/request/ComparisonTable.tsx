@@ -35,11 +35,11 @@ export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
 
   return (
     <div className="overflow-x-auto" data-testid="comparison-table">
-      <table className="w-full min-w-[600px] border-collapse text-left text-sm text-[#FFFFFF]">
+      <table className="w-full min-w-[600px] border-collapse text-left text-sm text-[var(--text)]">
         <caption className="sr-only">Package comparison</caption>
         <thead>
           <tr>
-            <th className="border-b border-[rgba(255,255,255,0.1)] py-4 pl-4 font-medium text-[rgba(255,255,255,0.4)]">
+            <th className="border-b border-[var(--borderSubtle)] py-4 pl-4 font-medium text-[var(--textMuted)]">
               Feature
             </th>
             {comparisonRows.map((row) => {
@@ -48,7 +48,7 @@ export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
                   ? row.operatorName
                   : 'Travel agent (name TBC)';
               return (
-                <th key={row.id} className="border-b border-[rgba(255,255,255,0.1)] p-4 font-semibold text-[#FFD31D]" title={headerLabel}>
+                <th key={row.id} className="border-b border-[var(--borderSubtle)] p-4 font-semibold text-[var(--yellow)]" title={headerLabel}>
                   {headerLabel}
                 </th>
               );
@@ -57,8 +57,8 @@ export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
         </thead>
         <tbody>
           {features.map((feature, i) => (
-            <tr key={i} className="border-b border-[rgba(255,255,255,0.05)] hover:bg-[rgba(255,255,255,0.02)]">
-              <td className="py-4 pl-4 font-medium text-[rgba(255,255,255,0.64)]">
+            <tr key={i} className="border-b border-[var(--borderSubtle)] hover:bg-[var(--surfaceDark)]">
+              <td className="py-4 pl-4 font-medium text-[var(--textMuted)]">
                 {feature.label}
               </td>
               {comparisonRows.map((row) => (

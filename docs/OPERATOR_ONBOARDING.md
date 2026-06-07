@@ -124,7 +124,7 @@ Fields marked **M** are mandatory for publishing. Fields marked **O** are option
 |-------|-----|------|-----------|-----------------|
 | **Price per person** | M | `number` | Min 1, max 50,000 | Prominent on card, sortable |
 | **Price type** | M | `'exact' \| 'from'` | — | "From £1,200" vs "£1,200" |
-| **Currency** | M | `string` | ISO 4217: `'GBP' \| 'USD' \| 'EUR' \| 'SAR'` | Converted to user's currency |
+| **Currency** | M | `string` | MVP UI accepts/displays `GBP`; other ISO 4217 values are future/import compatibility only | Displayed as deterministic GBP in public UI |
 | **Deposit amount** | O | `number` | Min 0, max price | "£200 deposit to secure" |
 | **Payment plan available** | O | `boolean` | — | "Monthly payments available" badge |
 | **What's included in price** | O | `string` | Max 500 chars, plain text | Tooltip or detail breakdown |

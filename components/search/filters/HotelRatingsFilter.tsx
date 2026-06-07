@@ -27,7 +27,7 @@ export const HotelRatingsFilter: React.FC<HotelRatingsFilterProps> = ({
               key={rating}
               onClick={() => handleRatingChange(rating)}
               className={`${styles.star} ${rating <= value ? styles.filled : styles.empty}`}
-              aria-label={`${rating} star${rating === 1 ? '' : 's'}`}
+              aria-label={`${rating} stars`}
               aria-checked={rating === value}
               role="radio"
               type="button"

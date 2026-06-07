@@ -135,6 +135,7 @@ const SEED_OPERATORS: OperatorProfile[] = [
 const SEED_USERS: User[] = [
   { id: 'cust1', email: 'customer@example.com', role: 'customer', name: 'Ali Client' },
   { id: 'op1', email: 'operator@example.com', role: 'operator', name: 'Ahmed Operator' },
+  { id: 'admin1', email: 'admin@kaabatrip.com', role: 'admin', name: 'Admin User' },
 ];
 
 const SEED_COMPLAINTS: Complaint[] = [

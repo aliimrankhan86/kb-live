@@ -698,14 +698,14 @@
   color: var(--bg);
 }
 
-/* Compare modal: scrollable on small viewports; flex child so close + title stay visible */
+/* Compare modal body: flex-1 so it fills remaining height after header */
 .comparisonModalBody {
   flex: 1;
   min-height: 0;
-  max-height: 85vh;
   overflow-y: auto;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  padding: 1.25rem 1.5rem;
 }
 
 @media (max-width: 480px) {

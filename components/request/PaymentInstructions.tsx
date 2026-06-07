@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MockDB } from '@/lib/api/mock-db';
 import { Repository } from '@/lib/api/repository';
-import type { BookingIntent } from '@/lib/types';
+import type { BookingIntent, PaymentInstructions } from '@/lib/types';
 import { Badge } from '@/components/ui/Badge';
 
 const customerCtx = { userId: 'cust1', role: 'customer' as const };
@@ -29,22 +29,38 @@ interface PaymentInstructionsProps {
 }
 
 export function PaymentInstructions({ bookingIntent }: PaymentInstructionsProps) {
-  const result = useMemo(() => {
-    try {
-      const instructions = Repository.getPaymentInstructions(customerCtx, bookingIntent.id);
-      return { type: 'success' as const, instructions };
-    } catch (err) {
-      return {
-        type: 'holding' as const,
-        message: err instanceof Error ? err.message : 'Payment instructions are unavailable',
-      };
-    }
+  const [result, setResult] = useState<{ type: 'loading' } | { type: 'success'; instructions: PaymentInstructions } | { type: 'holding'; message: string }>({ type: 'loading' });
+
+  useEffect(() => {
+    let cancelled = false;
+    Repository.getPaymentInstructions(customerCtx, bookingIntent.id)
+      .then((instructions) => {
+        if (!cancelled) setResult({ type: 'success', instructions });
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setResult({
+            type: 'holding',
+            message: err instanceof Error ? err.message : 'Payment instructions are unavailable',
+          });
+        }
+      });
+    return () => { cancelled = true; };
   }, [bookingIntent.id]);
 
-  const recentlyUpdated = useMemo(
-    () => (result.type === 'success' ? isRecentlyUpdated(result.instructions.operatorId) : false),
-    [result]
-  );
+  const recentlyUpdated = result.type === 'success' ? isRecentlyUpdated(result.instructions.operatorId) : false;
+
+  if (result.type === 'loading') {
+    return (
+      <div
+        className="rounded-md border border-[var(--borderSubtle)] bg-[rgba(255,255,255,0.04)] p-4 text-sm"
+        data-testid="payment-instructions"
+      >
+        <p className="font-medium text-[var(--text)]">Payment instructions</p>
+        <p className="mt-1 text-[var(--textMuted)]">Loading payment details…</p>
+      </div>
+    );
+  }
 
   if (result.type === 'holding') {
     return (

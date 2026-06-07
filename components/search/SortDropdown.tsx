@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { SortOption, SortState, SORT_OPTIONS, getSortConfig } from '@/lib/sort-types';
+import { SortOption, SORT_OPTIONS, getSortConfig } from '@/lib/sort-types';
 import { useClickOutside } from '@/hooks/useClickOutside';
 import { useEscapeKey } from '@/hooks/useEscapeKey';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
@@ -157,13 +157,9 @@ export const SortDropdown: React.FC<SortDropdownProps> = ({
   }, [isOpen]);
 
   return (
-    <div 
+    <div
       ref={dropdownRef}
       className={`${styles.dropdown} ${className}`}
-      role="combobox"
-      aria-expanded={isOpen}
-      aria-haspopup="listbox"
-      aria-label={ariaLabel}
     >
       {/* Dropdown Button */}
       <button
@@ -211,7 +207,7 @@ export const SortDropdown: React.FC<SortDropdownProps> = ({
           {SORT_OPTIONS.map((option, index) => (
             <button
               key={option.value}
-              ref={el => optionRefs.current[index] = el}
+              ref={el => { optionRefs.current[index] = el; }}
               type="button"
               className={`${styles.option} ${value === option.value ? styles.optionSelected : ''} ${focusedIndex === index ? styles.optionFocused : ''}`}
               onClick={() => handleOptionSelect(option.value)}

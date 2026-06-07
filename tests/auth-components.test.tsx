@@ -60,6 +60,7 @@ describe('SignUpForm', () => {
     expect(screen.getByTestId('signup-role-operator')).toBeInTheDocument();
     expect(screen.getByTestId('signup-email')).toBeInTheDocument();
     expect(screen.getByTestId('signup-password')).toBeInTheDocument();
+    expect(screen.getByTestId('signup-confirm-password')).toBeInTheDocument();
     expect(screen.getByTestId('signup-name')).toBeInTheDocument();
   });
 
@@ -68,6 +69,20 @@ describe('SignUpForm', () => {
     fireEvent.click(screen.getByTestId('signup-role-customer'));
     fireEvent.click(screen.getByTestId('signup-role-operator'));
     expect(screen.getByTestId('signup-submit')).toBeInTheDocument();
+  });
+
+  it('shows password mismatch error when passwords do not match', async () => {
+    render(<SignUpForm />);
+    fireEvent.change(screen.getByTestId('signup-name'), { target: { value: 'Test User' } });
+    fireEvent.change(screen.getByTestId('signup-email'), { target: { value: 'test@example.com' } });
+    fireEvent.change(screen.getByTestId('signup-password'), { target: { value: 'password123' } });
+    fireEvent.change(screen.getByTestId('signup-confirm-password'), { target: { value: 'different456' } });
+    fireEvent.click(screen.getByTestId('signup-terms-checkbox'));
+    fireEvent.click(screen.getByTestId('signup-submit'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('signup-password-mismatch')).toHaveTextContent('Passwords do not match');
+    });
   });
 
   it('shows error on failed signup', async () => {
@@ -80,6 +95,7 @@ describe('SignUpForm', () => {
     fireEvent.change(screen.getByTestId('signup-name'), { target: { value: 'Test User' } });
     fireEvent.change(screen.getByTestId('signup-email'), { target: { value: 'test@example.com' } });
     fireEvent.change(screen.getByTestId('signup-password'), { target: { value: 'password123' } });
+    fireEvent.change(screen.getByTestId('signup-confirm-password'), { target: { value: 'password123' } });
     fireEvent.click(screen.getByTestId('signup-terms-checkbox'));
     fireEvent.click(screen.getByTestId('signup-submit'));
 

@@ -36,7 +36,7 @@ function ComplaintCard({
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmitResponse = () => {
+  const handleSubmitResponse = async () => {
     setError(null);
     const trimmed = response.trim();
     if (trimmed.length < 5) {
@@ -46,7 +46,7 @@ function ComplaintCard({
     setSubmitting(true);
     try {
       MockDB.setCurrentUser('operator');
-      Repository.updateComplaintOperatorResponse(operatorCtx, complaint.id, trimmed);
+      await Repository.updateComplaintOperatorResponse(operatorCtx, complaint.id, trimmed);
       setResponding(false);
       setResponse('');
       onUpdate();
@@ -57,11 +57,11 @@ function ComplaintCard({
     }
   };
 
-  const handleStatusChange = (newStatus: ComplaintStatus) => {
+  const handleStatusChange = async (newStatus: ComplaintStatus) => {
     setStatus(newStatus);
     try {
       MockDB.setCurrentUser('operator');
-      Repository.updateComplaintStatus(operatorCtx, complaint.id, newStatus);
+      await Repository.updateComplaintStatus(operatorCtx, complaint.id, newStatus);
       onUpdate();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update status');
@@ -182,7 +182,7 @@ export function ComplaintsInbox() {
 
   const loadComplaints = () => {
     MockDB.setCurrentUser('operator');
-    setComplaints(Repository.getComplaints(operatorCtx));
+    Repository.getComplaints(operatorCtx).then(setComplaints);
   };
 
   useEffect(() => {

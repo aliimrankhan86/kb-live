@@ -11,10 +11,6 @@ import { ComparisonTable } from '@/components/request/ComparisonTable';
 import { Dialog, OverlayContent, OverlayHeader, OverlayTitle } from '@/components/ui/Overlay';
 import PackageCard from './PackageCard';
 import { FilterOverlay, FilterState } from './FilterOverlay';
-import SortDropdown from './SortDropdown';
-import { SortOption, sortPackages } from '@/lib/sort-types';
-import { CompareState, isCompareEnabled, getCompareButtonText, getCompareAriaLabel, isCompareDisabled } from '@/lib/compare-types';
-import { getBasketCountText, getBasketCountAriaLabel } from '@/lib/basket-types';
 import styles from './packages.module.css';
 
 const SHORTLIST_STORAGE_KEY = 'kb_shortlist_packages';
@@ -24,19 +20,22 @@ export type SearchPackageDisplay = Package & { slug?: string };
 
 type SortOption = 'price-asc' | 'price-desc' | 'rating' | 'distance';
 
+
 interface PackageListProps {
   packages: SearchPackageDisplay[];
   cataloguePackages?: CataloguePackage[];
   onFilter?: () => void;
+  sortBy?: SortOption;
+  onSortChange?: (sort: SortOption) => void;
 }
 
 const PackageList: React.FC<PackageListProps> = ({
   packages,
   cataloguePackages,
   onFilter,
+  sortBy: sortByProp,
+  onSortChange,
 }) => {
-
-
   const [shortlistedPackages, setShortlistedPackages] = useState<string[]>([]);
   const [shortlistLoaded, setShortlistLoaded] = useState(false);
   const [shortlistOnly, setShortlistOnly] = useState(false);
@@ -46,7 +45,8 @@ const PackageList: React.FC<PackageListProps> = ({
   const [operatorsById, setOperatorsById] = useState<Record<string, OperatorProfile>>({});
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<FilterState | null>(null);
-  const [sortBy, setSortBy] = useState<SortOption>('price-asc');
+  const [internalSort, setInternalSort] = useState<SortOption>('price-asc');
+  const sortBy = sortByProp ?? internalSort;
   const [isSortOpen, setIsSortOpen] = useState(false);
   const sortRef = useRef<HTMLDivElement>(null);
 
@@ -165,13 +165,14 @@ const PackageList: React.FC<PackageListProps> = ({
     <div className={styles.searchContainer}>
       <header className={styles.searchHeader}>
         <div className={styles.searchResults}>
-          Found {listPackages.length} amazing packages for your journey
+          Found {listPackages.length} packages matching your criteria
         </div>
         <div className={styles.searchControls}>
           <button
             className={styles.filterButton}
             onClick={handleFilterClick}
             aria-label="Filter packages"
+            data-testid="filter-button"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
               <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46 22,3" />
@@ -211,7 +212,11 @@ const PackageList: React.FC<PackageListProps> = ({
                     aria-selected={sortBy === opt.value}
                     className={`${styles.sortOption} ${sortBy === opt.value ? styles.sortOptionActive : ''}`}
                     onClick={() => {
-                      setSortBy(opt.value);
+                      if (onSortChange) {
+                        onSortChange(opt.value);
+                      } else {
+                        setInternalSort(opt.value);
+                      }
                       setIsSortOpen(false);
                     }}
                   >
@@ -243,7 +248,12 @@ const PackageList: React.FC<PackageListProps> = ({
             data-testid="search-compare-button"
             className={styles.compareButton}
             onClick={() => {
-              if (selectedCompareIds.length >= 2) setShowComparison(true);
+              // Defer past current event tick so Radix DismissableLayer
+              // doesn't treat this button's click as an "outside" click
+              // and immediately close the dialog it just opened.
+              if (selectedCompareIds.length >= 2) {
+                setTimeout(() => setShowComparison(true), 0);
+              }
             }}
             disabled={compareDisabled}
             aria-disabled={compareDisabled}
@@ -325,11 +335,11 @@ const PackageList: React.FC<PackageListProps> = ({
         initialFilters={appliedFilters || undefined}
       />
       <Dialog open={showComparison} onOpenChange={setShowComparison}>
-        <OverlayContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+        <OverlayContent className="max-w-4xl max-h-[90vh]">
           <OverlayHeader>
             <OverlayTitle>Compare Packages</OverlayTitle>
           </OverlayHeader>
-          <div className={`mt-4 ${styles.comparisonModalBody}`}>
+          <div className={styles.comparisonModalBody}>
             <ComparisonTable rows={comparisonRows} />
           </div>
         </OverlayContent>

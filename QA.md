@@ -144,6 +144,19 @@
 - [ ] Verify no invalid rows were saved.
 - [ ] Verify customer cannot access export/import (blocked by RBAC).
 
+## 15. Claude Local Chrome SEO/AEO QA
+
+- [ ] Run with local Chrome access against `/`, `/umrah`, `/search/packages`, one published `/packages/[slug]`, one public `/operators/[slug]`, `/umrah/london`, `/umrah/birmingham`, `/umrah/manchester`, `/robots.txt`, and `/sitemap.xml`.
+- [ ] Verify rendered title, meta description, canonical, Open Graph, and robots/indexability state.
+- [ ] Verify one sensible H1 per public page and a coherent H2/H3 hierarchy.
+- [ ] Verify key comparison and trust copy is visible in rendered HTML.
+- [ ] Parse JSON-LD scripts as valid JSON and confirm schema types match visible content.
+- [ ] Confirm package/operator schema facts match page content and do not include fabricated reviews, rankings, guarantees, or unsupported trust claims.
+- [ ] Check internal links across homepage, Umrah/search/city corridors, package detail, operator profile, and quote journeys.
+- [ ] Smoke at 320px and 1280px in Chrome: no horizontal overflow, overlapping text, console errors, or hydration errors.
+- [ ] If Lighthouse/DevTools is available, record performance/accessibility/SEO blockers with route and reproduction notes.
+- [ ] Do not claim rankings, search volume, backlinks, Core Web Vitals field data, GBP performance, competitor keyword footprint, or AI citation visibility from local Chrome alone.
+
 ## Phase 1 Regression Checklist (run before Phase 2 work)
 
 Automated

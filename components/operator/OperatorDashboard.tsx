@@ -27,11 +27,11 @@ function useDashboardData() {
     const operatorId = getOperatorId();
     const ctx = { userId: operatorId, role: 'operator' as const };
 
-    const load = () => {
-      const packages = Repository.getPackagesByOperator(operatorId);
-      const allRequests = Repository.getRequests(ctx);
+    const load = async () => {
+      const packages = await Repository.getPackagesByOperator(operatorId);
+      const allRequests = await Repository.getRequests(ctx);
       const offers = MockDB.getOffers().filter((o: Offer) => o.operatorId === operatorId);
-      const bookings = Repository.getBookingIntents(ctx);
+      const bookings = await Repository.getBookingIntents(ctx);
 
       setStats({
         publishedPackages: packages.filter((p) => p.status === 'published').length,

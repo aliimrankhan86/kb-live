@@ -51,8 +51,15 @@ export function BookableButton({
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    setBookable(Repository.isOperatorBookable(operatorId));
-    setChecking(false);
+    let cancelled = false;
+    Repository.isOperatorBookable(operatorId)
+      .then((result) => {
+        if (!cancelled) setBookable(result);
+      })
+      .finally(() => {
+        if (!cancelled) setChecking(false);
+      });
+    return () => { cancelled = true; };
   }, [operatorId]);
 
   if (existingIntent) {
@@ -123,17 +130,19 @@ export function RequestDetail({ id }: { id: string }) {
   const bookingErrorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Simulate API fetch
-    const req = Repository.getRequestById(customerContext, id);
-    if (req) {
-      setRequest(req);
-      const offs = Repository.getOffersForRequest(customerContext, id);
-      setOffers(offs);
-      const ops = MockDB.getOperators();
-      setOperators(ops);
-      setBookingIntents(Repository.getBookingIntents(customerContext));
-    }
-    setLoading(false);
+    const load = async () => {
+      const req = await Repository.getRequestById(customerContext, id);
+      if (req) {
+        setRequest(req);
+        const offs = await Repository.getOffersForRequest(customerContext, id);
+        setOffers(offs);
+        const ops = MockDB.getOperators();
+        setOperators(ops);
+        setBookingIntents(await Repository.getBookingIntents(customerContext));
+      }
+      setLoading(false);
+    };
+    load();
   }, [id]);
 
   useEffect(() => {
@@ -188,7 +197,7 @@ export function RequestDetail({ id }: { id: string }) {
     }
   };
 
-  const handleBookingSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleBookingSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!activeOfferForBooking) return;
 
@@ -206,7 +215,7 @@ export function RequestDetail({ id }: { id: string }) {
 
     try {
       const submittedAt = new Date().toISOString();
-      const newIntent = Repository.createBookingIntent(customerContext, {
+      const newIntent = await Repository.createBookingIntent(customerContext, {
         offerId: activeOfferForBooking.id,
         operatorId: activeOfferForBooking.operatorId,
         notes: evidenceNotes,

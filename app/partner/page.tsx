@@ -3,8 +3,19 @@ import Link from 'next/link'
 import { Header } from '@/components/layout/Header'
 
 export const metadata: Metadata = {
-  title: 'Partner with KaabaTrip — List Your Umrah & Hajj Packages',
-  description: 'Join KaabaTrip as a verified operator. Reach thousands of UK Muslims planning Umrah and Hajj. No upfront fees, transparent commission.',
+  title: 'List Your Umrah & Hajj Packages on KaabaTrip',
+  description: 'Join KaabaTrip as a verified operator. Reach thousands of UK Muslims planning Umrah and Hajj. No upfront fees. ATOL and ABTA operators welcome.',
+  alternates: {
+    canonical: '/partner',
+  },
+  openGraph: {
+    title: 'List Your Umrah & Hajj Packages | KaabaTrip Partners',
+    description: 'Reach UK travellers planning Umrah and Hajj. Verified operators only. No upfront fees.',
+    url: 'https://kaabatrip.com/partner',
+    siteName: 'KaabaTrip',
+    type: 'website',
+    locale: 'en_GB',
+  },
 }
 
 export default function PartnerLandingPage() {

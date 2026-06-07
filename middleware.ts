@@ -11,11 +11,14 @@ const PUBLIC_PREFIXES = [
   '/search',
   '/quote',
   '/operators',
-  '/showcase',
-  '/requests',
   '/robots.txt',
   '/sitemap.xml',
   '/login',
+  '/signup',
+  '/partner',
+  '/hajj',
+  '/privacy',
+  '/terms',
 ];
 
 /**

@@ -9,12 +9,12 @@ export const metadata: Metadata = {
   description: 'Browse published Umrah and Hajj packages from trusted operators.',
 }
 
-export default function PackagesPage() {
+export default async function PackagesPage() {
   let packages: Package[] = []
   let error: string | undefined
 
   try {
-    packages = Repository.listPackages()
+    packages = await Repository.listPackages()
   } catch (err) {
     error = err instanceof Error ? err.message : 'Unable to load packages right now.'
   }

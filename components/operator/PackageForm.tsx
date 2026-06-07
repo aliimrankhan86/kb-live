@@ -23,13 +23,13 @@ export function PackageForm({ initialData, onSuccess, onCancel }: PackageFormPro
     ...initialData,
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       if (initialData && initialData.id) {
-        Repository.updatePackage(context, initialData.id, formData);
+        await Repository.updatePackage(context, initialData.id, formData);
       } else {
-        Repository.createPackage(context, formData);
+        await Repository.createPackage(context, formData);
       }
       onSuccess();
     } catch (err) {
@@ -132,9 +132,7 @@ export function PackageForm({ initialData, onSuccess, onCancel }: PackageFormPro
             onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
             className="w-full rounded border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] px-3 py-2 focus:border-[#FFD31D] focus:outline-none"
           >
-            <option value="GBP">GBP</option>
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
+            <option value="GBP">GBP (£)</option>
           </select>
         </div>
       </div>

@@ -88,13 +88,27 @@ export function PackageDetail({ pkg, operator }: PackageDetailProps) {
           {operator?.atolNumber && (
             <div className="inline-flex items-center gap-2 rounded-md border border-green-500/30 bg-green-500/10 px-3 py-1.5 text-sm">
               <span aria-hidden="true" className="text-green-400 font-bold">✓</span>
-              <span className="text-green-300">ATOL {operator.atolNumber}</span>
+              <span className="text-green-300">
+                ATOL {operator.atolNumber}
+                {operator.atolVerifiedAt ? (
+                  <span className="ml-1 text-xs text-green-400" data-testid="atol-verified-badge">(Verified by KaabaTrip)</span>
+                ) : (
+                  <span className="ml-1 text-xs text-[var(--textMuted)]" data-testid="atol-self-reported">(Self-reported)</span>
+                )}
+              </span>
             </div>
           )}
           {operator?.abtaMemberNumber && (
             <div className="inline-flex items-center gap-2 rounded-md border border-green-500/30 bg-green-500/10 px-3 py-1.5 text-sm">
               <span aria-hidden="true" className="text-green-400 font-bold">✓</span>
-              <span className="text-green-300">ABTA {operator.abtaMemberNumber}</span>
+              <span className="text-green-300">
+                ABTA {operator.abtaMemberNumber}
+                {operator.abtaVerifiedAt ? (
+                  <span className="ml-1 text-xs text-green-400" data-testid="abta-verified-badge">(Verified by KaabaTrip)</span>
+                ) : (
+                  <span className="ml-1 text-xs text-[var(--textMuted)]" data-testid="abta-self-reported">(Self-reported)</span>
+                )}
+              </span>
             </div>
           )}
           {!operator?.atolNumber && !operator?.abtaMemberNumber && (

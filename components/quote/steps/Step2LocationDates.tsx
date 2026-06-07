@@ -13,8 +13,10 @@ export function Step2LocationDates() {
         <p className="mt-1 text-sm text-[rgba(255,255,255,0.64)]">
           Which city are you flying from? (Optional)
         </p>
+        <label htmlFor="departure-city" className="sr-only">Departure city</label>
         <input
           type="text"
+          id="departure-city"
           value={draft.departureCity || ''}
           onChange={(e) => setDraft({ departureCity: e.target.value })}
           placeholder="e.g. London, Manchester"
@@ -30,11 +32,12 @@ export function Step2LocationDates() {
           </p>
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-2 block text-sm font-medium text-[rgba(255,255,255,0.8)]">
+              <label htmlFor="travel-start-date" className="mb-2 block text-sm font-medium text-[rgba(255,255,255,0.8)]">
                 Start Date
               </label>
               <input
                 type="date"
+                id="travel-start-date"
                 value={draft.dateWindow?.start || ''}
                 onChange={(e) =>
                   setDraft({
@@ -49,11 +52,12 @@ export function Step2LocationDates() {
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-[rgba(255,255,255,0.8)]">
+              <label htmlFor="travel-end-date" className="mb-2 block text-sm font-medium text-[rgba(255,255,255,0.8)]">
                 End Date
               </label>
               <input
                 type="date"
+                id="travel-end-date"
                 value={draft.dateWindow?.end || ''}
                 onChange={(e) =>
                   setDraft({

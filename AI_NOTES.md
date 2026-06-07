@@ -1,241 +1,376 @@
-# AI Notes — KaabaTrip
+# KaabaTrip — AI Working Notes
 
-Single source of truth. Ultra-dense. Archive completed work to Historical Log.
-
----
-
-## Project Status
-
-### 🎯 Current Objective
-
-Filter overlay & Umrah search form UX overhaul — consistent app styling, GBP currency, working sliders, real date picker with visible calendar icon, date validation, copy fixes (no em dashes).
+> **For any AI (Claude, Kimi, GPT, etc.) picking this up:** Read §1 (status), §2 (rules), §3 (architecture). Everything else is reference. Build must stay at 0 errors, 0 warnings, tests at 222/222.
 
 ---
 
-## ✅ DONE (this session)
+## §1 — Current Status
 
-| Task                                | Status | Evidence                                                                          |
-| ----------------------------------- | ------ | --------------------------------------------------------------------------------- |
-| Commit all work to `main`           | ✅     | `6ed2f5d` on GitHub                                                               |
-| Create `current-branch` from `main` | ✅     | `git checkout -b current-branch`                                                  |
-| Calendar icon on date inputs        | ✅     | `components/umrah/UmrahSearchForm.tsx` - clickable SVG wrapper, `showPicker()`    |
-| Date validation                     | ✅     | Departure not past, return after departure, 7-60 day range, `role="alert"` errors |
-| Em dashes removed                   | ✅     | All `\u2013` replaced with `-` in labels, budget, child ages                      |
-| Update README.md                    | ✅     | Comprehensive project overview, tech stack, features, roadmap                     |
-| Push `main` to GitHub               | ✅     | `ddc7f87..6ed2f5d`                                                                |
-| Push `current-branch` to GitHub     | ✅     | New branch created on remote                                                      |
-| Delete extra branches               | ✅     | 16 old branches removed, only `main` + `current-branch` remain                    |
+**Date:** 2026-06-07 | **Branch:** `dev` | **Build:** ✅ 0 errors, 0 warnings | **Tests:** ✅ 222/222 unit | **E2E:** ✅ 19/21 chromium pass (2 skipped, 0 fail) | **Git:** ✅ pushed — `6459e14` (overlay consistency + Prisma config)
 
-## 🔄 PENDING (next session)
+### 🔄 Active work (highest → lowest priority)
 
-| #   | Priority | Task                                        | Why                                                                                                                       | Files                                                                      | Effort |
-| --- | -------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ------ |
-| 1   | **P0**   | Wire Repository → `getDataSource()` cutover | Production DB is built but completely unused. Hardcoded MockDB = no real data persistence.                                | `lib/api/repository.ts`, `lib/config.ts`                                   | Medium |
-| 2   | **P0**   | Add tests for new components                | `/api/interest`, `InclusionChipList`, `VerifiedBadge` have zero test coverage. AGENTS.md mandates tests pass before push. | `tests/interest.test.ts`, `tests/ui-components.test.tsx`                   | Medium |
-| 3   | **P1**   | GDPR data export endpoint                   | UK/EU legal requirement. Customer can download all their data.                                                            | `app/api/user/export/route.ts`, `app/settings/page.tsx`                    | Medium |
-| 4   | **P1**   | GDPR account deletion                       | UK/EU legal requirement. Customer can permanently delete account + data.                                                  | `app/api/user/delete/route.ts`, `app/settings/delete-account/page.tsx`     | Medium |
-| 5   | **P1**   | ABTA/ATOL real-time verification API        | Current badges show self-reported numbers only. Integrate ATOL search API for real verification.                          | `lib/api/verify-atol.ts`, `components/operators/OperatorProfileDetail.tsx` | High   |
-| 6   | **P2**   | Multi-currency UI selector                  | Currency auto-detected by IP. Users cannot override. Add dropdown in Header or settings.                                  | `components/layout/Header.tsx`, `lib/i18n/region.ts`                       | Medium |
-| 7   | **P2**   | `/kanban` route audit                       | Referenced in `QA.md` but no file at `app/kanban/page.tsx`. Either implement or remove from QA.                           | `app/kanban/page.tsx` or `QA.md`                                           | Low    |
+| #          | Task                                                         | Status                                                                                                                                     | Files                                                                              |
+| ---------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| T8         | 8-step PackageWizard (replace flat PackageForm)              | ✅ COMPLETE — wired, tested, building                                                                                                      | `components/operator/wizard/*.tsx` (8 steps + PackageWizard.tsx)                   |
+| T11        | PackageCard shows operator name + verified badge + hotels    | ✅ COMPLETE — public cards enhanced                                                                                                        | `components/search/PackageCard.tsx`, `PackageList.tsx`                             |
+| T12        | Enhanced operator public profile (ATOL/ABTA/regions/JSON-LD) | ✅ COMPLETE — profile + schema live                                                                                                        | `components/operators/OperatorProfileDetail.tsx`, `app/operators/[slug]/page.tsx`  |
+| T13        | SEO structured-data helper consolidation                     | ✅ COMPLETE — `/requests/[id]` uses `breadcrumbJsonLd` from `lib/seo/json-ld.ts`; `buildBreadcrumbJsonLd` removed from `Breadcrumb.tsx`    | `lib/seo/json-ld.ts`, `app/requests/[id]/page.tsx`, `components/ui/Breadcrumb.tsx` |
+| T14        | Validation utility functions                                 | ✅ COMPLETE — 7 reusable validators + 39 tests, all passing                                                                                | `lib/validation.ts`, `tests/validation.test.ts`                                    |
+| T15        | Unit tests: wizard full integration                          | ✅ COMPLETE (47/47 pass, part of T8)                                                                                                       | `tests/operator-wizard.test.tsx`                                                   |
+| T16        | E2E: onboarding → packages → dashboard                       | ✅ COMPLETE — `__e2e_user` cookie bypass implemented in middleware + session.ts; `E2E_TESTING=1` env var forwarded to Edge Runtime via `next.config.ts`; MockDB forced in production builds; all 10 operator tests now pass | `e2e/operator.spec.ts`, `e2e/helpers/auth.ts`, `lib/supabase/middleware.ts`, `lib/auth/session.ts`, `lib/config.ts`, `next.config.ts`, `playwright.config.ts` |
+| T17        | Final smoke + integration check                              | ✅ COMPLETE — 222/222 unit tests; 19/21 chromium E2E pass (2 skipped, 0 failures); build 0 errors 0 warnings                              | —                                                                                  |
+| OP-PERSIST | Operator package persistence wiring                          | ✅ COMPLETE — GET/DELETE added to `/api/operator/packages/route.ts`; page fetches on load, wires POST/PATCH/DELETE; loading + error states | `/operator/packages`, `app/api/operator/packages/route.ts`                         |
+| T18        | Chrome SEO/AEO QA                                            | ✅ DONE (server-side curl audit) — fixed robots.txt missing /admin+/settings, fixed duplicate title suffix on 8 pages, removed console.error from route, removed unused `request` param warning | `app/robots.ts`, 8 page files, `app/packages/[slug]/page.tsx`, `app/api/operator/packages/route.ts` |
+| T19        | SEO/AEO content expansion (seo-aeo-best-practices skill)     | ✅ DONE — AI crawler rules in robots.txt; `personJsonLd`, `touristTripJsonLd`, `dateModified` in json-ld.ts; TouristTrip wired to packages page; cost FAQ on /umrah; corridor links on homepage; /umrah/ramadan full expansion; /umrah/cost new pricing guide page | `app/robots.ts`, `lib/seo/json-ld.ts`, `app/page.tsx`, `app/umrah/page.tsx`, `app/umrah/ramadan/page.tsx`, `app/umrah/cost/page.tsx`, `app/packages/[slug]/page.tsx`, `app/sitemap.ts` |
 
 ---
 
-## Completed Checklist (P0–P2)
+## §9 — What's Left To Do (Next AI Handoff)
 
-#### P0 — Critical ✅
+These items are **intentionally not yet done** and must be picked up by the next session:
 
-- [x] `/api/interest` POST endpoint (manual validation, 201/400/500)
-- [x] Wire Hajj form (`app/hajj/page.tsx`) to endpoint (fetch + loading + toast)
+| #   | Task                               | Why pending                                                                                                                                          | What the next agent needs to do                                                                                                                                                                                                                                            |
+| --- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **T18 — SEO/AEO QA**               | ✅ DONE 2026-06-06 (server-side curl audit). Fixed: robots.txt missing /admin & /settings; 8 page titles doubled `\| KaabaTrip` via template; `console.error` in route; unused `_request` param lint warning. | — |
+| 2   | **T16 RE-ENABLE — Operator E2E**   | ✅ DONE 2026-06-06 — `__e2e_user` cookie bypass (two-level: middleware.ts + session.ts), `E2E_TESTING=1` env var forwarded to Edge via `next.config.ts`; MockDB forced in production builds via `getDataSource()`. All 10 operator tests now pass. | — |
+| 3   | **E2E auth infrastructure**        | ✅ DONE 2026-06-06 — `e2e/helpers/auth.ts` created with `TEST_USERS` + `setTestUser`/`clearTestUser`. All affected specs (`operator`, `bank-payment`, `flow`, `catalogue`) updated. 19/21 chromium tests pass, 0 fail. | — |
+| 8   | **Master Audit (Security/A11y/Perf/Quality)** | ✅ DONE 2026-06-06 — Security: rate limit added to `/api/interest`, brace-expansion vuln patched, all auth endpoints return minimal data, admin never in public schemas, CSP headers configured. A11y: `<main>` landmark for skip link, label/htmlFor bindings on 3 inputs in Step2. Perf: no `next/dynamic` code-split needed (only 5 framer-motion uses, optimizePackageImports configured). Code quality: 0 `any`, 0 `console.log`, 222/222 tests, 0 build errors/warnings. Remaining: 5 moderate npm vulns (PostCSS in Next.js internals — not actionable without breaking Next; Prisma dev dep — dev only). | — |
+| 4   | **Rate limiter production switch** | `lib/rate-limit.ts` uses an in-memory `Map` fallback when `UPSTASH_REDIS_REST_URL` is missing. This resets on every cold start on Vercel/Lambda.     | **INFRA TASK:** Add `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` to production env. Verify the Upstash path is hit in staging.                                                                                                                                  |
+| 5   | **Prisma cutover end-to-end**      | `FEATURE_USE_REAL_DB=true` is set in `.env.local`. Real Supabase project wired (`nzvepuzzxjoxvpcrlozx`). `prisma.config.ts` loads `.env.local` via dotenv and spreads `directUrl` for DDL. `db push` in progress — may need `npx prisma db push` to complete (was hanging on pgBouncer before directUrl fix). Once schema is pushed, run `npx prisma db seed` then verify. | **INFRA TASK (IN PROGRESS):** Confirm `npx prisma db push` completes cleanly. Then `npx prisma db seed`. Then smoke-test the app with `FEATURE_USE_REAL_DB=true`. Fix any RLS/adapter issues. |
+| 6   | **Console.log audit**              | ✅ DONE 2026-06-06 — `grep -rn "console\." components/ app/` found only `error.tsx`, `global-error.tsx` (error boundaries, allowed), and one route `console.error` that was removed. | — |
+| 7   | **SEO/AEO content expansion (T19)** | ✅ DONE 2026-06-06 — AI crawlers in robots.txt; `personJsonLd`, `touristTripJsonLd`, `dateModified` in json-ld.ts; TouristTrip on package pages; cost FAQ on /umrah; corridor links on homepage; /umrah/ramadan full expansion; /umrah/cost new page; sitemap updated. | See T19 row in §1 |
 
-#### P1 — High Priority ✅
+**Branch state:** `dev` pushed — latest commit `6459e14` (overlay consistency + Prisma config). All changes pushed to remote.
 
-- [x] PackageDetail: add operator inclusion chips (`pkg.inclusions.*`)
-- [x] PackageDetail: sticky CTA bar on mobile (price + Request Quote)
-- [x] Operator public page: ATOL/ABTA badge display
+### 2026-06-07 session changes
 
-#### P2 — Medium Priority ✅
+| What | Files | Commit |
+|---|---|---|
+| Overlay restructure: close button moved into `OverlayHeader` flex row (title left / X right) — fixes Compare modal close at bottom-right | `components/ui/Overlay.tsx` | `6459e14` |
+| New `OverlayBody` component (`flex-1 overflow-y-auto p-5`) for correct scroll regions | `components/ui/Overlay.tsx` | `6459e14` |
+| `OverlayFooter` now has `border-t` and `flex-shrink-0` | `components/ui/Overlay.tsx` | `6459e14` |
+| RangeSlider active track: `#4A9EFF` (blue) → `var(--yellow)` | `components/ui/RangeSlider.module.css` | `6459e14` |
+| LoginModal: title white→yellow, close button `×`→SVG X, border/shadow/radius use design tokens | `components/auth/LoginModal.tsx`, `LoginModal.module.css` | `6459e14` |
+| PhoneOtpModal: body wrapped in `OverlayBody` | `components/operator/PhoneOtpModal.tsx` | `6459e14` |
+| Compare dialog: removed redundant `overflow-hidden flex flex-col` override | `components/search/PackageList.tsx` | `6459e14` |
+| `prisma.config.ts`: load `.env.local` via dotenv; spread `directUrl` for DDL (bypasses pgBouncer) | `prisma.config.ts` | `6459e14` |
 
-- [x] Extract shared UI: `VerifiedBadge`, `InclusionChip`, `InclusionChipList` → `components/ui/`
-- [x] Refactor `PackageCard` → shared `VerifiedBadge` + `InclusionChip`
-- [x] Refactor `PackageDetail` → shared `InclusionChipList`
-- [x] Sort dropdown: close on outside click (`useRef` + `mousedown`)
-- [x] FilterOverlay: hotel star filter (already existed, wired)
-- [x] FilterOverlay: distance filter (already existed, wired)
+### Current Codex task handoff note (2026-06-06)
 
----
+User asked Codex to complete all pending tasks except T18 to a high quality level. If work stops mid-task, continue from this note:
 
-## Architecture — Data Layer (CRITICAL NOTE)
+1. Finish T13 by moving `/requests/[id]` breadcrumb JSON-LD to the shared `lib/seo/json-ld.ts` helper.
+2. Finish T14 by implementing reusable validation helpers and focused tests.
+3. Fix T16 operator E2E route/auth setup, then run the operator E2E spec.
+4. Wire `/operator/packages` wizard-created package persistence through existing repository/API paths where possible.
+5. Run `npm run test`, `npm run build`, and required smoke/E2E checks.
+6. Update `AI_NOTES.md`, `docs/NOW.md`, and `docs/EXECUTION_QUEUE.md` with exact results and any remaining impossibilities.
 
-### Dual Data Strategy: MockDB vs Supabase/Prisma
+### ✅ Completed in this session (uncommitted on `dev`)
 
-| Component               | Purpose                                                     | Status                               |
-| ----------------------- | ----------------------------------------------------------- | ------------------------------------ |
-| `lib/api/mock-db.ts`    | In-memory store via `localStorage`. Seed data. Zero config. | **ACTIVE** — hardcoded in Repository |
-| `lib/api/db/prisma.ts`  | Prisma client singleton                                     | Configured, not wired                |
-| `lib/api/db/adapter.ts` | Prisma → App type mappers (544 lines)                       | Built, not wired                     |
-| `lib/config.ts`         | `getDataSource()` returns `'prisma'` or `'mockdb'` per env  | Built, not used                      |
-| `lib/api/repository.ts` | All data operations                                         | **Hardcoded to MockDB**              |
+| Task     | What                                                                                                                     | Files                                                                                                                                                       |
+| -------- | ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| P0 BUG   | `filterByParams` in `'use client'` file crashed `/search/packages` server-side                                           | Extracted to `components/search/search-utils.ts` (no `'use client'`)                                                                                        |
+| P0 BUG   | Signup 500 ISE — corrupted import `mentimport` in `lib/auth/api.ts`                                                      | Fixed to proper `import`                                                                                                                                    |
+| P0       | All 84 Repository methods made async + callers await-ed                                                                  | `lib/api/repository.ts` + all consumers                                                                                                                     |
+| P0       | AppError typed errors + `mapErrorToResponse` — no raw `err.message` exposure                                             | `lib/errors.ts`                                                                                                                                             |
+| P0.2     | Upstash Redis rate limiter (in-memory dev fallback)                                                                      | `lib/rate-limit.ts`                                                                                                                                         |
+| P0.3–4   | GDPR export + deletion (Art. 20 + Art. 17)                                                                               | `app/api/user/export/route.ts`, `app/api/user/delete/route.ts`                                                                                              |
+| P1.5     | `/search/packages` → Server Component for SEO                                                                            | `app/search/packages/page.tsx` + `SearchPackagesClient.tsx`                                                                                                 |
+| P1.6     | JSON-LD: TravelAgency, Product+Offer, ItemList, BreadcrumbList, Organization, WebSite                                    | `lib/seo/json-ld.ts`, layout, package detail, search                                                                                                        |
+| SEO/AEO  | Beyond SEO remediation: homepage/Umrah/search/package/operator metadata, FAQ/WebPage graphs, entity/reputation-safe copy | `app/page.tsx`, `app/umrah/page.tsx`, `app/search/packages/page.tsx`, `app/packages/[slug]/page.tsx`, `app/operators/[slug]/page.tsx`, `lib/seo/json-ld.ts` |
+| P1.7–8   | Tests: auth API + interest API + UI components                                                                           | `tests/auth-api.test.ts`, `tests/interest-api.test.ts`, `tests/ui-components.test.tsx`                                                                      |
+| P1.9     | ATOL/ABTA admin verification endpoint                                                                                    | `app/api/admin/verify-operator/route.ts`                                                                                                                    |
+| P2.10–15 | OG locale, dead code removal, og:image, sort URL persistence, breadcrumbs, RBAC AppError                                 | Multiple files                                                                                                                                              |
+| AUDIT    | 14+ ESLint warnings cleared                                                                                              | `eslint.config.mjs` + multiple files                                                                                                                        |
+| SECURITY | CSP headers: X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, HSTS                          | `next.config.ts`                                                                                                                                            |
+| AUTH     | Auth endpoints return minimal data only (`{user: {id, email, role, name}}`)                                              | `app/api/auth/sign-in/route.ts`, `sign-up/route.ts`                                                                                                         |
+| RBAC     | `requireOperatorOwnerOrAdmin` helper; admin role never in public schemas                                                 | `lib/api/repository.ts`, `lib/validation.ts`                                                                                                                |
 
-### The Cutover Gap
+### 🏗️ New files created (untracked → now tracked)
 
-`Repository` imports `MockDB` directly and uses it for **all** reads/writes. The `getDataSource()` cutover mechanism exists but is **not wired**. To switch to production DB:
-
-1. Refactor `Repository` to branch on `getDataSource()`
-2. Route `'prisma'` calls through `lib/api/db/adapter.ts`
-3. Route `'mockdb'` calls to existing `MockDB`
-
-### Why Both Exist (by design)
-
-| Concern         | MockDB                           | Supabase + Prisma             |
-| --------------- | -------------------------------- | ----------------------------- |
-| Dev speed       | ✅ Zero setup, instant           | Needs env vars, DB connection |
-| Tests           | ✅ Deterministic, fast, isolated | Requires test DB + cleanup    |
-| Production      | ❌ localStorage, no auth         | ✅ RLS, real auth, real data  |
-| Team onboarding | ✅ Clone → `npm run dev`         | Needs Supabase project + env  |
-
-**Verdict:** Dual strategy is correct. The gap is that `Repository` has not been wired to the cutover switch. This is intentional for MVP phase — MockDB enables rapid iteration. Production cutover is a future migration task.
-
----
-
-## Shared UI Components (`components/ui/`)
-
-| Component           | Props                               | Used by       |
-| ------------------- | ----------------------------------- | ------------- |
-| `VerifiedBadge`     | `className?: string`                | PackageCard   |
-| `InclusionChip`     | `chip: { label, included }`         | PackageCard   |
-| `InclusionChipList` | `chips[], className?, data-testid?` | PackageDetail |
-
----
-
-## Configuration Mapping
-
-| Route                | Purpose                       | Status |
-| -------------------- | ----------------------------- | ------ |
-| `/`                  | Landing — Hero + trust bar    | Live   |
-| `/umrah`             | Search form — 4-step          | Live   |
-| `/hajj`              | Interest capture              | Live   |
-| `/search/packages`   | Results — sort/filter/compare | Live   |
-| `/packages/[slug]`   | Package detail                | Live   |
-| `/quote`             | Quote wizard                  | Live   |
-| `/requests/[id]`     | Request tracker               | Live   |
-| `/operator/*`        | Operator dashboard            | Live   |
-| `/admin/*`           | Admin tools                   | Live   |
-| `/login`, `/signup`  | Auth                          | Live   |
-| `/privacy`, `/terms` | UK compliance                 | Live   |
-
-### Third-Party APIs
-
-| Service              | Use                       | Env Key                      | Status     |
-| -------------------- | ------------------------- | ---------------------------- | ---------- |
-| Supabase (eu-west-2) | Auth + DB + Storage       | `NEXT_PUBLIC_SUPABASE_URL`   | Configured |
-| Prisma               | ORM + migrations          | `DATABASE_URL`, `DIRECT_URL` | Configured |
-| Google Analytics     | Analytics (consent-gated) | `NEXT_PUBLIC_GA_ID`          | Pending    |
-
-### Data Source
-
-- Production: Prisma → Supabase PostgreSQL (RLS enforced)
-- Test: MockDB (`lib/api/mock-db.ts`)
-- Cutover: `getDataSource()` in `lib/config.ts`
+| File                                         | Purpose                                                                      |
+| -------------------------------------------- | ---------------------------------------------------------------------------- |
+| `components/search/SearchPackagesClient.tsx` | Client-side search interactivity (sort, filters) inside Server Component     |
+| `components/search/search-utils.ts`          | `filterByParams`, `toSearchDisplay` — server+client safe (no `'use client'`) |
+| `components/ui/Breadcrumb.tsx`               | `<Breadcrumb items>` + `buildBreadcrumbJsonLd()`                             |
+| `lib/errors.ts`                              | `AppError`, `ErrorCode`, `mapErrorToResponse`                                |
+| `lib/rate-limit.ts`                          | Upstash Redis sliding window (5 req / 15 min). In-memory fallback for dev.   |
+| `lib/supabase/service-role.ts`               | Admin Supabase client for account deletion                                   |
+| `lib/validation.ts`                          | All Zod schemas: `signUpSchema`, `signInSchema`, `interestSchema`            |
+| `app/api/admin/verify-operator/route.ts`     | ATOL/ABTA admin verification                                                 |
+| `app/api/operator/packages/route.ts`         | Operator package CRUD API                                                    |
+| `app/api/user/export/route.ts`               | GDPR Art. 20 data export                                                     |
+| `app/api/user/delete/route.ts`               | GDPR Art. 17 erasure                                                         |
+| `app/settings/page.tsx`                      | User-facing GDPR settings (download + delete)                                |
+| `components/operator/wizard/*.tsx`           | 8-step PackageWizard (T8, complete)                                          |
 
 ---
 
-## Historical Log
+## §2 — Non-Negotiable Rules (Enforced Every Session)
 
-### 2026-06-05 — Session: Calendar Icon, Date Validation, Copy Fixes
+These rules exist because violations caused actual audit findings. Do not break them.
 
-- **Visible calendar icon**: Each date field has clickable wrapper with SVG calendar icon (`var(--yellow)`). Native browser icon hidden via CSS. Icon triggers `showPicker()` on click/tap/Enter/Space. Keyboard-accessible (`tabIndex={0}`, `role="button"`, Enter/Space handlers).
-- **Date validation**: Client-side validation on form submit: departure cannot be past, return must be after departure, minimum 7 days (Umrah), maximum 60 days. Errors rendered with `role="alert"` and `data-testid`.
-- **Copy fix**: All em dashes (`\u2013`) replaced with regular hyphens (`-`) in quick-select labels, budget display, child age options to avoid AI-generated appearance.
-- **Branch**: `current-branch` created from `main` after committing all prior work. `main` remains safe backup.
-- **Build**: 0 errors | **Tests**: 95/95 | **tsc**: 0 errors
+### 2.1 Client/Server boundary
 
-### 2026-06-05 —
+- `'use client'` file = component only. **Never export pure utility functions from a `'use client'` file.**
+- If a function is needed by both server and client: put it in a `.ts` file WITHOUT `'use client'`. Example: `search-utils.ts`.
+- Server Components may render Client Components as JSX. They CANNOT call their exported functions.
 
-- **All filter CSS modules**: unified `trackWrapper`/`track`/`activeTrack`/`rangeInput` pattern, `pointer-events: none` on inputs + `pointer-events: auto` on thumbs, `focus-visible` for a11y, mobile-first responsive queries
-- **Build**: 0 errors, 0 warnings | **Tests**: 95/95 pass | **tsc**: 0 errors
-- **Environment**: Created `.env.local` with placeholder Supabase URLs (dev-localhost pattern) to eliminate `Missing Supabase environment variables` error in dev server. `FEATURE_USE_REAL_DB=false` ensures MockDB remains active.
+### 2.2 Async/await discipline
 
-### 2026-06-05 — Session: Environment fix (supplementary)
+- ALL `Repository.*` calls MUST be `await`-ed — every method is async.
+- `params` and `searchParams` in Next.js 15 server components are Promises — `await` them before `.slug`, `.id`, etc.
 
-- Created `.env.local` with placeholder Supabase configuration matching `env.example` pattern: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `DATABASE_URL`, `DIRECT_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `FEATURE_USE_REAL_DB=false`
-- This suppresses the `Missing Supabase environment variables` error that was appearing in dev server logs (not a 500, but terminal noise)
-- No functional change — MockDB remains the active data source per `FEATURE_USE_REAL_DB=false`
+### 2.3 Security (HARD rules)
 
-### 2026-06-05 — Session: .clinerules v1.1 + Partner Journey + Hygiene
+- `'admin'` role MUST NOT appear in public Zod schemas, `VALID_ROLES` arrays, or client-rendered form options.
+- Auth endpoints return ONLY `{ user: { id, email, role, name } }` — never session object, JWT, or refresh token.
+- No `eval()`, `__non_webpack_require__`, or webpack globals. Dynamic server-only modules: `await import(/* webpackIgnore: true */ 'path')`.
+- In-memory rate limiters are **not** acceptable in production serverless. Upstash Redis required.
 
-- `.clinerules`: Added Section 10 — "🇬🇧 UK Localisation & UX Polish" (currency formatting: £/GBP only; British English spelling; "5 stars" with visual anchor)
-- Dead CSS removal: `packages.module.css` — removed 4 unused class blocks (`.verifiedBadge`, `.inclusionChip`, `.inclusionChipIncluded`, `.inclusionChipExcluded`) after shared component extraction
-- Hajj deduplication: `app/api/interest/route.ts` — server-side case-insensitive email+type dedupe via `MockDB.getInterests()`, returns 200 for duplicates, 201 for new
-- Partner landing page: Created `app/partner/page.tsx` — conversion-focused marketing page with hero, value props, how-it-works steps, UK compliance trust section, dual CTAs
-- Header: "For Partners" nav link now routes to `/partner` (was `/operator/onboarding`)
-- SEO: `docs/SEO.md` updated with `/partner` route meta tags
-- Build: 0 errors | Tests: 95/95
+### 2.4 Error handling
 
-### 2026-06-05 — P0 + P1 + P2 Complete (All High Priority Tasks)
+- API routes use `mapErrorToResponse(err)` from `lib/errors.ts` — never `err.message` directly.
+- RBAC helpers throw `AppError({ code: 'FORBIDDEN', status: 403 })` — not plain `Error`.
 
-- `/api/interest` POST endpoint: manual validation (email regex, type enum), 201/400/500 responses, dedupe header
-- MockDB: added `INTERESTS` storage key + `getInterests`/`saveInterest` methods
-- Hajj form: client-side fetch with loading state, success/error toast, `crypto.randomUUID()` dedupe, `aria-live` announcements
-- PackageDetail: inclusion chips (Visa/Flights/Transfers/Meals) with green/grey colour coding
-- PackageDetail: sticky mobile CTA bar (fixed bottom, price + Request Quote, hidden on md+)
-- OperatorProfileDetail: ATOL/ABTA badges with green alert styling, missing protection warning
-- Shared UI: `VerifiedBadge`, `InclusionChip`, `InclusionChipList` in `components/ui/`
-- Refactored: `PackageCard` → shared components, `PackageDetail` → `InclusionChipList`
-- Sort dropdown: closes on outside click via `useRef` + `mousedown` listener
-- FilterOverlay: hotel star + distance filters already wired and functional
-- Build: 0 errors | Tests: 95/95
+### 2.5 Code quality
 
-### 2026-06-05 — UX & IA Overhaul + `.clinerules`
+- No `console.log` or `console.warn` in production components/routes. Exceptions: error boundaries (`console.error`), supabase client missing-env warning (intentional dev guidance).
+- TypeScript strict — no `any`.
+- Zod validation before every DB/API call.
 
-- Hero: trust bar, value prop, disabled Hajj CTA
-- Hajj page: interest capture form
-- PackageCard: operator header, verified badge, ATOL, inclusion chips
-- PackageList: sort dropdown, empty state
-- Header: Umrah + Hajj nav
-- Umrah search: 4-step progressive disclosure, child stepper (age 0–11 dropdown), dropdown selects
-- Background: subdued Kaaba SVG overlay, trust bar opaque
-- PackageDetail: back button (router.back + fallback)
-- `.clinerules` created (9 sections)
+### 2.6 SEO
 
-### 2026-06-04 — Phase 1 Persistence (P1A–P1H)
+- Search pages must be Server Components (not `'use client'`). Interactive parts go in a child `<Suspense>` wrapper.
+- JSON-LD scripts on every significant page. Prefer `lib/seo/json-ld.ts` helpers and `graphJsonLd()` over inline/component-local builders.
+- AEO/GEO copy must be source-backed, concise, and visible when backed by `FAQPage` schema.
+- Reputation/trust copy must only use stored facts. Do not claim "best", "cheapest", "guaranteed", "price match", fake reviews, or unsupported rankings.
+- `searchParams` passed through server-side so initial HTML has real data.
 
-- Supabase SSR client, Prisma schema, DB adapter, auth middleware, RLS, storage, seed, cutover
+### 2.7 Claude local Chrome SEO QA brief
 
-### 2026-06-03 — UK/EU Compliance
+When Claude or another browser-capable agent has local Chrome access, run this as a follow-up technical SEO/AEO audit.
 
-- Cookie consent, Privacy Policy, Terms, Footer, marketing consent schema, GDPR
+**Mode:** Local Chrome / rendered-page audit. This validates implementation quality, not live ranking data.
 
-### 2026-06-02 — Phase 3 Operator Surfaces
+**Routes to check first:**
 
-- Registration, verification, dashboard, leads, profile, settings, sidebar
+- `/`
+- `/umrah`
+- `/search/packages`
+- `/packages/[slug]` using a published package slug from MockDB/repository data
+- `/operators/[slug]` using a public operator slug
+- `/umrah/london`, `/umrah/birmingham`, `/umrah/manchester`
+- `/robots.txt`, `/sitemap.xml`
 
-### 2026-06-01 — Auth + Booking Flow
+**Chrome checks:**
 
-- Login/signup, Supabase auth, quote wizard, request tracker, payment instructions
+- Rendered title, meta description, canonical, Open Graph, and robots/indexability state.
+- Exactly one sensible H1 per public page; H2/H3 hierarchy supports the page intent.
+- Key comparison copy is visible in rendered HTML, not hidden behind client-only state.
+- JSON-LD scripts exist, parse as valid JSON, and use page-appropriate schema types.
+- Package/operator facts in schema match visible page content; no fabricated reviews, ratings, rankings, or guarantees.
+- Internal links support search journeys: homepage → Umrah/search/corridors, search → package detail, package detail → operator/quote where available.
+- Mobile and desktop Chrome smoke at 320px and 1280px: no horizontal overflow, visible CTA, no overlapping text, no console/hydration errors.
+- Basic asset checks: logo/images load, meaningful alt text where images are visible.
+- If Lighthouse/DevTools is available, capture performance/accessibility/SEO signals and note blockers only when reproducible.
+
+**If defects are found:**
+
+- Make small, scoped fixes in the allowed public SEO/UI files.
+- Update `docs/NOW.md` with what changed and what remains unverified.
+- Run `npm run test`, `npm run build`, and repeat Chrome smoke for affected public routes.
+
+**Do not claim from local Chrome alone:**
+
+- Google rankings, search volume, backlink count/authority, Core Web Vitals field data, Google Business Profile performance, competitor keyword footprint, or AI Overview/Gemini/Perplexity citation visibility.
 
 ---
 
-## Quick Reference
+## §3 — Architecture
 
 ### Stack
 
-Next.js 15.5.4 (App Router) · React 19 · TypeScript (strict, no `any`) · Tailwind CSS · Supabase + Prisma · Vitest 4.1.8
+Next.js 15.5.19 (App Router) · React 19 · TypeScript strict · Tailwind CSS v4 · Supabase + Prisma ORM · Vitest 4.1.8
 
-### Conventions
+### Data layer
 
-- Server Components default; `'use client'` only at leaf nodes
-- URL = source of truth for global state (`searchParams`)
-- Data access via `Repository` with `RequestContext`
-- `data-testid` on every interactive element
-- Mobile-first: 320px → 768px → 1024px → 1280px
-- Zod validation before DB/API calls
-- No client-side secrets
+| Layer      | File                       | Purpose                                                                 |
+| ---------- | -------------------------- | ----------------------------------------------------------------------- |
+| Repository | `lib/api/repository.ts`    | All data operations (84 async methods). Use `store()` internally.       |
+| store()    | `lib/api/repository.ts:76` | Returns mockStore or Prisma proxy based on `getDataSource()`            |
+| MockDB     | `lib/api/mock-db.ts`       | In-memory localStorage store. Active in dev + tests.                    |
+| DBAdapter  | `lib/api/db/adapter.ts`    | Prisma → App type mappers (built, wired via `store()` proxy)            |
+| Config     | `lib/config.ts`            | `getDataSource()` → `'prisma'` (FEATURE_USE_REAL_DB=true) or `'mockdb'` |
 
-### Commands
+**Dev default:** MockDB. Prisma only when `FEATURE_USE_REAL_DB=true`.
+
+### Key files
+
+| File                                | What                                                                                                               |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `middleware.ts`                     | Auth guard. Public prefixes, operator/admin RBAC.                                                                  |
+| `lib/validation.ts`                 | All Zod schemas: `signUpSchema`, `signInSchema`, `interestSchema`                                                  |
+| `lib/errors.ts`                     | `AppError`, `ErrorCode`, `mapErrorToResponse`                                                                      |
+| `lib/rate-limit.ts`                 | Upstash Redis sliding window (5 req / 15 min). In-memory fallback for dev.                                         |
+| `lib/supabase/service-role.ts`      | Admin Supabase client for account deletion                                                                         |
+| `lib/seo/json-ld.ts`                | Shared Product, TravelAgency, ItemList, BreadcrumbList, Organization, WebSite, WebPage, FAQPage, TouristTrip, Person, and graph helpers |
+| `components/search/search-utils.ts` | `filterByParams`, `toSearchDisplay` — server+client safe (no `'use client'`)                                       |
+| `components/ui/Breadcrumb.tsx`      | `<Breadcrumb items>` — JSON-LD helper removed (use `lib/seo/json-ld.ts`)                                           |
+
+### Route map
+
+| Route                        | Type           | Notes                                               |
+| ---------------------------- | -------------- | --------------------------------------------------- |
+| `/`                          | Server         | Landing                                             |
+| `/umrah`                     | Server         | 4-step search form (client component inside)        |
+| `/hajj`                      | Server         | Hajj interest capture (server component + HajjInterestForm client child) |
+| `/umrah/cost`                | Server         | Pricing guide — 4 tiers, seasonal pricing, FAQs, JSON-LD |
+| `/search/packages`           | Server         | SSR packages + `<SearchPackagesClient>` in Suspense |
+| `/packages/[slug]`           | Server         | Package detail + JSON-LD                            |
+| `/operators/[slug]`          | Server         | Operator profile                                    |
+| `/requests/[id]`             | Server         | Request tracker                                     |
+| `/settings`                  | Client         | GDPR: download data + delete account                |
+| `/operator/*`                | Client         | Dashboard, packages, profile (role-gated)           |
+| `/admin/*`                   | Client         | Bank changes, complaints triage (admin-only)        |
+| `/api/auth/*`                | Route handlers | sign-up, sign-in, sign-out, me                      |
+| `/api/user/export`           | POST           | GDPR Art. 20 data export                            |
+| `/api/user/delete`           | DELETE         | GDPR Art. 17 erasure                                |
+| `/api/admin/verify-operator` | POST           | ATOL/ABTA admin verification                        |
+| `/api/interest`              | POST           | Hajj/Umrah interest capture                         |
+
+---
+
+## §4 — Shared Components
+
+| Component           | Props                                           | Used by                                                         |
+| ------------------- | ----------------------------------------------- | --------------------------------------------------------------- |
+| `VerifiedBadge`     | `className?`                                    | PackageCard                                                     |
+| `InclusionChip`     | `chip: { label, included }`                     | PackageCard                                                     |
+| `InclusionChipList` | `chips[], className?, data-testid?`             | PackageDetail                                                   |
+| `Breadcrumb`        | `items: BreadcrumbItem[], className?`           | packages/[slug], operators/[slug], requests/[id]                |
+| `RangeSlider`       | `min, max, value, onChange, aria-label-min/max` | BudgetFilter, DistanceFilter, TimePeriodFilter, UmrahSearchForm |
+
+### Overlay system (`components/ui/Overlay.tsx`)
+
+All modals/dialogs must use this system. Do **not** create custom `position: fixed` dialogs.
+
+```
+OverlayContent          — Radix Portal wrapper. flex-col overflow-hidden. No padding.
+  OverlayHeader         — ALWAYS first child. flex row: title content left, close ✕ right.
+                          Has px-5 py-4 + border-b. Close button built-in (no prop needed).
+  OverlayBody           — Scrollable middle section. flex-1 overflow-y-auto p-5.
+                          Use for any content that may overflow.
+  OverlayFooter         — ALWAYS last child (if buttons needed). border-t px-5 py-4 flex-shrink-0.
+```
+
+**Correct usage pattern:**
+```tsx
+<Dialog open={open} onOpenChange={setOpen}>
+  <OverlayContent className="max-w-lg">          {/* width override OK */}
+    <OverlayHeader>
+      <OverlayTitle>Title here</OverlayTitle>    {/* yellow, semibold */}
+    </OverlayHeader>
+    <OverlayBody>
+      {/* scrollable content */}
+    </OverlayBody>
+    <OverlayFooter>
+      <Button variant="secondary">Cancel</Button>
+      <Button>Confirm</Button>
+    </OverlayFooter>
+  </OverlayContent>
+</Dialog>
+```
+
+**Rules:**
+- Close button is always top-right, 36×36 px, `var(--borderSubtle)` border, yellow on hover. Never add a second one.
+- `OverlayBody` is required when content may scroll. Without it, content sits in the flex column with no scroll.
+- Do **not** add `position: absolute` children inside `OverlayContent` — the flex+overflow-hidden layout will clip or misplace them.
+- `OverlayContent` className overrides (e.g. `max-w-4xl`, `max-h-[90vh]`) are fine — they extend the base class.
+
+### FilterOverlay (`components/search/FilterOverlay.tsx`)
+
+Separate custom component (not Radix-based). Bottom-sheet on mobile, centred modal on desktop (`@media (min-width: 769px)`). Has its own backdrop, header (flex row with close button), scrollable content, and footer. Uses `FilterOverlay.module.css`. **Do not** replace with Overlay.tsx — this component handles complex filter state internally.
+
+### Close button standard (all overlays)
+
+| Property | Value |
+|---|---|
+| Size | 36 × 36 px |
+| Border | `1px solid var(--borderSubtle)` |
+| Default colour | `var(--textMuted)` |
+| Hover | border + text → `var(--yellow)`, bg → `rgba(255,211,29,0.06)` |
+| Focus | `focus-visible` ring, `var(--yellow)` |
+| Icon | SVG X, 16 × 16 px, `strokeWidth="2"` |
+
+---
+
+## §5 — Test Coverage
+
+17 test files, 222 tests. All must pass before any commit. Build must have 0 warnings.
+
+| File                                               | Coverage                                                     |
+| -------------------------------------------------- | ------------------------------------------------------------ |
+| `auth-api.test.ts`                                 | Sign-up validation, role rejection, rate limiting (13 tests) |
+| `interest-api.test.ts`                             | Interest endpoint: valid, dedup, invalid input (13 tests)    |
+| `ui-components.test.tsx`                           | VerifiedBadge, InclusionChip, InclusionChipList (14 tests)   |
+| `operator-wizard.test.tsx`                         | Wizard step validation, navigation, state (47 tests)         |
+| `package-csv.test.ts`                              | CSV import/export, RBAC                                      |
+| `bank-details.test.ts`, `complaints.test.ts`, etc. | Domain logic                                                 |
+
+Run: `npm test` (Vitest). E2E: `npx playwright test`.
+
+---
+
+## §6 — Commands
 
 ```bash
-npm run dev        # Dev server
-npm run build      # Production build
-npm test           # Unit tests
-npx tsc --noEmit   # Type check
+npm run dev         # Dev server (http://127.0.0.1:3000)
+npm run build       # Production build — must stay at 0 errors
+npm test            # Unit tests — must stay at 222/222
+npx tsc --noEmit    # Type check
 ```
+
+---
+
+## §7 — Common Pitfalls (Learned the Hard Way)
+
+| Pitfall                                                     | Symptom                                                 | Fix                                               |
+| ----------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------- |
+| Utility function in `'use client'` file, called from server | `"Attempted to call X() from the server"` runtime crash | Extract to `.ts` file without `'use client'`      |
+| `params` not awaited in Next.js 15                          | `TypeError: Cannot destructure property 'slug' of...`   | `const { slug } = await params`                   |
+| In-memory rate limiter in serverless                        | Zero protection after cold start                        | Use Upstash Redis (see §2.3)                      |
+| `eval('require')` for server-only modules                   | Webpack bundles fail / `no-require-imports` lint        | `await import(/* webpackIgnore: true */ '...')`   |
+| Admin role in public Zod schema                             | Security: users can self-register as admin              | `VALID_ROLES = ['customer', 'operator']` only     |
+| Full session in auth response                               | JWT/tokens exposed to client JS                         | Return only `{ user: { id, email, role, name } }` |
+| Missing `await` on Repository call                          | Stale data / silent failure                             | All 84 Repository methods are async               |
+| Prisma 7 — `url`/`directUrl` in `schema.prisma`            | `P1012` validation error on any Prisma CLI command      | Prisma 7 removed these from schema; put them in `prisma.config.ts` only |
+| `directUrl` missing from `prisma.config.ts`                | `migrate deploy` / `db push` hangs forever              | pgBouncer (port 6543) blocks DDL advisory locks; `directUrl` (port 5432) bypasses it |
+| `dotenv/config` default in `prisma.config.ts`              | `DATABASE_URL` undefined → "datasource.url required"   | Next.js uses `.env.local`; dotenv defaults to `.env`. Use `config({ path: '.env.local' })` |
+| `@` in Postgres password without URL-encoding              | TCP connection hangs (wrong host parsed from URL)       | URL-encode `@` as `%40` in `DATABASE_URL` and `DIRECT_URL` |
+| Absolute `position` child inside `flex overflow-hidden`    | Element clipped or mis-positioned (e.g. close button at bottom) | Use flex row layout with close button as a sibling, not absolute |
+| `OverlayContent` without `OverlayBody`                     | Content doesn't scroll; layout breaks on tall modals    | Always wrap scrollable content in `<OverlayBody>` |
+
+---
+
+## §8 — Historical Log (Condensed)
+
+| Date       | What                                                                                                                                                                                                      |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-07 | **Overlay consistency + Prisma config**: Redesigned `Overlay.tsx` — close button moved from `absolute` into `OverlayHeader` flex row (fixes Compare modal close at bottom-right). Added `OverlayBody` + updated `OverlayFooter`. Fixed RangeSlider active track blue→yellow. LoginModal title/close/border/shadow aligned to design tokens. `prisma.config.ts` now loads `.env.local` via dotenv; `directUrl` spread for DDL (bypasses pgBouncer port 6543 advisory lock hang). Password `@` URL-encoded as `%40`. Build 0 errors, tests 222/222. Commit `6459e14`. |
+| 2026-06-06 | **SEO/AEO content expansion (T19)**: Added AI crawler allow rules (GPTBot, ClaudeBot, PerplexityBot, Google-Extended) to robots.ts. Added `personJsonLd`, `touristTripJsonLd`, `dateModified` support to json-ld.ts. Wired TouristTrip schema alongside Product on package detail pages. Added cost FAQ to /umrah. Expanded /umrah/ramadan from 29-line stub to full corridor page (2027 dates, FAQs, AEO details). Created /umrah/cost pricing guide (4 tiers, seasonal pricing, 4 FAQs, JSON-LD). Added sitemap entry for /umrah/cost. Added corridor links section to homepage and /umrah page. Tests: 222/222, build: 0 errors, 0 warnings. |
+| 2026-06-06 | **Beyond SEO audit + fixes**: Fixed critical canonical bug — 8 pages pointed canonical at homepage. Fixed hajj page (was `'use client'` with no metadata, inheriting homepage title/canonical). Added FAQPage+WebPage+BreadcrumbList JSON-LD to all corridor pages. Rewrote CityCorridor with design tokens (was using `text-slate-900` invisible on dark bg). Added city-specific FAQ blocks for AEO. Commit `78d72f5`. |
+| 2026-06-06 | **T18 SEO/AEO QA**: robots.txt added /admin+/settings disallow; stripped duplicate `\| KaabaTrip` title suffix from 8 pages (template was appending it twice); removed `console.error` from packages route; fixed unused `request` param lint warning. Tests: 222/222; build: 0 errors, 0 warnings. |
+| 2026-06-06 | **MAJOR SESSION**: P0-P2 audit remediation. AppError, Upstash rate limiter, GDPR routes, Server Component search, JSON-LD, breadcrumbs, CSP headers, auth hardening, 14 ESLint fixes. Tests: 136→183.     |
+| 2026-06-06 | Beyond SEO remediation: public metadata, AEO FAQ blocks/schema, entity graph helpers, operator/package schema consolidation, reputation-safe copy, 320px public smoke fixes. Tests: 183/183; build clean. |
+| 2026-06-06 | BUG FIX: filterByParams in client file crashed /search/packages. Fixed via search-utils.ts.                                                                                                               |
+| 2026-06-06 | Audit remediation: 26 security/quality fixes. Second-pass: 10 more. Rate limiter Upstash, GDPR routes, ATOL/ABTA, breadcrumbs, JSON-LD, sort URL.                                                         |
+| 2026-06-06 | Signup Internal Server Error fixed (corrupted import in lib/auth/api.ts).                                                                                                                                 |
+| 2026-06-05 | Calendar icon date validation, unified RangeSlider, filter overlay consistency, GBP currency, mobile header.                                                                                              |
+| 2026-06-05 | .clinerules v1.1, partner page, Hajj dedup, shared UI extraction.                                                                                                                                         |
+| 2026-06-04 | Phase 1 persistence: Supabase SSR, Prisma, DB adapter, auth middleware, RLS.                                                                                                                              |
+| 2026-06-03 | UK/EU compliance: cookie consent, Privacy Policy, Terms, GDPR.                                                                                                                                            |
+| 2026-06-02 | Operator surfaces: registration, dashboard, leads, profile.                                                                                                                                               |
+| 2026-06-01 | Auth + booking flow: login/signup, quote wizard, request tracker.                                                                                                                                         |

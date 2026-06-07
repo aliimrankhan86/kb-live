@@ -105,9 +105,9 @@ describe('Repository.createOperator', () => {
     MockDB.setCurrentUser('operator');
   });
 
-  it('creates operator with pending status', () => {
+  it('creates operator with pending status', async () => {
     const ctx = { userId: 'new-op-123', role: 'operator' as const };
-    const op = Repository.createOperator(ctx, {
+    const op = await Repository.createOperator(ctx, {
       companyName: 'New Operator',
       contactEmail: 'new@example.com',
       contactPhone: '+44 999',
@@ -125,15 +125,15 @@ describe('Repository.updateOperator', () => {
     MockDB.setCurrentUser('operator');
   });
 
-  it('updates operator fields', () => {
+  it('updates operator fields', async () => {
     const ctx = { userId: 'op1', role: 'operator' as const };
-    const updated = Repository.updateOperator(ctx, 'op1', { companyName: 'Updated Name' });
+    const updated = await Repository.updateOperator(ctx, 'op1', { companyName: 'Updated Name' });
     expect(updated.companyName).toBe('Updated Name');
     expect(updated.id).toBe('op1');
   });
 
-  it('blocks unauthorized updates', () => {
+  it('blocks unauthorized updates', async () => {
     const ctx = { userId: 'other', role: 'operator' as const };
-    expect(() => Repository.updateOperator(ctx, 'op1', { companyName: 'Hacked' })).toThrow('Unauthorized');
+    await expect(Repository.updateOperator(ctx, 'op1', { companyName: 'Hacked' })).rejects.toThrow('Unauthorized');
   });
 });

@@ -87,11 +87,11 @@ export function OperatorProfileForm({ operator }: Props) {
   const score = getCompletenessScore(profileForScore);
   const hints = getCompletenessHints(profileForScore);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setSaving(true);
     try {
       const ctx = { userId: operator.id, role: 'operator' as const };
-      Repository.updateOperator(ctx, operator.id, {
+      await Repository.updateOperator(ctx, operator.id, {
         companyName: form.companyName.trim(),
         tradingName: form.tradingName.trim() || undefined,
         companyRegistrationNumber: form.companyRegistrationNumber.trim() || undefined,

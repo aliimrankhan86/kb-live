@@ -1,0 +1,163 @@
+/* Unified Range Slider — Used by ALL sliders app-wide */
+.slider {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+}
+
+.trackWrapper {
+  position: relative;
+  width: 100%;
+  height: 40px; /* Touch-friendly height for the entire slider area */
+  display: flex;
+  align-items: center;
+}
+
+/* Inactive track (background) */
+.track {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 8px;
+  background: #2D2D2D;
+  border-radius: 6px;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+/* Active track (filled portion) */
+.activeTrack {
+  position: absolute;
+  top: 50%;
+  height: 8px;
+  background: var(--yellow);
+  border-radius: 6px;
+  transform: translateY(-50%);
+  z-index: 2;
+  pointer-events: none;
+  transition: left 0.15s ease, width 0.15s ease;
+}
+
+/* Range inputs (invisible but functional) */
+.rangeInput {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+  z-index: 3;
+  border: none;
+  outline: none;
+  pointer-events: none;
+}
+
+/* Thumb — WebKit */
+.rangeInput::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  background: #D4AF37;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid #1A1A1A;
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  pointer-events: auto;
+  position: relative;
+  z-index: 4;
+}
+
+.rangeInput::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.5),
+    0 0 0 2px rgba(255, 255, 255, 0.15);
+}
+
+/* Thumb — Firefox */
+.rangeInput::-moz-range-thumb {
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  background: #D4AF37;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid #1A1A1A;
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  pointer-events: auto;
+  position: relative;
+  z-index: 4;
+}
+
+.rangeInput::-moz-range-thumb:hover {
+  transform: scale(1.15);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.5),
+    0 0 0 2px rgba(255, 255, 255, 0.15);
+}
+
+/* Focus visible */
+.rangeInput:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+}
+
+.rangeInput:focus-visible::-moz-range-thumb {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+}
+
+/* Second input (max thumb) sits above first */
+.rangeInput:nth-of-type(2) {
+  z-index: 4;
+}
+
+.rangeInput:nth-of-type(2)::-webkit-slider-thumb {
+  z-index: 5;
+}
+
+.rangeInput:nth-of-type(2)::-moz-range-thumb {
+  z-index: 5;
+}
+
+/* Min/max labels */
+.labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--textMuted);
+  font-family: var(--font-exo2);
+  margin-top: 0.25rem;
+}
+
+.label {
+  font-weight: 500;
+}
+
+/* Touch optimisation */
+.rangeInput {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .rangeInput::-webkit-slider-thumb,
+  .rangeInput::-moz-range-thumb {
+    width: 28px;
+    height: 28px;
+  }
+}

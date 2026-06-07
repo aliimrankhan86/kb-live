@@ -1,6 +1,5 @@
-'use client'
-
 import React, { useState, useCallback, useMemo } from 'react';
+import { RangeSlider } from '@/components/ui/RangeSlider';
 import styles from './TimePeriodFilter.module.css';
 
 interface TimePeriodFilterProps {
@@ -21,10 +20,10 @@ const currentYear = new Date().getFullYear();
 const nextYear = currentYear + 1;
 
 const specialOccasions = [
-  { id: 'christmas', label: `Christmas: Dec ${currentYear} – Jan ${nextYear}`, start: 'Dec', end: 'Jan', season: 'school-holidays' },
-  { id: 'easter', label: `Easter: Mar – Apr ${nextYear}`, start: 'Mar', end: 'Apr', season: 'school-holidays' },
-  { id: 'ramadan', label: `Ramadan: May – Jun ${nextYear}`, start: 'May', end: 'Jun', season: 'ramadan' },
-  { id: 'summer', label: `Summer: Jul – Sep ${nextYear}`, start: 'Jul', end: 'Sep', season: 'flexible' }
+  { id: 'christmas', label: `Christmas: Dec ${currentYear} - Jan ${nextYear}`, start: 'Dec', end: 'Jan', season: 'school-holidays' },
+  { id: 'easter', label: `Easter: Mar - Apr ${nextYear}`, start: 'Mar', end: 'Apr', season: 'school-holidays' },
+  { id: 'ramadan', label: `Ramadan: May - Jun ${nextYear}`, start: 'May', end: 'Jun', season: 'ramadan' },
+  { id: 'summer', label: `Summer: Jul - Sep ${nextYear}`, start: 'Jul', end: 'Sep', season: 'flexible' }
 ];
 
 export const TimePeriodFilter: React.FC<TimePeriodFilterProps> = ({
@@ -36,13 +35,8 @@ export const TimePeriodFilter: React.FC<TimePeriodFilterProps> = ({
 
   const startIndex = months.indexOf(value.start);
   const endIndex = months.indexOf(value.end);
-  const minIndex = Math.min(startIndex, endIndex);
-  const maxIndex = Math.max(startIndex, endIndex);
-  const leftPercent = (minIndex / 11) * 100;
-  const widthPercent = ((maxIndex - minIndex) / 11) * 100;
 
   const getYearLabel = useCallback((monthIdx: number) => {
-    // If month is Jan–May, assume next year; Jun–Dec assume current year
     return monthIdx <= 4 ? nextYear : currentYear;
   }, []);
 
@@ -50,9 +44,9 @@ export const TimePeriodFilter: React.FC<TimePeriodFilterProps> = ({
     const startY = getYearLabel(startIndex);
     const endY = getYearLabel(endIndex);
     if (startY === endY) {
-      return `${value.start} – ${value.end} ${startY}`;
+      return `${value.start} - ${value.end} ${startY}`;
     }
-    return `${value.start} ${startY} – ${value.end} ${endY}`;
+    return `${value.start} ${startY} - ${value.end} ${endY}`;
   }, [startIndex, endIndex, value.start, value.end, getYearLabel]);
 
   const handleSpecialOccasionSelect = useCallback((occasion: typeof specialOccasions[0]) => {
@@ -60,11 +54,13 @@ export const TimePeriodFilter: React.FC<TimePeriodFilterProps> = ({
     setIsCustomRange(false);
   }, [onChange]);
 
-  const handleCustomRangeChange = useCallback((type: 'start' | 'end', month: string) => {
-    const newValue = { ...value, [type]: month };
-    onChange(newValue, null);
+  const handleSliderChange = useCallback(([minIdx, maxIdx]: [number, number]) => {
+    onChange(
+      { start: months[minIdx], end: months[maxIdx] },
+      null
+    );
     setIsCustomRange(true);
-  }, [value, onChange]);
+  }, [onChange]);
 
   return (
     <div className={styles.container}>
@@ -74,38 +70,18 @@ export const TimePeriodFilter: React.FC<TimePeriodFilterProps> = ({
         {isCustomRange ? formatRange : specialOccasions.find(occ => occ.id === specialOccasion)?.label ?? formatRange}
       </div>
 
-      <div className={styles.rangeSlider}>
-        <div className={styles.trackWrapper}>
-          <div className={styles.track} />
-          <div 
-            className={styles.activeTrack}
-            style={{
-              left: `${leftPercent}%`,
-              width: `${widthPercent}%`
-            }}
-          />
-          <input
-            type="range"
-            min="0"
-            max="11"
-            value={startIndex}
-            onChange={(e) => handleCustomRangeChange('start', months[parseInt(e.target.value)])}
-            className={styles.rangeInput}
-            aria-label="Start month"
-            data-testid="time-start-slider"
-          />
-          <input
-            type="range"
-            min="0"
-            max="11"
-            value={endIndex}
-            onChange={(e) => handleCustomRangeChange('end', months[parseInt(e.target.value)])}
-            className={styles.rangeInput}
-            aria-label="End month"
-            data-testid="time-end-slider"
-          />
-        </div>
-      </div>
+      <RangeSlider
+        min={0}
+        max={11}
+        value={[startIndex, endIndex]}
+        step={1}
+        minGap={1}
+        onChange={handleSliderChange}
+        ariaLabelMin="Start month"
+        ariaLabelMax="End month"
+        data-testid-min="time-start-slider"
+        data-testid-max="time-end-slider"
+      />
 
       <div className={styles.specialOccasions}>
         <h4 className={styles.subLabel}>Quick Select</h4>

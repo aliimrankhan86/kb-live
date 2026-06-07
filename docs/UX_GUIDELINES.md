@@ -51,7 +51,7 @@ The package card is the core decision unit. Users scan 5-15 cards before shortli
 
 ### Card rules
 
-- **Price:** Always top-right. Use `Intl.NumberFormat` for locale-correct formatting. Show "from" label if `priceType === 'from'`. Show converted price if user's currency differs from package currency.
+- **Price:** Always top-right. MVP display is GBP-only using deterministic `en-GB` formatting. Show "from" label if `priceType === 'from'`. Do not convert from browser locale/localStorage in SSR-ed UI until multi-currency is reintroduced with a server/client-consistent snapshot.
 - **Operator:** Show company name, never just "Operator ID". Show verified badge if `verificationStatus === 'verified'`. Show ATOL number if available (UK trust signal).
 - **Hotels:** Show actual hotel name (users Google it). Star rating as filled/empty stars. Distance in user's preferred unit (miles/km). "Walking distance" for < 500m.
 - **Inclusions:** Use consistent icon set. Checkmark (included) vs X (not included). Order: Visa, Flights, Transfers, Meals. Add "Ziyarat" and "Guide" when those fields exist.
@@ -67,7 +67,7 @@ The compare modal is the decision moment. Users have narrowed to 2-3 options and
 
 | Row                 | Why it matters       | Display format                                      |
 | ------------------- | -------------------- | --------------------------------------------------- |
-| **Price**           | #1 decision factor   | Converted to user's currency, formatted with locale |
+| **Price**           | #1 decision factor   | GBP-only in MVP, formatted deterministically         |
 | **Operator**        | Trust                | Name + verified badge + ATOL if available           |
 | **Hotel (Makkah)**  | Proximity to worship | Name, stars, exact distance                         |
 | **Hotel (Madinah)** | Same                 | Name, stars, exact distance                         |
@@ -214,6 +214,7 @@ Users are spending £1,000-£5,000+ on pilgrimage. Trust is non-negotiable.
 - Quick picks for common date ranges
 - Trust row reinforces safety at decision point
 - CTA: "Find Packages" (not generic "Search")
+- A concise answer block may sit below the form for SEO/AEO support. Keep it secondary to the search flow, use factual traveller questions, and do not add unsupported claims or promotional copy.
 
 ### Search results (`/search/packages`)
 

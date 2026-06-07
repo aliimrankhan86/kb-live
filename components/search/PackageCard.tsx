@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Package } from '@/lib/mock-packages'
 import type { OperatorProfile } from '@/lib/types'
-import { CURRENCY_CHANGE_EVENT, getRegionSettings } from '@/lib/i18n/region'
+import { getRegionSettings } from '@/lib/i18n/region'
 import { formatPriceForRegion } from '@/lib/i18n/format'
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge'
 import { InclusionChip } from '@/components/ui/InclusionChip'
@@ -42,13 +42,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
   nightsMadinah,
   priceType = 'from',
 }) => {
-  const [regionSettings, setRegionSettings] = React.useState(() => getRegionSettings())
-
-  React.useEffect(() => {
-    const updateSettings = () => setRegionSettings(getRegionSettings())
-    window.addEventListener(CURRENCY_CHANGE_EVENT, updateSettings)
-    return () => window.removeEventListener(CURRENCY_CHANGE_EVENT, updateSettings)
-  }, [])
+  const regionSettings = React.useMemo(() => getRegionSettings(), [])
 
   const priceInfo = React.useMemo(
     () => formatPriceForRegion(pkg.price, pkg.currency, regionSettings),

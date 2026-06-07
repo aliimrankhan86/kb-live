@@ -89,7 +89,7 @@ export default function PaymentDetailsPage() {
     const next = loadData();
     setData(next);
     setPageState(deriveState(next));
-    setAuditEntries(Repository.getOperatorAuditLog(operatorCtx, OPERATOR_ID));
+    Repository.getOperatorAuditLog(operatorCtx, OPERATOR_ID).then(setAuditEntries);
   }, []);
 
   useEffect(() => {
@@ -110,13 +110,13 @@ export default function PaymentDetailsPage() {
     setShowOtp(true);
   };
 
-  const handleOtpConfirm = (phoneLastFour: string) => {
+  const handleOtpConfirm = async (phoneLastFour: string) => {
     if (!pendingFormDetails) return;
     setSubmitting(true);
     clearMessages();
     try {
       if (isOtpForChange) {
-        Repository.createBankChangeRequest(operatorCtx, {
+        await Repository.createBankChangeRequest(operatorCtx, {
           operatorId: OPERATOR_ID,
           proposedDetails: pendingFormDetails,
           phoneConfirmation: { confirmed: true, phoneLastFour },
@@ -124,7 +124,7 @@ export default function PaymentDetailsPage() {
         setShowChangeOverlay(false);
         setSuccessMsg('Change request submitted. It will be reviewed by our team.');
       } else {
-        Repository.createPaymentDetails(operatorCtx, {
+        await Repository.createPaymentDetails(operatorCtx, {
           operatorId: OPERATOR_ID,
           details: pendingFormDetails,
           phoneConfirmation: { confirmed: true, phoneLastFour },
@@ -141,13 +141,13 @@ export default function PaymentDetailsPage() {
     }
   };
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
     const req = data.pendingRequest;
     if (!req || req.status !== 'pending_review') return;
     setSubmitting(true);
     clearMessages();
     try {
-      Repository.cancelBankChangeRequest(operatorCtx, req.id);
+      await Repository.cancelBankChangeRequest(operatorCtx, req.id);
       setSuccessMsg('Change request cancelled.');
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : 'Failed to cancel. Please try again.');

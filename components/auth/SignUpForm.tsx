@@ -10,17 +10,26 @@ export function SignUpForm() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
   const [role, setRole] = useState<'customer' | 'operator'>('operator');
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [termsAgreed, setTermsAgreed] = useState(false);
   const [error, setError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setPasswordError('');
     setLoading(true);
+
+    if (password !== confirmPassword) {
+      setPasswordError('Passwords do not match. Please re-enter your password.');
+      setLoading(false);
+      return;
+    }
 
     try {
       const res = await fetch('/api/auth/sign-up', {
@@ -53,6 +62,16 @@ export function SignUpForm() {
           Join KaabaTrip as a traveller or partner.
         </p>
       </div>
+
+      {passwordError && (
+        <div
+          className="rounded-md border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400"
+          role="alert"
+          data-testid="signup-password-mismatch"
+        >
+          {passwordError}
+        </div>
+      )}
 
       {error && (
         <div
@@ -119,6 +138,16 @@ export function SignUpForm() {
         required
         autoComplete="new-password"
         data-testid="signup-password"
+      />
+
+      <Input
+        label="Confirm password"
+        type="password"
+        value={confirmPassword}
+        onChange={(e) => setConfirmPassword(e.target.value)}
+        required
+        autoComplete="new-password"
+        data-testid="signup-confirm-password"
       />
 
       <div className="space-y-3">

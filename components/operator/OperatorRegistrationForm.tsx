@@ -125,7 +125,7 @@ export function OperatorRegistrationForm() {
       // Simulate a context for registration (in production this would come from auth)
       const ctx = { userId: 'new-operator-' + Date.now(), role: 'operator' as const };
 
-      Repository.createOperator(ctx, {
+      await Repository.createOperator(ctx, {
         companyName: form.companyName.trim(),
         tradingName: form.tradingName.trim() || undefined,
         companyRegistrationNumber: form.companyRegistrationNumber.trim() || undefined,
@@ -148,8 +148,7 @@ export function OperatorRegistrationForm() {
       });
 
       router.push('/operator/onboarding/status');
-    } catch (e) {
-      console.error('Registration failed:', e);
+    } catch {
       alert('Registration failed. Please try again.');
     } finally {
       setSubmitting(false);

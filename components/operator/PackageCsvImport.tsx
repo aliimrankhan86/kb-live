@@ -22,7 +22,7 @@ export function PackageCsvImport({ onImport }: { onImport?: () => void }) {
 
     try {
       const text = await file.text();
-      const importResult = Repository.importPackagesFromCsv({ userId: user.id, role: user.role }, text);
+      const importResult = await Repository.importPackagesFromCsv({ userId: user.id, role: user.role }, text);
       setResult(importResult);
       if (importResult.saved.length > 0 && onImport) {
         onImport();

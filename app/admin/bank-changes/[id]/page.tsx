@@ -45,7 +45,7 @@ export default function BankChangeDetailPage() {
       (d) => d.operatorId === req.operatorId && d.status === 'active'
     );
     setCurrentDetails(details);
-    setAuditEntries(Repository.getOperatorAuditLog(adminCtx, req.operatorId));
+    Repository.getOperatorAuditLog(adminCtx, req.operatorId).then(setAuditEntries);
     setLoading(false);
   }, [id]);
 

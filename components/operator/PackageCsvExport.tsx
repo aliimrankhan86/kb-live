@@ -7,12 +7,12 @@ import { MockDB } from '@/lib/api/mock-db';
 export function PackageCsvExport() {
   const [exporting, setExporting] = useState(false);
 
-  const handleExport = () => {
+  const handleExport = async () => {
     const user = MockDB.currentUser;
     if (!user || user.role !== 'operator') return;
     setExporting(true);
     try {
-      const csv = Repository.exportPackagesAsCsv({ userId: user.id, role: user.role });
+      const csv = await Repository.exportPackagesAsCsv({ userId: user.id, role: user.role });
       if (!csv) {
         alert('No packages to export');
         setExporting(false);

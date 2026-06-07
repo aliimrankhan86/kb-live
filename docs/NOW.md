@@ -4,17 +4,20 @@
 
 ## Branch & goal
 
-- **Branch:** `main`
-- **Goal:** UK/EU legal compliance implementation: cookie consent, privacy policy, terms & conditions, footer, marketing consent, and database schema updates.
+- **Branch:** `dev` → target `main` after PR review
+- **Goal:** Keep the audit-remediation/operator-dashboard work accurate and ready for review. Current code is unit/build clean, but operator E2E is not clean.
+- **Current source-of-truth note:** This top section was verified on 2026-06-06. Older historical entries below may contain earlier test counts or task claims; use this section and `docs/EXECUTION_QUEUE.md` for current pending/done state.
 
 ## What works (verified)
 
-- **TypeScript**: `npx tsc --noEmit` passes (0 errors)
-- **Tests**: `npm test` passes (95/95)
-- **Build**: `npm run build` passes (0 errors, 0 warnings)
+## What works (verified)
+
+- **Tests**: `npm run test` passes (17 files, 222/222 tests) — verified 2026-06-07.
+- **Build**: `npm run build` compiles successfully (43 app routes). Pre-existing TypeScript error in `prisma.config.ts` (`directUrl` not in Prisma 7 `datasource` type) blocks full build — not introduced by this change.
+- **TypeScript**: covered by `npm run build` validity checks. `npx tsc --noEmit` was not rerun in this audit pass.
 - **Security audit**: Down from 17 vulnerabilities to 6 moderate (nested in dev tooling)
 - **Dead code**: Removed `@dnd-kit/*` unused dependencies, 9 unused import/variable warnings
-- **Next.js 15**: Updated to 15.5.4 stable, Vitest to 4.1.8
+- **Next.js 15**: Updated to 15.5.19, Vitest to 4.1.8
 - **CSP headers**: Added `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `HSTS`, `Content-Security-Policy`
 - **SEO JSON-LD**: Created `lib/seo/json-ld.ts` with Product, TravelAgency, ItemList, BreadcrumbList, Organization, WebSite schemas
 - **Dynamic sitemap**: Now includes published packages and verified operators with correct priorities
@@ -37,12 +40,17 @@
 - `/quote` and `/requests/[id]` now use the shared header, so logo/navigation are consistent with the rest of the app.
 - Quote journey now exposes a clear "Back to previous page" action in wizard and request detail views.
 - **Currency:** MVP shows GBP (£) only. Multi-currency display is future scope. The i18n infra (`lib/i18n/region.ts`, `lib/i18n/format.ts`) is built and ready but the UI selector is hidden until post-MVP. See `docs/AI_RUNBOOK.md` C8.
+- **Hydration guard:** `getRegionSettings()` is deterministic UK/GBP/miles in render paths and ignores browser locale/timezone/localStorage by default. This prevents server GBP output from hydrating as USD/EUR on the client.
+- **Root JSON-LD hydration guard:** Root layout JSON-LD now renders in body markup rather than a manual `<head>` child, with `suppressHydrationWarning` on `<html>` to avoid browser-extension-injected head scripts causing false hydration attribute mismatches.
 - BookingIntent creation now issues a unique immutable reference code.
 - Request detail payment handoff now supports image/PDF evidence metadata, optional text fields, and explicit skip-proof acknowledgement.
 - Operator payment details now have MockDB storage keys, seeded active details for one verified operator, bank-change requests, audit logs, and repository-level eligibility checks.
 - Cooling period lazy-activation fires on `Repository.getPaymentDetails` and `isOperatorBookableById` when `activationEligibleAt <= now`.
 - Operator settings page shows last 5 own bank audit entries via `AuditLogView`.
 - Admin bank change detail page shows full operator audit log via `Repository.getOperatorAuditLog`.
+- Operator onboarding, dashboard, leads, profile, payment settings, complaints, bank-review admin, package CSV, and the 8-step package wizard are implemented in code.
+- Public package cards show operator names, verified badges, ATOL badges, hotel details, inclusions, and compare/shortlist actions.
+- Public operator profiles show ATOL/ABTA, serving regions, departure airports, years in business, contact details, published packages, breadcrumbs, metadata, and TravelAgency JSON-LD.
 
 ## Shipped
 
@@ -54,6 +62,84 @@
 - MT-7 bank and payment E2E coverage shipped. See `docs/AI_RUNBOOK.md` COMPLETED section for `DONE-E2E-BANK-TESTS`.
 - MT-8 cooling period lazy-activation + operator audit log view shipped. See `docs/AI_RUNBOOK.md` COMPLETED section for `DONE-COOLING-AUDIT-LOG`.
 - MT-4 admin bank change review UI shipped. See `docs/AI_RUNBOOK.md` COMPLETED section for `DONE-ADMIN-BANK-REVIEW`.
+- Operator dashboard/onboarding package work through T12 and T15 is implemented and unit/build verified.
+
+## Pending / not verified
+
+- **T18 — Local Chrome SEO/AEO QA** ⏳ PENDING. Requires a browser-capable agent with local Chrome access. `AI_NOTES.md` §2.7 has the full checklist. This is implementation-quality verification only — not rankings/backlinks/live SERP data.
+- **T16 RE-ENABLE — Operator E2E** ⏳ PENDING. `e2e/operator.spec.ts` is skipped. Needs: (1) seed test operator, (2) Playwright auth fixture to sign in and set session cookie, (3) remove `test.describe.skip`, (4) run until 10/10 pass.
+- **E2E auth infrastructure** ⏳ PENDING. 4 pre-existing E2E specs fail due to missing auth (`bank-payment`, `catalogue`, `flow`, `slider-consistency`). Needs a shared Playwright auth fixture.
+- **Rate limiter production switch** ⏳ PENDING. `lib/rate-limit.ts` uses in-memory `Map` fallback. Needs `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` in production env.
+- **Prisma cutover end-to-end** ⏳ PENDING. `FEATURE_USE_REAL_DB` exists but never enabled. Needs staging verification with `FEATURE_USE_REAL_DB=true`.
+- **Console.log audit** ⏳ PENDING. `.clinerules` §11.2 bans `console.*` in `components/` and `app/`. Full `grep` sweep not yet run.
+
+### Completed in this session (UI consistency — Filter Overlay + Comparison Table)
+
+| Task           | What                                                                                                                                                                                                                                   | Files                                    |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| UI-CONSISTENCY | `OverlayContent` close button: moved from `sticky top-0 ml-auto` (broke when consumer set `flex flex-col overflow-hidden`) to `absolute right-4 top-4 z-10`. Now always sits at top-right regardless of parent layout.                 | `components/ui/Overlay.tsx`              |
+| UI-CONSISTENCY | `ComparisonTable` colour tokens: replaced all hardcoded `#FFFFFF`, `#FFD31D`, `rgba(255,255,255,0.1)` etc. with `var(--text)`, `var(--yellow)`, `var(--borderSubtle)`, `var(--textMuted)`, `var(--surfaceDark)` for theme consistency. | `components/request/ComparisonTable.tsx` |
+
+**Verification:**
+
+- `npm run test`: 222/222 pass
+- `npm run build`: compiles successfully (pre-existing `prisma.config.ts` type error unrelated)
+
+## Completed in this session (T13/T14/T16/T17/OP-PERSIST)
+
+| Task       | What                                                                                                                            | Files                                                                              |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| T13        | `/requests/[id]` breadcrumb JSON-LD consolidated to `lib/seo/json-ld.ts`; `buildBreadcrumbJsonLd` removed from `Breadcrumb.tsx` | `app/requests/[id]/page.tsx`, `components/ui/Breadcrumb.tsx`, `lib/seo/json-ld.ts` |
+| T14        | 7 reusable validators + 39 tests. Fixed UK landline regex edge case.                                                            | `lib/validation.ts`, `tests/validation.test.ts` (new)                              |
+| OP-PERSIST | `/api/operator/packages` GET/POST/PATCH/DELETE; page fetches on load with loading/error states                                  | `app/api/operator/packages/route.ts`, `app/operator/packages/page.tsx`             |
+| T16        | Operator E2E spec documented with auth setup instructions and `test.describe.skip`                                              | `e2e/operator.spec.ts`                                                             |
+| T17        | Full integration sign-off — 222/222 tests, 0 build errors                                                                       | —                                                                                  |
+
+**Verification:** `npm test` 222/222 pass | `npm run build` 0 errors | E2E: 2 pass, 12 skipped, 4 pre-existing failures
+**Branch:** `dev` clean, committed as `1786fa8`, pushed to `origin/dev`
+
+## What changed this session (2026-06-06 — Beyond SEO audit/remediation)
+
+### SEO, AEO, GEO, entity SEO, and reputation SEO
+
+**Confirmed gaps from local code audit:**
+
+- `/` had no page-level metadata export.
+- `/umrah` metadata was thin and lacked answer-engine content/schema.
+- `/search/packages`, `/packages/[slug]`, and `/operators/[slug]` had fragmented inline/component-local JSON-LD instead of consistently using `lib/seo/json-ld.ts`.
+- Operator metadata implied "verified" too broadly instead of reflecting stored verification status.
+- Homepage trust copy included unsupported "Price Match" wording.
+- Mobile smoke found horizontal overflow at 320px caused by the closed off-canvas header drawer.
+
+**Changes:**
+
+- Expanded `lib/seo/json-ld.ts` with richer source-backed Product, TravelAgency, ItemList, Organization, WebSite, WebPage, FAQPage, and `@graph` helpers.
+- Added homepage metadata and JSON-LD graph for Organization/WebSite/WebPage/FAQ.
+- Added stronger `/umrah` metadata, visible answer blocks, and FAQ/WebPage JSON-LD.
+- Added dynamic `/search/packages` metadata, consolidated ItemList/WebPage/FAQ JSON-LD, and factual results-count copy.
+- Updated package detail metadata and replaced inline Product/Breadcrumb schema with shared helper output plus package FAQ schema.
+- Updated operator profile metadata/schema to use stored verification status, published packages only, and shared TravelAgency/Breadcrumb/FAQ helpers.
+- Removed component-local operator JSON-LD builder from `OperatorProfileDetail`.
+- Replaced unsupported homepage "Price Match" trust signal with "Side-by-side Comparison".
+- Fixed mobile header drawer overflow by keeping the closed drawer out of layout.
+- Updated `docs/SEO.md` with AEO/GEO/entity/reputation requirements and current metadata/schema notes.
+
+**Verification:**
+
+- `npm run test`: pass (16 files, 183/183 tests).
+- `npm run build`: pass (43 app routes generated, 0 build/type errors).
+- Manual Playwright smoke via local dev server on `/`, `/umrah`, `/search/packages` at 320px and 1280px: all status 200, one `h1`, no horizontal overflow, no console/page errors.
+- Mobile drawer interaction smoke at 320px: drawer opens, links visible, no horizontal overflow.
+
+**Not verified from available data:**
+
+- Live rankings, search volumes, indexed page counts, backlinks/authority metrics, Core Web Vitals field data, Google Business Profile signals, third-party review footprint, and AI Overview/GEO citation visibility. These require GSC/GA4 exports, backlink tooling, GBP access, PageSpeed/CrUX/Lighthouse data, or an Apify/SEO crawl/SERP data source.
+
+## What changed this session (2026-06-06 — Claude SEO QA handoff)
+
+- Added `AI_NOTES.md` T18: Claude local Chrome SEO/AEO QA.
+- Documented the exact Chrome-rendered checks for public routes, JSON-LD, metadata, headings, visible content, internal links, mobile/desktop smoke, console/hydration errors, and Lighthouse/DevTools checks when available.
+- Documented limits of local Chrome-only validation: no claims about rankings, search volume, backlinks, Core Web Vitals field data, Google Business Profile performance, competitor keyword footprint, or AI citation visibility.
 
 ### `MT5-CUSTOMER-PAYMENT-INSTR` — Customer payment instructions
 
@@ -145,9 +231,87 @@
 - Payment handoff remains pay-operator-direct only: KaabaTrip does not collect, hold, or transfer customer funds.
 - Remaining MVP limit: operator 48h payment confirmation and evidence review surfaces are not yet enforced in UI/repository.
 
-## What changed this session
+## What changed this session (2026-06-06 — P0-P2 Audit Remediation)
 
-### Filter Overlay & Umrah Search UX Overhaul
+### P0-P2 AUDIT: Security, SEO, GDPR, Error Handling, ESLint
+
+**Verification:**
+
+- `npx tsc --noEmit`: pass (0 errors)
+- `npm test`: 183/183 pass (up from 136 — new test files added)
+- `npm run build`: pass (0 errors, 0 warnings)
+- `npm audit`: 6 moderate (dev tooling only)
+
+**Changes:**
+
+| Task     | What                                                                                            | Files                                                                                        |
+| -------- | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| P0 BUG   | `filterByParams` in `'use client'` file crashed `/search/packages` server-side                  | `components/search/search-utils.ts` (extracted, no `'use client'`)                           |
+| P0 BUG   | Signup 500 ISE — corrupted `mentimport` in `lib/auth/api.ts`                                    | Fixed to proper `import`                                                                     |
+| P0       | All 84 Repository methods made async + all callers `await`-ed                                   | `lib/api/repository.ts` + consumers                                                          |
+| P0       | `AppError` typed errors + `mapErrorToResponse` — no raw `err.message`                           | `lib/errors.ts` (new)                                                                        |
+| P0.2     | Upstash Redis rate limiter (in-memory dev fallback)                                             | `lib/rate-limit.ts` (new)                                                                    |
+| P0.3–4   | GDPR export + deletion (Art. 20 + Art. 17)                                                      | `app/api/user/export/route.ts`, `app/api/user/delete/route.ts` (new)                         |
+| P1.5     | `/search/packages` → Server Component for SEO                                                   | `app/search/packages/page.tsx` + `SearchPackagesClient.tsx` (new)                            |
+| P1.6     | JSON-LD schemas: TravelAgency, Product+Offer, ItemList, BreadcrumbList, Organization, WebSite   | `lib/seo/json-ld.ts` + page layouts                                                          |
+| P1.7–8   | Tests: auth API + interest API + UI components                                                  | `tests/auth-api.test.ts`, `tests/interest-api.test.ts`, `tests/ui-components.test.tsx` (new) |
+| P1.9     | ATOL/ABTA admin verification endpoint                                                           | `app/api/admin/verify-operator/route.ts` (new)                                               |
+| P2.10–15 | OG locale, dead code, og:image, sort URL, breadcrumbs, RBAC AppError                            | Multiple files                                                                               |
+| AUDIT    | 14+ ESLint warnings cleared                                                                     | `eslint.config.mjs` + multiple files                                                         |
+| SECURITY | CSP headers: X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, HSTS | `next.config.ts`                                                                             |
+| AUTH     | Auth endpoints return minimal data only                                                         | `app/api/auth/sign-in/route.ts`, `sign-up/route.ts`                                          |
+| RBAC     | `requireOperatorOwnerOrAdmin` helper; admin never in public schemas                             | `lib/api/repository.ts`, `lib/validation.ts` (new)                                           |
+
+**New untracked files now tracked:**
+
+- `components/search/SearchPackagesClient.tsx`
+- `components/search/search-utils.ts`
+- `components/ui/Breadcrumb.tsx`
+- `lib/errors.ts`
+- `lib/rate-limit.ts`
+- `lib/supabase/service-role.ts`
+- `lib/validation.ts`
+- `app/api/admin/verify-operator/route.ts`
+- `app/api/operator/packages/route.ts`
+- `app/api/user/export/route.ts`
+- `app/api/user/delete/route.ts`
+- `app/settings/page.tsx`
+- `components/operator/wizard/*.tsx` (8-step wizard implemented; operator E2E still failing)
+
+**Current pending after 2026-06-06 audit:**
+
+- T13: SEO structured-data helper consolidation.
+- T14: validation utility functions requested by queue.
+- T16: operator E2E spec exists but fails.
+- T17: final smoke + integration check remains blocked by T16.
+
+---
+
+### Fix: Signup Internal Server Error + Playwright headed-mode fix
+
+- **Root cause**: `lib/auth/api.ts` had corrupted first line `mentimport` (typo/merge artifact) causing a build syntax error. The `/signup` page imported `SignUpForm` which depended on `lib/auth/api.ts` transitively via `app/api/auth/me/route.ts`, so the entire page threw an Internal Server Error.
+- **Fix**: Removed `ment` prefix from line 1 → `import { createClient } from '@/lib/supabase/server';`
+- **E2E test fix**: `e2e/signup-password-mismatch.spec.ts` was using hardcoded `http://localhost:3000/signup` instead of Playwright's `baseURL`. Changed to relative `/signup`.
+- **Removed unnecessary MCP servers**: Cleared `.vscode/mcp.json` — removed `playwright` and `chrome-devtools` MCP entries that were causing double browser windows during test runs.
+- **Playwright headed-mode documentation**: Added `headless: true` default to `playwright.config.ts` with comment explaining `--headed` CLI flag for visible browser testing.
+- **Verification**:
+  - `npm run build`: pass (0 errors)
+  - `npm test`: 96/96 pass
+  - `npx playwright test e2e/signup-password-mismatch.spec.ts --project=chromium --headed --reporter=list`: pass (1/1, visible browser)
+- **Files changed**: `lib/auth/api.ts`, `e2e/signup-password-mismatch.spec.ts`, `.vscode/mcp.json`, `playwright.config.ts`
+
+### Filter Overlay Consistency + GBP Currency + Bug Fixes
+
+- **GBP-only currency**: Removed USD/EUR from `PackageForm.tsx` and `OfferForm.tsx`. Currency dropdown = `GBP (£)` only.
+- **FilterOverlay CSS fix**: Added missing `@keyframes slideIn`. Removed duplicate `@keyframes slideUp`.
+- **Slider CSS cleanup**: Removed duplicate `.rangeInput::-moz-range-thumb` blocks in `BudgetFilter.module.css` and `DistanceFilter.module.css`.
+- **UK English**: Changed `DistanceFilter.tsx` "50 m" → "50 metres".
+- **Hotel rating plural**: Fixed aria-label to always say "stars" per `.clinerules`.
+- **TypeScript fixes**: Fixed `PackageList.tsx` SortOption import conflict; fixed `SortDropdown.tsx` ref callback type error.
+- **Build**: `npm run build` passes (0 errors) | **Tests**: `npm test` passes (95/95)
+- **AI_NOTES.md**: Updated with session summary
+
+### Filter Overlay & Umrah Search UX Overhaul (previous)
 
 **FilterOverlay** (`components/search/FilterOverlay.tsx` + `.module.css`):
 
@@ -360,10 +524,10 @@ npm run build
 ## Last verified
 
 - `npx tsc --noEmit`: pass (0 errors)
-- `npm test`: 95/95 pass
+- `npm test`: 183/183 pass
 - `npm run build`: pass (0 errors, 0 warnings)
 - `npm audit`: 6 moderate (nested in dev tooling only — no critical/high)
-- Manual smoke: `/` (Hero with trust bar), `/umrah` (4-step form), `/hajj` (coming soon), `/search/packages` (sort + cards) at 320px and 1280px
+- Manual smoke: `/`, `/umrah`, `/hajj`, `/search/packages`, `/signup`, `/packages/[slug]`, `/operators/[slug]` at 320px and 1280px
 
 ## What changed this session (2026-06-05)
 

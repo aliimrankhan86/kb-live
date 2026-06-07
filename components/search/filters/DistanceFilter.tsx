@@ -1,6 +1,5 @@
-'use client'
-
 import React, { useCallback } from 'react';
+import { RangeSlider } from '@/components/ui/RangeSlider';
 import styles from './DistanceFilter.module.css';
 
 interface DistanceFilterProps {
@@ -20,32 +19,16 @@ export const DistanceFilter: React.FC<DistanceFilterProps> = ({
   value,
   onChange
 }) => {
-  const clamp = useCallback((v: number) => Math.max(MIN_DISTANCE, Math.min(MAX_DISTANCE, Math.round(v / STEP) * STEP)), []);
-
-  const handleMinChange = useCallback((min: number) => {
-    const clamped = clamp(min);
-    onChange({ min: Math.min(clamped, value.max - MIN_GAP), max: value.max });
-  }, [clamp, onChange, value.max]);
-
-  const handleMaxChange = useCallback((max: number) => {
-    const clamped = clamp(max);
-    onChange({ min: value.min, max: Math.max(clamped, value.min + MIN_GAP) });
-  }, [clamp, onChange, value.min]);
-
-  const getPercentage = useCallback((distance: number) => {
-    return ((distance - MIN_DISTANCE) / (MAX_DISTANCE - MIN_DISTANCE)) * 100;
-  }, []);
-
-  const formatDistance = (distance: number) => {
+  const formatDistance = useCallback((distance: number) => {
     if (distance >= 1000) {
       return `${(distance / 1000).toFixed(1)} km`;
     }
-    return `${distance} m`;
-  };
+    return `${distance} metres`;
+  }, []);
 
-  const leftPercent = getPercentage(value.min);
-  const rightPercent = getPercentage(value.max);
-  const activeWidth = rightPercent - leftPercent;
+  const handleChange = useCallback(([min, max]: [number, number]) => {
+    onChange({ min, max });
+  }, [onChange]);
 
   return (
     <div className={styles.container}>
@@ -55,45 +38,20 @@ export const DistanceFilter: React.FC<DistanceFilterProps> = ({
         {formatDistance(value.min)} — {formatDistance(value.max)}
       </div>
 
-      <div className={styles.sliderContainer}>
-        <div className={styles.trackWrapper}>
-          <div className={styles.track} />
-          <div 
-            className={styles.activeTrack}
-            style={{
-              left: `${leftPercent}%`,
-              width: `${activeWidth}%`
-            }}
-          />
-          <input
-            type="range"
-            min={MIN_DISTANCE}
-            max={MAX_DISTANCE}
-            step={STEP}
-            value={value.min}
-            onChange={(e) => handleMinChange(parseInt(e.target.value))}
-            className={styles.rangeInput}
-            aria-label="Minimum distance"
-            data-testid="distance-min-slider"
-          />
-          <input
-            type="range"
-            min={MIN_DISTANCE}
-            max={MAX_DISTANCE}
-            step={STEP}
-            value={value.max}
-            onChange={(e) => handleMaxChange(parseInt(e.target.value))}
-            className={styles.rangeInput}
-            aria-label="Maximum distance"
-            data-testid="distance-max-slider"
-          />
-        </div>
-        
-        <div className={styles.labels}>
-          <span className={styles.minLabel}>{formatDistance(MIN_DISTANCE)}</span>
-          <span className={styles.maxLabel}>{formatDistance(MAX_DISTANCE)}</span>
-        </div>
-      </div>
+      <RangeSlider
+        min={MIN_DISTANCE}
+        max={MAX_DISTANCE}
+        value={[value.min, value.max]}
+        step={STEP}
+        minGap={MIN_GAP}
+        onChange={handleChange}
+        minLabel={formatDistance(MIN_DISTANCE)}
+        maxLabel={formatDistance(MAX_DISTANCE)}
+        ariaLabelMin="Minimum distance"
+        ariaLabelMax="Maximum distance"
+        data-testid-min="distance-min-slider"
+        data-testid-max="distance-max-slider"
+      />
     </div>
   );
 };

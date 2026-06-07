@@ -21,13 +21,11 @@ export const FilterOverlayIntegration: React.FC = () => {
 
   const handleFilterApply = (filters: FilterState) => {
     setAppliedFilters(filters);
-    console.log('Applied filters:', filters);
     // Here you would typically filter your data based on the applied filters
   };
 
   const handleFilterReset = () => {
     setAppliedFilters(null);
-    console.log('Reset filters');
   };
 
   return (

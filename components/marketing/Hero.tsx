@@ -70,7 +70,7 @@ export const Hero: React.FC<HeroProps> = ({ className = '' }) => {
             Compare Umrah & Hajj Packages from Verified Travel Operators
           </h1>
           <p className={styles.hero__subtitle}>
-            Transparent pricing. Verified operators. No hidden fees. Find the journey that fits your budget and spiritual goals.
+            Review prices, hotel proximity, inclusions, and operator trust signals before requesting a quote.
           </p>
         </div>
 
@@ -96,7 +96,7 @@ export const Hero: React.FC<HeroProps> = ({ className = '' }) => {
             title="Are you a travel agent?"
             subtitle="List your packages and reach pilgrims directly"
             buttonText="Become a Partner"
-            href="/operator/onboarding"
+            href="/partner"
             className={styles.hero__ctaPartner}
           />
         </div>
@@ -124,10 +124,10 @@ export const Hero: React.FC<HeroProps> = ({ className = '' }) => {
           </div>
           <div className={styles.hero__trustItem}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-              <line x1="12" y1="1" x2="12" y2="23" />
-              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+              <rect x="3" y="4" width="18" height="16" rx="2" />
+              <path d="M7 8h10M7 12h10M7 16h6" />
             </svg>
-            <span>Price Match</span>
+            <span>Side-by-side Comparison</span>
           </div>
         </div>
       </div>

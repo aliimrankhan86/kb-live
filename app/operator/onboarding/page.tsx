@@ -1,7 +1,7 @@
 import { OperatorRegistrationForm } from '@/components/operator/OperatorRegistrationForm';
 
 export const metadata = {
-  title: 'Operator Onboarding — KaabaTrip',
+  title: 'Operator Onboarding',
   description: 'Register as a verified operator on KaabaTrip',
 };
 

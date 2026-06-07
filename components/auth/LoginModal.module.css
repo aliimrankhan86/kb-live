@@ -28,9 +28,9 @@
 /* Modal Container */
 .modal {
   background: var(--surfaceDark);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--borderSubtle);
+  border-radius: var(--radiusLg);
+  box-shadow: var(--shadowSoft);
   max-width: 480px;
   width: 100%;
   max-height: 90vh;
@@ -60,33 +60,33 @@
   font-family: var(--font-exo2);
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--text);
+  color: var(--yellow);
   margin: 0;
   line-height: 1.2;
 }
 
 .closeButton {
-  background: none;
-  border: none;
+  background: transparent;
+  border: 1px solid var(--borderSubtle);
   color: var(--textMuted);
-  font-size: 1.5rem;
   cursor: pointer;
-  padding: 0.25rem;
-  border-radius: 4px;
-  transition: color 0.2s ease, background-color 0.2s ease;
-  display: flex;
+  border-radius: var(--radiusMd);
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
 }
 
 .closeButton:hover {
-  color: var(--text);
-  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--yellow);
+  color: var(--yellow);
+  background: rgba(255, 211, 29, 0.06);
 }
 
-.closeButton:focus {
+.closeButton:focus-visible {
   outline: 2px solid var(--yellow);
   outline-offset: 2px;
 }

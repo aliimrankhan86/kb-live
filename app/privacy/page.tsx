@@ -2,9 +2,10 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | KaabaTrip',
+  title: 'Privacy Policy',
   description:
     'KaabaTrip Privacy Policy. How we collect, use and protect your personal data in compliance with UK GDPR and the Data Protection Act 2018.',
+  alternates: { canonical: '/privacy' },
   robots: { index: true, follow: true },
 };
 

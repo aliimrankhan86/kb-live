@@ -51,11 +51,11 @@ export function BankChangeReviewCard({
 
   const coolingEndsAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
-  const handleApprove = useCallback(() => {
+  const handleApprove = useCallback(async () => {
     setSubmitting(true);
     setErrorMsg('');
     try {
-      Repository.approveBankChangeRequest(adminCtx, request.id, undefined);
+      await Repository.approveBankChangeRequest(adminCtx, request.id, undefined);
       setShowApproveDialog(false);
       onAction();
     } catch (err) {
@@ -65,7 +65,7 @@ export function BankChangeReviewCard({
     }
   }, [request.id, onAction]);
 
-  const handleReject = useCallback(() => {
+  const handleReject = useCallback(async () => {
     setRejectError('');
     if (!rejectReason || rejectReason.trim().length < 10) {
       setRejectError('Reason must be at least 10 characters.');
@@ -74,7 +74,7 @@ export function BankChangeReviewCard({
     setSubmitting(true);
     setErrorMsg('');
     try {
-      Repository.rejectBankChangeRequest(adminCtx, request.id, rejectReason);
+      await Repository.rejectBankChangeRequest(adminCtx, request.id, rejectReason);
       setShowRejectDialog(false);
       setRejectReason('');
       onAction();
