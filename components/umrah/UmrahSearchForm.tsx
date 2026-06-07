@@ -12,6 +12,20 @@ interface UmrahSearchFormProps {
   className?: string
 }
 
+// UK departure airports commonly used for Umrah packages
+const DEPARTURE_AIRPORTS = [
+  { code: 'LHR', name: 'London Heathrow', city: 'London' },
+  { code: 'LGW', name: 'London Gatwick', city: 'London' },
+  { code: 'STN', name: 'London Stansted', city: 'London' },
+  { code: 'BHX', name: 'Birmingham', city: 'Birmingham' },
+  { code: 'MAN', name: 'Manchester', city: 'Manchester' },
+  { code: 'GLA', name: 'Glasgow', city: 'Glasgow' },
+  { code: 'EDI', name: 'Edinburgh', city: 'Edinburgh' },
+  { code: 'BRS', name: 'Bristol', city: 'Bristol' },
+] as const
+
+type AirportCode = typeof DEPARTURE_AIRPORTS[number]['code']
+
 // Generate dates relative to today for sensible defaults
 const today = new Date()
 const currentYear = today.getFullYear()
@@ -29,6 +43,7 @@ const parseInputDate = (v: string) => {
 }
 
 export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = '' }) => {
+  const [departureAirport, setDepartureAirport] = useState<AirportCode | ''>('LHR')
   const [departureDate, setDepartureDate] = useState(formatISODate(defaultDeparture))
   const [returnDate, setReturnDate] = useState(formatISODate(defaultReturn))
   const [selectedQuickPick, setSelectedQuickPick] = useState<string>('')
@@ -46,27 +61,27 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
 
   // Quick select options with real date ranges (use hyphens, not em dashes)
   const quickSelectOptions = useMemo(() => [
-    { 
-      id: 'christmas', 
-      label: `Christmas: Dec ${currentYear} - Jan ${nextYear}`, 
+    {
+      id: 'christmas',
+      label: `Christmas: Dec ${currentYear} - Jan ${nextYear}`,
       season: 'school-holidays',
       getDates: () => ({ start: `${currentYear}-12-20`, end: `${nextYear}-01-05` })
     },
-    { 
-      id: 'easter', 
-      label: `Easter: Mar - Apr ${nextYear}`, 
+    {
+      id: 'easter',
+      label: `Easter: Mar - Apr ${nextYear}`,
       season: 'school-holidays',
       getDates: () => ({ start: `${nextYear}-03-20`, end: `${nextYear}-04-10` })
     },
-    { 
-      id: 'ramadan', 
-      label: `Ramadan: May - Jun ${nextYear}`, 
+    {
+      id: 'ramadan',
+      label: `Ramadan: May - Jun ${nextYear}`,
       season: 'ramadan',
       getDates: () => ({ start: `${nextYear}-05-01`, end: `${nextYear}-06-15` })
     },
-    { 
-      id: 'summer', 
-      label: `Summer: Jul - Sep ${nextYear}`, 
+    {
+      id: 'summer',
+      label: `Summer: Jul - Sep ${nextYear}`,
       season: 'flexible',
       getDates: () => ({ start: `${nextYear}-07-01`, end: `${nextYear}-09-15` })
     }
@@ -206,6 +221,8 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
     }
   }
 
+  const selectedAirport = DEPARTURE_AIRPORTS.find(a => a.code === departureAirport)
+
   return (
     <div className={`${styles.searchForm} ${className}`}>
       <form
@@ -220,6 +237,7 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
         <input type="hidden" name="adults" value={String(adults)} />
         <input type="hidden" name="departureDate" value={departureDate} />
         <input type="hidden" name="returnDate" value={returnDate} />
+        {departureAirport && <input type="hidden" name="departureAirport" value={departureAirport} />}
         {children.length > 0 && (
           <input type="hidden" name="children" value={JSON.stringify(children.map((c) => c.age))} />
         )}
@@ -241,15 +259,47 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
           </p>
         </div>
 
-        {/* Step 1: Travel dates */}
+        {/* Step 1: Departing airport */}
         <div className={styles.searchForm__section}>
           <div className={styles.searchForm__sectionHeader}>
             <span className={styles.searchForm__stepNumber}>1</span>
+            <label htmlFor="departure-airport" className={styles.searchForm__label}>
+              Where will you fly from?
+            </label>
+          </div>
+          <div className={styles.searchForm__airportField}>
+            <select
+              id="departure-airport"
+              value={departureAirport}
+              onChange={(e) => setDepartureAirport(e.target.value as AirportCode)}
+              className={styles.searchForm__airportSelect}
+              aria-label="Departing airport"
+              data-testid="departure-airport-select"
+            >
+              <option value="">Any UK airport</option>
+              {DEPARTURE_AIRPORTS.map((airport) => (
+                <option key={airport.code} value={airport.code}>
+                  {airport.name} ({airport.code})
+                </option>
+              ))}
+            </select>
+            {selectedAirport && (
+              <span className={styles.searchForm__airportHint} aria-live="polite">
+                Flying from {selectedAirport.city}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Step 2: Travel dates */}
+        <div className={styles.searchForm__section}>
+          <div className={styles.searchForm__sectionHeader}>
+            <span className={styles.searchForm__stepNumber}>2</span>
             <label className={styles.searchForm__label}>
               When would you like to travel?
             </label>
           </div>
-          
+
           {/* Date Picker Inputs */}
           <div className={styles.searchForm__dateInputs}>
             <div className={styles.searchForm__dateField}>
@@ -350,10 +400,10 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
           </div>
         </div>
 
-        {/* Step 2: Travellers */}
+        {/* Step 3: Travellers */}
         <div className={styles.searchForm__section}>
           <div className={styles.searchForm__sectionHeader}>
-            <span className={styles.searchForm__stepNumber}>2</span>
+            <span className={styles.searchForm__stepNumber}>3</span>
             <label className={styles.searchForm__label}>
               How many travellers?
             </label>
@@ -455,10 +505,10 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
           </div>
         </div>
 
-        {/* Step 3: Hotel preference */}
+        {/* Step 4: Hotel preference */}
         <div className={styles.searchForm__section}>
           <div className={styles.searchForm__sectionHeader}>
-            <span className={styles.searchForm__stepNumber}>3</span>
+            <span className={styles.searchForm__stepNumber}>4</span>
             <label className={styles.searchForm__label}>
               Hotel star rating
             </label>
@@ -480,10 +530,10 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
           </div>
         </div>
 
-        {/* Step 4: Budget */}
+        {/* Step 5: Budget */}
         <div className={styles.searchForm__section}>
           <div className={styles.searchForm__sectionHeader}>
-            <span className={styles.searchForm__stepNumber}>4</span>
+            <span className={styles.searchForm__stepNumber}>5</span>
             <label className={styles.searchForm__label}>
               Budget per person
             </label>

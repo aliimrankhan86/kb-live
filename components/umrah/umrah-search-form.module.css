@@ -406,6 +406,56 @@
   padding: 0.5rem;
 }
 
+/* Airport select */
+.searchForm__airportField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.searchForm__airportSelect {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.625rem 2.5rem 0.625rem 0.875rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 0.5rem;
+  background: rgba(17, 17, 17, 0.6);
+  color: var(--text);
+  font-size: 0.9375rem;
+  font-family: var(--font-exo2);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2.5 4.5L6 8L9.5 4.5' stroke='%23FFD31D' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.875rem center;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.searchForm__airportSelect:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.searchForm__airportSelect:focus {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+  border-color: var(--yellow);
+}
+
+/* Ensure dropdown options are readable in dark mode */
+.searchForm__airportSelect option {
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.9375rem;
+  padding: 0.5rem;
+}
+
+.searchForm__airportHint {
+  font-size: 0.8125rem;
+  color: var(--textMuted);
+  font-family: var(--font-exo2);
+}
+
 /* Stepper for travellers */
 .searchForm__stepper {
   display: inline-flex;

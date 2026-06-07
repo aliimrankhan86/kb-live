@@ -1,18 +1,23 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 
+type SignUpRole = 'customer' | 'operator';
+
 export function SignUpForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const defaultRole = (searchParams.get('type') as SignUpRole) || 'operator';
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
-  const [role, setRole] = useState<'customer' | 'operator'>('operator');
+  const [role, setRole] = useState<SignUpRole>(defaultRole);
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [termsAgreed, setTermsAgreed] = useState(false);
   const [error, setError] = useState('');
@@ -54,12 +59,50 @@ export function SignUpForm() {
     }
   };
 
+  const isPartner = role === 'operator';
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4" data-testid="signup-form">
+      {/* Tabs */}
+      <div className="grid grid-cols-2 gap-2" role="tablist" aria-label="Account type">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={role === 'customer'}
+          onClick={() => setRole('customer')}
+          className={`rounded-md border px-3 py-2.5 text-sm font-medium transition-colors ${
+            role === 'customer'
+              ? 'border-[var(--yellow)] bg-[rgba(255,211,29,0.12)] text-[var(--text)]'
+              : 'border-[var(--borderSubtle)] text-[var(--textMuted)] hover:border-[var(--borderStrong)]'
+          }`}
+          data-testid="signup-role-customer"
+        >
+          Traveller
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={role === 'operator'}
+          onClick={() => setRole('operator')}
+          className={`rounded-md border px-3 py-2.5 text-sm font-medium transition-colors ${
+            role === 'operator'
+              ? 'border-[var(--yellow)] bg-[rgba(255,211,29,0.12)] text-[var(--text)]'
+              : 'border-[var(--borderSubtle)] text-[var(--textMuted)] hover:border-[var(--borderStrong)]'
+          }`}
+          data-testid="signup-role-operator"
+        >
+          Partner
+        </button>
+      </div>
+
       <div>
-        <h1 className="text-2xl font-semibold text-[var(--text)]">Create Account</h1>
+        <h1 className="text-2xl font-semibold text-[var(--text)]">
+          {isPartner ? 'Partner Registration' : 'Create Account'}
+        </h1>
         <p className="mt-1 text-sm text-[var(--textMuted)]">
-          Join KaabaTrip as a traveller or partner.
+          {isPartner
+            ? 'Register your travel company and start receiving bookings from UK travellers.'
+            : 'Join KaabaTrip to compare packages, save favourites, and request quotes.'}
         </p>
       </div>
 
@@ -82,33 +125,6 @@ export function SignUpForm() {
           {error}
         </div>
       )}
-
-      <div className="grid grid-cols-2 gap-2">
-        <button
-          type="button"
-          onClick={() => setRole('customer')}
-          className={`rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
-            role === 'customer'
-              ? 'border-[var(--yellow)] bg-[rgba(255,211,29,0.12)] text-[var(--text)]'
-              : 'border-[var(--borderSubtle)] text-[var(--textMuted)] hover:border-[var(--borderStrong)]'
-          }`}
-          data-testid="signup-role-customer"
-        >
-          Traveller
-        </button>
-        <button
-          type="button"
-          onClick={() => setRole('operator')}
-          className={`rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
-            role === 'operator'
-              ? 'border-[var(--yellow)] bg-[rgba(255,211,29,0.12)] text-[var(--text)]'
-              : 'border-[var(--borderSubtle)] text-[var(--textMuted)] hover:border-[var(--borderStrong)]'
-          }`}
-          data-testid="signup-role-operator"
-        >
-          Partner
-        </button>
-      </div>
 
       <Input
         label="Full name"
@@ -194,12 +210,15 @@ export function SignUpForm() {
         className="w-full"
         data-testid="signup-submit"
       >
-        {loading ? 'Creating account…' : 'Create Account'}
+        {loading ? 'Creating account…' : isPartner ? 'Register as Partner' : 'Create Account'}
       </Button>
 
       <p className="text-center text-sm text-[var(--textMuted)]">
         Already have an account?{' '}
-        <Link href="/login" className="text-[var(--yellow)] hover:underline">
+        <Link
+          href={isPartner ? '/login?type=partner' : '/login?type=customer'}
+          className="text-[var(--yellow)] hover:underline"
+        >
           Sign in
         </Link>
       </p>

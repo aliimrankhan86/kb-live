@@ -5,8 +5,10 @@ import { SignUpForm } from '@/components/auth/SignUpForm';
 import { OperatorSidebar } from '@/components/operator/OperatorSidebar';
 
 // Mock next/navigation
+const mockPush = vi.fn();
+const mockRefresh = vi.fn();
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
+  useRouter: () => ({ push: mockPush, refresh: mockRefresh }),
   useSearchParams: () => new URLSearchParams(),
   usePathname: () => '/operator/dashboard',
 }));
@@ -18,12 +20,51 @@ describe('LoginForm', () => {
     vi.resetAllMocks();
   });
 
-  it('renders login form with email and password fields', () => {
+  it('renders login form with Traveller tab selected by default', () => {
     render(<LoginForm />);
     expect(screen.getByTestId('login-form')).toBeInTheDocument();
+    expect(screen.getByTestId('login-tab-customer')).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByTestId('login-tab-partner')).toHaveAttribute('aria-selected', 'false');
     expect(screen.getByTestId('login-email')).toBeInTheDocument();
     expect(screen.getByTestId('login-password')).toBeInTheDocument();
     expect(screen.getByTestId('login-submit')).toBeInTheDocument();
+  });
+
+  it('switches between Traveller and Partner tabs', () => {
+    render(<LoginForm />);
+    // Default is Traveller
+    expect(screen.getByText('Traveller Login')).toBeInTheDocument();
+
+    // Switch to Partner
+    fireEvent.click(screen.getByTestId('login-tab-partner'));
+    expect(screen.getByText('Partner Login')).toBeInTheDocument();
+    expect(screen.getByTestId('login-tab-partner')).toHaveAttribute('aria-selected', 'true');
+
+    // Switch back to Traveller
+    fireEvent.click(screen.getByTestId('login-tab-customer'));
+    expect(screen.getByText('Traveller Login')).toBeInTheDocument();
+    expect(screen.getByTestId('login-tab-customer')).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('shows forgot password view when link is clicked', () => {
+    render(<LoginForm />);
+    expect(screen.queryByTestId('login-forgot-view')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('login-forgot-password'));
+    expect(screen.getByTestId('login-forgot-view')).toBeInTheDocument();
+    expect(screen.getByText('Reset Password')).toBeInTheDocument();
+    expect(screen.getByTestId('login-forgot-email')).toBeInTheDocument();
+    expect(screen.getByTestId('login-back-to-signin')).toBeInTheDocument();
+  });
+
+  it('returns to sign in from forgot password view', () => {
+    render(<LoginForm />);
+    fireEvent.click(screen.getByTestId('login-forgot-password'));
+    expect(screen.getByTestId('login-forgot-view')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('login-back-to-signin'));
+    expect(screen.queryByTestId('login-forgot-view')).not.toBeInTheDocument();
+    expect(screen.getByTestId('login-form')).toBeInTheDocument();
   });
 
   it('shows error on failed login', async () => {
@@ -42,9 +83,15 @@ describe('LoginForm', () => {
     });
   });
 
-  it('has link to signup', () => {
+  it('has traveller signup link in customer tab', () => {
     render(<LoginForm />);
-    expect(screen.getByText('Register your company')).toHaveAttribute('href', '/signup');
+    expect(screen.getByText('Sign up')).toHaveAttribute('href', '/signup?type=customer');
+  });
+
+  it('has partner signup link in partner tab', () => {
+    render(<LoginForm />);
+    fireEvent.click(screen.getByTestId('login-tab-partner'));
+    expect(screen.getByText('Register your company')).toHaveAttribute('href', '/signup?type=partner');
   });
 });
 
@@ -66,9 +113,14 @@ describe('SignUpForm', () => {
 
   it('toggles role between customer and operator', () => {
     render(<SignUpForm />);
+    // Default from URLSearchParams is operator (Partner)
+    expect(screen.getByRole('heading', { name: 'Partner Registration' })).toBeInTheDocument();
+
     fireEvent.click(screen.getByTestId('signup-role-customer'));
+    expect(screen.getByRole('heading', { name: 'Create Account' })).toBeInTheDocument();
+
     fireEvent.click(screen.getByTestId('signup-role-operator'));
-    expect(screen.getByTestId('signup-submit')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Partner Registration' })).toBeInTheDocument();
   });
 
   it('shows password mismatch error when passwords do not match', async () => {
@@ -109,6 +161,15 @@ describe('SignUpForm', () => {
     expect(screen.getByTestId('signup-terms-checkbox')).toBeInTheDocument();
     expect(screen.getByTestId('signup-marketing-checkbox')).toBeInTheDocument();
     expect(screen.getByTestId('signup-submit')).toBeDisabled();
+  });
+
+  it('links to login with correct type param based on role', () => {
+    render(<SignUpForm />);
+    // Default is partner
+    expect(screen.getByText('Sign in')).toHaveAttribute('href', '/login?type=partner');
+
+    fireEvent.click(screen.getByTestId('signup-role-customer'));
+    expect(screen.getByText('Sign in')).toHaveAttribute('href', '/login?type=customer');
   });
 });
 
