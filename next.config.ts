@@ -72,6 +72,11 @@ const nextConfig: NextConfig = {
     ];
   },
 
+  // Keep Node-only packages out of the client/edge bundle.
+  // pg and Prisma runtime use Node core modules (net, tls, dns) that do
+  // not exist in the browser or Edge Runtime.
+  serverExternalPackages: ['pg', '@prisma/adapter-pg', '@prisma/client'],
+
   // Tree-shake barrel imports from heavy dependencies. Works with both
   // Turbopack (dev) and webpack (production build).
   experimental: {

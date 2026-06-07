@@ -10,7 +10,6 @@ function createPrismaClient() {
   const connectionString = process.env.DATABASE_URL;
   const pool = new Pool({ connectionString });
   const adapter = new PrismaPg(pool);
-  // @ts-expect-error — PrismaClient constructor type stubs lag runtime; adapter arg is valid at runtime
   return new PrismaClient({ adapter });
 }
 

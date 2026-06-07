@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { QuoteRequest, Offer } from '@/lib/types';
+import { MockDB } from '@/lib/api/mock-db';
 
 interface OfferFormProps {
   request: QuoteRequest;

@@ -67,8 +67,10 @@ let prismaAdapter: typeof mockStore | null = null;
 async function loadPrismaAdapter(): Promise<typeof mockStore> {
   if (prismaAdapter) return prismaAdapter;
   // This path only executes server-side when getDataSource() === 'prisma'.
-  // Let Next bundle the module so SSR chunks resolve the adapter path correctly.
-  const mod = await import('./db/adapter');
+  // webpackIgnore prevents pg/Prisma (Node-only) from being pulled into the
+  // client bundle. The typeof window guard above ensures this is never called
+  // in the browser; Node resolves the path natively at runtime.
+  const mod = await import(/* webpackIgnore: true */ './db/adapter');
   prismaAdapter = (mod as typeof import('./db/adapter')).DBAdapter as unknown as typeof mockStore;
   return prismaAdapter;
 }

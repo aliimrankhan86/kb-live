@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Repository } from '@/lib/api/repository';
 import type { Complaint, ComplaintStatus } from '@/lib/types';
 import { Badge } from '@/components/ui/Badge';
@@ -178,17 +178,17 @@ function ComplaintCard({
 
 export function ComplaintsInbox({ operatorId }: { operatorId: string }) {
   const [complaints, setComplaints] = useState<Complaint[]>([]);
-  const operatorCtx = { userId: operatorId, role: 'operator' as const };
 
-  const loadComplaints = () => {
-    Repository.getComplaints(operatorCtx).then(setComplaints);
-  };
+  const loadComplaints = useCallback(() => {
+    const ctx = { userId: operatorId, role: 'operator' as const };
+    Repository.getComplaints(ctx).then(setComplaints);
+  }, [operatorId]);
 
   useEffect(() => {
     loadComplaints();
     const interval = setInterval(loadComplaints, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [loadComplaints]);
 
   if (complaints.length === 0) {
     return (
