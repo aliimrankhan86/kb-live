@@ -352,7 +352,7 @@ const preparePaymentEvidence = (paymentEvidence?: BookingPaymentEvidence): Booki
   if (invalidFile) throw new Error('Payment evidence must be an image or PDF');
 
   const submittedAt = paymentEvidence.submittedAt || new Date().toISOString();
-  const hasBytes = files.some((f) => typeof f.base64Data === 'string' && f.base64Data.length > 0);
+  const hasBytes = files.some((f) => typeof f.storagePath === 'string' && f.storagePath.length > 0);
   const retentionExpiresAt = new Date(Date.now() + EVIDENCE_RETENTION_MS).toISOString();
 
   return {
@@ -381,7 +381,7 @@ const pruneExpiredEvidence = (bookingIntent: BookingIntent): BookingIntent => {
       storageStatus: 'metadata-only',
       files: bookingIntent.paymentEvidence.files.map((f) => ({
         ...f,
-        base64Data: undefined,
+        storagePath: undefined,
       })),
     };
     return { ...bookingIntent, paymentEvidence: pruned };
@@ -473,6 +473,9 @@ export const Repository = {
     }
 
     const existingIntents = await store().getBookingIntents();
+    if (intent.id && existingIntents.some((booking) => booking.id === intent.id)) {
+      throw new Error('Booking intent already exists');
+    }
     const existingCodes = new Set(
       existingIntents
         .map((booking) => booking.referenceCode)
@@ -481,7 +484,7 @@ export const Repository = {
     const now = new Date().toISOString();
 
     const newIntent: BookingIntent = {
-      id: crypto.randomUUID(),
+      id: intent.id ?? crypto.randomUUID(),
       referenceCode: generateReferenceCode(existingCodes),
       offerId: offer.id,
       customerId: ctx.userId,

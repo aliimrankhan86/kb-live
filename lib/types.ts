@@ -211,7 +211,8 @@ export interface BookingPaymentEvidenceFile {
   kind: BookingPaymentEvidenceFileKind;
   lastModified?: number;
   uploadedAt: string;
-  base64Data?: string;
+  /** Object path within the private `payment-evidence` Supabase Storage bucket. */
+  storagePath?: string;
 }
 
 export type EvidenceStorageStatus = 'metadata-only' | 'bytes-stored';
