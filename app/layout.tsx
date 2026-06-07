@@ -5,6 +5,7 @@ import { baseMetadata } from "@/lib/seo";
 import { exo2Font } from "@/lib/fonts";
 import { Footer } from "@/components/layout/Footer";
 import { CookieConsent } from "@/components/compliance/CookieConsent";
+import { JsonLdScript } from "@/lib/seo/json-ld";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -44,10 +45,7 @@ export default function RootLayout({
   return (
     <html lang="en-GB" className={`${exo2Font.variable} ${inter.variable}`} suppressHydrationWarning>
       <body className="antialiased min-h-screen flex flex-col">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(travelAgencyJsonLd) }}
-        />
+        <JsonLdScript data={travelAgencyJsonLd} />
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[1000] focus:rounded focus:bg-[var(--yellow)] focus:px-4 focus:py-2 focus:text-black focus:font-medium"

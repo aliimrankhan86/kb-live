@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Header } from '@/components/layout/Header'
-import { breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
+import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
 
 export const metadata: Metadata = {
   title: 'How Much Does an Umrah Package Cost from the UK? 2026–2027 Guide',
@@ -78,10 +78,7 @@ export default function UmrahCostPage() {
   return (
     <>
       <Header />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(pageJsonLd) }}
-      />
+      <JsonLdScript data={pageJsonLd} />
       <main className="min-h-screen bg-[var(--background)] px-4 py-12 md:py-20">
         <article className="mx-auto max-w-3xl">
           <h1 className="text-3xl md:text-4xl font-bold text-[var(--text)] mb-6">

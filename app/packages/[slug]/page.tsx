@@ -3,7 +3,7 @@ import { Header } from '@/components/layout/Header'
 import { PackageDetail } from '@/components/packages/PackageDetail'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { Repository } from '@/lib/api/repository'
-import { breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, packageJsonLd, touristTripJsonLd } from '@/lib/seo/json-ld'
+import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, packageJsonLd, touristTripJsonLd } from '@/lib/seo/json-ld'
 import type { Package, OperatorProfile } from '@/lib/types'
 
 export async function generateMetadata({
@@ -131,10 +131,7 @@ export default async function PackageDetailPage({
     <>
       <Header />
       <main className="min-h-screen bg-[var(--background)]">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(packageDetailJsonLd) }}
-        />
+        <JsonLdScript data={packageDetailJsonLd} />
         <div className="w-full max-w-5xl mx-auto px-4 pt-6">
           <Breadcrumb items={breadcrumbItems} />
         </div>

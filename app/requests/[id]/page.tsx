@@ -1,7 +1,7 @@
 import { RequestDetail } from '@/components/request/RequestDetail';
 import { Header } from '@/components/layout/Header';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
-import { breadcrumbJsonLd } from '@/lib/seo/json-ld';
+import { JsonLdScript, breadcrumbJsonLd } from '@/lib/seo/json-ld';
 
 export default async function RequestPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -23,10 +23,7 @@ export default async function RequestPage({ params }: { params: Promise<{ id: st
     <>
       <Header />
       <main className="min-h-screen bg-[var(--background)]">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-        />
+        <JsonLdScript data={breadcrumbSchema} />
         <div className="w-full max-w-5xl mx-auto px-4 pt-6">
           <Breadcrumb items={breadcrumbItems} />
         </div>

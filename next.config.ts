@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import { IS_DEV_ENV } from "./lib/config";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -22,12 +21,6 @@ const nextConfig: NextConfig = {
 
   // Security headers for all routes
   async headers() {
-    // CSP: allow unsafe-eval only in development (Next.js dev mode needs it)
-    // In production, remove unsafe-eval to prevent XSS
-    const scriptSrc = IS_DEV_ENV
-      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
-      : "script-src 'self' 'unsafe-inline'";
-
     return [
       {
         source: '/(.*)',
@@ -52,20 +45,6 @@ const nextConfig: NextConfig = {
             key: 'Strict-Transport-Security',
             // Note: remove 'preload' once HSTS preload list application is submitted
             value: 'max-age=63072000; includeSubDomains',
-          },
-          {
-            key: 'Content-Security-Policy',
-            value: [
-              "default-src 'self'",
-              scriptSrc,
-              "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: blob: https://images.unsplash.com",
-              "font-src 'self'",
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
-              "frame-ancestors 'none'",
-              "base-uri 'self'",
-              "form-action 'self'",
-            ].join('; '),
           },
         ],
       },
