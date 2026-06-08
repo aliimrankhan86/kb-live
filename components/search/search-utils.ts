@@ -48,6 +48,26 @@ export function filterByParams(
     if (afterMax.length > 0) next = afterMax;
   }
 
+  const hotelStars = params.get('hotelStars');
+  if (hotelStars) {
+    const selectedStars = hotelStars
+      .split(',')
+      .map((value) => Number(value))
+      .filter((value) => [3, 4, 5].includes(value));
+
+    if (selectedStars.length > 0) {
+      const selected = new Set(selectedStars);
+      next = next.filter((p) => {
+        const makkahStars = p.hotelMakkahStars;
+        const madinahStars = p.hotelMadinahStars;
+        return (
+          (typeof makkahStars === 'number' && selected.has(makkahStars)) ||
+          (typeof madinahStars === 'number' && selected.has(madinahStars))
+        );
+      });
+    }
+  }
+
   return next;
 }
 

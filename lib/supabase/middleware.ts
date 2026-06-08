@@ -29,6 +29,19 @@ export async function updateSession(request: NextRequest): Promise<AuthResult> {
     }
   }
 
+  // Dev login bypass — only in local development. Never active in production.
+  if (process.env.NODE_ENV === 'development') {
+    const devCookie = request.cookies.get('__dev_user');
+    if (devCookie?.value) {
+      try {
+        const u = JSON.parse(devCookie.value) as { id: string; email: string; role: string };
+        if (u?.id && u?.email && u?.role) {
+          return { user: u, response: supabaseResponse };
+        }
+      } catch { /* invalid JSON — fall through to Supabase */ }
+    }
+  }
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 

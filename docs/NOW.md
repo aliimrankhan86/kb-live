@@ -14,6 +14,28 @@
 - **Build**: `npm run build` passes with 0 errors — verified 2026-06-08.
 - **TypeScript**: covered by `npm run build` validity checks.
 
+## Changes made in this session (2026-06-08 — Umrah Search UX)
+
+| Task | What | Files |
+| ---- | ---- | ----- |
+| UMRAH-ROUTE | Updated the Umrah search form to capture both departing city and returning city using the current target markets only: London, Birmingham, and Manchester. | `components/umrah/UmrahSearchForm.tsx`, `components/umrah/umrah-search-form.module.css` |
+| UMRAH-DATES | Reworked travel timing as an explicit either/or choice between exact dates and flexible holiday/religious periods such as Christmas school holidays, Easter school holidays, Ramadan, and summer school holidays. | `components/umrah/UmrahSearchForm.tsx`, `components/umrah/umrah-search-form.module.css` |
+| UMRAH-HOTEL-BUDGET | Changed hotel preference to a clearer multi-select model, removed currency-symbol presentation from the search form budget copy, added a compact search summary, and wired comma-separated hotel-star filters into results. | `components/umrah/UmrahSearchForm.tsx`, `components/umrah/umrah-search-form.module.css`, `components/search/search-utils.ts` |
+| COOKIE-CONSENT | Made "Essential only" the visually preselected-looking yellow action in the cookie banner while keeping "Accept all" secondary. | `components/compliance/CookieConsent.tsx` |
+| UX-DOCS | Documented the route, date, and hotel-preference search patterns. | `docs/UX_GUIDELINES.md` |
+
+**Verification:**
+
+- `npx tsc --noEmit`: pass
+- `git diff --check`: pass
+- `npm run test`: 17 files, 227/227 pass
+- `npm run build`: passes with 0 errors
+- Manual Playwright smoke: `/`, `/umrah`, `/search/packages?type=umrah` at 320px and 1280px; no 404s and no horizontal overflow
+- Manual Playwright interaction: holiday-period mode submits school-holiday dates, `departureAirport=LON`, `returnAirport=LON`, and `hotelStars=5,4`; no dollar-sign text found in the form flow
+- Cookie smoke: `Essential only` computed as yellow background, black text, yellow border
+- `npx playwright test --project=chromium`: 19 passed, 2 skipped
+- `npx playwright test`: 56 passed, 6 skipped, 1 unrelated WebKit failure in `e2e/signup-password-mismatch.spec.ts` where the signup full-name required field remained empty and blocked the password mismatch assertion
+
 ## Changes made in this session (2026-06-08 — Operator Analytics Events)
 
 | Task | What | Files |

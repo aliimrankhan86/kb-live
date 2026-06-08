@@ -122,7 +122,9 @@ All UI must use these shared components. Never create one-off equivalents.
 ### Search form (`/umrah`, `/hajj`)
 
 - Progressive disclosure: start with type + dates, expand to budget/preferences.
-- Quick picks: "Ramadan 2026", "School holidays", "Flexible dates" as tap targets.
+- Route capture is city-based for the current target markets: London, Birmingham, and Manchester. Capture both departing city and returning city before dates.
+- Dates are an either/or choice: exact departure/return dates, or a flexible holiday period such as Christmas school holidays, Easter school holidays, Ramadan, or summer school holidays.
+- Hotel preference supports multi-select star levels. "Show all" means no hotel-star filter; selecting 5, 4, or 3 star narrows results to those hotel levels.
 - Form submits as GET request (works without JS). Query params in URL for shareability.
 - CTA: "Find packages" (not "Search" — too generic).
 
@@ -209,9 +211,10 @@ Users are spending £1,000-£5,000+ on pilgrimage. Trust is non-negotiable.
 
 ### Umrah search (`/umrah`)
 
-- 4-step progressive disclosure: dates → travellers → hotel stars → budget
+- 5-step progressive disclosure: route → dates/holiday period → travellers → hotel preference → budget
 - Each step numbered with visual indicator
-- Quick picks for common date ranges
+- Date selection must clearly separate exact dates from flexible holiday/religious periods
+- Hotel preference must explain that multiple star levels can be selected
 - Trust row reinforces safety at decision point
 - CTA: "Find Packages" (not generic "Search")
 - A concise answer block may sit below the form for SEO/AEO support. Keep it secondary to the search flow, use factual traveller questions, and do not add unsupported claims or promotional copy.

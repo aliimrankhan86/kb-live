@@ -26,6 +26,18 @@ export async function getSessionUser(): Promise<SessionUser | null> {
     } catch { /* fall through to Supabase */ }
   }
 
+  // Dev login bypass — only in local development. Never active in production.
+  if (process.env.NODE_ENV === 'development') {
+    try {
+      const cookieStore = await cookies();
+      const devCookie = cookieStore.get('__dev_user');
+      if (devCookie?.value) {
+        const u = JSON.parse(devCookie.value);
+        if (u?.id && u?.email && u?.role) return u as SessionUser;
+      }
+    } catch { /* fall through to Supabase */ }
+  }
+
   const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();
 

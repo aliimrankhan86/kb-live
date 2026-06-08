@@ -54,7 +54,7 @@ This file is the source of truth for any AI agent picking up this project. Read 
 
 ## §1 — Current Status
 
-**Date:** 2026-06-07 | **Branch:** `dev` | **Build:** ✅ 0 errors, 0 warnings | **Tests:** ✅ 227/227 unit | **E2E:** ✅ 19/21 chromium pass (2 skipped, 0 fail) | **Git:** local branch ahead of `origin/dev`
+**Date:** 2026-06-08 | **Branch:** `dev` | **Build:** ✅ 0 errors, 0 warnings | **Tests:** ✅ 227/227 unit | **E2E:** ✅ 19/21 chromium pass (2 skipped, 0 fail) | **Git:** local branch ahead of `origin/dev`
 
 ### 🔄 Active work (highest → lowest priority)
 
@@ -386,12 +386,35 @@ Run: `npm test` (Vitest). E2E: `npx playwright test`.
 
 ---
 
-## §6 — Commands
+## §6 — Dev Login Bypass (Local Development Only)
+
+Go to **`http://127.0.0.1:3000/dev/login`** while `npm run dev` is running.
+
+| Button              | Email                   | Role       | ID      | Profile state                                      |
+| ------------------- | ----------------------- | ---------- | ------- | -------------------------------------------------- |
+| Customer            | `customer@example.com`  | `customer` | `cust1` | Standard user                                      |
+| Operator (Verified) | `operator@example.com`  | `operator` | `op1`   | Verified, ATOL/ABTA, packages, payment details     |
+| Operator (New)      | `operator2@example.com` | `operator` | `op2`   | Unverified, incomplete onboarding, no bank details |
+| Admin               | `admin@example.com`     | `admin`    | `op1`   | Admin access to /admin/\*                          |
+
+**How it works:** Clicking a persona sets a `__dev_user` cookie. The cookie is only read when `NODE_ENV === 'development'`. `/dev/*` routes redirect to `/` in production.
+
+**Seeded database users** (via `prisma/seed.ts` — same IDs as dev bypass):
+
+- Customer: `cust1` / `customer@example.com`
+- Verified operator: `op1` / `operator@example.com`
+- New operator: `op2` / `operator2@example.com`
+
+There is **no password** — the dev bypass uses cookie impersonation, not real Supabase auth. If you need actual Supabase auth for testing, use the real signup/sign-in flow at `/signup` and `/login`.
+
+---
+
+## §7 — Commands
 
 ```bash
 npm run dev         # Dev server (http://127.0.0.1:3000)
 npm run build       # Production build — must stay at 0 errors
-npm test            # Unit tests — must stay at 222/222
+npm test            # Unit tests — must stay at 227/227
 npx tsc --noEmit    # Type check
 ```
 
@@ -422,6 +445,8 @@ npx tsc --noEmit    # Type check
 
 | Date       | What                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-08 | **BUG FIX: UmrahSearchForm default dates** — `defaultDeparture` was `new Date(today.getFullYear(), today.getMonth() + 3, 1)` causing it to roll into next year (e.g. June + 3 months = September, crossing year boundary). Changed to `new Date(today.getFullYear(), today.getMonth(), today.getDate())` so departure defaults to today and return is 14 days later. Build 0 errors, tests 227/227.                                                                                                                                                                                                                                             |
+| 2026-06-08 | **Dev Login Bypass** — Created `app/dev/login/page.tsx` with instant persona switching via `__dev_user` cookie. Four accounts: Customer (cust1), Verified Operator (op1), New Operator (op2), Admin (op1/admin). Guards: `/dev/*` 404s in production; `__dev_user` only read when `NODE_ENV === 'development'`. Bypass wired into `lib/supabase/middleware.ts` + `lib/auth/session.ts`. Build 0 errors, tests 227/227.                                                                                                                                                                                                                          |
 | 2026-06-07 | **Overlay consistency + Prisma config**: Redesigned `Overlay.tsx` — close button moved from `absolute` into `OverlayHeader` flex row (fixes Compare modal close at bottom-right). Added `OverlayBody` + updated `OverlayFooter`. Fixed RangeSlider active track blue→yellow. LoginModal title/close/border/shadow aligned to design tokens. `prisma.config.ts` now loads `.env.local` via dotenv; `directUrl` spread for DDL (bypasses pgBouncer port 6543 advisory lock hang). Password `@` URL-encoded as `%40`. Build 0 errors, tests 222/222. Commit `6459e14`.                                                                             |
 | 2026-06-06 | **SEO/AEO content expansion (T19)**: Added AI crawler allow rules (GPTBot, ClaudeBot, PerplexityBot, Google-Extended) to robots.ts. Added `personJsonLd`, `touristTripJsonLd`, `dateModified` support to json-ld.ts. Wired TouristTrip schema alongside Product on package detail pages. Added cost FAQ to /umrah. Expanded /umrah/ramadan from 29-line stub to full corridor page (2027 dates, FAQs, AEO details). Created /umrah/cost pricing guide (4 tiers, seasonal pricing, 4 FAQs, JSON-LD). Added sitemap entry for /umrah/cost. Added corridor links section to homepage and /umrah page. Tests: 222/222, build: 0 errors, 0 warnings. |
 | 2026-06-06 | **Beyond SEO audit + fixes**: Fixed critical canonical bug — 8 pages pointed canonical at homepage. Fixed hajj page (was `'use client'` with no metadata, inheriting homepage title/canonical). Added FAQPage+WebPage+BreadcrumbList JSON-LD to all corridor pages. Rewrote CityCorridor with design tokens (was using `text-slate-900` invisible on dark bg). Added city-specific FAQ blocks for AEO. Commit `78d72f5`.                                                                                                                                                                                                                        |

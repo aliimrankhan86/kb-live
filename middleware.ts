@@ -109,6 +109,14 @@ export async function middleware(request: NextRequest) {
   const { user, response } = await updateSession(request);
   const path = request.nextUrl.pathname;
 
+  // Dev routes: block in production, allow in development
+  if (path.startsWith('/dev/')) {
+    if (process.env.NODE_ENV !== 'development') {
+      return applySecurityHeaders(NextResponse.redirect(new URL('/', request.url)), nonce, csp);
+    }
+    return applySecurityHeaders(createNonceResponse(response, requestHeaders), nonce, csp);
+  }
+
   // Public routes: always allow
   if (isPublic(path)) {
     return applySecurityHeaders(createNonceResponse(response, requestHeaders), nonce, csp);

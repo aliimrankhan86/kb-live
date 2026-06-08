@@ -80,7 +80,7 @@ export function CookieConsent() {
               {' '}
               <Link
                 href="/privacy"
-                className="underline text-[var(--accent)] hover:text-[var(--accentHover)]"
+                className="underline text-[var(--yellow)] hover:brightness-95"
                 onClick={() => setVisible(false)}
               >
                 Privacy Policy
@@ -88,7 +88,7 @@ export function CookieConsent() {
               {' and '}
               <Link
                 href="/terms"
-                className="underline text-[var(--accent)] hover:text-[var(--accentHover)]"
+                className="underline text-[var(--yellow)] hover:brightness-95"
                 onClick={() => setVisible(false)}
               >
                 Terms & Conditions
@@ -126,21 +126,21 @@ export function CookieConsent() {
           <div className="flex flex-wrap items-center gap-2 md:flex-col md:items-stretch lg:flex-row">
             <button
               onClick={() => setShowDetails(!showDetails)}
-              className="rounded-md border border-[var(--borderSubtle)] px-4 py-2 text-sm text-[var(--text)] hover:bg-[var(--surfaceLight)]"
+              className="rounded-md border border-[var(--borderSubtle)] px-4 py-2 text-sm text-[var(--text)] hover:bg-[rgba(255,255,255,0.06)]"
               data-testid="cookie-details-toggle"
             >
               {showDetails ? 'Hide details' : 'Manage cookies'}
             </button>
             <button
               onClick={handleAcceptEssential}
-              className="rounded-md border border-[var(--borderSubtle)] px-4 py-2 text-sm text-[var(--text)] hover:bg-[var(--surfaceLight)]"
+              className="rounded-md border border-[var(--yellow)] bg-[var(--yellow)] px-4 py-2 text-sm font-semibold text-black shadow-[0_0_0_1px_rgba(255,211,29,0.25)] hover:brightness-95"
               data-testid="cookie-essential-only"
             >
               Essential only
             </button>
             <button
               onClick={handleAcceptAll}
-              className="rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-medium text-[var(--background)] hover:bg-[var(--accentHover)]"
+              className="rounded-md border border-[var(--borderSubtle)] px-4 py-2 text-sm font-medium text-[var(--text)] hover:bg-[rgba(255,255,255,0.06)]"
               data-testid="cookie-accept-all"
             >
               Accept all
