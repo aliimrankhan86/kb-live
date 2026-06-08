@@ -69,33 +69,19 @@ export function OperatorPackagesClient({ operatorId }: { operatorId: string }) {
     }
   };
 
-  const handleWizardSuccess = async (pkg: Package) => {
-    const isEdit = Boolean(editingPackage);
-    try {
-      const res = await fetch('/api/operator/packages', {
-        method: isEdit ? 'PATCH' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(pkg),
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || `Failed to ${isEdit ? 'update' : 'create'} package`);
+  const handleWizardSuccess = (saved: Package) => {
+    // The wizard has already persisted the package via the API; just merge the
+    // returned record into local state.
+    setPackages((prev) => {
+      const existing = prev.findIndex((p) => p.id === saved.id);
+      if (existing >= 0) {
+        const next = [...prev];
+        next[existing] = saved;
+        return next;
       }
-      const data = await res.json();
-      const saved = data.package as Package;
-      setPackages((prev) => {
-        const existing = prev.findIndex((p) => p.id === saved.id);
-        if (existing >= 0) {
-          const next = [...prev];
-          next[existing] = saved;
-          return next;
-        }
-        return [saved, ...prev];
-      });
-      setView('list');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : `Failed to ${isEdit ? 'update' : 'create'} package`);
-    }
+      return [saved, ...prev];
+    });
+    setView('list');
   };
 
   if (view === 'create' || view === 'edit') {
