@@ -11,9 +11,10 @@
 
 | Check | State |
 | --- | --- |
-| `npm run test` | ✅ 238/238 pass (18 files) |
+| `npm run test` | ✅ 239/239 pass (18 files) |
 | `npm run build` | ✅ 0 errors (known Supabase Edge + webpack cache warnings only) |
 | `npx tsc --noEmit` | ✅ pass |
+| E2E `e2e/operator.spec.ts` | ✅ 30/30 pass (chromium + firefox + webkit) |
 | Lint | ✅ clean |
 
 ---
@@ -43,8 +44,16 @@
 
 **Auth**
 - Supabase auth + `/api/auth/me` shell (customer/operator/admin nav)
-- Dev persona login (`KaabaTrip!2026`) for local development, E2E, Vercel preview, or controlled QA with `KAABATRIP_ENABLE_DEV_AUTH=true`; true production fallback disabled by default
+- Dev persona login (`KaabaTrip!2026`) — **localhost + automated E2E only**, never on any deployed env (preview or production); no remote toggle. ⚠️ remove before prod launch (`AI_NOTES.md` §4). Note: only works under `npm run dev` (`NODE_ENV=development`); a local prod build (`npm start`) returns 401 by design.
 - Password show/hide toggle, forgot password
+
+**Quality / tests (EXECUTION_QUEUE Phase 5)**
+- Validation utility: 7 reusable validators (`lib/validation.ts`) + 39 unit tests (Task 14)
+- SEO JSON-LD consolidated: every page imports `@/lib/seo/json-ld`, no inline/local helpers (Task 13)
+- E2E operator flow: `e2e/operator.spec.ts` 30/30 cross-browser via `__e2e_user` cookie bypass (Task 16)
+
+**Storage / images**
+- Migration `004_package_images_bucket.sql` **applied + verified** on Supabase (2026-06-08): public `package-images` bucket (5MB; jpeg/png/webp) + 4 RLS policies (public read; insert/update/delete only into own `{auth.uid()}/…` prefix). Matches `lib/api/storage.ts` path convention. Re-runnable via `scripts/apply-migration-004.mjs` (idempotent).
 
 **Platform**
 - UK GDPR (privacy, terms, cookie consent, marketing consent)
@@ -58,16 +67,18 @@
 
 | Item | Status | Blocker |
 | --- | --- | --- |
-| **Apply migration `004_package_images_bucket.sql`** to Supabase | ❗ code ready, not applied | Needs Supabase DB access — creates `package-images` bucket (5MB, jpeg/png/webp). Image upload won't work until applied. |
+| **Remove dev/preview login bypass before prod** | ⚠️ must strip, do not ship | Dev-only customer/partner sign-in (personas + `KaabaTrip!2026` + `__dev_user`). Safe (gated off in prod build) but must be physically removed pre-launch. Strip checklist in `AI_NOTES.md` §4. |
 | Merge `dev` → `main` | open | PR review |
 
 ---
 
 ## ▶️ Next actions (do in order)
 
-1. Apply migration 004 to Supabase (`supabase/migrations/004_package_images_bucket.sql`) → verify image upload end-to-end on package wizard step 7.
+1. ✅ ~~Apply migration 004 to Supabase~~ — applied + verified 2026-06-08 (bucket + 4 RLS policies live). Remaining nicety: drive a real upload through package wizard step 7 with a logged-in operator to confirm the browser→Supabase round-trip.
 2. Open PR `dev` → `main`, run full gate (test + build + Playwright smoke at 320px/1280px).
 3. (then) groom backlog — see `docs/EXECUTION_QUEUE.md`.
+
+> **Queue status (2026-06-08):** EXECUTION_QUEUE Tasks 13/14/16 verified `[x]`; Task 17 `[~]` — gate green, only manual dev smoke + commit/push remain. No `[ ]` backlog left in the queue. Migration 004 applied → only Pending items are dev-login strip (pre-prod) + PR `dev`→`main`.
 
 ---
 

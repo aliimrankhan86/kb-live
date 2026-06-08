@@ -492,7 +492,7 @@ Replace the flat `PackageForm` with a multi-step wizard.
 
 ### Task 13: SEO structured data
 
-**Status:** `[~] 2026-06-06 — partially implemented`
+**Status:** `[x] 2026-06-08 — consolidation complete; all pages import @/lib/seo/json-ld, no inline/local helpers remain`
 **Complexity:** Medium
 **Files created:** `lib/seo/json-ld.ts`
 **Files to modify:** `app/packages/[slug]/page.tsx`, `app/operators/[slug]/page.tsx`, `app/search/packages/page.tsx`
@@ -527,7 +527,7 @@ Replace the flat `PackageForm` with a multi-step wizard.
 
 ### Task 14: Validation utility
 
-**Status:** `[~] 2026-06-06 — partially implemented`
+**Status:** `[x] 2026-06-08 — all 7 validators implemented + 39 unit tests (tests/validation.test.ts) green`
 **Complexity:** Small
 **Files created:** `lib/validation.ts`
 
@@ -578,7 +578,7 @@ Replace the flat `PackageForm` with a multi-step wizard.
 
 ### Task 16: E2E smoke test for operator flow
 
-**Status:** `[~] 2026-06-06 — spec exists but failing`
+**Status:** `[x] 2026-06-08 — 30/30 pass cross-browser (chromium+firefox+webkit). __e2e_user cookie bypass (E2E_TESTING=1) fixed the /operator/* → / redirect.`
 **Complexity:** Small
 **Files to create/modify:** `e2e/operator.spec.ts`
 
@@ -603,7 +603,7 @@ Replace the flat `PackageForm` with a multi-step wizard.
 
 ### Task 17: Final integration test + push
 
-**Status:** `[ ] — blocked by Task 16`
+**Status:** `[~] 2026-06-08 — gate green (239 unit + 30 E2E pass, build 0 errors, tsc clean). Operator flow covered by e2e/operator.spec.ts. Remaining: manual dev smoke + commit/push (user-controlled).`
 **Complexity:** Small
 
 **What to do:**
