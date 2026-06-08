@@ -597,6 +597,13 @@ export const Repository = {
     return all;
   },
 
+  getOffers: async (ctx: RequestContext): Promise<Offer[]> => {
+    const all = await store().getOffers();
+    if (ctx.role === 'operator') return all.filter((o) => o.operatorId === ctx.userId);
+    if (ctx.role === 'admin') return all;
+    return [];
+  },
+
   createOffer: async (ctx: RequestContext, offer: Offer): Promise<Offer> => {
     if (ctx.role !== 'operator') throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
     const secureOffer = { ...offer, operatorId: ctx.userId };
