@@ -1,6 +1,54 @@
 # KaabaTrip — AI Working Notes
 
-> **For any AI (Claude, Kimi, GPT, etc.) picking this up:** Read §1 (status), §2 (rules), §3 (architecture). Everything else is reference. Build must stay at 0 errors, 0 warnings, tests at 222/222.
+> **For any AI (Claude, Kimi, GPT, etc.) picking this up:** Read §1 (status), §2 (rules), §3 (architecture). Everything else is reference. Build must stay at 0 errors, 0 warnings, tests at 227/227.
+
+---
+
+## Current Status
+
+- All Tier 1 blockers resolved
+- Supabase live (EU West, Ireland)
+- Prisma seeded and connected
+- FEATURE_USE_REAL_DB=true
+- Upstash Redis live (EU West, Ireland) — PING→PONG verified
+- CSP unsafe-inline removed — nonce-based policy live
+- 227/227 tests passing
+- tsc clean, lint clean, build clean
+
+## Completed Features
+
+- Operator auth fixed — all MockDB hardwiring removed, real sessions via getSessionUser()
+- Admin layout built — sidebar, role guard
+- Booking confirmation screen — KT-XXXXXXXX reference code, trust lines, redirect from RequestDetail
+- Payment evidence file upload — Supabase Storage bucket payment-evidence, RLS enforced
+- BookingOutcome entity — schema, repository, operator UI, RBAC guarded
+- Operator status tiers — TierExplanation component on package detail and operator profile
+- Test coverage baseline — 27.98% statements, ratchet thresholds set
+- Operator dashboard rebuilt — summary stats, relative timestamps, manual refresh, no polling
+- Package image upload — Supabase Storage bucket package-images, up to 8 images, gallery on PackageDetail
+- imageUrl → images[] migration complete — no residual imageUrl anywhere
+- Double-POST bug fixed in PackageWizard
+- CSV import available on empty account
+- Offers stat now uses Repository.getOffers(ctx) — MockDB bypass removed
+
+## Pending Tasks (in priority order)
+
+1. Operator analytics — wire real events to OperatorAnalyticsDashboard (currently placeholder/MockDB data)
+2. Reconciliation export — admin CSV/PDF export of bookings and payment evidence for reconciliation
+3. Buy domain — when purchased, update: NEXT_PUBLIC_SITE_URL, NEXT_PUBLIC_PLAUSIBLE_DOMAIN, Supabase auth redirect URLs, canonical URLs, robots.txt, JSON-LD base URL, any hardcoded kaabatrip.com strings
+4. Wire Plausible analytics — after domain is live, respect cookie consent already in codebase
+5. Operator/admin RLS for payment evidence files — currently owner-only read access
+
+## Known Issues / Technical Debt
+
+- Storage bucket migrations must be applied via pg + DIRECT_URL directly, not prisma db push or supabase CLI (no config.toml, no linked project)
+- Supabase CLI not configured — use pg for any raw SQL migrations
+- Test coverage at ~28% — critical paths at 0%: lib/auth/session.ts, lib/auth/api.ts, app/api/operator/packages/route.ts, lib/api/db/adapter.ts
+- Operator/admin cannot read payment evidence files (RLS is owner-only)
+
+## Session Continuity Note
+
+This file is the source of truth for any AI agent picking up this project. Read it before starting any task. All decisions, completed work, known issues, and pending tasks are maintained here. Do not rely on git log alone — always read AI_NOTES.md first.
 
 ---
 
