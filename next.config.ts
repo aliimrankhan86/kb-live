@@ -8,12 +8,11 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
 
-  // Forward auth environment flags into Edge Runtime (middleware) at build time.
-  // Dev auth stays disabled for true production unless explicitly enabled.
+  // Forward only the E2E flag into Edge Runtime (middleware) at build time.
+  // Dev auth is localhost + E2E only — no remote/preview toggle exists, so
+  // KAABATRIP_ENABLE_DEV_AUTH and VERCEL_ENV are deliberately NOT exposed.
   env: {
     E2E_TESTING: process.env.E2E_TESTING || '',
-    KAABATRIP_ENABLE_DEV_AUTH: process.env.KAABATRIP_ENABLE_DEV_AUTH || '',
-    VERCEL_ENV: process.env.VERCEL_ENV || '',
   },
 
   images: {

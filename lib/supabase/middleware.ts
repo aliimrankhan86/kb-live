@@ -30,7 +30,7 @@ export async function updateSession(request: NextRequest): Promise<AuthResult> {
     }
   }
 
-  // Dev login bypass for local, E2E, and non-production preview environments.
+  // Dev login bypass — localhost + automated E2E only. Never on deployed envs.
   if (isDevAuthEnabled()) {
     const devCookie = request.cookies.get('__dev_user');
     if (devCookie?.value) {

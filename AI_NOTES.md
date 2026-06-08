@@ -155,7 +155,7 @@ Important auth behavior:
 
 - `/dev/login` uses cookie impersonation through `__dev_user`; it bypasses Supabase Auth and does not check a password.
 - E2E helpers use `__e2e_user`; they also bypass Supabase Auth.
-- Normal `/login` has a dev-auth credential fallback for the dev accounts above. It is enabled in local development, E2E, Vercel preview deployments, or when `KAABATRIP_ENABLE_DEV_AUTH=true` is explicitly set. It is disabled in true production by default. It validates `KaabaTrip!2026`, sets `__dev_user`, and returns the same safe user shape as real auth.
+- Normal `/login` has a dev-auth credential fallback for the dev accounts above. It is enabled on **localhost (`NODE_ENV=development`) and automated E2E (`E2E_TESTING=1`) only** — never on any deployed environment (preview or production). It validates `KaabaTrip!2026`, sets `__dev_user`, and returns the same safe user shape as real auth.
 - Non-dev credentials still use Supabase Auth.
 - Real password validation should be tested through `/signup` and `/login` with real Supabase-created credentials.
 - `/api/auth/me` powers the header session state so Supabase sessions, `__dev_user`, and `__e2e_user` render correct navigation.
@@ -172,6 +172,27 @@ Key files:
 - `components/auth/LoginForm.tsx`
 - `components/auth/SignUpForm.tsx`
 - `components/layout/Header.tsx`
+
+### ⚠️ REMOVE BEFORE PRODUCTION — dev/preview-only login
+
+The customer + partner login bypass is **local-dev / preview / QA tooling only**. It exists so the sign-in journey for customers and partners can be walked through and visually checked without real Supabase accounts. It must **not** ship in production-ready code.
+
+**Now locked to localhost + automated E2E only.** `isDevAuthEnabled()` returns `true` only when `NODE_ENV==='development'` (local `next dev`) or `E2E_TESTING==='1'`. Every deployed runtime (Vercel preview AND production) has `NODE_ENV='production'`, so the bypass is off and `/dev/login` redirects to `/`. There is intentionally **no remote/preview toggle** — `KAABATRIP_ENABLE_DEV_AUTH` and `VERCEL_ENV` are no longer read or exposed. The hardcoded password only works on localhost, so a public/preview URL cannot be used to impersonate anyone.
+
+> **Gotcha — "can't log in locally with the dev personas":** a local **production build** (`npm run build` + `npm start`, i.e. `next start`) runs with `NODE_ENV='production'`, so `isDevAuthEnabled()` is `false` and `/api/auth/sign-in` returns `401 AUTH_INVALID_CREDENTIALS` for `customer@example.com` / `KaabaTrip!2026` — this is the hardening working as designed, not a bug. To test customer/partner views you must run the **dev server** (`npm run dev`, which sets `NODE_ENV='development'`). Verify the running process: `next-server` started via `next start` = production = dev login off; `next dev --turbopack` = dev login on. (Alternatively set `E2E_TESTING=1`, but `.env.local` ships it empty.)
+
+The shared password `KaabaTrip!2026` still exists in source + git history (harmless remotely now, but) the code, password, and personas must still be **physically removed** before production launch, not just gated.
+
+Strip checklist (do all before prod launch):
+- [ ] Delete `lib/auth/dev-users.ts` (personas + `DEV_ACCOUNT_PASSWORD = 'KaabaTrip!2026'` + `isDevAuthEnabled()`).
+- [ ] Delete `app/dev/login/page.tsx` and the `/dev/*` route guard in `lib/supabase/middleware.ts`.
+- [ ] Remove `__dev_user` read/write/clear in `app/api/auth/sign-in/route.ts`, `app/api/auth/sign-out/route.ts`, `lib/supabase/middleware.ts`, `lib/auth/session.ts`, `app/api/auth/me/route.ts`.
+- [ ] Remove the dev-auth credential fallback in `/api/auth/sign-in` so all creds go to Supabase Auth.
+- [ ] Drop `KAABATRIP_ENABLE_DEV_AUTH` / `VERCEL_ENV` exposure from `next.config.ts` env block.
+- [ ] Remove dev-auth assertions from `tests/auth-api.test.ts` and `tests/auth-components.test.tsx`.
+- [ ] Remove `__e2e_user` bypass if e2e is not part of prod pipeline.
+
+Reason kept for now: testing the customer + partner sign-in journey and how it looks to those users. **Do not push this to production-ready code.**
 
 ---
 

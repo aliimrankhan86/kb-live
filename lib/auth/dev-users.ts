@@ -64,11 +64,14 @@ export function getDevUserByEmail(email: string): DevAuthUser | null {
 }
 
 export function isDevAuthEnabled() {
-  if (process.env.KAABATRIP_ENABLE_DEV_AUTH === 'true') return true;
-  if (process.env.KAABATRIP_ENABLE_DEV_AUTH === 'false') return false;
+  // SECURITY: localhost + automated E2E ONLY. Never enabled on any deployed
+  // environment — preview or production. A deployed runtime (Vercel) always
+  // has NODE_ENV='production', so this returns false there regardless of any
+  // other flag. There is intentionally NO remote toggle: the hardcoded dev
+  // personas + password must never be reachable from a public URL.
+  // See AI_NOTES.md §4 "REMOVE BEFORE PRODUCTION".
   if (process.env.E2E_TESTING === '1') return true;
-  if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) return true;
-  return Boolean(process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'production');
+  return process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
 }
 
 export function toSessionUser(user: DevAuthUser) {

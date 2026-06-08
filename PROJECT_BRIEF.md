@@ -42,7 +42,7 @@ Two modes:
 
 ## 4. Current state (verified 2026-06-08)
 - **Branch:** `dev` (target `main` after PR)
-- **Tests:** ✅ 238/238 pass (18 files) · **Build:** ✅ 0 errors · **tsc:** ✅ pass · **Lint:** ✅ clean
+- **Tests:** ✅ 239/239 pass (18 files) · **Build:** ✅ 0 errors · **tsc:** ✅ pass · **Lint:** ✅ clean
 - **MVP is feature-complete** across traveller / operator / admin flows.
 
 ---
@@ -54,7 +54,10 @@ Two modes:
 
 **Admin:** complaint triage · bank-change review queue · reconciliation CSV export · audit logs.
 
-**Auth:** Supabase + `/api/auth/me` (customer/operator/admin nav) · dev persona login for local/preview/controlled QA (`KaabaTrip!2026`, production fallback disabled by default) · password show/hide · forgot password.
+**Auth:** Supabase + `/api/auth/me` (customer/operator/admin nav) · **dev persona login is localhost + automated-E2E ONLY** — never enabled on any deployed env (preview or production); no remote toggle, so the `KaabaTrip!2026` personas cannot be reached from a public URL · password show/hide · forgot password.
+> ⚠️ **Dev login = local testing scaffold, NOT production code.** Must be physically removed before production launch (strip checklist in `AI_NOTES.md` §4). Gated to localhost only as of 2026-06-08; safe on deploys but still slated for removal.
+>
+> 🛠️ **Gotcha — "can't log in locally":** dev personas (`customer@example.com` / `operator@example.com` / `operator2@example.com` / `admin@example.com`, all `KaabaTrip!2026`) only work under **`npm run dev`** (`NODE_ENV=development`). A local **production build** (`npm run build` + `npm start` → `next start`) runs `NODE_ENV=production`, so `isDevAuthEnabled()` is false and sign-in returns **`401 AUTH_INVALID_CREDENTIALS`** — this is the hardening working as designed, not a bug. Fix = restart with `npm run dev`. Quick check: running process `next-server` (from `next start`) = login off; `next dev --turbopack` = login on.
 
 **Platform:** UK GDPR (privacy, terms, cookie consent, marketing consent) · SEO (JSON-LD, dynamic sitemap, city corridor pages `/umrah/london|birmingham|manchester`) · A11y WCAG 2.2 AA · security (nonce-based CSP, RLS migrations, rate limiting).
 
@@ -64,6 +67,7 @@ Two modes:
 | Item | Status | Blocker |
 | --- | --- | --- |
 | Apply migration `004_package_images_bucket.sql` to Supabase | ❗ code ready, NOT applied | needs Supabase DB access — creates `package-images` bucket (5MB; jpeg/png/webp). **Image upload is inert until applied.** |
+| Remove dev login scaffold before prod | ⚠️ must strip, do not ship | localhost-only & safe today, but personas + `KaabaTrip!2026` + `__dev_user` must be deleted pre-launch. Checklist: `AI_NOTES.md` §4. |
 | Merge `dev` → `main` | open | PR review |
 
 ## 7. ▶️ Next actions (in order)
@@ -84,3 +88,5 @@ Two modes:
 
 ## 9. How to keep this brief current
 This is a snapshot. After finishing + verifying work, update sections **4 (state), 5 (done), 6 (pending), 7 (next)** and the "Last verified" date at the top. In the repo, the live equivalent is `STATUS.md`.
+
+**Recurring-gotcha rule (for current + future AI sessions):** when a local issue is diagnosed as *expected behavior* rather than a bug (e.g. the dev-login `npm run dev` vs `npm start` gotcha in §5), record it once as a 🛠️ **Gotcha** note in the relevant section here **and** mirror it in `AI_NOTES.md` + `STATUS.md`. Treat the three docs as one synced set — if you add or change a gotcha in one, update the other two in the same pass. Do not spin up a separate notes file.

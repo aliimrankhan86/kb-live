@@ -10,9 +10,10 @@ import {
 } from '@/lib/auth/dev-users';
 
 /**
- * Dev login bypass page. Available in local, E2E, and non-production preview environments.
- * Set __dev_user cookie to instantly authenticate as customer, operator, or admin.
- * Redirects to / in production unless KAABATRIP_ENABLE_DEV_AUTH=true is set.
+ * Dev login bypass page. localhost + automated E2E ONLY — never on deployed envs.
+ * Sets __dev_user cookie to instantly authenticate as customer, operator, or admin.
+ * 404s on any deployed environment (preview or production); see isDevAuthEnabled().
+ * REMOVE BEFORE PRODUCTION — see AI_NOTES.md §4.
  */
 
 function DevLoginCard({

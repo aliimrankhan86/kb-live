@@ -24,23 +24,29 @@ describe('Auth API Security', () => {
       expect(isDevAuthEnabled()).toBe(true);
     });
 
-    it('allows documented dev accounts in Vercel preview deployments', () => {
+    it('allows automated E2E runs', () => {
       vi.stubEnv('NODE_ENV', 'production');
-      vi.stubEnv('VERCEL_ENV', 'preview');
+      vi.stubEnv('E2E_TESTING', '1');
       expect(isDevAuthEnabled()).toBe(true);
     });
 
-    it('keeps documented dev accounts disabled in production by default', () => {
+    it('keeps dev accounts disabled on Vercel preview deployments', () => {
+      vi.stubEnv('NODE_ENV', 'production');
+      vi.stubEnv('VERCEL_ENV', 'preview');
+      expect(isDevAuthEnabled()).toBe(false);
+    });
+
+    it('keeps dev accounts disabled in production', () => {
       vi.stubEnv('NODE_ENV', 'production');
       vi.stubEnv('VERCEL_ENV', 'production');
       expect(isDevAuthEnabled()).toBe(false);
     });
 
-    it('allows an explicit server-side override for controlled QA', () => {
+    it('ignores any remote override flag — there is no deployed bypass', () => {
       vi.stubEnv('NODE_ENV', 'production');
-      vi.stubEnv('VERCEL_ENV', 'production');
+      vi.stubEnv('VERCEL_ENV', 'preview');
       vi.stubEnv('KAABATRIP_ENABLE_DEV_AUTH', 'true');
-      expect(isDevAuthEnabled()).toBe(true);
+      expect(isDevAuthEnabled()).toBe(false);
     });
   });
 
