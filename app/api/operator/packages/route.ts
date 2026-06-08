@@ -3,6 +3,7 @@ import { getSessionUser } from '@/lib/auth/session';
 import { Repository } from '@/lib/api/repository';
 import { mapErrorToResponse } from '@/lib/errors';
 import type { Package } from '@/lib/types';
+import { AIRPORT_CODES } from '@/lib/airports';
 import { z } from 'zod';
 
 // ─── Zod schema ──────────────────────────────────────────────────────────────
@@ -20,6 +21,8 @@ const roomOccupancySchema = z.object({
   triple: z.boolean(),
   quad: z.boolean(),
 });
+
+const airportCodeSchema = z.enum(AIRPORT_CODES);
 
 const packageSchema = z.object({
   // Step 1 — required
@@ -52,7 +55,7 @@ const packageSchema = z.object({
   distanceToHaramMadinahMetres: z.number().int().nonnegative().optional(),
   // Step 4
   airline: z.string().optional(),
-  departureAirport: z.string().optional(),
+  departureAirport: airportCodeSchema.optional(),
   flightType: z.enum(['direct', 'one-stop', 'multi-stop']).optional(),
   // Step 5
   inclusions: inclusionsSchema.default({ visa: false, flights: false, transfers: false, meals: false }),

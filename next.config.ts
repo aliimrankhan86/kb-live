@@ -1,6 +1,9 @@
 import path from "node:path";
 import type { NextConfig } from "next";
 
+const dbAdapterPath = path.resolve(process.cwd(), 'lib/api/db/adapter.ts');
+const dbAdapterClientStubPath = './lib/api/db/client-adapter-stub.ts';
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
@@ -16,6 +19,12 @@ const nextConfig: NextConfig = {
     dangerouslyAllowSVG: true,
     contentDispositionType: "attachment",
     formats: ["image/avif", "image/webp"],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+    ],
     // Prevent SVG script execution when operator logos become uploadable
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
@@ -57,11 +66,19 @@ const nextConfig: NextConfig = {
   // not exist in the browser or Edge Runtime.
   serverExternalPackages: ['pg', '@prisma/adapter-pg', '@prisma/client'],
 
+  turbopack: {
+    resolveAlias: {
+      [dbAdapterPath]: { browser: dbAdapterClientStubPath },
+      './db/adapter': { browser: dbAdapterClientStubPath },
+      '@/lib/api/db/adapter': { browser: dbAdapterClientStubPath },
+    },
+  },
+
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.alias = {
         ...(config.resolve.alias ?? {}),
-        [path.resolve(process.cwd(), 'lib/api/db/adapter.ts')]: false,
+        [dbAdapterPath]: false,
       };
     }
 

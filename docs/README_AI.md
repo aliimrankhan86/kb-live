@@ -2,6 +2,8 @@
 
 **Read this file first. It is the single entry point for any AI agent or developer.**
 
+**Current canonical handover:** `AI_NOTES.md` is the single source of truth for verified status, pending areas, and Claude handoff context. If this file or another doc conflicts with a verified statement in `AI_NOTES.md`, update the stale doc instead of undoing implementation.
+
 ---
 
 ## What is KaabaTrip?
@@ -12,11 +14,11 @@ A two-sided marketplace for Umrah/Hajj pilgrimage packages. Travellers search, c
 
 - **Branch:** `dev`
 - **Stack:** Next.js 15.5.19 (App Router), React 19, Tailwind v4, TypeScript strict, Vitest 4.1.8, Playwright
-- **Verified 2026-06-07:** `npm run test` passes (17 files, 222/222). `npm run build` passes with 0 errors; known warning remains from `@supabase/supabase-js` using `process.version` in Edge middleware via `@supabase/ssr`.
-- **E2E 2026-06-07:** Last recorded chromium run in `AI_NOTES.md` is 19/21 pass, 2 skipped, 0 fail. Full cross-browser Playwright status still depends on local browser binary availability.
-- **Data:** Repository layer is async. MockDB remains the default for tests and E2E; Prisma/Supabase paths exist behind `FEATURE_USE_REAL_DB=true`. The Prisma adapter loader is production-chunk safe: server builds import `./db/adapter` literally, while client webpack aliases that adapter out so `pg`/Prisma do not enter browser bundles.
-- **Auth:** Supabase SSR/auth endpoints and middleware are wired; several dev/operator UI flows still rely on MockDB's simulated current user.
-- **Operator side:** Onboarding, dashboard, leads, profile, payment settings, bank-review admin, complaints, package CSV, and the 8-step package wizard exist. Operator package E2E is pending because route auth/test setup is not aligned.
+- **Verified 2026-06-08:** `npm run test` passes (18 files, 234/234). `npm run build` passes with 0 errors; known warning remains from `@supabase/supabase-js` using `process.version` in Edge middleware via `@supabase/ssr`, plus webpack cache-size warnings.
+- **E2E 2026-06-08:** `npx playwright test` passes with 57 passed, 6 skipped, 0 failed. `e2e/signup-password-mismatch.spec.ts` passes 3/3.
+- **Data:** Repository layer is async. MockDB remains the default for unit tests and cookie impersonation flows; Prisma/Supabase paths exist behind `FEATURE_USE_REAL_DB=true`. The Prisma adapter loader is production-chunk safe: server builds import `./db/adapter` literally, while client/browser builds alias that adapter to a stub so `pg`/Prisma do not enter browser bundles.
+- **Auth:** Supabase SSR/auth endpoints and middleware are wired. `/login` now supports development-only local dev persona credentials, sets `__dev_user`, and renders customer/operator/admin navigation through `/api/auth/me`.
+- **Operator side:** Onboarding, dashboard, leads, profile, payment settings, bank-review admin, complaints, package CSV, the 8-step package wizard, and real-event operator analytics exist. Admin reconciliation exists but needs explicit business/export verification before it is treated as complete.
 
 ## Localisation
 
@@ -52,9 +54,9 @@ See `docs/APP_STRUCTURE.md` for full journey maps and wireframes.
 | `/operator/onboarding` | Operator registration form. | Done |
 | `/operator/onboarding/status` | Operator verification status screen. | Done |
 | `/operator/dashboard` | Operator home with stats, activity, quick actions. | Done |
-| `/operator/packages` | Package list, CSV import/export, 8-step wizard. | Implemented; E2E pending |
+| `/operator/packages` | Package list, CSV import/export, 8-step wizard. | Done |
 | `/operator/leads` | Lead/enquiry management and offer response flow. | Done |
-| `/operator/analytics` | Stats dashboard. | Partial |
+| `/operator/analytics` | Event-backed analytics dashboard. | Done; deeper business insights future scope |
 | `/operator/profile` | Profile editor. | Done |
 | `/operator/settings` | Operator settings index. | Done |
 | `/operator/settings/payment-details` | Bank details with change request, cooling period, audit log. | Done |

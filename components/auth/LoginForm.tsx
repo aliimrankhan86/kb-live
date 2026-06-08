@@ -5,19 +5,37 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { PasswordInput } from '@/components/auth/PasswordInput';
 
 type LoginTab = 'customer' | 'partner';
+type ReturnedRole = 'customer' | 'operator' | 'admin';
+
+function resolveLoginType(value: string | null): LoginTab {
+  return value === 'partner' ? 'partner' : 'customer';
+}
+
+function getRedirectForRole(role: ReturnedRole, redirect: string | null): string {
+  if (role === 'operator') return redirect || '/operator/dashboard';
+  if (role === 'admin') return redirect || '/admin/complaints';
+
+  if (redirect && !redirect.startsWith('/operator') && !redirect.startsWith('/admin')) {
+    return redirect;
+  }
+
+  return '/';
+}
 
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get('redirect') || '/operator/dashboard';
+  const redirect = searchParams.get('redirect');
   const forgotParam = searchParams.get('forgot');
-  const defaultTab = (searchParams.get('type') as LoginTab) || 'customer';
+  const defaultTab = resolveLoginType(searchParams.get('type'));
 
   const [activeTab, setActiveTab] = useState<LoginTab>(defaultTab);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showForgot, setShowForgot] = useState(forgotParam === 'true');
@@ -45,14 +63,8 @@ export function LoginForm() {
       }
 
       // Redirect based on role
-      const role = data.user?.user_metadata?.role || 'customer';
-      if (role === 'operator') {
-        router.push('/operator/dashboard');
-      } else if (role === 'admin') {
-        router.push('/admin/complaints');
-      } else {
-        router.push(redirect);
-      }
+      const role = (data.user?.role || 'customer') as ReturnedRole;
+      router.push(getRedirectForRole(role, redirect));
       router.refresh();
     } catch {
       setError('Something went wrong. Please try again.');
@@ -222,14 +234,17 @@ export function LoginForm() {
       />
 
       <div className="space-y-1">
-        <Input
+        <PasswordInput
           label="Password"
-          type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
           autoComplete="current-password"
           data-testid="login-password"
+          showPassword={showPassword}
+          onToggleShowPassword={() => setShowPassword((current) => !current)}
+          toggleTestId="login-password-toggle"
+          helperText="Password must be at least 8 characters, with 1 uppercase, 1 lowercase, 1 number, and 1 special character."
         />
         <div className="flex justify-end">
           <button

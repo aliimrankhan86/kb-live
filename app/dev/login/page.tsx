@@ -1,6 +1,12 @@
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
+import {
+  DEV_ACCOUNT_PASSWORD,
+  DEV_AUTH_USERS,
+  type DevAuthKey,
+  toSessionUser,
+} from '@/lib/auth/dev-users';
 
 /**
  * Dev-only login bypass page. Available only in development.
@@ -8,53 +14,10 @@ import Link from 'next/link';
  * Redirects to / in production.
  */
 
-const DEV_USERS = {
-  customer: {
-    id: 'cust1',
-    email: 'customer@example.com',
-    role: 'customer',
-    name: 'Ali Client',
-    label: 'Customer',
-    description: 'Standard customer account — browse packages, request quotes, track requests.',
-    color: '#4A9EFF',
-  },
-  operator: {
-    id: 'op1',
-    email: 'operator@example.com',
-    role: 'operator',
-    name: 'Ahmed Operator',
-    label: 'Operator (Verified)',
-    description: 'Verified operator — full dashboard, packages, leads, profile, payment details.',
-    color: '#FFD31D',
-  },
-  operatorNew: {
-    id: 'op2',
-    email: 'operator2@example.com',
-    role: 'operator',
-    name: 'Fatima Operator',
-    label: 'Operator (New / Unverified)',
-    description: 'New operator — onboarding flow, incomplete profile, no bank details.',
-    color: '#E8A838',
-  },
-  admin: {
-    id: 'op1',
-    email: 'admin@example.com',
-    role: 'admin',
-    name: 'Admin User',
-    label: 'Admin',
-    description: 'Admin account — bank changes, complaints triage, operator verification.',
-    color: '#FF6B6B',
-  },
-} as const;
-
-type DevRole = keyof typeof DEV_USERS;
-
 function DevLoginCard({
-  roleKey: _roleKey,
   user,
 }: {
-  roleKey: DevRole;
-  user: (typeof DEV_USERS)[DevRole];
+  user: (typeof DEV_AUTH_USERS)[DevAuthKey];
 }) {
   return (
     <form
@@ -63,12 +26,7 @@ function DevLoginCard({
         const cookieStore = await cookies();
         cookieStore.set({
           name: '__dev_user',
-          value: JSON.stringify({
-            id: user.id,
-            email: user.email,
-            role: user.role,
-            name: user.name,
-          }),
+          value: JSON.stringify(toSessionUser(user)),
           path: '/',
           sameSite: 'lax',
           httpOnly: false,
@@ -97,6 +55,8 @@ function DevLoginCard({
       </p>
       <div className="text-xs" style={{ color: 'var(--textMuted)' }}>
         <span className="font-medium">Email:</span> {user.email}
+        <br />
+        <span className="font-medium">Password:</span> {DEV_ACCOUNT_PASSWORD}
         <br />
         <span className="font-medium">ID:</span> {user.id}
         <br />
@@ -186,9 +146,34 @@ export default async function DevLoginPage() {
       )}
 
       <div className="grid gap-6 sm:grid-cols-2">
-        {(Object.keys(DEV_USERS) as DevRole[]).map((key) => (
-          <DevLoginCard key={key} roleKey={key} user={DEV_USERS[key]} />
+        {(Object.keys(DEV_AUTH_USERS) as DevAuthKey[]).map((key) => (
+          <DevLoginCard key={key} user={DEV_AUTH_USERS[key]} />
         ))}
+      </div>
+
+      <div
+        className="mb-6 rounded-lg border p-4 text-sm"
+        style={{
+          borderColor: 'var(--borderSubtle)',
+          backgroundColor: 'var(--bgSecondary)',
+        }}
+      >
+        <p className="font-medium" style={{ color: 'var(--textPrimary)' }}>
+          Password complexity requirements
+        </p>
+        <ul className="mt-2 space-y-1 text-xs" style={{ color: 'var(--textMuted)' }}>
+          <li>• Minimum 8 characters</li>
+          <li>• At least 1 uppercase letter (A–Z)</li>
+          <li>• At least 1 lowercase letter (a–z)</li>
+          <li>• At least 1 number (0–9)</li>
+          <li>• At least 1 special character (!@#$%^&*)</li>
+        </ul>
+        <p className="mt-2 text-xs" style={{ color: 'var(--textMuted)' }}>
+          All dev accounts use the same password:{' '}
+          <code className="rounded px-1 py-0.5" style={{ backgroundColor: 'var(--bgPrimary)' }}>
+            {DEV_ACCOUNT_PASSWORD}
+          </code>
+        </p>
       </div>
 
       <div className="mt-8 flex flex-wrap gap-3 text-sm">

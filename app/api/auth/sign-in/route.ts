@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { apiSignIn } from '@/lib/auth/api';
+import { DEV_ACCOUNT_PASSWORD, getDevUserByEmail, toSessionUser } from '@/lib/auth/dev-users';
+import { AppError, mapErrorToResponse } from '@/lib/errors';
 import { signInSchema } from '@/lib/validation';
-import { mapErrorToResponse } from '@/lib/errors';
 import { checkRateLimit, getRateLimitIdentifier } from '@/lib/rate-limit';
 
 export async function POST(request: Request) {
@@ -32,6 +33,26 @@ export async function POST(request: Request) {
     }
 
     const { email, password } = parsed.data;
+    const devUser = getDevUserByEmail(email);
+
+    if (process.env.NODE_ENV === 'development' && devUser) {
+      if (password !== DEV_ACCOUNT_PASSWORD) {
+        throw new AppError({ code: 'AUTH_INVALID_CREDENTIALS', status: 401 });
+      }
+
+      const sessionUser = toSessionUser(devUser);
+      const response = NextResponse.json({ user: sessionUser });
+      response.cookies.set({
+        name: '__dev_user',
+        value: JSON.stringify(sessionUser),
+        path: '/',
+        sameSite: 'lax',
+        httpOnly: false,
+        secure: false,
+        maxAge: 60 * 60 * 24 * 7,
+      });
+      return response;
+    }
 
     const data = await apiSignIn({ email, password });
 

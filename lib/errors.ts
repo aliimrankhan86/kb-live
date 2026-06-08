@@ -5,6 +5,7 @@
  */
 
 export type ErrorCode =
+  | 'AUTH_INVALID_CREDENTIALS'
   | 'UNAUTHORIZED'
   | 'FORBIDDEN'
   | 'VALIDATION_ERROR'
@@ -20,6 +21,7 @@ export type ErrorCode =
   | 'INTERNAL_ERROR';
 
 const USER_FACING_MESSAGES: Record<ErrorCode, string> = {
+  AUTH_INVALID_CREDENTIALS: 'Invalid email or password.',
   UNAUTHORIZED: 'You are not authorised to perform this action.',
   FORBIDDEN: 'You do not have permission to access this resource.',
   VALIDATION_ERROR: 'Please check your input and try again.',

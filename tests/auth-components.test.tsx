@@ -83,6 +83,51 @@ describe('LoginForm', () => {
     });
   });
 
+  it('redirects traveller login to the customer view', async () => {
+    (global.fetch as Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ user: { id: 'cust1', email: 'customer@example.com', role: 'customer' } }),
+    });
+
+    render(<LoginForm />);
+    fireEvent.change(screen.getByTestId('login-email'), { target: { value: 'customer@example.com' } });
+    fireEvent.change(screen.getByTestId('login-password'), { target: { value: 'KaabaTrip!2026' } });
+    fireEvent.click(screen.getByTestId('login-submit'));
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith('/');
+    });
+  });
+
+  it('redirects partner login to the operator dashboard', async () => {
+    (global.fetch as Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ user: { id: 'op1', email: 'operator@example.com', role: 'operator' } }),
+    });
+
+    render(<LoginForm />);
+    fireEvent.click(screen.getByTestId('login-tab-partner'));
+    fireEvent.change(screen.getByTestId('login-email'), { target: { value: 'operator@example.com' } });
+    fireEvent.change(screen.getByTestId('login-password'), { target: { value: 'KaabaTrip!2026' } });
+    fireEvent.click(screen.getByTestId('login-submit'));
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith('/operator/dashboard');
+    });
+  });
+
+  it('toggles password visibility on login', () => {
+    render(<LoginForm />);
+    const passwordInput = screen.getByTestId('login-password');
+    expect(passwordInput).toHaveAttribute('type', 'password');
+
+    fireEvent.click(screen.getByTestId('login-password-toggle'));
+    expect(passwordInput).toHaveAttribute('type', 'text');
+
+    fireEvent.click(screen.getByTestId('login-password-toggle'));
+    expect(passwordInput).toHaveAttribute('type', 'password');
+  });
+
   it('has traveller signup link in customer tab', () => {
     render(<LoginForm />);
     expect(screen.getByText('Sign up')).toHaveAttribute('href', '/signup?type=customer');
@@ -127,8 +172,8 @@ describe('SignUpForm', () => {
     render(<SignUpForm />);
     fireEvent.change(screen.getByTestId('signup-name'), { target: { value: 'Test User' } });
     fireEvent.change(screen.getByTestId('signup-email'), { target: { value: 'test@example.com' } });
-    fireEvent.change(screen.getByTestId('signup-password'), { target: { value: 'password123' } });
-    fireEvent.change(screen.getByTestId('signup-confirm-password'), { target: { value: 'different456' } });
+    fireEvent.change(screen.getByTestId('signup-password'), { target: { value: 'TestPass123!' } });
+    fireEvent.change(screen.getByTestId('signup-confirm-password'), { target: { value: 'Different456!' } });
     fireEvent.click(screen.getByTestId('signup-terms-checkbox'));
     fireEvent.click(screen.getByTestId('signup-submit'));
 
@@ -146,8 +191,8 @@ describe('SignUpForm', () => {
     render(<SignUpForm />);
     fireEvent.change(screen.getByTestId('signup-name'), { target: { value: 'Test User' } });
     fireEvent.change(screen.getByTestId('signup-email'), { target: { value: 'test@example.com' } });
-    fireEvent.change(screen.getByTestId('signup-password'), { target: { value: 'password123' } });
-    fireEvent.change(screen.getByTestId('signup-confirm-password'), { target: { value: 'password123' } });
+    fireEvent.change(screen.getByTestId('signup-password'), { target: { value: 'TestPass123!' } });
+    fireEvent.change(screen.getByTestId('signup-confirm-password'), { target: { value: 'TestPass123!' } });
     fireEvent.click(screen.getByTestId('signup-terms-checkbox'));
     fireEvent.click(screen.getByTestId('signup-submit'));
 
@@ -161,6 +206,20 @@ describe('SignUpForm', () => {
     expect(screen.getByTestId('signup-terms-checkbox')).toBeInTheDocument();
     expect(screen.getByTestId('signup-marketing-checkbox')).toBeInTheDocument();
     expect(screen.getByTestId('signup-submit')).toBeDisabled();
+  });
+
+  it('toggles password visibility on signup fields', () => {
+    render(<SignUpForm />);
+    const passwordInput = screen.getByTestId('signup-password');
+    const confirmPasswordInput = screen.getByTestId('signup-confirm-password');
+
+    expect(passwordInput).toHaveAttribute('type', 'password');
+    fireEvent.click(screen.getByTestId('signup-password-toggle'));
+    expect(passwordInput).toHaveAttribute('type', 'text');
+
+    expect(confirmPasswordInput).toHaveAttribute('type', 'password');
+    fireEvent.click(screen.getByTestId('signup-confirm-password-toggle'));
+    expect(confirmPasswordInput).toHaveAttribute('type', 'text');
   });
 
   it('links to login with correct type param based on role', () => {

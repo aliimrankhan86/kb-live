@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback, useMemo } from 'react'
 import { RangeSlider } from '@/components/ui/RangeSlider'
+import { UMRAH_SEARCH_AIRPORTS, getAirportLabel, type AirportCode } from '@/lib/airports'
 import styles from './umrah-search-form.module.css'
 
 interface ChildInfo {
@@ -12,15 +13,8 @@ interface UmrahSearchFormProps {
   className?: string
 }
 
-const TARGET_CITIES = [
-  { code: 'LON', name: 'London', helper: 'Any London airport' },
-  { code: 'BHX', name: 'Birmingham', helper: 'Birmingham area' },
-  { code: 'MAN', name: 'Manchester', helper: 'Manchester area' },
-] as const
-
-type TargetCityCode = typeof TARGET_CITIES[number]['code']
 type TravelTimingMode = 'exact' | 'period'
-const DEFAULT_CITY: TargetCityCode = 'LON'
+const DEFAULT_AIRPORT: AirportCode = 'LHR'
 
 // Generate dates relative to today for sensible defaults
 const today = new Date()
@@ -31,7 +25,12 @@ const defaultDeparture = new Date(today.getFullYear(), today.getMonth(), today.g
 // Default return: 14 days after departure
 const defaultReturn = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 14)
 
-const formatISODate = (d: Date) => d.toISOString().split('T')[0]
+const formatISODate = (d: Date) => {
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
 
 const parseInputDate = (v: string) => {
   const [y, m, d] = v.split('-').map(Number)
@@ -39,8 +38,8 @@ const parseInputDate = (v: string) => {
 }
 
 export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = '' }) => {
-  const [departureAirport, setDepartureAirport] = useState<TargetCityCode | ''>(DEFAULT_CITY)
-  const [returnAirport, setReturnAirport] = useState<TargetCityCode | ''>(DEFAULT_CITY)
+  const [departureAirport, setDepartureAirport] = useState<AirportCode | ''>(DEFAULT_AIRPORT)
+  const [returnAirport, setReturnAirport] = useState<AirportCode | ''>(DEFAULT_AIRPORT)
   const [departureDate, setDepartureDate] = useState(formatISODate(defaultDeparture))
   const [returnDate, setReturnDate] = useState(formatISODate(defaultReturn))
   const [travelTimingMode, setTravelTimingMode] = useState<TravelTimingMode>('exact')
@@ -233,14 +232,14 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
     }
   }
 
-  const selectedAirport = TARGET_CITIES.find(a => a.code === departureAirport)
-  const selectedReturnAirport = TARGET_CITIES.find(a => a.code === returnAirport)
+  const selectedAirportLabel = getAirportLabel(departureAirport)
+  const selectedReturnAirportLabel = getAirportLabel(returnAirport)
   const selectedPeriod = flexiblePeriodOptions.find((option) => option.id === selectedQuickPick)
   const tripLengthDays = Math.max(
     0,
     Math.round((parseInputDate(returnDate).getTime() - parseInputDate(departureDate).getTime()) / (1000 * 60 * 60 * 24))
   )
-  const routeSummary = `${selectedAirport?.name ?? 'Any target city'} to Jeddah or Madinah, returning to ${selectedReturnAirport?.name ?? 'any target city'}`
+  const routeSummary = `${selectedAirportLabel ?? 'Any target airport'} to Jeddah or Madinah, returning to ${selectedReturnAirportLabel ?? 'any target airport'}`
   const dateSummary = travelTimingMode === 'period' && selectedPeriod
     ? `${selectedPeriod.label}: ${selectedPeriod.helper}`
     : `${formatDisplayDate(departureDate)} to ${formatDisplayDate(returnDate)}`
@@ -298,44 +297,44 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
           </div>
           <div className={styles.searchForm__routeGrid}>
             <div className={styles.searchForm__airportField}>
-              <span className={styles.searchForm__dateLabel}>Departing city</span>
+              <span className={styles.searchForm__dateLabel}>Departing airport</span>
               <select
                 id="departure-airport"
                 value={departureAirport}
-                onChange={(e) => setDepartureAirport(e.target.value as TargetCityCode)}
+                onChange={(e) => setDepartureAirport(e.target.value as AirportCode | '')}
                 className={styles.searchForm__airportSelect}
-                aria-label="Departing city"
+                aria-label="Departing airport"
                 data-testid="departure-airport-select"
               >
-                <option value="">Any target city</option>
-                {TARGET_CITIES.map((airport) => (
+                <option value="">Any target airport</option>
+                {UMRAH_SEARCH_AIRPORTS.map((airport) => (
                   <option key={airport.code} value={airport.code}>
-                    {airport.name}
+                    {airport.name} ({airport.code})
                   </option>
                 ))}
               </select>
             </div>
             <div className={styles.searchForm__airportField}>
-              <span className={styles.searchForm__dateLabel}>Returning city</span>
+              <span className={styles.searchForm__dateLabel}>Returning airport</span>
               <select
                 id="return-airport"
                 value={returnAirport}
-                onChange={(e) => setReturnAirport(e.target.value as TargetCityCode)}
+                onChange={(e) => setReturnAirport(e.target.value as AirportCode | '')}
                 className={styles.searchForm__airportSelect}
-                aria-label="Returning city"
+                aria-label="Returning airport"
                 data-testid="return-airport-select"
               >
-                <option value="">Any target city</option>
-                {TARGET_CITIES.map((airport) => (
+                <option value="">Any target airport</option>
+                {UMRAH_SEARCH_AIRPORTS.map((airport) => (
                   <option key={airport.code} value={airport.code}>
-                    {airport.name}
+                    {airport.name} ({airport.code})
                   </option>
                 ))}
               </select>
             </div>
           </div>
           <span className={styles.searchForm__airportHint} aria-live="polite">
-            We currently focus on London, Birmingham and Manchester departures.
+            London departures use Heathrow (LHR) and Gatwick (LGW). We also focus on Birmingham (BHX) and Manchester (MAN).
           </span>
         </div>
 

@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { AppError } from '@/lib/errors';
 import type { UserRole } from '@/lib/types';
 
 export interface SignUpInput {
@@ -45,7 +46,9 @@ export async function apiSignIn(input: SignInInput) {
     email: input.email,
     password: input.password,
   });
-  if (error) throw new Error(error.message);
+  if (error) {
+    throw new AppError({ code: 'AUTH_INVALID_CREDENTIALS', status: 401 });
+  }
   return data;
 }
 

@@ -109,6 +109,13 @@ All UI must use these shared components. Never create one-off equivalents.
 - Error states show message + retry button.
 - Empty states show helpful message + primary action.
 
+### Auth password fields
+
+- Password inputs must include an icon-only show/hide toggle inside the input edge.
+- The toggle must be keyboard reachable, at least 44px wide/high, and expose `aria-label` plus `aria-pressed`.
+- Use stable test IDs for both the input and toggle, for example `login-password` and `login-password-toggle`.
+- Signup password fields should keep the visible complexity checklist close to the field and disable submit until all password-complexity checks pass.
+
 ---
 
 ## 5. Page-level UX
@@ -122,7 +129,7 @@ All UI must use these shared components. Never create one-off equivalents.
 ### Search form (`/umrah`, `/hajj`)
 
 - Progressive disclosure: start with type + dates, expand to budget/preferences.
-- Route capture is city-based for the current target markets: London, Birmingham, and Manchester. Capture both departing city and returning city before dates.
+- Route capture is airport-based for the current target markets. London must be split into London Heathrow (LHR) and London Gatwick (LGW), with Birmingham (BHX) and Manchester (MAN) as the other launch options. Capture both departing airport and returning airport before dates.
 - Dates are an either/or choice: exact departure/return dates, or a flexible holiday period such as Christmas school holidays, Easter school holidays, Ramadan, or summer school holidays.
 - Hotel preference supports multi-select star levels. "Show all" means no hotel-star filter; selecting 5, 4, or 3 star narrows results to those hotel levels.
 - Form submits as GET request (works without JS). Query params in URL for shareability.

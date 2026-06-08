@@ -1,12 +1,90 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { PasswordInput } from '@/components/auth/PasswordInput';
 
 type SignUpRole = 'customer' | 'operator';
+
+interface PasswordCheck {
+  label: string;
+  met: boolean;
+}
+
+function getPasswordChecks(pwd: string): PasswordCheck[] {
+  return [
+    { label: 'At least 8 characters', met: pwd.length >= 8 },
+    { label: 'At least 1 uppercase letter (A–Z)', met: /[A-Z]/.test(pwd) },
+    { label: 'At least 1 lowercase letter (a–z)', met: /[a-z]/.test(pwd) },
+    { label: 'At least 1 number (0–9)', met: /[0-9]/.test(pwd) },
+    { label: 'At least 1 special character (!@#$%^&*)', met: /[^A-Za-z0-9]/.test(pwd) },
+  ];
+}
+
+function PasswordStrength({ password }: { password: string }) {
+  const checks = getPasswordChecks(password);
+  const metCount = checks.filter((c) => c.met).length;
+  const strength =
+    metCount <= 2 ? 'weak' : metCount <= 4 ? 'medium' : 'strong';
+
+  const barColor =
+    strength === 'weak'
+      ? '#ef4444'
+      : strength === 'medium'
+        ? '#eab308'
+        : '#22c55e';
+
+  return (
+    <div className="space-y-2">
+      <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-[var(--bgSecondary)]">
+        <div
+          className="transition-all duration-300"
+          style={{
+            width: `${(metCount / checks.length) * 100}%`,
+            backgroundColor: barColor,
+          }}
+        />
+      </div>
+      <ul className="space-y-1">
+        {checks.map((check) => (
+          <li
+            key={check.label}
+            className="flex items-center gap-2 text-xs transition-colors"
+            style={{
+              color: password.length === 0
+                ? 'var(--textMuted)'
+                : check.met
+                  ? '#22c55e'
+                  : '#ef4444',
+            }}
+          >
+            <span
+              className="inline-flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold"
+              style={{
+                backgroundColor: password.length === 0
+                  ? 'var(--bgSecondary)'
+                  : check.met
+                    ? 'rgba(34,197,94,0.15)'
+                    : 'rgba(239,68,68,0.15)',
+                color: password.length === 0
+                  ? 'var(--textMuted)'
+                  : check.met
+                    ? '#22c55e'
+                    : '#ef4444',
+              }}
+            >
+              {check.met ? '✓' : password.length === 0 ? '○' : '✗'}
+            </span>
+            {check.label}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 export function SignUpForm() {
   const router = useRouter();
@@ -16,6 +94,8 @@ export function SignUpForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [name, setName] = useState('');
   const [role, setRole] = useState<SignUpRole>(defaultRole);
   const [marketingConsent, setMarketingConsent] = useState(false);
@@ -24,11 +104,20 @@ export function SignUpForm() {
   const [passwordError, setPasswordError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const passwordChecks = useMemo(() => getPasswordChecks(password), [password]);
+  const allPasswordMet = passwordChecks.every((c) => c.met);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setPasswordError('');
     setLoading(true);
+
+    if (!allPasswordMet) {
+      setPasswordError('Password does not meet all requirements.');
+      setLoading(false);
+      return;
+    }
 
     if (password !== confirmPassword) {
       setPasswordError('Passwords do not match. Please re-enter your password.');
@@ -146,24 +235,31 @@ export function SignUpForm() {
         data-testid="signup-email"
       />
 
-      <Input
-        label="Password"
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-        autoComplete="new-password"
-        data-testid="signup-password"
-      />
+      <div className="space-y-2">
+        <PasswordInput
+          label="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          autoComplete="new-password"
+          data-testid="signup-password"
+          showPassword={showPassword}
+          onToggleShowPassword={() => setShowPassword((current) => !current)}
+          toggleTestId="signup-password-toggle"
+        />
+        <PasswordStrength password={password} />
+      </div>
 
-      <Input
+      <PasswordInput
         label="Confirm password"
-        type="password"
         value={confirmPassword}
         onChange={(e) => setConfirmPassword(e.target.value)}
         required
         autoComplete="new-password"
         data-testid="signup-confirm-password"
+        showPassword={showConfirmPassword}
+        onToggleShowPassword={() => setShowConfirmPassword((current) => !current)}
+        toggleTestId="signup-confirm-password-toggle"
       />
 
       <div className="space-y-3">
@@ -206,7 +302,7 @@ export function SignUpForm() {
 
       <Button
         type="submit"
-        disabled={loading || !termsAgreed}
+        disabled={loading || !termsAgreed || !allPasswordMet}
         className="w-full"
         data-testid="signup-submit"
       >

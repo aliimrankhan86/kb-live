@@ -5,20 +5,69 @@
 ## Branch & goal
 
 - **Branch:** `dev` → target `main` after PR review
-- **Goal:** Wire real server-side analytics events to the operator analytics dashboard.
+- **Goal:** Keep auth navigation visible for guests and make Umrah search airport-specific for London Heathrow/Gatwick.
 - **Current source-of-truth note:** This top section was verified on 2026-06-08.
+- **Canonical handover:** `AI_NOTES.md` is now the single source of truth for verified status, implementation posture, and pending areas.
 
 ## What works (verified)
 
-- **Tests**: `npm run test` passes (17 files, 227/227 tests) — verified 2026-06-08.
+- **Tests**: `npm run test` passes (18 files, 234/234 tests) — verified 2026-06-08.
 - **Build**: `npm run build` passes with 0 errors — verified 2026-06-08.
 - **TypeScript**: covered by `npm run build` validity checks.
+
+## Changes made in this session (2026-06-08 — Header Login + London Airports)
+
+| Task | What | Files |
+| ---- | ---- | ----- |
+| HEADER-GUEST-LOGIN | Guest header links now render while the auth probe is loading, so Login and For Partners do not disappear if `/api/auth/me` is slow or unavailable. Authenticated nav still replaces them once a user is known. | `components/layout/Header.tsx` |
+| UMRAH-AIRPORT-CODES | Replaced generic city-level Umrah route values with airport-level values. London is now represented by London Heathrow (LHR) and London Gatwick (LGW), alongside Birmingham (BHX) and Manchester (MAN), for both departing and returning selections. | `components/umrah/UmrahSearchForm.tsx`, `lib/airports.ts` |
+| SEARCH-BACKEND-AIRPORT | Server-side package filtering now validates and filters by submitted airport code, so LHR and LGW produce distinct backend search results. Operator package API validation also uses the shared airport code catalogue. | `components/search/search-utils.ts`, `app/api/operator/packages/route.ts`, `tests/search-utils.test.ts` |
+| UMRAH-LOCAL-DATES | Fixed exact-date defaults to use local date formatting instead of UTC `toISOString()`, preventing the UK timezone from defaulting departure to yesterday and blocking submit. | `components/umrah/UmrahSearchForm.tsx` |
+| AIRPORT-DOCS | Updated UX guidance to describe airport-level route capture and London Heathrow/Gatwick as separate launch options. | `docs/UX_GUIDELINES.md`, `docs/NOW.md`, `AI_NOTES.md` |
+
+**Verification:**
+
+- `npx tsc --noEmit`: pass
+- `npm run test -- tests/search-utils.test.ts tests/auth-components.test.tsx`: 2 files, 22/22 pass
+- `npm run test`: 18 files, 234/234 pass
+- `npm run build`: passes with 0 errors
+- `git diff --check`: pass
+- Manual Playwright smoke: guest Login and For Partners links visible on `/`; `/umrah` includes LHR, LGW, BHX, and MAN in departure/return airport selects; submit with `departureAirport=LGW` and `returnAirport=LHR` reaches `/search/packages`
+- Responsive Playwright smoke: `/`, `/umrah`, `/search/packages?type=umrah&departureAirport=LGW` at 320px and 1280px; no HTTP error text and no horizontal overflow
+
+## Changes made in this session (2026-06-08 — Single Source Handover)
+
+| Task | What | Files |
+| ---- | ---- | ----- |
+| HANDOVER-SOT | Replaced the conflicting historical AI notes with a dated, status-led handover for Claude/AI agents covering business plan, functional map, implementation architecture, recent verified work, auth/dev personas, verification commands, and pending areas. | `AI_NOTES.md` |
+| HANDOVER-DOCS | Pointed the AI entry doc and current session state at `AI_NOTES.md` as the canonical handover, and updated stale status for tests, E2E, auth, operator packages, and analytics. | `docs/README_AI.md`, `docs/NOW.md` |
+
+## Changes made in this session (2026-06-08 — Auth Login Personas)
+
+| Task | What | Files |
+| ---- | ---- | ----- |
+| AUTH-DEV-SIGNIN | Normal `/login` now accepts documented local dev persona credentials in development only, verifies `KaabaTrip!2026`, sets `__dev_user`, and returns the same safe `{ user }` shape as real auth. Real Supabase sign-in failures now return a safe 401 instead of a masked 500. | `app/api/auth/sign-in/route.ts`, `lib/auth/dev-users.ts`, `lib/auth/api.ts`, `lib/errors.ts` |
+| AUTH-ME-SHELL | Added `/api/auth/me` and switched the public header to it so Supabase sessions, `__dev_user`, and `__e2e_user` render customer/operator/admin navigation consistently. Sign-out clears `__dev_user`. | `app/api/auth/me/route.ts`, `app/api/auth/sign-out/route.ts`, `components/layout/Header.tsx` |
+| AUTH-PASSWORD-TOGGLE | Added accessible icon-only show/hide password controls to login and signup password fields. Signup submit remains disabled until the password complexity checklist passes. | `components/auth/PasswordInput.tsx`, `components/auth/LoginForm.tsx`, `components/auth/SignUpForm.tsx`, `docs/UX_GUIDELINES.md` |
+| AUTH-DEV-SMOKE | Fixed local Turbopack dev rendering for client components that import `Repository` by adding a browser-only adapter alias, and allowed `images.unsplash.com` for package cards. | `next.config.ts`, `lib/api/db/client-adapter-stub.ts` |
+| AUTH-TESTS | Added unit coverage for login role redirects and password visibility toggles. Updated the signup mismatch E2E fixture to use complexity-compliant mismatched passwords. | `tests/auth-components.test.tsx`, `e2e/signup-password-mismatch.spec.ts` |
+
+**Verification:**
+
+- `npx tsc --noEmit`: pass
+- `git diff --check`: pass
+- `npm run test`: 17 files, 232/232 pass
+- `npm run build`: passes with 0 errors; known Supabase Edge warning remains, plus webpack cache-size warnings
+- Manual Playwright smoke: `/`, `/umrah`, `/search/packages?type=umrah` at 320px and 1280px; no HTTP errors and no horizontal overflow
+- Manual Playwright auth smoke: `/login?type=customer` with `customer@example.com` + `KaabaTrip!2026` redirects to `/` and shows customer navigation; `/login?type=partner` with `operator@example.com` + `KaabaTrip!2026` redirects to `/operator/dashboard`
+- `npx playwright test e2e/signup-password-mismatch.spec.ts`: 3 passed
+- `npx playwright test`: 57 passed, 6 skipped
 
 ## Changes made in this session (2026-06-08 — Umrah Search UX)
 
 | Task | What | Files |
 | ---- | ---- | ----- |
-| UMRAH-ROUTE | Updated the Umrah search form to capture both departing city and returning city using the current target markets only: London, Birmingham, and Manchester. | `components/umrah/UmrahSearchForm.tsx`, `components/umrah/umrah-search-form.module.css` |
+| UMRAH-ROUTE | Historical city-level route capture was superseded by the current airport-level contract: LHR, LGW, BHX, and MAN. | `components/umrah/UmrahSearchForm.tsx`, `components/umrah/umrah-search-form.module.css`, `lib/airports.ts` |
 | UMRAH-DATES | Reworked travel timing as an explicit either/or choice between exact dates and flexible holiday/religious periods such as Christmas school holidays, Easter school holidays, Ramadan, and summer school holidays. | `components/umrah/UmrahSearchForm.tsx`, `components/umrah/umrah-search-form.module.css` |
 | UMRAH-HOTEL-BUDGET | Changed hotel preference to a clearer multi-select model, removed currency-symbol presentation from the search form budget copy, added a compact search summary, and wired comma-separated hotel-star filters into results. | `components/umrah/UmrahSearchForm.tsx`, `components/umrah/umrah-search-form.module.css`, `components/search/search-utils.ts` |
 | COOKIE-CONSENT | Made "Essential only" the visually preselected-looking yellow action in the cookie banner while keeping "Accept all" secondary. | `components/compliance/CookieConsent.tsx` |
@@ -31,7 +80,7 @@
 - `npm run test`: 17 files, 227/227 pass
 - `npm run build`: passes with 0 errors
 - Manual Playwright smoke: `/`, `/umrah`, `/search/packages?type=umrah` at 320px and 1280px; no 404s and no horizontal overflow
-- Manual Playwright interaction: holiday-period mode submits school-holiday dates, `departureAirport=LON`, `returnAirport=LON`, and `hotelStars=5,4`; no dollar-sign text found in the form flow
+- Manual Playwright interaction at that time used city-level `LON`; current verified contract supersedes this with airport-level `departureAirport` / `returnAirport` values such as `LGW` and `LHR`.
 - Cookie smoke: `Essential only` computed as yellow background, black text, yellow border
 - `npx playwright test --project=chromium`: 19 passed, 2 skipped
 - `npx playwright test`: 56 passed, 6 skipped, 1 unrelated WebKit failure in `e2e/signup-password-mismatch.spec.ts` where the signup full-name required field remained empty and blocked the password mismatch assertion
@@ -91,11 +140,14 @@ See `AI_NOTES.md` §8 for full historical log. Key prior work:
 
 ## Pending / not verified
 
-- **T18 — Local Chrome SEO/AEO QA** ⏳ PENDING. Requires a browser-capable agent with local Chrome access.
-- **T16 RE-ENABLE — Operator E2E** ⏳ PENDING. `e2e/operator.spec.ts` is skipped.
-- **E2E auth infrastructure** ⏳ PENDING. 4 pre-existing E2E specs fail due to missing auth.
-- **Rate limiter production switch** ⏳ PENDING. Needs Upstash Redis env vars.
-- **Prisma cutover end-to-end** ⏳ PENDING. `FEATURE_USE_REAL_DB` exists but never enabled.
+- **Production env validation** ⏳ PENDING. Confirm production has `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`, and verify the Redis rate-limit path outside local/dev fallback.
+- **Deployed Prisma/Supabase cutover** ⏳ PENDING. Local real-DB paths exist with `FEATURE_USE_REAL_DB=true`; deployed environment needs explicit smoke against Supabase data, auth redirects, and RLS.
+- **Domain launch** ⏳ PENDING. After purchase, update `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`, Supabase auth redirect URLs, canonical URLs, robots, sitemap, JSON-LD base URLs, and hardcoded `kaabatrip.com` assumptions.
+- **Plausible analytics** ⏳ PENDING. Wire after domain is live and cookie consent is confirmed.
+- **Payment evidence storage/RLS** ⏳ PENDING. Re-verify operator/admin read access for payment evidence files and resolve the product/architecture policy conflict on metadata-only versus byte storage.
+- **Admin reconciliation** ⏳ PENDING. `/admin/reconciliation` exists; business/export completeness still needs explicit verification.
+- **Local Chrome SEO/AEO QA** ⏳ PENDING. Server-side SEO/AEO work was completed earlier, but a rendered local Chrome audit remains useful.
+- **Test coverage** ⏳ PENDING. Tests pass, but critical auth/session/API/adapter/evidence paths need deeper coverage.
 
 ## Local tooling note
 

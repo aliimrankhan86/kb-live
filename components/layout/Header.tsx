@@ -5,7 +5,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
 import { Logo } from '@/components/graphics/Logo';
-import { createClient } from '@/lib/supabase/client';
 import type { UserRole } from '@/lib/types';
 import styles from './header.module.css';
 
@@ -27,39 +26,38 @@ export function Header({ className = '' }: { className?: string }) {
   const hamburgerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    const supabase = createClient();
-    if (!supabase) {
-      setLoading(false);
-      return;
+    let isMounted = true;
+
+    async function loadUser() {
+      try {
+        const response = await fetch('/api/auth/me', { cache: 'no-store' });
+        if (!response.ok) {
+          if (isMounted) setUser(null);
+          return;
+        }
+
+        const data = (await response.json()) as { user: AuthUser | null };
+        if (isMounted) {
+          setUser(data.user);
+        }
+      } catch {
+        if (isMounted) {
+          setUser(null);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
     }
 
-    supabase.auth.getUser().then(({ data: { user: u } }) => {
-      if (u) {
-        setUser({
-          id: u.id,
-          email: u.email || '',
-          role: (u.user_metadata?.role as UserRole) || 'customer',
-          name: u.user_metadata?.name || u.user_metadata?.full_name || null,
-        });
-      }
-      setLoading(false);
-    });
+    setLoading(true);
+    void loadUser();
 
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
-        setUser({
-          id: session.user.id,
-          email: session.user.email || '',
-          role: (session.user.user_metadata?.role as UserRole) || 'customer',
-          name: session.user.user_metadata?.name || session.user.user_metadata?.full_name || null,
-        });
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null);
-      }
-    });
-
-    return () => listener.subscription.unsubscribe();
-  }, []);
+    return () => {
+      isMounted = false;
+    };
+  }, [pathname]);
 
   const handleLogout = async () => {
     setMenuOpen(false);
@@ -196,7 +194,7 @@ export function Header({ className = '' }: { className?: string }) {
             </Link>
           ))}
 
-          {!loading && !user && guestLinks.map(link => (
+          {!user && guestLinks.map(link => (
             <Link
               key={link.href}
               href={link.href}
@@ -388,7 +386,7 @@ export function Header({ className = '' }: { className?: string }) {
               </Link>
             ))}
 
-            {!loading && !user && guestLinks.map(link => (
+            {!user && guestLinks.map(link => (
               <Link
                 key={link.href}
                 href={link.href}
