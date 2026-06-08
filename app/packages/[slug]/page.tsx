@@ -27,7 +27,7 @@ export async function generateMetadata({
         alternates: {
           canonical: `/packages/${pkg.slug}`,
         },
-        openGraph: pkg.imageUrl
+        openGraph: pkg.images?.[0]
           ? {
               title: `${pkg.title} | KaabaTrip`,
               description: `${packageType} package from ${operatorName} with ${pkg.totalNights} nights and transparent package details.`,
@@ -35,7 +35,7 @@ export async function generateMetadata({
               siteName: 'KaabaTrip',
               type: 'website',
               locale: 'en_GB',
-              images: [{ url: pkg.imageUrl, width: 1200, height: 630, alt: pkg.title }],
+              images: [{ url: pkg.images[0], width: 1200, height: 630, alt: pkg.title }],
             }
           : {
               title: `${pkg.title} | KaabaTrip`,

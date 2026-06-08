@@ -380,7 +380,6 @@ export interface Package {
   
   notes?: string; // sanitized, no HTML
   images?: string[];
-  imageUrl?: string;
 }
 
 export type ComplaintCategory =

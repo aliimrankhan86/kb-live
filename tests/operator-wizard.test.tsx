@@ -163,12 +163,12 @@ describe('validateStep7', () => {
     expect(validateStep7({ notes: 'a'.repeat(2001) })).toMatch(/2000/i);
   });
 
-  it('fails invalid imageUrl', () => {
-    expect(validateStep7({ imageUrl: 'not-a-url' })).toMatch(/http/i);
+  it('fails invalid image URL', () => {
+    expect(validateStep7({ images: ['not-a-url'] })).toMatch(/http/i);
   });
 
-  it('passes valid https URL', () => {
-    expect(validateStep7({ imageUrl: 'https://example.com/img.jpg' })).toBeNull();
+  it('passes valid https image URLs', () => {
+    expect(validateStep7({ images: ['https://example.com/img.jpg'] })).toBeNull();
   });
 });
 
@@ -292,9 +292,9 @@ describe('WizardStep7Marketing', () => {
     expect(screen.getByTestId('wizard-highlight-0')).toBeInTheDocument();
   });
 
-  it('renders image URL and notes fields', () => {
+  it('renders image upload and notes fields', () => {
     render(<WizardStep7Marketing data={{}} onChange={vi.fn()} error={null} />);
-    expect(screen.getByTestId('wizard-image-url')).toBeInTheDocument();
+    expect(screen.getByTestId('wizard-image-upload')).toBeInTheDocument();
     expect(screen.getByTestId('wizard-notes')).toBeInTheDocument();
   });
 

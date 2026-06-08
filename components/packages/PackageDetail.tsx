@@ -132,6 +132,34 @@ export function PackageDetail({ pkg, operator }: PackageDetailProps) {
         )}
       </header>
 
+      {pkg.images && pkg.images.length > 0 && (
+        <section className="mb-6" data-testid="package-image-gallery" aria-label="Package images">
+          <div className="overflow-hidden rounded-lg border border-[var(--border)]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={pkg.images[0]}
+              alt={`${pkg.title} — cover`}
+              className="aspect-[16/9] w-full object-cover"
+              data-testid="package-image-primary"
+            />
+          </div>
+          {pkg.images.length > 1 && (
+            <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6">
+              {pkg.images.slice(1).map((url, i) => (
+                <div key={url} className="overflow-hidden rounded border border-[var(--border)]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={url}
+                    alt={`${pkg.title} — image ${i + 2}`}
+                    className="aspect-square w-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
       <section className="grid gap-6 md:grid-cols-2">
         <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-5">
           <h2 className="text-lg font-semibold text-[var(--text)]">Trip details</h2>

@@ -37,7 +37,7 @@ export function packageJsonLd(pkg: Package, operatorName: string): Record<string
     name: pkg.title,
     description: `${pkg.pilgrimageType} package – ${pkg.totalNights} nights (${nightsMakkah} Makkah, ${nightsMadinah} Madinah). Hotels: ${hotelMakkahStars}★ Makkah, ${hotelMadinahStars}★ Madinah.`,
     sku: pkg.id,
-    image: compact([pkg.imageUrl, ...(pkg.images ?? [])]),
+    image: compact([...(pkg.images ?? [])]),
     brand: {
       '@type': 'Organization',
       name: operatorName,

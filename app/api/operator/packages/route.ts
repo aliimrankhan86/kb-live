@@ -63,7 +63,7 @@ const packageSchema = z.object({
   // Step 7
   highlights: z.array(z.string().max(200)).max(5).optional(),
   notes: z.string().max(2000).optional(),
-  imageUrl: z.string().url().optional().or(z.literal('')),
+  images: z.array(z.string().url()).max(8).optional(),
   // Step 8 — publish status
   status: z.enum(['draft', 'published']).default('draft'),
 });
@@ -93,8 +93,7 @@ export async function POST(request: NextRequest) {
 
     const ctx = { userId: user.id, role: user.role };
 
-    // Strip empty imageUrl
-    const pkg: Partial<Package> = { ...data as unknown as Partial<Package>, imageUrl: data.imageUrl || undefined };
+    const pkg: Partial<Package> = { ...data as unknown as Partial<Package> };
 
     const created = await Repository.createPackage(ctx, pkg);
 
@@ -176,7 +175,7 @@ export async function PATCH(request: NextRequest) {
 
     const ctx = { userId: user.id, role: user.role };
 
-    const pkg: Partial<Package> = { ...updates as unknown as Partial<Package>, imageUrl: updates.imageUrl || undefined };
+    const pkg: Partial<Package> = { ...updates as unknown as Partial<Package> };
 
     const updated = await Repository.updatePackage(ctx, id, pkg);
 
