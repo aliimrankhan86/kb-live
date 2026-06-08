@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { apiSignOut } from '@/lib/auth/api';
+import { isDevAuthEnabled } from '@/lib/auth/dev-users';
 import { mapErrorToResponse } from '@/lib/errors';
 
 export async function POST() {
@@ -11,7 +12,7 @@ export async function POST() {
     return response;
   } catch (err) {
     if (
-      process.env.NODE_ENV === 'development' &&
+      isDevAuthEnabled() &&
       err instanceof Error &&
       err.message.includes('Missing Supabase environment variables')
     ) {

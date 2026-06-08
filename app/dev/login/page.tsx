@@ -4,14 +4,15 @@ import Link from 'next/link';
 import {
   DEV_ACCOUNT_PASSWORD,
   DEV_AUTH_USERS,
+  isDevAuthEnabled,
   type DevAuthKey,
   toSessionUser,
 } from '@/lib/auth/dev-users';
 
 /**
- * Dev-only login bypass page. Available only in development.
+ * Dev login bypass page. Available in local, E2E, and non-production preview environments.
  * Set __dev_user cookie to instantly authenticate as customer, operator, or admin.
- * Redirects to / in production.
+ * Redirects to / in production unless KAABATRIP_ENABLE_DEV_AUTH=true is set.
  */
 
 function DevLoginCard({
@@ -101,7 +102,7 @@ function LogoutButton() {
 }
 
 export default async function DevLoginPage() {
-  if (process.env.NODE_ENV !== 'development') {
+  if (!isDevAuthEnabled()) {
     redirect('/');
   }
 
@@ -122,11 +123,11 @@ export default async function DevLoginPage() {
             Dev Login Bypass
           </h1>
           <p className="mt-1 text-sm" style={{ color: 'var(--textMuted)' }}>
-            Instantly switch between personas for local development. Only available in{' '}
+            Instantly switch between personas for local development and preview QA. Available when{' '}
             <code className="rounded px-1 py-0.5 text-xs" style={{ backgroundColor: 'var(--bgSecondary)' }}>
-              NODE_ENV=development
+              dev auth
             </code>
-            .
+            {' '}is enabled.
           </p>
         </div>
         {currentUser && <LogoutButton />}

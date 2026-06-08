@@ -63,6 +63,14 @@ export function getDevUserByEmail(email: string): DevAuthUser | null {
   return Object.values(DEV_AUTH_USERS).find((user) => user.email === normalizedEmail) ?? null;
 }
 
+export function isDevAuthEnabled() {
+  if (process.env.KAABATRIP_ENABLE_DEV_AUTH === 'true') return true;
+  if (process.env.KAABATRIP_ENABLE_DEV_AUTH === 'false') return false;
+  if (process.env.E2E_TESTING === '1') return true;
+  if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) return true;
+  return Boolean(process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'production');
+}
+
 export function toSessionUser(user: DevAuthUser) {
   return {
     id: user.id,

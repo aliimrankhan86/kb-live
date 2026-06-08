@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { checkRateLimit } from '../lib/rate-limit';
+import { isDevAuthEnabled } from '../lib/auth/dev-users';
 import { signUpSchema, signInSchema, interestSchema } from '../lib/validation';
 
 // Reset rate limit store before each test
@@ -13,6 +14,36 @@ vi.mock('../lib/rate-limit', async () => {
 });
 
 describe('Auth API Security', () => {
+  beforeEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  describe('Dev auth environment gate', () => {
+    it('allows documented dev accounts in local development', () => {
+      vi.stubEnv('NODE_ENV', 'development');
+      expect(isDevAuthEnabled()).toBe(true);
+    });
+
+    it('allows documented dev accounts in Vercel preview deployments', () => {
+      vi.stubEnv('NODE_ENV', 'production');
+      vi.stubEnv('VERCEL_ENV', 'preview');
+      expect(isDevAuthEnabled()).toBe(true);
+    });
+
+    it('keeps documented dev accounts disabled in production by default', () => {
+      vi.stubEnv('NODE_ENV', 'production');
+      vi.stubEnv('VERCEL_ENV', 'production');
+      expect(isDevAuthEnabled()).toBe(false);
+    });
+
+    it('allows an explicit server-side override for controlled QA', () => {
+      vi.stubEnv('NODE_ENV', 'production');
+      vi.stubEnv('VERCEL_ENV', 'production');
+      vi.stubEnv('KAABATRIP_ENABLE_DEV_AUTH', 'true');
+      expect(isDevAuthEnabled()).toBe(true);
+    });
+  });
+
   describe('Zod Validation — Sign Up', () => {
     it('rejects admin role', () => {
       const result = signUpSchema.safeParse({

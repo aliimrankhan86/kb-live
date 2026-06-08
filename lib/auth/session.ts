@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
+import { isDevAuthEnabled } from '@/lib/auth/dev-users';
 import type { UserRole } from '@/lib/types';
 
 export interface SessionUser {
@@ -26,8 +27,8 @@ export async function getSessionUser(): Promise<SessionUser | null> {
     } catch { /* fall through to Supabase */ }
   }
 
-  // Dev login bypass — only in local development. Never active in production.
-  if (process.env.NODE_ENV === 'development') {
+  // Dev login bypass for local, E2E, and non-production preview environments.
+  if (isDevAuthEnabled()) {
     try {
       const cookieStore = await cookies();
       const devCookie = cookieStore.get('__dev_user');

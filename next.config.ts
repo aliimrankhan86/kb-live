@@ -8,11 +8,12 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
 
-  // Forward E2E_TESTING into Edge Runtime (middleware) — compiled at build time.
-  // Only truthy when Playwright webServer injects E2E_TESTING=1.
-  // Production deployments never set this, so the bypass compiles to false.
+  // Forward auth environment flags into Edge Runtime (middleware) at build time.
+  // Dev auth stays disabled for true production unless explicitly enabled.
   env: {
     E2E_TESTING: process.env.E2E_TESTING || '',
+    KAABATRIP_ENABLE_DEV_AUTH: process.env.KAABATRIP_ENABLE_DEV_AUTH || '',
+    VERCEL_ENV: process.env.VERCEL_ENV || '',
   },
 
   images: {

@@ -1,19 +1,41 @@
 # NOW (session state)
 
+> Canonical project status is [`/STATUS.md`](../STATUS.md). This file is the **per-session scratchpad** (detailed change log per push). Keep both in sync: summary → `STATUS.md`, detail → here.
+
 **Update this file before every push. This is mandatory.**
 
 ## Branch & goal
 
 - **Branch:** `dev` → target `main` after PR review
-- **Goal:** Keep auth navigation visible for guests and make Umrah search airport-specific for London Heathrow/Gatwick.
+- **Goal:** Fix documented dev account login in preview/QA environments and keep auth notes consistent.
 - **Current source-of-truth note:** This top section was verified on 2026-06-08.
 - **Canonical handover:** `AI_NOTES.md` is now the single source of truth for verified status, implementation posture, and pending areas.
 
 ## What works (verified)
 
-- **Tests**: `npm run test` passes (18 files, 234/234 tests) — verified 2026-06-08.
+- **Tests**: `npm run test` passes (18 files, 238/238 tests) — verified 2026-06-08.
 - **Build**: `npm run build` passes with 0 errors — verified 2026-06-08.
 - **TypeScript**: covered by `npm run build` validity checks.
+
+## Changes made in this session (2026-06-08 — Dev Account Login Fix)
+
+| Task | What | Files |
+| ---- | ---- | ----- |
+| AUTH-PREVIEW-DEV-FALLBACK | Fixed documented dev account login outside local `NODE_ENV=development`. `/login` now accepts the reference dev accounts in local development, E2E, Vercel preview deployments, or controlled QA with `KAABATRIP_ENABLE_DEV_AUTH=true`; true production keeps the fallback disabled by default. | `lib/auth/dev-users.ts`, `app/api/auth/sign-in/route.ts`, `next.config.ts` |
+| AUTH-COOKIE-SCOPE | Aligned all `__dev_user` readers with the same dev-auth gate so sign-in, middleware, server sessions, `/api/auth/me`, `/dev/login`, and sign-out work together. | `lib/auth/session.ts`, `lib/supabase/middleware.ts`, `app/dev/login/page.tsx`, `app/api/auth/sign-out/route.ts` |
+| AUTH-PASSWORD-PASTE | Dev account password comparison trims accidental leading/trailing whitespace only for documented dev accounts. Real Supabase Auth passwords are unchanged. | `app/api/auth/sign-in/route.ts` |
+| AUTH-DOCS | Updated handover/status docs so they no longer say the documented `/login` dev account fallback is local-development only. | `AI_NOTES.md`, `docs/README_AI.md`, `docs/NOW.md`, `STATUS.md`, `PROJECT_BRIEF.md` |
+
+**Verification:**
+
+- `npm run test -- tests/auth-api.test.ts tests/auth-components.test.tsx`: 2 files, 38/38 pass
+- `npm run test`: 18 files, 238/238 pass
+- `npx tsc --noEmit`: pass
+- `npm run build`: passes with 0 errors; known Supabase Edge warning remains, plus webpack cache-size warnings
+- `git diff --check`: pass
+- Local API smoke: `POST /api/auth/sign-in` with `customer@example.com` + `KaabaTrip!2026` returns 200 and sets `__dev_user`
+- Local Playwright smoke: `/login?type=customer` with `customer@example.com` + `KaabaTrip!2026` redirects to `/` and `/api/auth/me` returns `role=customer`
+- Local Playwright smoke: `/login?type=partner` with `operator@example.com` + `KaabaTrip!2026` redirects to `/operator/dashboard` and `/api/auth/me` returns `role=operator`
 
 ## Changes made in this session (2026-06-08 — Header Login + London Airports)
 
@@ -29,7 +51,7 @@
 
 - `npx tsc --noEmit`: pass
 - `npm run test -- tests/search-utils.test.ts tests/auth-components.test.tsx`: 2 files, 22/22 pass
-- `npm run test`: 18 files, 234/234 pass
+- `npm run test`: 18 files, 238/238 pass after the dev-auth gate coverage was added
 - `npm run build`: passes with 0 errors
 - `git diff --check`: pass
 - Manual Playwright smoke: guest Login and For Partners links visible on `/`; `/umrah` includes LHR, LGW, BHX, and MAN in departure/return airport selects; submit with `departureAirport=LGW` and `returnAirport=LHR` reaches `/search/packages`
@@ -46,7 +68,7 @@
 
 | Task | What | Files |
 | ---- | ---- | ----- |
-| AUTH-DEV-SIGNIN | Normal `/login` now accepts documented local dev persona credentials in development only, verifies `KaabaTrip!2026`, sets `__dev_user`, and returns the same safe `{ user }` shape as real auth. Real Supabase sign-in failures now return a safe 401 instead of a masked 500. | `app/api/auth/sign-in/route.ts`, `lib/auth/dev-users.ts`, `lib/auth/api.ts`, `lib/errors.ts` |
+| AUTH-DEV-SIGNIN | Normal `/login` accepts documented dev persona credentials when dev auth is enabled, verifies `KaabaTrip!2026`, sets `__dev_user`, and returns the same safe `{ user }` shape as real auth. Real Supabase sign-in failures now return a safe 401 instead of a masked 500. | `app/api/auth/sign-in/route.ts`, `lib/auth/dev-users.ts`, `lib/auth/api.ts`, `lib/errors.ts` |
 | AUTH-ME-SHELL | Added `/api/auth/me` and switched the public header to it so Supabase sessions, `__dev_user`, and `__e2e_user` render customer/operator/admin navigation consistently. Sign-out clears `__dev_user`. | `app/api/auth/me/route.ts`, `app/api/auth/sign-out/route.ts`, `components/layout/Header.tsx` |
 | AUTH-PASSWORD-TOGGLE | Added accessible icon-only show/hide password controls to login and signup password fields. Signup submit remains disabled until the password complexity checklist passes. | `components/auth/PasswordInput.tsx`, `components/auth/LoginForm.tsx`, `components/auth/SignUpForm.tsx`, `docs/UX_GUIDELINES.md` |
 | AUTH-DEV-SMOKE | Fixed local Turbopack dev rendering for client components that import `Repository` by adding a browser-only adapter alias, and allowed `images.unsplash.com` for package cards. | `next.config.ts`, `lib/api/db/client-adapter-stub.ts` |

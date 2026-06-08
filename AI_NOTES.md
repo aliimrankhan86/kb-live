@@ -81,7 +81,7 @@ Coding invariants:
 
 Verified on 2026-06-08:
 
-- `npm run test`: **passes**, 18 files, **234/234 tests**.
+- `npm run test`: **passes**, 18 files, **238/238 tests**.
 - `npm run build`: **passes**, 0 build errors.
 - `npx tsc --noEmit`: **passes**.
 - `git diff --check`: **passes**.
@@ -155,7 +155,7 @@ Important auth behavior:
 
 - `/dev/login` uses cookie impersonation through `__dev_user`; it bypasses Supabase Auth and does not check a password.
 - E2E helpers use `__e2e_user`; they also bypass Supabase Auth.
-- Normal `/login` now has a **development-only** credential fallback for the dev accounts above. It validates `KaabaTrip!2026`, sets `__dev_user`, and returns the same safe user shape as real auth.
+- Normal `/login` has a dev-auth credential fallback for the dev accounts above. It is enabled in local development, E2E, Vercel preview deployments, or when `KAABATRIP_ENABLE_DEV_AUTH=true` is explicitly set. It is disabled in true production by default. It validates `KaabaTrip!2026`, sets `__dev_user`, and returns the same safe user shape as real auth.
 - Non-dev credentials still use Supabase Auth.
 - Real password validation should be tested through `/signup` and `/login` with real Supabase-created credentials.
 - `/api/auth/me` powers the header session state so Supabase sessions, `__dev_user`, and `__e2e_user` render correct navigation.
@@ -302,6 +302,12 @@ Feature areas currently implemented:
 
 ## 7. Recent Verified Work
 
+2026-06-08 dev account login fix:
+
+- Root cause for "Invalid email or password" with documented dev accounts: `/login` fallback and `__dev_user` readers were hard-gated to `NODE_ENV=development`, so Vercel preview / production-mode QA sent those credentials to Supabase Auth instead.
+- Fixed by centralizing dev-auth enablement in `isDevAuthEnabled()`: enabled for local development, E2E, Vercel preview, or explicit `KAABATRIP_ENABLE_DEV_AUTH=true`; disabled for true production by default.
+- `__dev_user` handling is now aligned across sign-in, middleware, server sessions, `/api/auth/me`, `/dev/login`, and sign-out.
+
 2026-06-08 header login + London airport split:
 
 - Guest header links now render while `/api/auth/me` is loading, so the Login and For Partners links do not become invisible for unauthenticated users.
@@ -313,8 +319,9 @@ Feature areas currently implemented:
 
 2026-06-08 auth/dev persona work:
 
-- Normal `/login` accepts documented local dev persona credentials in development only.
+- Normal `/login` accepts documented dev persona credentials in local development, E2E, Vercel preview deployments, or controlled QA environments with `KAABATRIP_ENABLE_DEV_AUTH=true`.
 - Dev persona fallback verifies `KaabaTrip!2026`, sets `__dev_user`, and returns safe user shape.
+- Dev persona password comparison trims accidental leading/trailing whitespace for these documented accounts only; real Supabase passwords are not trimmed or weakened.
 - Real Supabase sign-in failures return safe 401 responses instead of masked 500s.
 - Added `/api/auth/me`.
 - Header now renders role-appropriate navigation for Supabase, dev, and E2E sessions.

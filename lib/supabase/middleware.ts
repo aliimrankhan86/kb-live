@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { isDevAuthEnabled } from '@/lib/auth/dev-users';
 
 export interface AuthResult {
   user: { id: string; email: string; role: string } | null;
@@ -29,8 +30,8 @@ export async function updateSession(request: NextRequest): Promise<AuthResult> {
     }
   }
 
-  // Dev login bypass — only in local development. Never active in production.
-  if (process.env.NODE_ENV === 'development') {
+  // Dev login bypass for local, E2E, and non-production preview environments.
+  if (isDevAuthEnabled()) {
     const devCookie = request.cookies.get('__dev_user');
     if (devCookie?.value) {
       try {
@@ -46,8 +47,8 @@ export async function updateSession(request: NextRequest): Promise<AuthResult> {
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!url || !anonKey) {
-    // In development without Supabase configured, allow through
-    if (process.env.NODE_ENV === 'development') {
+    // In dev-auth environments without Supabase configured, allow through.
+    if (isDevAuthEnabled()) {
       return { user: null, response: supabaseResponse };
     }
     throw new Error(

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { apiSignIn } from '@/lib/auth/api';
-import { DEV_ACCOUNT_PASSWORD, getDevUserByEmail, toSessionUser } from '@/lib/auth/dev-users';
+import { DEV_ACCOUNT_PASSWORD, getDevUserByEmail, isDevAuthEnabled, toSessionUser } from '@/lib/auth/dev-users';
 import { AppError, mapErrorToResponse } from '@/lib/errors';
 import { signInSchema } from '@/lib/validation';
 import { checkRateLimit, getRateLimitIdentifier } from '@/lib/rate-limit';
@@ -35,8 +35,8 @@ export async function POST(request: Request) {
     const { email, password } = parsed.data;
     const devUser = getDevUserByEmail(email);
 
-    if (process.env.NODE_ENV === 'development' && devUser) {
-      if (password !== DEV_ACCOUNT_PASSWORD) {
+    if (isDevAuthEnabled() && devUser) {
+      if (password.trim() !== DEV_ACCOUNT_PASSWORD) {
         throw new AppError({ code: 'AUTH_INVALID_CREDENTIALS', status: 401 });
       }
 
