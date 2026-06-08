@@ -6,6 +6,7 @@ import { getSessionUser } from '@/lib/auth/session';
 const adminNavItems = [
   { label: 'Bank Changes', href: '/admin/bank-changes' },
   { label: 'Complaints', href: '/admin/complaints' },
+  { label: 'Reconciliation', href: '/admin/reconciliation' },
 ];
 
 interface AdminLayoutProps {

@@ -272,6 +272,20 @@ export interface BookingPaymentEvidence {
   retentionExpiresAt?: string;
 }
 
+/** One booking row for the admin reconciliation export. Flattened across booking, evidence, and outcome. */
+export interface ReconciliationRow {
+  referenceCode: string;
+  status: BookingStatus;
+  operatorName: string;
+  paymentReference?: string;
+  payerName?: string;
+  evidenceStatus?: EvidenceStorageStatus;
+  outcome?: BookingOutcomeType;
+  outcomeReportedAt?: string;
+  bookingCreatedAt: string;
+  quoteRequestId?: string;
+}
+
 export interface BookingIntent {
   id: string;
   referenceCode?: string; // Required for new records; legacy MockDB records are normalised on read.

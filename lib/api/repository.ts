@@ -25,6 +25,7 @@ import {
   PaymentInstructions,
   PaymentPhoneConfirmation,
   QuoteRequest,
+  ReconciliationRow,
   UserRole,
 } from '@/lib/types';
 import { generateSlug } from '@/lib/slug';
@@ -1497,6 +1498,54 @@ export const Repository = {
     };
     await store().saveBookingOutcome(newOutcome);
     return newOutcome;
+  },
+
+  // Reconciliation
+  getReconciliationData: async (
+    ctx: RequestContext,
+    fromDate: Date,
+    toDate: Date
+  ): Promise<ReconciliationRow[]> => {
+    requireAdmin(ctx);
+
+    const [intents, offers, operators, outcomes] = await Promise.all([
+      store().getBookingIntents(),
+      store().getOffers(),
+      store().getOperators(),
+      store().getBookingOutcomes(),
+    ]);
+
+    const operatorById = new Map(operators.map((o) => [o.id, o]));
+    const offerById = new Map(offers.map((o) => [o.id, o]));
+    const outcomeByIntentId = new Map(outcomes.map((o) => [o.bookingIntentId, o]));
+
+    const fromMs = fromDate.getTime();
+    const toMs = toDate.getTime();
+
+    return intents
+      .filter((intent) => {
+        const createdMs = new Date(intent.createdAt).getTime();
+        return createdMs >= fromMs && createdMs <= toMs;
+      })
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+      .map((intent) => {
+        const offer = offerById.get(intent.offerId);
+        const operator = operatorById.get(intent.operatorId);
+        const outcome = outcomeByIntentId.get(intent.id);
+        const evidence = intent.paymentEvidence;
+        return {
+          referenceCode: intent.referenceCode ?? intent.id,
+          status: intent.status,
+          operatorName: operator?.companyName ?? intent.operatorId,
+          paymentReference: evidence?.paymentReference,
+          payerName: evidence?.payerName,
+          evidenceStatus: evidence?.storageStatus,
+          outcome: outcome?.outcome,
+          outcomeReportedAt: outcome?.reportedAt,
+          bookingCreatedAt: intent.createdAt,
+          quoteRequestId: offer?.requestId,
+        };
+      });
   },
 
   getBookingOutcome: async (
