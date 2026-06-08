@@ -32,6 +32,8 @@ const buildBudgetRange = (pkg: Package): NonNullable<QuoteRequest['budgetRange']
 
 export const createQuotePrefillUrl = (pkg: Package) => {
   const params = new URLSearchParams()
+  params.set('sourcePackageId', pkg.id)
+  params.set('sourceOperatorId', pkg.operatorId)
   params.set('type', pkg.pilgrimageType)
   params.set('season', normalizeSeason(pkg))
 
@@ -81,8 +83,13 @@ export const parseQuotePrefillParams = (
   const budgetMin = toNumber(params.get('budgetMin'))
   const budgetMax = toNumber(params.get('budgetMax'))
   const currency = params.get('currency')
+  const sourcePackageId = params.get('sourcePackageId')
+  const sourceOperatorId = params.get('sourceOperatorId')
 
   const draft: Partial<QuoteRequest> = {}
+
+  if (sourcePackageId) draft.sourcePackageId = sourcePackageId
+  if (sourceOperatorId) draft.sourceOperatorId = sourceOperatorId
 
   if (type === 'umrah' || type === 'hajj') draft.type = type
   if (

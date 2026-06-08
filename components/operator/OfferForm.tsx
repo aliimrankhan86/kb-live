@@ -12,6 +12,7 @@ interface OfferFormProps {
 
 export function OfferForm({ request, operatorId, onSuccess }: OfferFormProps) {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<Partial<Offer>>({
     pricePerPerson: 0,
     currency: request.budgetRange?.currency || 'GBP',
@@ -30,9 +31,10 @@ export function OfferForm({ request, operatorId, onSuccess }: OfferFormProps) {
     notes: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
 
     const offer: Offer = {
       ...formData as Offer,
@@ -45,12 +47,26 @@ export function OfferForm({ request, operatorId, onSuccess }: OfferFormProps) {
       inclusions: formData.inclusions || { visa: false, flights: false, transfers: false, meals: false },
     };
 
-    // Simulate network delay
-    setTimeout(() => {
-      MockDB.saveOffer(offer);
-      setLoading(false);
+    try {
+      const response = await fetch('/api/operator/offers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(offer),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error ?? 'Failed to send offer');
+      }
+
+      const data = await response.json();
+      MockDB.saveOffer(data.offer ?? offer);
       onSuccess();
-    }, 1000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to send offer');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -157,6 +173,12 @@ export function OfferForm({ request, operatorId, onSuccess }: OfferFormProps) {
           placeholder="Describe hotel names, airline, etc."
         />
       </div>
+
+      {error ? (
+        <p className="text-sm text-[var(--danger)]" role="alert">
+          {error}
+        </p>
+      ) : null}
 
       <div className="flex justify-end pt-4">
         <button

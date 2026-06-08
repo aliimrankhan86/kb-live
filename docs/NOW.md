@@ -5,14 +5,39 @@
 ## Branch & goal
 
 - **Branch:** `dev` → target `main` after PR review
-- **Goal:** UX improvements to auth pages (login/signup tabs, forgot password) and Umrah search form (departing airport). Top navigation now available on auth pages.
-- **Current source-of-truth note:** This top section was verified on 2026-06-07.
+- **Goal:** Wire real server-side analytics events to the operator analytics dashboard.
+- **Current source-of-truth note:** This top section was verified on 2026-06-08.
 
 ## What works (verified)
 
-- **Tests**: `npm run test` passes (17 files, 227/227 tests) — verified 2026-06-07.
-- **Build**: `npm run build` passes with 0 errors, 0 warnings — verified 2026-06-07.
+- **Tests**: `npm run test` passes (17 files, 227/227 tests) — verified 2026-06-08.
+- **Build**: `npm run build` passes with 0 errors — verified 2026-06-08.
 - **TypeScript**: covered by `npm run build` validity checks.
+
+## Changes made in this session (2026-06-08 — Operator Analytics Events)
+
+| Task | What | Files |
+| ---- | ---- | ----- |
+| ANALYTICS-SCHEMA | Added `AnalyticsEventType` enum and `AnalyticsEvent` Prisma model with operator/package relations, event metadata, and occurrence timestamp. Pushed schema to Supabase and enabled RLS on `analytics_events`. | `prisma/schema.prisma` |
+| ANALYTICS-REPO | Added `Repository.trackEvent`, `getAnalyticsSummary`, `getAnalyticsTrend`, `createQuoteRequest`, and `updateBookingIntentStatus`. Added nonblocking event hooks for offer sent, booking started, and future confirmed/closed status transitions. | `lib/api/repository.ts`, `lib/api/mock-db.ts`, `lib/api/db/adapter.ts`, `lib/types.ts` |
+| ANALYTICS-TRACKING | Tracks package views on published package detail pages and quote requests through a new server-side quote request API. Quote prefill carries non-PII package/operator attribution. | `app/packages/[slug]/page.tsx`, `app/api/quote-requests/route.ts`, `components/quote/QuoteRequestWizard.tsx`, `lib/quote-prefill.ts` |
+| ANALYTICS-ACTIONS | Routed offer creation and booking intent creation through server APIs so `offer_sent` and `booking_started` are captured server-side when the real DB is enabled, while preserving the current MockDB UI mirror. | `app/api/operator/offers/route.ts`, `app/api/booking-intents/route.ts`, `components/operator/OfferForm.tsx`, `components/request/RequestDetail.tsx` |
+| ANALYTICS-DASHBOARD | Rebuilt operator analytics to use real event summaries/trends with 7/30/90 day ranges, summary cards, conversion funnel, and existing chart primitives. | `app/operator/analytics/page.tsx`, `components/operator/AnalyticsDashboard.tsx` |
+
+**Verification:**
+
+- `npx prisma db push`: database in sync
+- `npx prisma validate`: schema valid
+- `npx prisma generate`: Prisma client generated
+- `ALTER TABLE public.analytics_events ENABLE ROW LEVEL SECURITY;`: executed successfully
+- Read-only Prisma verification: `analyticsEventCount` query succeeded; RLS flag returned `true`
+- `npx tsc --noEmit`: pass
+- `npm run test`: 17 files, 227/227 pass
+- `npm run build`: passes with 0 errors
+- `npx playwright test --project=chromium`: 19 passed, 2 skipped
+- `npx playwright install firefox webkit`: installed missing browser binaries
+- `npx playwright test`: 57 passed, 6 skipped
+- Final `npx prisma db push`: database already in sync
 
 ## Changes made in this session (2026-06-07 — Auth UX + Umrah Airport)
 

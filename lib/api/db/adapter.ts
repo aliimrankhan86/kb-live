@@ -1,5 +1,6 @@
 import { prisma } from './prisma';
 import type {
+  AnalyticsEvent,
   AuditLogEntry,
   BankChangeRequest,
   BookingIntent,
@@ -20,6 +21,7 @@ import type {
   QuoteRequestModel as PrismaQuoteRequest,
   OfferModel as PrismaOffer,
   BookingIntentModel as PrismaBookingIntent,
+  AnalyticsEventModel as PrismaAnalyticsEvent,
   ComplaintModel as PrismaComplaint,
 } from '@/lib/generated/prisma/models';
 
@@ -170,6 +172,16 @@ const mapBookingIntent = (bi: PrismaBookingIntent): BookingIntent => ({
   skipProofAcknowledged: bi.skipProofAcknowledged ?? undefined,
   proofSkippedAt: toISO(bi.proofSkippedAt),
   notes: bi.notes ?? undefined,
+});
+
+const mapAnalyticsEvent = (event: PrismaAnalyticsEvent): AnalyticsEvent => ({
+  id: event.id,
+  operatorId: event.operatorId,
+  eventType: event.eventType as AnalyticsEvent['eventType'],
+  packageId: event.packageId ?? undefined,
+  referenceId: event.referenceId ?? undefined,
+  metadata: (event.metadata as unknown as AnalyticsEvent['metadata']) ?? undefined,
+  occurredAt: event.occurredAt.toISOString(),
 });
 
 const mapPackage = (pkg: PrismaPackage): Package => ({
@@ -507,6 +519,25 @@ export const DBAdapter = {
       },
     });
     return mapAuditLogEntry(saved);
+  },
+
+  // Analytics Events
+  getAnalyticsEvents: async (): Promise<AnalyticsEvent[]> =>
+    (await prisma.analyticsEvent.findMany()).map(mapAnalyticsEvent),
+
+  saveAnalyticsEvent: async (event: AnalyticsEvent): Promise<AnalyticsEvent> => {
+    const saved = await prisma.analyticsEvent.create({
+      data: {
+        id: event.id,
+        operatorId: event.operatorId,
+        eventType: event.eventType,
+        packageId: event.packageId ?? null,
+        referenceId: event.referenceId ?? null,
+        metadata: pj(event.metadata),
+        occurredAt: dateOrNow(event.occurredAt),
+      },
+    });
+    return mapAnalyticsEvent(saved);
   },
 
   // Complaints

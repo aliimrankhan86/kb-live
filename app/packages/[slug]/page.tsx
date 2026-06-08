@@ -105,6 +105,15 @@ export default async function PackageDetailPage({
     )
   }
 
+  try {
+    await Repository.trackEvent(pkg.operatorId, 'package_view', pkg.id, undefined, {
+      slug: pkg.slug,
+      type: pkg.pilgrimageType,
+    })
+  } catch {
+    // Analytics must not block package rendering.
+  }
+
   const breadcrumbItems = [
     { label: 'Home', href: '/' },
     { label: 'Packages', href: '/search/packages' },

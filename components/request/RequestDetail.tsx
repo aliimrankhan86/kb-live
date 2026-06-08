@@ -297,7 +297,7 @@ export function RequestDetail({ id }: { id: string }) {
         evidenceFilePayload = await uploadEvidenceFiles(bookingIntentId);
       }
 
-      const newIntent = await Repository.createBookingIntent(customerContext, {
+      const bookingPayload: Partial<BookingIntent> = {
         id: bookingIntentId,
         offerId: activeOfferForBooking.id,
         operatorId: activeOfferForBooking.operatorId,
@@ -309,16 +309,32 @@ export function RequestDetail({ id }: { id: string }) {
               paymentReference,
               notes: evidenceNotes,
               submittedAt,
-              storageStatus: 'bytes-stored',
+              storageStatus: 'bytes-stored' as const,
             }
           : undefined,
         skipProofAcknowledged: !hasEvidence && skipProofAcknowledged,
+      };
+
+      let newIntent: BookingIntent;
+
+      const response = await fetch('/api/booking-intents', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingPayload),
       });
+
+      if (response.ok) {
+        const data = await response.json();
+        newIntent = data.bookingIntent;
+      } else {
+        newIntent = await Repository.createBookingIntent(customerContext, bookingPayload);
+      }
+
+      MockDB.saveBookingIntent(newIntent);
       setBookingIntents((current) => [newIntent, ...current.filter((intent) => intent.id !== newIntent.id)]);
       if (!newIntent.referenceCode) throw new Error('Reference code was not issued.');
       setActiveOfferForBooking(null);
       resetBookingForm();
-      router.push(`/requests/${newIntent.id}/confirmation`);
     } catch (error) {
       setBookingError(error instanceof Error ? error.message : 'Failed to create booking intent.');
     }

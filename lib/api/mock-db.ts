@@ -1,4 +1,5 @@
 import {
+  AnalyticsEvent,
   AuditLogEntry,
   BankChangeRequest,
   BookingIntent,
@@ -24,6 +25,7 @@ const STORAGE_KEYS = {
   PAYMENT_DETAILS: 'kb_payment_details',
   BANK_CHANGE_REQUESTS: 'kb_bank_change_requests',
   AUDIT_LOG: 'kb_audit_log',
+  ANALYTICS_EVENTS: 'kb_analytics_events',
   COMPLAINTS: 'kb_complaints',
   INTERESTS: 'kb_interests',
 };
@@ -550,6 +552,16 @@ export const MockDB = {
     entries.push(entry);
     setStorage(STORAGE_KEYS.AUDIT_LOG, entries);
     return entry;
+  },
+
+  getAnalyticsEvents: (): AnalyticsEvent[] =>
+    getStorage<AnalyticsEvent[]>(STORAGE_KEYS.ANALYTICS_EVENTS, []),
+
+  saveAnalyticsEvent: (event: AnalyticsEvent) => {
+    const events = MockDB.getAnalyticsEvents();
+    events.push(event);
+    setStorage(STORAGE_KEYS.ANALYTICS_EVENTS, events);
+    return event;
   },
 
   getComplaints: (): Complaint[] => {

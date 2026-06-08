@@ -15,6 +15,33 @@ export interface User {
   };
 }
 
+export const ANALYTICS_EVENT_TYPES = [
+  'package_view',
+  'quote_request',
+  'offer_sent',
+  'booking_started',
+  'booking_confirmed',
+  'booking_closed',
+] as const;
+
+export type AnalyticsEventType = (typeof ANALYTICS_EVENT_TYPES)[number];
+
+export type AnalyticsMetadata = Record<string, string | number | boolean | null>;
+
+export interface AnalyticsEvent {
+  id: string;
+  operatorId: string;
+  eventType: AnalyticsEventType;
+  packageId?: string;
+  referenceId?: string;
+  metadata?: AnalyticsMetadata;
+  occurredAt: string;
+}
+
+export type AnalyticsEventCounts = Record<AnalyticsEventType, number>;
+
+export type AnalyticsTrendDay = { date: string } & AnalyticsEventCounts;
+
 export type VerificationStatus = 'pending' | 'verified' | 'rejected';
 
 export type OperatorTier = 'listed' | 'verified' | 'verified_plus';
@@ -155,6 +182,8 @@ export interface QuoteRequest {
   customerId: string; // User.id (or guest ID if allowed)
   status: 'open' | 'responded' | 'closed';
   createdAt: string; // ISO date
+  sourcePackageId?: string;
+  sourceOperatorId?: string;
   
   // Preferences
   type: 'umrah' | 'hajj';

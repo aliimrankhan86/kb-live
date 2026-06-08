@@ -81,6 +81,17 @@ enum BookingStatus {
   @@map("booking_status")
 }
 
+enum AnalyticsEventType {
+  package_view
+  quote_request
+  offer_sent
+  booking_started
+  booking_confirmed
+  booking_closed
+
+  @@map("analytics_event_type")
+}
+
 enum EvidenceStorageStatus {
   metadata_only
   bytes_stored
@@ -200,6 +211,7 @@ model OperatorProfile {
   packages           Package[]
   bookingIntents     BookingIntent[]     @relation("OperatorBookingIntents")
   complaints         Complaint[]         @relation("OperatorComplaints")
+  analyticsEvents    AnalyticsEvent[]
 
   @@map("operator_profiles")
 }
@@ -404,9 +416,29 @@ model Package {
   images                     String[]
 
   // Relations
-  operator OperatorProfile @relation(fields: [operatorId], references: [id])
+  operator        OperatorProfile  @relation(fields: [operatorId], references: [id])
+  analyticsEvents AnalyticsEvent[]
 
   @@map("packages")
+}
+
+model AnalyticsEvent {
+  id          String             @id @default(uuid())
+  operatorId  String             @map("operator_id")
+  eventType   AnalyticsEventType @map("event_type")
+  packageId   String?            @map("package_id")
+  referenceId String?            @map("reference_id")
+  metadata    Json?
+  occurredAt  DateTime           @default(now()) @map("occurred_at")
+
+  // Relations
+  operator OperatorProfile @relation(fields: [operatorId], references: [id])
+  package  Package?        @relation(fields: [packageId], references: [id])
+
+  @@index([operatorId, occurredAt])
+  @@index([operatorId, eventType, occurredAt])
+  @@index([packageId])
+  @@map("analytics_events")
 }
 
 model Complaint {

@@ -1,5 +1,11 @@
 import { MockDB } from './mock-db';
 import {
+  ANALYTICS_EVENT_TYPES,
+  AnalyticsEvent,
+  AnalyticsEventCounts,
+  AnalyticsEventType,
+  AnalyticsMetadata,
+  AnalyticsTrendDay,
   AuditLogEntry,
   BankChangeRequest,
   BookingIntent,
@@ -41,6 +47,7 @@ const mockStore = {
   getPaymentDetails: () => Promise.resolve(MockDB.getPaymentDetails()),
   getBankChangeRequests: () => Promise.resolve(MockDB.getBankChangeRequests()),
   getAuditLog: () => Promise.resolve(MockDB.getAuditLog()),
+  getAnalyticsEvents: () => Promise.resolve(MockDB.getAnalyticsEvents()),
   getComplaints: () => Promise.resolve(MockDB.getComplaints()),
   savePackage: (pkg: Package) => Promise.resolve(MockDB.savePackage(pkg)),
   saveOperator: (op: OperatorProfile) => Promise.resolve(MockDB.saveOperator(op)),
@@ -50,6 +57,7 @@ const mockStore = {
   savePaymentDetails: (pd: PaymentDetails) => Promise.resolve(MockDB.savePaymentDetails(pd)),
   saveBankChangeRequest: (bcr: BankChangeRequest) => Promise.resolve(MockDB.saveBankChangeRequest(bcr)),
   saveAuditLogEntry: (entry: AuditLogEntry) => Promise.resolve(MockDB.saveAuditLogEntry(entry)),
+  saveAnalyticsEvent: (event: AnalyticsEvent) => Promise.resolve(MockDB.saveAnalyticsEvent(event)),
   saveComplaint: (c: Complaint) => Promise.resolve(MockDB.saveComplaint(c)),
   deletePackage: (id: string) => Promise.resolve(MockDB.deletePackage(id)),
   getBookingOutcomes: () => Promise.resolve(MockDB.getBookingOutcomes()),
@@ -111,6 +119,7 @@ const MAX_REFERENCE_CODE_ATTEMPTS = 10;
 const BANK_CHANGE_COOLING_PERIOD_MS = 24 * 60 * 60 * 1000;
 const PAY_OPERATOR_DIRECT_DISCLOSURE =
   'You pay the operator directly. KaabaTrip does not collect, hold, or transfer customer funds. The operator is the contracting party and is responsible for package fulfilment, payment records, and any payment outcome.';
+const ANALYTICS_PII_KEY_PATTERN = /(email|phone|name|address|customer|payer|payment|account)/i;
 
 const isAcceptedEvidenceFile = (file: BookingPaymentEvidenceFile) =>
   (file.kind === 'image' && file.mimeType.startsWith('image/')) ||
@@ -119,6 +128,51 @@ const isAcceptedEvidenceFile = (file: BookingPaymentEvidenceFile) =>
 const cleanOptionalText = (value?: string) => {
   const trimmed = value?.trim();
   return trimmed ? trimmed : undefined;
+};
+
+const emptyAnalyticsCounts = (): AnalyticsEventCounts =>
+  ANALYTICS_EVENT_TYPES.reduce(
+    (counts, eventType) => ({
+      ...counts,
+      [eventType]: 0,
+    }),
+    {} as AnalyticsEventCounts
+  );
+
+const sanitizeAnalyticsMetadata = (metadata?: AnalyticsMetadata): AnalyticsMetadata | undefined => {
+  if (!metadata) return undefined;
+
+  const sanitized = Object.entries(metadata).reduce<AnalyticsMetadata>((acc, [key, value]) => {
+    if (ANALYTICS_PII_KEY_PATTERN.test(key)) return acc;
+    if (
+      typeof value === 'string' ||
+      typeof value === 'number' ||
+      typeof value === 'boolean' ||
+      value === null
+    ) {
+      acc[key] = value;
+    }
+    return acc;
+  }, {});
+
+  return Object.keys(sanitized).length > 0 ? sanitized : undefined;
+};
+
+const isWithinAnalyticsRange = (event: AnalyticsEvent, fromDate?: Date, toDate?: Date) => {
+  const occurredAt = new Date(event.occurredAt).getTime();
+  if (fromDate && occurredAt < fromDate.getTime()) return false;
+  if (toDate && occurredAt > toDate.getTime()) return false;
+  return true;
+};
+
+const getUtcDateKey = (date: Date) => date.toISOString().slice(0, 10);
+
+const getAnalyticsTrendStart = (days: number) => {
+  const safeDays = Math.max(1, Math.min(days, 365));
+  const now = new Date();
+  const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  start.setUTCDate(start.getUTCDate() - safeDays + 1);
+  return start;
 };
 
 const requireAdmin = (ctx: RequestContext) => {
@@ -398,7 +452,110 @@ const requireBookingIntentEvidenceAccess = (ctx: RequestContext, bookingIntent: 
 };
 
 export const Repository = {
+  // Analytics Events
+  trackEvent: async (
+    operatorId: string,
+    eventType: AnalyticsEventType,
+    packageId?: string,
+    referenceId?: string,
+    metadata?: AnalyticsMetadata
+  ): Promise<AnalyticsEvent> => {
+    const event: AnalyticsEvent = {
+      id: crypto.randomUUID(),
+      operatorId,
+      eventType,
+      packageId,
+      referenceId,
+      metadata: sanitizeAnalyticsMetadata(metadata),
+      occurredAt: new Date().toISOString(),
+    };
+
+    return store().saveAnalyticsEvent(event);
+  },
+
+  getAnalyticsSummary: async (
+    operatorId: string,
+    fromDate?: Date,
+    toDate?: Date
+  ): Promise<AnalyticsEventCounts> => {
+    const events = (await store().getAnalyticsEvents()).filter(
+      (event) => event.operatorId === operatorId && isWithinAnalyticsRange(event, fromDate, toDate)
+    );
+
+    return events.reduce((counts, event) => {
+      counts[event.eventType] += 1;
+      return counts;
+    }, emptyAnalyticsCounts());
+  },
+
+  getAnalyticsTrend: async (operatorId: string, days: number): Promise<AnalyticsTrendDay[]> => {
+    const safeDays = Math.max(1, Math.min(days, 365));
+    const start = getAnalyticsTrendStart(safeDays);
+    const rows = new Map<string, AnalyticsTrendDay>();
+
+    for (let i = 0; i < safeDays; i += 1) {
+      const date = new Date(start);
+      date.setUTCDate(start.getUTCDate() + i);
+      const key = getUtcDateKey(date);
+      rows.set(key, { date: key, ...emptyAnalyticsCounts() });
+    }
+
+    const events = (await store().getAnalyticsEvents()).filter(
+      (event) => event.operatorId === operatorId && new Date(event.occurredAt) >= start
+    );
+
+    for (const event of events) {
+      const key = getUtcDateKey(new Date(event.occurredAt));
+      const row = rows.get(key);
+      if (row) row[event.eventType] += 1;
+    }
+
+    return Array.from(rows.values());
+  },
+
   // Quote Requests
+  createQuoteRequest: async (ctx: RequestContext, request: QuoteRequest): Promise<QuoteRequest> => {
+    if (ctx.role !== 'customer') throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
+
+    const now = new Date().toISOString();
+    const secureRequest: QuoteRequest = {
+      ...request,
+      id: request.id || crypto.randomUUID(),
+      customerId: ctx.userId,
+      status: 'open',
+      createdAt: request.createdAt || now,
+    };
+
+    const saved = await store().saveRequest(secureRequest);
+    const targetOperatorIds = new Set<string>();
+
+    if (saved.sourceOperatorId) {
+      targetOperatorIds.add(saved.sourceOperatorId);
+    } else if (saved.sourcePackageId) {
+      const pkg = (await store().getPackages()).find((candidate) => candidate.id === saved.sourcePackageId);
+      if (pkg) targetOperatorIds.add(pkg.operatorId);
+    } else {
+      const operators = await store().getOperators();
+      operators
+        .filter((operator) => operator.verificationStatus === 'verified')
+        .forEach((operator) => targetOperatorIds.add(operator.id));
+    }
+
+    for (const operatorId of targetOperatorIds) {
+      try {
+        await Repository.trackEvent(operatorId, 'quote_request', saved.sourcePackageId, saved.id, {
+          type: saved.type,
+          season: saved.season,
+          source: saved.sourcePackageId ? 'package_detail' : 'quote_wizard',
+        });
+      } catch {
+        // Analytics must not block quote submission.
+      }
+    }
+
+    return saved;
+  },
+
   getRequests: async (ctx: RequestContext): Promise<QuoteRequest[]> => {
     const all = await store().getRequests();
     if (ctx.role === 'customer') {
@@ -443,7 +600,15 @@ export const Repository = {
   createOffer: async (ctx: RequestContext, offer: Offer): Promise<Offer> => {
     if (ctx.role !== 'operator') throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
     const secureOffer = { ...offer, operatorId: ctx.userId };
-    return store().saveOffer(secureOffer);
+    const saved = await store().saveOffer(secureOffer);
+    try {
+      await Repository.trackEvent(ctx.userId, 'offer_sent', undefined, saved.id, {
+        requestId: saved.requestId,
+      });
+    } catch {
+      // Analytics must not block offer creation.
+    }
+    return saved;
   },
 
   // Booking Intents
@@ -500,7 +665,52 @@ export const Repository = {
     };
 
     await store().saveBookingIntent(newIntent);
+    try {
+      await Repository.trackEvent(newIntent.operatorId, 'booking_started', undefined, newIntent.id, {
+        offerId: newIntent.offerId,
+      });
+    } catch {
+      // Analytics must not block booking intent creation.
+    }
     return newIntent;
+  },
+
+  updateBookingIntentStatus: async (
+    ctx: RequestContext,
+    bookingIntentId: string,
+    status: BookingIntent['status']
+  ): Promise<BookingIntent> => {
+    const bookingIntents = await store().getBookingIntents();
+    const existing = bookingIntents.find((booking) => booking.id === bookingIntentId);
+    if (!existing) throw new Error('Booking intent not found');
+
+    if (ctx.role !== 'operator' || existing.operatorId !== ctx.userId) {
+      throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
+    }
+
+    const updated: BookingIntent = {
+      ...existing,
+      status,
+      updatedAt: new Date().toISOString(),
+    };
+
+    await store().saveBookingIntent(updated);
+
+    if (status === 'confirmed' || status === 'closed') {
+      try {
+        await Repository.trackEvent(
+          updated.operatorId,
+          status === 'confirmed' ? 'booking_confirmed' : 'booking_closed',
+          undefined,
+          updated.id,
+          { offerId: updated.offerId }
+        );
+      } catch {
+        // Analytics must not block booking status updates.
+      }
+    }
+
+    return updated;
   },
 
   getBookingIntents: async (ctx: RequestContext): Promise<BookingIntent[]> => {
