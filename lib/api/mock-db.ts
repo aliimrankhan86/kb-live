@@ -756,6 +756,48 @@ export const MockDB = {
     return event;
   },
 
+  seedAnalyticsForOperator: (operatorId: string, days = 30) => {
+    const existing = MockDB.getAnalyticsEvents().filter((e) => e.operatorId === operatorId);
+    if (existing.length > 0) return;
+
+    const newEvents: AnalyticsEvent[] = [];
+    const now = new Date();
+    let seed = operatorId.charCodeAt(0) + operatorId.charCodeAt(operatorId.length - 1);
+    const rand = () => { seed = (seed * 1664525 + 1013904223) & 0xffffffff; return (seed >>> 0) / 0xffffffff; };
+
+    for (let i = days - 1; i >= 0; i--) {
+      const day = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+      day.setUTCDate(day.getUTCDate() - i);
+      const iso = day.toISOString().slice(0, 10);
+
+      const views = Math.floor(rand() * 16) + 5;
+      const quotes = Math.max(0, Math.floor(views * (0.1 + rand() * 0.2)));
+      const offers = Math.max(0, Math.floor(quotes * (0.3 + rand() * 0.4)));
+      const started = Math.max(0, Math.floor(offers * (0.2 + rand() * 0.3)));
+      const confirmed = Math.max(0, Math.floor(started * (0.3 + rand() * 0.4)));
+
+      const push = (type: AnalyticsEvent['eventType'], count: number) => {
+        for (let j = 0; j < count; j++) {
+          newEvents.push({
+            id: `seed-${type}-${iso}-${j}`,
+            operatorId,
+            eventType: type,
+            occurredAt: `${iso}T${String(Math.floor(rand() * 23)).padStart(2, '0')}:${String(Math.floor(rand() * 59)).padStart(2, '0')}:00.000Z`,
+          });
+        }
+      };
+
+      push('package_view', views);
+      push('quote_request', quotes);
+      push('offer_sent', offers);
+      push('booking_started', started);
+      push('booking_confirmed', confirmed);
+    }
+
+    const all = MockDB.getAnalyticsEvents();
+    setStorage(STORAGE_KEYS.ANALYTICS_EVENTS, [...all, ...newEvents]);
+  },
+
   getComplaints: (): Complaint[] => {
     const complaints = getStorage<Complaint[]>(STORAGE_KEYS.COMPLAINTS, []);
     if (complaints.length === 0) {

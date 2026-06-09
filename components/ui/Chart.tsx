@@ -14,12 +14,14 @@ interface ChartContainerProps extends HTMLAttributes<HTMLDivElement> {
 
 export function ChartContainer({ title, subtitle, className, children, ...props }: ChartContainerProps) {
   return (
-    <div className={cn('rounded-xl border border-[var(--borderSubtle)] bg-[var(--surfaceDark)] p-4', className)} {...props}>
-      <Text size="sm" tone="muted">
-        {subtitle ?? 'Dashboard metric'}
-      </Text>
-      <Text className="mt-1 text-lg font-semibold">{title}</Text>
-      <div className="mt-4">{children}</div>
+    <div className={cn('rounded-xl border border-[var(--borderSubtle)] bg-[var(--surfaceDark)] p-5', className)} {...props}>
+      <Text className="text-base font-semibold">{title}</Text>
+      {subtitle && (
+        <Text size="sm" tone="muted" className="mt-0.5">
+          {subtitle}
+        </Text>
+      )}
+      <div className="mt-5">{children}</div>
     </div>
   );
 }
@@ -61,23 +63,73 @@ export function LineChart({ points, className }: { points: Point[]; className?: 
 
 export function BarChart({ points, className }: { points: Point[]; className?: string }) {
   const width = 640;
-  const height = 220;
-  const padding = 24;
+  const height = 240;
+  const paddingX = 8;
+  const paddingTop = 24;
+  const paddingBottom = 28;
+  const chartH = height - paddingTop - paddingBottom;
   const max = Math.max(...points.map((p) => p.value), 1);
-  const barWidth = (width - padding * 2) / Math.max(points.length, 1);
+  const barW = (width - paddingX * 2) / Math.max(points.length, 1);
+  const gap = Math.max(barW * 0.18, 2);
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className={cn('h-56 w-full', className)} role="img" aria-label="Bar chart">
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      className={cn('h-60 w-full', className)}
+      role="img"
+      aria-label="Activity bar chart"
+    >
+      {/* Baseline */}
+      <line
+        x1={paddingX}
+        y1={height - paddingBottom}
+        x2={width - paddingX}
+        y2={height - paddingBottom}
+        stroke="var(--borderSubtle)"
+        strokeWidth="1"
+      />
       {points.map((point, index) => {
-        const h = (point.value / max) * (height - padding * 2);
-        const x = padding + index * barWidth + 6;
-        const y = height - padding - h;
+        const h = Math.max((point.value / max) * chartH, point.value > 0 ? 3 : 0);
+        const x = paddingX + index * barW + gap;
+        const bw = Math.max(barW - gap * 2, 2);
+        const y = height - paddingBottom - h;
         return (
-          <g key={`${point.label}-${index}`}>
-            <rect x={x} y={y} width={Math.max(barWidth - 12, 10)} height={h} rx="6" fill="var(--info)" />
-            <text x={x + (Math.max(barWidth - 12, 10) / 2)} y={height - 6} textAnchor="middle" fontSize="11" fill="var(--textMuted)">
-              {point.label}
-            </text>
+          <g key={`${point.label}-${index}`} role="img" aria-label={`${point.label || index}: ${point.value}`}>
+            {/* Value label above bar */}
+            {point.value > 0 && (
+              <text
+                x={x + bw / 2}
+                y={y - 4}
+                textAnchor="middle"
+                fontSize="10"
+                fill="var(--textMuted)"
+                fontFamily="inherit"
+              >
+                {point.value}
+              </text>
+            )}
+            <rect
+              x={x}
+              y={y}
+              width={bw}
+              height={h}
+              rx="3"
+              fill="var(--yellow)"
+              fillOpacity="0.75"
+            />
+            {/* Date label */}
+            {point.label && (
+              <text
+                x={x + bw / 2}
+                y={height - 8}
+                textAnchor="middle"
+                fontSize="10"
+                fill="var(--textMuted)"
+                fontFamily="inherit"
+              >
+                {point.label}
+              </text>
+            )}
           </g>
         );
       })}

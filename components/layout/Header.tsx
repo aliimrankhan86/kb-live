@@ -163,9 +163,6 @@ export function Header({ className = '' }: { className?: string }) {
     setMenuOpen(false);
   }, []);
 
-  if (pathname?.startsWith('/operator/') || pathname?.startsWith('/admin/')) {
-    return null;
-  }
 
   const navLinks = [
     { href: '/umrah', label: 'Umrah', testId: 'nav-umrah', icon: ICONS.umrah },

@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Package } from '@/lib/mock-packages'
@@ -30,6 +30,8 @@ interface PackageCardProps {
 }
 
 
+const HOTEL_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='80' viewBox='0 0 120 80'%3E%3Crect width='120' height='80' fill='%23222'/%3E%3Crect x='35' y='20' width='50' height='40' rx='2' fill='%23333'/%3E%3Crect x='45' y='35' width='10' height='25' rx='1' fill='%23444'/%3E%3Crect x='65' y='35' width='10' height='25' rx='1' fill='%23444'/%3E%3Crect x='35' y='20' width='50' height='8' rx='2' fill='%23444'/%3E%3C/svg%3E"
+
 const PackageCard: React.FC<PackageCardProps> = ({
   package: pkg,
   isShortlisted = false,
@@ -43,6 +45,8 @@ const PackageCard: React.FC<PackageCardProps> = ({
   priceType = 'from',
 }) => {
   const regionSettings = React.useMemo(() => getRegionSettings(), [])
+  const [makkahImgSrc, setMakkahImgSrc] = useState(pkg.makkahHotel.image || HOTEL_FALLBACK)
+  const [madinaImgSrc, setMadinaImgSrc] = useState(pkg.madinaHotel.image || HOTEL_FALLBACK)
 
   const priceInfo = React.useMemo(
     () => formatPriceForRegion(pkg.price, pkg.currency, regionSettings),
@@ -128,12 +132,13 @@ const PackageCard: React.FC<PackageCardProps> = ({
         <div className={styles.hotelsColumn}>
           <div className={styles.hotelBlock}>
             <Image
-              src={pkg.makkahHotel.image}
+              src={makkahImgSrc}
               alt={`${pkg.makkahHotel.name} in ${pkg.makkahHotel.location}`}
               width={120}
               height={80}
               className={styles.hotelImage}
-              style={{ width: 'auto', height: 'auto' }}
+              onError={() => setMakkahImgSrc(HOTEL_FALLBACK)}
+              unoptimized={makkahImgSrc === HOTEL_FALLBACK}
             />
             <div className={styles.hotelLocation}>{pkg.makkahHotel.location}</div>
             <div className={styles.hotelName}>{pkg.makkahHotel.name}</div>
@@ -148,12 +153,13 @@ const PackageCard: React.FC<PackageCardProps> = ({
 
           <div className={styles.hotelBlock}>
             <Image
-              src={pkg.madinaHotel.image}
+              src={madinaImgSrc}
               alt={`${pkg.madinaHotel.name} in ${pkg.madinaHotel.location}`}
               width={120}
               height={80}
               className={styles.hotelImage}
-              style={{ width: 'auto', height: 'auto' }}
+              onError={() => setMadinaImgSrc(HOTEL_FALLBACK)}
+              unoptimized={madinaImgSrc === HOTEL_FALLBACK}
             />
             <div className={styles.hotelLocation}>{pkg.madinaHotel.location}</div>
             <div className={styles.hotelName}>{pkg.madinaHotel.name}</div>

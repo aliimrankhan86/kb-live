@@ -24,6 +24,28 @@ function getPasswordChecks(pwd: string): PasswordCheck[] {
   ];
 }
 
+function PasswordMatchIndicator({ password, confirm }: { password: string; confirm: string }) {
+  if (!confirm) return null;
+  const match = password === confirm;
+  return (
+    <p
+      className="mt-1.5 flex items-center gap-1.5 text-xs"
+      style={{ color: match ? '#22c55e' : '#ef4444' }}
+      aria-live="polite"
+    >
+      <span
+        className="inline-flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold"
+        style={{
+          backgroundColor: match ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
+        }}
+      >
+        {match ? '✓' : '✗'}
+      </span>
+      {match ? 'Passwords match' : 'Passwords do not match'}
+    </p>
+  );
+}
+
 function PasswordStrength({ password }: { password: string }) {
   const checks = getPasswordChecks(password);
   const metCount = checks.filter((c) => c.met).length;
@@ -216,15 +238,22 @@ export function SignUpForm() {
         </div>
       )}
 
-      <Input
-        label="Full name"
-        type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        required
-        autoComplete="name"
-        data-testid="signup-name"
-      />
+      <div>
+        <Input
+          label={isPartner ? 'Company name' : 'Full name'}
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          autoComplete={isPartner ? 'organization' : 'name'}
+          data-testid="signup-name"
+        />
+        {isPartner && (
+          <p className="mt-1.5 text-xs text-[var(--textMuted)]">
+            Your registered or trading company name
+          </p>
+        )}
+      </div>
 
       <Input
         label="Email"
@@ -251,17 +280,20 @@ export function SignUpForm() {
         <PasswordStrength password={password} />
       </div>
 
-      <PasswordInput
-        label="Confirm password"
-        value={confirmPassword}
-        onChange={(e) => setConfirmPassword(e.target.value)}
-        required
-        autoComplete="new-password"
-        data-testid="signup-confirm-password"
-        showPassword={showConfirmPassword}
-        onToggleShowPassword={() => setShowConfirmPassword((current) => !current)}
-        toggleTestId="signup-confirm-password-toggle"
-      />
+      <div>
+        <PasswordInput
+          label="Confirm password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          required
+          autoComplete="new-password"
+          data-testid="signup-confirm-password"
+          showPassword={showConfirmPassword}
+          onToggleShowPassword={() => setShowConfirmPassword((current) => !current)}
+          toggleTestId="signup-confirm-password-toggle"
+        />
+        <PasswordMatchIndicator password={password} confirm={confirmPassword} />
+      </div>
 
       <div className="space-y-3">
         <label className="flex items-start gap-2 text-xs text-[var(--textMuted)] cursor-pointer">

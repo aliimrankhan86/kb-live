@@ -472,6 +472,17 @@ Feature areas currently implemented:
 
 ## 7. Recent Verified Work
 
+2026-06-09 UI polish — header breathing room, image consistency, compare UX:
+
+- **Header spacing**: Replaced fixed `height` values on `.header` with `padding`-based layout on `.header__container`. All breakpoints now use explicit top/bottom padding (`1rem` desktop, `0.875rem` default mobile, `0.75rem` small, `0.625rem` extra-small). This prevents the header from ever looking edge-to-edge regardless of content changes.
+- **Sign In CTA breathing room**: Added `margin-left: 0.75rem` to `.header__loginCta` and reduced nav `gap` to `0.25rem` so the Sign In button has clear visual separation from the nav links.
+- **Hotel image consistency**: `.hotelImage` is now locked to `height: 120px; min-height: 120px; max-height: 120px; object-fit: cover; object-position: center`. The inline `style={{ width: 'auto', height: 'auto' }}` override that was breaking CSS sizing has been removed. Both operator-uploaded images and fallback images render at identical dimensions.
+- **Fallback images for hotel blocks**: `PackageCard` now tracks `makkahImgSrc` / `madinaImgSrc` in state, initialised from package data with a fallback to an inline SVG building placeholder. `onError` callbacks swap to the fallback on load failure. `unoptimized` is applied to Next.js `<Image>` when a data-URI fallback is active to avoid optimisation errors.
+- **Compare help text visibility**: Initially improved to `0.8125rem` + `rgba(255,255,255,0.6)` with an info icon. Further redesigned (same session) into a proper callout strip: yellow left accent border (`3px solid var(--yellow)`), subtle yellow-tinted background, white text `rgba(255,255,255,0.9)`, with **Compare** and **2 packages** bolded in yellow. Instruction rewritten to "Tick **Compare** on any **2 packages** to compare them side by side" for immediate scannability. Icon changed to the compare/grid SVG for semantic match.
+- **Nights badge clarity**: `.nightsBadge` was near-invisible (`var(--textMuted)` on `rgba(255,255,255,0.04)`). Redesigned with `rgba(255,211,29,0.08)` background, `1px solid rgba(255,211,29,0.2)` border, `font-weight: 600`, and `rgba(255,255,255,0.9)` text. Passes 4.5:1 contrast at a glance.
+
+---
+
 2026-06-08 dev account login fix and later hardening:
 
 - Root cause for "Invalid email or password" with documented dev accounts: `/login` fallback and `__dev_user` readers were hard-gated to `NODE_ENV=development`, so Vercel preview / production-mode QA sent those credentials to Supabase Auth instead.
@@ -534,6 +545,23 @@ Earlier completed platform work:
 
 ---
 
+2026-06-09 quote form step 2 — city/airport scope locked:
+
+- **Cities reduced to 3**: `UK_CITIES` in `Step2LocationDates` now contains only `['London', 'Manchester', 'Birmingham']`. All other city options (Leeds, Glasgow, Edinburgh, Bristol, Leicester, Other) and their corresponding airport chips have been removed.
+- **London airports trimmed to 2**: London now maps only to LHR (Heathrow) and LGW (Gatwick). STN, LTN, and LCY removed — matches the launch airport set used on `/umrah` and `/search/packages`.
+- **Dead `departureArea` field removed**: the "Area of London" sub-picker and the `departureArea` draft field are gone. Airport filtering always used `a.city === selectedCity` and never read `departureArea`. No downstream code is affected.
+- **Return-airport hint added**: a quiet helper line — "Your return flight will depart from the same airport." — appears below the airport chips whenever the airport section is visible. Dimmed (`rgba(255,255,255,0.4)`) so it informs without competing with the selection action.
+
+Supported city → airport mapping (current, authoritative):
+
+| City | Airport(s) |
+| --- | --- |
+| London | LHR (Heathrow), LGW (Gatwick) |
+| Manchester | MAN |
+| Birmingham | BHX |
+
+---
+
 ## 8. Pending / Left Areas
 
 Do not mark these complete unless re-verified.
@@ -556,6 +584,7 @@ Do not mark these complete unless re-verified.
 | P2 | Local Chrome SEO/AEO QA | Server-side SEO/AEO work was done earlier. A rendered local Chrome audit remains useful for titles, JSON-LD, canonicals, noindex/robots, and visible FAQ consistency. |
 | P2 | Test coverage | Tests pass, but coverage was previously around 28 percent. Increase coverage for auth session, auth API, DB adapter, package APIs, analytics, and payment evidence. |
 | P2 | Docs consistency | Some docs still contain stale historical status such as operator analytics partial/E2E pending. Update those docs as touched; do not regress implementation to match stale docs. |
+| P2 | ~~London area picker — dead field~~ | **RESOLVED 2026-06-09.** `departureArea` field and sub-picker removed entirely from `Step2LocationDates`. |
 
 ⚠️ PARTIALLY RESOLVED — Payment evidence RLS
 The storage RLS policies now grant read access to the involved operator and to
