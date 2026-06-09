@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -62,6 +63,13 @@ export default function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-12 md:px-6">
+      <Breadcrumb
+        className="mb-6"
+        items={[
+          { label: 'Home', href: '/' },
+          { label: 'Account settings' },
+        ]}
+      />
       <h1 className="mb-8 text-2xl font-semibold text-[var(--text)]">Account settings</h1>
 
       {/* Data export */}

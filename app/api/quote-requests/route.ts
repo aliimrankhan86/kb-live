@@ -47,6 +47,20 @@ const quoteRequestSchema = z.object({
   sourceOperatorId: z.string().optional(),
 });
 
+export async function GET() {
+  try {
+    const user = await getSessionUser();
+    if (!user || user.role !== 'customer') {
+      return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
+    }
+    const requests = await Repository.getRequests({ userId: user.id, role: 'customer' });
+    return NextResponse.json({ requests });
+  } catch (err) {
+    const { body, status } = mapErrorToResponse(err);
+    return NextResponse.json(body, { status });
+  }
+}
+
 export async function POST(request: NextRequest) {
   // Rate limiting — throttle by IP to prevent burst abuse. Scoped separately from auth + interest budgets.
   const rateLimit = await checkRateLimit(getRateLimitIdentifier(request, 'quote'));

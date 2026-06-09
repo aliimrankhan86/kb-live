@@ -76,6 +76,7 @@
 - SEO: JSON-LD, dynamic sitemap, city corridor pages (`/umrah/london|birmingham|manchester`)
 - A11y: WCAG 2.2 AA, ARIA, keyboard nav, 44px tap targets
 - Security: nonce-based CSP (replaced unsafe-inline), RLS migrations, rate limiting (Upstash)
+- `/settings` breadcrumb (`Home / Account settings`) — orientation + escape path for destructive-action page
 
 ---
 
