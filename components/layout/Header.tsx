@@ -5,7 +5,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
 import { Logo } from '@/components/graphics/Logo';
-import { createClient } from '@/lib/supabase/client';
 import type { UserRole } from '@/lib/types';
 import styles from './header.module.css';
 
@@ -15,6 +14,42 @@ interface AuthUser {
   role: UserRole;
   name?: string | null;
 }
+
+// Minimal inline SVG icons — 24×24 stroked
+function Icon({ d, d2, size = 18 }: { d: string; d2?: string; size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      style={{ flexShrink: 0 }}
+    >
+      <path d={d} />
+      {d2 && <path d={d2} />}
+    </svg>
+  );
+}
+
+const ICONS = {
+  umrah: 'M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z',
+  hajj: 'M3 21h18M5 21V7l7-4 7 4v14M9 21V12h6v9',
+  quote: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+  requests: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2',
+  partners: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z',
+  dashboard: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z',
+  admin: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',
+  settings: {
+    d: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z',
+    d2: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z',
+  },
+  logout: 'M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1',
+};
 
 export function Header({ className = '' }: { className?: string }) {
   const router = useRouter();
@@ -27,39 +62,28 @@ export function Header({ className = '' }: { className?: string }) {
   const hamburgerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    const supabase = createClient();
-    if (!supabase) {
-      setLoading(false);
-      return;
+    let isMounted = true;
+
+    async function loadUser() {
+      try {
+        const response = await fetch('/api/auth/me', { cache: 'no-store' });
+        if (!response.ok) {
+          if (isMounted) setUser(null);
+          return;
+        }
+        const data = (await response.json()) as { user: AuthUser | null };
+        if (isMounted) setUser(data.user);
+      } catch {
+        if (isMounted) setUser(null);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
     }
 
-    supabase.auth.getUser().then(({ data: { user: u } }) => {
-      if (u) {
-        setUser({
-          id: u.id,
-          email: u.email || '',
-          role: (u.user_metadata?.role as UserRole) || 'customer',
-          name: u.user_metadata?.name || u.user_metadata?.full_name || null,
-        });
-      }
-      setLoading(false);
-    });
-
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
-        setUser({
-          id: session.user.id,
-          email: session.user.email || '',
-          role: (session.user.user_metadata?.role as UserRole) || 'customer',
-          name: session.user.user_metadata?.name || session.user.user_metadata?.full_name || null,
-        });
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null);
-      }
-    });
-
-    return () => listener.subscription.unsubscribe();
-  }, []);
+    setLoading(true);
+    void loadUser();
+    return () => { isMounted = false; };
+  }, [pathname]);
 
   const handleLogout = async () => {
     setMenuOpen(false);
@@ -70,13 +94,11 @@ export function Header({ className = '' }: { className?: string }) {
     router.refresh();
   };
 
-  // Close mobile drawer on route change
   useEffect(() => {
     setMobileDrawerOpen(false);
     setMenuOpen(false);
   }, [pathname]);
 
-  // Close mobile drawer on Escape
   useEffect(() => {
     if (!mobileDrawerOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -86,7 +108,6 @@ export function Header({ className = '' }: { className?: string }) {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [mobileDrawerOpen]);
 
-  // Close mobile drawer on click outside
   useEffect(() => {
     if (!mobileDrawerOpen) return;
     const handleClickOutside = (e: MouseEvent) => {
@@ -103,19 +124,16 @@ export function Header({ className = '' }: { className?: string }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [mobileDrawerOpen]);
 
-  // Focus trap for mobile drawer
   useEffect(() => {
     if (!mobileDrawerOpen) return;
     const drawer = mobileDrawerRef.current;
     if (!drawer) return;
-
     const focusableElements = drawer.querySelectorAll<HTMLElement>(
       'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
     );
     const first = focusableElements[0];
     const last = focusableElements[focusableElements.length - 1];
     first?.focus();
-
     const handleTab = (e: KeyboardEvent) => {
       if (e.key !== 'Tab') return;
       if (e.shiftKey && document.activeElement === first) {
@@ -134,29 +152,33 @@ export function Header({ className = '' }: { className?: string }) {
   const isAdmin = user?.role === 'admin';
   const isCustomer = user?.role === 'customer';
 
+  const displayName = user?.name ? user.name.split(' ')[0] : user?.email?.split('@')[0] ?? '';
+  const avatarLetter = (user?.name || user?.email || 'U')[0].toUpperCase();
+
+  const isActive = (href: string) =>
+    href === '/' ? pathname === '/' : pathname?.startsWith(href) ?? false;
+
   const toggleMobileDrawer = useCallback(() => {
     setMobileDrawerOpen(prev => !prev);
     setMenuOpen(false);
   }, []);
 
-  // Don't show header on operator pages (they have sidebar)
   if (pathname?.startsWith('/operator/') || pathname?.startsWith('/admin/')) {
     return null;
   }
 
   const navLinks = [
-    { href: '/umrah', label: 'Umrah', testId: 'nav-umrah' },
-    { href: '/hajj', label: 'Hajj', testId: 'nav-hajj' },
-    { href: '/quote', label: 'Get a Quote', testId: 'nav-quote' },
+    { href: '/umrah', label: 'Umrah', testId: 'nav-umrah', icon: ICONS.umrah },
+    { href: '/hajj', label: 'Hajj', testId: 'nav-hajj', icon: ICONS.hajj },
+    { href: '/quote', label: 'Get a Quote', testId: 'nav-quote', icon: ICONS.quote },
   ];
 
   const guestLinks = [
-    { href: '/partner', label: 'For Partners', testId: 'nav-partners' },
-    { href: '/login', label: 'Login', testId: 'nav-login' },
+    { href: '/partner', label: 'For Partners', testId: 'nav-partners', icon: ICONS.partners },
   ];
 
   const customerLinks = [
-    { href: '/requests', label: 'My Requests', testId: 'nav-requests' },
+    { href: '/requests', label: 'My Requests', testId: 'nav-requests', icon: ICONS.requests },
   ];
 
   const operatorAdminLinks = [
@@ -164,6 +186,7 @@ export function Header({ className = '' }: { className?: string }) {
       href: isAdmin ? '/admin/complaints' : '/operator/dashboard',
       label: isAdmin ? 'Admin' : 'Dashboard',
       testId: 'nav-dashboard',
+      icon: isAdmin ? ICONS.admin : ICONS.dashboard,
     },
   ];
 
@@ -189,19 +212,21 @@ export function Header({ className = '' }: { className?: string }) {
             <Link
               key={link.href}
               href={link.href}
-              className={styles.header__navLink}
+              className={`${styles.header__navLink} ${isActive(link.href) ? styles.header__navLinkActive : ''}`}
               data-testid={link.testId}
+              aria-current={isActive(link.href) ? 'page' : undefined}
             >
               {link.label}
             </Link>
           ))}
 
-          {!loading && !user && guestLinks.map(link => (
+          {!user && guestLinks.map(link => (
             <Link
               key={link.href}
               href={link.href}
-              className={styles.header__navLink}
+              className={`${styles.header__navLink} ${isActive(link.href) ? styles.header__navLinkActive : ''}`}
               data-testid={link.testId}
+              aria-current={isActive(link.href) ? 'page' : undefined}
             >
               {link.label}
             </Link>
@@ -213,8 +238,9 @@ export function Header({ className = '' }: { className?: string }) {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={styles.header__navLink}
+                  className={`${styles.header__navLink} ${isActive(link.href) ? styles.header__navLinkActive : ''}`}
                   data-testid={link.testId}
+                  aria-current={isActive(link.href) ? 'page' : undefined}
                 >
                   {link.label}
                 </Link>
@@ -227,19 +253,17 @@ export function Header({ className = '' }: { className?: string }) {
                   aria-haspopup="menu"
                   data-testid="user-menu-trigger"
                 >
-                  {user?.name || user?.email}
+                  {displayName}
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                     <path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" strokeWidth="1.5" />
                   </svg>
                 </button>
                 {menuOpen && (
                   <div className={styles.header__dropdown} role="menu">
-                    <button
-                      onClick={handleLogout}
-                      className={styles.header__dropdownItem}
-                      data-testid="logout-btn"
-                      role="menuitem"
-                    >
+                    <Link href="/settings" className={styles.header__dropdownItem} onClick={() => setMenuOpen(false)} role="menuitem">
+                      Settings
+                    </Link>
+                    <button onClick={handleLogout} className={styles.header__dropdownItem} data-testid="logout-btn" role="menuitem">
                       Log out
                     </button>
                   </div>
@@ -254,8 +278,9 @@ export function Header({ className = '' }: { className?: string }) {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={styles.header__navLink}
+                  className={`${styles.header__navLink} ${isActive(link.href) ? styles.header__navLinkActive : ''}`}
                   data-testid={link.testId}
+                  aria-current={isActive(link.href) ? 'page' : undefined}
                 >
                   {link.label}
                 </Link>
@@ -268,7 +293,7 @@ export function Header({ className = '' }: { className?: string }) {
                   aria-haspopup="menu"
                   data-testid="user-menu-trigger"
                 >
-                  {user?.name || user?.email}
+                  {displayName}
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                     <path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" strokeWidth="1.5" />
                   </svg>
@@ -277,36 +302,27 @@ export function Header({ className = '' }: { className?: string }) {
                   <div className={styles.header__dropdown} role="menu">
                     {!isAdmin && (
                       <>
-                        <Link
-                          href="/operator/profile"
-                          className={styles.header__dropdownItem}
-                          onClick={() => setMenuOpen(false)}
-                          role="menuitem"
-                        >
+                        <Link href="/operator/profile" className={styles.header__dropdownItem} onClick={() => setMenuOpen(false)} role="menuitem">
                           Profile
                         </Link>
-                        <Link
-                          href="/operator/settings"
-                          className={styles.header__dropdownItem}
-                          onClick={() => setMenuOpen(false)}
-                          role="menuitem"
-                        >
+                        <Link href="/operator/settings" className={styles.header__dropdownItem} onClick={() => setMenuOpen(false)} role="menuitem">
                           Settings
                         </Link>
                       </>
                     )}
-                    <button
-                      onClick={handleLogout}
-                      className={styles.header__dropdownItem}
-                      data-testid="logout-btn"
-                      role="menuitem"
-                    >
+                    <button onClick={handleLogout} className={styles.header__dropdownItem} data-testid="logout-btn" role="menuitem">
                       Log out
                     </button>
                   </div>
                 )}
               </div>
             </>
+          )}
+
+          {!loading && !user && (
+            <Link href="/login" className={styles.header__loginCta} data-testid="nav-login">
+              Sign in
+            </Link>
           )}
         </nav>
 
@@ -321,18 +337,18 @@ export function Header({ className = '' }: { className?: string }) {
           data-testid="mobile-menu-toggle"
         >
           {mobileDrawerOpen ? (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           ) : (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
               <path d="M3 12h18M3 6h18M3 18h18" />
             </svg>
           )}
         </button>
       </div>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Overlay */}
       {mobileDrawerOpen && (
         <div
           className={styles.header__mobileOverlay}
@@ -340,6 +356,8 @@ export function Header({ className = '' }: { className?: string }) {
           aria-hidden="true"
         />
       )}
+
+      {/* Mobile Drawer */}
       {mobileDrawerOpen && (
         <div
           ref={mobileDrawerRef}
@@ -349,19 +367,13 @@ export function Header({ className = '' }: { className?: string }) {
           role="dialog"
           aria-modal="true"
         >
-          <h2 id="mobile-drawer-title" className="sr-only">
-            Mobile navigation
-          </h2>
+          <h2 id="mobile-drawer-title" className="sr-only">Mobile navigation</h2>
+
+          {/* Drawer header */}
           <div className={styles.header__mobileDrawerHeader}>
             <Link href="/" className={styles.header__mobileBrand} onClick={() => setMobileDrawerOpen(false)}>
               <Logo size={28} />
-              <Image
-                src="/text-logo.svg"
-                alt="KaabaTrip"
-                width={90}
-                height={38}
-                priority
-              />
+              <Image src="/text-logo.svg" alt="KaabaTrip" width={90} height={38} priority />
             </Link>
             <button
               className={styles.header__mobileClose}
@@ -369,102 +381,172 @@ export function Header({ className = '' }: { className?: string }) {
               aria-label="Close menu"
               data-testid="mobile-menu-close"
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
                 <path d="M18 6L6 18M6 6l12 12" />
               </svg>
             </button>
           </div>
 
+          {/* Nav section */}
           <nav className={styles.header__mobileNav} aria-label="Mobile menu">
-            {navLinks.map(link => (
+
+            {/* Core nav links */}
+            <div className={styles.header__mobileSectionLabel}>Explore</div>
+            {navLinks.map(link => {
+              const active = isActive(link.href);
+              const isQuote = link.href === '/quote';
+              if (isQuote) {
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={styles.header__mobileNavQuoteCta}
+                    onClick={() => setMobileDrawerOpen(false)}
+                    data-testid={`mobile-${link.testId}`}
+                    aria-current={active ? 'page' : undefined}
+                  >
+                    <Icon d={link.icon} size={18} />
+                    {link.label}
+                  </Link>
+                );
+              }
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`${styles.header__mobileNavLink} ${active ? styles.header__mobileNavLinkActive : ''}`}
+                  onClick={() => setMobileDrawerOpen(false)}
+                  data-testid={`mobile-${link.testId}`}
+                  aria-current={active ? 'page' : undefined}
+                >
+                  <Icon d={link.icon} size={18} />
+                  {link.label}
+                </Link>
+              );
+            })}
+
+            {!user && guestLinks.map(link => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={styles.header__mobileNavLink}
+                className={`${styles.header__mobileNavLink} ${isActive(link.href) ? styles.header__mobileNavLinkActive : ''}`}
                 onClick={() => setMobileDrawerOpen(false)}
                 data-testid={`mobile-${link.testId}`}
+                aria-current={isActive(link.href) ? 'page' : undefined}
               >
+                <Icon d={link.icon} size={18} />
                 {link.label}
               </Link>
             ))}
 
-            {!loading && !user && guestLinks.map(link => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={styles.header__mobileNavLink}
-                onClick={() => setMobileDrawerOpen(false)}
-                data-testid={`mobile-${link.testId}`}
-              >
-                {link.label}
-              </Link>
-            ))}
-
+            {/* Customer links */}
             {!loading && isCustomer && (
               <>
                 {customerLinks.map(link => (
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={styles.header__mobileNavLink}
+                    className={`${styles.header__mobileNavLink} ${isActive(link.href) ? styles.header__mobileNavLinkActive : ''}`}
                     onClick={() => setMobileDrawerOpen(false)}
                     data-testid={`mobile-${link.testId}`}
+                    aria-current={isActive(link.href) ? 'page' : undefined}
                   >
+                    <Icon d={link.icon} size={18} />
                     {link.label}
                   </Link>
                 ))}
-                <div className={styles.header__mobileDivider} />
-                <span className={styles.header__mobileUserLabel}>{user?.name || user?.email}</span>
-                <button
-                  onClick={handleLogout}
-                  className={styles.header__mobileNavLink}
-                  data-testid="mobile-logout-btn"
-                >
-                  Log out
-                </button>
               </>
             )}
 
+            {/* Operator / Admin links */}
             {!loading && (isOperator || isAdmin) && (
               <>
                 {operatorAdminLinks.map(link => (
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={styles.header__mobileNavLink}
+                    className={`${styles.header__mobileNavLink} ${isActive(link.href) ? styles.header__mobileNavLinkActive : ''}`}
                     onClick={() => setMobileDrawerOpen(false)}
                     data-testid={`mobile-${link.testId}`}
+                    aria-current={isActive(link.href) ? 'page' : undefined}
                   >
+                    <Icon d={link.icon} size={18} />
                     {link.label}
                   </Link>
                 ))}
                 {!isAdmin && (
-                  <>
-                    <Link
-                      href="/operator/profile"
-                      className={styles.header__mobileNavLink}
-                      onClick={() => setMobileDrawerOpen(false)}
-                    >
-                      Profile
-                    </Link>
-                    <Link
-                      href="/operator/settings"
-                      className={styles.header__mobileNavLink}
-                      onClick={() => setMobileDrawerOpen(false)}
-                    >
-                      Settings
-                    </Link>
-                  </>
+                  <Link
+                    href="/operator/profile"
+                    className={`${styles.header__mobileNavLink} ${isActive('/operator/profile') ? styles.header__mobileNavLinkActive : ''}`}
+                    onClick={() => setMobileDrawerOpen(false)}
+                  >
+                    <Icon d={ICONS.settings.d} d2={ICONS.settings.d2} size={18} />
+                    Profile & settings
+                  </Link>
                 )}
+              </>
+            )}
+
+            {/* Spacer pushes account section to bottom */}
+            <div style={{ flex: 1 }} />
+
+            {/* Logged-in user card + account actions */}
+            {!loading && user && (
+              <>
                 <div className={styles.header__mobileDivider} />
-                <span className={styles.header__mobileUserLabel}>{user?.name || user?.email}</span>
+                <div className={styles.header__mobileSectionLabel}>Account</div>
+
+                {/* User card */}
+                <div className={styles.header__mobileUserCard}>
+                  <div className={styles.header__mobileUserAvatar}>{avatarLetter}</div>
+                  <div className={styles.header__mobileUserInfo}>
+                    <span className={styles.header__mobileUserName}>{displayName}</span>
+                    <span className={styles.header__mobileUserEmail}>{user.email}</span>
+                  </div>
+                </div>
+
+                {(isCustomer) && (
+                  <Link
+                    href="/settings"
+                    className={`${styles.header__mobileNavLink} ${isActive('/settings') ? styles.header__mobileNavLinkActive : ''}`}
+                    onClick={() => setMobileDrawerOpen(false)}
+                  >
+                    <Icon d={ICONS.settings.d} d2={ICONS.settings.d2} size={18} />
+                    Settings
+                  </Link>
+                )}
+
                 <button
                   onClick={handleLogout}
-                  className={styles.header__mobileNavLink}
+                  className={styles.header__mobileNavLinkDanger}
                   data-testid="mobile-logout-btn"
                 >
+                  <Icon d={ICONS.logout} size={18} />
                   Log out
                 </button>
+              </>
+            )}
+
+            {/* Guest: Sign in CTA */}
+            {!loading && !user && (
+              <>
+                <div className={styles.header__mobileDivider} />
+                <Link
+                  href="/login"
+                  className={styles.header__mobileLoginCta}
+                  onClick={() => setMobileDrawerOpen(false)}
+                  data-testid="mobile-nav-login"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  href="/signup"
+                  className={styles.header__mobileNavLink}
+                  onClick={() => setMobileDrawerOpen(false)}
+                  style={{ justifyContent: 'center', fontSize: '0.875rem', color: 'var(--textMuted)' }}
+                >
+                  Create account
+                </Link>
               </>
             )}
           </nav>

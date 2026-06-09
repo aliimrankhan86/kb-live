@@ -1,10 +1,9 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
-import { Header } from '@/components/layout/Header';
 import { SearchPackagesClient } from '@/components/search/SearchPackagesClient';
 import { filterByParams } from '@/components/search/search-utils';
 import { Repository } from '@/lib/api/repository';
-import { faqPageJsonLd, graphJsonLd, searchResultsJsonLd, webPageJsonLd } from '@/lib/seo/json-ld';
+import { JsonLdScript, faqPageJsonLd, graphJsonLd, searchResultsJsonLd, webPageJsonLd } from '@/lib/seo/json-ld';
 import styles from '@/components/search/packages.module.css';
 
 interface SearchPackagesPageProps {
@@ -82,11 +81,7 @@ export default async function SearchPackagesPage({ searchParams }: SearchPackage
 
   return (
     <>
-      <Header />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(searchJsonLd) }}
-      />
+      <JsonLdScript data={searchJsonLd} />
       <Suspense
         fallback={
           <main className={styles.searchPage}>

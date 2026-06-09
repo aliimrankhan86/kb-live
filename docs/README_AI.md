@@ -2,6 +2,8 @@
 
 **Read this file first. It is the single entry point for any AI agent or developer.**
 
+**Current canonical handover:** `AI_NOTES.md` is the single source of truth for verified status, pending areas, and Claude handoff context. If this file or another doc conflicts with a verified statement in `AI_NOTES.md`, update the stale doc instead of undoing implementation.
+
 ---
 
 ## What is KaabaTrip?
@@ -12,11 +14,11 @@ A two-sided marketplace for Umrah/Hajj pilgrimage packages. Travellers search, c
 
 - **Branch:** `dev`
 - **Stack:** Next.js 15.5.19 (App Router), React 19, Tailwind v4, TypeScript strict, Vitest 4.1.8, Playwright
-- **Verified 2026-06-06:** `npm run test` passes (183/183). `npm run build` passes (43 app routes generated, 0 build/type errors).
-- **E2E 2026-06-06:** `npx playwright test e2e/operator.spec.ts --reporter=list` fails. Chromium is redirected from `/operator/packages` to `/`, so the operator wizard assertions do not run. Firefox/WebKit browser binaries are missing locally and require `npx playwright install`.
-- **Data:** Repository layer is async. MockDB remains the default for dev/tests; Prisma/Supabase paths exist behind config and migrations.
-- **Auth:** Supabase SSR/auth endpoints and middleware are wired; several dev/operator UI flows still rely on MockDB's simulated current user.
-- **Operator side:** Onboarding, dashboard, leads, profile, payment settings, bank-review admin, complaints, package CSV, and the 8-step package wizard exist. Operator package E2E is pending because route auth/test setup is not aligned.
+- **Verified 2026-06-09:** `npm run test` passes (18 files, 239/239). `npm run build` passes with 0 errors. `npm run lint` passes with a Next.js deprecation notice for `next lint`; `npx prisma validate` passes.
+- **E2E 2026-06-08:** `npx playwright test` passes with 57 passed, 6 skipped, 0 failed. `e2e/signup-password-mismatch.spec.ts` passes 3/3.
+- **Data:** Target production architecture is Supabase Postgres/Auth/Storage + Prisma + Upstash Redis. MockDB remains valid for unit tests and controlled E2E/dev simulation, but the 2026-06-09 audit found direct MockDB imports still present in production-facing UI/API paths. See `AI_NOTES.md` §0 before launch work.
+- **Auth:** Supabase SSR/auth endpoints and middleware are wired. `/login` supports documented dev persona credentials only in local development or automated E2E (`E2E_TESTING=1`). Vercel preview and production must use real Supabase Auth; there is no remote dev-auth toggle.
+- **Operator side:** Onboarding, dashboard, leads, profile, payment settings, bank-review admin, complaints, package CSV, the 8-step package wizard, and real-event operator analytics exist. Admin reconciliation exists but needs explicit business/export verification before it is treated as complete.
 
 ## Localisation
 
@@ -52,9 +54,9 @@ See `docs/APP_STRUCTURE.md` for full journey maps and wireframes.
 | `/operator/onboarding` | Operator registration form. | Done |
 | `/operator/onboarding/status` | Operator verification status screen. | Done |
 | `/operator/dashboard` | Operator home with stats, activity, quick actions. | Done |
-| `/operator/packages` | Package list, CSV import/export, 8-step wizard. | Implemented; E2E pending |
+| `/operator/packages` | Package list, CSV import/export, 8-step wizard. | Done |
 | `/operator/leads` | Lead/enquiry management and offer response flow. | Done |
-| `/operator/analytics` | Stats dashboard. | Partial |
+| `/operator/analytics` | Event-backed analytics dashboard. | Done; deeper business insights future scope |
 | `/operator/profile` | Profile editor. | Done |
 | `/operator/settings` | Operator settings index. | Done |
 | `/operator/settings/payment-details` | Bank details with change request, cooling period, audit log. | Done |

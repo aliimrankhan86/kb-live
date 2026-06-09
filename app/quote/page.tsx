@@ -1,11 +1,9 @@
 import { Suspense } from 'react';
 import { QuoteRequestWizard } from '@/components/quote/QuoteRequestWizard';
-import { Header } from '@/components/layout/Header';
 
 export default function QuotePage() {
   return (
     <>
-      <Header />
       <main className="min-h-screen bg-[var(--background)] py-12 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl">
           <div className="mb-8 text-center">

@@ -1,9 +1,8 @@
 import type { Metadata } from 'next'
-import { Header } from '@/components/layout/Header'
 import { OperatorProfileDetail } from '@/components/operators/OperatorProfileDetail'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { Repository } from '@/lib/api/repository'
-import { breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, operatorJsonLd } from '@/lib/seo/json-ld'
+import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, operatorJsonLd } from '@/lib/seo/json-ld'
 import type { OperatorProfile, Package } from '@/lib/types'
 
 interface OperatorPageProps {
@@ -83,7 +82,6 @@ export default async function OperatorProfilePage({ params }: OperatorPageProps)
   if (error) {
     return (
       <>
-        <Header />
         <main className="min-h-screen bg-[var(--background)]">{renderNotFound(error)}</main>
       </>
     )
@@ -92,7 +90,6 @@ export default async function OperatorProfilePage({ params }: OperatorPageProps)
   if (!operator) {
     return (
       <>
-        <Header />
         <main className="min-h-screen bg-[var(--background)]">
           {renderNotFound('This operator is not available.')}
         </main>
@@ -124,12 +121,8 @@ export default async function OperatorProfilePage({ params }: OperatorPageProps)
 
   return (
     <>
-      <Header />
       <main className="min-h-screen bg-[var(--background)]">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(operatorProfileJsonLd) }}
-        />
+        <JsonLdScript data={operatorProfileJsonLd} />
         <div className="w-full max-w-5xl mx-auto px-4 pt-6">
           <Breadcrumb items={breadcrumbItems} />
         </div>

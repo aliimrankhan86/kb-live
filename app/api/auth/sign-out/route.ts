@@ -1,12 +1,15 @@
 import { NextResponse } from 'next/server';
 import { apiSignOut } from '@/lib/auth/api';
+import { mapErrorToResponse } from '@/lib/errors';
 
 export async function POST() {
+  const response = NextResponse.json({ success: true });
+
   try {
     await apiSignOut();
-    return NextResponse.json({ success: true });
+    return response;
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Sign out failed';
-    return NextResponse.json({ error: message }, { status: 500 });
+    const { body, status } = mapErrorToResponse(err);
+    return NextResponse.json(body, { status });
   }
 }

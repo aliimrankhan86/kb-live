@@ -2,7 +2,9 @@
 
 ## Overview
 
-KaabaTrip is a Next.js 15 App Router application. Uses Supabase (London eu-west-2) for Postgres persistence, Auth, and Storage. The Repository pattern abstracts data access and enforces RBAC. MockDB remains for unit tests only; production and development use Prisma + Supabase when `FEATURE_USE_REAL_DB=true`.
+KaabaTrip is a Next.js 15 App Router application. The approved target and production architecture uses Supabase (London eu-west-2) for Postgres persistence, Auth, and Storage, Prisma for data access, and Upstash Redis for rate limiting. The Repository pattern abstracts data access and enforces RBAC. MockDB remains valid for unit tests and controlled E2E/dev simulation only.
+
+**2026-06-09 audit caveat:** the repo still contains direct MockDB imports in production-facing UI/API paths. Treat the diagram below as the target architecture and see `AI_NOTES.md` §0 for the cutover blockers that must be fixed before public launch.
 
 ## Architecture diagram
 
@@ -25,7 +27,7 @@ PUBLIC SIDE                      OPERATOR SIDE
        +---> lib/api/mock-db.ts (unit tests only)
 ```
 
-**Rule:** UI components never import MockDB directly. Always go through Repository.
+**Rule:** UI components should never import MockDB directly. Always go through Repository/server APIs. This rule is not yet fully satisfied; the current exception inventory is in `AI_NOTES.md` §0.
 
 ## Data model
 
@@ -156,4 +158,4 @@ lib/i18n/
 5. ✅ P1E: RLS policies (deny-by-default, role-based)
 6. ✅ P1F: Storage buckets (evidence files, operator exports)
 7. ✅ P1G: Seed migration (MockDB data → Postgres)
-8. ⏳ P1H: Cutover — feature flag `FEATURE_USE_REAL_DB` controls data source; MockDB available for unit tests; production defaults to Prisma + Supabase
+8. ⏳ P1H: Cutover — feature flag `FEATURE_USE_REAL_DB` controls data source; MockDB available for unit tests/E2E/dev simulation. Production must be configured to use Prisma + Supabase and should fail fast if the flag or required env vars are missing.

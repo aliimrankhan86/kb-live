@@ -33,7 +33,7 @@ export async function POST() {
         paymentEvidence: b.paymentEvidence
           ? {
               ...b.paymentEvidence,
-              files: b.paymentEvidence.files.map(({ base64Data: _base64Data, ...f }) => f),
+              files: b.paymentEvidence.files.map(({ storagePath: _storagePath, ...f }) => f),
             }
           : undefined,
       })),

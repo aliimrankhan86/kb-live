@@ -13,19 +13,20 @@
 .searchForm__card {
   background: rgba(17, 17, 17, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 1rem;
-  padding: 2.5rem;
+  border-radius: 0.5rem;
+  padding: 2rem;
   backdrop-filter: blur(10px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .searchForm__header {
-  text-align: center;
-  margin-bottom: 2rem;
+  text-align: left;
+  margin-bottom: 1.5rem;
+  max-width: 36rem;
 }
 
 .searchForm__title {
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   font-weight: 600;
   color: var(--text);
   margin-bottom: 0.5rem;
@@ -39,8 +40,8 @@
 }
 
 .searchForm__section {
-  margin-bottom: 1.75rem;
-  padding-bottom: 1.75rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1.25rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -52,7 +53,8 @@
   display: flex;
   align-items: center;
   gap: 0.625rem;
-  margin-bottom: 0.875rem;
+  margin-bottom: 0.75rem;
+  justify-content: space-between;
 }
 
 .searchForm__stepNumber {
@@ -82,7 +84,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .searchForm__dateField {
@@ -96,7 +98,7 @@
   font-weight: 500;
   color: var(--textMuted);
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0;
 }
 
 .searchForm__dateInputWrapper {
@@ -118,6 +120,47 @@
   outline: 2px solid var(--yellow);
   outline-offset: 2px;
   border-color: var(--yellow);
+}
+
+.searchForm__sectionHelp {
+  margin: -0.25rem 0 0.875rem;
+  color: var(--textMuted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.searchForm__choiceToggle {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 0.875rem;
+  padding: 0.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.searchForm__choiceButton {
+  min-height: 44px;
+  border: 1px solid transparent;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: var(--textMuted);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.searchForm__choiceButton:hover {
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.searchForm__choiceButtonActive {
+  background: rgba(255, 211, 29, 0.14);
+  border-color: rgba(255, 211, 29, 0.55);
+  color: var(--yellow);
 }
 
 .searchForm__dateInput {
@@ -265,22 +308,22 @@
 
 .searchForm__quickSelect {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.75rem;
-  margin-top: 1rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.875rem;
 }
 
 .searchForm__quickButton {
   background: rgba(17, 17, 17, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 0.5rem;
-  padding: 0.75rem 1rem;
+  padding: 0.625rem 0.75rem;
   min-height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   color: var(--text);
-  font-size: 0.9rem;
+  font-size: 0.8125rem;
   font-weight: 400;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -303,13 +346,56 @@
   outline-offset: 2px;
 }
 
+.searchForm__periodGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
+}
+
+.searchForm__periodButton {
+  display: flex;
+  min-height: 72px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 0.5rem;
+  background: rgba(17, 17, 17, 0.64);
+  color: var(--text);
+  padding: 0.75rem;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.searchForm__periodButton:hover {
+  border-color: rgba(255, 211, 29, 0.65);
+}
+
+.searchForm__periodButtonActive {
+  border-color: var(--yellow);
+  background: rgba(255, 211, 29, 0.12);
+}
+
+.searchForm__periodTitle {
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.searchForm__periodHelper {
+  color: var(--textMuted);
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
 /* Traveller rows (Adults + Children) */
 .searchForm__travellerRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.875rem;
 }
 
 .searchForm__travellerRow:last-of-type {
@@ -330,7 +416,7 @@
 
 /* Traveller summary */
 .searchForm__travellerSummary {
-  margin-top: 1rem;
+  margin-top: 0.875rem;
   padding: 0.625rem 0.875rem;
   background: rgba(255, 211, 29, 0.06);
   border: 1px solid rgba(255, 211, 29, 0.15);
@@ -342,8 +428,8 @@
 
 /* Child age inputs */
 .searchForm__childAges {
-  margin-top: 1rem;
-  padding: 1rem;
+  margin-top: 0.875rem;
+  padding: 0.875rem;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 0.75rem;
@@ -406,6 +492,70 @@
   padding: 0.5rem;
 }
 
+/* Airport select */
+.searchForm__routeGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.searchForm__airportField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.searchForm__airportSelect {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.625rem 2.5rem 0.625rem 0.875rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 0.5rem;
+  background: rgba(17, 17, 17, 0.6);
+  color: var(--text);
+  font-size: 0.9375rem;
+  font-family: var(--font-exo2);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2.5 4.5L6 8L9.5 4.5' stroke='%23FFD31D' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.875rem center;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.searchForm__airportSelect:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.searchForm__airportSelect:focus {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+  border-color: var(--yellow);
+}
+
+/* Ensure dropdown options are readable in dark mode */
+.searchForm__airportSelect option {
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.9375rem;
+  padding: 0.5rem;
+}
+
+.searchForm__airportHint {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--textMuted);
+  font-family: var(--font-exo2);
+}
+
+.searchForm__tripLength {
+  margin: 0.25rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--textMuted);
+}
+
 /* Stepper for travellers */
 .searchForm__stepper {
   display: inline-flex;
@@ -448,14 +598,14 @@
   font-size: 0.9375rem;
   font-weight: 500;
   color: var(--text);
-  min-width: 100px;
+  min-width: 80px;
   text-align: center;
 }
 
 /* Hotel star chips */
 .searchForm__chipGroup {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.5rem;
 }
 
@@ -463,8 +613,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 40px;
-  padding: 0.5rem 1rem;
+  flex-direction: column;
+  min-height: 68px;
+  padding: 0.625rem 0.75rem;
   border-radius: 0.5rem;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -473,6 +624,14 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+}
+
+.searchForm__chipHint {
+  margin-top: 0.25rem;
+  color: var(--textMuted);
+  font-size: 0.6875rem;
+  font-weight: 400;
+  line-height: 1.25;
 }
 
 .searchForm__chip:hover {
@@ -485,12 +644,25 @@
   color: var(--yellow);
 }
 
-/* Budget toggle */
-.searchForm__toggle {
+.searchForm__selectionNote {
+  margin: 0.75rem 0 0;
+  border: 1px solid rgba(255, 211, 29, 0.16);
+  border-radius: 0.5rem;
+  background: rgba(255, 211, 29, 0.06);
+  color: var(--yellow);
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Budget toggle — inline in header, opt-out affordance */
+.searchForm__budgetToggle {
   display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
   cursor: pointer;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .searchForm__toggleInput {
@@ -502,8 +674,8 @@
 
 .searchForm__toggleTrack {
   position: relative;
-  width: 44px;
-  height: 24px;
+  width: 36px;
+  height: 20px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.15);
   transition: background 0.2s ease;
@@ -518,27 +690,34 @@
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   background: var(--text);
   transition: transform 0.2s ease;
 }
 
 .searchForm__toggleInput:checked + .searchForm__toggleTrack .searchForm__toggleThumb {
-  transform: translateX(20px);
+  transform: translateX(16px);
   background: var(--bg);
 }
 
-.searchForm__toggleLabel {
-  font-size: 0.875rem;
-  color: var(--text);
+.searchForm__budgetToggleLabel {
+  font-size: 0.8125rem;
+  color: var(--textMuted);
   font-weight: 500;
 }
 
 /* Budget section */
 .searchForm__budgetSection {
-  margin-top: 1rem;
+  margin-top: 0.5rem;
+}
+
+.searchForm__budgetRow {
+  display: flex;
+  align-items: baseline;
+  gap: 0.375rem;
+  margin-bottom: 0.75rem;
 }
 
 .searchForm__budgetUnit {
@@ -549,10 +728,42 @@
 
 .searchForm__selectedBudget {
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--yellow);
-  margin-bottom: 1rem;
-  padding: 0.5rem 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.searchForm__budgetBounds {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  font-size: 0.6875rem;
+  color: var(--textMuted);
+  font-variant-numeric: tabular-nums;
+}
+
+.searchForm__summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.searchForm__summaryLabel {
+  margin: 0 0 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--textMuted);
+  text-transform: uppercase;
+}
+
+.searchForm__summaryValue {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.875rem;
+  line-height: 1.45;
 }
 
 .searchForm__searchButton {
@@ -565,17 +776,17 @@
   background: var(--yellow);
   color: var(--bg);
   border: none;
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   padding: 0.875rem 2rem;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin: 1.5rem 0 1rem 0;
+  margin: 1.25rem 0 0.875rem 0;
   box-shadow: 0 4px 16px rgba(255, 211, 29, 0.3);
   text-decoration: none;
   text-align: center;
-  letter-spacing: 0.025em;
+  letter-spacing: 0;
 }
 
 .searchForm__searchButton:hover {
@@ -594,9 +805,9 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 1.25rem;
-  margin-bottom: 1rem;
-  padding: 0.75rem 0;
+  gap: 0.875rem 1.25rem;
+  margin-bottom: 0;
+  padding: 0.625rem 0 0;
 }
 
 .searchForm__trustItem {
@@ -622,18 +833,17 @@
 
 /* Responsive styles */
 @media (max-width: 768px) {
+  .searchForm__routeGrid,
   .searchForm__dateInputs {
     grid-template-columns: 1fr;
   }
   
   .searchForm__card {
-    padding: 2rem 1.5rem;
+    padding: 1.5rem;
   }
   
   .searchForm__header {
-    gap: 0.75rem;
     margin-bottom: 1.5rem;
-    flex-direction: column;
   }
   
   .searchForm__backButton {
@@ -654,8 +864,13 @@
   }
   
   .searchForm__quickSelect {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.5rem;
+  }
+
+  .searchForm__periodGrid,
+  .searchForm__chipGroup {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   
   .searchForm__quickButton {
@@ -668,17 +883,19 @@
     font-size: 1rem;
     font-weight: 700;
   }
+
+  .searchForm__summary {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 480px) {
   .searchForm__card {
-    padding: 1.5rem 1rem;
+    padding: 1.25rem 1rem;
   }
   
   .searchForm__header {
-    gap: 0.5rem;
     margin-bottom: 1.25rem;
-    flex-direction: column;
   }
   
   .searchForm__backButton {
@@ -699,7 +916,7 @@
   }
   
   .searchForm__section {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.125rem;
   }
   
   .searchForm__label {
@@ -712,8 +929,19 @@
   }
   
   .searchForm__quickButton {
-    padding: 0.5rem 0.75rem;
+    padding: 0.5rem 0.625rem;
     font-size: 0.8rem;
+  }
+
+  .searchForm__choiceToggle,
+  .searchForm__periodGrid,
+  .searchForm__chipGroup {
+    grid-template-columns: 1fr;
+  }
+
+  .searchForm__periodButton,
+  .searchForm__chip {
+    min-height: 58px;
   }
   
   .searchForm__searchButton {

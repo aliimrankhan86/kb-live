@@ -1,8 +1,7 @@
 import { Metadata } from 'next'
-import { Header } from '@/components/layout/Header'
 import { UmrahSearchForm } from '@/components/umrah/UmrahSearchForm'
 import Link from 'next/link'
-import { breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
+import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
 
 export const metadata: Metadata = {
   title: 'Umrah Packages 2026 from the UK - Compare Operators',
@@ -63,11 +62,7 @@ const umrahJsonLd = graphJsonLd([
 export default function UmrahPage() {
   return (
     <>
-      <Header />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(umrahJsonLd) }}
-      />
+      <JsonLdScript data={umrahJsonLd} />
       <main className="min-h-screen px-4 py-10">
         <UmrahSearchForm />
         <section

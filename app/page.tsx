@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Header } from '@/components/layout/Header'
 import { Hero } from '@/components/marketing/Hero'
-import { faqPageJsonLd, graphJsonLd, organizationJsonLd, webPageJsonLd, websiteJsonLd } from '@/lib/seo/json-ld'
+import { JsonLdScript, faqPageJsonLd, graphJsonLd, organizationJsonLd, webPageJsonLd, websiteJsonLd } from '@/lib/seo/json-ld'
 
 const corridorLinks = [
   { label: 'Umrah from London', href: '/umrah/london' },
@@ -64,11 +63,7 @@ const homeJsonLd = graphJsonLd([
 export default function Home() {
   return (
     <>
-      <Header />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd) }}
-      />
+      <JsonLdScript data={homeJsonLd} />
       <Hero />
       {/* Internal navigation — links homepage to corridor and guide pages for SEO and user discovery */}
       <section className="mx-auto max-w-4xl px-4 py-8 border-t border-[var(--border)]">

@@ -85,11 +85,12 @@ All tables have `ENABLE ROW LEVEL SECURITY` with deny-by-default. Policies are d
 ### 3. XSS (Cross-Site Scripting)
 
 - **Threat**: Malicious script in "Notes" field.
-- **Mitigation**: React automatically escapes content in JSX. We do not use `dangerouslySetInnerHTML`.
+- **Mitigation**: React automatically escapes content in JSX. JSON-LD scripts are the only allowed `dangerouslySetInnerHTML` usage; they serialize trusted schema objects with `JSON.stringify` and receive the request CSP nonce.
 
 ## Supabase Auth & Session Security
 
 - **Session strategy**: JWT stored in httpOnly cookies via `@supabase/ssr`. No tokens in `localStorage`.
+- **Authorization role source**: Production authorization must not trust Supabase `user_metadata` / `raw_user_meta_data` because it is user-editable. Use `app_metadata` set via service-role/admin flows, or load role from the server-side `users` table by authenticated `user.id`.
 - **Middleware**: `middleware.ts` refreshes expired JWTs on every request. Session cookies are automatically rotated.
 - **Anon key**: Public (client-side) — used for auth and public data reads. Cannot bypass RLS.
 - **Service role key**: Server-only, never exposed to client. Used for admin operations and seeding.
@@ -102,9 +103,11 @@ All tables have `ENABLE ROW LEVEL SECURITY` with deny-by-default. Policies are d
 - **RLS**: Deny-by-default. Every table has `ENABLE ROW LEVEL SECURITY`. Anonymous users have zero access unless explicitly granted.
 - **Storage buckets**: `evidence-files` and `operator-exports` are private. No public URLs. Signed URLs are time-limited and RBAC-checked before generation.
 
+**2026-06-09 audit blocker:** current session/middleware code still reads `user_metadata.role`. Move this to the trusted role source above before production.
+
 ### Security Headers
 
-Production deployments enforce these headers via `next.config.ts`:
+Production deployments enforce static headers via `next.config.ts` and the nonce-based `Content-Security-Policy` via `middleware.ts`:
 
 | Header                      | Value                                                                                                                                                                                                                                 | Purpose                         |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
@@ -112,8 +115,10 @@ Production deployments enforce these headers via `next.config.ts`:
 | `X-Content-Type-Options`    | `nosniff`                                                                                                                                                                                                                             | Prevent MIME sniffing           |
 | `Referrer-Policy`           | `strict-origin-when-cross-origin`                                                                                                                                                                                                     | Limit referrer leakage          |
 | `Permissions-Policy`        | `geolocation=(), camera=(), microphone=(), payment=()`                                                                                                                                                                                | Disable unused browser features |
-| `Strict-Transport-Security` | `max-age=63072000; includeSubDomains; preload`                                                                                                                                                                                        | Enforce HTTPS                   |
-| `Content-Security-Policy`   | `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'` | Mitigate XSS/injection          |
+| `Strict-Transport-Security` | `max-age=63072000; includeSubDomains`                                                                                                                                                                                                 | Enforce HTTPS                   |
+| `Content-Security-Policy`   | `default-src 'self'; script-src 'self' 'nonce-{per-request-nonce}'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://images.unsplash.com; font-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'` | Mitigate XSS/injection          |
+
+Development CSP adds `unsafe-eval` to `script-src` for Next.js development tooling only. Production CSP does not include `unsafe-inline` or `unsafe-eval` in `script-src`.
 
 ### 4. Rate Limiting (Stub)
 

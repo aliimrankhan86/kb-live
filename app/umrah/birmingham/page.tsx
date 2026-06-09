@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { CityCorridor } from '@/components/marketing/CityCorridor'
-import { breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
+import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
 
 export const metadata: Metadata = {
   title: 'Umrah Packages from Birmingham 2026 – Compare & Book',
@@ -58,10 +58,7 @@ const pageJsonLd = graphJsonLd([
 export default function BirminghamUmrahPage() {
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(pageJsonLd) }}
-      />
+      <JsonLdScript data={pageJsonLd} />
       <CityCorridor
         city="Birmingham"
         h1="Umrah Packages from Birmingham"

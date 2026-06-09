@@ -6,6 +6,7 @@ import { PackageCsvImport } from './PackageCsvImport';
 
 interface OperatorPackagesListProps {
   packages: Package[];
+  operatorId: string;
   isLoading?: boolean;
   error?: string;
   onCreate: () => void;
@@ -26,6 +27,7 @@ const getSeasonOrDateWindow = (pkg: Package) => {
 
 export function OperatorPackagesList({
   packages,
+  operatorId,
   isLoading = false,
   error,
   onCreate,
@@ -56,20 +58,23 @@ export function OperatorPackagesList({
         </div>
       ) : !hasPackages ? (
         <div className="py-12 text-center text-[rgba(255,255,255,0.4)]" data-testid="operator-packages-empty">
-          <p>No packages found. Create one to get started.</p>
-          <button
-            type="button"
-            onClick={onCreate}
-            className="mt-4 rounded bg-[#FFD31D] px-4 py-2 text-sm font-medium text-[#000000] hover:bg-[#E5BD1A]"
-          >
-            Create package
-          </button>
+          <p>No packages found. Create one or import a CSV to get started.</p>
+          <div className="mt-4 flex items-center justify-center gap-2">
+            <button
+              type="button"
+              onClick={onCreate}
+              className="rounded bg-[#FFD31D] px-4 py-2 text-sm font-medium text-[#000000] hover:bg-[#E5BD1A]"
+            >
+              Create package
+            </button>
+            <PackageCsvImport operatorId={operatorId} onImport={onCreate} />
+          </div>
         </div>
       ) : (
         <div className="space-y-4">
           <div className="flex justify-end gap-2">
-            <PackageCsvImport onImport={onCreate} />
-            <PackageCsvExport />
+            <PackageCsvImport operatorId={operatorId} onImport={onCreate} />
+            <PackageCsvExport operatorId={operatorId} />
             <button
               type="button"
               onClick={onCreate}

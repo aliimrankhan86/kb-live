@@ -13,11 +13,15 @@ vi.mock('../lib/rate-limit', async () => {
 });
 
 describe('Auth API Security', () => {
+  beforeEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   describe('Zod Validation — Sign Up', () => {
     it('rejects admin role', () => {
       const result = signUpSchema.safeParse({
         email: 'test@example.com',
-        password: 'Password1',
+        password: 'Password1!',
         role: 'admin',
         name: 'Test',
       });
@@ -27,7 +31,7 @@ describe('Auth API Security', () => {
     it('accepts valid customer signup', () => {
       const result = signUpSchema.safeParse({
         email: 'test@example.com',
-        password: 'Password1',
+        password: 'Password1!',
         role: 'customer',
         name: 'Test User',
       });
@@ -37,7 +41,16 @@ describe('Auth API Security', () => {
     it('rejects weak password (no uppercase)', () => {
       const result = signUpSchema.safeParse({
         email: 'test@example.com',
-        password: 'password1',
+        password: 'password1!',
+        role: 'customer',
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects weak password (no special character)', () => {
+      const result = signUpSchema.safeParse({
+        email: 'test@example.com',
+        password: 'Password1',
         role: 'customer',
       });
       expect(result.success).toBe(false);
@@ -46,7 +59,7 @@ describe('Auth API Security', () => {
     it('rejects weak password (too short)', () => {
       const result = signUpSchema.safeParse({
         email: 'test@example.com',
-        password: 'Pass1',
+        password: 'Pass1!',
         role: 'customer',
       });
       expect(result.success).toBe(false);
@@ -55,7 +68,7 @@ describe('Auth API Security', () => {
     it('rejects invalid email', () => {
       const result = signUpSchema.safeParse({
         email: 'not-an-email',
-        password: 'Password1',
+        password: 'Password1!',
         role: 'customer',
       });
       expect(result.success).toBe(false);
@@ -64,7 +77,7 @@ describe('Auth API Security', () => {
     it('rejects long name', () => {
       const result = signUpSchema.safeParse({
         email: 'test@example.com',
-        password: 'Password1',
+        password: 'Password1!',
         role: 'customer',
         name: 'a'.repeat(101),
       });

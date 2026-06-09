@@ -1,9 +1,8 @@
 import type { Metadata } from 'next'
-import { Header } from '@/components/layout/Header'
 import { PackageDetail } from '@/components/packages/PackageDetail'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { Repository } from '@/lib/api/repository'
-import { breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, packageJsonLd, touristTripJsonLd } from '@/lib/seo/json-ld'
+import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, packageJsonLd, touristTripJsonLd } from '@/lib/seo/json-ld'
 import type { Package, OperatorProfile } from '@/lib/types'
 
 export async function generateMetadata({
@@ -27,7 +26,7 @@ export async function generateMetadata({
         alternates: {
           canonical: `/packages/${pkg.slug}`,
         },
-        openGraph: pkg.imageUrl
+        openGraph: pkg.images?.[0]
           ? {
               title: `${pkg.title} | KaabaTrip`,
               description: `${packageType} package from ${operatorName} with ${pkg.totalNights} nights and transparent package details.`,
@@ -35,7 +34,7 @@ export async function generateMetadata({
               siteName: 'KaabaTrip',
               type: 'website',
               locale: 'en_GB',
-              images: [{ url: pkg.imageUrl, width: 1200, height: 630, alt: pkg.title }],
+              images: [{ url: pkg.images[0], width: 1200, height: 630, alt: pkg.title }],
             }
           : {
               title: `${pkg.title} | KaabaTrip`,
@@ -88,7 +87,6 @@ export default async function PackageDetailPage({
   if (error) {
     return (
       <>
-        <Header />
         <main className="min-h-screen bg-[var(--background)]">{renderNotFound(error)}</main>
       </>
     )
@@ -97,12 +95,20 @@ export default async function PackageDetailPage({
   if (!pkg || pkg.status !== 'published') {
     return (
       <>
-        <Header />
         <main className="min-h-screen bg-[var(--background)]">
           {renderNotFound('This package is no longer available.')}
         </main>
       </>
     )
+  }
+
+  try {
+    await Repository.trackEvent(pkg.operatorId, 'package_view', pkg.id, undefined, {
+      slug: pkg.slug,
+      type: pkg.pilgrimageType,
+    })
+  } catch {
+    // Analytics must not block package rendering.
   }
 
   const breadcrumbItems = [
@@ -129,12 +135,8 @@ export default async function PackageDetailPage({
 
   return (
     <>
-      <Header />
       <main className="min-h-screen bg-[var(--background)]">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(packageDetailJsonLd) }}
-        />
+        <JsonLdScript data={packageDetailJsonLd} />
         <div className="w-full max-w-5xl mx-auto px-4 pt-6">
           <Breadcrumb items={breadcrumbItems} />
         </div>

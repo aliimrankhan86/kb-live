@@ -5,6 +5,7 @@
 
 import type { Package as CataloguePackage } from '@/lib/types';
 import type { Package as SearchPackage } from '@/lib/mock-packages';
+import { parseAirportCode } from '@/lib/airports';
 
 const PLACEHOLDER_IMAGE =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjgwIiB2aWV3Qm94PSIwIDAgMTIwIDgwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iODAiIGZpbGw9InJnYmEoMjU1LCAyNTUsIDI1NSwgMC4xKSIvPjx0ZXh0IHg9IjYwIiB5PSI0MCIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9InJnYmEoMjU1LCAyNTUsIDI1NSwgMC41KSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+SG90ZWwgSW1hZ2U8L3RleHQ+PC9zdmc+';
@@ -48,6 +49,31 @@ export function filterByParams(
     if (afterMax.length > 0) next = afterMax;
   }
 
+  const hotelStars = params.get('hotelStars');
+  if (hotelStars) {
+    const selectedStars = hotelStars
+      .split(',')
+      .map((value) => Number(value))
+      .filter((value) => [3, 4, 5].includes(value));
+
+    if (selectedStars.length > 0) {
+      const selected = new Set(selectedStars);
+      next = next.filter((p) => {
+        const makkahStars = p.hotelMakkahStars;
+        const madinahStars = p.hotelMadinahStars;
+        return (
+          (typeof makkahStars === 'number' && selected.has(makkahStars)) ||
+          (typeof madinahStars === 'number' && selected.has(madinahStars))
+        );
+      });
+    }
+  }
+
+  const departureAirport = parseAirportCode(params.get('departureAirport'));
+  if (departureAirport) {
+    next = next.filter((p) => p.departureAirport === departureAirport);
+  }
+
   return next;
 }
 
@@ -69,14 +95,14 @@ export function toSearchDisplay(
       location: 'Makkah',
       rating: pkg.hotelMakkahStars ?? 4,
       distance: dist(pkg.distanceBandMakkah),
-      image: pkg.imageUrl ?? PLACEHOLDER_IMAGE,
+      image: pkg.images?.[0] ?? PLACEHOLDER_IMAGE,
     },
     madinaHotel: {
       name: pkg.hotelMadinahName ?? pkg.title,
       location: 'Madinah',
       rating: pkg.hotelMadinahStars ?? 4,
       distance: dist(pkg.distanceBandMadinah),
-      image: pkg.imageUrl ?? PLACEHOLDER_IMAGE,
+      image: pkg.images?.[0] ?? PLACEHOLDER_IMAGE,
     },
     price: pkg.pricePerPerson,
     currency: pkg.currency,

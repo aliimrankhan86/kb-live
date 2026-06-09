@@ -153,7 +153,10 @@ export function WizardStep8Review({ data, onSaveDraft, onPublish, isSaving, erro
         {highlights.length > 0 && (
           <ReviewRow label="Highlights" value={highlights.map((h, i) => <div key={i}>{h}</div>)} />
         )}
-        <ReviewRow label="Image URL" value={data.imageUrl} />
+        <ReviewRow
+          label="Images"
+          value={data.images && data.images.length > 0 ? `${data.images.length} uploaded` : undefined}
+        />
         <ReviewRow
           label="Notes"
           value={

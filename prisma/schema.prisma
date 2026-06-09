@@ -81,11 +81,32 @@ enum BookingStatus {
   @@map("booking_status")
 }
 
+enum AnalyticsEventType {
+  package_view
+  quote_request
+  offer_sent
+  booking_started
+  booking_confirmed
+  booking_closed
+
+  @@map("analytics_event_type")
+}
+
 enum EvidenceStorageStatus {
   metadata_only
   bytes_stored
 
   @@map("evidence_storage_status")
+}
+
+enum BookingOutcomeType {
+  travelled
+  cancelled_operator
+  cancelled_customer
+  no_show
+  disputed
+
+  @@map("booking_outcome_type")
 }
 
 enum ComplaintCategory {
@@ -190,6 +211,7 @@ model OperatorProfile {
   packages           Package[]
   bookingIntents     BookingIntent[]     @relation("OperatorBookingIntents")
   complaints         Complaint[]         @relation("OperatorComplaints")
+  analyticsEvents    AnalyticsEvent[]
 
   @@map("operator_profiles")
 }
@@ -337,8 +359,22 @@ model BookingIntent {
   customer   User        @relation(fields: [customerId], references: [id], name: "CustomerBookingIntents")
   operator   OperatorProfile @relation(fields: [operatorId], references: [id], name: "OperatorBookingIntents")
   complaints Complaint[]
+  outcome    BookingOutcome?
 
   @@map("booking_intents")
+}
+
+model BookingOutcome {
+  id              String             @id @default(uuid())
+  bookingIntentId String             @unique @map("booking_intent_id")
+  outcome         BookingOutcomeType
+  reportedAt      DateTime           @default(now()) @map("reported_at")
+  notes           String?
+
+  // Relations
+  bookingIntent BookingIntent @relation(fields: [bookingIntentId], references: [id])
+
+  @@map("booking_outcomes")
 }
 
 model Package {
@@ -380,9 +416,29 @@ model Package {
   images                     String[]
 
   // Relations
-  operator OperatorProfile @relation(fields: [operatorId], references: [id])
+  operator        OperatorProfile  @relation(fields: [operatorId], references: [id])
+  analyticsEvents AnalyticsEvent[]
 
   @@map("packages")
+}
+
+model AnalyticsEvent {
+  id          String             @id @default(uuid())
+  operatorId  String             @map("operator_id")
+  eventType   AnalyticsEventType @map("event_type")
+  packageId   String?            @map("package_id")
+  referenceId String?            @map("reference_id")
+  metadata    Json?
+  occurredAt  DateTime           @default(now()) @map("occurred_at")
+
+  // Relations
+  operator OperatorProfile @relation(fields: [operatorId], references: [id])
+  package  Package?        @relation(fields: [packageId], references: [id])
+
+  @@index([operatorId, occurredAt])
+  @@index([operatorId, eventType, occurredAt])
+  @@index([packageId])
+  @@map("analytics_events")
 }
 
 model Complaint {

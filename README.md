@@ -32,7 +32,7 @@ A UK-focused Next.js platform connecting pilgrims with verified travel operators
 
 ### Testing & Quality
 
-- **Vitest 4.1.8** - Unit tests (95 tests passing)
+- **Vitest 4.1.8** - Unit tests (238 tests passing)
 - **Testing Library** - React component testing
 - **Playwright** - End-to-end testing
 - **ESLint** + **Prettier** - Code quality
@@ -165,7 +165,7 @@ npm run db:studio    # Prisma Studio GUI
 ## 🧪 Testing
 
 ```bash
-npm test             # 95 unit tests
+npm test             # 238 unit tests
 npx playwright test  # E2E tests
 ```
 

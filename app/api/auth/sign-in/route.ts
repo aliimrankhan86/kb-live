@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import { apiSignIn } from '@/lib/auth/api';
-import { signInSchema } from '@/lib/validation';
 import { mapErrorToResponse } from '@/lib/errors';
+import { signInSchema } from '@/lib/validation';
 import { checkRateLimit, getRateLimitIdentifier } from '@/lib/rate-limit';
 
 export async function POST(request: Request) {
   // Rate limiting
-  const rateLimitId = getRateLimitIdentifier(request);
+  const rateLimitId = getRateLimitIdentifier(request, 'auth');
   const rateLimit = await checkRateLimit(rateLimitId);
   if (rateLimit.limited) {
     return NextResponse.json(
@@ -21,7 +21,6 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    // Zod validation
     const parsed = signInSchema.safeParse(body);
     if (!parsed.success) {
       const issues = parsed.error.issues.map((i) => i.message);
@@ -32,7 +31,6 @@ export async function POST(request: Request) {
     }
 
     const { email, password } = parsed.data;
-
     const data = await apiSignIn({ email, password });
 
     // Do NOT return the session object (contains JWT). Cookie is already set server-side.
@@ -40,7 +38,8 @@ export async function POST(request: Request) {
       user: {
         id: data.user?.id,
         email: data.user?.email,
-        role: String(data.user?.user_metadata?.role || 'customer'),
+        // SECURITY: role comes from app_metadata (service-role-only), never user_metadata.
+        role: String(data.user?.app_metadata?.role || 'customer'),
         name: (data.user?.user_metadata?.name as string) || null,
       },
     });

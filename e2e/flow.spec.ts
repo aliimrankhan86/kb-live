@@ -116,7 +116,7 @@ test('End-to-end Quote -> Offer -> Compare Flow', async ({ page }) => {
 
   await page.getByRole('button', { name: 'Proceed direct' }).first().click();
   await expect(page.getByText('Pay operator direct')).toBeVisible();
-  await expect(page.getByTestId('payment-evidence-upload')).toHaveAttribute('accept', /image\/\*,application\/pdf/);
+  await expect(page.getByTestId('payment-evidence-upload')).toHaveAttribute('accept', /application\/pdf/);
 
   await page.getByTestId('booking-intent-submit').click();
   await expect(page.getByRole('alert')).toContainText('Upload payment evidence or choose Skip proof');

@@ -2,15 +2,16 @@
 
 import { useState } from 'react';
 import { QuoteRequest, Offer } from '@/lib/types';
-import { MockDB } from '@/lib/api/mock-db';
 
 interface OfferFormProps {
   request: QuoteRequest;
+  operatorId: string;
   onSuccess: () => void;
 }
 
-export function OfferForm({ request, onSuccess }: OfferFormProps) {
+export function OfferForm({ request, operatorId, onSuccess }: OfferFormProps) {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<Partial<Offer>>({
     pricePerPerson: 0,
     currency: request.budgetRange?.currency || 'GBP',
@@ -29,27 +30,40 @@ export function OfferForm({ request, onSuccess }: OfferFormProps) {
     notes: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
 
     const offer: Offer = {
       ...formData as Offer,
       id: crypto.randomUUID(),
       requestId: request.id,
-      operatorId: MockDB.currentUser.id, // Current mocked operator
+      operatorId,
       createdAt: new Date().toISOString(),
       // Ensure required fields
       roomOccupancy: formData.roomOccupancy || { single: false, double: true, triple: false, quad: false },
       inclusions: formData.inclusions || { visa: false, flights: false, transfers: false, meals: false },
     };
 
-    // Simulate network delay
-    setTimeout(() => {
-      MockDB.saveOffer(offer);
-      setLoading(false);
+    try {
+      const response = await fetch('/api/operator/offers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(offer),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error ?? 'Failed to send offer');
+      }
+
       onSuccess();
-    }, 1000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to send offer');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -156,6 +170,12 @@ export function OfferForm({ request, onSuccess }: OfferFormProps) {
           placeholder="Describe hotel names, airline, etc."
         />
       </div>
+
+      {error ? (
+        <p className="text-sm text-[var(--danger)]" role="alert">
+          {error}
+        </p>
+      ) : null}
 
       <div className="flex justify-end pt-4">
         <button

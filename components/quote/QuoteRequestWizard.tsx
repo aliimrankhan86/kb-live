@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useQuoteRequestStore } from '@/lib/store/quote-request';
 import { Step1TypeSeason } from './steps/Step1TypeSeason';
@@ -9,7 +9,7 @@ import { Step3StayDetails } from './steps/Step3StayDetails';
 import { Step4GroupBudget } from './steps/Step4GroupBudget';
 import { Step5Review } from './steps/Step5Review';
 import { AnimatePresence, motion } from 'framer-motion';
-import { MockDB } from '@/lib/api/mock-db';
+
 import { useRouter } from 'next/navigation';
 import { QuoteRequest } from '@/lib/types';
 import { parseQuotePrefillParams } from '@/lib/quote-prefill';
@@ -20,6 +20,8 @@ export function QuoteRequestWizard() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const prefillParams = useMemo(() => (searchParams ? searchParams.toString() : ''), [searchParams]);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!searchParams || prefillParams.length === 0) return;
@@ -38,7 +40,10 @@ export function QuoteRequestWizard() {
     }
   }, [prefillParams, searchParams, setDraft]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    setSubmitError(null);
+    setSubmitting(true);
+
     const newRequest: QuoteRequest = {
       ...(draft as QuoteRequest),
       id: crypto.randomUUID(),
@@ -55,9 +60,27 @@ export function QuoteRequestWizard() {
       newRequest.inclusions = { visa: true, flights: true, transfers: true, meals: true };
     }
 
-    MockDB.saveRequest(newRequest);
-    reset(); // Clear draft
-    router.push(`/requests/${newRequest.id}`);
+    try {
+      const response = await fetch('/api/quote-requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newRequest),
+      });
+      const data = (await response.json()) as { error?: string; request?: QuoteRequest };
+      if (!response.ok) {
+        throw new Error(data.error ?? 'Unable to submit quote request.');
+      }
+
+      if (!data.request) throw new Error('Unable to submit quote request.');
+
+      const savedRequest = data.request;
+      reset(); // Clear draft
+      router.push(`/requests/${savedRequest.id}`);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : 'Unable to submit quote request.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const renderStep = () => {
@@ -118,6 +141,16 @@ export function QuoteRequestWizard() {
         </motion.div>
       </AnimatePresence>
 
+      {submitError ? (
+        <div
+          role="alert"
+          data-testid="quote-submit-error"
+          className="mt-6 rounded-md border border-[var(--danger)]/60 bg-[color:rgba(239,68,68,0.12)] px-4 py-3 text-sm text-[var(--text)]"
+        >
+          {submitError}
+        </div>
+      ) : null}
+
       <div className="mt-8 flex justify-between pt-6 border-t border-[rgba(255,255,255,0.1)]">
         <Button
           type="button"
@@ -142,10 +175,11 @@ export function QuoteRequestWizard() {
           <Button
             type="button"
             onClick={handleSubmit}
+            disabled={submitting}
             variant="primary"
             className="px-6"
           >
-            Submit Request
+            {submitting ? 'Submitting...' : 'Submit Request'}
           </Button>
         )}
       </div>

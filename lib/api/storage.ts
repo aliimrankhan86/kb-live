@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 const BUCKETS = {
   evidence: 'evidence-files',
   exports: 'operator-exports',
+  packageImages: 'package-images',
 } as const;
 
 type BucketName = (typeof BUCKETS)[keyof typeof BUCKETS];
@@ -84,6 +85,15 @@ export async function deleteFile(
   const path = buildPath(userId, contextId, filename);
   const { error } = await supabase.storage.from(bucket).remove([path]);
   if (error) throw new Error(error.message);
+}
+
+/**
+ * Resolve the public URL for an object in a public bucket (e.g. package-images).
+ */
+export async function getPublicUrl(bucket: BucketName, path: string): Promise<string> {
+  const supabase = await createClient();
+  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+  return data.publicUrl;
 }
 
 /**

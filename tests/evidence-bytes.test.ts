@@ -73,7 +73,7 @@ describe('Evidence bytes storage', () => {
   });
 
   describe('preparePaymentEvidence', () => {
-    it('stores metadata-only when no base64 data provided', async () => {
+    it('stores metadata-only when no storage path provided', async () => {
       const bi = await Repository.createBookingIntent(customerCtx, {
         offerId: 'offer-test-1',
         operatorId: 'op1',
@@ -93,12 +93,12 @@ describe('Evidence bytes storage', () => {
         },
       });
       expect(bi.paymentEvidence?.storageStatus).toBe('metadata-only');
-      expect(bi.paymentEvidence?.files[0].base64Data).toBeUndefined();
+      expect(bi.paymentEvidence?.files[0].storagePath).toBeUndefined();
       expect(bi.paymentEvidence?.retentionExpiresAt).toBeTruthy();
       expect(bi.paymentEvidence?.disputeFlag).toBe(false);
     });
 
-    it('stores bytes-stored when base64 data provided', async () => {
+    it('stores bytes-stored when storage path provided', async () => {
       const bi = await Repository.createBookingIntent(customerCtx, {
         offerId: 'offer-test-1',
         operatorId: 'op1',
@@ -111,7 +111,7 @@ describe('Evidence bytes storage', () => {
               sizeBytes: 1024,
               kind: 'image',
               uploadedAt: '2026-01-01T00:00:00.000Z',
-              base64Data: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+              storagePath: 'intent-1/cust1/receipt.png',
             },
           ],
           submittedAt: '2026-01-01T00:00:00.000Z',
@@ -119,7 +119,7 @@ describe('Evidence bytes storage', () => {
         },
       });
       expect(bi.paymentEvidence?.storageStatus).toBe('bytes-stored');
-      expect(bi.paymentEvidence?.files[0].base64Data).toBeTruthy();
+      expect(bi.paymentEvidence?.files[0].storagePath).toBeTruthy();
       expect(bi.paymentEvidence?.retentionExpiresAt).toBeTruthy();
     });
   });
@@ -130,14 +130,14 @@ describe('Evidence bytes storage', () => {
         offerId: 'offer-test-1',
         operatorId: 'op1',
         paymentEvidence: {
-          files: [{ id: 'f1', name: 'r.png', mimeType: 'image/png', sizeBytes: 1, kind: 'image', uploadedAt: '2026-01-01T00:00:00.000Z', base64Data: 'data' }],
+          files: [{ id: 'f1', name: 'r.png', mimeType: 'image/png', sizeBytes: 1, kind: 'image', uploadedAt: '2026-01-01T00:00:00.000Z', storagePath: 'intent-1/cust1/r.png' }],
           submittedAt: '2026-01-01T00:00:00.000Z',
           storageStatus: 'metadata-only',
         },
       });
       const evidence = await Repository.getEvidenceBytes(customerCtx, bi.id);
       expect(evidence).toBeDefined();
-      expect(evidence?.files[0].base64Data).toBe('data');
+      expect(evidence?.files[0].storagePath).toBe('intent-1/cust1/r.png');
     });
 
     it('returns evidence bytes for involved operator', async () => {
@@ -145,7 +145,7 @@ describe('Evidence bytes storage', () => {
         offerId: 'offer-test-1',
         operatorId: 'op1',
         paymentEvidence: {
-          files: [{ id: 'f1', name: 'r.png', mimeType: 'image/png', sizeBytes: 1, kind: 'image', uploadedAt: '2026-01-01T00:00:00.000Z', base64Data: 'data' }],
+          files: [{ id: 'f1', name: 'r.png', mimeType: 'image/png', sizeBytes: 1, kind: 'image', uploadedAt: '2026-01-01T00:00:00.000Z', storagePath: 'intent-1/cust1/r.png' }],
           submittedAt: '2026-01-01T00:00:00.000Z',
           storageStatus: 'metadata-only',
         },
@@ -160,7 +160,7 @@ describe('Evidence bytes storage', () => {
         offerId: 'offer-test-1',
         operatorId: 'op1',
         paymentEvidence: {
-          files: [{ id: 'f1', name: 'r.png', mimeType: 'image/png', sizeBytes: 1, kind: 'image', uploadedAt: '2026-01-01T00:00:00.000Z', base64Data: 'data' }],
+          files: [{ id: 'f1', name: 'r.png', mimeType: 'image/png', sizeBytes: 1, kind: 'image', uploadedAt: '2026-01-01T00:00:00.000Z', storagePath: 'intent-1/cust1/r.png' }],
           submittedAt: '2026-01-01T00:00:00.000Z',
           storageStatus: 'metadata-only',
         },
@@ -175,7 +175,7 @@ describe('Evidence bytes storage', () => {
         offerId: 'offer-test-1',
         operatorId: 'op1',
         paymentEvidence: {
-          files: [{ id: 'f1', name: 'r.png', mimeType: 'image/png', sizeBytes: 1, kind: 'image', uploadedAt: '2026-01-01T00:00:00.000Z', base64Data: 'data' }],
+          files: [{ id: 'f1', name: 'r.png', mimeType: 'image/png', sizeBytes: 1, kind: 'image', uploadedAt: '2026-01-01T00:00:00.000Z', storagePath: 'intent-1/cust1/r.png' }],
           submittedAt: '2026-01-01T00:00:00.000Z',
           storageStatus: 'metadata-only',
         },
@@ -204,7 +204,7 @@ describe('Evidence bytes storage', () => {
         offerId: 'offer-test-1',
         operatorId: 'op1',
         paymentEvidence: {
-          files: [{ id: 'f1', name: 'r.png', mimeType: 'image/png', sizeBytes: 1, kind: 'image', uploadedAt: '2026-01-01T00:00:00.000Z', base64Data: 'data' }],
+          files: [{ id: 'f1', name: 'r.png', mimeType: 'image/png', sizeBytes: 1, kind: 'image', uploadedAt: '2026-01-01T00:00:00.000Z', storagePath: 'intent-1/cust1/r.png' }],
           submittedAt: '2026-01-01T00:00:00.000Z',
           storageStatus: 'metadata-only',
         },
@@ -219,7 +219,7 @@ describe('Evidence bytes storage', () => {
         offerId: 'offer-test-1',
         operatorId: 'op1',
         paymentEvidence: {
-          files: [{ id: 'f1', name: 'r.png', mimeType: 'image/png', sizeBytes: 1, kind: 'image', uploadedAt: '2026-01-01T00:00:00.000Z', base64Data: 'data' }],
+          files: [{ id: 'f1', name: 'r.png', mimeType: 'image/png', sizeBytes: 1, kind: 'image', uploadedAt: '2026-01-01T00:00:00.000Z', storagePath: 'intent-1/cust1/r.png' }],
           submittedAt: '2026-01-01T00:00:00.000Z',
           storageStatus: 'metadata-only',
         },

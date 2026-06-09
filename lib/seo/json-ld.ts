@@ -4,6 +4,7 @@
  */
 
 import type { Package, OperatorProfile } from '@/lib/types';
+import { createElement, type ReactElement } from 'react';
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kaabatrip.com';
 
@@ -36,7 +37,7 @@ export function packageJsonLd(pkg: Package, operatorName: string): Record<string
     name: pkg.title,
     description: `${pkg.pilgrimageType} package – ${pkg.totalNights} nights (${nightsMakkah} Makkah, ${nightsMadinah} Madinah). Hotels: ${hotelMakkahStars}★ Makkah, ${hotelMadinahStars}★ Madinah.`,
     sku: pkg.id,
-    image: compact([pkg.imageUrl, ...(pkg.images ?? [])]),
+    image: compact([...(pkg.images ?? [])]),
     brand: {
       '@type': 'Organization',
       name: operatorName,
@@ -336,7 +337,14 @@ export function graphJsonLd(nodes: Record<string, unknown>[]): Record<string, un
   };
 }
 
-/** Serialize JSON-LD to script tag string (for Server Components) */
-export function jsonLdScript(data: Record<string, unknown>): string {
-  return `<script type="application/ld+json">${JSON.stringify(data)}</script>`;
+export async function JsonLdScript({ data }: { data: Record<string, unknown> }): Promise<ReactElement> {
+  const { headers } = await import('next/headers');
+  const nonce = (await headers()).get('x-nonce') ?? undefined;
+
+  return createElement('script', {
+    type: 'application/ld+json',
+    nonce,
+    suppressHydrationWarning: true,
+    dangerouslySetInnerHTML: { __html: JSON.stringify(data) },
+  });
 }

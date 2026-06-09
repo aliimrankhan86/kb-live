@@ -2,8 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { MockDB } from '@/lib/api/mock-db';
-import type { BankChangeRequest } from '@/lib/types';
+import type { BankChangeRequest, OperatorProfile } from '@/lib/types';
 import { Badge } from '@/components/ui/Badge';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Heading } from '@/components/ui/Heading';
@@ -14,12 +13,17 @@ const formatDate = (iso: string) =>
 
 export default function BankChangesQueuePage() {
   const [requests, setRequests] = useState<BankChangeRequest[]>([]);
+  const [operatorById, setOperatorById] = useState<Record<string, OperatorProfile>>({});
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(() => {
-    const all = MockDB.getBankChangeRequests().filter((r) => r.status === 'pending_review');
-    setRequests(all);
-    setLoading(false);
+    fetch('/api/admin/bank-changes')
+      .then((r) => r.json())
+      .then((d) => {
+        setRequests(d.requests ?? []);
+        setOperatorById(d.operatorById ?? {});
+        setLoading(false);
+      });
   }, []);
 
   useEffect(() => {
@@ -54,7 +58,7 @@ export default function BankChangesQueuePage() {
       ) : (
         <div className="space-y-4">
           {requests.map((request) => {
-            const operator = MockDB.getOperators().find((o) => o.id === request.operatorId);
+            const operator = operatorById[request.operatorId];
             return (
               <Card key={request.id}>
                 <CardHeader>

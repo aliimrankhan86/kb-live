@@ -33,10 +33,6 @@ export async function updateSession(request: NextRequest): Promise<AuthResult> {
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!url || !anonKey) {
-    // In development without Supabase configured, allow through
-    if (process.env.NODE_ENV === 'development') {
-      return { user: null, response: supabaseResponse };
-    }
     throw new Error(
       'Missing Supabase environment variables: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set'
     );
@@ -60,7 +56,10 @@ export async function updateSession(request: NextRequest): Promise<AuthResult> {
   // Refresh session if expired — required for Server Components to have valid auth state
   const { data: { user } } = await supabase.auth.getUser();
 
-  const role = user?.user_metadata?.role as string | undefined;
+  // SECURITY: authorization role is read from app_metadata only. app_metadata is
+  // service-role-writable, so a user cannot self-escalate (unlike user_metadata,
+  // which auth.updateUser() lets the user edit). Set at signup via service role.
+  const role = user?.app_metadata?.role as string | undefined;
 
   return {
     user: user

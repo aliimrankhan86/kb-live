@@ -9,8 +9,11 @@ export const DialogTrigger = DialogPrimitive.Trigger;
 export const DialogClose = DialogPrimitive.Close;
 
 /* ─── Shared close button — used by OverlayHeader ─────────────────────── */
-const CloseButton = () => (
-  <DialogPrimitive.Close className="inline-flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md border border-[var(--borderSubtle)] bg-transparent text-[var(--textMuted)] transition-colors hover:border-[var(--yellow)] hover:bg-[rgba(255,211,29,0.06)] hover:text-[var(--yellow)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focusRing)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surfaceDark)] disabled:pointer-events-none">
+const CloseButton = ({ testId }: { testId?: string }) => (
+  <DialogPrimitive.Close
+    className="absolute right-5 top-4 inline-flex h-11 w-11 items-center justify-center rounded-md border border-[var(--borderSubtle)] bg-transparent text-[var(--textMuted)] transition-colors hover:border-[var(--yellow)] hover:bg-[rgba(255,211,29,0.06)] hover:text-[var(--yellow)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focusRing)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surfaceDark)] disabled:pointer-events-none sm:right-6"
+    data-testid={testId}
+  >
     <span className="sr-only">Close</span>
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -67,17 +70,18 @@ OverlayContent.displayName = DialogPrimitive.Content.displayName;
 export const OverlayHeader = ({
   className,
   children,
+  closeButtonTestId,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
+}: React.HTMLAttributes<HTMLDivElement> & { closeButtonTestId?: string }) => (
   <div
     className={cn(
-      'flex flex-shrink-0 items-start justify-between gap-3 border-b border-[var(--borderSubtle)] px-5 py-4',
+      'relative flex flex-shrink-0 items-start border-b border-[var(--borderSubtle)] px-5 py-4 pr-20 sm:px-6 sm:pr-24',
       className
     )}
     {...props}
   >
     <div className="flex min-w-0 flex-1 flex-col space-y-1">{children}</div>
-    <CloseButton />
+    <CloseButton testId={closeButtonTestId} />
   </div>
 );
 OverlayHeader.displayName = 'OverlayHeader';
@@ -101,7 +105,7 @@ export const OverlayFooter = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      'flex flex-shrink-0 flex-col-reverse gap-2 border-t border-[var(--borderSubtle)] px-5 py-4 sm:flex-row sm:justify-end',
+      'flex flex-shrink-0 flex-col-reverse gap-2 border-t border-[var(--borderSubtle)] px-5 py-4 sm:flex-row sm:justify-end sm:px-6',
       className
     )}
     {...props}

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { OperatorProfile, Package } from '@/lib/types'
+import { TierExplanation } from '@/components/operators/TierExplanation'
 
 interface OperatorProfileDetailProps {
   operator: OperatorProfile
@@ -63,6 +64,12 @@ export function OperatorProfileDetail({ operator, packages }: OperatorProfileDet
             </div>
           )}
         </div>
+
+        {operator.tier && (
+          <div className="mt-3">
+            <TierExplanation tier={operator.tier} />
+          </div>
+        )}
       </header>
 
       {/* About + quick-stats grid */}

@@ -1,4 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
+import { createServiceRoleClient } from '@/lib/supabase/service-role';
+import { AppError } from '@/lib/errors';
 import type { UserRole } from '@/lib/types';
 
 export interface SignUpInput {
@@ -23,8 +25,10 @@ export async function apiSignUp(input: SignUpInput) {
     email: input.email,
     password: input.password,
     options: {
+        // NOTE: role is deliberately NOT stored in user_metadata. user_metadata is
+        // editable by the user via supabase.auth.updateUser({ data }), so trusting it
+        // for authorization would allow self-escalation. Role goes to app_metadata below.
         data: {
-          role: input.role,
           name: input.name || input.email.split('@')[0],
           marketingConsent: input.marketingConsent ?? false,
           marketingConsentAt: input.marketingConsent ? new Date().toISOString() : null,
@@ -33,6 +37,24 @@ export async function apiSignUp(input: SignUpInput) {
     },
   });
   if (error) throw new Error(error.message);
+
+  // SECURITY: write the authorization role to app_metadata, which only the service
+  // role can set. This is the single trusted source read by getSessionUser(),
+  // middleware, and /api/auth/me. signUpSchema + the route already constrain role to
+  // customer|operator, so admin cannot be self-assigned here.
+  const userId = data.user?.id;
+  if (userId) {
+    const admin = createServiceRoleClient();
+    const { error: roleError } = await admin.auth.admin.updateUserById(userId, {
+      app_metadata: { role: input.role },
+    });
+    if (roleError) {
+      // Fail loudly: an account without a trusted role would silently behave as a
+      // customer, which is a confusing security-relevant state. Surface as 500.
+      throw new AppError({ code: 'INTERNAL_ERROR', status: 500 });
+    }
+  }
+
   return data;
 }
 
@@ -45,7 +67,15 @@ export async function apiSignIn(input: SignInInput) {
     email: input.email,
     password: input.password,
   });
-  if (error) throw new Error(error.message);
+  if (error) {
+    // Supabase returns "Email not confirmed" when the user hasn't clicked their
+    // verification link. Surface this as a specific code so the client can show
+    // a helpful message + resend link instead of a generic "wrong credentials".
+    if (error.message?.toLowerCase().includes('email not confirmed')) {
+      throw new AppError({ code: 'AUTH_EMAIL_NOT_CONFIRMED', status: 403 });
+    }
+    throw new AppError({ code: 'AUTH_INVALID_CREDENTIALS', status: 401 });
+  }
   return data;
 }
 
@@ -68,7 +98,8 @@ export async function apiGetUser() {
   return {
     id: user.id,
     email: user.email || '',
-    role: (user.user_metadata?.role as UserRole) || 'customer',
+    // SECURITY: role from app_metadata only (service-role-writable, not user-editable).
+    role: (user.app_metadata?.role as UserRole) || 'customer',
     name: (user.user_metadata?.name as string) || null,
   };
 }

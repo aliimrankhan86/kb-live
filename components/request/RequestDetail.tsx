@@ -18,11 +18,15 @@ import { PaymentInstructions } from './PaymentInstructions';
 import { ComplaintForm } from './ComplaintForm';
 import { handleOfferSelection } from '@/lib/comparison';
 import { Repository, RequestContext } from '@/lib/api/repository';
+import { createClient } from '@/lib/supabase/client';
 import { formatMoney } from '@/lib/i18n/format';
 import { CURRENCY_CHANGE_EVENT, getRegionSettings } from '@/lib/i18n/region';
 
 const customerContext: RequestContext = { userId: 'cust1', role: 'customer' };
-const PAYMENT_EVIDENCE_ACCEPT = 'image/*,application/pdf';
+const EVIDENCE_BUCKET = 'payment-evidence';
+const MAX_EVIDENCE_BYTES = 10 * 1024 * 1024; // 10MB
+const ACCEPTED_EVIDENCE_MIME = ['image/jpeg', 'image/png', 'application/pdf'];
+const PAYMENT_EVIDENCE_ACCEPT = '.jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf';
 const PAY_OPERATOR_DIRECT_DISCLOSURE =
   'You pay the operator directly. KaabaTrip does not collect, hold, or transfer customer funds. The operator is the contracting party and is responsible for package fulfilment, payment records, and any payment outcome.';
 const SKIP_PROOF_ACKNOWLEDGEMENT =
@@ -33,10 +37,20 @@ const displayValue = (value?: string | null) => {
   return trimmed ? trimmed : 'Not provided';
 };
 
-const isAcceptedEvidenceFile = (file: File) => file.type.startsWith('image/') || file.type === 'application/pdf';
+const isAcceptedEvidenceFile = (file: File) => ACCEPTED_EVIDENCE_MIME.includes(file.type);
 
 const getEvidenceFileKind = (file: File): BookingPaymentEvidenceFile['kind'] =>
   file.type === 'application/pdf' ? 'pdf' : 'image';
+
+const formatBytes = (bytes: number): string => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+// Strip path separators and unsafe chars so the object key stays a single segment.
+const sanitizeFileName = (name: string): string =>
+  name.replace(/[^A-Za-z0-9._-]+/g, '_').replace(/^_+|_+$/g, '') || 'file';
 
 export function BookableButton({
   operatorId,
@@ -116,11 +130,12 @@ export function RequestDetail({ id }: { id: string }) {
   const [loading, setLoading] = useState(true);
   const [selectedOffers, setSelectedOffers] = useState<string[]>([]);
   const [showComparison, setShowComparison] = useState(false);
-  const [bookingSuccess, setBookingSuccess] = useState<string | null>(null);
   const [bookingIntents, setBookingIntents] = useState<BookingIntent[]>([]);
   const [activeOfferForBooking, setActiveOfferForBooking] = useState<Offer | null>(null);
   const [evidenceFiles, setEvidenceFiles] = useState<BookingPaymentEvidenceFile[]>([]);
+  const [evidenceRawFiles, setEvidenceRawFiles] = useState<File[]>([]);
   const [evidenceInputKey, setEvidenceInputKey] = useState(0);
+  const [uploadingEvidence, setUploadingEvidence] = useState(false);
   const [payerName, setPayerName] = useState('');
   const [paymentReference, setPaymentReference] = useState('');
   const [evidenceNotes, setEvidenceNotes] = useState('');
@@ -157,6 +172,7 @@ export function RequestDetail({ id }: { id: string }) {
 
   const resetBookingForm = () => {
     setEvidenceFiles([]);
+    setEvidenceRawFiles([]);
     setEvidenceInputKey((current) => current + 1);
     setPayerName('');
     setPaymentReference('');
@@ -168,16 +184,28 @@ export function RequestDetail({ id }: { id: string }) {
 
   const handleEvidenceChange = (event: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? []);
-    const invalidFile = files.find((file) => !isAcceptedEvidenceFile(file));
 
-    if (invalidFile) {
+    const clearSelection = (message: string) => {
       setEvidenceFiles([]);
+      setEvidenceRawFiles([]);
       setEvidenceInputKey((current) => current + 1);
-      setBookingError('Payment evidence must be an image or PDF.');
+      setBookingError(message);
+    };
+
+    const invalidFile = files.find((file) => !isAcceptedEvidenceFile(file));
+    if (invalidFile) {
+      clearSelection('Payment evidence must be a JPG, PNG, or PDF file.');
+      return;
+    }
+
+    const oversizeFile = files.find((file) => file.size > MAX_EVIDENCE_BYTES);
+    if (oversizeFile) {
+      clearSelection(`"${oversizeFile.name}" is ${formatBytes(oversizeFile.size)}. Each file must be 10MB or smaller.`);
       return;
     }
 
     const uploadedAt = new Date().toISOString();
+    setEvidenceRawFiles(files);
     setEvidenceFiles(
       files.map((file) => ({
         id: crypto.randomUUID(),
@@ -194,6 +222,53 @@ export function RequestDetail({ id }: { id: string }) {
       setSkipProof(false);
       setSkipProofAcknowledged(false);
       setBookingError(null);
+    }
+  };
+
+  // Uploads the selected files to the private `payment-evidence` bucket and returns
+  // evidence metadata stamped with each object's storage path.
+  const uploadEvidenceFiles = async (bookingIntentId: string): Promise<BookingPaymentEvidenceFile[]> => {
+    const supabase = createClient();
+    if (!supabase) {
+      throw new Error('File storage is unavailable. Please try again later or choose Skip proof.');
+    }
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw new Error('You must be signed in to upload payment evidence.');
+    }
+
+    setUploadingEvidence(true);
+    try {
+      const uploadedAt = new Date().toISOString();
+      const uploaded: BookingPaymentEvidenceFile[] = [];
+
+      for (const file of evidenceRawFiles) {
+        const objectName = `${Date.now()}-${sanitizeFileName(file.name)}`;
+        const path = `${bookingIntentId}/${user.id}/${objectName}`;
+        const { error: uploadError } = await supabase.storage
+          .from(EVIDENCE_BUCKET)
+          .upload(path, file, { contentType: file.type, upsert: false });
+
+        if (uploadError) {
+          throw new Error(`Failed to upload "${file.name}": ${uploadError.message}`);
+        }
+
+        uploaded.push({
+          id: crypto.randomUUID(),
+          name: file.name,
+          mimeType: file.type,
+          sizeBytes: file.size,
+          kind: getEvidenceFileKind(file),
+          lastModified: file.lastModified,
+          uploadedAt,
+          storagePath: path,
+        });
+      }
+
+      return uploaded;
+    } finally {
+      setUploadingEvidence(false);
     }
   };
 
@@ -215,28 +290,51 @@ export function RequestDetail({ id }: { id: string }) {
 
     try {
       const submittedAt = new Date().toISOString();
-      const newIntent = await Repository.createBookingIntent(customerContext, {
+      const bookingIntentId = crypto.randomUUID();
+
+      let evidenceFilePayload = evidenceFiles;
+      if (hasEvidence) {
+        evidenceFilePayload = await uploadEvidenceFiles(bookingIntentId);
+      }
+
+      const bookingPayload: Partial<BookingIntent> = {
+        id: bookingIntentId,
         offerId: activeOfferForBooking.id,
         operatorId: activeOfferForBooking.operatorId,
         notes: evidenceNotes,
         paymentEvidence: hasEvidence
           ? {
-              files: evidenceFiles,
+              files: evidenceFilePayload,
               payerName,
               paymentReference,
               notes: evidenceNotes,
               submittedAt,
-              storageStatus: 'metadata-only',
+              storageStatus: 'bytes-stored' as const,
             }
           : undefined,
         skipProofAcknowledged: !hasEvidence && skipProofAcknowledged,
+      };
+
+      let newIntent: BookingIntent;
+
+      const response = await fetch('/api/booking-intents', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingPayload),
       });
+
+      if (response.ok) {
+        const data = await response.json();
+        newIntent = data.bookingIntent;
+      } else {
+        newIntent = await Repository.createBookingIntent(customerContext, bookingPayload);
+      }
+
+      MockDB.saveBookingIntent(newIntent);
       setBookingIntents((current) => [newIntent, ...current.filter((intent) => intent.id !== newIntent.id)]);
       if (!newIntent.referenceCode) throw new Error('Reference code was not issued.');
-      setBookingSuccess(newIntent.referenceCode);
       setActiveOfferForBooking(null);
       resetBookingForm();
-      setTimeout(() => setBookingSuccess(null), 3000);
     } catch (error) {
       setBookingError(error instanceof Error ? error.message : 'Failed to create booking intent.');
     }
@@ -274,17 +372,6 @@ export function RequestDetail({ id }: { id: string }) {
         </span>
       </div>
 
-      {bookingSuccess ? (
-        <div
-          role="status"
-          className="mb-6 rounded-md border border-[var(--borderSubtle)] bg-[rgba(34,197,94,0.1)] p-4 text-sm text-[var(--text)]"
-        >
-          Booking intent recorded. Reference{' '}
-          <span data-testid="booking-intent-reference-code" className="font-mono text-[var(--yellow)]">
-            {bookingSuccess}
-          </span>
-        </div>
-      ) : null}
 
       {/* Request Summary */}
       <div className="mb-8 rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] p-6">
@@ -489,13 +576,13 @@ export function RequestDetail({ id }: { id: string }) {
                 className="block min-h-11 w-full rounded-md border border-[var(--borderSubtle)] bg-[var(--surfaceDark)] px-3 py-2 text-sm text-[var(--text)] file:mr-4 file:rounded-md file:border-0 file:bg-[var(--yellow)] file:px-3 file:py-2 file:text-sm file:font-medium file:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focusRing)]"
               />
               <p id="payment-evidence-help" className="text-xs text-[var(--textMuted)]">
-                Accepted formats: images and PDF. This local MVP stores file metadata only.
+                Accepted formats: JPG, PNG, or PDF. Maximum 10MB per file. Files are stored securely and visible only to you, the operator, and KaabaTrip admin.
               </p>
               {evidenceFiles.length > 0 ? (
                 <ul className="space-y-1 text-xs text-[var(--textMuted)]" aria-label="Selected evidence files">
                   {evidenceFiles.map((file) => (
-                    <li key={file.id}>
-                      {file.name} ({file.kind.toUpperCase()})
+                    <li key={file.id} data-testid="payment-evidence-file">
+                      {file.name} <span className="text-[var(--textMuted)]">({file.kind.toUpperCase()}, {formatBytes(file.sizeBytes)})</span>
                     </li>
                   ))}
                 </ul>
@@ -560,8 +647,8 @@ export function RequestDetail({ id }: { id: string }) {
               >
                 Cancel
               </Button>
-              <Button type="submit" data-testid="booking-intent-submit">
-                Record booking intent
+              <Button type="submit" data-testid="booking-intent-submit" disabled={uploadingEvidence}>
+                {uploadingEvidence ? 'Uploading evidence…' : 'Record booking intent'}
               </Button>
             </div>
           </form>

@@ -1,7 +1,9 @@
 import {
+  AnalyticsEvent,
   AuditLogEntry,
   BankChangeRequest,
   BookingIntent,
+  BookingOutcome,
   Complaint,
   Offer,
   OperatorProfile,
@@ -15,6 +17,7 @@ const STORAGE_KEYS = {
   REQUESTS: 'kb_requests',
   OFFERS: 'kb_offers',
   BOOKING_INTENTS: 'kb_bookings',
+  BOOKING_OUTCOMES: 'kb_booking_outcomes',
   PACKAGES: 'kb_packages',
   PACKAGES_SEED_VERSION: 'kb_packages_seed_version',
   USERS: 'kb_users',
@@ -22,6 +25,7 @@ const STORAGE_KEYS = {
   PAYMENT_DETAILS: 'kb_payment_details',
   BANK_CHANGE_REQUESTS: 'kb_bank_change_requests',
   AUDIT_LOG: 'kb_audit_log',
+  ANALYTICS_EVENTS: 'kb_analytics_events',
   COMPLAINTS: 'kb_complaints',
   INTERESTS: 'kb_interests',
 };
@@ -550,6 +554,16 @@ export const MockDB = {
     return entry;
   },
 
+  getAnalyticsEvents: (): AnalyticsEvent[] =>
+    getStorage<AnalyticsEvent[]>(STORAGE_KEYS.ANALYTICS_EVENTS, []),
+
+  saveAnalyticsEvent: (event: AnalyticsEvent) => {
+    const events = MockDB.getAnalyticsEvents();
+    events.push(event);
+    setStorage(STORAGE_KEYS.ANALYTICS_EVENTS, events);
+    return event;
+  },
+
   getComplaints: (): Complaint[] => {
     const complaints = getStorage<Complaint[]>(STORAGE_KEYS.COMPLAINTS, []);
     if (complaints.length === 0) {
@@ -579,6 +593,21 @@ export const MockDB = {
     interests.push({ email, type, createdAt: new Date().toISOString() });
     setStorage(STORAGE_KEYS.INTERESTS, interests);
     return { email, type, createdAt: new Date().toISOString() };
+  },
+
+  getBookingOutcomes: (): BookingOutcome[] =>
+    getStorage<BookingOutcome[]>(STORAGE_KEYS.BOOKING_OUTCOMES, []),
+
+  saveBookingOutcome: (outcome: BookingOutcome) => {
+    const outcomes = MockDB.getBookingOutcomes();
+    const existingIndex = outcomes.findIndex((o) => o.bookingIntentId === outcome.bookingIntentId);
+    if (existingIndex >= 0) {
+      outcomes[existingIndex] = outcome;
+    } else {
+      outcomes.push(outcome);
+    }
+    setStorage(STORAGE_KEYS.BOOKING_OUTCOMES, outcomes);
+    return outcome;
   },
 
   // For simulation

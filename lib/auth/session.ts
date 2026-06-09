@@ -7,6 +7,7 @@ export interface SessionUser {
   email: string;
   role: UserRole;
   name?: string | null;
+  emailVerified: boolean;
 }
 
 /**
@@ -21,7 +22,9 @@ export async function getSessionUser(): Promise<SessionUser | null> {
       const e2eCookie = cookieStore.get('__e2e_user');
       if (e2eCookie?.value) {
         const u = JSON.parse(e2eCookie.value);
-        if (u?.id && u?.email && u?.role) return u as SessionUser;
+        if (u?.id && u?.email && u?.role) {
+          return { ...u, emailVerified: u.emailVerified ?? true } as SessionUser;
+        }
       }
     } catch { /* fall through to Supabase */ }
   }
@@ -31,12 +34,16 @@ export async function getSessionUser(): Promise<SessionUser | null> {
 
   if (error || !user) return null;
 
-  const role = (user.user_metadata?.role as UserRole) || 'customer';
+  // SECURITY: trust app_metadata.role (service-role-only) for authorization.
+  // user_metadata is user-editable and must never drive RBAC. Default to the
+  // least-privileged role if absent.
+  const role = (user.app_metadata?.role as UserRole) || 'customer';
   return {
     id: user.id,
     email: user.email || '',
     role,
     name: user.user_metadata?.name || user.user_metadata?.full_name || null,
+    emailVerified: !!user.email_confirmed_at,
   };
 }
 

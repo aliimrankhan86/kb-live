@@ -1,13 +1,16 @@
+import path from "node:path";
 import type { NextConfig } from "next";
-import { IS_DEV_ENV } from "./lib/config";
+
+const dbAdapterPath = path.resolve(process.cwd(), 'lib/api/db/adapter.ts');
+const dbAdapterClientStubPath = './lib/api/db/client-adapter-stub.ts';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
 
-  // Forward E2E_TESTING into Edge Runtime (middleware) — compiled at build time.
-  // Only truthy when Playwright webServer injects E2E_TESTING=1.
-  // Production deployments never set this, so the bypass compiles to false.
+  // Forward only the E2E flag into Edge Runtime (middleware) at build time.
+  // Dev auth is localhost + E2E only — no remote/preview toggle exists, so
+  // KAABATRIP_ENABLE_DEV_AUTH and VERCEL_ENV are deliberately NOT exposed.
   env: {
     E2E_TESTING: process.env.E2E_TESTING || '',
   },
@@ -16,18 +19,18 @@ const nextConfig: NextConfig = {
     dangerouslyAllowSVG: true,
     contentDispositionType: "attachment",
     formats: ["image/avif", "image/webp"],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+    ],
     // Prevent SVG script execution when operator logos become uploadable
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
   // Security headers for all routes
   async headers() {
-    // CSP: allow unsafe-eval only in development (Next.js dev mode needs it)
-    // In production, remove unsafe-eval to prevent XSS
-    const scriptSrc = IS_DEV_ENV
-      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
-      : "script-src 'self' 'unsafe-inline'";
-
     return [
       {
         source: '/(.*)',
@@ -53,23 +56,33 @@ const nextConfig: NextConfig = {
             // Note: remove 'preload' once HSTS preload list application is submitted
             value: 'max-age=63072000; includeSubDomains',
           },
-          {
-            key: 'Content-Security-Policy',
-            value: [
-              "default-src 'self'",
-              scriptSrc,
-              "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: blob: https://images.unsplash.com",
-              "font-src 'self'",
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
-              "frame-ancestors 'none'",
-              "base-uri 'self'",
-              "form-action 'self'",
-            ].join('; '),
-          },
         ],
       },
     ];
+  },
+
+  // Keep Node-only packages out of the client/edge bundle.
+  // pg and Prisma runtime use Node core modules (net, tls, dns) that do
+  // not exist in the browser or Edge Runtime.
+  serverExternalPackages: ['pg', '@prisma/adapter-pg', '@prisma/client'],
+
+  turbopack: {
+    resolveAlias: {
+      [dbAdapterPath]: { browser: dbAdapterClientStubPath },
+      './db/adapter': { browser: dbAdapterClientStubPath },
+      '@/lib/api/db/adapter': { browser: dbAdapterClientStubPath },
+    },
+  },
+
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.alias = {
+        ...(config.resolve.alias ?? {}),
+        [dbAdapterPath]: false,
+      };
+    }
+
+    return config;
   },
 
   // Tree-shake barrel imports from heavy dependencies. Works with both
@@ -84,10 +97,9 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  // No custom webpack config. Development uses Turbopack (--turbopack flag
-  // in npm run dev), which has its own Rust-based module system and does not
-  // suffer from the __webpack_modules__[moduleId] HMR bug. Production builds
-  // use webpack with default settings, which are stable for one-shot builds.
+  // Development uses Turbopack (--turbopack flag in npm run dev). Production
+  // webpack keeps a small client-only alias above so Repository can remain
+  // usable in MockDB-era client components without bundling pg/Prisma.
 };
 
 export default nextConfig;

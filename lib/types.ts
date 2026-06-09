@@ -15,6 +15,33 @@ export interface User {
   };
 }
 
+export const ANALYTICS_EVENT_TYPES = [
+  'package_view',
+  'quote_request',
+  'offer_sent',
+  'booking_started',
+  'booking_confirmed',
+  'booking_closed',
+] as const;
+
+export type AnalyticsEventType = (typeof ANALYTICS_EVENT_TYPES)[number];
+
+export type AnalyticsMetadata = Record<string, string | number | boolean | null>;
+
+export interface AnalyticsEvent {
+  id: string;
+  operatorId: string;
+  eventType: AnalyticsEventType;
+  packageId?: string;
+  referenceId?: string;
+  metadata?: AnalyticsMetadata;
+  occurredAt: string;
+}
+
+export type AnalyticsEventCounts = Record<AnalyticsEventType, number>;
+
+export type AnalyticsTrendDay = { date: string } & AnalyticsEventCounts;
+
 export type VerificationStatus = 'pending' | 'verified' | 'rejected';
 
 export type OperatorTier = 'listed' | 'verified' | 'verified_plus';
@@ -155,6 +182,8 @@ export interface QuoteRequest {
   customerId: string; // User.id (or guest ID if allowed)
   status: 'open' | 'responded' | 'closed';
   createdAt: string; // ISO date
+  sourcePackageId?: string;
+  sourceOperatorId?: string;
   
   // Preferences
   type: 'umrah' | 'hajj';
@@ -201,6 +230,21 @@ export interface QuoteRequest {
 
 export type BookingStatus = 'started' | 'contacted' | 'confirmed' | 'closed';
 
+export type BookingOutcomeType =
+  | 'travelled'
+  | 'cancelled_operator'
+  | 'cancelled_customer'
+  | 'no_show'
+  | 'disputed';
+
+export interface BookingOutcome {
+  id: string;
+  bookingIntentId: string;
+  outcome: BookingOutcomeType;
+  reportedAt: string;
+  notes?: string;
+}
+
 export type BookingPaymentEvidenceFileKind = 'image' | 'pdf';
 
 export interface BookingPaymentEvidenceFile {
@@ -211,7 +255,8 @@ export interface BookingPaymentEvidenceFile {
   kind: BookingPaymentEvidenceFileKind;
   lastModified?: number;
   uploadedAt: string;
-  base64Data?: string;
+  /** Object path within the private `payment-evidence` Supabase Storage bucket. */
+  storagePath?: string;
 }
 
 export type EvidenceStorageStatus = 'metadata-only' | 'bytes-stored';
@@ -225,6 +270,20 @@ export interface BookingPaymentEvidence {
   storageStatus: EvidenceStorageStatus;
   disputeFlag?: boolean;
   retentionExpiresAt?: string;
+}
+
+/** One booking row for the admin reconciliation export. Flattened across booking, evidence, and outcome. */
+export interface ReconciliationRow {
+  referenceCode: string;
+  status: BookingStatus;
+  operatorName: string;
+  paymentReference?: string;
+  payerName?: string;
+  evidenceStatus?: EvidenceStorageStatus;
+  outcome?: BookingOutcomeType;
+  outcomeReportedAt?: string;
+  bookingCreatedAt: string;
+  quoteRequestId?: string;
 }
 
 export interface BookingIntent {

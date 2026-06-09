@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { useEffect, useMemo, useState, useTransition } from 'react'
 import type { Package, OperatorProfile } from '@/lib/types'
-import { MockDB } from '@/lib/api/mock-db'
 import { mapPackageToComparison, handleComparisonSelection } from '@/lib/comparison'
 import { ComparisonTable } from '@/components/request/ComparisonTable'
 import { CURRENCY_CHANGE_EVENT, getRegionSettings } from '@/lib/i18n/region'
@@ -42,12 +41,18 @@ export function PackagesBrowse({ packages, error }: PackagesBrowseProps) {
   const [regionSettings, setRegionSettings] = useState(() => getRegionSettings())
 
   useEffect(() => {
-    const ops = MockDB.getOperators()
-    const map = ops.reduce<Record<string, OperatorProfile>>((acc, op) => {
-      acc[op.id] = op
-      return acc
-    }, {})
-    setOperatorsById(map)
+    fetch('/api/operators')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.operators) {
+          setOperatorsById(
+            (d.operators as OperatorProfile[]).reduce<Record<string, OperatorProfile>>(
+              (acc, op) => { acc[op.id] = op; return acc; },
+              {}
+            )
+          )
+        }
+      })
   }, [])
 
   useEffect(() => {

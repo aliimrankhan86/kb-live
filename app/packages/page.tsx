@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { Header } from '@/components/layout/Header'
 import { PackagesBrowse } from '@/components/packages/PackagesBrowse'
 import { Repository } from '@/lib/api/repository'
 import type { Package } from '@/lib/types'
@@ -21,7 +20,6 @@ export default async function PackagesPage() {
 
   return (
     <>
-      <Header />
       <main className="min-h-screen bg-[var(--background)]">
         <PackagesBrowse packages={packages} error={error} />
       </main>

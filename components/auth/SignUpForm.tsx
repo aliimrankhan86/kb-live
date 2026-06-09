@@ -1,29 +1,123 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useMemo } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { PasswordInput } from '@/components/auth/PasswordInput';
+
+type SignUpRole = 'customer' | 'operator';
+
+interface PasswordCheck {
+  label: string;
+  met: boolean;
+}
+
+function getPasswordChecks(pwd: string): PasswordCheck[] {
+  return [
+    { label: 'At least 8 characters', met: pwd.length >= 8 },
+    { label: 'At least 1 uppercase letter (A–Z)', met: /[A-Z]/.test(pwd) },
+    { label: 'At least 1 lowercase letter (a–z)', met: /[a-z]/.test(pwd) },
+    { label: 'At least 1 number (0–9)', met: /[0-9]/.test(pwd) },
+    { label: 'At least 1 special character (!@#$%^&*)', met: /[^A-Za-z0-9]/.test(pwd) },
+  ];
+}
+
+function PasswordStrength({ password }: { password: string }) {
+  const checks = getPasswordChecks(password);
+  const metCount = checks.filter((c) => c.met).length;
+  const strength =
+    metCount <= 2 ? 'weak' : metCount <= 4 ? 'medium' : 'strong';
+
+  const barColor =
+    strength === 'weak'
+      ? '#ef4444'
+      : strength === 'medium'
+        ? '#eab308'
+        : '#22c55e';
+
+  return (
+    <div className="space-y-2">
+      <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-[var(--bgSecondary)]">
+        <div
+          className="transition-all duration-300"
+          style={{
+            width: `${(metCount / checks.length) * 100}%`,
+            backgroundColor: barColor,
+          }}
+        />
+      </div>
+      <ul className="space-y-1">
+        {checks.map((check) => (
+          <li
+            key={check.label}
+            className="flex items-center gap-2 text-xs transition-colors"
+            style={{
+              color: password.length === 0
+                ? 'var(--textMuted)'
+                : check.met
+                  ? '#22c55e'
+                  : '#ef4444',
+            }}
+          >
+            <span
+              className="inline-flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold"
+              style={{
+                backgroundColor: password.length === 0
+                  ? 'var(--bgSecondary)'
+                  : check.met
+                    ? 'rgba(34,197,94,0.15)'
+                    : 'rgba(239,68,68,0.15)',
+                color: password.length === 0
+                  ? 'var(--textMuted)'
+                  : check.met
+                    ? '#22c55e'
+                    : '#ef4444',
+              }}
+            >
+              {check.met ? '✓' : password.length === 0 ? '○' : '✗'}
+            </span>
+            {check.label}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 export function SignUpForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const defaultRole = (searchParams.get('type') as SignUpRole) || 'operator';
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [name, setName] = useState('');
-  const [role, setRole] = useState<'customer' | 'operator'>('operator');
+  const [role, setRole] = useState<SignUpRole>(defaultRole);
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [termsAgreed, setTermsAgreed] = useState(false);
   const [error, setError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const passwordChecks = useMemo(() => getPasswordChecks(password), [password]);
+  const allPasswordMet = passwordChecks.every((c) => c.met);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setPasswordError('');
     setLoading(true);
+
+    if (!allPasswordMet) {
+      setPasswordError('Password does not meet all requirements.');
+      setLoading(false);
+      return;
+    }
 
     if (password !== confirmPassword) {
       setPasswordError('Passwords do not match. Please re-enter your password.');
@@ -46,20 +140,59 @@ export function SignUpForm() {
         return;
       }
 
-      // After sign-up, redirect to login
-      router.push('/login?registered=true');
+      // Redirect to verify-email page. If Supabase email confirmation is disabled
+      // the user is already confirmed, but this page is harmless in that case.
+      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
     } catch {
       setError('Something went wrong. Please try again.');
       setLoading(false);
     }
   };
 
+  const isPartner = role === 'operator';
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4" data-testid="signup-form">
+      {/* Tabs */}
+      <div className="grid grid-cols-2 gap-2" role="tablist" aria-label="Account type">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={role === 'customer'}
+          onClick={() => setRole('customer')}
+          className={`rounded-md border px-3 py-2.5 text-sm font-medium transition-colors ${
+            role === 'customer'
+              ? 'border-[var(--yellow)] bg-[rgba(255,211,29,0.12)] text-[var(--text)]'
+              : 'border-[var(--borderSubtle)] text-[var(--textMuted)] hover:border-[var(--borderStrong)]'
+          }`}
+          data-testid="signup-role-customer"
+        >
+          Traveller
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={role === 'operator'}
+          onClick={() => setRole('operator')}
+          className={`rounded-md border px-3 py-2.5 text-sm font-medium transition-colors ${
+            role === 'operator'
+              ? 'border-[var(--yellow)] bg-[rgba(255,211,29,0.12)] text-[var(--text)]'
+              : 'border-[var(--borderSubtle)] text-[var(--textMuted)] hover:border-[var(--borderStrong)]'
+          }`}
+          data-testid="signup-role-operator"
+        >
+          Partner
+        </button>
+      </div>
+
       <div>
-        <h1 className="text-2xl font-semibold text-[var(--text)]">Create Account</h1>
+        <h1 className="text-2xl font-semibold text-[var(--text)]">
+          {isPartner ? 'Partner Registration' : 'Create Account'}
+        </h1>
         <p className="mt-1 text-sm text-[var(--textMuted)]">
-          Join KaabaTrip as a traveller or partner.
+          {isPartner
+            ? 'Register your travel company and start receiving bookings from UK travellers.'
+            : 'Join KaabaTrip to compare packages, save favourites, and request quotes.'}
         </p>
       </div>
 
@@ -83,33 +216,6 @@ export function SignUpForm() {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-2">
-        <button
-          type="button"
-          onClick={() => setRole('customer')}
-          className={`rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
-            role === 'customer'
-              ? 'border-[var(--yellow)] bg-[rgba(255,211,29,0.12)] text-[var(--text)]'
-              : 'border-[var(--borderSubtle)] text-[var(--textMuted)] hover:border-[var(--borderStrong)]'
-          }`}
-          data-testid="signup-role-customer"
-        >
-          Traveller
-        </button>
-        <button
-          type="button"
-          onClick={() => setRole('operator')}
-          className={`rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
-            role === 'operator'
-              ? 'border-[var(--yellow)] bg-[rgba(255,211,29,0.12)] text-[var(--text)]'
-              : 'border-[var(--borderSubtle)] text-[var(--textMuted)] hover:border-[var(--borderStrong)]'
-          }`}
-          data-testid="signup-role-operator"
-        >
-          Partner
-        </button>
-      </div>
-
       <Input
         label="Full name"
         type="text"
@@ -130,24 +236,31 @@ export function SignUpForm() {
         data-testid="signup-email"
       />
 
-      <Input
-        label="Password"
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-        autoComplete="new-password"
-        data-testid="signup-password"
-      />
+      <div className="space-y-2">
+        <PasswordInput
+          label="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          autoComplete="new-password"
+          data-testid="signup-password"
+          showPassword={showPassword}
+          onToggleShowPassword={() => setShowPassword((current) => !current)}
+          toggleTestId="signup-password-toggle"
+        />
+        <PasswordStrength password={password} />
+      </div>
 
-      <Input
+      <PasswordInput
         label="Confirm password"
-        type="password"
         value={confirmPassword}
         onChange={(e) => setConfirmPassword(e.target.value)}
         required
         autoComplete="new-password"
         data-testid="signup-confirm-password"
+        showPassword={showConfirmPassword}
+        onToggleShowPassword={() => setShowConfirmPassword((current) => !current)}
+        toggleTestId="signup-confirm-password-toggle"
       />
 
       <div className="space-y-3">
@@ -190,16 +303,19 @@ export function SignUpForm() {
 
       <Button
         type="submit"
-        disabled={loading || !termsAgreed}
+        disabled={loading || !termsAgreed || !allPasswordMet}
         className="w-full"
         data-testid="signup-submit"
       >
-        {loading ? 'Creating account…' : 'Create Account'}
+        {loading ? 'Creating account…' : isPartner ? 'Register as Partner' : 'Create Account'}
       </Button>
 
       <p className="text-center text-sm text-[var(--textMuted)]">
         Already have an account?{' '}
-        <Link href="/login" className="text-[var(--yellow)] hover:underline">
+        <Link
+          href={isPartner ? '/login?type=partner' : '/login?type=customer'}
+          className="text-[var(--yellow)] hover:underline"
+        >
           Sign in
         </Link>
       </p>
