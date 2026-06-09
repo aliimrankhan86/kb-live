@@ -82,8 +82,12 @@ export async function checkRateLimit(identifier: string): Promise<{ limited: boo
   return checkInMemory(identifier);
 }
 
-export function getRateLimitIdentifier(request: Request): string {
+/**
+ * Build a rate-limit key. The `scope` namespaces the bucket per endpoint so that,
+ * e.g., login attempts do not consume the quote-request budget for the same IP.
+ */
+export function getRateLimitIdentifier(request: Request, scope = 'global'): string {
   const forwarded = request.headers.get('x-forwarded-for');
-  if (forwarded) return `ratelimit:${forwarded.split(',')[0].trim()}`;
-  return 'ratelimit:unknown';
+  const ip = forwarded ? forwarded.split(',')[0].trim() : 'unknown';
+  return `ratelimit:${scope}:${ip}`;
 }

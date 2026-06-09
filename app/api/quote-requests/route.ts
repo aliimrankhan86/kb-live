@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { getSessionUser } from '@/lib/auth/session';
 import { Repository } from '@/lib/api/repository';
 import { mapErrorToResponse } from '@/lib/errors';
+import { checkRateLimit, getRateLimitIdentifier } from '@/lib/rate-limit';
 import type { QuoteRequest } from '@/lib/types';
 
 const quoteRequestSchema = z.object({
@@ -47,6 +48,16 @@ const quoteRequestSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  // Rate limiting — quote submission is public (anonymous allowed), so throttle by IP
+  // to prevent lead-spam / abuse. Scoped separately from auth + interest budgets.
+  const rateLimit = await checkRateLimit(getRateLimitIdentifier(request, 'quote'));
+  if (rateLimit.limited) {
+    return NextResponse.json(
+      { error: 'Too many attempts. Please try again later.' },
+      { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfter) } }
+    );
+  }
+
   try {
     const user = await getSessionUser();
 

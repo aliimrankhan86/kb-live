@@ -7,7 +7,7 @@ import { checkRateLimit, getRateLimitIdentifier } from '@/lib/rate-limit';
 
 export async function POST(request: Request) {
   // Rate limiting
-  const rateLimitId = getRateLimitIdentifier(request);
+  const rateLimitId = getRateLimitIdentifier(request, 'auth');
   const rateLimit = await checkRateLimit(rateLimitId);
   if (rateLimit.limited) {
     return NextResponse.json(

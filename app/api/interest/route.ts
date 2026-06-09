@@ -5,7 +5,7 @@ import { checkRateLimit, getRateLimitIdentifier } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   // Rate limiting — prevent interest-list spam
-  const rateLimitId = getRateLimitIdentifier(request);
+  const rateLimitId = getRateLimitIdentifier(request, 'interest');
   const rateLimit = await checkRateLimit(rateLimitId);
   if (rateLimit.limited) {
     return NextResponse.json(
