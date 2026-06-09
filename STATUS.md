@@ -84,15 +84,16 @@
 
 | Item | Status | Blocker |
 | --- | --- | --- |
-| Merge `dev` → `main` | open | PR review |
+| Merge `dev` → `main` | [PR #27 open](https://github.com/aliimrankhan86/kb-live/pull/27) | PR review |
 
 ---
 
 ## ▶️ Next actions (do in order)
 
-1. ✅ ~~Apply migration 004 to Supabase~~ — applied + verified 2026-06-08 (bucket + 4 RLS policies live). Remaining nicety: drive a real upload through package wizard step 7 with a logged-in operator to confirm the browser→Supabase round-trip.
-2. Open PR `dev` → `main`, run full gate (test + build + Playwright smoke at 320px/1280px).
-3. (then) groom backlog — see `docs/EXECUTION_QUEUE.md`.
+1. ✅ ~~Apply migration 004 to Supabase~~ — applied + verified 2026-06-08.
+2. ✅ ~~Open PR `dev` → `main`~~ — [PR #27](https://github.com/aliimrankhan86/kb-live/pull/27) open 2026-06-09.
+3. Review + merge PR #27 (run Playwright smoke 320px/1280px before merge).
+4. (then) groom backlog — see `docs/EXECUTION_QUEUE.md`.
 
 > **Queue status (2026-06-08):** EXECUTION_QUEUE Tasks 13/14/16 verified `[x]`; Task 17 `[~]` — gate green, only manual dev smoke + commit/push remain. No `[ ]` backlog left in the queue. Migration 004 applied → only Pending items are dev-login strip (pre-prod) + PR `dev`→`main`.
 
