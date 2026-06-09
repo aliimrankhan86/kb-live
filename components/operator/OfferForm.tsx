@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { QuoteRequest, Offer } from '@/lib/types';
-import { MockDB } from '@/lib/api/mock-db';
 
 interface OfferFormProps {
   request: QuoteRequest;
@@ -59,8 +58,6 @@ export function OfferForm({ request, operatorId, onSuccess }: OfferFormProps) {
         throw new Error(data.error ?? 'Failed to send offer');
       }
 
-      const data = await response.json();
-      MockDB.saveOffer(data.offer ?? offer);
       onSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to send offer');

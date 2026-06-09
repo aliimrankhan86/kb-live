@@ -9,7 +9,7 @@ import { Step3StayDetails } from './steps/Step3StayDetails';
 import { Step4GroupBudget } from './steps/Step4GroupBudget';
 import { Step5Review } from './steps/Step5Review';
 import { AnimatePresence, motion } from 'framer-motion';
-import { MockDB } from '@/lib/api/mock-db';
+
 import { useRouter } from 'next/navigation';
 import { QuoteRequest } from '@/lib/types';
 import { parseQuotePrefillParams } from '@/lib/quote-prefill';
@@ -74,7 +74,6 @@ export function QuoteRequestWizard() {
       if (!data.request) throw new Error('Unable to submit quote request.');
 
       const savedRequest = data.request;
-      MockDB.saveRequest(savedRequest);
       reset(); // Clear draft
       router.push(`/requests/${savedRequest.id}`);
     } catch (error) {

@@ -12,10 +12,8 @@ vi.mock('next/link', () => ({
   ),
 }));
 
-vi.mock('@/lib/api/mock-db', () => ({
-  MockDB: {
-    getOperators: () => [],
-  },
+vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+  json: () => Promise.resolve({ operators: [] }),
 }));
 
 const basePackages: Package[] = [

@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Repository } from '@/lib/api/repository';
 import type { AuditLogEntry, BankChangeRequest, PaymentDetails, PaymentDetailsInput } from '@/lib/types';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -16,7 +15,6 @@ import {
 import { BankDetailsForm } from '@/components/operator/BankDetailsForm';
 import { PhoneOtpModal } from '@/components/operator/PhoneOtpModal';
 import { AuditLogView } from '@/components/admin/AuditLogView';
-import { MockDB } from '@/lib/api/mock-db';
 
 type PageState =
   | 'loading'
@@ -39,30 +37,7 @@ const maskedAccount = (acct: string) => `****${acct.slice(-4)}`;
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
-export function PaymentDetailsClient({ operatorId }: { operatorId: string }) {
-  const operatorCtx = { userId: operatorId, role: 'operator' as const };
-
-  const loadData = (): PageData => {
-    const allDetails = MockDB.getPaymentDetails();
-    const activeDetails = allDetails.find(
-      (d) => d.operatorId === operatorId && d.status === 'active'
-    ) ?? null;
-
-    const allRequests = MockDB.getBankChangeRequests().filter(
-      (r) => r.operatorId === operatorId
-    );
-    const pendingRequest =
-      allRequests.find((r) => r.status === 'pending_review' || r.status === 'approved') ?? null;
-    const rejectedRequest =
-      !pendingRequest
-        ? [...allRequests].sort(
-            (a, b) => new Date(b.requestedAt).getTime() - new Date(a.requestedAt).getTime()
-          ).find((r) => r.status === 'rejected') ?? null
-        : null;
-
-    return { activeDetails, pendingRequest, rejectedRequest };
-  };
-
+export function PaymentDetailsClient() {
   const deriveState = (data: PageData): PageState => {
     if (!data.activeDetails) return 'empty';
     if (!data.pendingRequest && !data.rejectedRequest) return 'active';
@@ -84,12 +59,20 @@ export function PaymentDetailsClient({ operatorId }: { operatorId: string }) {
   const [auditEntries, setAuditEntries] = useState<AuditLogEntry[]>([]);
 
   const refresh = useCallback(() => {
-    const next = loadData();
-    setData(next);
-    setPageState(deriveState(next));
-    Repository.getOperatorAuditLog(operatorCtx, operatorId).then(setAuditEntries);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [operatorId]);
+    Promise.all([
+      fetch('/api/operator/payment-details').then((r) => r.json()),
+      fetch('/api/operator/audit-log').then((r) => r.json()),
+    ]).then(([pd, al]) => {
+      const next: PageData = {
+        activeDetails: pd.activeDetails ?? null,
+        pendingRequest: pd.pendingRequest ?? null,
+        rejectedRequest: pd.rejectedRequest ?? null,
+      };
+      setData(next);
+      setPageState(deriveState(next));
+      if (al.entries) setAuditEntries(al.entries);
+    });
+  }, []);
 
   useEffect(() => {
     refresh();
@@ -115,19 +98,21 @@ export function PaymentDetailsClient({ operatorId }: { operatorId: string }) {
     clearMessages();
     try {
       if (isOtpForChange) {
-        await Repository.createBankChangeRequest(operatorCtx, {
-          operatorId,
-          proposedDetails: pendingFormDetails,
-          phoneConfirmation: { confirmed: true, phoneLastFour },
+        const res = await fetch('/api/operator/bank-changes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ proposedDetails: pendingFormDetails, phoneConfirmation: { confirmed: true, phoneLastFour } }),
         });
+        if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? 'Failed to submit change request');
         setShowChangeOverlay(false);
         setSuccessMsg('Change request submitted. It will be reviewed by our team.');
       } else {
-        await Repository.createPaymentDetails(operatorCtx, {
-          operatorId,
-          details: pendingFormDetails,
-          phoneConfirmation: { confirmed: true, phoneLastFour },
+        const res = await fetch('/api/operator/payment-details', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ details: pendingFormDetails, phoneConfirmation: { confirmed: true, phoneLastFour } }),
         });
+        if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? 'Failed to save payment details');
         setSuccessMsg('Payment details saved successfully.');
       }
     } catch (err) {
@@ -146,7 +131,8 @@ export function PaymentDetailsClient({ operatorId }: { operatorId: string }) {
     setSubmitting(true);
     clearMessages();
     try {
-      await Repository.cancelBankChangeRequest(operatorCtx, req.id);
+      const res = await fetch(`/api/operator/bank-changes/${req.id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? 'Failed to cancel');
       setSuccessMsg('Change request cancelled.');
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : 'Failed to cancel. Please try again.');

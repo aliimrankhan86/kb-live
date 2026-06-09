@@ -1,7 +1,6 @@
 'use client';
 
 import { Offer, OperatorProfile } from '@/lib/types';
-import { MockDB } from '@/lib/api/mock-db';
 import { useEffect, useState } from 'react';
 import { mapOfferToComparison, ComparisonRow } from '@/lib/comparison';
 
@@ -14,9 +13,13 @@ export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
   const [operators, setOperators] = useState<Record<string, OperatorProfile>>({});
 
   useEffect(() => {
-    const ops = MockDB.getOperators();
-    const opsMap = ops.reduce((acc, op) => ({ ...acc, [op.id]: op }), {});
-    setOperators(opsMap);
+    fetch('/api/operators')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.operators) {
+          setOperators((d.operators as OperatorProfile[]).reduce((acc, op) => ({ ...acc, [op.id]: op }), {}));
+        }
+      });
   }, []);
 
   const comparisonRows = rows ?? offers.map(o => mapOfferToComparison(o, operators[o.operatorId]));

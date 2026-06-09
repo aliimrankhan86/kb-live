@@ -1315,6 +1315,28 @@ export const Repository = {
     return (await store().getOperators()).find((operator) => operator.slug === slug);
   },
 
+  listPublicOperators: async (): Promise<OperatorProfile[]> => {
+    return store().getOperators();
+  },
+
+  getBankChangeRequests: async (ctx: RequestContext): Promise<BankChangeRequest[]> => {
+    requireOperatorOwnerOrAdmin(ctx, ctx.userId);
+    const all = await store().getBankChangeRequests();
+    if (ctx.role === 'admin') return all;
+    return all.filter((r) => r.operatorId === ctx.userId);
+  },
+
+  getBookingOutcomes: async (ctx: RequestContext): Promise<BookingOutcome[]> => {
+    const all = await store().getBookingOutcomes();
+    if (ctx.role === 'admin') return all;
+    if (ctx.role === 'operator') {
+      const bookings = await store().getBookingIntents();
+      const ids = new Set(bookings.filter((b) => b.operatorId === ctx.userId).map((b) => b.id));
+      return all.filter((o) => ids.has(o.bookingIntentId));
+    }
+    return [];
+  },
+
   updatePackage: async (ctx: RequestContext, id: string, updates: Partial<Package>): Promise<Package> => {
     const all = await store().getPackages();
     const existing = all.find((p) => p.id === id);

@@ -5,7 +5,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import type { Package as CataloguePackage, OperatorProfile } from '@/lib/types';
 import { Package } from '@/lib/mock-packages';
-import { MockDB } from '@/lib/api/mock-db';
 import { mapPackageToComparison, handleComparisonSelection } from '@/lib/comparison';
 import { ComparisonTable } from '@/components/request/ComparisonTable';
 import {
@@ -70,8 +69,18 @@ const PackageList: React.FC<PackageListProps> = ({
   }, [isSortOpen]);
 
   useEffect(() => {
-    const ops = MockDB.getOperators();
-    setOperatorsById(ops.reduce<Record<string, OperatorProfile>>((acc, op) => ({ ...acc, [op.id]: op }), {}));
+    fetch('/api/operators')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.operators) {
+          setOperatorsById(
+            (d.operators as OperatorProfile[]).reduce<Record<string, OperatorProfile>>(
+              (acc, op) => ({ ...acc, [op.id]: op }),
+              {}
+            )
+          );
+        }
+      });
   }, []);
 
   useEffect(() => {

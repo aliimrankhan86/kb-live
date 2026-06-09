@@ -1,14 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import { MockDB } from '@/lib/api/mock-db';
-import { Repository } from '@/lib/api/repository';
 import type { BookingIntent, ComplaintCategory, ComplaintSeverity } from '@/lib/types';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { Button } from '@/components/ui/Button';
 
-const customerCtx = { userId: 'cust1', role: 'customer' as const };
 
 const CATEGORY_OPTIONS: { label: string; value: ComplaintCategory }[] = [
   { label: 'Payment issue', value: 'payment_issue' },
@@ -49,13 +46,15 @@ export function ComplaintForm({ bookingIntent }: ComplaintFormProps) {
 
     setSubmitting(true);
     try {
-      MockDB.setCurrentUser('customer');
-      await Repository.createComplaint(customerCtx, {
-        bookingIntentId: bookingIntent.id,
-        category,
-        severity,
-        description: trimmed,
+      const res = await fetch('/api/complaints', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookingIntentId: bookingIntent.id, category, severity, description: trimmed }),
       });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? 'Failed to submit complaint');
+      }
       setSubmitted(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to submit complaint');

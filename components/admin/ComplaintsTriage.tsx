@@ -1,8 +1,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { MockDB } from '@/lib/api/mock-db';
-import { Repository } from '@/lib/api/repository';
 import type { Complaint, ComplaintStatus } from '@/lib/types';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -10,7 +8,6 @@ import { Textarea } from '@/components/ui/Textarea';
 import { Select } from '@/components/ui/Select';
 import { Checkbox } from '@/components/ui/Checkbox';
 
-const adminCtx = { userId: 'admin1', role: 'admin' as const };
 
 const SEVERITY_FILTER_OPTIONS = [
   { label: 'All severities', value: 'all' },
@@ -59,8 +56,12 @@ function AdminComplaintCard({
     setError(null);
     setSubmitting(true);
     try {
-      MockDB.setCurrentUser('operator'); // needed for MockDB simulation
-      await Repository.updateComplaintAdminNotes(adminCtx, complaint.id, notes, flagged);
+      const res = await fetch(`/api/complaints/${complaint.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ op: 'notes', notes, flagOperator: flagged }),
+      });
+      if (!res.ok) throw new Error('Failed to update');
       setEditing(false);
       onUpdate();
     } catch (err) {
@@ -72,8 +73,12 @@ function AdminComplaintCard({
 
   const handleStatusChange = async (status: ComplaintStatus) => {
     try {
-      MockDB.setCurrentUser('operator');
-      await Repository.updateComplaintStatus(adminCtx, complaint.id, status);
+      const res = await fetch(`/api/complaints/${complaint.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ op: 'status', status }),
+      });
+      if (!res.ok) throw new Error('Failed to update status');
       onUpdate();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update status');
@@ -207,8 +212,9 @@ export function ComplaintsTriage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   const loadComplaints = () => {
-    MockDB.setCurrentUser('operator');
-    Repository.getComplaints(adminCtx).then(setComplaints);
+    fetch('/api/complaints')
+      .then((r) => r.json())
+      .then((d) => { if (d.complaints) setComplaints(d.complaints); });
   };
 
   useEffect(() => {

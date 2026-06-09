@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { BankChangeRequest, PaymentDetails } from '@/lib/types';
-import { Repository } from '@/lib/api/repository';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Textarea } from '@/components/ui/Textarea';
@@ -15,10 +14,6 @@ import {
   OverlayTitle,
 } from '@/components/ui/Overlay';
 import { AuditLogView } from './AuditLogView';
-import { MockDB } from '@/lib/api/mock-db';
-
-const ADMIN_ID = 'admin1';
-const adminCtx = { userId: ADMIN_ID, role: 'admin' as const };
 
 const formatDateTime = (iso: string) =>
   new Date(iso).toLocaleDateString('en-GB', {
@@ -55,7 +50,12 @@ export function BankChangeReviewCard({
     setSubmitting(true);
     setErrorMsg('');
     try {
-      await Repository.approveBankChangeRequest(adminCtx, request.id, undefined);
+      const res = await fetch(`/api/admin/bank-changes/${request.id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'approve' }),
+      });
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? 'Approval failed');
       setShowApproveDialog(false);
       onAction();
     } catch (err) {
@@ -74,7 +74,12 @@ export function BankChangeReviewCard({
     setSubmitting(true);
     setErrorMsg('');
     try {
-      await Repository.rejectBankChangeRequest(adminCtx, request.id, rejectReason);
+      const res = await fetch(`/api/admin/bank-changes/${request.id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'reject', reviewNotes: rejectReason }),
+      });
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? 'Rejection failed');
       setShowRejectDialog(false);
       setRejectReason('');
       onAction();
@@ -85,7 +90,12 @@ export function BankChangeReviewCard({
     }
   }, [request.id, rejectReason, onAction]);
 
-  const operator = MockDB.getOperators().find((o) => o.id === request.operatorId);
+  const [operator, setOperator] = useState<import('@/lib/types').OperatorProfile | undefined>();
+  useEffect(() => {
+    fetch('/api/operators')
+      .then((r) => r.json())
+      .then((d) => setOperator((d.operators ?? []).find((o: import('@/lib/types').OperatorProfile) => o.id === request.operatorId)));
+  }, [request.operatorId]);
 
   return (
     <div className="space-y-6" data-testid="bank-change-review-card">

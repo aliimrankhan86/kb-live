@@ -1,8 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { MockDB } from '@/lib/api/mock-db';
-import { BookingIntent, BookingOutcome, QuoteRequest } from '@/lib/types';
+import { BookingIntent, BookingOutcome, Offer, QuoteRequest } from '@/lib/types';
 import { OfferForm } from '@/components/operator/OfferForm';
 import { OutcomeForm } from '@/components/operator/OutcomeForm';
 import {
@@ -20,33 +19,31 @@ interface OperatorLeadsClientProps {
 
 export function OperatorLeadsClient({ operatorId }: OperatorLeadsClientProps) {
   const [requests, setRequests] = useState<QuoteRequest[]>([]);
+  const [offers, setOffers] = useState<Offer[]>([]);
   const [filter, setFilter] = useState<'all' | 'new' | 'responded'>('all');
   const [selectedRequest, setSelectedRequest] = useState<QuoteRequest | null>(null);
   const [bookings, setBookings] = useState<BookingIntent[]>([]);
   const [outcomes, setOutcomes] = useState<BookingOutcome[]>([]);
 
-  const loadRequests = useCallback(() => {
-    const all = MockDB.getRequests();
-    setRequests(all.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+  const loadLeads = useCallback(() => {
+    fetch('/api/operator/leads')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.requests) setRequests([...d.requests].sort((a: QuoteRequest, b: QuoteRequest) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+        if (d.offers) setOffers(d.offers);
+        if (d.bookings) setBookings([...d.bookings].filter((b: BookingIntent) => b.status === 'confirmed' || b.status === 'closed').sort((a: BookingIntent, b: BookingIntent) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()));
+        if (d.outcomes) setOutcomes(d.outcomes);
+      });
   }, []);
 
-  const loadBookings = useCallback(() => {
-    const all = MockDB.getBookingIntents().filter(
-      (b) => b.operatorId === operatorId && (b.status === 'confirmed' || b.status === 'closed')
-    );
-    setBookings(all.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()));
-    setOutcomes(MockDB.getBookingOutcomes());
-  }, [operatorId]);
-
   useEffect(() => {
-    loadRequests();
-    loadBookings();
-    const interval = setInterval(() => { loadRequests(); loadBookings(); }, 5000);
+    loadLeads();
+    const interval = setInterval(loadLeads, 5000);
     return () => clearInterval(interval);
-  }, [loadRequests, loadBookings]);
+  }, [loadLeads]);
 
   const filtered = requests.filter((req) => {
-    const hasOffer = MockDB.getOffersByRequestId(req.id).some((o) => o.operatorId === operatorId);
+    const hasOffer = offers.some((o) => o.requestId === req.id && o.operatorId === operatorId);
     if (filter === 'new') return req.status === 'open' && !hasOffer;
     if (filter === 'responded') return hasOffer;
     return true;
@@ -84,7 +81,7 @@ export function OperatorLeadsClient({ operatorId }: OperatorLeadsClientProps) {
           </div>
         ) : (
           filtered.map((req) => {
-            const hasOffer = MockDB.getOffersByRequestId(req.id).some((o) => o.operatorId === operatorId);
+            const hasOffer = offers.some((o) => o.requestId === req.id && o.operatorId === operatorId);
             return (
               <div
                 key={req.id}
@@ -136,7 +133,7 @@ export function OperatorLeadsClient({ operatorId }: OperatorLeadsClientProps) {
               operatorId={operatorId}
               onSuccess={() => {
                 setSelectedRequest(null);
-                loadRequests();
+                loadLeads();
               }}
             />
           )}

@@ -34,6 +34,19 @@ const bookingIntentSchema = z.object({
   skipProofAcknowledged: z.boolean().optional(),
 });
 
+export async function GET() {
+  try {
+    const user = await getSessionUser();
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const ctx = { userId: user.id, role: user.role };
+    const bookingIntents = await Repository.getBookingIntents(ctx);
+    return NextResponse.json({ bookingIntents });
+  } catch (err) {
+    const { body, status } = mapErrorToResponse(err);
+    return NextResponse.json(body, { status });
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const user = await getSessionUser();
