@@ -3,7 +3,7 @@
 > **Single rolling tracker.** Any AI/dev: read this for current state. Update it after work is **done + tested + verified** (see `CLAUDE.md` rule).
 > Detailed handover lives in `AI_NOTES.md`. Cold-start brief: `HANDOFF.md`. Business: `BUSINESS.md`.
 
-**Last verified:** 2026-06-09 · **Branch:** `dev` → `main` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
+**Last verified:** 2026-06-09 (post dev-login strip) · **Branch:** `dev` → `main` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
 
 ---
 
@@ -11,7 +11,7 @@
 
 | Check | State |
 | --- | --- |
-| `npm run test` | ✅ 239/239 pass (18 files) |
+| `npm run test` | ✅ 234/234 pass (18 files) |
 | `npm run build` | ✅ 0 errors (known Supabase Edge + webpack cache warnings only) |
 | `npx tsc --noEmit` | ✅ pass |
 | E2E `e2e/operator.spec.ts` | ✅ 30/30 pass (chromium + firefox + webkit) |
@@ -44,8 +44,18 @@
 
 **Auth**
 - Supabase auth + `/api/auth/me` shell (customer/operator/admin nav)
-- Dev persona login (`KaabaTrip!2026`) — **localhost + automated E2E only**, never on any deployed env (preview or production); no remote toggle. ⚠️ remove before prod launch (`AI_NOTES.md` §4). Note: only works under `npm run dev` (`NODE_ENV=development`); a local prod build (`npm start`) returns 401 by design.
+- Dev persona login **removed** (2026-06-09) — `lib/auth/dev-users.ts`, `/dev/login`, `__dev_user` cookie all deleted. Auth is Supabase-only.
+- `__e2e_user` bypass remains, gated to `E2E_TESTING=1` (Playwright CI only).
 - Password show/hide toggle, forgot password
+
+**Dev login strip (2026-06-09)**
+- `lib/auth/dev-users.ts` deleted — personas, `DEV_ACCOUNT_PASSWORD`, `isDevAuthEnabled()` gone
+- `app/dev/login/page.tsx` deleted — `/dev/login` route gone
+- `__dev_user` cookie removed from sign-in, sign-out, middleware, session
+- `/dev/*` route guard removed from `middleware.ts`
+- All sign-in now goes through Supabase Auth only
+- `__e2e_user` bypass kept, gated to `E2E_TESTING=1` (CI only, never deployed)
+- 5 dev-auth gate tests removed; suite: 234/234 ✅
 
 **API / security (2026-06-09)**
 - All client components migrated off direct MockDB access → proper authenticated API routes
@@ -73,7 +83,6 @@
 
 | Item | Status | Blocker |
 | --- | --- | --- |
-| **Remove dev/preview login bypass before prod** | ⚠️ must strip, do not ship | Dev-only customer/partner sign-in (personas + `KaabaTrip!2026` + `__dev_user`). Safe (gated off in prod build) but must be physically removed pre-launch. Strip checklist in `AI_NOTES.md` §4. |
 | Merge `dev` → `main` | open | PR review |
 
 ---

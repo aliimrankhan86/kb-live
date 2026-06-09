@@ -305,27 +305,14 @@ Key files:
 - `components/auth/SignUpForm.tsx`
 - `components/layout/Header.tsx`
 
-### REMOVE BEFORE PRODUCTION - dev-only login
+### Dev-only login — REMOVED (2026-06-09)
 
-The customer + partner login bypass is **local-dev / E2E tooling only**. It exists so the sign-in journey for customers and partners can be walked through and visually checked without real Supabase accounts. It must **not** ship in production-ready code.
+The dev persona bypass (`__dev_user`, `lib/auth/dev-users.ts`, `/dev/login`) has been **physically deleted** from the codebase. All sign-in goes through Supabase Auth. There is no fallback, no hardcoded password, no persona cookie.
 
-**Now locked to localhost + automated E2E only.** `isDevAuthEnabled()` returns `true` only when `NODE_ENV==='development'` (local `next dev`) or `E2E_TESTING==='1'`. Every deployed runtime (Vercel preview AND production) has `NODE_ENV='production'`, so the bypass is off and `/dev/login` redirects to `/`. There is intentionally **no remote/preview toggle** — `KAABATRIP_ENABLE_DEV_AUTH` and `VERCEL_ENV` are no longer read or exposed. The hardcoded password only works on localhost, so a public/preview URL cannot be used to impersonate anyone.
+**What remains (intentional):**
+- `__e2e_user` cookie bypass in `lib/supabase/middleware.ts` and `lib/auth/session.ts` — active only when `E2E_TESTING=1` (Playwright CI env). Production builds compile `E2E_TESTING=''` via `next.config.ts`, so this path is dead in any deployment.
 
-> **Gotcha — "can't log in locally with the dev personas":** a local **production build** (`npm run build` + `npm start`, i.e. `next start`) runs with `NODE_ENV='production'`, so `isDevAuthEnabled()` is `false` and `/api/auth/sign-in` returns `401 AUTH_INVALID_CREDENTIALS` for `customer@example.com` / `KaabaTrip!2026` — this is the hardening working as designed, not a bug. To test customer/partner views you must run the **dev server** (`npm run dev`, which sets `NODE_ENV='development'`). Verify the running process: `next-server` started via `next start` = production = dev login off; `next dev --turbopack` = dev login on. (Alternatively set `E2E_TESTING=1`, but `.env.local` ships it empty.)
-
-The shared password `KaabaTrip!2026` still exists in source + git history (harmless remotely now, but) the code, password, and personas must still be **physically removed** before production launch, not just gated.
-
-Strip checklist (do all before prod launch):
-- [ ] Delete `lib/auth/dev-users.ts` (personas + `DEV_ACCOUNT_PASSWORD = 'KaabaTrip!2026'` + `isDevAuthEnabled()`).
-- [ ] Delete `app/dev/login/page.tsx` and the `/dev/*` route guard in `lib/supabase/middleware.ts`.
-- [ ] Remove `__dev_user` read/write/clear in `app/api/auth/sign-in/route.ts`, `app/api/auth/sign-out/route.ts`, `lib/supabase/middleware.ts`, `lib/auth/session.ts`, `app/api/auth/me/route.ts`.
-- [ ] Remove the dev-auth credential fallback in `/api/auth/sign-in` so all creds go to Supabase Auth.
-- [ ] Drop `KAABATRIP_ENABLE_DEV_AUTH` / `VERCEL_ENV` exposure from `next.config.ts` env block.
-- [ ] Remove dev-auth assertions from `tests/auth-api.test.ts` and `tests/auth-components.test.tsx`.
-- [ ] Remove `__e2e_user` bypass if e2e is not part of prod pipeline.
-- [ ] Update docs (`AI_NOTES.md` §4, `STATUS.md`, `PROJECT_BRIEF.md`) to state dev login is **removed**, not just gated.
-
-Reason kept for now: testing the customer + partner sign-in journey and how it looks to those users. **Do not push this to production-ready code.**
+**To test locally:** use real Supabase credentials or set `E2E_TESTING=1` with a `__e2e_user` cookie shaped `{ id, email, role }`.
 
 ---
 
