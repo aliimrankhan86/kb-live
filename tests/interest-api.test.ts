@@ -1,7 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { MockDB } from '@/lib/api/mock-db';
 
-// Mock NextRequest/NextResponse from next/server
 vi.mock('next/server', () => {
   const NextResponse = {
     json: (body: unknown, init?: { status?: number }) => ({
@@ -14,7 +12,6 @@ vi.mock('next/server', () => {
   return { NextResponse, NextRequest: class {} };
 });
 
-// Mock rate-limit so tests don't require Upstash or real IP headers
 vi.mock('../lib/rate-limit', async () => {
   const actual = await vi.importActual<typeof import('../lib/rate-limit')>('../lib/rate-limit');
   return {
@@ -23,6 +20,31 @@ vi.mock('../lib/rate-limit', async () => {
     getRateLimitIdentifier: vi.fn(() => 'test-identifier'),
   };
 });
+
+// In-memory store that simulates Supabase unique constraint behaviour
+const interestStore: { email: string; type: string }[] = [];
+
+vi.mock('../lib/supabase/service-role', () => ({
+  createServiceRoleClient: () => ({
+    from: () => ({
+      insert: (row: { email: string; type: string }) => {
+        const dup = interestStore.some(
+          (i) => i.email === row.email && i.type === row.type
+        );
+        if (dup) return Promise.resolve({ error: { code: '23505' } });
+        interestStore.push(row);
+        return Promise.resolve({ error: null });
+      },
+      select: () => ({
+        eq: () => ({
+          eq: () => ({
+            maybeSingle: () => Promise.resolve({ data: null }),
+          }),
+        }),
+      }),
+    }),
+  }),
+}));
 
 const makeRequest = (body: unknown) => ({
   json: async () => body,
@@ -38,7 +60,7 @@ async function callRoute(body: unknown) {
 
 describe('/api/interest route', () => {
   beforeEach(() => {
-    localStorage.clear();
+    interestStore.length = 0;
     vi.resetModules();
   });
 
@@ -57,35 +79,28 @@ describe('/api/interest route', () => {
       expect((body as { type: string }).type).toBe('umrah');
     });
 
-    it('trims email whitespace', async () => {
-      const { body, status } = await callRoute({ email: '  trimmed@example.com  ', type: 'hajj' });
+    it('trims and lowercases email', async () => {
+      const { body, status } = await callRoute({ email: '  Trimmed@Example.com  ', type: 'hajj' });
       expect(status).toBe(201);
       expect((body as { email: string }).email).toBe('trimmed@example.com');
     });
 
-    it('persists interest to MockDB', async () => {
+    it('persists interest to store', async () => {
       await callRoute({ email: 'persist@example.com', type: 'hajj' });
-      const stored = MockDB.getInterests();
-      expect(stored.some((i) => i.email === 'persist@example.com' && i.type === 'hajj')).toBe(true);
+      expect(interestStore.some((i) => i.email === 'persist@example.com' && i.type === 'hajj')).toBe(true);
     });
   });
 
   describe('deduplication', () => {
     it('returns 200 for duplicate email+type', async () => {
-      await callRoute({ email: 'dup@example.com', type: 'hajj' });
+      interestStore.push({ email: 'dup@example.com', type: 'hajj' });
       const { body, status } = await callRoute({ email: 'dup@example.com', type: 'hajj' });
       expect(status).toBe(200);
       expect((body as { message: string }).message).toContain('already on the list');
     });
 
-    it('is case-insensitive for email dedup', async () => {
-      await callRoute({ email: 'Case@Example.com', type: 'hajj' });
-      const { status } = await callRoute({ email: 'case@example.com', type: 'hajj' });
-      expect(status).toBe(200);
-    });
-
     it('allows same email with different type', async () => {
-      await callRoute({ email: 'both@example.com', type: 'hajj' });
+      interestStore.push({ email: 'both@example.com', type: 'hajj' });
       const { status } = await callRoute({ email: 'both@example.com', type: 'umrah' });
       expect(status).toBe(201);
     });

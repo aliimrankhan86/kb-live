@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSessionUser } from '@/lib/auth/session';
-import { MockDB } from '@/lib/api/mock-db';
+import { Repository } from '@/lib/api/repository';
+import { createServiceRoleClient } from '@/lib/supabase/service-role';
 import { mapErrorToResponse } from '@/lib/errors';
 
 export async function POST() {
@@ -11,13 +12,24 @@ export async function POST() {
     }
 
     const userId = user.id;
+    const ctx = { userId, role: user.role };
 
-    const requests = MockDB.getRequests().filter((r) => r.customerId === userId);
-    const bookingIntents = MockDB.getBookingIntents().filter(
-      (b) => b.customerId === userId
-    );
-    const interests = MockDB.getInterests().filter((i) => i.email === user.email);
-    const complaints = MockDB.getComplaints().filter((c) => c.customerId === userId);
+    const [allRequests, allBookingIntents, allComplaints] = await Promise.all([
+      Repository.getRequests(ctx),
+      Repository.getBookingIntents(ctx),
+      Repository.getComplaints(ctx),
+    ]);
+
+    const requests = allRequests.filter((r) => r.customerId === userId);
+    const bookingIntents = allBookingIntents.filter((b) => b.customerId === userId);
+    const complaints = allComplaints.filter((c) => c.customerId === userId);
+
+    const supabase = createServiceRoleClient();
+    const { data: interestRows } = await supabase
+      .from('interests')
+      .select('email, type, created_at')
+      .eq('email', user.email?.toLowerCase() ?? '');
+    const interests = interestRows ?? [];
 
     const exportData = {
       exportedAt: new Date().toISOString(),

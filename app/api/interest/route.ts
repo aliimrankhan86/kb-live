@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { MockDB } from '@/lib/api/mock-db';
 import { interestSchema } from '@/lib/validation';
 import { checkRateLimit, getRateLimitIdentifier } from '@/lib/rate-limit';
+import { createServiceRoleClient } from '@/lib/supabase/service-role';
 
 export async function POST(request: NextRequest) {
-  // Rate limiting — prevent interest-list spam
   const rateLimitId = getRateLimitIdentifier(request, 'interest');
   const rateLimit = await checkRateLimit(rateLimitId);
   if (rateLimit.limited) {
@@ -20,7 +19,6 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    // Zod validation
     const parsed = interestSchema.safeParse(body);
     if (!parsed.success) {
       const issues = parsed.error.issues.map((i) => i.message);
@@ -31,26 +29,28 @@ export async function POST(request: NextRequest) {
     }
 
     const { email, type } = parsed.data;
+    const trimmedEmail = email.trim().toLowerCase();
 
-    const trimmedEmail = email.trim();
+    const supabase = createServiceRoleClient();
 
-    // Server-side deduplication: skip if same email+type already exists
-    const existing = MockDB.getInterests().find(
-      (i) => i.email.toLowerCase() === trimmedEmail.toLowerCase() && i.type === type
-    );
-    if (existing) {
-      return NextResponse.json(
-        {
-          message:
-            'You are already on the list. We will notify you when packages are available.',
-          email: trimmedEmail,
-          type,
-        },
-        { status: 200 }
-      );
+    const { error } = await supabase
+      .from('interests')
+      .insert({ email: trimmedEmail, type });
+
+    if (error) {
+      if (error.code === '23505') {
+        return NextResponse.json(
+          {
+            message:
+              'You are already on the list. We will notify you when packages are available.',
+            email: trimmedEmail,
+            type,
+          },
+          { status: 200 }
+        );
+      }
+      throw error;
     }
-
-    MockDB.saveInterest(trimmedEmail, type);
 
     return NextResponse.json(
       { message: 'Interest registered successfully', email: trimmedEmail, type },
