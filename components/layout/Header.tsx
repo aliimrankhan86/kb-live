@@ -132,6 +132,11 @@ export function Header({ className = '' }: { className?: string }) {
   const isAdmin = user?.role === 'admin';
   const isCustomer = user?.role === 'customer';
 
+  const displayName = user?.name ? user.name.split(' ')[0] : user?.email;
+
+  const isActive = (href: string) =>
+    href === '/' ? pathname === '/' : pathname?.startsWith(href) ?? false;
+
   const toggleMobileDrawer = useCallback(() => {
     setMobileDrawerOpen(prev => !prev);
     setMenuOpen(false);
@@ -150,7 +155,6 @@ export function Header({ className = '' }: { className?: string }) {
 
   const guestLinks = [
     { href: '/partner', label: 'For Partners', testId: 'nav-partners' },
-    { href: '/login', label: 'Login', testId: 'nav-login' },
   ];
 
   const customerLinks = [
@@ -187,8 +191,9 @@ export function Header({ className = '' }: { className?: string }) {
             <Link
               key={link.href}
               href={link.href}
-              className={styles.header__navLink}
+              className={`${styles.header__navLink} ${isActive(link.href) ? styles.header__navLinkActive : ''}`}
               data-testid={link.testId}
+              aria-current={isActive(link.href) ? 'page' : undefined}
             >
               {link.label}
             </Link>
@@ -198,8 +203,9 @@ export function Header({ className = '' }: { className?: string }) {
             <Link
               key={link.href}
               href={link.href}
-              className={styles.header__navLink}
+              className={`${styles.header__navLink} ${isActive(link.href) ? styles.header__navLinkActive : ''}`}
               data-testid={link.testId}
+              aria-current={isActive(link.href) ? 'page' : undefined}
             >
               {link.label}
             </Link>
@@ -211,8 +217,9 @@ export function Header({ className = '' }: { className?: string }) {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={styles.header__navLink}
+                  className={`${styles.header__navLink} ${isActive(link.href) ? styles.header__navLinkActive : ''}`}
                   data-testid={link.testId}
+                  aria-current={isActive(link.href) ? 'page' : undefined}
                 >
                   {link.label}
                 </Link>
@@ -225,13 +232,21 @@ export function Header({ className = '' }: { className?: string }) {
                   aria-haspopup="menu"
                   data-testid="user-menu-trigger"
                 >
-                  {user?.name || user?.email}
+                  {displayName}
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                     <path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" strokeWidth="1.5" />
                   </svg>
                 </button>
                 {menuOpen && (
                   <div className={styles.header__dropdown} role="menu">
+                    <Link
+                      href="/settings"
+                      className={styles.header__dropdownItem}
+                      onClick={() => setMenuOpen(false)}
+                      role="menuitem"
+                    >
+                      Settings
+                    </Link>
                     <button
                       onClick={handleLogout}
                       className={styles.header__dropdownItem}
@@ -252,8 +267,9 @@ export function Header({ className = '' }: { className?: string }) {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={styles.header__navLink}
+                  className={`${styles.header__navLink} ${isActive(link.href) ? styles.header__navLinkActive : ''}`}
                   data-testid={link.testId}
+                  aria-current={isActive(link.href) ? 'page' : undefined}
                 >
                   {link.label}
                 </Link>
@@ -266,7 +282,7 @@ export function Header({ className = '' }: { className?: string }) {
                   aria-haspopup="menu"
                   data-testid="user-menu-trigger"
                 >
-                  {user?.name || user?.email}
+                  {displayName}
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                     <path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" strokeWidth="1.5" />
                   </svg>
@@ -305,6 +321,16 @@ export function Header({ className = '' }: { className?: string }) {
                 )}
               </div>
             </>
+          )}
+
+          {!loading && !user && (
+            <Link
+              href="/login"
+              className={styles.header__loginCta}
+              data-testid="nav-login"
+            >
+              Sign in
+            </Link>
           )}
         </nav>
 
@@ -378,9 +404,10 @@ export function Header({ className = '' }: { className?: string }) {
               <Link
                 key={link.href}
                 href={link.href}
-                className={styles.header__mobileNavLink}
+                className={`${styles.header__mobileNavLink} ${isActive(link.href) ? styles.header__mobileNavLinkActive : ''}`}
                 onClick={() => setMobileDrawerOpen(false)}
                 data-testid={`mobile-${link.testId}`}
+                aria-current={isActive(link.href) ? 'page' : undefined}
               >
                 {link.label}
               </Link>
@@ -390,9 +417,10 @@ export function Header({ className = '' }: { className?: string }) {
               <Link
                 key={link.href}
                 href={link.href}
-                className={styles.header__mobileNavLink}
+                className={`${styles.header__mobileNavLink} ${isActive(link.href) ? styles.header__mobileNavLinkActive : ''}`}
                 onClick={() => setMobileDrawerOpen(false)}
                 data-testid={`mobile-${link.testId}`}
+                aria-current={isActive(link.href) ? 'page' : undefined}
               >
                 {link.label}
               </Link>
@@ -404,15 +432,23 @@ export function Header({ className = '' }: { className?: string }) {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={styles.header__mobileNavLink}
+                    className={`${styles.header__mobileNavLink} ${isActive(link.href) ? styles.header__mobileNavLinkActive : ''}`}
                     onClick={() => setMobileDrawerOpen(false)}
                     data-testid={`mobile-${link.testId}`}
+                    aria-current={isActive(link.href) ? 'page' : undefined}
                   >
                     {link.label}
                   </Link>
                 ))}
                 <div className={styles.header__mobileDivider} />
-                <span className={styles.header__mobileUserLabel}>{user?.name || user?.email}</span>
+                <span className={styles.header__mobileUserLabel}>{displayName}</span>
+                <Link
+                  href="/settings"
+                  className={styles.header__mobileNavLink}
+                  onClick={() => setMobileDrawerOpen(false)}
+                >
+                  Settings
+                </Link>
                 <button
                   onClick={handleLogout}
                   className={styles.header__mobileNavLink}
@@ -429,9 +465,10 @@ export function Header({ className = '' }: { className?: string }) {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={styles.header__mobileNavLink}
+                    className={`${styles.header__mobileNavLink} ${isActive(link.href) ? styles.header__mobileNavLinkActive : ''}`}
                     onClick={() => setMobileDrawerOpen(false)}
                     data-testid={`mobile-${link.testId}`}
+                    aria-current={isActive(link.href) ? 'page' : undefined}
                   >
                     {link.label}
                   </Link>
@@ -455,7 +492,7 @@ export function Header({ className = '' }: { className?: string }) {
                   </>
                 )}
                 <div className={styles.header__mobileDivider} />
-                <span className={styles.header__mobileUserLabel}>{user?.name || user?.email}</span>
+                <span className={styles.header__mobileUserLabel}>{displayName}</span>
                 <button
                   onClick={handleLogout}
                   className={styles.header__mobileNavLink}
@@ -463,6 +500,20 @@ export function Header({ className = '' }: { className?: string }) {
                 >
                   Log out
                 </button>
+              </>
+            )}
+
+            {!loading && !user && (
+              <>
+                <div className={styles.header__mobileDivider} />
+                <Link
+                  href="/login"
+                  className={styles.header__mobileLoginCta}
+                  onClick={() => setMobileDrawerOpen(false)}
+                  data-testid="mobile-nav-login"
+                >
+                  Sign in
+                </Link>
               </>
             )}
           </nav>

@@ -1,5 +1,4 @@
 import { Metadata } from 'next'
-import { Header } from '@/components/layout/Header'
 import { DesignSystemPlayground } from '@/components/showcase/DesignSystemPlayground'
 
 export const metadata: Metadata = {
@@ -10,7 +9,6 @@ export const metadata: Metadata = {
 export default function ShowcasePage() {
   return (
     <>
-      <Header />
       <DesignSystemPlayground />
     </>
   )

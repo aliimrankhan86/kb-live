@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Header } from '@/components/layout/Header'
 import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
 
 export const metadata: Metadata = {
@@ -77,7 +76,6 @@ const pageJsonLd = graphJsonLd([
 export default function UmrahCostPage() {
   return (
     <>
-      <Header />
       <JsonLdScript data={pageJsonLd} />
       <main className="min-h-screen bg-[var(--background)] px-4 py-12 md:py-20">
         <article className="mx-auto max-w-3xl">

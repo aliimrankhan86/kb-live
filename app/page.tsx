@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Header } from '@/components/layout/Header'
 import { Hero } from '@/components/marketing/Hero'
 import { JsonLdScript, faqPageJsonLd, graphJsonLd, organizationJsonLd, webPageJsonLd, websiteJsonLd } from '@/lib/seo/json-ld'
 
@@ -64,7 +63,6 @@ const homeJsonLd = graphJsonLd([
 export default function Home() {
   return (
     <>
-      <Header />
       <JsonLdScript data={homeJsonLd} />
       <Hero />
       {/* Internal navigation — links homepage to corridor and guide pages for SEO and user discovery */}

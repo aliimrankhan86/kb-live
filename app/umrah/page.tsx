@@ -1,5 +1,4 @@
 import { Metadata } from 'next'
-import { Header } from '@/components/layout/Header'
 import { UmrahSearchForm } from '@/components/umrah/UmrahSearchForm'
 import Link from 'next/link'
 import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
@@ -63,7 +62,6 @@ const umrahJsonLd = graphJsonLd([
 export default function UmrahPage() {
   return (
     <>
-      <Header />
       <JsonLdScript data={umrahJsonLd} />
       <main className="min-h-screen px-4 py-10">
         <UmrahSearchForm />

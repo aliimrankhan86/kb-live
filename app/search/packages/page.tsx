@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
-import { Header } from '@/components/layout/Header';
 import { SearchPackagesClient } from '@/components/search/SearchPackagesClient';
 import { filterByParams } from '@/components/search/search-utils';
 import { Repository } from '@/lib/api/repository';
@@ -82,7 +81,6 @@ export default async function SearchPackagesPage({ searchParams }: SearchPackage
 
   return (
     <>
-      <Header />
       <JsonLdScript data={searchJsonLd} />
       <Suspense
         fallback={

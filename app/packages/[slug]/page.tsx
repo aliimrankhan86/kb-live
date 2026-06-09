@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { Header } from '@/components/layout/Header'
 import { PackageDetail } from '@/components/packages/PackageDetail'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { Repository } from '@/lib/api/repository'
@@ -88,7 +87,6 @@ export default async function PackageDetailPage({
   if (error) {
     return (
       <>
-        <Header />
         <main className="min-h-screen bg-[var(--background)]">{renderNotFound(error)}</main>
       </>
     )
@@ -97,7 +95,6 @@ export default async function PackageDetailPage({
   if (!pkg || pkg.status !== 'published') {
     return (
       <>
-        <Header />
         <main className="min-h-screen bg-[var(--background)]">
           {renderNotFound('This package is no longer available.')}
         </main>
@@ -138,7 +135,6 @@ export default async function PackageDetailPage({
 
   return (
     <>
-      <Header />
       <main className="min-h-screen bg-[var(--background)]">
         <JsonLdScript data={packageDetailJsonLd} />
         <div className="w-full max-w-5xl mx-auto px-4 pt-6">

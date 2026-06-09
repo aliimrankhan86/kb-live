@@ -1,6 +1,5 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { Header } from '@/components/layout/Header'
 
 export const metadata: Metadata = {
   title: 'List Your Umrah & Hajj Packages on KaabaTrip',
@@ -21,7 +20,6 @@ export const metadata: Metadata = {
 export default function PartnerLandingPage() {
   return (
     <>
-      <Header />
       <main className="min-h-screen">
         {/* Hero */}
         <section className="relative border-b border-[var(--border)] bg-[var(--surfaceDark)] px-4 py-20 text-center">

@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Header } from '@/components/layout/Header';
 import { HajjInterestForm } from '@/components/hajj/HajjInterestForm';
 import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld';
 
@@ -63,7 +62,6 @@ const hajjPageJsonLd = graphJsonLd([
 export default function HajjPage() {
   return (
     <>
-      <Header />
       <JsonLdScript data={hajjPageJsonLd} />
       <main className="min-h-screen flex items-center justify-center px-4 py-20">
         <div className="max-w-lg w-full text-center">

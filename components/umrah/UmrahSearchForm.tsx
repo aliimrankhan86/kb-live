@@ -638,28 +638,29 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
             <label className={styles.searchForm__label}>
               Budget
             </label>
+            <label className={styles.searchForm__budgetToggle}>
+              <input
+                type="checkbox"
+                checked={!budgetEnabled}
+                onChange={(e) => setBudgetEnabled(!e.target.checked)}
+                className={styles.searchForm__toggleInput}
+                aria-label="No budget limit"
+                data-testid="budget-toggle"
+              />
+              <span className={styles.searchForm__toggleTrack}>
+                <span className={styles.searchForm__toggleThumb} />
+              </span>
+              <span className={styles.searchForm__budgetToggleLabel}>Any budget</span>
+            </label>
           </div>
-          <label className={styles.searchForm__toggle}>
-            <input
-              type="checkbox"
-              checked={budgetEnabled}
-              onChange={(e) => setBudgetEnabled(e.target.checked)}
-              className={styles.searchForm__toggleInput}
-              aria-label="Enable budget filter"
-              data-testid="budget-toggle"
-            />
-            <span className={styles.searchForm__toggleTrack}>
-              <span className={styles.searchForm__toggleThumb} />
-            </span>
-            <span className={styles.searchForm__toggleLabel}>
-              {budgetEnabled ? 'Set budget range' : 'No budget limit'}
-            </span>
-          </label>
 
           {budgetEnabled && (
             <div className={styles.searchForm__budgetSection}>
-              <div className={styles.searchForm__selectedBudget}>
-                GBP {minBudget.toLocaleString('en-GB')} - {maxBudget.toLocaleString('en-GB')} <span className={styles.searchForm__budgetUnit}>per person</span>
+              <div className={styles.searchForm__budgetRow}>
+                <span className={styles.searchForm__selectedBudget}>
+                  GBP {minBudget.toLocaleString('en-GB')} – {maxBudget.toLocaleString('en-GB')}
+                </span>
+                <span className={styles.searchForm__budgetUnit}>per person</span>
               </div>
               <RangeSlider
                 min={minBudgetValue}
@@ -673,6 +674,10 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
                 data-testid-min="budget-min-slider"
                 data-testid-max="budget-max-slider"
               />
+              <div className={styles.searchForm__budgetBounds} aria-hidden="true">
+                <span>£{minBudgetValue.toLocaleString('en-GB')}</span>
+                <span>£{maxBudgetValue.toLocaleString('en-GB')}</span>
+              </div>
             </div>
           )}
         </div>

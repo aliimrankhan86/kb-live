@@ -214,6 +214,42 @@
   outline-offset: 2px;
 }
 
+.header__mobileNavLinkActive {
+  color: #FFD31D !important;
+  color: var(--yellow, #FFD31D) !important;
+  background: rgba(255, 211, 29, 0.06) !important;
+}
+
+/* Mobile login CTA */
+.header__mobileLoginCta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 0.75rem 1rem;
+  margin: 0.25rem 0;
+  border-radius: 8px;
+  background: #FFD31D;
+  background: var(--yellow, #FFD31D);
+  color: #000;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: var(--font-exo2);
+  transition: opacity 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.header__mobileLoginCta:hover {
+  opacity: 0.88;
+}
+
+.header__mobileLoginCta:focus-visible {
+  outline: 2px solid #FFD31D;
+  outline-offset: 2px;
+}
+
 .header__mobileDivider {
   height: 1px;
   background: rgba(255, 255, 255, 0.08);
@@ -355,6 +391,41 @@
   .header__navLink:focus-visible {
     outline: 2px solid var(--yellow);
     outline-offset: 2px;
+  }
+
+  .header__navLinkActive {
+    color: var(--yellow) !important;
+    border-color: rgba(255, 211, 29, 0.25) !important;
+    background: rgba(255, 211, 29, 0.06) !important;
+  }
+
+  /* Login CTA button */
+  .header__loginCta {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0.4375rem 1.125rem;
+    background: var(--yellow);
+    color: #000;
+    font-weight: 700;
+    font-size: 0.9375rem;
+    border-radius: var(--radiusMd);
+    text-decoration: none;
+    transition: opacity 0.2s ease, transform 0.15s ease;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+
+  .header__loginCta:hover {
+    opacity: 0.88;
+    transform: translateY(-1px);
+  }
+
+  .header__loginCta:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
   }
 }
 
