@@ -72,10 +72,14 @@ remained 239/239 green; `npx tsc --noEmit` and `npm run build` clean.
    limiter identifiers namespaced per endpoint (auth / interest / quote) so they
    no longer share one IP bucket.
 
-Remaining from this pass (not blocking, see notes): `cust1` hardcode in
-`/api/quote-requests` (product decision — P0 #3); `style-src 'unsafe-inline'` in
+Remaining from this pass (not blocking, see notes): `style-src 'unsafe-inline'` in
 CSP (impractical to remove with Next 15 + Tailwind; script-src is nonce-based);
 final CSP `frame-ancestors` / CORS origins (gated on domain purchase).
+
+4. **Anonymous quote hardcode `cust1` (P0 #3) — FIXED (2026-06-09).** Product
+   decision: require login before quote submission. `POST /api/quote-requests` now
+   returns `401` if no authenticated customer session exists. `customerId` is
+   always the real `user.id`; the `'cust1'` fallback is gone. Tests: 239/239 green.
 
 ### P0 launch blockers
 
@@ -89,10 +93,9 @@ final CSP `frame-ancestors` / CORS origins (gated on domain purchase).
    - Risk: real Supabase data and client-side local/test data can diverge; GDPR export can omit real data; users can see simulated state after failed server writes.
    - Fix: Remove MockDB imports from all production UI/API paths. Use server routes/Server Components plus `Repository` with server-derived `RequestContext`. Keep MockDB only under tests, fixtures, and explicit dev-only tooling.
 
-3. **Anonymous/customer quote and booking flows still use hardcoded `cust1` in production-facing code.**
-   - Evidence: `/api/quote-requests` assigns `customerId: 'cust1'` when no customer session exists. `components/request/RequestDetail.tsx` uses `customerContext = { userId: 'cust1', role: 'customer' }` and falls back to client-side `Repository.createBookingIntent()` plus `MockDB.saveBookingIntent()` if the server API fails.
-   - Risk: cross-user data ownership confusion, false booking success, and polluted Supabase records under a seed identity.
-   - Fix: Choose the product model. Either require login before quote/booking intent, or add a proper anonymous lead/contact schema with claim/convert flow. Never use `cust1` outside test/dev fixtures.
+3. **~~Anonymous/customer quote and booking flows still use hardcoded `cust1`~~ — FIXED 2026-06-09.**
+   - `POST /api/quote-requests` now requires an authenticated customer session; returns `401` otherwise. `customerId` always set from `user.id`.
+   - ⚠️ Remaining: `components/request/RequestDetail.tsx` still uses `customerContext = { userId: 'cust1', role: 'customer' }` for client-side `Repository.createBookingIntent()` / `MockDB.saveBookingIntent()` fallback. This is covered by P0 #2 (MockDB removal). Fix there, not here.
 
 4. **Real DB cutover is opt-in and not yet proven in deployment.**
    - Evidence: `getDataSource()` returns MockDB unless `FEATURE_USE_REAL_DB=true`; E2E always forces MockDB. Docs say production should be Supabase, but the code can silently run MockDB if the flag is missing.

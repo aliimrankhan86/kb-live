@@ -48,8 +48,7 @@ const quoteRequestSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  // Rate limiting — quote submission is public (anonymous allowed), so throttle by IP
-  // to prevent lead-spam / abuse. Scoped separately from auth + interest budgets.
+  // Rate limiting — throttle by IP to prevent burst abuse. Scoped separately from auth + interest budgets.
   const rateLimit = await checkRateLimit(getRateLimitIdentifier(request, 'quote'));
   if (rateLimit.limited) {
     return NextResponse.json(
@@ -61,6 +60,13 @@ export async function POST(request: NextRequest) {
   try {
     const user = await getSessionUser();
 
+    if (!user || user.role !== 'customer') {
+      return NextResponse.json(
+        { error: 'You must be signed in as a customer to submit a quote request.' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const parsed = quoteRequestSchema.safeParse(body);
     if (!parsed.success) {
@@ -71,12 +77,12 @@ export async function POST(request: NextRequest) {
     const quoteRequest: QuoteRequest = {
       ...parsed.data,
       id: parsed.data.id ?? crypto.randomUUID(),
-      customerId: user?.role === 'customer' ? user.id : 'cust1',
+      customerId: user.id,
       status: 'open',
       createdAt: now,
     };
 
-    const saved = await Repository.createQuoteRequest({ userId: quoteRequest.customerId, role: 'customer' }, quoteRequest);
+    const saved = await Repository.createQuoteRequest({ userId: user.id, role: 'customer' }, quoteRequest);
 
     return NextResponse.json({ request: saved }, { status: 201 });
   } catch (err) {
