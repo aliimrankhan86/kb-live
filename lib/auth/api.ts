@@ -68,6 +68,12 @@ export async function apiSignIn(input: SignInInput) {
     password: input.password,
   });
   if (error) {
+    // Supabase returns "Email not confirmed" when the user hasn't clicked their
+    // verification link. Surface this as a specific code so the client can show
+    // a helpful message + resend link instead of a generic "wrong credentials".
+    if (error.message?.toLowerCase().includes('email not confirmed')) {
+      throw new AppError({ code: 'AUTH_EMAIL_NOT_CONFIRMED', status: 403 });
+    }
     throw new AppError({ code: 'AUTH_INVALID_CREDENTIALS', status: 401 });
   }
   return data;

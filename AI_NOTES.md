@@ -1,6 +1,6 @@
 # KaabaTrip AI Handover - Single Source of Truth
 
-**Last verified:** 2026-06-09
+**Last verified:** 2026-06-09 (email verification pass)
 **Last architecture/security audit:** 2026-06-09
 **Branch:** `dev`
 **Audience:** Claude, Codex, Kimi, and any AI/developer taking over the project.
@@ -79,7 +79,36 @@ final CSP `frame-ancestors` / CORS origins (gated on domain purchase).
 4. **Anonymous quote hardcode `cust1` (P0 #3) — FIXED (2026-06-09).** Product
    decision: require login before quote submission. `POST /api/quote-requests` now
    returns `401` if no authenticated customer session exists. `customerId` is
-   always the real `user.id`; the `'cust1'` fallback is gone. Tests: 239/239 green.
+   always the real `user.id`; the `'cust1'` fallback is gone. Tests: 234/234 green.
+
+5. **Email verification enforcement (2026-06-09) — IMPLEMENTED.** Four-layer defence
+   against fake/throwaway email addresses and unverified users:
+   - **Disposable email blocking** at signup (`lib/validation.ts`): `signUpSchema`
+     rejects ~60 known throwaway/temp-mail domains with a Zod `.refine()` check.
+     Extend the `DISPOSABLE_DOMAINS` set as new providers are discovered.
+   - **Supabase email confirmation flow**: new route `app/auth/confirm/route.ts`
+     handles Supabase OTP callback links (`/auth/confirm?token_hash=...&type=signup`),
+     exchanges the token, and redirects to `/` with `?verified=1`.
+   - **Verify-email page** (`app/verify-email`): shown immediately after signup.
+     Displays resend button (calls `POST /api/auth/resend-verification`) and guidance.
+     Email is passed as a query param so the resend call is pre-populated.
+   - **Quote-request gate** (`POST /api/quote-requests`): returns `403
+     AUTH_EMAIL_NOT_VERIFIED` if `user.emailVerified === false`. Unverified users
+     cannot submit quote requests (main data-scraping/fake-lead vector).
+   - **Sign-in: unconfirmed email** (`apiSignIn`): Supabase's `email_not_confirmed`
+     error is caught and surfaced as `AppError { AUTH_EMAIL_NOT_CONFIRMED, 403 }`.
+     `LoginForm` checks the response `code` field and shows a resend-verification
+     link inline when this code is returned.
+   - `SessionUser.emailVerified` (boolean) added to `lib/auth/session.ts`; derived
+     from `user.email_confirmed_at`. E2E bypass cookie defaults `emailVerified: true`.
+
+   ⚠️ **Supabase dashboard action required before this is live in production:**
+   Auth → Settings → "Enable email confirmations" must be ON. Without this toggle
+   Supabase auto-confirms all signups and `email_confirmed_at` is set immediately —
+   the gate is harmless but not enforced. Turn it on before going public.
+   Also configure the redirect URL in Supabase Auth → URL Configuration:
+   `Site URL = https://<yourdomain>` and add `https://<yourdomain>/auth/confirm`
+   to the "Redirect URLs" allow-list.
 
 ### P0 launch blockers
 
@@ -119,8 +148,8 @@ final CSP `frame-ancestors` / CORS origins (gated on domain purchase).
 
 ### User journey gaps to resolve before public launch
 
-- Decide whether quote requests are allowed before login. If yes, design guest lead capture, email verification, and account-claim flow. If no, route users to login before creating persistent QuoteRequest records.
-- Verify real Supabase sign-up, email confirmation, sign-in, forgot-password, reset-password, and sign-out on deployed Vercel.
+- ~~Decide whether quote requests are allowed before login~~ — decided: login required. Quote requests further gated on email verification.
+- Verify real Supabase sign-up, email confirmation, sign-in, forgot-password, reset-password, and sign-out on deployed Vercel. **Enable "Email confirmations" in Supabase Auth settings before going public** (see item 5 in the security remediation section above).
 - Define what "verified operator" means operationally: who checks ATOL/ABTA/company data, what evidence is stored, what is visible to travellers, and how rejected operators recover.
 - Define complaint/dispute handoff language and support ownership so users do not think KaabaTrip is escrow, insurer, or travel operator.
 - Confirm package image upload/display with one real operator and one real package before stripping dev login.
@@ -518,6 +547,7 @@ Do not mark these complete unless re-verified.
 | P0 | RLS/grants audit | Run Supabase advisors and tighten broad/incomplete RLS policies before exposing real data. |
 | P0 | Production env validation | Confirm production has `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`; verify Redis path is used outside local/dev fallback. |
 | P0 | Deployed Prisma/Supabase cutover | Local/verified paths exist with `FEATURE_USE_REAL_DB=true`; deployed environment needs explicit smoke against Supabase data, auth redirects, and RLS. |
+| P0 | **Supabase email confirmation toggle** | In Supabase Dashboard → Auth → Settings → **"Enable email confirmations" must be ON** before going public. Without it, `email_confirmed_at` is set on signup automatically and the email-verification gate is a no-op. Also add `https://<yourdomain>/auth/confirm` to Auth → URL Configuration → Redirect URLs allow-list. Code is ready; this is a dashboard click. |
 | P0 | Domain launch | Buy/configure production domain. Then update `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`, Supabase auth redirect URLs, canonical URLs, robots, sitemap, JSON-LD base URLs, and any hardcoded `kaabatrip.com` assumptions. |
 | P1 | Plausible analytics | Wire after domain is live and cookie-consent behavior is confirmed. |
 | P1 | Payment evidence policy conflict | Product canon says MVP evidence storage is metadata-only; architecture notes describe byte storage/purge. Resolve policy before shipping file-byte storage changes. |
@@ -562,11 +592,13 @@ Tracked diagnostic script:
 ### Gate 2: Safe to make public
 1. Buy domain.
 2. Set NEXT_PUBLIC_SITE_URL.
-3. Update Supabase auth redirect URLs.
-4. Wire Plausible.
-5. Check canonical URLs, sitemap, robots.txt, JSON-LD.
-6. Confirm all deployed auth flows: sign up, email confirmation, sign in, forgot password, reset password.
-7. Confirm package image URLs resolve correctly on deployed pages.
+3. **Supabase Dashboard → Auth → Settings → turn ON "Enable email confirmations".** ← do not skip. Without this, fake/unverified emails bypass the quote-request gate.
+4. **Supabase Dashboard → Auth → URL Configuration → add `https://<yourdomain>/auth/confirm` to Redirect URLs allow-list.** ← required for verification links to work.
+5. Update remaining Supabase auth redirect URLs (password reset, etc.).
+6. Wire Plausible.
+7. Check canonical URLs, sitemap, robots.txt, JSON-LD.
+8. Confirm all deployed auth flows: sign up, email confirmation, sign in, forgot password, reset password.
+9. Confirm package image URLs resolve correctly on deployed pages.
 
 ### Gate 3: Soft launch readiness (business, not code)
 1. Onboard 5 real operators.

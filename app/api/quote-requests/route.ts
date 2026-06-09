@@ -81,6 +81,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!user.emailVerified) {
+      return NextResponse.json(
+        { error: 'Please verify your email address before submitting a quote request. Check your inbox for a verification link.', code: 'AUTH_EMAIL_NOT_VERIFIED' },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const parsed = quoteRequestSchema.safeParse(body);
     if (!parsed.success) {

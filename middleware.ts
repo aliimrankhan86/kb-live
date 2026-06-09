@@ -15,6 +15,8 @@ const PUBLIC_PREFIXES = [
   '/sitemap.xml',
   '/login',
   '/signup',
+  '/verify-email',
+  '/auth',
   '/partner',
   '/hajj',
   '/privacy',

@@ -37,6 +37,7 @@ export function LoginForm() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [errorCode, setErrorCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [showForgot, setShowForgot] = useState(forgotParam === 'true');
   const [forgotEmail, setForgotEmail] = useState('');
@@ -45,6 +46,7 @@ export function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setErrorCode('');
     setLoading(true);
 
     try {
@@ -58,6 +60,7 @@ export function LoginForm() {
 
       if (!res.ok) {
         setError(data.error || 'Invalid email or password');
+        setErrorCode(data.code || '');
         setLoading(false);
         return;
       }
@@ -215,11 +218,21 @@ export function LoginForm() {
 
       {error && (
         <div
-          className="rounded-md border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400"
+          className="rounded-md border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400 space-y-1"
           role="alert"
           data-testid="login-error"
         >
-          {error}
+          <p>{error}</p>
+          {errorCode === 'AUTH_EMAIL_NOT_CONFIRMED' && (
+            <p>
+              <Link
+                href={`/verify-email?email=${encodeURIComponent(email)}`}
+                className="underline text-red-300 hover:text-red-200"
+              >
+                Resend verification email
+              </Link>
+            </p>
+          )}
         </div>
       )}
 

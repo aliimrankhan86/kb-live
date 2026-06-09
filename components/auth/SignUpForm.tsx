@@ -140,8 +140,9 @@ export function SignUpForm() {
         return;
       }
 
-      // After sign-up, redirect to login
-      router.push('/login?registered=true');
+      // Redirect to verify-email page. If Supabase email confirmation is disabled
+      // the user is already confirmed, but this page is harmless in that case.
+      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
     } catch {
       setError('Something went wrong. Please try again.');
       setLoading(false);

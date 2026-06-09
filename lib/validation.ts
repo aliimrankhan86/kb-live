@@ -5,12 +5,41 @@ import { z } from 'zod';
  * All user inputs must be validated before hitting database or API endpoints.
  */
 
+// Known throwaway/disposable email domains. Extend as needed.
+const DISPOSABLE_DOMAINS = new Set([
+  'mailinator.com', 'guerrillamail.com', 'guerrillamail.info', 'guerrillamail.biz',
+  'guerrillamail.de', 'guerrillamail.net', 'guerrillamail.org', 'grr.la',
+  'sharklasers.com', 'spam4.me', 'trashmail.com', 'trashmail.me', 'trashmail.net',
+  'trashmail.io', 'trashmail.at', 'trashmail.xyz', 'trashmail.org',
+  'yopmail.com', 'yopmail.fr', 'cool.fr.nf', 'jetable.fr.nf', 'nospam.ze.tc',
+  'nomail.xl.cx', 'mega.zik.dj', 'speed.1s.fr', 'courriel.fr.nf', 'moncourrier.fr.nf',
+  'monemail.fr.nf', 'monmail.fr.nf', 'tempmail.com', 'temp-mail.org', 'temp-mail.io',
+  'dispostable.com', 'mailnull.com', 'spamgourmet.com', 'spamgourmet.net',
+  'fakeinbox.com', 'maildrop.cc', 'getnada.com', 'mohmal.com',
+  'discardmail.com', 'discardmail.de', 'spamhereplease.com', 'spamherelots.com',
+  '10minutemail.com', '10minutemail.net', '10minutemail.org', 'minutemail.com',
+  'discard.email', 'tempinbox.com', 'spambox.us', 'spambox.info',
+  'mailnew.com', 'mintemail.com', 'emailondeck.com', 'mailtemp.info',
+  'anonbox.net', 'filzmail.com', 'throwam.com', 'safetymail.info',
+  'crazymailing.com', 'spamdecoy.net', 'inoutmail.de', 'inoutmail.eu',
+  'kurzepost.de', 'objectmail.com', 'rofl.wtf', 'wegwerfmail.de',
+  'wegwerfmail.net', 'wegwerfmail.org', 'sofort-mail.de', 'spamfree24.org',
+  'spamfree24.de', 'spamfree24.info', 'hatespam.org', 'antispam24.de',
+  'notmailinator.com', 'bspamfree.org', 'mailmetrash.com', 'maythespaybe.com',
+]);
+
+function isDisposableEmail(email: string): boolean {
+  const domain = email.split('@')[1]?.toLowerCase();
+  return domain ? DISPOSABLE_DOMAINS.has(domain) : false;
+}
+
 export const signUpSchema = z.object({
   email: z
     .string()
     .min(1, 'Email is required')
     .max(254, 'Email must be 254 characters or fewer')
-    .email('Enter a valid email address'),
+    .email('Enter a valid email address')
+    .refine((v) => !isDisposableEmail(v), 'Disposable email addresses are not allowed. Use a real email to receive your verification link.'),
   password: z
     .string()
     .min(8, 'Password must be at least 8 characters')
