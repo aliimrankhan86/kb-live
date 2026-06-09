@@ -26,8 +26,21 @@ export function Step5Review() {
           
           <div>
             <h3 className="mb-2 font-medium text-[rgba(255,255,255,0.4)]">Location</h3>
-            <p>{draft.departureCity || 'Not specified'}</p>
-            <p>{draft.dateWindow?.flexible ? 'Flexible Dates' : `${draft.dateWindow?.start} to ${draft.dateWindow?.end}`}</p>
+            {draft.departureCity ? (
+              <p>{draft.departureCity}{draft.departureArea ? `, ${draft.departureArea}` : ''}</p>
+            ) : (
+              <p className="text-[rgba(255,255,255,0.4)]">City not specified</p>
+            )}
+            {draft.departureAirport && (
+              <p className="mt-0.5 text-[rgba(255,255,255,0.7)]">✈ {draft.departureAirport}</p>
+            )}
+            <p className="mt-0.5">
+              {draft.season !== 'custom'
+                ? `${draft.season?.charAt(0).toUpperCase()}${draft.season?.slice(1)} — ${draft.dateWindow?.flexible ? 'Flexible dates' : 'Fixed dates'}`
+                : draft.dateWindow?.start && draft.dateWindow?.end
+                  ? `${draft.dateWindow.start} → ${draft.dateWindow.end}`
+                  : 'Dates not set'}
+            </p>
           </div>
 
           <div>

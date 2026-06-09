@@ -238,15 +238,22 @@ export function SignUpForm() {
         </div>
       )}
 
-      <Input
-        label="Full name"
-        type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        required
-        autoComplete="name"
-        data-testid="signup-name"
-      />
+      <div>
+        <Input
+          label={isPartner ? 'Company name' : 'Full name'}
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          autoComplete={isPartner ? 'organization' : 'name'}
+          data-testid="signup-name"
+        />
+        {isPartner && (
+          <p className="mt-1.5 text-xs text-[var(--textMuted)]">
+            Your registered or trading company name
+          </p>
+        )}
+      </div>
 
       <Input
         label="Email"

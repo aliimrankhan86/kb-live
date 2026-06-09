@@ -196,6 +196,8 @@ export interface QuoteRequest {
   
   // Location & Stay
   departureCity?: string;
+  departureArea?: string;
+  departureAirport?: string;
   totalNights: number;
   nightsMakkah: number;
   nightsMadinah: number;

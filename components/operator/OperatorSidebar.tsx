@@ -83,8 +83,6 @@ export function OperatorSidebar({ operatorName, verificationStatus, userRole, us
           >
             Close menu
           </button>
-          <p className="text-xs uppercase tracking-wide text-[rgba(255,255,255,0.64)]">KaabaTrip</p>
-          <h2 className="text-xl font-semibold text-[#FFFFFF]">Operator</h2>
         </div>
 
         <nav className="space-y-2" aria-label="Operator sections">

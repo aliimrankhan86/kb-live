@@ -1,4 +1,6 @@
+import { Suspense } from 'react';
 import { OperatorRegistrationForm } from '@/components/operator/OperatorRegistrationForm';
+import { OnboardingVerifiedBanner } from '@/components/operator/OnboardingVerifiedBanner';
 
 export const metadata = {
   title: 'Operator Onboarding',
@@ -8,6 +10,9 @@ export const metadata = {
 export default function OperatorOnboardingPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
+      <Suspense fallback={null}>
+        <OnboardingVerifiedBanner />
+      </Suspense>
       <div>
         <h1 className="text-2xl font-semibold text-[var(--text)]">Operator Registration</h1>
         <p className="mt-1 text-sm text-[var(--textMuted)]">

@@ -14,9 +14,11 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     const { error } = await supabase.auth.verifyOtp({ type, token_hash });
     if (!error) {
-      // Redirect to the intended destination (or home) with a verified flag
-      // so the page can show a "Email verified!" banner.
-      const redirectUrl = new URL(next, origin);
+      const { data: { user } } = await supabase.auth.getUser();
+      const role = user?.app_metadata?.role;
+      // Operators go straight to onboarding to complete their company profile
+      const destination = role === 'operator' && next === '/' ? '/operator/onboarding' : next;
+      const redirectUrl = new URL(destination, origin);
       redirectUrl.searchParams.set('verified', '1');
       return NextResponse.redirect(redirectUrl);
     }

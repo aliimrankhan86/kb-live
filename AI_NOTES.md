@@ -545,6 +545,23 @@ Earlier completed platform work:
 
 ---
 
+2026-06-09 quote form step 2 — city/airport scope locked:
+
+- **Cities reduced to 3**: `UK_CITIES` in `Step2LocationDates` now contains only `['London', 'Manchester', 'Birmingham']`. All other city options (Leeds, Glasgow, Edinburgh, Bristol, Leicester, Other) and their corresponding airport chips have been removed.
+- **London airports trimmed to 2**: London now maps only to LHR (Heathrow) and LGW (Gatwick). STN, LTN, and LCY removed — matches the launch airport set used on `/umrah` and `/search/packages`.
+- **Dead `departureArea` field removed**: the "Area of London" sub-picker and the `departureArea` draft field are gone. Airport filtering always used `a.city === selectedCity` and never read `departureArea`. No downstream code is affected.
+- **Return-airport hint added**: a quiet helper line — "Your return flight will depart from the same airport." — appears below the airport chips whenever the airport section is visible. Dimmed (`rgba(255,255,255,0.4)`) so it informs without competing with the selection action.
+
+Supported city → airport mapping (current, authoritative):
+
+| City | Airport(s) |
+| --- | --- |
+| London | LHR (Heathrow), LGW (Gatwick) |
+| Manchester | MAN |
+| Birmingham | BHX |
+
+---
+
 ## 8. Pending / Left Areas
 
 Do not mark these complete unless re-verified.
@@ -567,6 +584,7 @@ Do not mark these complete unless re-verified.
 | P2 | Local Chrome SEO/AEO QA | Server-side SEO/AEO work was done earlier. A rendered local Chrome audit remains useful for titles, JSON-LD, canonicals, noindex/robots, and visible FAQ consistency. |
 | P2 | Test coverage | Tests pass, but coverage was previously around 28 percent. Increase coverage for auth session, auth API, DB adapter, package APIs, analytics, and payment evidence. |
 | P2 | Docs consistency | Some docs still contain stale historical status such as operator analytics partial/E2E pending. Update those docs as touched; do not regress implementation to match stale docs. |
+| P2 | ~~London area picker — dead field~~ | **RESOLVED 2026-06-09.** `departureArea` field and sub-picker removed entirely from `Step2LocationDates`. |
 
 ⚠️ PARTIALLY RESOLVED — Payment evidence RLS
 The storage RLS policies now grant read access to the involved operator and to
