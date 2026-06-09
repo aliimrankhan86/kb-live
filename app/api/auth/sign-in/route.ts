@@ -61,7 +61,8 @@ export async function POST(request: Request) {
       user: {
         id: data.user?.id,
         email: data.user?.email,
-        role: String(data.user?.user_metadata?.role || 'customer'),
+        // SECURITY: role comes from app_metadata (service-role-only), never user_metadata.
+        role: String(data.user?.app_metadata?.role || 'customer'),
         name: (data.user?.user_metadata?.name as string) || null,
       },
     });

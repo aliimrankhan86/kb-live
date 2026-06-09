@@ -1,10 +1,98 @@
 # KaabaTrip AI Handover - Single Source of Truth
 
-**Last verified:** 2026-06-08
+**Last verified:** 2026-06-09
+**Last architecture/security audit:** 2026-06-09
 **Branch:** `dev`
 **Audience:** Claude, Codex, Kimi, and any AI/developer taking over the project.
 
 This file is the current handover source of truth. If another document conflicts with a verified statement here, treat that other document as stale and update it before changing implementation. Historical notes were intentionally overwritten to remove contradictory pending/completed status.
+
+---
+
+## 0. Architecture Decision & Master Audit - 2026-06-09
+
+### Decision
+
+KaabaTrip's correct target and production architecture is **Supabase + Prisma + Upstash Redis**, not a client-side MockDB MVP.
+
+Evidence checked:
+
+- `package.json` includes `@prisma/client`, `@prisma/adapter-pg`, `pg`, `@supabase/supabase-js`, `@supabase/ssr`, `@upstash/redis`, and `@upstash/ratelimit`.
+- `prisma/schema.prisma`, `prisma.config.ts`, and Supabase migrations exist.
+- `lib/api/db/prisma.ts` creates a Prisma 7 client with the `pg` adapter and `DATABASE_URL`.
+- `lib/api/db/adapter.ts` maps app models to Prisma models.
+- `lib/config.ts` selects Prisma only when `FEATURE_USE_REAL_DB=true`; tests and E2E intentionally use MockDB.
+- `.env.local` has the expected env names present for Supabase, Prisma, service role, feature flag, and Upstash. Values were not printed.
+- `npx prisma validate` passed on 2026-06-09.
+- `npm run test` passed on 2026-06-09: 18 files, 239/239 tests.
+- `npm run build` passed on 2026-06-09.
+
+Practical conclusion:
+
+- Trust the Supabase/Prisma/Redis architecture.
+- MockDB is allowed for unit tests and controlled E2E/dev simulation only.
+- The repo is **not yet cleanly cut over for launch** because production-facing components and API routes still import/use MockDB directly.
+
+### Production audit verdict
+
+Current launch score from local evidence: **62/100 - risky, internal beta only**.
+
+Do not make the site public until the P0 blockers below are fixed and re-verified with `FEATURE_USE_REAL_DB=true` against Supabase.
+
+### P0 launch blockers
+
+1. **Auth roles currently rely on Supabase `user_metadata`.**
+   - Evidence: `lib/auth/session.ts`, `lib/supabase/middleware.ts`, `lib/auth/api.ts`, and `app/api/auth/sign-in/route.ts` read `user.user_metadata.role`.
+   - Risk: Supabase user metadata is user-editable. Any server-side authorization that trusts it can become role escalation.
+   - Fix: Store authorization role in `app_metadata` using admin/service-role updates, or load role from the server-side `users` table by authenticated `user.id`. Middleware, `getSessionUser()`, `/api/auth/me`, and sign-in response DTOs must use the trusted source only. Public sign-up may request `customer` or `operator`, but must not self-authorize admin or verified/operator privileges.
+
+2. **MockDB still leaks into production-facing paths.**
+   - Evidence from `rg`: direct MockDB imports remain in `components/request/RequestDetail.tsx`, `components/quote/QuoteRequestWizard.tsx`, `components/operator/OfferForm.tsx`, `components/operator/PaymentDetailsClient.tsx`, `components/operator/OperatorLeadsClient.tsx`, `components/admin/*`, `components/search/PackageList.tsx`, `components/packages/PackagesBrowse.tsx`, `components/request/PaymentInstructions.tsx`, `components/request/ComplaintForm.tsx`, `components/request/ComparisonTable.tsx`, `app/admin/bank-changes/*`, `app/api/user/export/route.ts`, and `app/api/interest/route.ts`.
+   - Risk: real Supabase data and client-side local/test data can diverge; GDPR export can omit real data; users can see simulated state after failed server writes.
+   - Fix: Remove MockDB imports from all production UI/API paths. Use server routes/Server Components plus `Repository` with server-derived `RequestContext`. Keep MockDB only under tests, fixtures, and explicit dev-only tooling.
+
+3. **Anonymous/customer quote and booking flows still use hardcoded `cust1` in production-facing code.**
+   - Evidence: `/api/quote-requests` assigns `customerId: 'cust1'` when no customer session exists. `components/request/RequestDetail.tsx` uses `customerContext = { userId: 'cust1', role: 'customer' }` and falls back to client-side `Repository.createBookingIntent()` plus `MockDB.saveBookingIntent()` if the server API fails.
+   - Risk: cross-user data ownership confusion, false booking success, and polluted Supabase records under a seed identity.
+   - Fix: Choose the product model. Either require login before quote/booking intent, or add a proper anonymous lead/contact schema with claim/convert flow. Never use `cust1` outside test/dev fixtures.
+
+4. **Real DB cutover is opt-in and not yet proven in deployment.**
+   - Evidence: `getDataSource()` returns MockDB unless `FEATURE_USE_REAL_DB=true`; E2E always forces MockDB. Docs say production should be Supabase, but the code can silently run MockDB if the flag is missing.
+   - Risk: a deployed production environment can appear functional while writing to non-persistent MockDB/localStorage simulation.
+   - Fix: For Vercel production, fail fast unless `FEATURE_USE_REAL_DB=true`, Supabase env, `DATABASE_URL`, `DIRECT_URL`, and Upstash env are present. Keep MockDB fallback only for `NODE_ENV=test`, local dev without the flag, and explicit E2E.
+
+5. **RLS policies need Supabase hardening before relying on Data API access.**
+   - Evidence: RLS exists, but several policies are broad or incomplete for production: `offers_read_all`, `audit_log_insert_system WITH CHECK (true)`, update policies without `WITH CHECK`, and no verified deployed policy audit in this session.
+   - Risk: if tables are exposed to anon/authenticated roles, broad policies can leak or allow unexpected writes.
+   - Fix: Run Supabase advisors and inspect grants. Add `TO authenticated` / `TO anon` deliberately, ownership predicates for every non-public table, and `WITH CHECK` on every update policy that must preserve ownership. Keep service-role use server-only and narrow.
+
+### P1 high-value fixes
+
+- **Payment evidence policy conflict:** product canon says MVP is metadata-only; architecture/code support storage bytes and private bucket uploads. Decide before launch. If bytes remain, add operator/admin signed download routes that enforce BookingIntent RBAC and avoid exposing storage paths directly.
+- **GDPR export/delete must use real repositories:** `app/api/user/export/route.ts` reads MockDB, and delete removes the Supabase auth user but does not prove cleanup/anonymisation of Prisma records.
+- **Rate limits only cover auth today:** extend Upstash rate limiting to quote requests, booking intents, package image uploads, payment instruction reads, bank-detail/change endpoints, admin approval/rejection, complaints, and interest capture.
+- **Health check is shallow:** `/api/health` returns static JSON. Add a private/deploy-time dependency check for Supabase, Prisma, and Upstash.
+- **CI branch mismatch:** `.github/workflows/ci.yml` runs on `main` and `develop`, while docs say active branch is `dev`. Add `dev` or rename branch policy before relying on CI gates.
+- **Package image rendering needs deployment smoke:** `package-images` is a public Supabase bucket, but CSP/Next image allowlists must be verified against the actual Supabase storage host.
+- **Admin reconciliation needs business verification:** route exists, but export completeness, date semantics, and sensitive field policy need owner sign-off.
+
+### User journey gaps to resolve before public launch
+
+- Decide whether quote requests are allowed before login. If yes, design guest lead capture, email verification, and account-claim flow. If no, route users to login before creating persistent QuoteRequest records.
+- Verify real Supabase sign-up, email confirmation, sign-in, forgot-password, reset-password, and sign-out on deployed Vercel.
+- Define what "verified operator" means operationally: who checks ATOL/ABTA/company data, what evidence is stored, what is visible to travellers, and how rejected operators recover.
+- Define complaint/dispute handoff language and support ownership so users do not think KaabaTrip is escrow, insurer, or travel operator.
+- Confirm package image upload/display with one real operator and one real package before stripping dev login.
+
+### Implementation order for the next AI/fixer
+
+1. Replace role source with trusted `app_metadata` or DB role lookup.
+2. Remove production MockDB imports and hardcoded `cust1` paths.
+3. Make production fail fast if `FEATURE_USE_REAL_DB=true` and required envs are not set.
+4. Harden RLS/grants and run Supabase advisors.
+5. Rework quote/booking guest journey.
+6. Expand rate limits and real GDPR export/delete.
+7. Run `npm run test`, `npm run build`, `npx playwright test`, and deployed Supabase smoke.
 
 ---
 
@@ -79,15 +167,17 @@ Coding invariants:
 
 ## 3. Verified Current State
 
-Verified on 2026-06-08:
+Verified on 2026-06-09 unless noted:
 
-- `npm run test`: **passes**, 18 files, **238/238 tests**.
+- `npm run test`: **passes**, 18 files, **239/239 tests**.
 - `npm run build`: **passes**, 0 build errors.
-- `npx tsc --noEmit`: **passes**.
 - `git diff --check`: **passes**.
-- `npx playwright test`: **57 passed, 6 skipped, 0 failed**.
-- `npx playwright test e2e/signup-password-mismatch.spec.ts`: **3 passed**.
-- Manual Playwright smoke:
+- `npm run lint`: **passes**, with a Next.js deprecation notice for `next lint`.
+- `npx prisma validate`: **passes**.
+- `npx tsc --noEmit`: **passes**.
+- `npx playwright test`: **57 passed, 6 skipped, 0 failed** on 2026-06-08.
+- `npx playwright test e2e/signup-password-mismatch.spec.ts`: **3 passed** on 2026-06-08.
+- Manual Playwright smoke on 2026-06-08:
   - `/`, `/umrah`, `/search/packages?type=umrah&departureAirport=LGW`
   - 320px and 1280px
   - no HTTP errors and no horizontal overflow observed.
@@ -122,6 +212,7 @@ Current data posture:
 - MockDB remains for unit tests and E2E-style impersonation flows.
 - Repository layer is the abstraction boundary for business data and RBAC.
 - Supabase project is in EU West / Ireland per existing architecture notes.
+- 2026-06-09 audit caveat: production-facing UI/API paths still contain direct MockDB imports. Treat this as cutover debt and do not ship public production until Section 0 P0 items are fixed.
 
 ---
 
@@ -173,9 +264,9 @@ Key files:
 - `components/auth/SignUpForm.tsx`
 - `components/layout/Header.tsx`
 
-### ⚠️ REMOVE BEFORE PRODUCTION — dev/preview-only login
+### REMOVE BEFORE PRODUCTION - dev-only login
 
-The customer + partner login bypass is **local-dev / preview / QA tooling only**. It exists so the sign-in journey for customers and partners can be walked through and visually checked without real Supabase accounts. It must **not** ship in production-ready code.
+The customer + partner login bypass is **local-dev / E2E tooling only**. It exists so the sign-in journey for customers and partners can be walked through and visually checked without real Supabase accounts. It must **not** ship in production-ready code.
 
 **Now locked to localhost + automated E2E only.** `isDevAuthEnabled()` returns `true` only when `NODE_ENV==='development'` (local `next dev`) or `E2E_TESTING==='1'`. Every deployed runtime (Vercel preview AND production) has `NODE_ENV='production'`, so the bypass is off and `/dev/login` redirects to `/`. There is intentionally **no remote/preview toggle** — `KAABATRIP_ENABLE_DEV_AUTH` and `VERCEL_ENV` are no longer read or exposed. The hardcoded password only works on localhost, so a public/preview URL cannot be used to impersonate anyone.
 
@@ -191,6 +282,7 @@ Strip checklist (do all before prod launch):
 - [ ] Drop `KAABATRIP_ENABLE_DEV_AUTH` / `VERCEL_ENV` exposure from `next.config.ts` env block.
 - [ ] Remove dev-auth assertions from `tests/auth-api.test.ts` and `tests/auth-components.test.tsx`.
 - [ ] Remove `__e2e_user` bypass if e2e is not part of prod pipeline.
+- [ ] Update docs (`AI_NOTES.md` §4, `STATUS.md`, `PROJECT_BRIEF.md`) to state dev login is **removed**, not just gated.
 
 Reason kept for now: testing the customer + partner sign-in journey and how it looks to those users. **Do not push this to production-ready code.**
 
@@ -323,10 +415,10 @@ Feature areas currently implemented:
 
 ## 7. Recent Verified Work
 
-2026-06-08 dev account login fix:
+2026-06-08 dev account login fix and later hardening:
 
 - Root cause for "Invalid email or password" with documented dev accounts: `/login` fallback and `__dev_user` readers were hard-gated to `NODE_ENV=development`, so Vercel preview / production-mode QA sent those credentials to Supabase Auth instead.
-- Fixed by centralizing dev-auth enablement in `isDevAuthEnabled()`: enabled for local development, E2E, Vercel preview, or explicit `KAABATRIP_ENABLE_DEV_AUTH=true`; disabled for true production by default.
+- The later hardened state is stricter: `isDevAuthEnabled()` is enabled only for local development or `E2E_TESTING=1`. Vercel preview/production and `KAABATRIP_ENABLE_DEV_AUTH` are not valid remote toggles.
 - `__dev_user` handling is now aligned across sign-in, middleware, server sessions, `/api/auth/me`, `/dev/login`, and sign-out.
 
 2026-06-08 header login + London airport split:
@@ -340,7 +432,7 @@ Feature areas currently implemented:
 
 2026-06-08 auth/dev persona work:
 
-- Normal `/login` accepts documented dev persona credentials in local development, E2E, Vercel preview deployments, or controlled QA environments with `KAABATRIP_ENABLE_DEV_AUTH=true`.
+- Normal `/login` accepts documented dev persona credentials in local development or automated E2E only.
 - Dev persona fallback verifies `KaabaTrip!2026`, sets `__dev_user`, and returns safe user shape.
 - Dev persona password comparison trims accidental leading/trailing whitespace for these documented accounts only; real Supabase passwords are not trimmed or weakened.
 - Real Supabase sign-in failures return safe 401 responses instead of masked 500s.
@@ -391,11 +483,15 @@ Do not mark these complete unless re-verified.
 
 | Priority | Area | Current status / next step |
 | --- | --- | --- |
+| P0 | Trusted auth role source | Current auth/session paths read `user_metadata.role`. Move role authorization to Supabase `app_metadata` or the server-side `users` table before production. |
+| P0 | MockDB cutover | Direct MockDB imports remain in production-facing UI/API routes. Remove or isolate behind dev/test-only boundaries before launch. |
+| P0 | Hardcoded customer identity | Quote/request/booking paths still use `cust1` in production-facing code. Require login or build a real anonymous lead model. |
+| P0 | Production fail-fast | Production can silently use MockDB if `FEATURE_USE_REAL_DB` is missing. Make production require real DB and required envs. |
+| P0 | RLS/grants audit | Run Supabase advisors and tighten broad/incomplete RLS policies before exposing real data. |
 | P0 | Production env validation | Confirm production has `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`; verify Redis path is used outside local/dev fallback. |
 | P0 | Deployed Prisma/Supabase cutover | Local/verified paths exist with `FEATURE_USE_REAL_DB=true`; deployed environment needs explicit smoke against Supabase data, auth redirects, and RLS. |
 | P0 | Domain launch | Buy/configure production domain. Then update `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`, Supabase auth redirect URLs, canonical URLs, robots, sitemap, JSON-LD base URLs, and any hardcoded `kaabatrip.com` assumptions. |
 | P1 | Plausible analytics | Wire after domain is live and cookie-consent behavior is confirmed. |
-| P1 | Payment evidence RLS/read access | Old notes say operator/admin read access for payment evidence files may still be owner-only. Re-verify storage bucket policies before relying on evidence retrieval. |
 | P1 | Payment evidence policy conflict | Product canon says MVP evidence storage is metadata-only; architecture notes describe byte storage/purge. Resolve policy before shipping file-byte storage changes. |
 | P1 | Admin reconciliation | `/admin/reconciliation` exists. Verify export completeness, expected CSV/PDF format, and payment-evidence linkage before treating as done. |
 | P1 | Operator analytics depth | Base real-event dashboard is done. Future work: deeper conversion breakdowns, top-package analysis, attribution quality, and business-facing chart polish. |
@@ -403,13 +499,50 @@ Do not mark these complete unless re-verified.
 | P2 | Test coverage | Tests pass, but coverage was previously around 28 percent. Increase coverage for auth session, auth API, DB adapter, package APIs, analytics, and payment evidence. |
 | P2 | Docs consistency | Some docs still contain stale historical status such as operator analytics partial/E2E pending. Update those docs as touched; do not regress implementation to match stale docs. |
 
+⚠️ UNRESOLVED DEPENDENCY — Payment evidence RLS
+Operator and admin read access to payment evidence files is currently owner-only.
+Open question: is admin/operator read access required at launch?
+- If YES → this is a Gate 2 launch blocker. Promote it.
+- If NO → confirmed post-launch debt. Document that evidence upload works but review is not available at launch.
+This must be resolved before Gate 2 is signed off.
+
 Known local/tooling files:
 
 - `.agents/`
 - `.claude/`
-- `scripts/`
 
 These are local/untracked tooling artifacts. Do not push them unless the user explicitly asks to version them.
+
+Tracked diagnostic script:
+
+- `npm run check:upstash` runs `scripts/check-upstash.mjs`. It loads `.env.local`, checks whether `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are present, initializes Redis + `@upstash/ratelimit`, runs `PING`, and runs one limiter probe. It prints only boolean env presence and safe probe results; it must not print Redis URLs, tokens, token lengths, or other secret-derived values.
+
+---
+
+## Pre-launch gates
+
+### Gate 1: Safe to merge dev → main
+1. Fix Section 0 P0 blockers: trusted role source, MockDB cutover, no hardcoded `cust1`, production fail-fast, RLS/grants audit.
+2. Photo upload smoke test - real operator account, real image, real browser. Do this BEFORE stripping dev login.
+3. Strip dev-login - remove personas, password reference, `__dev_user`, and `isDevAuthEnabled()`. Update docs to say removed, not just gated.
+4. Final verification - unit tests, type-check, build, operator E2E, basic mobile and desktop smoke.
+5. PR dev → main.
+
+### Gate 2: Safe to make public
+1. Buy domain.
+2. Set NEXT_PUBLIC_SITE_URL.
+3. Update Supabase auth redirect URLs.
+4. Wire Plausible.
+5. Check canonical URLs, sitemap, robots.txt, JSON-LD.
+6. Confirm all deployed auth flows: sign up, email confirmation, sign in, forgot password, reset password.
+7. Confirm package image URLs resolve correctly on deployed pages.
+
+### Gate 3: Soft launch readiness (business, not code)
+1. Onboard 5 real operators.
+2. Get ~50 packages live.
+3. Run one real operator onboarding QA pass.
+4. Confirm package data quality.
+5. Confirm no copy implies KaabaTrip is a travel operator or payment processor.
 
 ---
 

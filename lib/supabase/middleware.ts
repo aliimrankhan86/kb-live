@@ -74,7 +74,10 @@ export async function updateSession(request: NextRequest): Promise<AuthResult> {
   // Refresh session if expired — required for Server Components to have valid auth state
   const { data: { user } } = await supabase.auth.getUser();
 
-  const role = user?.user_metadata?.role as string | undefined;
+  // SECURITY: authorization role is read from app_metadata only. app_metadata is
+  // service-role-writable, so a user cannot self-escalate (unlike user_metadata,
+  // which auth.updateUser() lets the user edit). Set at signup via service role.
+  const role = user?.app_metadata?.role as string | undefined;
 
   return {
     user: user

@@ -7,15 +7,33 @@
 ## Branch & goal
 
 - **Branch:** `dev` → target `main` after PR review
-- **Goal:** Fix documented dev account login in preview/QA environments and keep auth notes consistent.
-- **Current source-of-truth note:** This top section was verified on 2026-06-08.
+- **Goal:** Pre-launch architecture/security audit and cutover risk handoff.
+- **Current source-of-truth note:** Architecture/security audit and verification updated on 2026-06-09.
 - **Canonical handover:** `AI_NOTES.md` is now the single source of truth for verified status, implementation posture, and pending areas.
 
 ## What works (verified)
 
-- **Tests**: `npm run test` passes (18 files, 238/238 tests) — verified 2026-06-08.
-- **Build**: `npm run build` passes with 0 errors — verified 2026-06-08.
+- **Tests**: `npm run test` passes (18 files, 239/239 tests) — verified 2026-06-09.
+- **Build**: `npm run build` passes with 0 errors — verified 2026-06-09.
 - **TypeScript**: covered by `npm run build` validity checks.
+- **Architecture decision**: Supabase + Prisma + Upstash Redis is the correct target/production architecture. MockDB is not the production architecture, but production-facing MockDB imports remain and are now documented as launch blockers in `AI_NOTES.md` §0.
+
+## Changes made in this session (2026-06-09 — Master Architecture/Security Audit)
+
+| Task | What | Files |
+| ---- | ---- | ----- |
+| ARCH-DECISION | Resolved the architecture conflict: trust Supabase/Prisma/Redis as the target and production architecture; MockDB is test/dev simulation only. | `AI_NOTES.md`, `docs/README_AI.md`, `docs/ARCHITECTURE.md`, `docs/SECURITY.md`, `docs/NOW.md` |
+| PRELAUNCH-AUDIT | Added a launch-readiness audit with P0 blockers: trusted auth role source, production MockDB cutover, hardcoded `cust1` removal, production fail-fast, RLS/grants audit, and deployed real-DB smoke. | `AI_NOTES.md` |
+| DOC-DRIFT-FIX | Corrected stale dev-auth wording. Dev personas are local dev/E2E only; Vercel preview and production must use real Supabase Auth. | `AI_NOTES.md`, `docs/README_AI.md`, `docs/NOW.md` |
+
+**Verification so far:**
+
+- `npm run lint`: pass, with Next.js deprecation notice for `next lint`.
+- `npx prisma validate`: pass.
+- `npx tsc --noEmit`: pass.
+- `npm run test`: pass, 18 files, 239/239 tests.
+- `npm run build`: pass, 0 build errors.
+- Secret scan by tracked filenames/patterns: no tracked `.env`, `.pem`, service-role, Upstash token, or `DATABASE_URL=` matches found.
 
 ## Changes made in this session (2026-06-08 — Dev Account Login Fix)
 
@@ -164,6 +182,11 @@ See `AI_NOTES.md` §8 for full historical log. Key prior work:
 
 - **Production env validation** ⏳ PENDING. Confirm production has `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`, and verify the Redis rate-limit path outside local/dev fallback.
 - **Deployed Prisma/Supabase cutover** ⏳ PENDING. Local real-DB paths exist with `FEATURE_USE_REAL_DB=true`; deployed environment needs explicit smoke against Supabase data, auth redirects, and RLS.
+- **Trusted auth role source** ⏳ PENDING. Current session/middleware code reads Supabase `user_metadata.role`; production authorization must move to `app_metadata` or the server-side `users` table.
+- **Production MockDB cutover** ⏳ PENDING. Direct MockDB imports remain in production-facing UI/API paths and must be removed or isolated before public launch.
+- **Hardcoded customer identity** ⏳ PENDING. `cust1` is still used in quote/request/booking paths; require login or implement a real anonymous lead model.
+- **Production fail-fast** ⏳ PENDING. Production must not silently run MockDB if `FEATURE_USE_REAL_DB` is missing.
+- **RLS/grants audit** ⏳ PENDING. Run Supabase advisors and tighten broad/incomplete RLS policies before relying on exposed Data API tables.
 - **Domain launch** ⏳ PENDING. After purchase, update `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`, Supabase auth redirect URLs, canonical URLs, robots, sitemap, JSON-LD base URLs, and hardcoded `kaabatrip.com` assumptions.
 - **Plausible analytics** ⏳ PENDING. Wire after domain is live and cookie consent is confirmed.
 - **Payment evidence storage/RLS** ⏳ PENDING. Re-verify operator/admin read access for payment evidence files and resolve the product/architecture policy conflict on metadata-only versus byte storage.
@@ -173,4 +196,5 @@ See `AI_NOTES.md` §8 for full historical log. Key prior work:
 
 ## Local tooling note
 
-- `.agents/`, `.claude/`, and `scripts/_upstash_check.mjs` are intentionally untracked local/tooling artifacts. Do not push them by default.
+- `.agents/` and `.claude/` are intentionally untracked local/tooling artifacts. Do not push them by default.
+- `npm run check:upstash` runs the tracked `scripts/check-upstash.mjs` diagnostic. It verifies Upstash env presence, Redis `PING`, and one rate-limit probe without printing Redis URLs, tokens, token lengths, or other secret-derived values.

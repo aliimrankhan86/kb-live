@@ -14,10 +14,10 @@ A two-sided marketplace for Umrah/Hajj pilgrimage packages. Travellers search, c
 
 - **Branch:** `dev`
 - **Stack:** Next.js 15.5.19 (App Router), React 19, Tailwind v4, TypeScript strict, Vitest 4.1.8, Playwright
-- **Verified 2026-06-08:** `npm run test` passes (18 files, 238/238). `npm run build` passes with 0 errors; known warning remains from `@supabase/supabase-js` using `process.version` in Edge middleware via `@supabase/ssr`, plus webpack cache-size warnings.
+- **Verified 2026-06-09:** `npm run test` passes (18 files, 239/239). `npm run build` passes with 0 errors. `npm run lint` passes with a Next.js deprecation notice for `next lint`; `npx prisma validate` passes.
 - **E2E 2026-06-08:** `npx playwright test` passes with 57 passed, 6 skipped, 0 failed. `e2e/signup-password-mismatch.spec.ts` passes 3/3.
-- **Data:** Repository layer is async. MockDB remains the default for unit tests and cookie impersonation flows; Prisma/Supabase paths exist behind `FEATURE_USE_REAL_DB=true`. The Prisma adapter loader is production-chunk safe: server builds import `./db/adapter` literally, while client/browser builds alias that adapter to a stub so `pg`/Prisma do not enter browser bundles.
-- **Auth:** Supabase SSR/auth endpoints and middleware are wired. `/login` supports documented dev persona credentials in local development, E2E, Vercel preview, or controlled QA with `KAABATRIP_ENABLE_DEV_AUTH=true`; true production keeps the fallback disabled by default. Dev persona sessions set `__dev_user` and render customer/operator/admin navigation through `/api/auth/me`.
+- **Data:** Target production architecture is Supabase Postgres/Auth/Storage + Prisma + Upstash Redis. MockDB remains valid for unit tests and controlled E2E/dev simulation, but the 2026-06-09 audit found direct MockDB imports still present in production-facing UI/API paths. See `AI_NOTES.md` §0 before launch work.
+- **Auth:** Supabase SSR/auth endpoints and middleware are wired. `/login` supports documented dev persona credentials only in local development or automated E2E (`E2E_TESTING=1`). Vercel preview and production must use real Supabase Auth; there is no remote dev-auth toggle.
 - **Operator side:** Onboarding, dashboard, leads, profile, payment settings, bank-review admin, complaints, package CSV, the 8-step package wizard, and real-event operator analytics exist. Admin reconciliation exists but needs explicit business/export verification before it is treated as complete.
 
 ## Localisation

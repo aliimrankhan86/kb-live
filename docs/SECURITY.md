@@ -90,6 +90,7 @@ All tables have `ENABLE ROW LEVEL SECURITY` with deny-by-default. Policies are d
 ## Supabase Auth & Session Security
 
 - **Session strategy**: JWT stored in httpOnly cookies via `@supabase/ssr`. No tokens in `localStorage`.
+- **Authorization role source**: Production authorization must not trust Supabase `user_metadata` / `raw_user_meta_data` because it is user-editable. Use `app_metadata` set via service-role/admin flows, or load role from the server-side `users` table by authenticated `user.id`.
 - **Middleware**: `middleware.ts` refreshes expired JWTs on every request. Session cookies are automatically rotated.
 - **Anon key**: Public (client-side) — used for auth and public data reads. Cannot bypass RLS.
 - **Service role key**: Server-only, never exposed to client. Used for admin operations and seeding.
@@ -101,6 +102,8 @@ All tables have `ENABLE ROW LEVEL SECURITY` with deny-by-default. Policies are d
   - `DIRECT_URL` — server-only, direct Postgres connection for migrations
 - **RLS**: Deny-by-default. Every table has `ENABLE ROW LEVEL SECURITY`. Anonymous users have zero access unless explicitly granted.
 - **Storage buckets**: `evidence-files` and `operator-exports` are private. No public URLs. Signed URLs are time-limited and RBAC-checked before generation.
+
+**2026-06-09 audit blocker:** current session/middleware code still reads `user_metadata.role`. Move this to the trusted role source above before production.
 
 ### Security Headers
 

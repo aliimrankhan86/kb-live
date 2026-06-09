@@ -44,7 +44,10 @@ export async function getSessionUser(): Promise<SessionUser | null> {
 
   if (error || !user) return null;
 
-  const role = (user.user_metadata?.role as UserRole) || 'customer';
+  // SECURITY: trust app_metadata.role (service-role-only) for authorization.
+  // user_metadata is user-editable and must never drive RBAC. Default to the
+  // least-privileged role if absent.
+  const role = (user.app_metadata?.role as UserRole) || 'customer';
   return {
     id: user.id,
     email: user.email || '',
