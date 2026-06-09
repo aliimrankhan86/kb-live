@@ -3,11 +3,11 @@
 > **Single rolling tracker.** Any AI/dev: read this for current state. Update it after work is **done + tested + verified** (see `CLAUDE.md` rule).
 > Detailed handover lives in `AI_NOTES.md`. Cold-start brief: `HANDOFF.md`. Business: `BUSINESS.md`.
 
-**Last verified:** 2026-06-08 · **Branch:** `dev` → `main` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
+**Last verified:** 2026-06-09 · **Branch:** `dev` → `main` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
 
 ---
 
-## Health (verified 2026-06-08)
+## Health (verified 2026-06-09)
 
 | Check | State |
 | --- | --- |
@@ -46,6 +46,12 @@
 - Supabase auth + `/api/auth/me` shell (customer/operator/admin nav)
 - Dev persona login (`KaabaTrip!2026`) — **localhost + automated E2E only**, never on any deployed env (preview or production); no remote toggle. ⚠️ remove before prod launch (`AI_NOTES.md` §4). Note: only works under `npm run dev` (`NODE_ENV=development`); a local prod build (`npm start`) returns 401 by design.
 - Password show/hide toggle, forgot password
+
+**API / security (2026-06-09)**
+- All client components migrated off direct MockDB access → proper authenticated API routes
+- Hardcoded role contexts (`admin1`, `cust1`) fully removed from client code
+- New routes: complaints, admin bank-changes, operator leads/payment-details/bank-changes/audit-log, operators list, quote-requests/[id], booking-intents GET
+- Repository: `listPublicOperators`, `getBankChangeRequests(ctx)`, `getBookingOutcomes(ctx)` added
 
 **Quality / tests (EXECUTION_QUEUE Phase 5)**
 - Validation utility: 7 reusable validators (`lib/validation.ts`) + 39 unit tests (Task 14)
