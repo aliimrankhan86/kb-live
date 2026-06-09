@@ -39,6 +39,44 @@ Current launch score from local evidence: **62/100 - risky, internal beta only**
 
 Do not make the site public until the P0 blockers below are fixed and re-verified with `FEATURE_USE_REAL_DB=true` against Supabase.
 
+### 2026-06-09 security remediation pass (applied)
+
+A pre-launch CRITICAL/HIGH security pass fixed and verified the following. Tests
+remained 239/239 green; `npx tsc --noEmit` and `npm run build` clean.
+
+1. **Trusted role source (P0 #1) — FIXED.** Authorization role now reads from
+   `app_metadata.role` (service-role-only) in `getSessionUser()`, supabase
+   middleware, `apiGetUser`, and the sign-in DTO; defaults to least-privilege
+   `customer`. `apiSignUp` writes the role to `app_metadata` via the service role
+   and no longer stores role in user-editable `user_metadata`. Closes the
+   self-escalation vector (a user could previously `auth.updateUser({ data:
+   { role:'admin' } })`).
+   - ⚠️ Backfill: any pre-existing Supabase auth users created before this change
+     have role only in `user_metadata` and will default to `customer`. Set their
+     `app_metadata.role` via the service role (admin API) before launch.
+
+2. **RLS actually enabled on the live DB (P0 #5) — FIXED.** Introspection found
+   11 of 12 public tables had NO row-level security: the public anon key could
+   read `users`, `payment_details`, `bank_change_requests`, `booking_intents`,
+   `offers`, `complaints` via the Supabase Data API (confirmed HTTP 200 + rows
+   for PII + bank details). Root cause: `001_enable_rls.sql` never applied because
+   it compared `auth.uid()` (uuid) to `text` columns. Rewrote `001` with
+   `auth.uid()::text`, tightened `offers` (was `USING(true)`), dropped the
+   permissive `audit_log` insert, added `005` (analytics_events + booking_outcomes)
+   and `006` (payment-evidence operator/admin read). Applied via
+   `scripts/apply-rls-migrations.mjs`; verified anon now gets 0 rows on sensitive
+   tables, public catalogue still readable. App unaffected (all table access is
+   Prisma/direct connection, which bypasses RLS).
+
+3. **Rate limiting (P1) — extended.** `POST /api/quote-requests` now rate-limited;
+   limiter identifiers namespaced per endpoint (auth / interest / quote) so they
+   no longer share one IP bucket.
+
+Remaining from this pass (not blocking, see notes): `cust1` hardcode in
+`/api/quote-requests` (product decision — P0 #3); `style-src 'unsafe-inline'` in
+CSP (impractical to remove with Next 15 + Tailwind; script-src is nonce-based);
+final CSP `frame-ancestors` / CORS origins (gated on domain purchase).
+
 ### P0 launch blockers
 
 1. **Auth roles currently rely on Supabase `user_metadata`.**
@@ -499,12 +537,15 @@ Do not mark these complete unless re-verified.
 | P2 | Test coverage | Tests pass, but coverage was previously around 28 percent. Increase coverage for auth session, auth API, DB adapter, package APIs, analytics, and payment evidence. |
 | P2 | Docs consistency | Some docs still contain stale historical status such as operator analytics partial/E2E pending. Update those docs as touched; do not regress implementation to match stale docs. |
 
-⚠️ UNRESOLVED DEPENDENCY — Payment evidence RLS
-Operator and admin read access to payment evidence files is currently owner-only.
-Open question: is admin/operator read access required at launch?
-- If YES → this is a Gate 2 launch blocker. Promote it.
-- If NO → confirmed post-launch debt. Document that evidence upload works but review is not available at launch.
-This must be resolved before Gate 2 is signed off.
+⚠️ PARTIALLY RESOLVED — Payment evidence RLS
+The storage RLS policies now grant read access to the involved operator and to
+admins (migration `006`, applied 2026-06-09), matching the §5 RBAC model. Customer
+write access is unchanged. Adding the policies is forward-compatible and harmless.
+Remaining (business decision, not code): whether to SHIP the operator/admin
+evidence-review UI / signed-download path at launch. If yes, build the
+signed-download route enforcing BookingIntent RBAC and never expose raw storage
+paths. If no, this is confirmed post-launch debt — upload works, review UI is not
+wired. Resolve before Gate 2 sign-off.
 
 Known local/tooling files:
 
