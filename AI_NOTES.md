@@ -472,6 +472,16 @@ Feature areas currently implemented:
 
 ## 7. Recent Verified Work
 
+2026-06-09 UI polish — header breathing room, image consistency, compare UX:
+
+- **Header spacing**: Replaced fixed `height` values on `.header` with `padding`-based layout on `.header__container`. All breakpoints now use explicit top/bottom padding (`1rem` desktop, `0.875rem` default mobile, `0.75rem` small, `0.625rem` extra-small). This prevents the header from ever looking edge-to-edge regardless of content changes.
+- **Sign In CTA breathing room**: Added `margin-left: 0.75rem` to `.header__loginCta` and reduced nav `gap` to `0.25rem` so the Sign In button has clear visual separation from the nav links.
+- **Hotel image consistency**: `.hotelImage` is now locked to `height: 120px; min-height: 120px; max-height: 120px; object-fit: cover; object-position: center`. The inline `style={{ width: 'auto', height: 'auto' }}` override that was breaking CSS sizing has been removed. Both operator-uploaded images and fallback images render at identical dimensions.
+- **Fallback images for hotel blocks**: `PackageCard` now tracks `makkahImgSrc` / `madinaImgSrc` in state, initialised from package data with a fallback to an inline SVG building placeholder. `onError` callbacks swap to the fallback on load failure. `unoptimized` is applied to Next.js `<Image>` when a data-URI fallback is active to avoid optimisation errors.
+- **Compare help text visibility**: "Select at least 2 packages to compare" now renders with an info icon (SVG inline), slightly larger font (`0.8125rem`), and `rgba(255,255,255,0.6)` colour — noticeably more visible than the previous `textMuted` grey.
+
+---
+
 2026-06-08 dev account login fix and later hardening:
 
 - Root cause for "Invalid email or password" with documented dev accounts: `/login` fallback and `__dev_user` readers were hard-gated to `NODE_ENV=development`, so Vercel preview / production-mode QA sent those credentials to Supabase Auth instead.
