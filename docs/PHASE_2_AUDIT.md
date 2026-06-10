@@ -388,7 +388,7 @@ Implement complaints flow end-to-end: customer submits complaint tied to Booking
 - [x] Customer ComplaintForm integrated into RequestDetail below PaymentInstructions for existing BookingIntents
 - [x] Operator ComplaintsInbox on /operator/dashboard with respond + status change
 - [x] Admin ComplaintsTriage on /admin/complaints with severity/status filters, internal notes, flag operator
-- [x] Required UX copy blocks present: pay-operator-direct, contract with operator, KaabaTrip logs/routes only
+- [x] Required UX copy blocks present: pay-operator-direct, contract with operator, PilgrimCompare logs/routes only
 - [x] 21 unit tests covering all Repository RBAC rules
 - [x] No regressions in existing tests (55/55 pass) or E2E (6/6 chromium)
 
@@ -996,7 +996,7 @@ Resolve build-time ESLint warnings without changing behavior.
 
 **Notes / Decisions:**
 
-- MVP remains pay-operator-direct only. KaabaTrip stores no customer funds.
+- MVP remains pay-operator-direct only. PilgrimCompare stores no customer funds.
 - Payment evidence storage is metadata-only in MockDB; no file bytes are stored.
 - Operator 48h payment confirmation remains a product requirement but is not yet enforced in UI/repository.
 
@@ -1044,7 +1044,7 @@ Resolve build-time ESLint warnings without changing behavior.
 **Notes / Decisions:**
 
 - No public routes changed; this is repository/data-model foundation work only.
-- MVP remains pay-operator-direct only. KaabaTrip does not collect, hold, or transfer customer funds.
+- MVP remains pay-operator-direct only. PilgrimCompare does not collect, hold, or transfer customer funds.
 - No guarantees language was added.
 - Payment instructions remain in-app only and are scoped through BookingIntent RBAC.
 

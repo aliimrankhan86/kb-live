@@ -15,8 +15,8 @@ Use this paragraph (or a tightened version of it) on the About page, the footer 
 ## 2. Identity rules (rebrand enforcement)
 
 - The brand is **PilgrimCompare**, one word, capital P and capital C. Never Pilgrim Compare, PilgrimCompare.co.uk as a name, or pilgrimcompare in body copy.
-- **Zero references to KaabaTrip anywhere**: code, comments, copy, metadata, OG tags, structured data, email templates, SVGs, alt text, favicons, manifest.json, package.json, README, test fixtures, seed data, error messages, environment variable names, URLs.
-- Known outstanding offenders: `/public/logo.svg` and `/public/text-logo.svg` still contain KaabaTrip branding.
+- **Zero references to PilgrimCompare anywhere**: code, comments, copy, metadata, OG tags, structured data, email templates, SVGs, alt text, favicons, manifest.json, package.json, README, test fixtures, seed data, error messages, environment variable names, URLs.
+- Known outstanding offenders: `/public/logo.svg` and `/public/text-logo.svg` still contain PilgrimCompare branding.
 - Legal entity disclosure in the footer and Terms (Companies Act 2006 and E-Commerce Regulations 2002 require all of these for a UK online service): registered company name, company number, country of registration, registered office address, a contact email, and VAT number if VAT-registered. If the registered entity name differs from PilgrimCompare, use: "PilgrimCompare is a trading name of [Company Name Ltd], registered in England and Wales, company number [N], registered office [address]. Contact: support@pilgrimcompare.co.uk." Use a placeholder token `{{LEGAL_ENTITY_BLOCK}}` in code if details are not yet in env config; never invent them. Operating without this disclosure is itself a breach, so this is launch-blocking, not cosmetic.
 
 ## 3. The five hard boundaries (never violate in any copy)
@@ -137,7 +137,7 @@ Plain-English version of the model: compare → enquire → operator replies →
 | Package page | Operator name prominent, ATOL number + CAA link, price attribution + date, standard payment copy, "Not provided" for gaps | Inferred fields, PilgrimCompare-voiced promises |
 | Compare view | Identical field set per package, explicit "Not provided" cells | Hidden differences, default-sorted by anything resembling paid placement |
 | Enquiry flow | Data-sharing disclosure ("your details go to the operator"), reference code copy on confirmation | Payment fields of any kind |
-| Header/footer | Links to Terms, Privacy, How it works, Contact; legal entity line in footer | KaabaTrip anything |
+| Header/footer | Links to Terms, Privacy, How it works, Contact; legal entity line in footer | PilgrimCompare anything |
 | Emails | Standard copy blocks from master plan section 7.1 | Refund/availability promises |
 | 404/empty/error states | Honest copy ("No packages currently match") | Fabricated alternatives |
 

@@ -1,6 +1,6 @@
 # Login Modal Implementation
 
-A comprehensive, accessible, and production-ready login modal system that seamlessly integrates with the KaabaTrip design system and architecture patterns.
+A comprehensive, accessible, and production-ready login modal system that seamlessly integrates with the PilgrimCompare design system and architecture patterns.
 
 ## 🏗️ Architecture Overview
 
@@ -39,7 +39,7 @@ const handleLogin = async (credentials: LoginCredentials): Promise<void> => {
   isOpen={isLoginModalOpen}
   onClose={() => setIsLoginModalOpen(false)}
   onLogin={handleLogin}
-  ariaLabel="Login to your KaabaTrip account"
+  ariaLabel="Login to your PilgrimCompare account"
   closeOnBackdropClick={true}
 />
 ```
@@ -320,7 +320,7 @@ AUTH_SECRET=your-secret-key
 
 ### Design System
 
-- [KaabaTrip Design Tokens](./tokens.css)
+- [PilgrimCompare Design Tokens](./tokens.css)
 - [Component Library](./README.md)
 - [Accessibility Guidelines](./ACCESSIBILITY.md)
 
@@ -337,4 +337,4 @@ When contributing to the LoginModal component:
 
 ## 📄 License
 
-This component is part of the KaabaTrip application and follows the same licensing terms.
+This component is part of the PilgrimCompare application and follows the same licensing terms.

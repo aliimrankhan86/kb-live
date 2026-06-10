@@ -1,4 +1,4 @@
-You are taking over implementation support for KaabaTrip.
+You are taking over implementation support for PilgrimCompare.
 
 Read in this order:
 

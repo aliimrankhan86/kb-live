@@ -1,4 +1,4 @@
-# AGENTS.md (KaabaTrip)
+# AGENTS.md (PilgrimCompare)
 
 ## Purpose
 

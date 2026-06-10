@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines how KaabaTrip work is planned, executed, verified, and documented.
+This document defines how PilgrimCompare work is planned, executed, verified, and documented.
 It is the operating system for shipping changes safely while keeping the repo and docs coherent.
 
 This workflow is designed to work with:

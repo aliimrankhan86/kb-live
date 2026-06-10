@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document provides comprehensive development instructions for the compare functionality implemented in the KaabaTrip application. The compare feature enables users to compare packages when they have 2 or more packages in their shortlist.
+This document provides comprehensive development instructions for the compare functionality implemented in the PilgrimCompare application. The compare feature enables users to compare packages when they have 2 or more packages in their shortlist.
 
 ## 🏗️ Architecture Integration
 

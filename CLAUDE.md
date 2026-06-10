@@ -1,4 +1,4 @@
-# CLAUDE.md — KaabaTrip
+# CLAUDE.md — PilgrimCompare
 
 Any AI/agent working here: this file auto-loads. Obey it.
 

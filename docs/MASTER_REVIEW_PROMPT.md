@@ -1,12 +1,12 @@
-# Master Review Prompt — KaabaTrip Codebase Audit
+# Master Review Prompt — PilgrimCompare Codebase Audit
 
-Use this prompt with Claude Code (or any expert AI coding agent) to perform a comprehensive multi-disciplinary review of the entire KaabaTrip codebase.
+Use this prompt with Claude Code (or any expert AI coding agent) to perform a comprehensive multi-disciplinary review of the entire PilgrimCompare codebase.
 
 ---
 
 ## Context
 
-KaabaTrip is a Next.js 15 (App Router) + React 19 + TypeScript web application for comparing Hajj and Umrah packages from verified UK travel operators. It targets Muslim travellers in the UK.
+PilgrimCompare is a Next.js 15 (App Router) + React 19 + TypeScript web application for comparing Hajj and Umrah packages from verified UK travel operators. It targets Muslim travellers in the UK.
 
 **Stack**: Next.js 15.5.19 · React 19.1.0 · TypeScript (strict) · Tailwind CSS · Supabase + Prisma · Vitest 4.1.8 · Playwright 1.60.0
 
