@@ -40,38 +40,13 @@
   border-radius: 0.25rem;
 }
 
-.header__textLogo {
-  display: inline-flex;
-  align-items: center;
-  font-family: var(--font-nunito), 'Nunito', system-ui, sans-serif;
-  font-size: 1.5rem;
-  font-weight: 800;
-  letter-spacing: 0;
-  line-height: 1;
-  user-select: none;
-  color: #FFD31D;
-  color: var(--yellow, #FFD31D);
-}
-
+/* Wordmark colour token — change this one variable for any theme */
+.header__textLogo,
 .header__textLogoMobile {
-  display: inline-flex;
-  align-items: center;
-  font-family: var(--font-nunito), 'Nunito', system-ui, sans-serif;
-  font-size: 1.25rem;
-  font-weight: 800;
-  letter-spacing: 0;
-  line-height: 1;
+  display: block;
+  color: var(--wordmark-color, var(--yellow, #FFD31D));
   user-select: none;
-  color: #FFD31D;
-  color: var(--yellow, #FFD31D);
-}
-
-.header__wordmarkPilgrim {
-  color: inherit;
-}
-
-.header__wordmarkCompare {
-  color: inherit;
+  flex-shrink: 0;
 }
 
 /* Desktop Navigation — hidden on mobile */
@@ -496,10 +471,6 @@
     padding: 1rem 2rem;
   }
 
-  .header__textLogo {
-    font-size: 1.625rem;
-    font-weight: 800;
-  }
 
   /* Show desktop nav, hide hamburger */
   .header__desktopNav {
@@ -593,9 +564,6 @@
     padding: 0.75rem 0.875rem;
   }
 
-  .header__textLogo {
-    font-size: 1.25rem;
-  }
 
   .header__hamburger {
     width: 44px;
@@ -613,9 +581,6 @@
     padding: 0.625rem 0.625rem;
   }
 
-  .header__textLogo {
-    font-size: 1.125rem;
-  }
 
   .header__mobileDrawer {
     width: min(280px, 90vw);

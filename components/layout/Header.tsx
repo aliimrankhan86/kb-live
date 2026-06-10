@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { Logo } from '@/components/graphics/Logo';
+import { WordmarkLogo } from '@/components/graphics/WordmarkLogo';
 import type { UserRole } from '@/lib/types';
 import styles from './header.module.css';
 
@@ -192,9 +193,7 @@ export function Header({ className = '' }: { className?: string }) {
         {/* Brand */}
         <Link href="/" className={styles.header__brand} aria-label="PilgrimCompare - Go to homepage">
           <Logo size={32} />
-          <span className={styles.header__textLogo} aria-hidden="true">
-            <span className={styles.header__wordmarkPilgrim}>Pilgrim</span><span className={styles.header__wordmarkCompare}>Compare</span>
-          </span>
+          <WordmarkLogo className={styles.header__textLogo} height={30} />
         </Link>
 
         {/* Desktop Navigation */}
@@ -364,9 +363,7 @@ export function Header({ className = '' }: { className?: string }) {
           <div className={styles.header__mobileDrawerHeader}>
             <Link href="/" className={styles.header__mobileBrand} onClick={() => setMobileDrawerOpen(false)}>
               <Logo size={28} />
-              <span className={styles.header__textLogoMobile} aria-hidden="true">
-                <span className={styles.header__wordmarkPilgrim}>Pilgrim</span><span className={styles.header__wordmarkCompare}>Compare</span>
-              </span>
+              <WordmarkLogo className={styles.header__textLogoMobile} height={26} />
             </Link>
             <button
               className={styles.header__mobileClose}
