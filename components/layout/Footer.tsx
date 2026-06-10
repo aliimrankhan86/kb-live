@@ -203,7 +203,7 @@ export function Footer() {
         {/* Legal entity disclosure — Companies Act 2006 §82
             Registered office address intentionally omitted while founder
             transitions to a non-residential registered office. See AI_NOTES §14. */}
-        <p className="mt-3 text-[11px] leading-relaxed text-[var(--textMuted)]">
+        <p className="mt-3 text-center text-[11px] leading-relaxed text-[var(--textMuted)]">
           PilgrimCompare is a trading name of{' '}
           <span className="text-[var(--text)]">Paramount Consultants Limited</span>, registered in
           England and Wales (company no.{' '}
