@@ -417,8 +417,12 @@ Mailboxes `support/privacy/dpo/complaints@pilgrimcompare.co.uk` → Cloudflare E
   - Section "PilgrimCompare Limited" → renamed to **"Contact"** (address + email only).
   - Dropped `Company Reg: [Registration in progress]` and `VAT: [To be completed]` placeholders — Companies Act 2006 §82 requires real registered name + number, never placeholders.
   - Copyright "© PilgrimCompare Limited" → "© PilgrimCompare".
-  - **TODO when company decided**: add one-line disclosure under copyright — *"PilgrimCompare is a trading name of [Real Co Ltd], company no. XXXXXXX, registered in England and Wales."*
+- **Added Companies Act 2006 §82 disclosure** under copyright row: *"PilgrimCompare is a trading name of **Paramount Consultants Limited**, registered in England and Wales (company no. **09679002**). VAT no. **GB 221 6154 46**. Registered office: Slough, Berkshire, United Kingdom."*
+  - **⚠ Follow-up needed**: registered office line uses partial address ("Slough, Berkshire"). §82 strictly requires the full street + postcode as on Companies House. Update when founder confirms full registered office address.
 - **Added DPO contact** to Legal section: `mailto:dpo@pilgrimcompare.co.uk` ("Data Protection (DPO)"). GDPR Art 38 expects discoverable DPO contact; mailbox already forwarding per §9 of this doc.
+
+### Trust strip layout fix (same session)
+- **[components/marketing/Hero.module.css](components/marketing/Hero.module.css)** — Hero trust bar (Verified Operators / ATOL Protected / Transparent Pricing / Side-by-side Comparison) was using `flex-wrap + justify-center` which produced an uneven 2/1/1 stack at mobile widths. Switched to explicit grid: **2 cols at <768px**, **4 cols at ≥768px**. Allow text to wrap (no more ellipsis). Now balanced at every breakpoint.
 
 ### Automation suite — NOT started
 

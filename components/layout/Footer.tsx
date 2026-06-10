@@ -200,6 +200,16 @@ export function Footer() {
           <p>&copy; {currentYear} PilgrimCompare. All rights reserved.</p>
           <p>Governed by the laws of England and Wales.</p>
         </div>
+
+        {/* Legal entity disclosure — Companies Act 2006 §82 */}
+        <p className="mt-3 text-[11px] leading-relaxed text-[var(--textMuted)]">
+          PilgrimCompare is a trading name of{' '}
+          <span className="text-[var(--text)]">Paramount Consultants Limited</span>, registered in
+          England and Wales (company no.{' '}
+          <span className="text-[var(--text)]">09679002</span>). VAT no.{' '}
+          <span className="text-[var(--text)]">GB 221 6154 46</span>. Registered office: Slough,
+          Berkshire, United Kingdom.
+        </p>
       </div>
     </footer>
   );
