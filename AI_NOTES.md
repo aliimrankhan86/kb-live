@@ -1033,9 +1033,26 @@ Full transactional email system built on Resend + React Email. Sending domain ve
 3. **Email 3 reply-to is customer email.** If a customer has a disposable/fake email, the operator reply-to bounces silently. Mitigated by the disposable-email block at signup (`lib/validation.ts`).
 4. **No email rate limiting yet.** A customer could spam the quote endpoint (triggering emails 2+3) at the rate-limiter cadence. The existing Upstash rate limit on `POST /api/quote-requests` provides the only throttle. Consider a per-user email cooldown if abuse is observed post-launch.
 
+### Additional work completed after §13 was written (same session)
+
+| Action | Detail |
+| --- | --- |
+| Cloudflare Email Routing enabled on `pilgrimcompare.co.uk` | MX + TXT DNS records auto-added by Cloudflare |
+| `support@pilgrimcompare.co.uk` | Active → `aliimrankhan86@googlemail.com` |
+| `privacy@pilgrimcompare.co.uk` | Active → `aliimrankhan86@googlemail.com` |
+| `dpo@pilgrimcompare.co.uk` | Active → `aliimrankhan86@googlemail.com` |
+| `complaints@pilgrimcompare.co.uk` | Active → `aliimrankhan86@googlemail.com` |
+| Gmail filter | `to:(pilgrimcompare.co.uk)` → label `PilgrimCompare` + Never send to Spam |
+
+### Decision: email mailboxes
+
+Chose Cloudflare Email Routing (free, forwarding-only) over Google Workspace (£5/user/month) for now. Rationale: no operators onboarded yet, no need to reply-from `support@`. **Switch to Google Workspace when first real operators are onboarded** — user has confirmed this intent. At that point: buy a Google Workspace account, point MX records to Google, migrate the 4 forwarding rules to real mailboxes.
+
 ### Exact next step for next session
 
-1. **Create email mailboxes** — `support/privacy/dpo/complaints@pilgrimcompare.co.uk` via domain admin panel. Required before going public.
-2. **Enable Supabase email confirmations** — Dashboard → Auth → Settings → "Enable email confirmations" ON. Also add `https://pilgrimcompare.co.uk/auth/confirm` to Redirect URLs allow-list.
-3. **Remaining MockDB removal pass** — `grep -rn "from.*mock-db" components/ app/` for live list. Components still importing MockDB: `QuoteRequestWizard`, `OfferForm`, `PaymentDetailsClient`, `OperatorLeadsClient`, `admin/*`, `PackagesBrowse`, `ComplaintForm`, `ComparisonTable`.
-4. **`app_metadata` role backfill** — any Supabase auth user created before 2026-06-09 defaults to `customer`. Backfill via service role admin API before launch.
+**Infrastructure is complete.** No setup items remain. Next work is product/code:
+
+1. **Enable Supabase email confirmations** — Dashboard → Auth → Settings → "Enable email confirmations" ON. Also add `https://pilgrimcompare.co.uk/auth/confirm` to Redirect URLs allow-list. Required before any real users sign up or the email-verification gate is a no-op.
+2. **Remaining MockDB removal pass** — run `grep -rn "from.*mock-db" components/ app/` for live list. Components still importing MockDB: `QuoteRequestWizard`, `OfferForm`, `PaymentDetailsClient`, `OperatorLeadsClient`, `admin/*`, `PackagesBrowse`, `ComplaintForm`, `ComparisonTable`. Lower urgency but must be done before public launch.
+3. **`app_metadata` role backfill** — any Supabase auth user created before 2026-06-09 has role only in `user_metadata` and defaults to `customer`. Backfill via Supabase service role admin API before launch.
+4. **Google Workspace upgrade** — when first operator is onboarded and needs professional email replies from `support@pilgrimcompare.co.uk`. Not blocking now.
