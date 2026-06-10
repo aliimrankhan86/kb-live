@@ -51,9 +51,9 @@
 - `npx tsc --noEmit`: pass
 - `npm run build`: passes with 0 errors; known Supabase Edge warning remains, plus webpack cache-size warnings
 - `git diff --check`: pass
-- Local API smoke: `POST /api/auth/sign-in` with `customer@example.com` + `KaabaTrip!2026` returns 200 and sets `__dev_user`
-- Local Playwright smoke: `/login?type=customer` with `customer@example.com` + `KaabaTrip!2026` redirects to `/` and `/api/auth/me` returns `role=customer`
-- Local Playwright smoke: `/login?type=partner` with `operator@example.com` + `KaabaTrip!2026` redirects to `/operator/dashboard` and `/api/auth/me` returns `role=operator`
+- Local API smoke: `POST /api/auth/sign-in` with `customer@example.com` + `PilgrimCompare!2026` returns 200 and sets `__dev_user`
+- Local Playwright smoke: `/login?type=customer` with `customer@example.com` + `PilgrimCompare!2026` redirects to `/` and `/api/auth/me` returns `role=customer`
+- Local Playwright smoke: `/login?type=partner` with `operator@example.com` + `PilgrimCompare!2026` redirects to `/operator/dashboard` and `/api/auth/me` returns `role=operator`
 
 ## Changes made in this session (2026-06-08 — Header Login + London Airports)
 
@@ -86,7 +86,7 @@
 
 | Task | What | Files |
 | ---- | ---- | ----- |
-| AUTH-DEV-SIGNIN | Normal `/login` accepts documented dev persona credentials when dev auth is enabled, verifies `KaabaTrip!2026`, sets `__dev_user`, and returns the same safe `{ user }` shape as real auth. Real Supabase sign-in failures now return a safe 401 instead of a masked 500. | `app/api/auth/sign-in/route.ts`, `lib/auth/dev-users.ts`, `lib/auth/api.ts`, `lib/errors.ts` |
+| AUTH-DEV-SIGNIN | Normal `/login` accepts documented dev persona credentials when dev auth is enabled, verifies `PilgrimCompare!2026`, sets `__dev_user`, and returns the same safe `{ user }` shape as real auth. Real Supabase sign-in failures now return a safe 401 instead of a masked 500. | `app/api/auth/sign-in/route.ts`, `lib/auth/dev-users.ts`, `lib/auth/api.ts`, `lib/errors.ts` |
 | AUTH-ME-SHELL | Added `/api/auth/me` and switched the public header to it so Supabase sessions, `__dev_user`, and `__e2e_user` render customer/operator/admin navigation consistently. Sign-out clears `__dev_user`. | `app/api/auth/me/route.ts`, `app/api/auth/sign-out/route.ts`, `components/layout/Header.tsx` |
 | AUTH-PASSWORD-TOGGLE | Added accessible icon-only show/hide password controls to login and signup password fields. Signup submit remains disabled until the password complexity checklist passes. | `components/auth/PasswordInput.tsx`, `components/auth/LoginForm.tsx`, `components/auth/SignUpForm.tsx`, `docs/UX_GUIDELINES.md` |
 | AUTH-DEV-SMOKE | Fixed local Turbopack dev rendering for client components that import `Repository` by adding a browser-only adapter alias, and allowed `images.unsplash.com` for package cards. | `next.config.ts`, `lib/api/db/client-adapter-stub.ts` |
@@ -99,7 +99,7 @@
 - `npm run test`: 17 files, 232/232 pass
 - `npm run build`: passes with 0 errors; known Supabase Edge warning remains, plus webpack cache-size warnings
 - Manual Playwright smoke: `/`, `/umrah`, `/search/packages?type=umrah` at 320px and 1280px; no HTTP errors and no horizontal overflow
-- Manual Playwright auth smoke: `/login?type=customer` with `customer@example.com` + `KaabaTrip!2026` redirects to `/` and shows customer navigation; `/login?type=partner` with `operator@example.com` + `KaabaTrip!2026` redirects to `/operator/dashboard`
+- Manual Playwright auth smoke: `/login?type=customer` with `customer@example.com` + `PilgrimCompare!2026` redirects to `/` and shows customer navigation; `/login?type=partner` with `operator@example.com` + `PilgrimCompare!2026` redirects to `/operator/dashboard`
 - `npx playwright test e2e/signup-password-mismatch.spec.ts`: 3 passed
 - `npx playwright test`: 57 passed, 6 skipped
 
@@ -187,7 +187,7 @@ See `AI_NOTES.md` §8 for full historical log. Key prior work:
 - **Hardcoded customer identity** ⏳ PENDING. `cust1` is still used in quote/request/booking paths; require login or implement a real anonymous lead model.
 - **Production fail-fast** ⏳ PENDING. Production must not silently run MockDB if `FEATURE_USE_REAL_DB` is missing.
 - **RLS/grants audit** ⏳ PENDING. Run Supabase advisors and tighten broad/incomplete RLS policies before relying on exposed Data API tables.
-- **Domain launch** ⏳ PENDING. After purchase, update `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`, Supabase auth redirect URLs, canonical URLs, robots, sitemap, JSON-LD base URLs, and hardcoded `kaabatrip.com` assumptions.
+- **Domain launch** ⏳ PENDING. After purchase, update `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`, Supabase auth redirect URLs, canonical URLs, robots, sitemap, JSON-LD base URLs, and hardcoded `pilgrimcompare.com` assumptions.
 - **Plausible analytics** ⏳ PENDING. Wire after domain is live and cookie consent is confirmed.
 - **Payment evidence storage/RLS** ⏳ PENDING. Re-verify operator/admin read access for payment evidence files and resolve the product/architecture policy conflict on metadata-only versus byte storage.
 - **Admin reconciliation** ⏳ PENDING. `/admin/reconciliation` exists; business/export completeness still needs explicit verification.

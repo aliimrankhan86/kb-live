@@ -1,4 +1,4 @@
-# KaabaTrip — Master Architecture & Execution Plan
+# PilgrimCompare — Master Architecture & Execution Plan
 
 **Author:** Opus Architect session, 2026-02-04
 **Branch:** `main-v2-UI` (commit `d9386b1`)
@@ -28,7 +28,7 @@ Umrah/Hajj travellers cannot easily compare packages across operators. Data is i
 
 ### Why shortlist/compare matter
 
-These are the core differentiator. Without comparison, KaabaTrip is just another listing site. The shortlist persists across sessions (localStorage), ensuring users don't lose their research. Compare (2-3 items, structured table) is the moment of clarity that drives booking intent.
+These are the core differentiator. Without comparison, PilgrimCompare is just another listing site. The shortlist persists across sessions (localStorage), ensuring users don't lose their research. Compare (2-3 items, structured table) is the moment of clarity that drives booking intent.
 
 ### What "good" looks like for this milestone
 
@@ -508,7 +508,7 @@ interface OperatorProfile {
 ### Sonnet task prompt template
 
 ```
-You are working in the KaabaTrip repo on branch `main-v2-UI`.
+You are working in the PilgrimCompare repo on branch `main-v2-UI`.
 
 ## Context (read these files before doing anything)
 1. docs/README_AI.md

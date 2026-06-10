@@ -1,6 +1,6 @@
 # App Structure & User Journeys
 
-Complete map of every screen, route, and user flow in the KaabaTrip application. This is the source of truth for what exists and what needs to be built.
+Complete map of every screen, route, and user flow in the PilgrimCompare application. This is the source of truth for what exists and what needs to be built.
 
 **Legend:** `[DONE]` = built and working, `[PARTIAL]` = shell exists but incomplete, `[TODO]` = not yet started.
 
@@ -10,7 +10,7 @@ Complete map of every screen, route, and user flow in the KaabaTrip application.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                          KaabaTrip                                  │
+│                          PilgrimCompare                                  │
 │                                                                     │
 │  PUBLIC SIDE (travellers)          OPERATOR SIDE (travel agents)     │
 │  ─────────────────────────        ──────────────────────────────    │
@@ -298,7 +298,7 @@ Operator pages use the shared `app/operator/layout.tsx` wrapper with sidebar nav
 ```
 ┌─────────────────────────────────────────────────────┐
 │ ┌──── Sidebar (240px) ────┐ ┌── Main content ─────┐│
-│ │ KaabaTrip Logo          │ │                      ││
+│ │ PilgrimCompare Logo          │ │                      ││
 │ │                         │ │  Page-specific       ││
 │ │ Dashboard          [●]  │ │  content renders     ││
 │ │ My Packages        [ ]  │ │  here via {children} ││

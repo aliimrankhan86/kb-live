@@ -1,6 +1,6 @@
 # Operator Onboarding & Package Data Specification
 
-This document defines every piece of data a travel operator must provide to become a KaabaTrip partner, and exactly how that data helps travellers choose the right package. It is the single source of truth for the operator-facing forms, validation rules, and the data contract between operator and traveller.
+This document defines every piece of data a travel operator must provide to become a PilgrimCompare partner, and exactly how that data helps travellers choose the right package. It is the single source of truth for the operator-facing forms, validation rules, and the data contract between operator and traveller.
 
 ---
 
@@ -395,7 +395,7 @@ operator.verificationStatus: must be 'verified'
 
 ```
 ┌──────────────────────────────────────┐
-│ Join KaabaTrip as a Travel Operator  │
+│ Join PilgrimCompare as a Travel Operator  │
 │──────────────────────────────────────│
 │ Company name: [__________________]   │
 │ Registration #: [________________]   │

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the security architecture and assumptions for the KaabaTrip MVP (Phase 1.1).
+This document outlines the security architecture and assumptions for the PilgrimCompare MVP (Phase 1.1).
 
 ## Role-Based Access Control (RBAC)
 

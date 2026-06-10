@@ -1,4 +1,4 @@
-# Product Canon (KaabaTrip)
+# Product Canon (PilgrimCompare)
 
 ## Vision
 
@@ -52,7 +52,7 @@ Goal: onboard supply easily while giving customers clarity and confidence.
 ### Out of scope (for now)
 
 - Payment gateway integration
-- KaabaTrip-held customer funds, escrow, chargebacks, merchant-of-record checkout, or KaabaTrip invoices
+- PilgrimCompare-held customer funds, escrow, chargebacks, merchant-of-record checkout, or PilgrimCompare invoices
 - Scraping competitor sites
 - Automated WhatsApp/phone follow-ups
 - Self-serve onboarding with verification unless explicitly added
@@ -67,7 +67,7 @@ Goal: onboard supply easily while giving customers clarity and confidence.
 
 ## BookingIntent and payment evidence policy
 
-- BookingIntent is a pay-operator-direct intent record, not a KaabaTrip payment or booking confirmation.
+- BookingIntent is a pay-operator-direct intent record, not a PilgrimCompare payment or booking confirmation.
 - `BookingIntent.referenceCode` is generated as `KT-...`, unique, and immutable once issued.
 - Payment evidence accepts image/PDF metadata plus optional text. MVP storage is metadata-only; file bytes are not stored.
 - If proof is skipped, `skipProofAcknowledged` is required and `proofSkippedAt` is recorded.
@@ -78,11 +78,11 @@ Goal: onboard supply easily while giving customers clarity and confidence.
 
 Pay-operator-direct disclosure:
 
-> You pay the operator directly. KaabaTrip does not collect, hold, or transfer customer funds. The operator is the contracting party and is responsible for package fulfilment, payment records, and any payment outcome.
+> You pay the operator directly. PilgrimCompare does not collect, hold, or transfer customer funds. The operator is the contracting party and is responsible for package fulfilment, payment records, and any payment outcome.
 
 Skip-proof acknowledgement must include:
 
-> KaabaTrip does not have access to the operator’s payment records… ability to help evidence payment may be limited… This does not remove legal rights…
+> PilgrimCompare does not have access to the operator’s payment records… ability to help evidence payment may be limited… This does not remove legal rights…
 
 ## Geography and currency
 
@@ -98,8 +98,8 @@ Skip-proof acknowledgement must include:
 
 - Marketplace and enquiry system until payments are implemented.
 - No guarantees. Final confirmation is with the operator.
-- Operators are the contracting party. KaabaTrip does not hold customer funds.
+- Operators are the contracting party. PilgrimCompare does not hold customer funds.
 
 ## Naming
 
-Project name may change in future, but docs and code refer to "KaabaTrip" for now.
+Project name may change in future, but docs and code refer to "PilgrimCompare" for now.

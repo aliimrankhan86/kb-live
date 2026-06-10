@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document provides comprehensive development instructions for the sort dropdown feature implemented in the KaabaTrip application. The implementation follows the established architecture patterns, design system, and accessibility standards.
+This document provides comprehensive development instructions for the sort dropdown feature implemented in the PilgrimCompare application. The implementation follows the established architecture patterns, design system, and accessibility standards.
 
 ## 🏗️ Architecture Integration
 

@@ -1,4 +1,4 @@
-# Repo Map (KaabaTrip)
+# Repo Map (PilgrimCompare)
 
 ## Purpose
 

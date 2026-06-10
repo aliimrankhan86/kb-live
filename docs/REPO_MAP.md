@@ -1,4 +1,4 @@
-# Repo Map (KaabaTrip)
+# Repo Map (PilgrimCompare)
 
 Fast navigation guide. If you add a feature or refactor, update this file.
 

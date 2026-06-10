@@ -1,8 +1,8 @@
-# KaabaTrip AI_RUNBOOK.md
+# PilgrimCompare AI_RUNBOOK.md
 
 version: 1.1
 last_updated: 2026-06-06
-owner: Ali Khan (ali@kaabatrip)
+owner: Ali Khan (ali@pilgrimcompare)
 status: ACTIVE — single source of truth for all AI and human contributors
 
 ---
@@ -13,8 +13,8 @@ These constraints are hard. Any output that violates them must be rejected.
 
 ### Core constraints
 
-- C1 MVP is pay-operator-direct only. KaabaTrip holds zero customer funds.
-- C2 No guarantees. Operator is the contracting party, not KaabaTrip.
+- C1 MVP is pay-operator-direct only. PilgrimCompare holds zero customer funds.
+- C2 No guarantees. Operator is the contracting party, not PilgrimCompare.
 - C3 Operators are source of truth. Missing values → "Not provided". Never infer or default.
 - C4 Compare: max 3 Comparable items only. Incomplete/Assisted items excluded at type and runtime.
 - C5 Verified claims require evidence. No implied guarantees, no "fully vetted" language.
@@ -33,7 +33,7 @@ These constraints are hard. Any output that violates them must be rejected.
 
 - T1 Tiers: Listed / Verified. Verified Plus is future scope only — do not activate.
 - T2 Bank details: captured in controlled onboarding. Changes via change-request + cooling period + audit log + manual admin review only.
-- T3 Complaints: customer → operator first. KaabaTrip logs, routes, escalates. No refund promises in MVP.
+- T3 Complaints: customer → operator first. PilgrimCompare logs, routes, escalates. No refund promises in MVP.
 
 ### Data and privacy
 
@@ -44,7 +44,7 @@ These constraints are hard. Any output that violates them must be rejected.
 
 ### Non-goals (MVP)
 
-- N1 No KaabaTrip-held payments, escrow, chargebacks, merchant-of-record checkout.
+- N1 No PilgrimCompare-held payments, escrow, chargebacks, merchant-of-record checkout.
 - N2 No competitor scraping.
 - N3 No automated WhatsApp follow-ups.
 
@@ -69,15 +69,15 @@ These constraints are hard. Any output that violates them must be rejected.
 
 Pay-operator-direct disclosure:
 
-> You pay the operator directly. KaabaTrip does not collect, hold, or transfer customer funds. The operator is the contracting party and is responsible for package fulfilment, payment records, and any payment outcome.
+> You pay the operator directly. PilgrimCompare does not collect, hold, or transfer customer funds. The operator is the contracting party and is responsible for package fulfilment, payment records, and any payment outcome.
 
 Skip-proof acknowledgement must include:
 
-> KaabaTrip does not have access to the operator's payment records… ability to help evidence payment may be limited… This does not remove legal rights…
+> PilgrimCompare does not have access to the operator's payment records… ability to help evidence payment may be limited… This does not remove legal rights…
 
 ### Red flags — reject any output containing these
 
-- "guarantee", "we ensure", "KaabaTrip promises", "risk-free", "full refund"
+- "guarantee", "we ensure", "PilgrimCompare promises", "risk-free", "full refund"
 - "organiser", "merchant-of-record", "checkout", "invoice", "escrow", "chargeback"
 - Operator data rendered by inference or `|| default` instead of "Not provided"
 - Bank details editable without change-control gate, cooling period, audit log, and manual review
@@ -352,8 +352,8 @@ acceptance_criteria:
   - [x] Operator can respond (min 5 chars) and update status (operator_responding, resolved, cannot_resolve)
   - [x] Admin sees all complaints via /admin/complaints with ComplaintsTriage component
   - [x] Admin can add internal notes, flag operator internally, update status (admin_triage, resolved, closed)
-  - [x] No copy contains "refund", "guarantee", "KaabaTrip will resolve", or similar
-  - [x] Copy states customer should contact operator directly and KaabaTrip logs/routes only
+  - [x] No copy contains "refund", "guarantee", "PilgrimCompare will resolve", or similar
+  - [x] Copy states customer should contact operator directly and PilgrimCompare logs/routes only
   - [x] tsc --noEmit passes
   - [x] npm test passes (55/55)
   - [x] npm run build passes
@@ -931,7 +931,7 @@ summary: MT-7. Single E2E spec e2e/bank-payment.spec.ts with 4 serial tests cove
 Send this verbatim to any AI (Claude, Kimi, GPT-4o, Gemini) to initiate a work session:
 
 ```
-You are a developer for KaabaTrip.
+You are a developer for PilgrimCompare.
 
 Instructions:
 1. Read docs/AI_RUNBOOK.md (the entire file).
@@ -948,7 +948,7 @@ Instructions:
 9. Stop. Do not push. The human will review and push.
 
 Hard constraints (never violate):
-- Pay-operator-direct only. KaabaTrip holds no funds.
+- Pay-operator-direct only. PilgrimCompare holds no funds.
 - No guarantees, no refund promises, no "fully vetted" language.
 - Operators are source of truth. Missing values → "Not provided". Never infer.
 - Bank details: never email, never show without BookingIntent gate, change-control required for updates.

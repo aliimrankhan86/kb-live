@@ -2,9 +2,9 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
 import { Logo } from '@/components/graphics/Logo';
+import { WordmarkLogo } from '@/components/graphics/WordmarkLogo';
 import type { UserRole } from '@/lib/types';
 import styles from './header.module.css';
 
@@ -193,14 +193,7 @@ export function Header({ className = '' }: { className?: string }) {
         {/* Brand */}
         <Link href="/" className={styles.header__brand} aria-label="PilgrimCompare - Go to homepage">
           <Logo size={32} />
-          <Image
-            src="/text-logo.svg"
-            alt="PilgrimCompare"
-            className={styles.header__textLogo}
-            width={108}
-            height={45}
-            priority
-          />
+          <WordmarkLogo className={styles.header__textLogo} height={30} />
         </Link>
 
         {/* Desktop Navigation */}
@@ -370,7 +363,7 @@ export function Header({ className = '' }: { className?: string }) {
           <div className={styles.header__mobileDrawerHeader}>
             <Link href="/" className={styles.header__mobileBrand} onClick={() => setMobileDrawerOpen(false)}>
               <Logo size={28} />
-              <Image src="/text-logo.svg" alt="PilgrimCompare" width={90} height={38} priority />
+              <WordmarkLogo className={styles.header__textLogoMobile} height={26} />
             </Link>
             <button
               className={styles.header__mobileClose}

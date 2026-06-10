@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { Logo } from '@/components/graphics/Logo';
+import { WordmarkLogo } from '@/components/graphics/WordmarkLogo';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -12,13 +12,7 @@ export function Footer() {
         <div className="mb-8 flex flex-col items-center gap-3 sm:flex-row sm:items-start sm:gap-6">
           <Link href="/" className="flex items-center gap-2 shrink-0" aria-label="PilgrimCompare - Go to homepage">
             <Logo size={28} />
-            <Image
-              src="/text-logo.svg"
-              alt="PilgrimCompare"
-              width={90}
-              height={38}
-              priority
-            />
+            <WordmarkLogo height={26} style={{ color: 'var(--wordmark-color, var(--yellow, #FFD31D))' }} />
           </Link>
           <p className="text-center text-xs text-[var(--textMuted)] sm:text-left sm:max-w-xs">
             Compare Umrah and Hajj packages from verified UK travel operators.

@@ -62,7 +62,7 @@ We use `dnd-kit` with `KeyboardSensor` and `sortableKeyboardCoordinates` to ensu
 - [ ] Avoid brittle selectors in E2E tests (prefer `getByTestId`, `getByRole` with name, or scoped locators).
 - [ ] If a UI change affects selectors, update Playwright tests in the same task.
 
-### Common UI Patterns (KaabaTrip)
+### Common UI Patterns (PilgrimCompare)
 
 - [ ] Loading states use `role="status"` and `aria-busy="true"` where applicable.
 - [ ] Error messages use `role="alert"` and include clear text (not colour-only).

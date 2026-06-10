@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document provides comprehensive development instructions for the basket functionality implemented in the KaabaTrip application. The basket feature allows users to add packages to their basket for potential booking, with independent state management from the shortlist and compare features.
+This document provides comprehensive development instructions for the basket functionality implemented in the PilgrimCompare application. The basket feature allows users to add packages to their basket for potential booking, with independent state management from the shortlist and compare features.
 
 ## 🏗️ Architecture Integration
 
