@@ -1,6 +1,6 @@
 # PilgrimCompare AI Handover - Single Source of Truth
 
-**Last verified:** 2026-06-10 (rebrand + domain wiring)
+**Last verified:** 2026-06-10 (CI workflow + branch protection)
 **Last architecture/security audit:** 2026-06-09
 **Branch:** `dev`
 **Audience:** Claude, Codex, Kimi, and any AI/developer taking over the project.
@@ -142,7 +142,7 @@ final CSP `frame-ancestors` / CORS origins (gated on domain purchase).
 - **GDPR export/delete must use real repositories:** `app/api/user/export/route.ts` reads MockDB, and delete removes the Supabase auth user but does not prove cleanup/anonymisation of Prisma records.
 - **Rate limits only cover auth today:** extend Upstash rate limiting to quote requests, booking intents, package image uploads, payment instruction reads, bank-detail/change endpoints, admin approval/rejection, complaints, and interest capture.
 - **Health check is shallow:** `/api/health` returns static JSON. Add a private/deploy-time dependency check for Supabase, Prisma, and Upstash.
-- **CI branch mismatch:** `.github/workflows/ci.yml` runs on `main` and `develop`, while docs say active branch is `dev`. Add `dev` or rename branch policy before relying on CI gates.
+- **~~CI branch mismatch~~:** **RESOLVED 2026-06-10.** `.github/workflows/ci.yml` rewritten to target `main` and `dev` (not `develop`). `prisma generate` added before `tsc`. Branch protection rulesets active on both branches requiring `ci` check. See §12.
 - **Package image rendering needs deployment smoke:** `package-images` is a public Supabase bucket, but CSP/Next image allowlists must be verified against the actual Supabase storage host.
 - **Admin reconciliation needs business verification:** route exists, but export completeness, date semantics, and sensitive field policy need owner sign-off.
 
@@ -888,3 +888,77 @@ This covers all paths (`/`, `/umrah`, `/search/packages`, etc.) with a 301 perma
 1. **KT- reference codes** — the copy in `app/terms/page.tsx` still mentions "e.g., KT-XXXXX". This is a correct description of current DB behaviour; update copy once reference prefix is formally migrated.
 2. **Plausible analytics** — no script in codebase yet. Wire `data-domain=pilgrimcompare.co.uk` to `app/layout.tsx` post-domain-launch, gated behind cookie consent check.
 3. **Email addresses** — footer/privacy/terms now show `@pilgrimcompare.co.uk` addresses. Ensure those mailboxes exist before going live (`support@`, `privacy@`, `dpo@`, `complaints@`).
+
+---
+
+## 12. CI Workflow + Branch Protection — 2026-06-10 (Prompt 4)
+
+### What changed
+
+GitHub Actions CI workflow rewritten and branch protection rulesets created for both `main` and `dev`.
+
+### Files created / modified
+
+| File | What |
+| --- | --- |
+| `.github/workflows/ci.yml` | **Rewritten** — old file targeted non-existent `develop` branch, ran Playwright E2E, had npm caching. New file: PR-only trigger on `main`+`dev`, job named `ci`, steps: checkout → Node 20 → `npm ci` → `npx prisma generate` → `npx tsc --noEmit` → `npm run test`. No Playwright, no caching, no build step. |
+
+### Root cause fix: prisma generate
+
+First CI run failed with:
+```
+error TS2307: Cannot find module '@/lib/generated/prisma/models'
+error TS2307: Cannot find module '@/lib/generated/prisma/client'
+```
+`lib/generated/prisma` is in `.gitignore` — Prisma client is never committed. Added `npx prisma generate` step between `npm ci` and `npx tsc --noEmit`. Second run passed in 48s.
+
+### Branch protection rulesets (configured manually in GitHub)
+
+Two rulesets created via **Settings → Rules → Rulesets**:
+
+**Protect main** (Active):
+- Target: `main`
+- Rules: Restrict deletions ✅, Require PR before merging ✅ (0 approvals), Require status checks to pass ✅ (`ci` check, branches must be up to date), Block force pushes ✅
+
+**Protect dev** (Active):
+- Target: `dev`
+- Same rules as above
+
+### Decisions made
+
+1. **No Playwright in CI.** E2E tests take too long for PR checks. Vitest (unit/integration) is sufficient gate. Playwright stays as a manual/pre-merge step.
+2. **Job named `ci` not `test`.** Branch protection requires specifying the exact job name as a status check. `ci` matches the workflow file job name exactly.
+3. **Node 20 not 24.** Local machine runs Node 24 but `@types/node` is `^20` — using Node 20 LTS for CI consistency.
+4. **0 required approvals on both rulesets.** Solo project. PRs are required as a workflow record and CI gate, not for human review. Change to 1 when collaborators are added.
+5. **No bypass list.** Ruleset applies to everyone including the repo owner — intentional to prevent accidental direct pushes to protected branches.
+
+### AI_NOTES.md P1 item resolved
+
+The item "CI branch mismatch: `.github/workflows/ci.yml` runs on `main` and `develop`, while docs say active branch is `dev`" is now **RESOLVED**.
+
+### Open risks
+
+1. **`ci` status check requires at least one completed run before it appears in the branch protection dropdown.** Already resolved — PR #29 ran and passed before the ruleset was created. Future repos: create the workflow file and run a PR first, then add protection.
+2. **Prisma generate in CI uses the schema from the repo** — it does not connect to the database. Type generation only. This is correct and intentional. If the schema ever requires a live DB introspection step, revisit.
+3. **No `DATABASE_URL` secret set in GitHub Actions.** Not needed currently — `prisma generate` uses the local schema file, not a live DB. If a future CI step needs a real DB connection (e.g. migration smoke test), `DATABASE_URL` must be added as a GitHub Actions secret.
+
+### Exact next step for next session
+
+All Gate 1 P0 blockers are resolved. CI is green. Branch protection is live.
+
+**Next: Prompt 5 — Remaining MockDB removal pass.**
+
+Run `grep -rn "from.*mock-db" components/ app/` to get the live list. Components still importing MockDB:
+- `components/quote/QuoteRequestWizard.tsx`
+- `components/operator/OfferForm.tsx`
+- `components/operator/PaymentDetailsClient.tsx`
+- `components/operator/OperatorLeadsClient.tsx`
+- `components/admin/*`
+- `components/packages/PackagesBrowse.tsx`
+- `components/request/ComplaintForm.tsx`
+- `components/request/ComparisonTable.tsx`
+
+After MockDB pass, confirm:
+- Vercel production env vars: `FEATURE_USE_REAL_DB=true`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `NEXT_PUBLIC_SITE_URL=https://pilgrimcompare.co.uk`
+- Supabase Dashboard → Auth → Settings → "Enable email confirmations" ON
+- `app_metadata` role backfill for pre-2026-06-09 users
