@@ -92,6 +92,7 @@
 - All 4 templates tested end-to-end via `scripts/test-emails.mjs` ✅
 - Supabase Auth SMTP → Resend (`smtp.resend.com`, port 465, user: `resend`) ✅
 - Supabase Auth Email 1 (confirm signup) template → PilgrimCompare branded HTML ✅
+- Cloudflare Email Routing: `support/privacy/dpo/complaints@pilgrimcompare.co.uk` → Gmail forwarding, all Active ✅ (upgrade to Google Workspace when onboarding operators)
 
 **Platform**
 - UK GDPR (privacy, terms, cookie consent, marketing consent)
@@ -110,7 +111,6 @@
 | Item | Status | Blocker |
 | --- | --- | --- |
 | Merge `dev` → `main` | PR #27 already merged | — |
-| Email mailboxes | Create `support/privacy/dpo/complaints@pilgrimcompare.co.uk` | Domain admin |
 
 ---
 

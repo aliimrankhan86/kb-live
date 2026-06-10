@@ -9,7 +9,7 @@
 
 **State (2026-06-10):** Branch `dev`. Tests 232/232 ✅. Build clean ✅. MockDB removed from production paths. RLS audit complete. Transactional email suite live — `send.pilgrimcompare.co.uk` verified on Resend, `RESEND_API_KEY` in Vercel, 4 templates wired into quote-requests + booking-intents APIs.
 
-**Remaining setup items:** Create email mailboxes `support/privacy/dpo/complaints@pilgrimcompare.co.uk` (domain admin action). All other setup items complete.
+**Remaining setup items:** None — all setup complete. Email mailboxes `support/privacy/dpo/complaints@pilgrimcompare.co.uk` live via Cloudflare Email Routing (→ Gmail). Upgrade to Google Workspace when onboarding real operators.
 
 **How to verify any change (mandatory before push):**
 ```bash

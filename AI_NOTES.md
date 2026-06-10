@@ -1028,7 +1028,7 @@ Full transactional email system built on Resend + React Email. Sending domain ve
 
 ### Open risks / known issues
 
-1. **Email mailboxes not yet created.** `support@pilgrimcompare.co.uk`, `privacy@pilgrimcompare.co.uk`, `dpo@pilgrimcompare.co.uk`, `complaints@pilgrimcompare.co.uk` — used in footer/privacy/terms and as reply-to. Must exist before going public or replies bounce. Domain admin action — outside code scope.
+1. **Email mailboxes — DONE.** `support/privacy/dpo/complaints@pilgrimcompare.co.uk` created via Cloudflare Email Routing, all Active, forwarding to `aliimrankhan86@googlemail.com`. Receive-only (no send-from). **Upgrade to Google Workspace** (£5/user/month) when onboarding real operators so support can reply from `support@pilgrimcompare.co.uk`. User has confirmed this intent.
 2. **Supabase "Enable email confirmations" toggle.** Still needs turning ON in Supabase Dashboard → Auth → Settings before going public (see §0 P0 item and Gate 2). Without it, `email_confirmed_at` is set on signup automatically and the email-verification gate + Email 1 are no-ops.
 3. **Email 3 reply-to is customer email.** If a customer has a disposable/fake email, the operator reply-to bounces silently. Mitigated by the disposable-email block at signup (`lib/validation.ts`).
 4. **No email rate limiting yet.** A customer could spam the quote endpoint (triggering emails 2+3) at the rate-limiter cadence. The existing Upstash rate limit on `POST /api/quote-requests` provides the only throttle. Consider a per-user email cooldown if abuse is observed post-launch.
