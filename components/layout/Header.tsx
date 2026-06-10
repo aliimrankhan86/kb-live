@@ -110,6 +110,34 @@ export function Header({ className = '' }: { className?: string }) {
 
   useEffect(() => {
     if (!mobileDrawerOpen) return;
+    const { body, documentElement: html } = document;
+    const scrollY = window.scrollY;
+    const prevBodyOverflow = body.style.overflow;
+    const prevHtmlOverflow = html.style.overflow;
+    const prevBodyPosition = body.style.position;
+    const prevBodyTop = body.style.top;
+    const prevBodyWidth = body.style.width;
+    const scrollbarWidth = window.innerWidth - html.clientWidth;
+    const prevPaddingRight = body.style.paddingRight;
+    body.style.overflow = 'hidden';
+    html.style.overflow = 'hidden';
+    body.style.position = 'fixed';
+    body.style.top = `-${scrollY}px`;
+    body.style.width = '100%';
+    if (scrollbarWidth > 0) body.style.paddingRight = `${scrollbarWidth}px`;
+    return () => {
+      body.style.overflow = prevBodyOverflow;
+      html.style.overflow = prevHtmlOverflow;
+      body.style.position = prevBodyPosition;
+      body.style.top = prevBodyTop;
+      body.style.width = prevBodyWidth;
+      body.style.paddingRight = prevPaddingRight;
+      window.scrollTo(0, scrollY);
+    };
+  }, [mobileDrawerOpen]);
+
+  useEffect(() => {
+    if (!mobileDrawerOpen) return;
     const handleClickOutside = (e: MouseEvent) => {
       if (
         mobileDrawerRef.current &&
