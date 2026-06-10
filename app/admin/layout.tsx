@@ -33,7 +33,7 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
           aria-label="Admin navigation"
         >
           <div className="mb-6">
-            <p className="text-xs uppercase tracking-wide text-[rgba(255,255,255,0.64)]">KaabaTrip</p>
+            <p className="text-xs uppercase tracking-wide text-[rgba(255,255,255,0.64)]">PilgrimCompare</p>
             <h2 className="text-xl font-semibold text-[#FFFFFF]">Admin</h2>
           </div>
 

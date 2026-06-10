@@ -41,7 +41,7 @@ export function CityCorridor({ city, h1, intro, queryParams, faqs }: CityCorrido
               </li>
               <li className="flex items-start gap-2">
                 <span aria-hidden="true" className="text-[var(--yellow)] font-bold mt-0.5">✓</span>
-                <span>Request a quote or book directly with the operator — KaabaTrip does not hold your money</span>
+                <span>Request a quote or book directly with the operator — PilgrimCompare does not hold your money</span>
               </li>
             </ul>
           </section>

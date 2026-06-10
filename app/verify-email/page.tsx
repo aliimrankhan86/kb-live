@@ -2,8 +2,8 @@ import { Suspense } from 'react';
 import { VerifyEmailContent } from '@/components/auth/VerifyEmailContent';
 
 export const metadata = {
-  title: 'Verify Your Email — KaabaTrip',
-  description: 'Check your inbox to verify your KaabaTrip account.',
+  title: 'Verify Your Email — PilgrimCompare',
+  description: 'Check your inbox to verify your PilgrimCompare account.',
 };
 
 export default function VerifyEmailPage() {

@@ -4,6 +4,10 @@ import { Repository } from '@/lib/api/repository';
 import { mapErrorToResponse } from '@/lib/errors';
 import type { BookingIntent } from '@/lib/types';
 import { z } from 'zod';
+import {
+  sendBookingIntentConfirmation,
+  sendPaymentEvidenceNotification,
+} from '@/lib/email/send';
 
 const evidenceFileSchema = z.object({
   id: z.string().min(1),
@@ -69,9 +73,55 @@ export async function POST(request: NextRequest) {
       parsed.data as Partial<BookingIntent>
     );
 
+    // Fire-and-forget: emails must not fail the API response.
+    if (user) {
+      void sendBookingEmails(
+        user.email,
+        user.name ?? '',
+        bookingIntent,
+        Boolean(parsed.data.paymentEvidence?.files?.length),
+      );
+    }
+
     return NextResponse.json({ bookingIntent, persisted: true }, { status: 201 });
   } catch (err) {
     const { body, status } = mapErrorToResponse(err);
     return NextResponse.json(body, { status });
+  }
+}
+
+async function sendBookingEmails(
+  customerEmail: string,
+  customerName: string,
+  intent: BookingIntent,
+  hasEvidence: boolean,
+): Promise<void> {
+  try {
+    const operator = await Repository.getOperatorById(intent.operatorId);
+    const operatorName = operator
+      ? (operator.tradingName ?? operator.companyName)
+      : 'the operator';
+
+    // Email 4 — booking intent confirmation to customer.
+    await sendBookingIntentConfirmation({
+      customerEmail,
+      customerName: customerName || 'Pilgrim',
+      operatorName,
+      packageName: null,
+      refCode: intent.referenceCode ?? intent.id,
+    });
+
+    // Email 5 — payment evidence notification to operator (only when evidence included).
+    if (hasEvidence && operator) {
+      await sendPaymentEvidenceNotification({
+        operatorEmail: operator.contactEmail,
+        operatorName,
+        customerName: customerName || customerEmail,
+        packageName: null,
+        refCode: intent.referenceCode ?? intent.id,
+      });
+    }
+  } catch (err) {
+    console.error('[email] sendBookingEmails failed:', err);
   }
 }

@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { BookingIntent, BookingPaymentEvidenceFile, QuoteRequest, Offer, OperatorProfile } from '@/lib/types';
-import { MockDB } from '@/lib/api/mock-db';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -17,20 +16,18 @@ import { ComparisonTable } from './ComparisonTable';
 import { PaymentInstructions } from './PaymentInstructions';
 import { ComplaintForm } from './ComplaintForm';
 import { handleOfferSelection } from '@/lib/comparison';
-import { Repository, RequestContext } from '@/lib/api/repository';
 import { createClient } from '@/lib/supabase/client';
 import { formatMoney } from '@/lib/i18n/format';
 import { CURRENCY_CHANGE_EVENT, getRegionSettings } from '@/lib/i18n/region';
 
-const customerContext: RequestContext = { userId: 'cust1', role: 'customer' };
 const EVIDENCE_BUCKET = 'payment-evidence';
 const MAX_EVIDENCE_BYTES = 10 * 1024 * 1024; // 10MB
 const ACCEPTED_EVIDENCE_MIME = ['image/jpeg', 'image/png', 'application/pdf'];
 const PAYMENT_EVIDENCE_ACCEPT = '.jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf';
 const PAY_OPERATOR_DIRECT_DISCLOSURE =
-  'You pay the operator directly. KaabaTrip does not collect, hold, or transfer customer funds. The operator is the contracting party and is responsible for package fulfilment, payment records, and any payment outcome.';
+  'You pay the operator directly. PilgrimCompare does not collect, hold, or transfer customer funds. The operator is the contracting party and is responsible for package fulfilment, payment records, and any payment outcome.';
 const SKIP_PROOF_ACKNOWLEDGEMENT =
-  'KaabaTrip does not have access to the operator’s payment records… ability to help evidence payment may be limited… This does not remove legal rights…';
+  'PilgrimCompare does not have access to the operator’s payment records… ability to help evidence payment may be limited… This does not remove legal rights…';
 
 const displayValue = (value?: string | null) => {
   const trimmed = value?.trim();
@@ -53,29 +50,14 @@ const sanitizeFileName = (name: string): string =>
   name.replace(/[^A-Za-z0-9._-]+/g, '_').replace(/^_+|_+$/g, '') || 'file';
 
 export function BookableButton({
-  operatorId,
   existingIntent,
   onProceed,
+  isBookable,
 }: {
-  operatorId: string;
   existingIntent: boolean;
   onProceed: () => void;
+  isBookable: boolean;
 }) {
-  const [bookable, setBookable] = useState(true);
-  const [checking, setChecking] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    Repository.isOperatorBookable(operatorId)
-      .then((result) => {
-        if (!cancelled) setBookable(result);
-      })
-      .finally(() => {
-        if (!cancelled) setChecking(false);
-      });
-    return () => { cancelled = true; };
-  }, [operatorId]);
-
   if (existingIntent) {
     return (
       <Button type="button" size="sm" disabled className="flex-1" data-testid="book-now-btn">
@@ -84,15 +66,7 @@ export function BookableButton({
     );
   }
 
-  if (checking) {
-    return (
-      <Button type="button" size="sm" disabled className="flex-1" data-testid="book-now-btn">
-        Checking...
-      </Button>
-    );
-  }
-
-  if (!bookable) {
+  if (!isBookable) {
     return (
       <Button
         type="button"
@@ -146,16 +120,32 @@ export function RequestDetail({ id }: { id: string }) {
 
   useEffect(() => {
     const load = async () => {
-      const req = await Repository.getRequestById(customerContext, id);
-      if (req) {
+      try {
+        const reqRes = await fetch(`/api/quote-requests/${id}`);
+        if (!reqRes.ok) return;
+        const { request: req } = await reqRes.json() as { request: QuoteRequest };
         setRequest(req);
-        const offs = await Repository.getOffersForRequest(customerContext, id);
-        setOffers(offs);
-        const ops = MockDB.getOperators();
-        setOperators(ops);
-        setBookingIntents(await Repository.getBookingIntents(customerContext));
+
+        const [offsRes, opsRes, intentsRes] = await Promise.all([
+          fetch(`/api/quote-requests/${id}/offers`),
+          fetch('/api/operators'),
+          fetch('/api/booking-intents'),
+        ]);
+        if (offsRes.ok) {
+          const { offers } = await offsRes.json() as { offers: Offer[] };
+          setOffers(offers);
+        }
+        if (opsRes.ok) {
+          const { operators } = await opsRes.json() as { operators: OperatorProfile[] };
+          setOperators(operators);
+        }
+        if (intentsRes.ok) {
+          const { bookingIntents } = await intentsRes.json() as { bookingIntents: BookingIntent[] };
+          setBookingIntents(bookingIntents);
+        }
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     load();
   }, [id]);
@@ -324,13 +314,12 @@ export function RequestDetail({ id }: { id: string }) {
       });
 
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json() as { bookingIntent: BookingIntent };
         newIntent = data.bookingIntent;
       } else {
-        newIntent = await Repository.createBookingIntent(customerContext, bookingPayload);
+        const errData = await response.json().catch(() => ({})) as { error?: string };
+        throw new Error(errData.error ?? 'Failed to create booking intent.');
       }
-
-      MockDB.saveBookingIntent(newIntent);
       setBookingIntents((current) => [newIntent, ...current.filter((intent) => intent.id !== newIntent.id)]);
       if (!newIntent.referenceCode) throw new Error('Reference code was not issued.');
       setActiveOfferForBooking(null);
@@ -479,7 +468,7 @@ export function RequestDetail({ id }: { id: string }) {
                           </span>
                         </p>
                         <p className="mt-1 text-xs text-[var(--textMuted)]">
-                          Evidence is visible only to you, the involved operator, and KaabaTrip admin.
+                          Evidence is visible only to you, the involved operator, and PilgrimCompare admin.
                         </p>
                       </div>
                       <PaymentInstructions bookingIntent={existingIntent} />
@@ -491,12 +480,15 @@ export function RequestDetail({ id }: { id: string }) {
                       View Details
                     </Button>
                     <BookableButton
-                      operatorId={offer.operatorId}
                       existingIntent={Boolean(existingIntent)}
                       onProceed={() => {
                         resetBookingForm();
                         setActiveOfferForBooking(offer);
                       }}
+                      isBookable={
+                        getOperator(offer.operatorId)?.eligibilityFlags?.canReceiveBookings === true &&
+                        getOperator(offer.operatorId)?.eligibilityFlags?.bankDetailsActive === true
+                      }
                     />
                   </div>
                 </div>
@@ -576,7 +568,7 @@ export function RequestDetail({ id }: { id: string }) {
                 className="block min-h-11 w-full rounded-md border border-[var(--borderSubtle)] bg-[var(--surfaceDark)] px-3 py-2 text-sm text-[var(--text)] file:mr-4 file:rounded-md file:border-0 file:bg-[var(--yellow)] file:px-3 file:py-2 file:text-sm file:font-medium file:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focusRing)]"
               />
               <p id="payment-evidence-help" className="text-xs text-[var(--textMuted)]">
-                Accepted formats: JPG, PNG, or PDF. Maximum 10MB per file. Files are stored securely and visible only to you, the operator, and KaabaTrip admin.
+                Accepted formats: JPG, PNG, or PDF. Maximum 10MB per file. Files are stored securely and visible only to you, the operator, and PilgrimCompare admin.
               </p>
               {evidenceFiles.length > 0 ? (
                 <ul className="space-y-1 text-xs text-[var(--textMuted)]" aria-label="Selected evidence files">

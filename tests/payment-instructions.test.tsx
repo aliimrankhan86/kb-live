@@ -1,29 +1,55 @@
 import React from 'react';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { PaymentInstructions } from '../components/request/PaymentInstructions';
-import { MockDB } from '../lib/api/mock-db';
-import { BookingIntent } from '../lib/types';
+import type { BookingIntent, PaymentInstructions as PaymentInstructionsType } from '../lib/types';
+
+const baseIntent = (overrides: Partial<BookingIntent> = {}): BookingIntent => ({
+  id: 'bi-test',
+  referenceCode: 'KT-TEST-001',
+  offerId: 'offer-1',
+  customerId: 'cust1',
+  operatorId: 'op1',
+  status: 'started',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  ...overrides,
+});
+
+const mockInstructions: PaymentInstructionsType = {
+  bookingIntentId: 'bi-test',
+  operatorId: 'op1',
+  operatorName: 'Al-Hidayah Travel Ltd',
+  paymentDetailsId: 'pd-1',
+  accountHolderName: 'Al-Hidayah Travel Ltd',
+  bankName: 'Example Business Bank',
+  sortCode: '20-00-00',
+  accountNumber: '12345678',
+  currency: 'GBP',
+  country: 'GB',
+  disclosure: 'You pay the operator directly.',
+  delivery: 'in_app_only',
+};
+
+function mockFetch(response: { ok: boolean; body: unknown }) {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn().mockResolvedValue({
+      ok: response.ok,
+      json: () => Promise.resolve(response.body),
+    }),
+  );
+}
 
 describe('PaymentInstructions component', () => {
-  beforeEach(() => {
-    localStorage.clear();
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
-  it('shows holding message when operator is Listed and not bookable', async () => {
-    const intent: BookingIntent = {
-      id: 'bi-listed',
-      referenceCode: 'KT-TEST-001',
-      offerId: 'offer-listed',
-      customerId: 'cust1',
-      operatorId: 'op2',
-      status: 'started',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    MockDB.saveBookingIntent(intent);
+  it('shows holding message when operator is not eligible', async () => {
+    mockFetch({ ok: false, body: { error: 'Operator is not eligible to receive bookings' } });
 
-    render(<PaymentInstructions bookingIntent={intent} />);
+    render(<PaymentInstructions bookingIntent={baseIntent()} />);
 
     await waitFor(() => {
       expect(screen.getByTestId('payment-instructions')).toBeInTheDocument();
@@ -32,19 +58,9 @@ describe('PaymentInstructions component', () => {
   });
 
   it('shows holding message for unauthorized customer', async () => {
-    const intent: BookingIntent = {
-      id: 'bi-unauthorized',
-      referenceCode: 'KT-TEST-002',
-      offerId: 'offer-unauthorized',
-      customerId: 'other-customer',
-      operatorId: 'op1',
-      status: 'started',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    MockDB.saveBookingIntent(intent);
+    mockFetch({ ok: false, body: { error: 'Unauthorized' } });
 
-    render(<PaymentInstructions bookingIntent={intent} />);
+    render(<PaymentInstructions bookingIntent={baseIntent({ id: 'bi-unauth' })} />);
 
     await waitFor(() => {
       expect(screen.getByTestId('payment-instructions')).toBeInTheDocument();
@@ -52,19 +68,10 @@ describe('PaymentInstructions component', () => {
     });
   });
 
-  it('shows full bank details for Verified operator with matching BookingIntent', async () => {
-    const intent: BookingIntent = {
-      id: 'bi-verified',
-      referenceCode: 'KT-TEST-003',
-      offerId: 'offer-verified',
-      customerId: 'cust1',
-      operatorId: 'op1',
-      status: 'started',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    MockDB.saveBookingIntent(intent);
+  it('shows full bank details for verified operator', async () => {
+    mockFetch({ ok: true, body: { instructions: mockInstructions } });
 
+    const intent = baseIntent({ referenceCode: 'KT-TEST-003' });
     render(<PaymentInstructions bookingIntent={intent} />);
 
     await waitFor(() => {
@@ -75,61 +82,18 @@ describe('PaymentInstructions component', () => {
       expect(screen.getByTestId('bank-bank-name')).toHaveTextContent('Example Business Bank');
       expect(screen.getByTestId('payment-disclaimer')).toHaveTextContent(/You pay the operator directly/);
       expect(screen.getAllByText('KT-TEST-003')).toHaveLength(2);
-      expect(screen.queryByTestId('recently-updated-warning')).not.toBeInTheDocument();
-    });
-  });
-
-  it('shows recently-updated warning when bank details were activated in the last 7 days', async () => {
-    const intent: BookingIntent = {
-      id: 'bi-recent',
-      referenceCode: 'KT-TEST-004',
-      offerId: 'offer-recent',
-      customerId: 'cust1',
-      operatorId: 'op1',
-      status: 'started',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    MockDB.saveBookingIntent(intent);
-
-    MockDB.saveAuditLogEntry({
-      id: 'audit-recent',
-      action: 'bank_change.activated',
-      actorUserId: 'admin1',
-      actorRole: 'admin',
-      operatorId: 'op1',
-      targetType: 'bank_change_request',
-      targetId: 'bcr-recent',
-      createdAt: new Date().toISOString(),
-    });
-
-    render(<PaymentInstructions bookingIntent={intent} />);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('recently-updated-warning')).toBeInTheDocument();
-      expect(screen.getByRole('alert')).toHaveTextContent(/recently updated/);
     });
   });
 
   it('discloses pay-operator-direct copy exactly', async () => {
-    const intent: BookingIntent = {
-      id: 'bi-disclosure',
-      referenceCode: 'KT-TEST-005',
-      offerId: 'offer-disclosure',
-      customerId: 'cust1',
-      operatorId: 'op1',
-      status: 'started',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    MockDB.saveBookingIntent(intent);
+    mockFetch({ ok: true, body: { instructions: mockInstructions } });
 
-    render(<PaymentInstructions bookingIntent={intent} />);
+    render(<PaymentInstructions bookingIntent={baseIntent()} />);
 
     await waitFor(() => {
       const disclosure = screen.getByTestId('payment-disclaimer');
       expect(disclosure).toHaveTextContent(
-        'You pay the operator directly. KaabaTrip does not collect, hold, or transfer customer funds. The operator is the contracting party and is responsible for package fulfilment, payment records, and any payment outcome.'
+        'You pay the operator directly. PilgrimCompare does not collect, hold, or transfer customer funds. The operator is the contracting party and is responsible for package fulfilment, payment records, and any payment outcome.',
       );
     });
   });

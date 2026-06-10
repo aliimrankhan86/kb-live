@@ -19,7 +19,7 @@ export const ShowcaseHero: React.FC<ShowcaseHeroProps> = ({ className = '' }) =>
           Showcase
         </h1>
         <p className={styles.hero__subtitle}>
-          Discover the amazing features and experiences that make KaabaTrip the perfect choice for your spiritual journey.
+          Discover the amazing features and experiences that make PilgrimCompare the perfect choice for your spiritual journey.
         </p>
       </div>
     </section>

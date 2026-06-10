@@ -417,7 +417,7 @@ export function OperatorRegistrationForm() {
             <span aria-hidden="true" className="text-[var(--danger)] font-bold">✗</span>
             <span>
               <strong className="text-[var(--text)]">No protection</strong> — If you do not hold ATOL or ABTA, you must clearly state this.
-              KaabaTrip will display a prominent warning on your listings so travellers can make an informed choice.
+              PilgrimCompare will display a prominent warning on your listings so travellers can make an informed choice.
             </span>
           </div>
         </div>
@@ -426,7 +426,7 @@ export function OperatorRegistrationForm() {
           <p className="font-medium text-[var(--text)]">Your responsibility</p>
           <p className="mt-1">
             You are solely responsible for ensuring your business holds appropriate financial protection for the services you offer.
-            KaabaTrip displays the information you provide for traveller transparency only.
+            PilgrimCompare displays the information you provide for traveller transparency only.
             We are not responsible for verifying the validity of your ATOL or ABTA credentials,
             nor are we liable if your protection status changes or lapses.
           </p>
@@ -441,8 +441,8 @@ export function OperatorRegistrationForm() {
             data-testid="reg-atol-abta-ack"
           />
           <span className="text-sm text-[var(--textMuted)]">
-            I confirm that I understand ATOL/ABTA requirements and that KaabaTrip will display my protection status
-            (or lack thereof) prominently to travellers. I accept that KaabaTrip is not responsible for verifying
+            I confirm that I understand ATOL/ABTA requirements and that PilgrimCompare will display my protection status
+            (or lack thereof) prominently to travellers. I accept that PilgrimCompare is not responsible for verifying
             my credentials or for any claims arising from my financial protection status.
           </span>
         </label>

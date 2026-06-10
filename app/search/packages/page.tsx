@@ -38,10 +38,10 @@ export async function generateMetadata({ searchParams }: SearchPackagesPageProps
       canonical: '/search/packages',
     },
     openGraph: {
-      title: `${packageType} Package Search Results | KaabaTrip`,
+      title: `${packageType} Package Search Results | PilgrimCompare`,
       description: `Compare ${packageType.toLowerCase()} packages from UK operators with transparent package details.`,
-      url: 'https://kaabatrip.com/search/packages',
-      siteName: 'KaabaTrip',
+      url: 'https://pilgrimcompare.co.uk/search/packages',
+      siteName: 'PilgrimCompare',
       type: 'website',
       locale: 'en_GB',
     },
@@ -67,14 +67,14 @@ export default async function SearchPackagesPage({ searchParams }: SearchPackage
     searchResultsJsonLd(initialFiltered, `${packageType} Packages`),
     faqPageJsonLd([
       {
-        question: 'What can I compare in KaabaTrip package search results?',
+        question: 'What can I compare in PilgrimCompare package search results?',
         answer:
           'You can compare package price, operator, verification status, ATOL details where listed, hotel names, hotel ratings, distance to Haram, nights split, flights, transfers, meals, and cancellation notes where provided.',
       },
       {
         question: 'Why do some package fields say not provided?',
         answer:
-          'KaabaTrip shows missing package details clearly rather than hiding them. Travellers should confirm final itinerary, availability, inclusions, and payment terms with the travel operator.',
+          'PilgrimCompare shows missing package details clearly rather than hiding them. Travellers should confirm final itinerary, availability, inclusions, and payment terms with the travel operator.',
       },
     ]),
   ]);

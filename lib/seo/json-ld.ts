@@ -1,12 +1,12 @@
 /**
- * JSON-LD structured data generators for KaabaTrip SEO.
+ * JSON-LD structured data generators for PilgrimCompare SEO.
  * Renders as `<script type="application/ld+json">` in page markup.
  */
 
 import type { Package, OperatorProfile } from '@/lib/types';
 import { createElement, type ReactElement } from 'react';
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kaabatrip.com';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://pilgrimcompare.co.uk';
 
 export interface BreadcrumbItem {
   name: string;
@@ -127,8 +127,8 @@ export function operatorJsonLd(operator: OperatorProfile): Record<string, unknow
     email: operator.contactEmail,
     description:
       operator.verificationStatus === 'verified'
-        ? `Verified ${operator.pilgrimageTypesOffered?.join(' and ') ?? 'pilgrimage'} travel operator on KaabaTrip.`
-        : `${operator.pilgrimageTypesOffered?.join(' and ') ?? 'Pilgrimage'} travel operator profile on KaabaTrip.`,
+        ? `Verified ${operator.pilgrimageTypesOffered?.join(' and ') ?? 'pilgrimage'} travel operator on PilgrimCompare.`
+        : `${operator.pilgrimageTypesOffered?.join(' and ') ?? 'Pilgrimage'} travel operator profile on PilgrimCompare.`,
     ...(operator.contactPhone ? { telephone: operator.contactPhone } : {}),
     ...(operator.websiteUrl ? { sameAs: [operator.websiteUrl] } : {}),
     ...(operator.officeAddress
@@ -165,7 +165,7 @@ export function searchResultsJsonLd(
     '@type': 'ItemList',
     '@id': `${BASE_URL}/search/packages#itemlist`,
     name: listName,
-    description: 'Search results for Hajj and Umrah package comparison on KaabaTrip.',
+    description: 'Search results for Hajj and Umrah package comparison on PilgrimCompare.',
     numberOfItems: results.length,
     itemListElement: results.map((r, i) => ({
       '@type': 'ListItem',
@@ -196,7 +196,7 @@ export function organizationJsonLd(): Record<string, unknown> {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     '@id': `${BASE_URL}/#organization`,
-    name: 'KaabaTrip',
+    name: 'PilgrimCompare',
     url: BASE_URL,
     logo: `${BASE_URL}/logo.svg`,
     description: 'Compare verified Hajj and Umrah packages from trusted UK travel operators.',
@@ -211,7 +211,7 @@ export function websiteJsonLd(): Record<string, unknown> {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     '@id': `${BASE_URL}/#website`,
-    name: 'KaabaTrip',
+    name: 'PilgrimCompare',
     url: BASE_URL,
     publisher: { '@id': `${BASE_URL}/#organization` },
     inLanguage: 'en-GB',

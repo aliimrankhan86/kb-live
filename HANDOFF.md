@@ -1,4 +1,4 @@
-# KaabaTrip — AI Handoff Brief
+# PilgrimCompare — AI Handoff Brief
 
 > **Cold-start brief.** Give this file to any AI tool. Read top-to-bottom in 60 seconds, then you know what to do.
 > Full status: `STATUS.md` · Business: `BUSINESS.md` · Deep handover: `AI_NOTES.md` · Rules: `AGENTS.md`
@@ -7,13 +7,13 @@
 
 **Stack:** Next.js 15.5 (App Router, Server Components) · React 19 · TypeScript strict · Supabase (auth/Postgres/RLS/storage, `eu-west-2`) · Prisma · Tailwind · Zustand · Vitest + Playwright.
 
-**State (2026-06-08):** Branch `dev`. Tests 238/238 ✅. Build clean ✅. MVP feature-complete across traveller/operator/admin flows.
+**State (2026-06-10):** Branch `dev`. Tests 232/232 ✅. Build clean ✅. MockDB removed from production paths. RLS audit complete. Transactional email suite live. All domain redirects working — `pilgrimcompare.com` and `www.pilgrimcompare.com` both 301 to `pilgrimcompare.co.uk`. Supabase email confirmations ON.
 
-**The one thing blocking:** migration `004_package_images_bucket.sql` not applied to Supabase → package image upload inert until done. **That's the next action.**
+**Remaining setup items:** None — all setup complete. Email mailboxes `support/privacy/dpo/complaints@pilgrimcompare.co.uk` live via Cloudflare Email Routing (→ Gmail). Upgrade to Google Workspace when onboarding real operators.
 
 **How to verify any change (mandatory before push):**
 ```bash
-npm run test     # 238/238 must pass
+npm run test     # 232/232 must pass
 npm run build    # 0 errors
 npx tsc --noEmit # pass
 # if UI/routes changed: Playwright smoke on / , /umrah , /search/packages at 320px + 1280px

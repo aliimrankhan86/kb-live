@@ -20,7 +20,7 @@ const testimonials: Testimonial[] = [
     id: '1',
     name: 'Ahmad Hassan',
     location: 'London, UK',
-    text: 'KaabaTrip made my Hajj journey unforgettable. The guides were knowledgeable, accommodations were excellent, and everything was perfectly organized.',
+    text: 'PilgrimCompare made my Hajj journey unforgettable. The guides were knowledgeable, accommodations were excellent, and everything was perfectly organized.',
     rating: 5
   },
   {

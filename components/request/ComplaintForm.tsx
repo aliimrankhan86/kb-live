@@ -96,7 +96,7 @@ export function ComplaintForm({ bookingIntent }: ComplaintFormProps) {
           first response, as your contract is with them.
         </p>
         <p className="text-sm text-[var(--textMuted)]">
-          KaabaTrip logs and routes issues and may take action on operator status. We are not a dispute
+          PilgrimCompare logs and routes issues and may take action on operator status. We are not a dispute
           adjudicator.
         </p>
       </div>
@@ -148,10 +148,10 @@ export function ComplaintForm({ bookingIntent }: ComplaintFormProps) {
       >
         <p className="font-medium text-[var(--text)]">Before you submit</p>
         <ul className="mt-1 list-disc space-y-0.5 pl-4">
-          <li>You pay the operator directly. KaabaTrip does not hold funds.</li>
+          <li>You pay the operator directly. PilgrimCompare does not hold funds.</li>
           <li>Your contract and refund rights are with the operator.</li>
           <li>
-            KaabaTrip logs and routes issues and may take action on operator status. We are not a dispute
+            PilgrimCompare logs and routes issues and may take action on operator status. We are not a dispute
             adjudicator in MVP.
           </li>
         </ul>

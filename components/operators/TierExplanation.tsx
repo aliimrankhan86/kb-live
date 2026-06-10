@@ -3,7 +3,7 @@ import type { OperatorTier } from '@/lib/types';
 const TIER_COPY: Record<OperatorTier, { label: string; description: string; colour: string }> = {
   listed: {
     label: 'Listed',
-    description: 'This operator is registered on KaabaTrip. Basic details have been collected.',
+    description: 'This operator is registered on PilgrimCompare. Basic details have been collected.',
     colour: 'text-[var(--textMuted)] border-[var(--borderSubtle)] bg-transparent',
   },
   verified: {

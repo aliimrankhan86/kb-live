@@ -34,10 +34,10 @@ export async function generateMetadata({
           canonical: `/operators/${operator.slug}`,
         },
         openGraph: {
-          title: `${operator.companyName} | KaabaTrip operator profile`,
+          title: `${operator.companyName} | PilgrimCompare operator profile`,
           description: `Compare published packages, departure airports, and trust signals for ${operator.companyName}.`,
-          url: `https://kaabatrip.com/operators/${operator.slug}`,
-          siteName: 'KaabaTrip',
+          url: `https://pilgrimcompare.co.uk/operators/${operator.slug}`,
+          siteName: 'PilgrimCompare',
           type: 'profile',
           locale: 'en_GB',
         },
@@ -109,12 +109,12 @@ export default async function OperatorProfilePage({ params }: OperatorPageProps)
       {
         question: `What can I verify about ${operator.companyName}?`,
         answer:
-          'KaabaTrip shows the operator profile details available in the platform, including verification status, ATOL and ABTA details where listed, departure airports, serving regions, contact details, and published packages.',
+          'PilgrimCompare shows the operator profile details available in the platform, including verification status, ATOL and ABTA details where listed, departure airports, serving regions, contact details, and published packages.',
       },
       {
-        question: `Does KaabaTrip publish all packages from ${operator.companyName}?`,
+        question: `Does PilgrimCompare publish all packages from ${operator.companyName}?`,
         answer:
-          'This public profile shows packages currently published on KaabaTrip. Travellers should confirm final availability, itinerary, and payment terms directly with the operator.',
+          'This public profile shows packages currently published on PilgrimCompare. Travellers should confirm final availability, itinerary, and payment terms directly with the operator.',
       },
     ]),
   ]);

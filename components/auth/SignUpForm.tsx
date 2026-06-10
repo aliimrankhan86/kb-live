@@ -214,7 +214,7 @@ export function SignUpForm() {
         <p className="mt-1 text-sm text-[var(--textMuted)]">
           {isPartner
             ? 'Register your travel company and start receiving bookings from UK travellers.'
-            : 'Join KaabaTrip to compare packages, save favourites, and request quotes.'}
+            : 'Join PilgrimCompare to compare packages, save favourites, and request quotes.'}
         </p>
       </div>
 

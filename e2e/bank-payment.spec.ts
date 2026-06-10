@@ -142,7 +142,7 @@ test.describe('Bank onboarding and payment flows', () => {
     await expect(page.getByTestId('bank-account-holder')).toBeVisible();
     await expect(page.getByTestId('bank-sort-code')).toBeVisible();
     await expect(page.getByTestId('bank-account-number')).toBeVisible();
-    await expect(page.getByTestId('payment-disclaimer')).toContainText('KaabaTrip does not collect');
+    await expect(page.getByTestId('payment-disclaimer')).toContainText('PilgrimCompare does not collect');
 
     // No recently-updated warning expected for op1 seeded details
     const warning = page.getByTestId('recently-updated-warning');

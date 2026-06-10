@@ -4,8 +4,33 @@
  */
 
 import type { Package as CataloguePackage } from '@/lib/types';
-import type { Package as SearchPackage } from '@/lib/mock-packages';
 import { parseAirportCode } from '@/lib/airports';
+
+export interface SearchFlightSegment {
+  date: string;
+  duration: string;
+  route: string;
+}
+
+export interface SearchHotel {
+  name: string;
+  location: string;
+  rating: number;
+  distance: string;
+  image: string;
+}
+
+export interface SearchPackageDisplay {
+  id: string;
+  slug?: string;
+  departure: SearchFlightSegment;
+  return: SearchFlightSegment;
+  makkahHotel: SearchHotel;
+  madinaHotel: SearchHotel;
+  price: number;
+  currency: string;
+  priceNote: string;
+}
 
 const PLACEHOLDER_IMAGE =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjgwIiB2aWV3Qm94PSIwIDAgMTIwIDgwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iODAiIGZpbGw9InJnYmEoMjU1LCAyNTUsIDI1NSwgMC4xKSIvPjx0ZXh0IHg9IjYwIiB5PSI0MCIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9InJnYmEoMjU1LCAyNTUsIDI1NSwgMC41KSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+SG90ZWwgSW1hZ2U8L3RleHQ+PC9zdmc+';
@@ -77,9 +102,7 @@ export function filterByParams(
   return next;
 }
 
-export function toSearchDisplay(
-  pkg: CataloguePackage
-): SearchPackage & { slug: string } {
+export function toSearchDisplay(pkg: CataloguePackage): SearchPackageDisplay {
   const dist = (b: string) =>
     b === 'near' ? 'Near Haram' : b === 'far' ? 'Far' : b === 'medium' ? 'Medium' : '-';
 

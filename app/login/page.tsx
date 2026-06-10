@@ -3,7 +3,7 @@ import { LoginForm } from '@/components/auth/LoginForm';
 
 export const metadata = {
   title: 'Sign In',
-  description: 'Sign in to your KaabaTrip traveller or partner account',
+  description: 'Sign in to your PilgrimCompare traveller or partner account',
 };
 
 export default function LoginPage() {

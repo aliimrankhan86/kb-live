@@ -26,8 +26,8 @@ export const viewport: Viewport = {
 const travelAgencyJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'TravelAgency',
-  name: 'KaabaTrip',
-  url: 'https://kaabatrip.com',
+  name: 'PilgrimCompare',
+  url: 'https://pilgrimcompare.co.uk',
   description: 'Discover the best Hajj and Umrah packages for your spiritual journey to the Holy Land.',
   areaServed: { '@type': 'Country', name: 'United Kingdom' },
   serviceType: ['Hajj packages', 'Umrah packages'],

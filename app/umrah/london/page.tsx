@@ -8,10 +8,10 @@ export const metadata: Metadata = {
     'Browse and compare Umrah packages departing from London Heathrow, Gatwick, and Stansted. Verified UK operators, hotels near Haram, flights included. Request a quote now.',
   alternates: { canonical: '/umrah/london' },
   openGraph: {
-    title: 'Umrah Packages from London 2026 – Compare & Book | KaabaTrip',
+    title: 'Umrah Packages from London 2026 – Compare & Book | PilgrimCompare',
     description: 'Compare Umrah packages from London airports with verified UK operators.',
-    url: 'https://kaabatrip.com/umrah/london',
-    siteName: 'KaabaTrip',
+    url: 'https://pilgrimcompare.co.uk/umrah/london',
+    siteName: 'PilgrimCompare',
     type: 'website',
     locale: 'en_GB',
   },
@@ -29,7 +29,7 @@ const faqs = [
       'Umrah packages from London typically start from around £800 per person for budget packages and can reach £3,000 or more for premium 5-star hotel stays near the Haram. Price depends on departure date, hotel rating, and inclusions.',
   },
   {
-    question: 'How do I compare Umrah packages from London on KaabaTrip?',
+    question: 'How do I compare Umrah packages from London on PilgrimCompare?',
     answer:
       'Use the search filters to set your departure city to London, select your travel dates and number of travellers, then compare up to 3 packages side by side. All operators are verified before listing.',
   },
@@ -43,7 +43,7 @@ const faqs = [
 const pageJsonLd = graphJsonLd([
   webPageJsonLd({
     path: '/umrah/london',
-    name: 'Umrah Packages from London 2026 – Compare & Book | KaabaTrip',
+    name: 'Umrah Packages from London 2026 – Compare & Book | PilgrimCompare',
     description:
       'Compare Umrah packages departing from London Heathrow, Gatwick, and Stansted with verified UK operators.',
   }),

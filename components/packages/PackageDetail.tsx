@@ -92,7 +92,7 @@ export function PackageDetail({ pkg, operator }: PackageDetailProps) {
               <span className="text-green-300">
                 ATOL {operator.atolNumber}
                 {operator.atolVerifiedAt ? (
-                  <span className="ml-1 text-xs text-green-400" data-testid="atol-verified-badge">(Verified by KaabaTrip)</span>
+                  <span className="ml-1 text-xs text-green-400" data-testid="atol-verified-badge">(Verified by PilgrimCompare)</span>
                 ) : (
                   <span className="ml-1 text-xs text-[var(--textMuted)]" data-testid="atol-self-reported">(Self-reported)</span>
                 )}
@@ -105,7 +105,7 @@ export function PackageDetail({ pkg, operator }: PackageDetailProps) {
               <span className="text-green-300">
                 ABTA {operator.abtaMemberNumber}
                 {operator.abtaVerifiedAt ? (
-                  <span className="ml-1 text-xs text-green-400" data-testid="abta-verified-badge">(Verified by KaabaTrip)</span>
+                  <span className="ml-1 text-xs text-green-400" data-testid="abta-verified-badge">(Verified by PilgrimCompare)</span>
                 ) : (
                   <span className="ml-1 text-xs text-[var(--textMuted)]" data-testid="abta-self-reported">(Self-reported)</span>
                 )}
@@ -228,7 +228,7 @@ export function PackageDetail({ pkg, operator }: PackageDetailProps) {
         <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--textMuted)]">Important — Your Protection</h2>
         <div className="mt-3 space-y-2 text-sm text-[var(--textMuted)]">
           <p>
-            This package is sold by <strong className="text-[var(--text)]">{operator?.companyName ?? 'the travel operator'}</strong>, not by KaabaTrip.
+            This package is sold by <strong className="text-[var(--text)]">{operator?.companyName ?? 'the travel operator'}</strong>, not by PilgrimCompare.
           </p>
           {operator?.atolNumber ? (
             <p>
@@ -249,7 +249,7 @@ export function PackageDetail({ pkg, operator }: PackageDetailProps) {
             </p>
           ) : null}
           <p className="mt-2 text-xs">
-            KaabaTrip is a comparison platform. We do not verify ATOL/ABTA credentials and are not responsible for the operator{'\''}s financial protection status.
+            PilgrimCompare is a comparison platform. We do not verify ATOL/ABTA credentials and are not responsible for the operator{'\''}s financial protection status.
             Your contract is directly with the operator. Always confirm protection details in writing before paying.
           </p>
         </div>

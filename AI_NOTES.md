@@ -1,715 +1,393 @@
-# KaabaTrip AI Handover - Single Source of Truth
+# PilgrimCompare AI Handover — Single Source of Truth
 
-**Last verified:** 2026-06-09 (email verification pass)
-**Last architecture/security audit:** 2026-06-09
+**Last verified:** 2026-06-10 (CI workflow + branch protection + infra verification)
 **Branch:** `dev`
 **Audience:** Claude, Codex, Kimi, and any AI/developer taking over the project.
 
-This file is the current handover source of truth. If another document conflicts with a verified statement here, treat that other document as stale and update it before changing implementation. Historical notes were intentionally overwritten to remove contradictory pending/completed status.
+**Next immediate action:**
+Q1 — KaabaTrip sweep, banned-phrase audit, dynamic departure cities
+Prompt file: `docs/PILGRIMCOMPARE_QUALITY_PROMPTS.md` → Q1
+Pre-req: `docs/PILGRIMCOMPARE_LANGUAGE_AND_LEGAL_STANDARDS.md` must be committed to repo first (founder manual task)
+
+This file is the current handover source of truth. If another document conflicts with a verified statement here, treat that other document as stale and update it before changing implementation.
 
 ---
 
-## 0. Architecture Decision & Master Audit - 2026-06-09
+## 0. Gate Status
 
-### Decision
+### Gate 1 — Safe to merge dev → main ✅ DONE
+- MockDB removed from all production-facing paths (Prompt 1)
+- `FEATURE_USE_REAL_DB` fail-fast implemented: throws if not `'true'` outside test/E2E (Prompt 1)
+- RLS and grants audited; migrations 008 + 009 applied and verified (Prompt 2)
+- PR #27 merged
 
-KaabaTrip's correct target and production architecture is **Supabase + Prisma + Upstash Redis**, not a client-side MockDB MVP.
+### Gate 2 — Safe to make public ✅ DONE (one exception)
+- Domain `pilgrimcompare.co.uk` live on Vercel; `NEXT_PUBLIC_SITE_URL` set correctly
+- Supabase auth redirect URLs updated; email confirmation toggle ON
+- Cloudflare DNS wired: `pilgrimcompare.com` + `www.pilgrimcompare.com` → `pilgrimcompare.co.uk` (301, preserve path + query)
+- Resend SMTP configured; all 5 transactional emails live
+- Email mailboxes: `support/privacy/dpo/complaints@pilgrimcompare.co.uk` forwarding active
+- CI workflow green; branch protection active on `main` + `dev`
 
-Evidence checked:
+**Exception (not blocking, must close before scaling):**
+- **Plausible analytics: UNCONFIRMED** — wire `data-domain=pilgrimcompare.co.uk` in `app/layout.tsx` behind cookie consent
 
-- `package.json` includes `@prisma/client`, `@prisma/adapter-pg`, `pg`, `@supabase/supabase-js`, `@supabase/ssr`, `@upstash/redis`, and `@upstash/ratelimit`.
-- `prisma/schema.prisma`, `prisma.config.ts`, and Supabase migrations exist.
-- `lib/api/db/prisma.ts` creates a Prisma 7 client with the `pg` adapter and `DATABASE_URL`.
-- `lib/api/db/adapter.ts` maps app models to Prisma models.
-- `lib/config.ts` selects Prisma only when `FEATURE_USE_REAL_DB=true`; tests and E2E intentionally use MockDB.
-- `.env.local` has the expected env names present for Supabase, Prisma, service role, feature flag, and Upstash. Values were not printed.
-- `npx prisma validate` passed on 2026-06-09.
-- `npm run test` passed on 2026-06-09: 18 files, 239/239 tests.
-- `npm run build` passed on 2026-06-09.
+### Gate 3 — Soft launch ⚡ ACTIVE
+Target: 5 operators onboarded, ~50 packages live. No code blockers for this gate — it is an operator acquisition and data-quality goal.
 
-Practical conclusion:
-
-- Trust the Supabase/Prisma/Redis architecture.
-- MockDB is allowed for unit tests and controlled E2E/dev simulation only.
-- The repo is **not yet cleanly cut over for launch** because production-facing components and API routes still import/use MockDB directly.
-
-### Production audit verdict
-
-Current launch score from local evidence: **62/100 - risky, internal beta only**.
-
-Do not make the site public until the P0 blockers below are fixed and re-verified with `FEATURE_USE_REAL_DB=true` against Supabase.
-
-### 2026-06-09 security remediation pass (applied)
-
-A pre-launch CRITICAL/HIGH security pass fixed and verified the following. Tests
-remained 239/239 green; `npx tsc --noEmit` and `npm run build` clean.
-
-1. **Trusted role source (P0 #1) — FIXED.** Authorization role now reads from
-   `app_metadata.role` (service-role-only) in `getSessionUser()`, supabase
-   middleware, `apiGetUser`, and the sign-in DTO; defaults to least-privilege
-   `customer`. `apiSignUp` writes the role to `app_metadata` via the service role
-   and no longer stores role in user-editable `user_metadata`. Closes the
-   self-escalation vector (a user could previously `auth.updateUser({ data:
-   { role:'admin' } })`).
-   - ⚠️ Backfill: any pre-existing Supabase auth users created before this change
-     have role only in `user_metadata` and will default to `customer`. Set their
-     `app_metadata.role` via the service role (admin API) before launch.
-
-2. **RLS actually enabled on the live DB (P0 #5) — FIXED.** Introspection found
-   11 of 12 public tables had NO row-level security: the public anon key could
-   read `users`, `payment_details`, `bank_change_requests`, `booking_intents`,
-   `offers`, `complaints` via the Supabase Data API (confirmed HTTP 200 + rows
-   for PII + bank details). Root cause: `001_enable_rls.sql` never applied because
-   it compared `auth.uid()` (uuid) to `text` columns. Rewrote `001` with
-   `auth.uid()::text`, tightened `offers` (was `USING(true)`), dropped the
-   permissive `audit_log` insert, added `005` (analytics_events + booking_outcomes)
-   and `006` (payment-evidence operator/admin read). Applied via
-   `scripts/apply-rls-migrations.mjs`; verified anon now gets 0 rows on sensitive
-   tables, public catalogue still readable. App unaffected (all table access is
-   Prisma/direct connection, which bypasses RLS).
-
-3. **Rate limiting (P1) — extended.** `POST /api/quote-requests` now rate-limited;
-   limiter identifiers namespaced per endpoint (auth / interest / quote) so they
-   no longer share one IP bucket.
-
-Remaining from this pass (not blocking, see notes): `style-src 'unsafe-inline'` in
-CSP (impractical to remove with Next 15 + Tailwind; script-src is nonce-based);
-final CSP `frame-ancestors` / CORS origins (gated on domain purchase).
-
-4. **Anonymous quote hardcode `cust1` (P0 #3) — FIXED (2026-06-09).** Product
-   decision: require login before quote submission. `POST /api/quote-requests` now
-   returns `401` if no authenticated customer session exists. `customerId` is
-   always the real `user.id`; the `'cust1'` fallback is gone. Tests: 234/234 green.
-
-5. **Email verification enforcement (2026-06-09) — IMPLEMENTED.** Four-layer defence
-   against fake/throwaway email addresses and unverified users:
-   - **Disposable email blocking** at signup (`lib/validation.ts`): `signUpSchema`
-     rejects ~60 known throwaway/temp-mail domains with a Zod `.refine()` check.
-     Extend the `DISPOSABLE_DOMAINS` set as new providers are discovered.
-   - **Supabase email confirmation flow**: new route `app/auth/confirm/route.ts`
-     handles Supabase OTP callback links (`/auth/confirm?token_hash=...&type=signup`),
-     exchanges the token, and redirects to `/` with `?verified=1`.
-   - **Verify-email page** (`app/verify-email`): shown immediately after signup.
-     Displays resend button (calls `POST /api/auth/resend-verification`) and guidance.
-     Email is passed as a query param so the resend call is pre-populated.
-   - **Quote-request gate** (`POST /api/quote-requests`): returns `403
-     AUTH_EMAIL_NOT_VERIFIED` if `user.emailVerified === false`. Unverified users
-     cannot submit quote requests (main data-scraping/fake-lead vector).
-   - **Sign-in: unconfirmed email** (`apiSignIn`): Supabase's `email_not_confirmed`
-     error is caught and surfaced as `AppError { AUTH_EMAIL_NOT_CONFIRMED, 403 }`.
-     `LoginForm` checks the response `code` field and shows a resend-verification
-     link inline when this code is returned.
-   - `SessionUser.emailVerified` (boolean) added to `lib/auth/session.ts`; derived
-     from `user.email_confirmed_at`. E2E bypass cookie defaults `emailVerified: true`.
-
-   ⚠️ **Supabase dashboard action required before this is live in production:**
-   Auth → Settings → "Enable email confirmations" must be ON. Without this toggle
-   Supabase auto-confirms all signups and `email_confirmed_at` is set immediately —
-   the gate is harmless but not enforced. Turn it on before going public.
-   Also configure the redirect URL in Supabase Auth → URL Configuration:
-   `Site URL = https://<yourdomain>` and add `https://<yourdomain>/auth/confirm`
-   to the "Redirect URLs" allow-list.
-
-### P0 launch blockers
-
-1. **Auth roles currently rely on Supabase `user_metadata`.**
-   - Evidence: `lib/auth/session.ts`, `lib/supabase/middleware.ts`, `lib/auth/api.ts`, and `app/api/auth/sign-in/route.ts` read `user.user_metadata.role`.
-   - Risk: Supabase user metadata is user-editable. Any server-side authorization that trusts it can become role escalation.
-   - Fix: Store authorization role in `app_metadata` using admin/service-role updates, or load role from the server-side `users` table by authenticated `user.id`. Middleware, `getSessionUser()`, `/api/auth/me`, and sign-in response DTOs must use the trusted source only. Public sign-up may request `customer` or `operator`, but must not self-authorize admin or verified/operator privileges.
-
-2. **MockDB still leaks into production-facing paths.**
-   - Evidence from `rg`: direct MockDB imports remain in `components/request/RequestDetail.tsx`, `components/quote/QuoteRequestWizard.tsx`, `components/operator/OfferForm.tsx`, `components/operator/PaymentDetailsClient.tsx`, `components/operator/OperatorLeadsClient.tsx`, `components/admin/*`, `components/search/PackageList.tsx`, `components/packages/PackagesBrowse.tsx`, `components/request/PaymentInstructions.tsx`, `components/request/ComplaintForm.tsx`, `components/request/ComparisonTable.tsx`, `app/admin/bank-changes/*`, `app/api/user/export/route.ts`, and `app/api/interest/route.ts`.
-   - Risk: real Supabase data and client-side local/test data can diverge; GDPR export can omit real data; users can see simulated state after failed server writes.
-   - Fix: Remove MockDB imports from all production UI/API paths. Use server routes/Server Components plus `Repository` with server-derived `RequestContext`. Keep MockDB only under tests, fixtures, and explicit dev-only tooling.
-
-3. **~~Anonymous/customer quote and booking flows still use hardcoded `cust1`~~ — FIXED 2026-06-09.**
-   - `POST /api/quote-requests` now requires an authenticated customer session; returns `401` otherwise. `customerId` always set from `user.id`.
-   - ⚠️ Remaining: `components/request/RequestDetail.tsx` still uses `customerContext = { userId: 'cust1', role: 'customer' }` for client-side `Repository.createBookingIntent()` / `MockDB.saveBookingIntent()` fallback. This is covered by P0 #2 (MockDB removal). Fix there, not here.
-
-4. **Real DB cutover is opt-in and not yet proven in deployment.**
-   - Evidence: `getDataSource()` returns MockDB unless `FEATURE_USE_REAL_DB=true`; E2E always forces MockDB. Docs say production should be Supabase, but the code can silently run MockDB if the flag is missing.
-   - Risk: a deployed production environment can appear functional while writing to non-persistent MockDB/localStorage simulation.
-   - Fix: For Vercel production, fail fast unless `FEATURE_USE_REAL_DB=true`, Supabase env, `DATABASE_URL`, `DIRECT_URL`, and Upstash env are present. Keep MockDB fallback only for `NODE_ENV=test`, local dev without the flag, and explicit E2E.
-
-5. **RLS policies need Supabase hardening before relying on Data API access.**
-   - Evidence: RLS exists, but several policies are broad or incomplete for production: `offers_read_all`, `audit_log_insert_system WITH CHECK (true)`, update policies without `WITH CHECK`, and no verified deployed policy audit in this session.
-   - Risk: if tables are exposed to anon/authenticated roles, broad policies can leak or allow unexpected writes.
-   - Fix: Run Supabase advisors and inspect grants. Add `TO authenticated` / `TO anon` deliberately, ownership predicates for every non-public table, and `WITH CHECK` on every update policy that must preserve ownership. Keep service-role use server-only and narrow.
-
-### P1 high-value fixes
-
-- **Payment evidence policy conflict:** product canon says MVP is metadata-only; architecture/code support storage bytes and private bucket uploads. Decide before launch. If bytes remain, add operator/admin signed download routes that enforce BookingIntent RBAC and avoid exposing storage paths directly.
-- **GDPR export/delete must use real repositories:** `app/api/user/export/route.ts` reads MockDB, and delete removes the Supabase auth user but does not prove cleanup/anonymisation of Prisma records.
-- **Rate limits only cover auth today:** extend Upstash rate limiting to quote requests, booking intents, package image uploads, payment instruction reads, bank-detail/change endpoints, admin approval/rejection, complaints, and interest capture.
-- **Health check is shallow:** `/api/health` returns static JSON. Add a private/deploy-time dependency check for Supabase, Prisma, and Upstash.
-- **CI branch mismatch:** `.github/workflows/ci.yml` runs on `main` and `develop`, while docs say active branch is `dev`. Add `dev` or rename branch policy before relying on CI gates.
-- **Package image rendering needs deployment smoke:** `package-images` is a public Supabase bucket, but CSP/Next image allowlists must be verified against the actual Supabase storage host.
-- **Admin reconciliation needs business verification:** route exists, but export completeness, date semantics, and sensitive field policy need owner sign-off.
-
-### User journey gaps to resolve before public launch
-
-- ~~Decide whether quote requests are allowed before login~~ — decided: login required. Quote requests further gated on email verification.
-- Verify real Supabase sign-up, email confirmation, sign-in, forgot-password, reset-password, and sign-out on deployed Vercel. **Enable "Email confirmations" in Supabase Auth settings before going public** (see item 5 in the security remediation section above).
-- Define what "verified operator" means operationally: who checks ATOL/ABTA/company data, what evidence is stored, what is visible to travellers, and how rejected operators recover.
-- Define complaint/dispute handoff language and support ownership so users do not think KaabaTrip is escrow, insurer, or travel operator.
-- Confirm package image upload/display with one real operator and one real package before stripping dev login.
-
-### Implementation order for the next AI/fixer
-
-1. Replace role source with trusted `app_metadata` or DB role lookup.
-2. Remove production MockDB imports and hardcoded `cust1` paths.
-3. Make production fail fast if `FEATURE_USE_REAL_DB=true` and required envs are not set.
-4. Harden RLS/grants and run Supabase advisors.
-5. Rework quote/booking guest journey.
-6. Expand rate limits and real GDPR export/delete.
-7. Run `npm run test`, `npm run build`, `npx playwright test`, and deployed Supabase smoke.
+**Pre-req before any operator onboarding:**
+- `/public/logo.svg` and `/public/text-logo.svg` still contain KaabaTrip — fix first (Q1 scope)
 
 ---
 
-## 1. Product Truth
+## 1. Product Identity & Hard Rules
 
-KaabaTrip is a UK-first, comparison-first marketplace for Umrah and Hajj.
+### Brand
+- **PilgrimCompare** — never KaabaTrip in user-facing copy, UI components, or code comments
+- UK-first Umrah comparison and enquiry marketplace
+- Does not hold funds, take bookings, or issue ATOL certs
+- Missing data = **"Not provided"** — never infer, estimate, or fill in
 
-The product supports two modes:
+### Standard copy (use verbatim — do not paraphrase)
+1. "You pay the operator directly. PilgrimCompare does not receive or hold your payment."
+2. "Your travel contract, cancellations and refunds are with the operator named on this page."
+3. "Your PilgrimCompare reference code is a tracking code, not a payment receipt."
 
-- **Catalogue listings:** operators publish structured package pages that are searchable, comparable, and SEO friendly.
-- **Quote-first offers:** travellers submit preferences, operators respond with comparable offers, and travellers express booking intent.
-
-Primary users:
-
-- **Travellers / customers:** browse, search, shortlist, compare up to 3 packages/offers, request quotes, and create BookingIntent records.
-- **Travel operators / partners:** onboard, manage packages, respond to leads, track booking intents, update profile/payment details, and review analytics.
-- **Admins:** review operator/bank changes, complaints, reconciliation data, and sensitive audit flows.
-
-Business and legal posture:
-
-- KaabaTrip is a marketplace and enquiry system at this stage.
-- Operators are the source of truth for package content, availability, pricing, fulfilment, and payment records.
-- KaabaTrip does **not** collect, hold, transfer, escrow, or invoice customer funds.
-- BookingIntent is an intent/reference record, not a payment confirmation or final booking.
-- Customer payment handoff is **pay-operator-direct**.
-- Never invent operator trust claims. Use stored facts only: verification status, ATOL/ABTA numbers when present, company metadata, regions, and profile completeness.
-- If data is missing, show "Not provided" or an equivalent explicit absence. Do not guess.
-- MVP public pricing is UK-first and GBP-only. Multi-currency is future scope.
-
-Canonical product file: `docs/00_PRODUCT_CANON.md`.
+### Hard don'ts — code and copy
+- Never take, hold, route, or invoice payment
+- Never conclude a booking or issue a ticket, voucher, or ATOL cert
+- Never bundle services from two operators
+- Never use undisclosed paid ranking — default sort must be neutral and disclosed (DMCC Act 2024)
+- Never use "priority placement" in operator-facing copy — use "we build your profile to rank at its best"
 
 ---
 
-## 2. Non-Negotiable Project Rules
+## 2. Revenue Model
 
-Read these before work:
+Operators pay. Travellers are always free. Funds never flow through the platform.
 
+| Phase | Trigger | Model |
+|---|---|---|
+| **Phase 1** | Now — founding tier | Free. Framing: "we build your profile to rank at its best" |
+| **Phase 2** | 150+ enquiries/month | £10/qualified enquiry **or** £79/month subscription |
+| **Phase 3** | 90-day booking outcome loop proven | £75 flat success fee per completed booking — B2B invoice only |
+
+**BookingOutcome dataset = billing evidence.** Protect from day one. Do not expose or truncate outcome records.
+
+---
+
+## 3. Non-Negotiable Rules
+
+### Read before every session
 1. `AGENTS.md`
 2. `docs/README_AI.md`
 3. `docs/NOW.md`
 4. This `AI_NOTES.md`
+5. `.agents/skills/supabase/SKILL.md`
+6. `.agents/skills/supabase-postgres-best-practices/SKILL.md`
 
-Additional docs by task:
+### Session protocol
+- **One task per prompt.** Do not scope-creep into adjacent work.
+- **`/compact` at ~50% context** to prevent overflow mid-task.
+- **Update `AI_NOTES.md` at session end** — gate status if shifted, open risks if changed, next step updated.
 
+### Before every push
+- `npm run test` green (232/232 or higher)
+- `npm run build` 0 errors
+- `npx tsc --noEmit` pass
+- UI/route change → Playwright smoke `/`, `/umrah`, `/search/packages` at 320px + 1280px
+- Small focused diffs; one concern per commit; add `data-testid` for new Playwright targets
+
+### Additional docs by task
 - UI edits: `docs/UX_GUIDELINES.md`
 - Public route/SEO changes: `docs/SEO.md`
 - Operator work: `docs/OPERATOR_ONBOARDING.md`
 - Architecture/security changes: `docs/ARCHITECTURE.md`, `docs/SECURITY.md`
 
-Before every push:
-
-- Update `docs/NOW.md`.
-- Run `npm run test`.
-- Run `npm run build`.
-- If UI/routing changed, manually smoke `/`, `/umrah`, `/search/packages` at 320px and 1280px.
-- If routes or `data-testid` contracts changed, run Playwright.
-
-Coding invariants:
-
-- Keep diffs focused.
-- Do not revert unrelated user changes.
-- UI components must not import MockDB directly. Use `Repository`.
-- All `Repository.*` calls are async and must be awaited.
-- Next.js 15 `params` and `searchParams` are promises in Server Components.
-- Public schemas/forms must not expose an `admin` role.
-- Auth APIs must only return safe user shape: `{ user: { id, email, role, name } }`.
-- API errors should use `AppError` / `mapErrorToResponse`, not raw `err.message`.
-- No production `console.log` / `console.warn`.
-- Use Zod validation before API/DB writes.
+### Coding invariants
+- UI components must not import MockDB directly — use `Repository`
+- All `Repository.*` calls are async and must be awaited
+- Next.js 15 `params` and `searchParams` are promises in Server Components
+- Public schemas/forms must not expose an `admin` role
+- Auth APIs must only return safe user shape: `{ user: { id, email, role, name } }`
+- API errors use `AppError` / `mapErrorToResponse`, not raw `err.message`
+- No production `console.log` / `console.warn`
+- Use Zod validation before API/DB writes
 
 ---
 
-## 3. Verified Current State
+## 4. Verified Current State
 
-Verified on 2026-06-09 unless noted:
+**Verified 2026-06-10:**
+- `npm run test`: **232/232 passes**, 18 files
+- `npm run build`: **0 errors**
+- `npx tsc --noEmit`: **passes**
+- `npm run lint`: **passes**
+- `npx prisma validate`: **passes** (schema unchanged since 2026-06-09)
+- `npx playwright test`: 57 passed, 6 skipped, 0 failed (last full run 2026-06-08)
 
-- `npm run test`: **passes**, 18 files, **239/239 tests**.
-- `npm run build`: **passes**, 0 build errors.
-- `git diff --check`: **passes**.
-- `npm run lint`: **passes**, with a Next.js deprecation notice for `next lint`.
-- `npx prisma validate`: **passes**.
-- `npx tsc --noEmit`: **passes**.
-- `npx playwright test`: **57 passed, 6 skipped, 0 failed** on 2026-06-08.
-- `npx playwright test e2e/signup-password-mismatch.spec.ts`: **3 passed** on 2026-06-08.
-- Manual Playwright smoke on 2026-06-08:
-  - `/`, `/umrah`, `/search/packages?type=umrah&departureAirport=LGW`
-  - 320px and 1280px
-  - no HTTP errors and no horizontal overflow observed.
-- Manual header/airport smoke:
-  - guest `Login` and `For Partners` links visible on `/`.
-  - `/umrah` departure/return selects include London Heathrow (LHR), London Gatwick (LGW), Birmingham (BHX), and Manchester (MAN).
-  - form submit with Gatwick departure and Heathrow return lands on `/search/packages?...departureAirport=LGW&returnAirport=LHR`.
-- Manual auth smoke:
-  - customer login with `customer@example.com` / `KaabaTrip!2026` redirects to `/` and shows customer navigation.
-  - partner login with `operator@example.com` / `KaabaTrip!2026` redirects to `/operator/dashboard`.
+**Stack:**
+- Next.js 15.5.19 App Router · React 19 · TypeScript strict
+- Tailwind v4 · Vitest 4.1.8 · Playwright
+- Prisma 7 + Supabase Postgres/Auth/Storage (EU West / Ireland)
+- Upstash Redis (rate limiting)
 
-Known non-failing warnings:
-
-- Supabase Edge warning from `@supabase/supabase-js` / `@supabase/ssr` referencing `process.version`.
-- Webpack cache-size warnings during build.
-- One Unsplash image URL was observed returning upstream 404 during E2E, but tests passed and the app remained functional.
-
-Stack:
-
-- Next.js 15.5.19 App Router
-- React 19
-- TypeScript strict
-- Tailwind v4
-- Vitest 4.1.8
-- Playwright
-- Prisma + Supabase Postgres/Auth/Storage
-- Upstash Redis available for rate limiting when env vars are present
-
-Current data posture:
-
-- `FEATURE_USE_REAL_DB=true` is used for real Prisma/Supabase paths.
-- MockDB remains for unit tests and E2E-style impersonation flows.
-- Repository layer is the abstraction boundary for business data and RBAC.
-- Supabase project is in EU West / Ireland per existing architecture notes.
-- 2026-06-09 audit caveat: production-facing UI/API paths still contain direct MockDB imports. Treat this as cutover debt and do not ship public production until Section 0 P0 items are fixed.
+**Known non-failing warnings:**
+- Supabase Edge warning from `@supabase/ssr` referencing `process.version`
+- Webpack cache-size warnings during build
 
 ---
 
-## 4. Auth and Dev Persona Handover
+## 5. Auth & Dev Personas
 
-Password complexity rule:
+### Password rules
+Min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special character. Enforced in `lib/validation.ts`, sign-up route, and `SignUpForm.tsx`.
 
-- Minimum 8 characters
-- At least 1 uppercase letter
-- At least 1 lowercase letter
-- At least 1 number
-- At least 1 special character
-
-Enforced in:
-
-- `lib/validation.ts`
-- `app/api/auth/sign-up/route.ts`
-- `components/auth/SignUpForm.tsx`
-- unit tests
-
-Dev account reference:
+### Dev accounts (local `NODE_ENV=development` and `E2E_TESTING=1` only)
 
 | Persona | Email | Password | Expected view |
-| --- | --- | --- | --- |
-| Customer | `customer@example.com` | `KaabaTrip!2026` | Traveller/customer nav and public customer flows |
-| Operator verified | `operator@example.com` | `KaabaTrip!2026` | Partner dashboard and operator flows |
-| Operator new | `operator2@example.com` | `KaabaTrip!2026` | Partner/onboarding status style flows |
-| Admin | `admin@example.com` | `KaabaTrip!2026` | Admin complaint/review flows |
+|---|---|---|---|
+| Customer | `customer@example.com` | `KaabaTrip!2026` | Customer nav + public flows |
+| Operator verified | `operator@example.com` | `KaabaTrip!2026` | Partner dashboard |
+| Operator new | `operator2@example.com` | `KaabaTrip!2026` | Onboarding status flows |
+| Admin | `admin@example.com` | `KaabaTrip!2026` | Admin audit flows |
 
-Important auth behavior:
+`KaabaTrip!2026` is intentionally unchanged — it is a dev credential token, not user-facing copy.
 
-- `/dev/login` uses cookie impersonation through `__dev_user`; it bypasses Supabase Auth and does not check a password.
-- E2E helpers use `__e2e_user`; they also bypass Supabase Auth.
-- Normal `/login` has a dev-auth credential fallback for the dev accounts above. It is enabled on **localhost (`NODE_ENV=development`) and automated E2E (`E2E_TESTING=1`) only** — never on any deployed environment (preview or production). It validates `KaabaTrip!2026`, sets `__dev_user`, and returns the same safe user shape as real auth.
-- Non-dev credentials still use Supabase Auth.
-- Real password validation should be tested through `/signup` and `/login` with real Supabase-created credentials.
-- `/api/auth/me` powers the header session state so Supabase sessions, `__dev_user`, and `__e2e_user` render correct navigation.
-- Sign-out clears `__dev_user`.
-- Login and signup password fields now have accessible eye-icon show/hide controls.
+### Auth bypass paths
+- `__e2e_user` cookie: active only when `E2E_TESTING=1`. `next.config.ts` compiles `E2E_TESTING=''` in all deployments — path is dead in production/preview.
+- `/dev/login` route and `lib/auth/dev-users.ts`: **deleted 2026-06-09**. No bypass for non-E2E flows.
 
-Key files:
+### Role source
+Authorization role reads from `app_metadata.role` (service-role-only) — not user-editable `user_metadata`. Fixed 2026-06-09.
 
-- `lib/auth/dev-users.ts`
-- `app/api/auth/sign-in/route.ts`
-- `app/api/auth/me/route.ts`
-- `app/api/auth/sign-out/route.ts`
-- `components/auth/PasswordInput.tsx`
-- `components/auth/LoginForm.tsx`
-- `components/auth/SignUpForm.tsx`
-- `components/layout/Header.tsx`
-
-### Dev-only login — REMOVED (2026-06-09)
-
-The dev persona bypass (`__dev_user`, `lib/auth/dev-users.ts`, `/dev/login`) has been **physically deleted** from the codebase. All sign-in goes through Supabase Auth. There is no fallback, no hardcoded password, no persona cookie.
-
-**What remains (intentional):**
-- `__e2e_user` cookie bypass in `lib/supabase/middleware.ts` and `lib/auth/session.ts` — active only when `E2E_TESTING=1` (Playwright CI env). Production builds compile `E2E_TESTING=''` via `next.config.ts`, so this path is dead in any deployment.
-
-**To test locally:** use real Supabase credentials or set `E2E_TESTING=1` with a `__e2e_user` cookie shaped `{ id, email, role }`.
+⚠️ Backfill required: any Supabase auth user created before 2026-06-09 has role only in `user_metadata` and will default to `customer`. Set `app_metadata.role` via the service-role admin API before operator onboarding.
 
 ---
 
-## 5. Architecture Summary
+## 6. Architecture
 
-High-level architecture:
-
-```text
+```
 Next.js App Router UI
-  -> API routes / Server Components
-  -> lib/api/repository.ts
-  -> lib/api/db/adapter.ts for Prisma/Supabase
-  -> Supabase Postgres/Auth/Storage with RLS
+  → API routes / Server Components
+  → lib/api/repository.ts
+  → lib/api/db/adapter.ts (Prisma/Supabase)
+  → Supabase Postgres/Auth/Storage with RLS
 ```
 
-Repository rule:
+**Repository rule:** UI and routes go through `Repository`. MockDB exists for unit tests and E2E only — never in production-facing paths.
 
-- UI and routes should go through `Repository`.
-- MockDB is a test/local simulation layer, not a business dependency for UI components.
+**Client/server boundary:** `next.config.ts` aliases the DB adapter for browser bundles. `lib/api/db/client-adapter-stub.ts` keeps Turbopack/browser paths safe.
 
-Important client/server boundary fix:
+### Core entities
+`User` · `OperatorProfile` · `Package` · `QuoteRequest` · `Offer` · `BookingIntent` · `PaymentDetails` · `BankChangeRequest` · `AuditLogEntry` · `Complaint` · `AnalyticsEvent`
 
-- Client components that import modules reaching `Repository` must not pull Prisma/`pg` into browser bundles.
-- `next.config.ts` includes a browser-only alias for the DB adapter.
-- `lib/api/db/client-adapter-stub.ts` exists to keep Turbopack/browser paths safe.
-
-Core entities:
-
-- `User`
-- `OperatorProfile`
-- `Package`
-- `QuoteRequest`
-- `Offer`
-- `BookingIntent`
-- `PaymentDetails`
-- `BankChangeRequest`
-- `AuditLogEntry`
-- `Complaint`
-- `AnalyticsEvent`
-
-Operator eligibility:
-
-- verified profile
-- tier is not `listed`
+### Operator eligibility (bookable)
+- `verificationStatus === 'verified'`
+- tier ≠ `listed`
 - `eligibilityFlags.canReceiveBookings === true`
 - `eligibilityFlags.bankDetailsActive === true`
-- one active `PaymentDetails` record exists
+- one active `PaymentDetails` record
 
-RBAC shape:
+### RBAC shape
+- Customers: own quote requests, booking intents, complaints, evidence
+- Operators: open leads, own packages/offers/bookings/profile/payment records
+- Admins: bank changes, complaints, reconciliation, sensitive audit flows
+- Public: published packages + public operator profiles only
 
-- Customers see and mutate their own quote requests, booking intents, complaints, and evidence.
-- Operators see relevant open leads and their own packages/offers/bookings/profile/payment records.
-- Admins review bank changes, complaints, reconciliation, and sensitive operator/payment evidence flows.
-- Public users can read published packages and public operator profiles only.
-
-Payment/evidence policy:
-
-- BookingIntent reference codes are `KT-...`, unique, and immutable.
-- Evidence metadata and any file bytes must be visible only to the customer, involved operator, or admin.
-- The product canon says MVP evidence storage is metadata-only; architecture notes mention bytes can be stored/purged. Treat this as a policy conflict to resolve before expanding evidence storage.
+### Payment/evidence policy
+- BookingIntent reference codes are `KT-…`, unique, and immutable
+- Evidence metadata and file bytes visible only to the customer, involved operator, or admin
+- Product canon says MVP evidence storage is metadata-only; architecture supports byte storage — **policy conflict, resolve before shipping evidence-review UI**
 
 ---
 
-## 6. Current Feature Map
+## 7. Feature Map
 
-Public/customer routes:
+### Public / customer routes
 
 | Route | Status |
-| --- | --- |
+|---|---|
 | `/` | Done |
 | `/umrah` | Done |
 | `/hajj` | Done |
-| `/umrah/ramadan` | Done |
-| `/umrah/london` | Done |
-| `/umrah/birmingham` | Done |
-| `/umrah/manchester` | Done |
-| `/umrah/cost` | Done |
+| `/umrah/ramadan` · `/umrah/london` · `/umrah/birmingham` · `/umrah/manchester` · `/umrah/cost` | Done |
 | `/search/packages` | Done |
-| `/packages` | Done |
-| `/packages/[slug]` | Done |
+| `/packages` · `/packages/[slug]` | Done |
 | `/operators/[slug]` | Done |
 | `/quote` | Done |
-| `/requests/[id]` | Done |
-| `/requests/[id]/confirmation` | Done |
+| `/requests/[id]` · `/requests/[id]/confirmation` | Done |
 | `/settings` | Done |
-| `/privacy` | Done |
-| `/terms` | Done |
-| `/login` | Done |
-| `/signup` | Done |
-| `/dev/login` | Done for development only |
+| `/privacy` · `/terms` | Done |
+| `/login` · `/signup` · `/verify-email` | Done |
 
-Operator/admin routes:
+### Operator / admin routes
 
 | Route | Status |
-| --- | --- |
+|---|---|
 | `/partner` | Exists |
-| `/operator/onboarding` | Done |
-| `/operator/onboarding/status` | Done |
+| `/operator/onboarding` · `/operator/onboarding/status` | Done |
 | `/operator/dashboard` | Done |
-| `/operator/packages` | Done; includes CSV import/export and package wizard |
+| `/operator/packages` | Done (CSV import/export + wizard) |
 | `/operator/leads` | Done |
-| `/operator/analytics` | Rebuilt with real event summaries/trends and verified on 2026-06-08 |
-| `/operator/profile` | Done |
-| `/operator/settings` | Done |
+| `/operator/analytics` | Done (real event summaries + trends) |
+| `/operator/profile` · `/operator/settings` | Done |
 | `/operator/settings/payment-details` | Done |
-| `/admin/bank-changes` | Done |
-| `/admin/bank-changes/[id]` | Done |
+| `/admin/bank-changes` · `/admin/bank-changes/[id]` | Done |
 | `/admin/complaints` | Done |
-| `/admin/reconciliation` | Exists; business completeness/export format still needs explicit verification |
+| `/admin/reconciliation` | Exists — export format + CSV schema need business sign-off |
 
-Feature areas currently implemented:
+### Airport scope (launch)
 
-- Traveller search from `/umrah` to `/search/packages`.
-- Shortlist and compare up to 3 packages.
-- Package details with operator profile linking.
-- Quote wizard and request tracking.
-- Offer response flow.
-- BookingIntent reference and confirmation screen.
-- Operator onboarding/status.
-- Operator dashboard, leads, packages, analytics, profile, payment settings.
-- Bank details change-control and admin review.
-- Complaints/admin triage.
-- SEO foundations: metadata, sitemap, robots, JSON-LD helpers, corridor pages.
-- GDPR customer settings: export/delete flows.
-- Cookie consent UI.
-
----
-
-## 7. Recent Verified Work
-
-2026-06-09 UI polish — header breathing room, image consistency, compare UX:
-
-- **Header spacing**: Replaced fixed `height` values on `.header` with `padding`-based layout on `.header__container`. All breakpoints now use explicit top/bottom padding (`1rem` desktop, `0.875rem` default mobile, `0.75rem` small, `0.625rem` extra-small). This prevents the header from ever looking edge-to-edge regardless of content changes.
-- **Sign In CTA breathing room**: Added `margin-left: 0.75rem` to `.header__loginCta` and reduced nav `gap` to `0.25rem` so the Sign In button has clear visual separation from the nav links.
-- **Hotel image consistency**: `.hotelImage` is now locked to `height: 120px; min-height: 120px; max-height: 120px; object-fit: cover; object-position: center`. The inline `style={{ width: 'auto', height: 'auto' }}` override that was breaking CSS sizing has been removed. Both operator-uploaded images and fallback images render at identical dimensions.
-- **Fallback images for hotel blocks**: `PackageCard` now tracks `makkahImgSrc` / `madinaImgSrc` in state, initialised from package data with a fallback to an inline SVG building placeholder. `onError` callbacks swap to the fallback on load failure. `unoptimized` is applied to Next.js `<Image>` when a data-URI fallback is active to avoid optimisation errors.
-- **Compare help text visibility**: Initially improved to `0.8125rem` + `rgba(255,255,255,0.6)` with an info icon. Further redesigned (same session) into a proper callout strip: yellow left accent border (`3px solid var(--yellow)`), subtle yellow-tinted background, white text `rgba(255,255,255,0.9)`, with **Compare** and **2 packages** bolded in yellow. Instruction rewritten to "Tick **Compare** on any **2 packages** to compare them side by side" for immediate scannability. Icon changed to the compare/grid SVG for semantic match.
-- **Nights badge clarity**: `.nightsBadge` was near-invisible (`var(--textMuted)` on `rgba(255,255,255,0.04)`). Redesigned with `rgba(255,211,29,0.08)` background, `1px solid rgba(255,211,29,0.2)` border, `font-weight: 600`, and `rgba(255,255,255,0.9)` text. Passes 4.5:1 contrast at a glance.
-
----
-
-2026-06-08 dev account login fix and later hardening:
-
-- Root cause for "Invalid email or password" with documented dev accounts: `/login` fallback and `__dev_user` readers were hard-gated to `NODE_ENV=development`, so Vercel preview / production-mode QA sent those credentials to Supabase Auth instead.
-- The later hardened state is stricter: `isDevAuthEnabled()` is enabled only for local development or `E2E_TESTING=1`. Vercel preview/production and `KAABATRIP_ENABLE_DEV_AUTH` are not valid remote toggles.
-- `__dev_user` handling is now aligned across sign-in, middleware, server sessions, `/api/auth/me`, `/dev/login`, and sign-out.
-
-2026-06-08 header login + London airport split:
-
-- Guest header links now render while `/api/auth/me` is loading, so the Login and For Partners links do not become invisible for unauthenticated users.
-- Umrah route capture now uses airport-level values instead of generic city values.
-- London is split into London Heathrow (LHR) and London Gatwick (LGW), with Birmingham (BHX) and Manchester (MAN) as the other launch airport options.
-- Server-side search filtering validates and filters by `departureAirport`, so LHR and LGW produce distinct package result sets.
-- Operator package API validation uses the shared airport code catalogue.
-- Default exact-date submission uses local date formatting rather than UTC `toISOString()`, preventing UK timezone shifts from defaulting the departure date to yesterday.
-
-2026-06-08 auth/dev persona work:
-
-- Normal `/login` accepts documented dev persona credentials in local development or automated E2E only.
-- Dev persona fallback verifies `KaabaTrip!2026`, sets `__dev_user`, and returns safe user shape.
-- Dev persona password comparison trims accidental leading/trailing whitespace for these documented accounts only; real Supabase passwords are not trimmed or weakened.
-- Real Supabase sign-in failures return safe 401 responses instead of masked 500s.
-- Added `/api/auth/me`.
-- Header now renders role-appropriate navigation for Supabase, dev, and E2E sessions.
-- Sign-out clears `__dev_user`.
-- Login/signup password fields have accessible eye-icon toggles.
-- Signup mismatch E2E fixture now uses complexity-compliant mismatched passwords.
-- Turbopack/browser DB adapter alias added.
-- `images.unsplash.com` allowed for package card images.
-
-2026-06-08 Umrah search UX:
-
-- Departure and return route capture uses launch airport options: London Heathrow (LHR), London Gatwick (LGW), Birmingham (BHX), and Manchester (MAN).
-- Travel timing supports exact dates or flexible holiday/religious periods.
-- Hotel preference changed to clearer multi-select behavior.
-- Search summary and hotel-star filter query handling updated.
-- Cookie banner now visually prioritizes "Essential only".
-
-2026-06-08 operator analytics:
-
-- Added `AnalyticsEventType` and `AnalyticsEvent`.
-- Added repository event tracking and summary/trend methods.
-- Tracks package views, quote requests, offers sent, booking started, and future status transitions.
-- Routed offer and booking intent creation through server APIs for tracking.
-- Rebuilt `/operator/analytics` with range controls, summary cards, funnel, trend data, and existing chart primitives.
-- Prisma push/validate/generate verified; RLS enabled on `analytics_events`.
-
-Earlier completed platform work:
-
-- Package wizard with 8 steps.
-- Operator package persistence API.
-- Package image upload and `images[]` migration.
-- Payment details and bank change review.
-- BookingIntent confirmation screen.
-- Payment evidence metadata flow.
-- Operator tier/status display.
-- SEO/AEO content expansion.
-- CSP nonce hardening.
-- Error handling and GDPR endpoints.
-- Rate limiter with Upstash path and dev fallback.
-
----
-
-2026-06-09 quote form step 2 — city/airport scope locked:
-
-- **Cities reduced to 3**: `UK_CITIES` in `Step2LocationDates` now contains only `['London', 'Manchester', 'Birmingham']`. All other city options (Leeds, Glasgow, Edinburgh, Bristol, Leicester, Other) and their corresponding airport chips have been removed.
-- **London airports trimmed to 2**: London now maps only to LHR (Heathrow) and LGW (Gatwick). STN, LTN, and LCY removed — matches the launch airport set used on `/umrah` and `/search/packages`.
-- **Dead `departureArea` field removed**: the "Area of London" sub-picker and the `departureArea` draft field are gone. Airport filtering always used `a.city === selectedCity` and never read `departureArea`. No downstream code is affected.
-- **Return-airport hint added**: a quiet helper line — "Your return flight will depart from the same airport." — appears below the airport chips whenever the airport section is visible. Dimmed (`rgba(255,255,255,0.4)`) so it informs without competing with the selection action.
-
-Supported city → airport mapping (current, authoritative):
-
-| City | Airport(s) |
-| --- | --- |
+| City | Airports |
+|---|---|
 | London | LHR (Heathrow), LGW (Gatwick) |
 | Manchester | MAN |
 | Birmingham | BHX |
 
 ---
 
-## 8. Pending / Left Areas
+## 8. Open Risks & Pending Items
 
-Do not mark these complete unless re-verified.
+### P0 — must resolve before scaling
 
-| Priority | Area | Current status / next step |
-| --- | --- | --- |
-| P0 | Trusted auth role source | Current auth/session paths read `user_metadata.role`. Move role authorization to Supabase `app_metadata` or the server-side `users` table before production. |
-| P0 | MockDB cutover | Direct MockDB imports remain in production-facing UI/API routes. Remove or isolate behind dev/test-only boundaries before launch. |
-| P0 | Hardcoded customer identity | Quote/request/booking paths still use `cust1` in production-facing code. Require login or build a real anonymous lead model. |
-| P0 | Production fail-fast | Production can silently use MockDB if `FEATURE_USE_REAL_DB` is missing. Make production require real DB and required envs. |
-| P0 | RLS/grants audit | Run Supabase advisors and tighten broad/incomplete RLS policies before exposing real data. |
-| P0 | Production env validation | Confirm production has `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`; verify Redis path is used outside local/dev fallback. |
-| P0 | Deployed Prisma/Supabase cutover | Local/verified paths exist with `FEATURE_USE_REAL_DB=true`; deployed environment needs explicit smoke against Supabase data, auth redirects, and RLS. |
-| P0 | **Supabase email confirmation toggle** | In Supabase Dashboard → Auth → Settings → **"Enable email confirmations" must be ON** before going public. Without it, `email_confirmed_at` is set on signup automatically and the email-verification gate is a no-op. Also add `https://<yourdomain>/auth/confirm` to Auth → URL Configuration → Redirect URLs allow-list. Code is ready; this is a dashboard click. |
-| P0 | Domain launch | Buy/configure production domain. Then update `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`, Supabase auth redirect URLs, canonical URLs, robots, sitemap, JSON-LD base URLs, and any hardcoded `kaabatrip.com` assumptions. |
-| P1 | Plausible analytics | Wire after domain is live and cookie-consent behavior is confirmed. |
-| P1 | Payment evidence policy conflict | Product canon says MVP evidence storage is metadata-only; architecture notes describe byte storage/purge. Resolve policy before shipping file-byte storage changes. |
-| P1 | Admin reconciliation | `/admin/reconciliation` exists. Verify export completeness, expected CSV/PDF format, and payment-evidence linkage before treating as done. |
-| P1 | Operator analytics depth | Base real-event dashboard is done. Future work: deeper conversion breakdowns, top-package analysis, attribution quality, and business-facing chart polish. |
-| P2 | Local Chrome SEO/AEO QA | Server-side SEO/AEO work was done earlier. A rendered local Chrome audit remains useful for titles, JSON-LD, canonicals, noindex/robots, and visible FAQ consistency. |
-| P2 | Test coverage | Tests pass, but coverage was previously around 28 percent. Increase coverage for auth session, auth API, DB adapter, package APIs, analytics, and payment evidence. |
-| P2 | Docs consistency | Some docs still contain stale historical status such as operator analytics partial/E2E pending. Update those docs as touched; do not regress implementation to match stale docs. |
-| P2 | ~~London area picker — dead field~~ | **RESOLVED 2026-06-09.** `departureArea` field and sub-picker removed entirely from `Step2LocationDates`. |
+| Item | Status |
+|---|---|
+| `/public/logo.svg` + `/public/text-logo.svg` contain KaabaTrip | **OPEN — fix before operator onboarding (Q1 scope)** |
+| PaymentEvidence RLS — operator/admin read access | **UNCONFIRMED** — storage policies updated (migration 006) but evidence-review UI and signed-download route not built. Resolve before Gate 2 fully closed. |
+| `app_metadata` role backfill | Pre-2026-06-09 users default to `customer`. Backfill via service-role admin API before onboarding operators. |
+| Plausible analytics | Not wired — add `data-domain=pilgrimcompare.co.uk` in `app/layout.tsx` gated behind cookie consent. |
 
-⚠️ PARTIALLY RESOLVED — Payment evidence RLS
-The storage RLS policies now grant read access to the involved operator and to
-admins (migration `006`, applied 2026-06-09), matching the §5 RBAC model. Customer
-write access is unchanged. Adding the policies is forward-compatible and harmless.
-Remaining (business decision, not code): whether to SHIP the operator/admin
-evidence-review UI / signed-download path at launch. If yes, build the
-signed-download route enforcing BookingIntent RBAC and never expose raw storage
-paths. If no, this is confirmed post-launch debt — upload works, review UI is not
-wired. Resolve before Gate 2 sign-off.
+### P1 — high value, not launch-blocking today
 
-Known local/tooling files:
+| Item | Status |
+|---|---|
+| GDPR export/delete | `/api/user/export` uses partial real-DB paths. Verify `Repository` methods cover all PII tables before public launch. |
+| Rate limiting scope | Only `POST /api/quote-requests` + auth endpoints covered. Extend to booking intents, bank-detail changes, admin actions, evidence uploads. |
+| Admin reconciliation | `/admin/reconciliation` exists. Export format, CSV schema, and payment-evidence linkage need owner sign-off before treating as done. |
+| Email rate limiting | Per-user email cooldown not implemented. Existing Upstash rate limit on quote endpoint is only throttle. |
+| Evidence bytes policy | Product canon: MVP = metadata only. Architecture supports byte storage/purge. Resolve policy before shipping evidence-review UI. |
+| Google Workspace upgrade | Upgrade from Cloudflare Email Routing (forward-only) when first operator is onboarded and needs reply-from `support@pilgrimcompare.co.uk`. |
+| Health check depth | `/api/health` returns static JSON. Add a deploy-time dependency check for Supabase, Prisma, and Upstash. |
 
-- `.agents/`
-- `.claude/`
+### P2 — cleanup
 
-These are local/untracked tooling artifacts. Do not push them unless the user explicitly asks to version them.
-
-Tracked diagnostic script:
-
-- `npm run check:upstash` runs `scripts/check-upstash.mjs`. It loads `.env.local`, checks whether `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are present, initializes Redis + `@upstash/ratelimit`, runs `PING`, and runs one limiter probe. It prints only boolean env presence and safe probe results; it must not print Redis URLs, tokens, token lengths, or other secret-derived values.
+| Item | Status |
+|---|---|
+| Test coverage | Passes at 232/232 but coverage ~28%. Increase for auth session, DB adapter, package APIs, analytics, payment evidence. |
+| `KT-` reference prefix | Existing DB records use this. Rename only post-launch after migration. `/terms` copy references `KT-XXXXX` — update when prefix changes. |
+| Docs consistency | Some docs contain stale historical status. Update when touched; do not regress implementation to match stale docs. |
 
 ---
 
-## Pre-launch gates
+## 9. Infrastructure Reference
 
-### Gate 1: Safe to merge dev → main
-1. Fix Section 0 P0 blockers: trusted role source, MockDB cutover, no hardcoded `cust1`, production fail-fast, RLS/grants audit.
-2. Photo upload smoke test - real operator account, real image, real browser. Do this BEFORE stripping dev login.
-3. Strip dev-login - remove personas, password reference, `__dev_user`, and `isDevAuthEnabled()`. Update docs to say removed, not just gated.
-4. Final verification - unit tests, type-check, build, operator E2E, basic mobile and desktop smoke.
-5. PR dev → main.
+### Domain + DNS
 
-### Gate 2: Safe to make public
-1. Buy domain.
-2. Set NEXT_PUBLIC_SITE_URL.
-3. **Supabase Dashboard → Auth → Settings → turn ON "Enable email confirmations".** ← do not skip. Without this, fake/unverified emails bypass the quote-request gate.
-4. **Supabase Dashboard → Auth → URL Configuration → add `https://<yourdomain>/auth/confirm` to Redirect URLs allow-list.** ← required for verification links to work.
-5. Update remaining Supabase auth redirect URLs (password reset, etc.).
-6. Wire Plausible.
-7. Check canonical URLs, sitemap, robots.txt, JSON-LD.
-8. Confirm all deployed auth flows: sign up, email confirmation, sign in, forgot password, reset password.
-9. Confirm package image URLs resolve correctly on deployed pages.
+| Zone | Record / Rule | Value |
+|---|---|---|
+| `pilgrimcompare.com` | CNAME `www` | `pilgrimcompare.com` (Cloudflare proxied) |
+| `pilgrimcompare.com` | Redirect rule | `http.host eq "pilgrimcompare.com" or http.host eq "www.pilgrimcompare.com"` → `concat("https://pilgrimcompare.co.uk", http.request.uri.path)`, 301, preserve query string |
+| `pilgrimcompare.co.uk` | Vercel DNS | Production deployment |
 
-### Gate 3: Soft launch readiness (business, not code)
-1. Onboard 5 real operators.
-2. Get ~50 packages live.
-3. Run one real operator onboarding QA pass.
-4. Confirm package data quality.
-5. Confirm no copy implies KaabaTrip is a travel operator or payment processor.
+### Transactional email
+
+| Email | Trigger | From | Reply-to | To |
+|---|---|---|---|---|
+| Confirm signup (1) | Supabase Auth | Supabase → Resend SMTP | — | New user |
+| Enquiry confirmation (2) | `POST /api/quote-requests` | `notifications@send.pilgrimcompare.co.uk` | `support@pilgrimcompare.co.uk` | Customer |
+| Operator enquiry alert (3) | `POST /api/quote-requests` | same | Customer email | Operator |
+| Booking intent (4) | `POST /api/booking-intents` | same | `support@` | Customer |
+| Payment evidence (5) | `POST /api/booking-intents` (with evidence) | same | `support@` | Operator |
+
+Mailboxes `support/privacy/dpo/complaints@pilgrimcompare.co.uk` → Cloudflare Email Routing → `aliimrankhan86@googlemail.com`. Gmail filter: `to:(pilgrimcompare.co.uk)` → label `PilgrimCompare`, never spam. Upgrade to Google Workspace when first operator onboarded.
+
+### CI / branch protection
+- Workflow: `.github/workflows/ci.yml` — triggers on PR to `main` + `dev`
+- Steps: checkout → Node 20 → `npm ci` → `npx prisma generate` → `npx tsc --noEmit` → `npm run test`
+- No Playwright in CI (too slow for PR checks — run manually pre-merge)
+- Branch protection active on `main` + `dev`: require PR, require `ci` status check, block force-push, 0 required approvals (solo project)
+- No `DATABASE_URL` in CI — `prisma generate` uses schema file only (correct and intentional)
+
+### Supabase
+- Region: EU West / Ireland
+- Email confirmation toggle: **ON** ✅
+- Redirect URL allow-list includes `https://pilgrimcompare.co.uk/auth/confirm` ✅
+- SMTP: Resend — host `smtp.resend.com`, port 465, user `resend`
+
+### Vercel production env vars (all must be set)
+- `NEXT_PUBLIC_SITE_URL=https://pilgrimcompare.co.uk`
+- `FEATURE_USE_REAL_DB=true`
+- `RESEND_API_KEY`
+- `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`
+- All Supabase vars (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`) + `DATABASE_URL`
 
 ---
 
-## 9. Verification Playbook
+## 10. Pending Prompt Queue
 
-For docs-only handover edits:
+### Completed
+
+| Prompt | Task | Status |
+|---|---|---|
+| Prompt 1 | MockDB removal + `FEATURE_USE_REAL_DB` fail-fast | ✅ Done |
+| Prompt 2 | RLS and grants audit — migrations 008 + 009 | ✅ Done |
+| Prompt 3 | Domain wiring + full KaabaTrip → PilgrimCompare rebrand | ✅ Done |
+| Prompt 4 | GitHub branch protection + CI workflow | ✅ Done |
+
+### Quality pass queue — NEXT
+
+| Queue | Task | Pre-req |
+|---|---|---|
+| **Q1** ← next | KaabaTrip sweep + banned-phrase audit + dynamic departure cities + logo SVGs | `docs/PILGRIMCOMPARE_LANGUAGE_AND_LEGAL_STANDARDS.md` committed |
+| Q2 | Legal pages `/terms` `/privacy` `/how-it-works` | Q1 done |
+| Q3 | IA/nav — header, footer, back buttons, breadcrumbs | Q1 done |
+| Q4 | Mobile polish 360/390/430px | Q3 done |
+| Q5 | SEO — metadata, JSON-LD, sitemap | Q1 done |
+| Q6 | Ranking transparency + Featured infrastructure | Revenue model confirmed |
+
+### Automation suite — NOT started
+
+Prompts 5–13: email triggers, crons, Telegram alerts, operator data ingestion, target-list pipeline. Scope in `docs/PILGRIMCOMPARE_CLAUDE_CODE_PROMPTS.md` once committed.
+
+---
+
+## 11. Verification Playbook
 
 ```bash
+# Docs-only changes
 git diff --check
-```
 
-For implementation changes:
-
-```bash
+# Implementation changes
 npx tsc --noEmit
 npm run test
 npm run build
-```
 
-For UI/routing changes:
-
-```bash
+# UI / routing changes
 npm run dev
 npx playwright test
 ```
 
-Manual smoke targets:
+**Manual smoke targets:** `/` · `/umrah` · `/search/packages?type=umrah` · `/login` · `/operator/dashboard` · `/operator/analytics`
 
-- `/`
-- `/umrah`
-- `/search/packages?type=umrah`
-- `/login?type=customer`
-- `/login?type=partner`
-- `/operator/dashboard`
-- `/operator/analytics`
+**Viewports:** 320px mobile · 1280px desktop
 
-Viewport requirements:
-
-- 320px mobile
-- 1280px desktop
-
-Auth smoke:
-
-- Customer: `customer@example.com` / `KaabaTrip!2026`
-- Partner: `operator@example.com` / `KaabaTrip!2026`
-
-Expected customer result:
-
-- Redirects to `/`
-- Customer-facing header/navigation visible
-- Public customer flows usable
-
-Expected partner result:
-
-- Redirects to `/operator/dashboard`
-- Partner/operator dashboard visible
-- Operator nav usable
+**Auth smoke:**
+- Customer: `customer@example.com` / `KaabaTrip!2026` → redirects to `/`, customer nav visible
+- Partner: `operator@example.com` / `KaabaTrip!2026` → redirects to `/operator/dashboard`
 
 ---
 
-## 10. How The Next AI Should Work
+## 12. How the Next AI Should Work
 
-Start with this sequence:
-
-1. Read `AGENTS.md`, `docs/README_AI.md`, `docs/NOW.md`, and this file.
+1. Read `AGENTS.md`, `docs/README_AI.md`, `docs/NOW.md`, this file, `.agents/skills/supabase/SKILL.md`, `.agents/skills/supabase-postgres-best-practices/SKILL.md`.
 2. Run `git status -sb`.
-3. Treat existing uncommitted changes as user/agent work; do not revert them.
-4. If a doc conflicts with the verified state here, update the doc instead of undoing implementation.
-5. Pick one scoped task.
+3. Do not revert uncommitted user/agent work.
+4. If a doc conflicts with verified state here, update the doc — do not undo implementation.
+5. Pick **one** scoped task.
 6. Update relevant docs as part of the task.
-7. Run the required verification gates.
-8. Update `docs/NOW.md` before handoff or push.
+7. Run required verification gates.
+8. Update `docs/NOW.md` and this file before handoff or push.
 
-Current handoff intent from the user:
-
-- They want to see both **customer view** and **partner view** locally.
-- Auth/dev persona login is fixed for that purpose.
-- Use `/login?type=customer` and `/login?type=partner`, or `/dev/login` for one-click impersonation.
+**Current handoff intent (2026-06-10):**
+Prompts 1–4 complete. Infrastructure fully deployed. Gate 1 + Gate 2 done. Next session is Q1 — KaabaTrip sweep. Wait for `docs/PILGRIMCOMPARE_LANGUAGE_AND_LEGAL_STANDARDS.md` to be committed before starting Q1.

@@ -191,11 +191,11 @@ export function Header({ className = '' }: { className?: string }) {
     <header className={`${styles.header} ${className}`} aria-label="Main navigation">
       <div className={styles.header__container}>
         {/* Brand */}
-        <Link href="/" className={styles.header__brand} aria-label="KaabaTrip - Go to homepage">
+        <Link href="/" className={styles.header__brand} aria-label="PilgrimCompare - Go to homepage">
           <Logo size={32} />
           <Image
             src="/text-logo.svg"
-            alt="KaabaTrip"
+            alt="PilgrimCompare"
             className={styles.header__textLogo}
             width={108}
             height={45}
@@ -370,7 +370,7 @@ export function Header({ className = '' }: { className?: string }) {
           <div className={styles.header__mobileDrawerHeader}>
             <Link href="/" className={styles.header__mobileBrand} onClick={() => setMobileDrawerOpen(false)}>
               <Logo size={28} />
-              <Image src="/text-logo.svg" alt="KaabaTrip" width={90} height={38} priority />
+              <Image src="/text-logo.svg" alt="PilgrimCompare" width={90} height={38} priority />
             </Link>
             <button
               className={styles.header__mobileClose}

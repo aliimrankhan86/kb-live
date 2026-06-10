@@ -51,9 +51,9 @@ export default async function BookingConfirmationPage({
           </h2>
           <ul className="space-y-3">
             {[
-              'You pay the operator directly. KaabaTrip does not receive or hold your payment.',
+              'You pay the operator directly. PilgrimCompare does not receive or hold your payment.',
               'Your travel contract, cancellations and refunds are with the operator named on this page.',
-              'Your KaabaTrip reference code is a tracking code, not a payment receipt.',
+              'Your PilgrimCompare reference code is a tracking code, not a payment receipt.',
             ].map((line) => (
               <li
                 key={line}
@@ -103,7 +103,7 @@ export default async function BookingConfirmationPage({
               <span>
                 Keep your reference code{' '}
                 <strong className="font-mono">{referenceCode}</strong> safe. You
-                will need it if you contact KaabaTrip support.
+                will need it if you contact PilgrimCompare support.
               </span>
             </li>
           </ol>

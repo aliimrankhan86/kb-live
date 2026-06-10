@@ -5,6 +5,12 @@ import { Repository } from '@/lib/api/repository';
 import { mapErrorToResponse } from '@/lib/errors';
 import { checkRateLimit, getRateLimitIdentifier } from '@/lib/rate-limit';
 import type { QuoteRequest } from '@/lib/types';
+import {
+  sendEnquiryConfirmation,
+  sendOperatorEnquiryAlert,
+  findSimilarPackages,
+  quoteRefCode,
+} from '@/lib/email/send';
 
 const quoteRequestSchema = z.object({
   id: z.string().uuid().optional(),
@@ -105,9 +111,92 @@ export async function POST(request: NextRequest) {
 
     const saved = await Repository.createQuoteRequest({ userId: user.id, role: 'customer' }, quoteRequest);
 
+    // Fire-and-forget: emails must not fail the API response.
+    void sendQuoteEmails(user.email, user.name ?? '', saved);
+
     return NextResponse.json({ request: saved }, { status: 201 });
   } catch (err) {
     const { body, status } = mapErrorToResponse(err);
     return NextResponse.json(body, { status });
+  }
+}
+
+async function sendQuoteEmails(
+  customerEmail: string,
+  customerName: string,
+  saved: QuoteRequest,
+): Promise<void> {
+  try {
+    const refCode = quoteRefCode(saved.id);
+
+    // Resolve package + operator from source IDs (best-effort; graceful fallback).
+    let packageName = 'your Umrah enquiry';
+    let operatorId: string | undefined = saved.sourceOperatorId;
+
+    if (saved.sourcePackageId) {
+      const pkg = await Repository.getPackageById(saved.sourcePackageId);
+      if (pkg) {
+        packageName = pkg.title;
+        operatorId ??= pkg.operatorId;
+      }
+    }
+
+    let operatorName = 'the operator';
+    let operatorEmail: string | undefined;
+    if (operatorId) {
+      const operator = await Repository.getOperatorById(operatorId);
+      if (operator) {
+        operatorName = operator.tradingName ?? operator.companyName;
+        operatorEmail = operator.contactEmail;
+      }
+    }
+
+    // Similar packages (exclude the source package the customer just enquired about).
+    const allPublished = await Repository.listPackages();
+    const similar = findSimilarPackages(allPublished, saved);
+
+    // Email 2 — customer confirmation.
+    await sendEnquiryConfirmation({
+      customerEmail,
+      customerName: customerName || 'Pilgrim',
+      packageName,
+      operatorName,
+      refCode,
+      similarPackages: similar,
+    });
+
+    // Email 3 — operator alert (only when enquiry targets a specific operator).
+    if (operatorEmail) {
+      const { occupancy, dateWindow, notes } = saved;
+      const totalPeople =
+        (occupancy.single ?? 0) +
+        (occupancy.double ?? 0) * 2 +
+        (occupancy.triple ?? 0) * 3 +
+        (occupancy.quad ?? 0) * 4;
+
+      const travelDates = dateWindow?.start
+        ? `${dateWindow.start}${dateWindow.end ? ` to ${dateWindow.end}` : ''}`
+        : 'Not provided';
+
+      const groupSize =
+        totalPeople > 0
+          ? `${totalPeople} traveller${totalPeople !== 1 ? 's' : ''}`
+          : 'Not provided';
+
+      await sendOperatorEnquiryAlert({
+        operatorEmail,
+        operatorName,
+        customerName: customerName || customerEmail,
+        customerEmail,
+        customerPhone: undefined,
+        packageName,
+        travelDates,
+        groupSize,
+        message: notes ?? '',
+        refCode,
+      });
+    }
+  } catch (err) {
+    console.error('[email] sendQuoteEmails failed:', err);
   }
 }

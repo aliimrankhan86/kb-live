@@ -75,7 +75,7 @@ describe('bank details repository methods', () => {
     expect(instructions.accountHolderName).toBe('Al-Hidayah Travel Ltd');
     expect(instructions.accountNumber).toBe('12345678');
     expect(instructions.delivery).toBe('in_app_only');
-    expect(instructions.disclosure).toContain('KaabaTrip does not collect, hold, or transfer customer funds');
+    expect(instructions.disclosure).toContain('PilgrimCompare does not collect, hold, or transfer customer funds');
   });
 
   it('rejects payment instruction access for unrelated customers and operators', async () => {

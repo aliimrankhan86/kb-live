@@ -15,7 +15,7 @@ export async function generateMetadata({
     const pkg = await Repository.getPackageBySlug(slug)
     if (pkg && pkg.status === 'published') {
       const operator = await Repository.getOperatorById(pkg.operatorId)
-      const operatorName = operator?.companyName ?? 'KaabaTrip operator'
+      const operatorName = operator?.companyName ?? 'PilgrimCompare operator'
       const packageType = pkg.pilgrimageType === 'hajj' ? 'Hajj' : 'Umrah'
       const price = `£${pkg.pricePerPerson.toLocaleString('en-GB')}`
       const hotelStars = Math.max(pkg.hotelMakkahStars ?? 0, pkg.hotelMadinahStars ?? 0)
@@ -28,19 +28,19 @@ export async function generateMetadata({
         },
         openGraph: pkg.images?.[0]
           ? {
-              title: `${pkg.title} | KaabaTrip`,
+              title: `${pkg.title} | PilgrimCompare`,
               description: `${packageType} package from ${operatorName} with ${pkg.totalNights} nights and transparent package details.`,
-              url: `https://kaabatrip.com/packages/${pkg.slug}`,
-              siteName: 'KaabaTrip',
+              url: `https://pilgrimcompare.co.uk/packages/${pkg.slug}`,
+              siteName: 'PilgrimCompare',
               type: 'website',
               locale: 'en_GB',
               images: [{ url: pkg.images[0], width: 1200, height: 630, alt: pkg.title }],
             }
           : {
-              title: `${pkg.title} | KaabaTrip`,
+              title: `${pkg.title} | PilgrimCompare`,
               description: `${packageType} package from ${operatorName} with ${pkg.totalNights} nights and transparent package details.`,
-              url: `https://kaabatrip.com/packages/${pkg.slug}`,
-              siteName: 'KaabaTrip',
+              url: `https://pilgrimcompare.co.uk/packages/${pkg.slug}`,
+              siteName: 'PilgrimCompare',
               type: 'website',
               locale: 'en_GB',
             },
@@ -117,8 +117,8 @@ export default async function PackageDetailPage({
     { label: pkg.title },
   ];
   const packageDetailJsonLd = graphJsonLd([
-    packageJsonLd(pkg, operator?.companyName ?? 'KaabaTrip'),
-    touristTripJsonLd(pkg, operator?.companyName ?? 'KaabaTrip'),
+    packageJsonLd(pkg, operator?.companyName ?? 'PilgrimCompare'),
+    touristTripJsonLd(pkg, operator?.companyName ?? 'PilgrimCompare'),
     breadcrumbJsonLd(breadcrumbItems.map((item) => ({ name: item.label, path: item.href }))),
     faqPageJsonLd([
       {
@@ -128,7 +128,7 @@ export default async function PackageDetailPage({
       },
       {
         question: 'Who provides this pilgrimage package?',
-        answer: `${operator?.companyName ?? 'The listed operator'} provides this package. KaabaTrip helps travellers compare details and request a quote.`,
+        answer: `${operator?.companyName ?? 'The listed operator'} provides this package. PilgrimCompare helps travellers compare details and request a quote.`,
       },
     ]),
   ]);
