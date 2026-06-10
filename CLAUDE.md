@@ -22,6 +22,13 @@ When a local problem turns out to be **expected behavior, not a bug**, capture i
 ## Known gotchas (read before debugging "broken" local behavior)
 - **Dev login fails locally → check the server, not the code.** Dev personas (`customer@example.com` / `operator@example.com` / `operator2@example.com` / `admin@example.com`, all `KaabaTrip!2026`) only work under `npm run dev` (`NODE_ENV=development`). A local prod build (`npm run build` + `npm start` → `next start`) runs `NODE_ENV=production`, so `isDevAuthEnabled()` is false and sign-in returns `401 AUTH_INVALID_CREDENTIALS` **by design**. Fix = restart with `npm run dev`. Full note: `PROJECT_BRIEF.md` §5, `AI_NOTES.md` §4.
 
+## Git branching strategy (mandatory)
+- **Never push directly to `main` or `dev`** — both are protected, require PR + CI green.
+- Flow: `feature/your-branch` → PR → **`dev`** → (when approved) PR → `main`.
+- All new work branches off `dev`. All PRs target `dev` first.
+- Only `dev` → `main` PRs are allowed once `dev` is verified and stable.
+- Before creating a PR, always `git fetch origin` first to ensure local refs are current.
+
 ## Non-negotiable before every push (from AGENTS.md)
 - `npm run test` green · `npm run build` 0 errors · `npx tsc --noEmit` pass
 - UI/route change → Playwright smoke `/`, `/umrah`, `/search/packages` at 320px + 1280px
