@@ -36,7 +36,8 @@ This file is the current handover source of truth. If another document conflicts
 Target: 5 operators onboarded, ~50 packages live. No code blockers for this gate — it is an operator acquisition and data-quality goal.
 
 **Pre-req before any operator onboarding:**
-- `/public/logo.svg` and `/public/text-logo.svg` still contain PilgrimCompare — fix first (Q1 scope)
+- `WordmarkLogo` component (`components/graphics/WordmarkLogo.tsx`) ✅ done — Nunito ExtraBold 800, `currentColor`, used in Header + Footer
+- `/public/logo.svg` and `/public/text-logo.svg` static files — verify brand strings are current (Q1 scope)
 
 ---
 
@@ -332,14 +333,14 @@ Mailboxes `support/privacy/dpo/complaints@pilgrimcompare.co.uk` → Cloudflare E
 |---|---|---|
 | Prompt 1 | MockDB removal + `FEATURE_USE_REAL_DB` fail-fast | ✅ Done |
 | Prompt 2 | RLS and grants audit — migrations 008 + 009 | ✅ Done |
-| Prompt 3 | Domain wiring + full PilgrimCompare → PilgrimCompare rebrand | ✅ Done |
+| Prompt 3 | Domain wiring + full KaabaTrip → PilgrimCompare rebrand | ✅ Done |
 | Prompt 4 | GitHub branch protection + CI workflow | ✅ Done |
 
 ### Quality pass queue — NEXT
 
 | Queue | Task | Pre-req |
 |---|---|---|
-| **Q1** ← next | PilgrimCompare sweep + banned-phrase audit + dynamic departure cities + logo SVGs | `docs/PILGRIMCOMPARE_LANGUAGE_AND_LEGAL_STANDARDS.md` committed |
+| **Q1** ← next | PilgrimCompare sweep + banned-phrase audit + dynamic departure cities | `docs/PILGRIMCOMPARE_LANGUAGE_AND_LEGAL_STANDARDS.md` committed |
 | Q2 | Legal pages `/terms` `/privacy` `/how-it-works` | Q1 done |
 | Q3 | IA/nav — header, footer, back buttons, breadcrumbs | Q1 done |
 | Q4 | Mobile polish 360/390/430px | Q3 done |
