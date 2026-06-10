@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { Logo } from '@/components/graphics/Logo';
 
 export function Footer() {
@@ -12,13 +11,9 @@ export function Footer() {
         <div className="mb-8 flex flex-col items-center gap-3 sm:flex-row sm:items-start sm:gap-6">
           <Link href="/" className="flex items-center gap-2 shrink-0" aria-label="PilgrimCompare - Go to homepage">
             <Logo size={28} />
-            <Image
-              src="/text-logo.svg"
-              alt="PilgrimCompare"
-              width={90}
-              height={38}
-              priority
-            />
+            <span className="footer__wordmark" style={{ fontFamily: 'var(--font-exo2), system-ui, sans-serif', fontSize: '1.375rem', fontWeight: 700, letterSpacing: '-0.01em', lineHeight: 1 }}>
+              <span style={{ color: '#FFFFFF' }}>Pilgrim</span><span style={{ color: '#FFD31D' }}>Compare</span>
+            </span>
           </Link>
           <p className="text-center text-xs text-[var(--textMuted)] sm:text-left sm:max-w-xs">
             Compare Umrah and Hajj packages from verified UK travel operators.

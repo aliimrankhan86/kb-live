@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
 import { Logo } from '@/components/graphics/Logo';
 import type { UserRole } from '@/lib/types';
@@ -193,14 +192,9 @@ export function Header({ className = '' }: { className?: string }) {
         {/* Brand */}
         <Link href="/" className={styles.header__brand} aria-label="PilgrimCompare - Go to homepage">
           <Logo size={32} />
-          <Image
-            src="/text-logo.svg"
-            alt="PilgrimCompare"
-            className={styles.header__textLogo}
-            width={108}
-            height={45}
-            priority
-          />
+          <span className={styles.header__textLogo} aria-hidden="true">
+            <span className={styles.header__wordmarkPilgrim}>Pilgrim</span><span className={styles.header__wordmarkCompare}>Compare</span>
+          </span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -370,7 +364,9 @@ export function Header({ className = '' }: { className?: string }) {
           <div className={styles.header__mobileDrawerHeader}>
             <Link href="/" className={styles.header__mobileBrand} onClick={() => setMobileDrawerOpen(false)}>
               <Logo size={28} />
-              <Image src="/text-logo.svg" alt="PilgrimCompare" width={90} height={38} priority />
+              <span className={styles.header__textLogoMobile} aria-hidden="true">
+                <span className={styles.header__wordmarkPilgrim}>Pilgrim</span><span className={styles.header__wordmarkCompare}>Compare</span>
+              </span>
             </Link>
             <button
               className={styles.header__mobileClose}
