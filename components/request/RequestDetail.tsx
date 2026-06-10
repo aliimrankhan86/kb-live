@@ -25,9 +25,9 @@ const MAX_EVIDENCE_BYTES = 10 * 1024 * 1024; // 10MB
 const ACCEPTED_EVIDENCE_MIME = ['image/jpeg', 'image/png', 'application/pdf'];
 const PAYMENT_EVIDENCE_ACCEPT = '.jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf';
 const PAY_OPERATOR_DIRECT_DISCLOSURE =
-  'You pay the operator directly. KaabaTrip does not collect, hold, or transfer customer funds. The operator is the contracting party and is responsible for package fulfilment, payment records, and any payment outcome.';
+  'You pay the operator directly. PilgrimCompare does not collect, hold, or transfer customer funds. The operator is the contracting party and is responsible for package fulfilment, payment records, and any payment outcome.';
 const SKIP_PROOF_ACKNOWLEDGEMENT =
-  'KaabaTrip does not have access to the operator’s payment records… ability to help evidence payment may be limited… This does not remove legal rights…';
+  'PilgrimCompare does not have access to the operator’s payment records… ability to help evidence payment may be limited… This does not remove legal rights…';
 
 const displayValue = (value?: string | null) => {
   const trimmed = value?.trim();
@@ -468,7 +468,7 @@ export function RequestDetail({ id }: { id: string }) {
                           </span>
                         </p>
                         <p className="mt-1 text-xs text-[var(--textMuted)]">
-                          Evidence is visible only to you, the involved operator, and KaabaTrip admin.
+                          Evidence is visible only to you, the involved operator, and PilgrimCompare admin.
                         </p>
                       </div>
                       <PaymentInstructions bookingIntent={existingIntent} />
@@ -568,7 +568,7 @@ export function RequestDetail({ id }: { id: string }) {
                 className="block min-h-11 w-full rounded-md border border-[var(--borderSubtle)] bg-[var(--surfaceDark)] px-3 py-2 text-sm text-[var(--text)] file:mr-4 file:rounded-md file:border-0 file:bg-[var(--yellow)] file:px-3 file:py-2 file:text-sm file:font-medium file:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focusRing)]"
               />
               <p id="payment-evidence-help" className="text-xs text-[var(--textMuted)]">
-                Accepted formats: JPG, PNG, or PDF. Maximum 10MB per file. Files are stored securely and visible only to you, the operator, and KaabaTrip admin.
+                Accepted formats: JPG, PNG, or PDF. Maximum 10MB per file. Files are stored securely and visible only to you, the operator, and PilgrimCompare admin.
               </p>
               {evidenceFiles.length > 0 ? (
                 <ul className="space-y-1 text-xs text-[var(--textMuted)]" aria-label="Selected evidence files">

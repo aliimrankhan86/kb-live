@@ -119,7 +119,7 @@ const REFERENCE_CODE_PREFIX = 'KT';
 const MAX_REFERENCE_CODE_ATTEMPTS = 10;
 const BANK_CHANGE_COOLING_PERIOD_MS = 24 * 60 * 60 * 1000;
 const PAY_OPERATOR_DIRECT_DISCLOSURE =
-  'You pay the operator directly. KaabaTrip does not collect, hold, or transfer customer funds. The operator is the contracting party and is responsible for package fulfilment, payment records, and any payment outcome.';
+  'You pay the operator directly. PilgrimCompare does not collect, hold, or transfer customer funds. The operator is the contracting party and is responsible for package fulfilment, payment records, and any payment outcome.';
 const ANALYTICS_PII_KEY_PATTERN = /(email|phone|name|address|customer|payer|payment|account)/i;
 
 const isAcceptedEvidenceFile = (file: BookingPaymentEvidenceFile) =>

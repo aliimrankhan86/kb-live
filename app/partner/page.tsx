@@ -2,16 +2,16 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'List Your Umrah & Hajj Packages on KaabaTrip',
-  description: 'Join KaabaTrip as a verified operator. Reach thousands of UK Muslims planning Umrah and Hajj. No upfront fees. ATOL and ABTA operators welcome.',
+  title: 'List Your Umrah & Hajj Packages on PilgrimCompare',
+  description: 'Join PilgrimCompare as a verified operator. Reach thousands of UK Muslims planning Umrah and Hajj. No upfront fees. ATOL and ABTA operators welcome.',
   alternates: {
     canonical: '/partner',
   },
   openGraph: {
-    title: 'List Your Umrah & Hajj Packages | KaabaTrip Partners',
+    title: 'List Your Umrah & Hajj Packages | PilgrimCompare Partners',
     description: 'Reach UK travellers planning Umrah and Hajj. Verified operators only. No upfront fees.',
-    url: 'https://kaabatrip.com/partner',
-    siteName: 'KaabaTrip',
+    url: 'https://pilgrimcompare.co.uk/partner',
+    siteName: 'PilgrimCompare',
     type: 'website',
     locale: 'en_GB',
   },
@@ -31,7 +31,7 @@ export default function PartnerLandingPage() {
               Reach Thousands of UK Muslims Planning Umrah & Hajj
             </h1>
             <p className="mt-5 text-lg text-[var(--textMuted)]">
-              List your verified packages on KaabaTrip — the UK{"'"}s trusted Umrah & Hajj comparison platform.
+              List your verified packages on PilgrimCompare — the UK{"'"}s trusted Umrah & Hajj comparison platform.
               No upfront fees. Transparent commission. UK-focused audience.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -123,7 +123,7 @@ export default function PartnerLandingPage() {
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-2xl font-semibold text-[var(--text)]">Built for UK Compliance</h2>
             <p className="mt-4 text-[var(--textMuted)]">
-              KaabaTrip requires all operators to display ATOL/ABTA status prominently.
+              PilgrimCompare requires all operators to display ATOL/ABTA status prominently.
               Travellers see verified protection badges — or a clear warning if protection is not listed.
               This transparency drives higher-quality enquiries and builds long-term trust.
             </p>
@@ -135,7 +135,7 @@ export default function PartnerLandingPage() {
           <div className="mx-auto max-w-xl text-center">
             <h2 className="text-2xl font-semibold text-[var(--text)]">Ready to Grow Your Business?</h2>
             <p className="mt-3 text-[var(--textMuted)]">
-              Join operators already listing on KaabaTrip and start receiving enquiries from UK travellers today.
+              Join operators already listing on PilgrimCompare and start receiving enquiries from UK travellers today.
             </p>
             <Link
               href="/operator/onboarding"

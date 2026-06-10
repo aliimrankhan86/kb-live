@@ -12,11 +12,11 @@ export const metadata: Metadata = {
     canonical: '/hajj',
   },
   openGraph: {
-    title: 'Hajj Packages 2027 – Coming Soon | KaabaTrip',
+    title: 'Hajj Packages 2027 – Coming Soon | PilgrimCompare',
     description:
       'Register interest for Hajj 2027 packages from verified UK operators. Compare prices, hotels, and inclusions when packages go live.',
-    url: 'https://kaabatrip.com/hajj',
-    siteName: 'KaabaTrip',
+    url: 'https://pilgrimcompare.co.uk/hajj',
+    siteName: 'PilgrimCompare',
     type: 'website',
     locale: 'en_GB',
   },
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 
 const hajjFaqs = [
   {
-    question: 'When will Hajj 2027 packages be available on KaabaTrip?',
+    question: 'When will Hajj 2027 packages be available on PilgrimCompare?',
     answer:
       'We expect Hajj 2027 packages from verified UK operators to go live in late 2026. Register your interest to be notified first.',
   },
@@ -39,16 +39,16 @@ const hajjFaqs = [
       'Hajj packages from the UK typically range from £5,000 to £15,000 per person depending on accommodation grade, group size, and included services. Prices vary each year based on government quota allocations.',
   },
   {
-    question: 'Is KaabaTrip ATOL protected?',
+    question: 'Is PilgrimCompare ATOL protected?',
     answer:
-      'KaabaTrip is a comparison and enquiry platform — we do not sell packages directly. All operators listed on KaabaTrip are required to declare their ATOL and ABTA status. Always verify this directly with the operator before booking.',
+      'PilgrimCompare is a comparison and enquiry platform — we do not sell packages directly. All operators listed on PilgrimCompare are required to declare their ATOL and ABTA status. Always verify this directly with the operator before booking.',
   },
 ];
 
 const hajjPageJsonLd = graphJsonLd([
   webPageJsonLd({
     path: '/hajj',
-    name: 'Hajj Packages 2027 from the UK – Coming Soon | KaabaTrip',
+    name: 'Hajj Packages 2027 from the UK – Coming Soon | PilgrimCompare',
     description:
       'Compare Hajj packages for 2027 from verified UK operators with ATOL and ABTA protection.',
   }),

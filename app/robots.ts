@@ -16,6 +16,6 @@ export default function robots(): MetadataRoute.Robots {
       { userAgent: 'PerplexityBot', allow: '/' },
       { userAgent: 'Google-Extended', allow: '/' },
     ],
-    sitemap: 'https://kaabatrip.com/sitemap.xml',
+    sitemap: 'https://pilgrimcompare.co.uk/sitemap.xml',
   }
 }

@@ -190,7 +190,7 @@ const LoginModalComponent: React.FC<LoginModalProps> = ({
           {/* Header */}
           <div className={styles.modalHeader}>
             <h2 id="login-modal-title" className={styles.modalTitle}>
-              Login to KaabaTrip
+              Login to PilgrimCompare
             </h2>
             <button
               type="button"

@@ -8,11 +8,11 @@ export const metadata: Metadata = {
     'Umrah packages from the UK start from around £800 per person. Compare budget, mid-range, and premium 5-star options. Full breakdown of what affects the price and what is included.',
   alternates: { canonical: '/umrah/cost' },
   openGraph: {
-    title: 'Umrah Package Cost from the UK – Pricing Guide 2026–2027 | KaabaTrip',
+    title: 'Umrah Package Cost from the UK – Pricing Guide 2026–2027 | PilgrimCompare',
     description:
       'Compare Umrah package prices by hotel tier, travel season, and departure airport. Find out what is included and how to get the best value.',
-    url: 'https://kaabatrip.com/umrah/cost',
-    siteName: 'KaabaTrip',
+    url: 'https://pilgrimcompare.co.uk/umrah/cost',
+    siteName: 'PilgrimCompare',
     type: 'website',
     locale: 'en_GB',
   },
@@ -60,7 +60,7 @@ const faqs = [
 const pageJsonLd = graphJsonLd([
   webPageJsonLd({
     path: '/umrah/cost',
-    name: 'How Much Does an Umrah Package Cost from the UK? 2026–2027 Guide | KaabaTrip',
+    name: 'How Much Does an Umrah Package Cost from the UK? 2026–2027 Guide | PilgrimCompare',
     description:
       'Umrah packages from the UK start from around £800 per person. Compare budget, mid-range, and premium 5-star options with full pricing breakdown.',
     dateModified: '2026-06-06',
@@ -270,7 +270,7 @@ export default function UmrahCostPage() {
               Ready to compare Umrah packages?
             </h2>
             <p className="text-sm text-[var(--textMuted)] mb-4">
-              KaabaTrip lets you compare packages side by side — prices, hotel ratings, distance to
+              PilgrimCompare lets you compare packages side by side — prices, hotel ratings, distance to
               Haram, inclusions, and operator trust signals — before requesting a quote directly
               from the operator.
             </p>

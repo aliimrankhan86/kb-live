@@ -1,6 +1,6 @@
-# KaabaTrip AI Handover - Single Source of Truth
+# PilgrimCompare AI Handover - Single Source of Truth
 
-**Last verified:** 2026-06-10 (MockDB P0 close-out)
+**Last verified:** 2026-06-10 (rebrand + domain wiring)
 **Last architecture/security audit:** 2026-06-09
 **Branch:** `dev`
 **Audience:** Claude, Codex, Kimi, and any AI/developer taking over the project.
@@ -676,7 +676,7 @@ Do not mark these complete unless re-verified.
 | P0 | Production env validation | Confirm production has `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`; verify Redis path is used outside local/dev fallback. |
 | P0 | Deployed Prisma/Supabase cutover | Local/verified paths exist with `FEATURE_USE_REAL_DB=true`; deployed environment needs explicit smoke against Supabase data, auth redirects, and RLS. |
 | P0 | **Supabase email confirmation toggle** | In Supabase Dashboard → Auth → Settings → **"Enable email confirmations" must be ON** before going public. Without it, `email_confirmed_at` is set on signup automatically and the email-verification gate is a no-op. Also add `https://<yourdomain>/auth/confirm` to Auth → URL Configuration → Redirect URLs allow-list. Code is ready; this is a dashboard click. |
-| P0 | Domain launch | Buy/configure production domain. Then update `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`, Supabase auth redirect URLs, canonical URLs, robots, sitemap, JSON-LD base URLs, and any hardcoded `kaabatrip.com` assumptions. |
+| P0 | ~~Domain launch~~ | **RESOLVED 2026-06-10.** Domain is `pilgrimcompare.co.uk`. `NEXT_PUBLIC_SITE_URL=https://pilgrimcompare.co.uk` set in `env.example`. All hardcoded `kaabatrip.com` URLs replaced across all pages, JSON-LD, robots, sitemap, seo.ts, metadata. Brand renamed `KaabaTrip` → `PilgrimCompare` in all copy (25+ files). `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` — wire after domain goes live (no Plausible script in codebase yet). Supabase auth redirect URLs updated manually (done outside code). Cloudflare redirect rule for `pilgrimcompare.com` → `pilgrimcompare.co.uk` must be added manually — see §11 below. |
 | P1 | Plausible analytics | Wire after domain is live and cookie-consent behavior is confirmed. |
 | P1 | Payment evidence policy conflict | Product canon says MVP evidence storage is metadata-only; architecture notes describe byte storage/purge. Resolve policy before shipping file-byte storage changes. |
 | P1 | Admin reconciliation | `/admin/reconciliation` exists. Verify export completeness, expected CSV/PDF format, and payment-evidence linkage before treating as done. |
@@ -812,6 +812,7 @@ Current handoff intent from the user (2026-06-10):
 
 - **Prompt 1 (MockDB P0 close-out) is complete and verified.**
 - **Prompt 2 (RLS and Grants Audit) is complete and verified.** Migrations 008 + 009 applied to production Supabase.
+- **Prompt 3 (rebrand + domain wiring) is complete and verified.** See §11 below.
 
 ### Exact next step for next session
 
@@ -819,10 +820,71 @@ All Gate 1 P0 blockers are now resolved. The next work is:
 
 1. **Continue remaining MockDB removal pass.** Run `grep -rn "from.*mock-db" components/ app/` for live list. Components still importing MockDB: `QuoteRequestWizard`, `OfferForm`, `PaymentDetailsClient`, `OperatorLeadsClient`, `admin/*`, `PackagesBrowse`, `ComplaintForm`, `ComparisonTable`. These are lower urgency but must be fixed before public launch.
 
-2. **Confirm Vercel production env vars.** `FEATURE_USE_REAL_DB=true`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` must all be set. Without them the app throws on first DB-touching route.
+2. **Confirm Vercel production env vars.** `FEATURE_USE_REAL_DB=true`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, and `NEXT_PUBLIC_SITE_URL=https://pilgrimcompare.co.uk` must all be set. Without them the app throws on first DB-touching route.
 
-3. **Supabase email confirmation toggle.** Dashboard → Auth → Settings → "Enable email confirmations" ON. Required before going public. Also add `https://<yourdomain>/auth/confirm` to Auth → URL Configuration → Redirect URLs.
+3. **Supabase email confirmation toggle.** Dashboard → Auth → Settings → "Enable email confirmations" ON. Required before going public. Also add `https://pilgrimcompare.co.uk/auth/confirm` to Auth → URL Configuration → Redirect URLs.
 
 4. **`app_metadata` role backfill.** Any Supabase auth user created before 2026-06-09 has role only in `user_metadata` and will default to `customer`. Backfill via the service role admin API before launch.
 
-5. **Merge PR #27** (`dev` → `main`) once steps 1–3 are verified. Run Playwright smoke at 320px + 1280px before merge.
+5. **Add Cloudflare redirect rule** for `pilgrimcompare.com` → `pilgrimcompare.co.uk`. See §11 for exact rule.
+
+6. **Wire Plausible analytics.** Add script to `app/layout.tsx` with `data-domain=pilgrimcompare.co.uk` once domain is live. Gate behind cookie consent.
+
+---
+
+## 11. Domain & Rebrand — 2026-06-10
+
+### What changed
+
+Brand renamed **KaabaTrip → PilgrimCompare**. Production domain wired to **pilgrimcompare.co.uk**. Redirect domain **pilgrimcompare.com** (Cloudflare rule required — see below).
+
+### Files touched (25+ source files)
+
+| Category | Files |
+| --- | --- |
+| Config | `package.json`, `env.example` |
+| SEO infra | `lib/seo.ts`, `lib/seo/json-ld.ts`, `app/robots.ts`, `app/sitemap.ts` |
+| Layout | `app/layout.tsx` |
+| Pages (metadata + copy) | `app/page.tsx`, `app/umrah/page.tsx`, `app/umrah/birmingham/page.tsx`, `app/umrah/london/page.tsx`, `app/umrah/manchester/page.tsx`, `app/umrah/cost/page.tsx`, `app/umrah/ramadan/page.tsx`, `app/hajj/page.tsx`, `app/search/packages/page.tsx`, `app/partner/page.tsx`, `app/packages/[slug]/page.tsx`, `app/operators/[slug]/page.tsx`, `app/privacy/page.tsx`, `app/terms/page.tsx`, `app/settings/page.tsx`, `app/signup/page.tsx`, `app/verify-email/page.tsx`, `app/login/page.tsx`, `app/requests/[id]/confirmation/page.tsx`, `app/admin/layout.tsx`, `app/api/health/route.ts`, `app/operator/onboarding/page.tsx`, `app/showcase/page.tsx` |
+| Components | `components/layout/Footer.tsx`, `components/layout/Header.tsx`, `components/operators/TierExplanation.tsx`, `components/auth/LoginModal.tsx`, `components/auth/SignUpForm.tsx`, `components/compliance/CookieConsent.tsx`, `components/marketing/CityCorridor.tsx`, `components/request/RequestDetail.tsx`, `components/request/ComplaintForm.tsx`, `components/request/PaymentInstructions.tsx`, `components/packages/PackageDetail.tsx`, `components/graphics/Logo.tsx`, `components/operator/OperatorRegistrationForm.tsx`, `components/showcase/*` |
+| Lib | `lib/config.ts`, `lib/api/repository.ts`, `lib/api/mock-db.ts` |
+| Tests | `tests/bank-details.test.ts`, `tests/smoke.e2e.spec.ts`, `tests/payment-instructions.test.tsx`, `tests/hero.spec.tsx`, `e2e/smoke.e2e.spec.ts`, `e2e/bank-payment.spec.ts` |
+| Docs | `README.md`, `docs/SEO.md` |
+
+### What was NOT changed (intentional)
+
+- `KaabaTrip!2026` — dev login password credential; unchanged by design (code logic, not copy)
+- `KT-XXXXX` booking reference prefix — existing DB records use this prefix; changing mid-flight would break lookups. Rename post-launch when reference DB is migrated.
+- Supabase auth redirect URLs — updated manually in dashboard (per original instruction)
+- CLAUDE.md, AI_NOTES.md internal planning docs — updated header only; historical entries preserve original context
+
+### env.example state
+
+```
+NEXT_PUBLIC_SITE_URL=https://pilgrimcompare.co.uk
+NEXT_PUBLIC_APP_NAME=PilgrimCompare
+```
+
+Vercel must have `NEXT_PUBLIC_SITE_URL=https://pilgrimcompare.co.uk` set — without it the sitemap fallback and JSON-LD BASE_URL fallback both still resolve correctly (`?? 'https://pilgrimcompare.co.uk'`), but explicit env var is safer.
+
+### Cloudflare redirect rule (add manually)
+
+In the Cloudflare dashboard for the **pilgrimcompare.com** zone:
+
+**Rules → Redirect Rules → Create rule**
+
+| Field | Value |
+| --- | --- |
+| Rule name | `Redirect .com to .co.uk` |
+| When incoming requests match | `Hostname equals pilgrimcompare.com` |
+| Then | Redirect to `https://pilgrimcompare.co.uk${uri.path}` |
+| Type | 301 (Permanent) |
+| Preserve query string | Yes |
+
+This covers all paths (`/`, `/umrah`, `/search/packages`, etc.) with a 301 permanent redirect preserving the path and query string.
+
+### Open risks
+
+1. **KT- reference codes** — the copy in `app/terms/page.tsx` still mentions "e.g., KT-XXXXX". This is a correct description of current DB behaviour; update copy once reference prefix is formally migrated.
+2. **Plausible analytics** — no script in codebase yet. Wire `data-domain=pilgrimcompare.co.uk` to `app/layout.tsx` post-domain-launch, gated behind cookie consent check.
+3. **Email addresses** — footer/privacy/terms now show `@pilgrimcompare.co.uk` addresses. Ensure those mailboxes exist before going live (`support@`, `privacy@`, `dpo@`, `complaints@`).

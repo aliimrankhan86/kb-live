@@ -21,7 +21,7 @@ export const ShowcaseCTA: React.FC<ShowcaseCTAProps> = ({ className = '' }) => {
             Ready to Begin Your Journey?
           </h2>
           <p className={styles.cta__description}>
-            Join thousands of satisfied pilgrims who have trusted KaabaTrip for their spiritual journey. 
+            Join thousands of satisfied pilgrims who have trusted PilgrimCompare for their spiritual journey. 
             Book your package today and experience the difference.
           </p>
           <div className={styles.cta__buttons}>

@@ -10,12 +10,12 @@ interface LogoProps {
 export const Logo: React.FC<LogoProps> = ({ 
   className = '', 
   size = 32,
-  'aria-label': ariaLabel = 'KaabaTrip Logo'
+  'aria-label': ariaLabel = 'PilgrimCompare Logo'
 }) => {
   return (
     <Image
       src="/logo.svg"
-      alt="KaabaTrip Logo"
+      alt="PilgrimCompare Logo"
       width={size}
       height={size}
       className={className}

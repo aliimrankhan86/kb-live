@@ -93,7 +93,7 @@ describe('PaymentInstructions component', () => {
     await waitFor(() => {
       const disclosure = screen.getByTestId('payment-disclaimer');
       expect(disclosure).toHaveTextContent(
-        'You pay the operator directly. KaabaTrip does not collect, hold, or transfer customer funds. The operator is the contracting party and is responsible for package fulfilment, payment records, and any payment outcome.',
+        'You pay the operator directly. PilgrimCompare does not collect, hold, or transfer customer funds. The operator is the contracting party and is responsible for package fulfilment, payment records, and any payment outcome.',
       );
     });
   });

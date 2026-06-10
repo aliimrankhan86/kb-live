@@ -8,11 +8,11 @@ export const metadata: Metadata = {
     'Compare Ramadan Umrah packages from verified UK operators for 2027. Perform Umrah during the holiest month with ATOL-protected operators — hotels near the Grand Mosque, flights, and visa included.',
   alternates: { canonical: '/umrah/ramadan' },
   openGraph: {
-    title: 'Ramadan Umrah Packages 2027 from the UK | KaabaTrip',
+    title: 'Ramadan Umrah Packages 2027 from the UK | PilgrimCompare',
     description:
       'Book your Ramadan Umrah 2027 with verified UK operators. Compare packages, hotel distance to Haram, and request a quote.',
-    url: 'https://kaabatrip.com/umrah/ramadan',
-    siteName: 'KaabaTrip',
+    url: 'https://pilgrimcompare.co.uk/umrah/ramadan',
+    siteName: 'PilgrimCompare',
     type: 'website',
     locale: 'en_GB',
   },
@@ -37,14 +37,14 @@ const faqs = [
   {
     question: 'Are Ramadan Umrah packages ATOL protected?',
     answer:
-      "UK travel operators selling package holidays that include international flights and accommodation must hold ATOL (Air Travel Organiser's Licence) protection. Always verify the operator's ATOL number on the Civil Aviation Authority (CAA) website before booking. KaabaTrip lists operators' protection status where provided.",
+      "UK travel operators selling package holidays that include international flights and accommodation must hold ATOL (Air Travel Organiser's Licence) protection. Always verify the operator's ATOL number on the Civil Aviation Authority (CAA) website before booking. PilgrimCompare lists operators' protection status where provided.",
   },
 ]
 
 const pageJsonLd = graphJsonLd([
   webPageJsonLd({
     path: '/umrah/ramadan',
-    name: 'Ramadan Umrah Packages 2027 from the UK | KaabaTrip',
+    name: 'Ramadan Umrah Packages 2027 from the UK | PilgrimCompare',
     description:
       'Compare Ramadan Umrah packages from verified UK operators for 2027. Hotels near the Grand Mosque, flights, ATOL protected.',
   }),

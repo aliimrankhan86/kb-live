@@ -4,7 +4,7 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Privacy Policy',
   description:
-    'KaabaTrip Privacy Policy. How we collect, use and protect your personal data in compliance with UK GDPR and the Data Protection Act 2018.',
+    'PilgrimCompare Privacy Policy. How we collect, use and protect your personal data in compliance with UK GDPR and the Data Protection Act 2018.',
   alternates: { canonical: '/privacy' },
   robots: { index: true, follow: true },
 };
@@ -21,20 +21,20 @@ export default function PrivacyPolicyPage() {
         <section className="mb-8">
           <h2 className="mb-3 text-xl font-semibold">1. Who we are</h2>
           <p className="mb-3 text-sm leading-relaxed">
-            KaabaTrip Limited (“we”, “us”, “our”) is a UK-based travel comparison platform
+            PilgrimCompare Limited (“we”, “us”, “our”) is a UK-based travel comparison platform
             registered in England and Wales. Our registered office is:
           </p>
           <address className="mb-3 text-sm not-italic leading-relaxed text-[var(--textMuted)]">
-            KaabaTrip Limited<br />
+            PilgrimCompare Limited<br />
             Slough, Berkshire<br />
             United Kingdom<br />
-            Email: privacy@kaabatrip.com
+            Email: privacy@pilgrimcompare.co.uk
           </address>
           <p className="text-sm leading-relaxed">
-            For data protection purposes, KaabaTrip Limited is the data controller of your
+            For data protection purposes, PilgrimCompare Limited is the data controller of your
             personal information. Our Data Protection Officer can be reached at{' '}
-            <a href="mailto:dpo@kaabatrip.com" className="underline text-[var(--accent)]">
-              dpo@kaabatrip.com
+            <a href="mailto:dpo@pilgrimcompare.co.uk" className="underline text-[var(--accent)]">
+              dpo@pilgrimcompare.co.uk
             </a>.
           </p>
         </section>
@@ -92,8 +92,8 @@ export default function PrivacyPolicyPage() {
             <li>
               <strong>Consent:</strong> marketing communications and analytics cookies.
               You can withdraw consent at any time by emailing{' '}
-              <a href="mailto:privacy@kaabatrip.com" className="underline text-[var(--accent)]">
-                privacy@kaabatrip.com
+              <a href="mailto:privacy@pilgrimcompare.co.uk" className="underline text-[var(--accent)]">
+                privacy@pilgrimcompare.co.uk
               </a>.
             </li>
           </ul>
@@ -102,7 +102,7 @@ export default function PrivacyPolicyPage() {
         <section className="mb-8">
           <h2 className="mb-3 text-xl font-semibold">4. How we use your data</h2>
           <ul className="list-disc pl-5 text-sm leading-relaxed space-y-1">
-            <li>To provide and maintain the KaabaTrip comparison platform.</li>
+            <li>To provide and maintain the PilgrimCompare comparison platform.</li>
             <li>To match your quote requests with verified travel operators.</li>
             <li>To facilitate booking intents between you and your chosen operator.</li>
             <li>To process complaints and disputes in accordance with UK consumer law.</li>
@@ -202,8 +202,8 @@ export default function PrivacyPolicyPage() {
           </ul>
           <p className="mt-3 text-sm leading-relaxed">
             To exercise any of these rights, email us at{' '}
-            <a href="mailto:privacy@kaabatrip.com" className="underline text-[var(--accent)]">
-              privacy@kaabatrip.com
+            <a href="mailto:privacy@pilgrimcompare.co.uk" className="underline text-[var(--accent)]">
+              privacy@pilgrimcompare.co.uk
             </a>. We will respond within one month.
           </p>
         </section>
@@ -255,10 +255,10 @@ export default function PrivacyPolicyPage() {
             please contact us:
           </p>
           <address className="mt-3 text-sm not-italic leading-relaxed text-[var(--textMuted)]">
-            KaabaTrip Limited<br />
+            PilgrimCompare Limited<br />
             Slough, Berkshire<br />
             United Kingdom<br />
-            Email: <a href="mailto:privacy@kaabatrip.com" className="underline text-[var(--accent)]">privacy@kaabatrip.com</a>
+            Email: <a href="mailto:privacy@pilgrimcompare.co.uk" className="underline text-[var(--accent)]">privacy@pilgrimcompare.co.uk</a>
           </address>
         </section>
 

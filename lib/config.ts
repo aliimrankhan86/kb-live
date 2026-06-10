@@ -1,5 +1,5 @@
 /**
- * Feature flags for the KaabaTrip application.
+ * Feature flags for the PilgrimCompare application.
  * All flags are environment-driven and read at runtime.
  */
 

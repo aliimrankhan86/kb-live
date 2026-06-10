@@ -3,7 +3,7 @@ import { DesignSystemPlayground } from '@/components/showcase/DesignSystemPlaygr
 
 export const metadata: Metadata = {
   title: 'Design System',
-  description: 'Comprehensive KaabaTrip design system playground.',
+  description: 'Comprehensive PilgrimCompare design system playground.',
 }
 
 export default function ShowcasePage() {

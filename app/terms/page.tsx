@@ -4,7 +4,7 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Terms & Conditions',
   description:
-    'KaabaTrip Terms and Conditions. UK travel comparison platform terms covering booking, payments, ATOL/ABTA, consumer rights, and data protection.',
+    'PilgrimCompare Terms and Conditions. UK travel comparison platform terms covering booking, payments, ATOL/ABTA, consumer rights, and data protection.',
   alternates: { canonical: '/terms' },
   robots: { index: true, follow: true },
 };
@@ -19,14 +19,14 @@ export default function TermsPage() {
         </p>
 
         <section className="mb-8">
-          <h2 className="mb-3 text-xl font-semibold">1. About KaabaTrip</h2>
+          <h2 className="mb-3 text-xl font-semibold">1. About PilgrimCompare</h2>
           <p className="mb-3 text-sm leading-relaxed">
-          KaabaTrip Limited (&ldquo;KaabaTrip&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;) is a UK-registered travel comparison
+          PilgrimCompare Limited (&ldquo;PilgrimCompare&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;) is a UK-registered travel comparison
           platform. Our registered office is at Slough, Berkshire, United Kingdom.
           Company registration number: [Registration in progress].
           </p>
           <p className="text-sm leading-relaxed">
-            <strong>Important:</strong> KaabaTrip is a comparison platform only. We do not
+            <strong>Important:</strong> PilgrimCompare is a comparison platform only. We do not
             organise, sell, or fulfil travel packages. Your contract for any travel package
             is directly with the travel operator you select. We do not collect, hold, or
             transfer customer funds.
@@ -37,7 +37,7 @@ export default function TermsPage() {
           <h2 className="mb-3 text-xl font-semibold">2. Definitions</h2>
           <ul className="list-disc pl-5 text-sm leading-relaxed space-y-1">
             <li>
-              <strong>&ldquo;Platform&rdquo;</strong> means the KaabaTrip website and any related
+              <strong>&ldquo;Platform&rdquo;</strong> means the PilgrimCompare website and any related
               services.
             </li>
             <li>
@@ -62,7 +62,7 @@ export default function TermsPage() {
         <section className="mb-8">
           <h2 className="mb-3 text-xl font-semibold">3. Platform nature and limitations</h2>
           <p className="mb-3 text-sm leading-relaxed">
-            KaabaTrip acts solely as an intermediary comparison platform. We:
+            PilgrimCompare acts solely as an intermediary comparison platform. We:
           </p>
           <ul className="list-disc pl-5 text-sm leading-relaxed space-y-1">
             <li>Do not verify ATOL or ABTA credentials independently.</li>
@@ -73,7 +73,7 @@ export default function TermsPage() {
           </ul>
           <p className="mt-3 text-sm leading-relaxed">
             All payments are made directly between the traveller and the operator.
-            KaabaTrip is not party to any contract between a traveller and an operator.
+            PilgrimCompare is not party to any contract between a traveller and an operator.
           </p>
         </section>
 
@@ -81,7 +81,7 @@ export default function TermsPage() {
           <h2 className="mb-3 text-xl font-semibold">4. ATOL and ABTA protection</h2>
           <p className="mb-3 text-sm leading-relaxed">
             Where operators display ATOL or ABTA numbers on our platform, this information
-            is provided by the operator. KaabaTrip does not independently verify these
+            is provided by the operator. PilgrimCompare does not independently verify these
             credentials.
           </p>
           <ul className="list-disc pl-5 text-sm leading-relaxed space-y-1">
@@ -128,7 +128,7 @@ export default function TermsPage() {
             <li>Be at least 16 years of age, or have parental/guardian consent.</li>
             <li>Verify ATOL/ABTA protection directly with the operator before booking.</li>
             <li>Confirm all package details, inclusions, and terms directly with the operator.</li>
-            <li>Make payments directly to the operator, not to KaabaTrip.</li>
+            <li>Make payments directly to the operator, not to PilgrimCompare.</li>
           </ul>
         </section>
 
@@ -144,7 +144,7 @@ export default function TermsPage() {
             <li>Handle all payments, refunds, and cancellations directly with travellers.</li>
             <li>Comply with all applicable UK laws, including the Package Travel Regulations 2018.</li>
             <li>
-              Acknowledge that KaabaTrip does not verify credentials and that they are
+              Acknowledge that PilgrimCompare does not verify credentials and that they are
               solely responsible for their financial protection status.
             </li>
           </ul>
@@ -153,21 +153,21 @@ export default function TermsPage() {
         <section className="mb-8">
           <h2 className="mb-3 text-xl font-semibold">7. Booking reference and payment</h2>
           <p className="mb-3 text-sm leading-relaxed">
-            The booking process on KaabaTrip works as follows:
+            The booking process on PilgrimCompare works as follows:
           </p>
           <ol className="list-decimal pl-5 text-sm leading-relaxed space-y-1">
             <li>You submit a quote request with your travel preferences.</li>
             <li>Verified operators may respond with offers.</li>
             <li>You select an offer and submit a Booking Intent (non-binding).</li>
             <li>The operator provides payment instructions directly.</li>
-            <li>You pay the operator directly. KaabaTrip is not involved in the payment and takes no commission.</li>
+            <li>You pay the operator directly. PilgrimCompare is not involved in the payment and takes no commission.</li>
           </ol>
           <p className="mt-3 text-sm leading-relaxed">
-            <strong>Important — Your KaabaTrip reference:</strong> When you submit a Booking Intent,
-            KaabaTrip issues a unique reference code (e.g., KT-XXXXX). You must provide this reference
+            <strong>Important — Your PilgrimCompare reference:</strong> When you submit a Booking Intent,
+            PilgrimCompare issues a unique reference code (e.g., KT-XXXXX). You must provide this reference
             to the operator when making payment. If you do not provide our reference, we cannot verify
             that the booking originated through our platform. In such cases, any dispute is a matter
-            between you and the operator directly. KaabaTrip will not be able to offer assistance,
+            between you and the operator directly. PilgrimCompare will not be able to offer assistance,
             mediation, or complaint routing.
           </p>
           <p className="mt-3 text-sm leading-relaxed">
@@ -181,7 +181,7 @@ export default function TermsPage() {
           <h2 className="mb-3 text-xl font-semibold">8. Cancellations and refunds</h2>
           <p className="mb-3 text-sm leading-relaxed">
             Cancellation and refund terms are determined by the individual operator and
-            must be confirmed before payment. KaabaTrip does not process cancellations or
+            must be confirmed before payment. PilgrimCompare does not process cancellations or
             refunds.
           </p>
           <p className="text-sm leading-relaxed">
@@ -215,7 +215,7 @@ export default function TermsPage() {
               admin team for triage.
             </li>
             <li>
-              KaabaTrip logs and routes complaints but does not adjudicate disputes or
+              PilgrimCompare logs and routes complaints but does not adjudicate disputes or
               enforce resolutions.
             </li>
           </ol>
@@ -253,8 +253,8 @@ export default function TermsPage() {
             new packages, deals, or platform updates if you have given explicit consent.
             You can opt in during sign-up or in your account settings. You can withdraw
             consent at any time by emailing{' '}
-            <a href="mailto:privacy@kaabatrip.com" className="underline text-[var(--accent)]">
-              privacy@kaabatrip.com
+            <a href="mailto:privacy@pilgrimcompare.co.uk" className="underline text-[var(--accent)]">
+              privacy@pilgrimcompare.co.uk
             </a>{' '}
             or clicking the unsubscribe link in any marketing email.
           </p>
@@ -306,8 +306,8 @@ export default function TermsPage() {
         <section className="mb-8">
           <h2 className="mb-3 text-xl font-semibold">12. Intellectual property</h2>
           <p className="text-sm leading-relaxed">
-            All content on the KaabaTrip platform, including text, graphics, logos, and
-            software, is the property of KaabaTrip Limited or its licensors and is
+            All content on the PilgrimCompare platform, including text, graphics, logos, and
+            software, is the property of PilgrimCompare Limited or its licensors and is
             protected by UK and international copyright laws. You may not reproduce,
             distribute, or create derivative works without our express written permission.
           </p>
@@ -320,7 +320,7 @@ export default function TermsPage() {
           </p>
           <ul className="list-disc pl-5 text-sm leading-relaxed space-y-1">
             <li>
-              KaabaTrip is not liable for any loss, damage, or expense arising from your
+              PilgrimCompare is not liable for any loss, damage, or expense arising from your
               use of the platform or any travel package booked through an operator.
             </li>
             <li>
@@ -375,16 +375,16 @@ export default function TermsPage() {
             For any questions about these Terms & Conditions, please contact us:
           </p>
           <address className="mt-3 text-sm not-italic leading-relaxed text-[var(--textMuted)]">
-            KaabaTrip Limited<br />
+            PilgrimCompare Limited<br />
             Slough, Berkshire<br />
             United Kingdom<br />
-            Email: <a href="mailto:support@kaabatrip.com" className="underline text-[var(--accent)]">support@kaabatrip.com</a>
+            Email: <a href="mailto:support@pilgrimcompare.co.uk" className="underline text-[var(--accent)]">support@pilgrimcompare.co.uk</a>
           </address>
         </section>
 
         <p className="mt-12 text-xs text-[var(--textMuted)]">
           These Terms & Conditions are governed by the laws of England and Wales.
-          By using the KaabaTrip platform, you acknowledge that you have read,
+          By using the PilgrimCompare platform, you acknowledge that you have read,
           understood, and agree to be bound by these terms.
         </p>
       </div>

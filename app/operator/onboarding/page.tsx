@@ -4,7 +4,7 @@ import { OnboardingVerifiedBanner } from '@/components/operator/OnboardingVerifi
 
 export const metadata = {
   title: 'Operator Onboarding',
-  description: 'Register as a verified operator on KaabaTrip',
+  description: 'Register as a verified operator on PilgrimCompare',
 };
 
 export default function OperatorOnboardingPage() {

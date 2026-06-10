@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next';
 import { Repository } from '@/lib/api/repository';
 import type { Package, OperatorProfile } from '@/lib/types';
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kaabatrip.com';
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://pilgrimcompare.co.uk';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Static pages

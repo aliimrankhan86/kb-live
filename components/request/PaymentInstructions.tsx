@@ -5,7 +5,7 @@ import type { BookingIntent, PaymentInstructions } from '@/lib/types';
 import { Badge } from '@/components/ui/Badge';
 
 const PAY_OPERATOR_DIRECT_DISCLOSURE =
-  'You pay the operator directly. KaabaTrip does not collect, hold, or transfer customer funds. The operator is the contracting party and is responsible for package fulfilment, payment records, and any payment outcome.';
+  'You pay the operator directly. PilgrimCompare does not collect, hold, or transfer customer funds. The operator is the contracting party and is responsible for package fulfilment, payment records, and any payment outcome.';
 
 interface PaymentInstructionsProps {
   bookingIntent: BookingIntent;
@@ -130,7 +130,7 @@ export function PaymentInstructions({ bookingIntent }: PaymentInstructionsProps)
           </p>
           <p className="mt-1 text-xs text-[var(--textMuted)]">
             You must provide this reference when making payment. Without it, we cannot verify
-            that your booking originated through KaabaTrip and will be unable to assist with
+            that your booking originated through PilgrimCompare and will be unable to assist with
             any disputes or complaints.
           </p>
         </div>

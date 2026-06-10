@@ -7,7 +7,7 @@ test.skip('homepage loads correctly', async ({ page }) => {
   await page.waitForLoadState('networkidle')
   
   // Check page title
-  await expect(page).toHaveTitle(/KaabaTrip/)
+  await expect(page).toHaveTitle(/PilgrimCompare/)
   
   // Check main headings
   await expect(page.getByText('Search Best Packages for:')).toHaveCount(2)
@@ -17,7 +17,7 @@ test.skip('homepage loads correctly', async ({ page }) => {
   await expect(page.getByRole('link', { name: 'UMRAH' })).toBeVisible()
   
   // Check header
-  await expect(page.getByRole('link', { name: /KaabaTrip Logo KaabaTrip/ })).toBeVisible()
+  await expect(page.getByRole('link', { name: /PilgrimCompare Logo PilgrimCompare/ })).toBeVisible()
 })
 
 test.skip('navigation links work', async ({ page }) => {

@@ -73,7 +73,7 @@ export function CookieConsent() {
           <div className="flex-1">
             <p className="text-sm text-[var(--text)]">
               <strong className="block text-base mb-1">We value your privacy</strong>
-              KaabaTrip uses cookies to operate this site and improve your experience.
+              PilgrimCompare uses cookies to operate this site and improve your experience.
               Essential cookies are required for authentication and security.
               Analytics cookies help us understand how our site is used.
               By continuing to browse, you agree to our use of cookies.

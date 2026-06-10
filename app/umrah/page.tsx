@@ -12,11 +12,11 @@ export const metadata: Metadata = {
     canonical: '/umrah',
   },
   openGraph: {
-    title: 'Umrah Packages 2026 from the UK | KaabaTrip',
+    title: 'Umrah Packages 2026 from the UK | PilgrimCompare',
     description:
       'Find Umrah packages by travel dates, budget, hotel rating, and operator trust signals.',
-    url: 'https://kaabatrip.com/umrah',
-    siteName: 'KaabaTrip',
+    url: 'https://pilgrimcompare.co.uk/umrah',
+    siteName: 'PilgrimCompare',
     type: 'website',
     locale: 'en_GB',
   },
@@ -24,9 +24,9 @@ export const metadata: Metadata = {
 
 const umrahFaqs = [
   {
-    question: 'How do I compare Umrah packages on KaabaTrip?',
+    question: 'How do I compare Umrah packages on PilgrimCompare?',
     answer:
-      'Choose your dates, travellers, hotel preference, and budget. KaabaTrip then shows matching packages so you can compare price, Makkah and Madinah hotels, inclusions, nights, and operator trust signals side by side.',
+      'Choose your dates, travellers, hotel preference, and budget. PilgrimCompare then shows matching packages so you can compare price, Makkah and Madinah hotels, inclusions, nights, and operator trust signals side by side.',
   },
   {
     question: 'What should UK travellers check before booking an Umrah package?',
@@ -34,7 +34,7 @@ const umrahFaqs = [
       'Check the operator profile, ATOL and ABTA details where listed, hotel names and distance to Haram, flight route, inclusions, cancellation policy, and final availability with the travel operator.',
   },
   {
-    question: 'Are prices on KaabaTrip final booking prices?',
+    question: 'Are prices on PilgrimCompare final booking prices?',
     answer:
       'Prices are indicative package prices shown for comparison. Final availability, itinerary, inclusions, and payment terms are confirmed by the travel operator.',
   },

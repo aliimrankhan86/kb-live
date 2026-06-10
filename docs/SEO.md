@@ -1,12 +1,12 @@
 # SEO Strategy
 
-Search engine optimisation plan for KaabaTrip. Follow these rules on every page. When adding a new route, update this file and the sitemap.
+Search engine optimisation plan for PilgrimCompare. Follow these rules on every page. When adding a new route, update this file and the sitemap.
 
 ---
 
 ## 1. Target keywords & intent
 
-KaabaTrip targets high-intent pilgrimage travellers searching for packages. Keywords are grouped by funnel stage.
+PilgrimCompare targets high-intent pilgrimage travellers searching for packages. Keywords are grouped by funnel stage.
 
 ### Top-of-funnel (awareness)
 
@@ -46,7 +46,7 @@ Public pages must work for classic search crawlers, answer engines, and generati
 
 ### GEO / AI citation readiness
 
-- Each public page should have a clear page entity: KaabaTrip, package, operator, city corridor, or search result list.
+- Each public page should have a clear page entity: PilgrimCompare, package, operator, city corridor, or search result list.
 - Keep facts source-backed from package/operator fields: price, nights, hotels, ATOL/ABTA details, serving regions, and departure airports.
 - Prefer specific comparison facts over generic marketing copy, because AI summaries need short, attributable statements.
 
@@ -63,7 +63,7 @@ Public pages must work for classic search crawlers, answer engines, and generati
 
 - Show trust signals only when stored in operator data: verification status, ATOL number, ABTA membership, years in business, office/contact details.
 - Show missing protection fields honestly instead of hiding them.
-- Do not imply KaabaTrip collects payment. Public copy must preserve the pay-operator-direct disclosure.
+- Do not imply PilgrimCompare collects payment. Public copy must preserve the pay-operator-direct disclosure.
 - Avoid fake review, rating, backlink, guarantee, or removal claims.
 
 ---
@@ -76,23 +76,23 @@ Every route must export Next.js `Metadata` with these fields. Use the `generateM
 
 | Route               | Title                                                               | Description                                                                                                                                | Keywords                                         |
 | ------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------ |
-| `/`                 | `KaabaTrip - Compare Hajj & Umrah Packages from UK Operators`       | `Compare Hajj and Umrah packages from UK travel operators. Review prices, hotels near Haram, inclusions, ATOL/ABTA details, and operator profiles before requesting a quote.` | hajj packages, umrah packages, compare, UK       |
-| `/umrah`            | `Umrah Packages 2026 from the UK - Compare Operators \| KaabaTrip`  | `Compare Umrah packages from UK travel operators by budget, hotel rating, distance to Haram, traveller count, and included services before requesting a quote.` | umrah packages 2026, umrah from UK               |
-| `/hajj`             | `Hajj Packages 2026 – Compare & Book \| KaabaTrip`                  | `Find and compare Hajj packages from ATOL-protected UK operators. 5-star hotels, direct flights, all-inclusive options.`                   | hajj packages 2026, hajj from UK                 |
-| `/partner`          | `Partner with KaabaTrip — List Your Packages`                       | `Join KaabaTrip as a verified operator. Reach thousands of UK Muslims planning Umrah and Hajj. No upfront fees, transparent commission.`   | umrah operator, list umrah packages, partner     |
-| `/umrah/ramadan`    | `Ramadan Umrah 2026 – Special Packages \| KaabaTrip`                | `Ramadan Umrah packages from UK operators. Hotels near Haram, flights included, group and family options.`                                 | ramadan umrah 2026, umrah ramadan packages       |
-| `/packages`         | `All Pilgrimage Packages – Browse & Compare \| KaabaTrip`           | `Browse all Hajj and Umrah packages. Filter, shortlist, and compare side by side.`                                                         | pilgrimage packages, hajj umrah compare          |
-| `/search/packages`  | Dynamic: `{N} {type} Packages - Compare UK Operators \| KaabaTrip`  | Dynamic: `Compare {N} packages by price, hotels, distance to Haram, inclusions, and operator trust signals.`                               | (use query params)                               |
-| `/umrah/london`     | `Umrah Packages from London 2026 – Compare & Book \| KaabaTrip`     | `Browse and compare Umrah packages departing from London. Verified UK operators, hotels near Haram, flights included.`                     | umrah from london, umrah packages london         |
-| `/umrah/birmingham` | `Umrah Packages from Birmingham 2026 – Compare & Book \| KaabaTrip` | `Browse and compare Umrah packages departing from Birmingham. Verified UK operators, hotels near Haram, flights included.`                 | umrah from birmingham, umrah packages birmingham |
-| `/umrah/manchester` | `Umrah Packages from Manchester 2026 – Compare & Book \| KaabaTrip` | `Browse and compare Umrah packages departing from Manchester. Verified UK operators, hotels near Haram, flights included.`                 | umrah from manchester, umrah packages manchester |
+| `/`                 | `PilgrimCompare - Compare Hajj & Umrah Packages from UK Operators`       | `Compare Hajj and Umrah packages from UK travel operators. Review prices, hotels near Haram, inclusions, ATOL/ABTA details, and operator profiles before requesting a quote.` | hajj packages, umrah packages, compare, UK       |
+| `/umrah`            | `Umrah Packages 2026 from the UK - Compare Operators \| PilgrimCompare`  | `Compare Umrah packages from UK travel operators by budget, hotel rating, distance to Haram, traveller count, and included services before requesting a quote.` | umrah packages 2026, umrah from UK               |
+| `/hajj`             | `Hajj Packages 2026 – Compare & Book \| PilgrimCompare`                  | `Find and compare Hajj packages from ATOL-protected UK operators. 5-star hotels, direct flights, all-inclusive options.`                   | hajj packages 2026, hajj from UK                 |
+| `/partner`          | `Partner with PilgrimCompare — List Your Packages`                       | `Join PilgrimCompare as a verified operator. Reach thousands of UK Muslims planning Umrah and Hajj. No upfront fees, transparent commission.`   | umrah operator, list umrah packages, partner     |
+| `/umrah/ramadan`    | `Ramadan Umrah 2026 – Special Packages \| PilgrimCompare`                | `Ramadan Umrah packages from UK operators. Hotels near Haram, flights included, group and family options.`                                 | ramadan umrah 2026, umrah ramadan packages       |
+| `/packages`         | `All Pilgrimage Packages – Browse & Compare \| PilgrimCompare`           | `Browse all Hajj and Umrah packages. Filter, shortlist, and compare side by side.`                                                         | pilgrimage packages, hajj umrah compare          |
+| `/search/packages`  | Dynamic: `{N} {type} Packages - Compare UK Operators \| PilgrimCompare`  | Dynamic: `Compare {N} packages by price, hotels, distance to Haram, inclusions, and operator trust signals.`                               | (use query params)                               |
+| `/umrah/london`     | `Umrah Packages from London 2026 – Compare & Book \| PilgrimCompare`     | `Browse and compare Umrah packages departing from London. Verified UK operators, hotels near Haram, flights included.`                     | umrah from london, umrah packages london         |
+| `/umrah/birmingham` | `Umrah Packages from Birmingham 2026 – Compare & Book \| PilgrimCompare` | `Browse and compare Umrah packages departing from Birmingham. Verified UK operators, hotels near Haram, flights included.`                 | umrah from birmingham, umrah packages birmingham |
+| `/umrah/manchester` | `Umrah Packages from Manchester 2026 – Compare & Book \| PilgrimCompare` | `Browse and compare Umrah packages departing from Manchester. Verified UK operators, hotels near Haram, flights included.`                 | umrah from manchester, umrah packages manchester |
 
 ### Dynamic routes
 
 | Route               | Title template                                   | Description template                                                                                      |
 | ------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
-| `/packages/[slug]`  | `{title} – {type} Package \| KaabaTrip`          | `{title} by {operatorName}. {nights} nights, {stars} star hotels, {price} per person. Compare inclusions and request a quote.` |
-| `/operators/[slug]` | `{companyName} – {Verified/Listed} Umrah & Hajj Operator \| KaabaTrip` | `View {companyName}'s public operator profile, published packages, departure airports, contact details, and ATOL/ABTA details where listed.` |
+| `/packages/[slug]`  | `{title} – {type} Package \| PilgrimCompare`          | `{title} by {operatorName}. {nights} nights, {stars} star hotels, {price} per person. Compare inclusions and request a quote.` |
+| `/operators/[slug]` | `{companyName} – {Verified/Listed} Umrah & Hajj Operator \| PilgrimCompare` | `View {companyName}'s public operator profile, published packages, departure airports, contact details, and ATOL/ABTA details where listed.` |
 
 ---
 
@@ -131,7 +131,7 @@ Structured data helps Google show rich snippets. Add JSON-LD to each page type.
   "@context": "https://schema.org",
   "@type": "TravelAgency",
   "name": "{companyName}",
-  "url": "https://kaabatrip.com/operators/{slug}",
+  "url": "https://pilgrimcompare.co.uk/operators/{slug}",
   "description": "Verified {pilgrimageType} travel operator",
   "address": {
     "@type": "PostalAddress",
@@ -152,7 +152,7 @@ Structured data helps Google show rich snippets. Add JSON-LD to each page type.
     {
       "@type": "ListItem",
       "position": 1,
-      "url": "https://kaabatrip.com/packages/{slug}"
+      "url": "https://pilgrimcompare.co.uk/packages/{slug}"
     }
   ]
 }
@@ -169,13 +169,13 @@ Structured data helps Google show rich snippets. Add JSON-LD to each page type.
       "@type": "ListItem",
       "position": 1,
       "name": "Home",
-      "item": "https://kaabatrip.com/"
+      "item": "https://pilgrimcompare.co.uk/"
     },
     {
       "@type": "ListItem",
       "position": 2,
       "name": "Umrah",
-      "item": "https://kaabatrip.com/umrah"
+      "item": "https://pilgrimcompare.co.uk/umrah"
     },
     { "@type": "ListItem", "position": 3, "name": "{packageTitle}" }
   ]

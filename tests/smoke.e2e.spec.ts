@@ -4,7 +4,7 @@ test('homepage loads correctly', async ({ page }) => {
   await page.goto('/')
   
   // Check page title
-  await expect(page).toHaveTitle(/KaabaTrip/)
+  await expect(page).toHaveTitle(/PilgrimCompare/)
   
   // Check background color
   const body = page.locator('body')
@@ -22,7 +22,7 @@ test('homepage loads correctly', async ({ page }) => {
   await expect(page.getByRole('link', { name: 'UMRAH' })).toBeVisible()
   
   // Check header
-  await expect(page.getByText('KaabaTrip')).toBeVisible()
+  await expect(page.getByText('PilgrimCompare')).toBeVisible()
   await expect(page.getByRole('link', { name: 'Become A Partner' })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Login' })).toBeVisible()
 })

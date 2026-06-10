@@ -8,10 +8,10 @@ export const metadata: Metadata = {
     'Browse and compare Umrah packages departing from Birmingham Airport (BHX). Verified UK operators, hotels near Haram, flights included. Request a quote now.',
   alternates: { canonical: '/umrah/birmingham' },
   openGraph: {
-    title: 'Umrah Packages from Birmingham 2026 – Compare & Book | KaabaTrip',
+    title: 'Umrah Packages from Birmingham 2026 – Compare & Book | PilgrimCompare',
     description: 'Compare Umrah packages departing from Birmingham BHX with verified UK operators.',
-    url: 'https://kaabatrip.com/umrah/birmingham',
-    siteName: 'KaabaTrip',
+    url: 'https://pilgrimcompare.co.uk/umrah/birmingham',
+    siteName: 'PilgrimCompare',
     type: 'website',
     locale: 'en_GB',
   },
@@ -31,7 +31,7 @@ const faqs = [
   {
     question: 'Are there Umrah operators based in Birmingham?',
     answer:
-      'Yes, Birmingham has a large Muslim community and several established Umrah operators. KaabaTrip lists verified operators who accept bookings from Birmingham travellers, including those offering BHX departure options.',
+      'Yes, Birmingham has a large Muslim community and several established Umrah operators. PilgrimCompare lists verified operators who accept bookings from Birmingham travellers, including those offering BHX departure options.',
   },
   {
     question: 'What is included in a typical Umrah package from Birmingham?',
@@ -43,7 +43,7 @@ const faqs = [
 const pageJsonLd = graphJsonLd([
   webPageJsonLd({
     path: '/umrah/birmingham',
-    name: 'Umrah Packages from Birmingham 2026 – Compare & Book | KaabaTrip',
+    name: 'Umrah Packages from Birmingham 2026 – Compare & Book | PilgrimCompare',
     description:
       'Compare Umrah packages departing from Birmingham Airport BHX with verified UK operators.',
   }),

@@ -1,4 +1,4 @@
-# KaabaTrip - Compare Umrah & Hajj Packages from Verified Operators
+# PilgrimCompare - Compare Umrah & Hajj Packages from Verified Operators
 
 A UK-focused Next.js platform connecting pilgrims with verified travel operators for Hajj and Umrah packages. Built with production-grade architecture, strict TypeScript, and UK GDPR compliance.
 
@@ -40,7 +40,7 @@ A UK-focused Next.js platform connecting pilgrims with verified travel operators
 ## 📁 Project Structure
 
 ```
-kaabatrip/
+pilgrimcompare/
 ├── app/                          # Next.js App Router
 │   ├── page.tsx                  # Landing page
 │   ├── umrah/page.tsx            # Umrah search form
@@ -223,4 +223,4 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-**KaabaTrip** - Making your spiritual journey accessible, transparent, and memorable. 🌙
+**PilgrimCompare** - Making your spiritual journey accessible, transparent, and memorable. 🌙

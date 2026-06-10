@@ -8,10 +8,10 @@ export const metadata: Metadata = {
     'Browse and compare Umrah packages departing from Manchester Airport (MAN). Verified UK operators, hotels near Haram, flights included. Request a quote now.',
   alternates: { canonical: '/umrah/manchester' },
   openGraph: {
-    title: 'Umrah Packages from Manchester 2026 – Compare & Book | KaabaTrip',
+    title: 'Umrah Packages from Manchester 2026 – Compare & Book | PilgrimCompare',
     description: 'Compare Umrah packages departing from Manchester MAN with verified UK operators.',
-    url: 'https://kaabatrip.com/umrah/manchester',
-    siteName: 'KaabaTrip',
+    url: 'https://pilgrimcompare.co.uk/umrah/manchester',
+    siteName: 'PilgrimCompare',
     type: 'website',
     locale: 'en_GB',
   },
@@ -31,7 +31,7 @@ const faqs = [
   {
     question: 'Are there Umrah operators covering the North of England?',
     answer:
-      'Yes, many UK Umrah operators offer packages departing from Manchester Airport, serving travellers across the North of England, including Manchester, Leeds, Sheffield, and Bradford. KaabaTrip lists verified operators with MAN departure options.',
+      'Yes, many UK Umrah operators offer packages departing from Manchester Airport, serving travellers across the North of England, including Manchester, Leeds, Sheffield, and Bradford. PilgrimCompare lists verified operators with MAN departure options.',
   },
   {
     question: 'What should I check before booking an Umrah package from Manchester?',
@@ -43,7 +43,7 @@ const faqs = [
 const pageJsonLd = graphJsonLd([
   webPageJsonLd({
     path: '/umrah/manchester',
-    name: 'Umrah Packages from Manchester 2026 – Compare & Book | KaabaTrip',
+    name: 'Umrah Packages from Manchester 2026 – Compare & Book | PilgrimCompare',
     description:
       'Compare Umrah packages departing from Manchester Airport MAN with verified UK operators.',
   }),
