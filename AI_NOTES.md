@@ -1056,3 +1056,33 @@ Chose Cloudflare Email Routing (free, forwarding-only) over Google Workspace (£
 2. **Remaining MockDB removal pass** — run `grep -rn "from.*mock-db" components/ app/` for live list. Components still importing MockDB: `QuoteRequestWizard`, `OfferForm`, `PaymentDetailsClient`, `OperatorLeadsClient`, `admin/*`, `PackagesBrowse`, `ComplaintForm`, `ComparisonTable`. Lower urgency but must be done before public launch.
 3. **`app_metadata` role backfill** — any Supabase auth user created before 2026-06-09 has role only in `user_metadata` and defaults to `customer`. Backfill via Supabase service role admin API before launch.
 4. **Google Workspace upgrade** — when first operator is onboarded and needs professional email replies from `support@pilgrimcompare.co.uk`. Not blocking now.
+
+---
+
+## §14 — Prompt 6: www redirect + infra verification (2026-06-10)
+
+### What was done
+
+| Item | Outcome |
+| --- | --- |
+| Supabase "Confirm email" toggle | Already ON ✅ — no change needed |
+| Supabase Redirect URL `https://pilgrimcompare.co.uk/auth/confirm` | Already in allow-list ✅ — no change needed |
+| MockDB removal pass (`grep -rn "from.*mock-db" components/ app/`) | Zero results — already complete ✅ |
+| `www.pilgrimcompare.com` not loading | Fixed — see below ✅ |
+
+### www.pilgrimcompare.com fix
+
+Root cause: no `www` DNS record existed in Cloudflare. The redirect rule already matched both `pilgrimcompare.com` and `www.pilgrimcompare.com` (from a previous manual edit), but the `www` hostname was never reaching Cloudflare because no DNS record proxied it.
+
+Fix applied:
+1. **DNS record added** — Cloudflare → `pilgrimcompare.com` → DNS → Records → Add record: `CNAME`, Name `www`, Target `pilgrimcompare.com`, Proxy status **Proxied** (orange cloud).
+2. **Redirect rule** — already correct: `http.host eq "pilgrimcompare.com" or http.host eq "www.pilgrimcompare.com"` → `concat("https://pilgrimcompare.co.uk", http.request.uri.path)`, 301, preserve query string.
+3. **Laptop DNS cache flushed** — `sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder` to clear stale negative cache entry.
+
+Result: `www.pilgrimcompare.com` and `www.pilgrimcompare.com/any/path` now 301 redirect to `pilgrimcompare.co.uk` ✅. Verified on mobile (no home Wi-Fi) and laptop post-flush.
+
+### Exact next steps for next session
+
+1. **`app_metadata` role backfill** — any Supabase auth user created before 2026-06-09 has role only in `user_metadata` and defaults to `customer`. Backfill via Supabase service role admin API before launch.
+2. **Product/backlog work** — see `docs/EXECUTION_QUEUE.md` for remaining queue items.
+3. **Google Workspace upgrade** — when first operator is onboarded. Not blocking.
