@@ -7,7 +7,7 @@
 
 **Stack:** Next.js 15.5 (App Router, Server Components) · React 19 · TypeScript strict · Supabase (auth/Postgres/RLS/storage, `eu-west-2`) · Prisma · Tailwind · Zustand · Vitest + Playwright.
 
-**State (2026-06-10):** Branch `dev`. Tests 232/232 ✅. Build clean ✅. MockDB removed from production paths. RLS audit complete. Transactional email suite live. All domain redirects working — `pilgrimcompare.com` and `www.pilgrimcompare.com` both 301 to `pilgrimcompare.co.uk`. Supabase email confirmations ON.
+**State (2026-06-10):** Branch `dev` (1 commit behind `main` — pending structural sync PR). Tests 232/232 ✅. Build clean ✅. MockDB removed from production paths. RLS audit complete. Transactional email suite live. All domain redirects working — `pilgrimcompare.com` and `www.pilgrimcompare.com` both 301 to `pilgrimcompare.co.uk`. Supabase email confirmations ON. **WordmarkLogo** component live in Header + Footer (`components/graphics/WordmarkLogo.tsx`, Nunito ExtraBold 800, `currentColor`). PR #34 merged to `main`.
 
 **Remaining setup items:** None — all setup complete. Email mailboxes `support/privacy/dpo/complaints@pilgrimcompare.co.uk` live via Cloudflare Email Routing (→ Gmail). Upgrade to Google Workspace when onboarding real operators.
 
