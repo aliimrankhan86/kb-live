@@ -443,6 +443,46 @@ Prompts 5–13: email triggers, crons, Telegram alerts, operator data ingestion,
 
 ---
 
+## 15. Umrah Mobile UX Overhaul — 2026-06-10
+
+Branch: `feature/umrah-mobile-ux-overhaul` (off `dev`, PR pending). Scope: the core business surfaces — `/search/packages` results, the compare experience, the filter panel, and `/umrah` form headings. Grounded in the `ui-ux-pro-max` + `make-interfaces-feel-better` + `accessibility` skills. Verified at 360/390px in the live preview; `npm run test` 232/232, `npm run build` 0 errors, `tsc` pass.
+
+### Problems addressed (confirmed in code + live preview)
+1. **Two overlapping concepts collided.** Every card had **Save** (heart) *and* **Compare** (grid). The header *also* stacked a "Shortlist only" toggle, an "N in shortlist" counter, a disabled **Compare (0)** button (looked active), and a help banner with a cryptic ▣ grid icon. High cognitive load; users couldn't tell shortlist from compare.
+2. **Cards ~2.5 screens tall**, dominated by placeholder noise ("Departure TBC / - / LHR → JED/MED" twice). Price — the thing people compare on — was buried below the fold.
+3. **Comparison was a 672px sideways-scrolling table** inside a dialog — you couldn't see two packages at once on a phone.
+4. **The filter panel did nothing.** `FilterOverlay` wrote to local React state with a shape `filterByParams` never read (it had a literal `// Here you would typically filter…` placeholder). It also priced in **USD** and offered **Christmas/Easter** presets — wrong audience for Umrah.
+
+### Decisions taken (founder-approved via AskUserQuestion)
+- **Compare-first + sticky bar** (demote Save to a quiet bookmark).
+- **Filters: make them fully work + localize** (GBP, Umrah-relevant presets).
+- **Mobile comparison: native side-by-side** with attribute labels (implemented as fit-to-width, no horizontal scroll — see note below).
+- **Scope: all of** results/cards, compare, filters & sort, `/umrah` form.
+
+### What changed
+- **[PackageCard.tsx](components/search/PackageCard.tsx)** — rewritten price-first (~1 screen). Flight placeholders condensed to a single quiet route/nights line (`TBC`/`-` suppressed via `isPlaceholder`). Compact hotel rows with 56px thumbnails. Save = quiet bookmark in the header (kept `data-testid="shortlist-toggle-…"`). Compare = a real word-labelled checkbox ("Compare" → "Selected", yellow tick); selected card gets a yellow glow border. Kept `data-testid="package-compare-toggle-…"`; added `package-view-…`. New `compareFull` prop disables the toggle when 3 are already picked.
+- **[CompareBar.tsx](components/search/CompareBar.tsx)** + module CSS — new sticky bottom bar (`position: fixed`, `env(safe-area-inset-bottom)`). Appears on first selection; says in plain words what to do ("Pick N more to compare" → "Ready — tap Compare"); shows operator-name chips with remove ×; Clear + Compare CTA (kept `data-testid="search-compare-button"`). The list reserves `padding-bottom` so the bar never hides the last card.
+- **[PackageList.tsx](components/search/PackageList.tsx)** — header decluttered to **count + Filter + Sort**. "Saved" is now a chip shown only when something is saved (kept `data-testid="search-shortlist-count"`). Removed the disabled compare button, the counter, and the help banner. Mounts `CompareBar`; opens the comparison dialog (kept the Radix `setTimeout(…,0)` defer). Empty-state "Reset filters" clears the filter URL params via `router.replace`.
+- **[ComparisonTable.tsx](components/request/ComparisonTable.tsx)** — responsive **fit-to-width** comparison (`table-fixed`, no horizontal scroll). Two packages sit side by side on a phone; a third just narrows the columns. Operator + price move into rich column headers; the cheapest column is flagged **"Lowest price"** and tinted. Shared by `/search`, `/packages`, and the offer flow → all three improve at once. Kept `data-testid="comparison-table"` + offer support.
+  - ⚠️ **Gotcha (don't "fix" back to inline CSS module here):** an early version used a sticky-label `<table>` with a `ComparisonTable.module.css`. Two problems: (a) the CSS-module import broke the `PackagesBrowse` **vitest** suite — Vite ran the file through Tailwind v4 PostCSS in the test env and threw "Invalid PostCSS Plugin"; the original component used inline Tailwind, which is why it had been fine. (b) Sticky cells in a `border-separate` table showed a faint compositing ghost of scrolled columns at the boundary on mobile. The fit-to-width + inline-Tailwind version avoids **both**. Keep ComparisonTable on inline Tailwind (no `.module.css`).
+- **[FilterOverlay.tsx](components/search/FilterOverlay.tsx)** — rewritten self-contained: reads the live URL on open, and **Apply writes the real contract** `filterByParams` reads → results actually filter (`SearchPackagesClient` re-renders on URL change). Localized to **£**; controls are Budget (£300–£3,000+), Hotel rating **3/4/5 multi-select**, When you travel (**Any / Ramadan / School holidays** → `season`), Distance to the Haram (→ `maxDistance`), **Direct flights only** (→ `flightType`). Dropped the decorative dual `FilterState`/`onApply` plumbing. Kept `data-testid` `filter-overlay`/`filter-apply-btn`/`filter-reset-btn` and the shared `budget-min-slider`/`distance-min-slider` sliders.
+- **[search-utils.ts](components/search/search-utils.ts)** — `filterByParams` extended for **`maxDistance`** (distance bands → representative metres via `DISTANCE_BAND_METERS`) and **`flightType=direct`**. `toSearchDisplay` priceNote simplified to `per person` (the card shows a "from" pill).
+- **[umrah-search-form.module.css](components/umrah/umrah-search-form.module.css)** — step headings were `justify-content: space-between`, which shoved short headings ("When are you travelling?") to the far right. Switched to `flex-start`; the budget opt-out toggle still floats right via its own `margin-left:auto`.
+- **[e2e/slider-consistency.spec.ts](e2e/slider-consistency.spec.ts)** — dropped the `time-start-slider` screenshot (the month-range time slider was replaced by clearer season chips); budget + distance sliders unchanged.
+
+### Filter URL contract (the working one — reuse, don't reinvent)
+`type` · `season` (`ramadan` | `school-holidays` | `flexible`) · `budgetMin` · `budgetMax` · `hotelStars` (CSV of 3/4/5) · `maxDistance` (metres; bands map near≈400 / medium≈1200 / far≈2500) · `flightType=direct` · `departureAirport`. The `/umrah` form GET-submits these; the results FilterOverlay now writes the same set. Changing the URL re-runs `filterByParams` in `SearchPackagesClient`.
+
+### Verified end-to-end in preview (390px)
+6→3 results when "5 star" applied (URL `?type=umrah&hotelStars=5`); compare selection highlights cards + reveals the sticky bar; 2-up and 3-up comparisons render with no horizontal scroll and the correct "Lowest price" flag; clean console after a dev restart.
+
+### Out of scope / follow-ups
+- Orphaned old filter sub-components under `components/search/filters/*` and `components/ui/FilterOverlay*` are no longer imported by the search page (dead code; safe cleanup later). `components/search/README.md` still documents the old decorative `FilterState` API — update when touched.
+- Live result-count in the filter "Show packages" CTA (needs the candidate count) — deferred.
+- ⚠️ **Process gotcha:** running `npm run build` while the Turbopack `npm run dev` server is up shares `.next` and can corrupt the dev server's chunks (it served a stale `handleFilterApply` ReferenceError). Stop the preview before a prod build, or restart the dev server afterwards.
+
+---
+
 ## 11. Verification Playbook
 
 ```bash

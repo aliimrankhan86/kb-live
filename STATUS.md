@@ -3,7 +3,7 @@
 > **Single rolling tracker.** Any AI/dev: read this for current state. Update it after work is **done + tested + verified** (see `CLAUDE.md` rule).
 > Detailed handover lives in `AI_NOTES.md`. Cold-start brief: `HANDOFF.md`. Business: `BUSINESS.md`.
 
-**Last verified:** 2026-06-10 (wordmark rebrand + PR #34 dev→main merged) · **Branch:** `dev` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
+**Last verified:** 2026-06-10 (Umrah mobile UX overhaul — compare-first results, mobile-native comparison, working localized filters) · **Branch:** `feature/umrah-mobile-ux-overhaul` (off `dev`, PR pending) · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
 
 ---
 
@@ -25,7 +25,8 @@
 - Package discovery: browse, sort, filter (budget, dates, hotel stars, Haram distance, flight type)
 - Umrah 4-step search form (date picker, traveller stepper, star select, budget slider)
 - Airport-level routing: LHR, LGW, BHX, MAN (departure + return), backend filters by airport code
-- Shortlist / compare up to 3 packages
+- **Compare-first results (mobile UX overhaul 2026-06-10, see AI_NOTES §15):** price-first cards, sticky compare bar, mobile-native 2-up comparison with "Lowest price" flag, decluttered header. Compare up to 3; Save demoted to a quiet bookmark.
+- **Results filter panel now functional** (was decorative): writes the real URL contract (budget £, hotel stars, season, distance band, direct flights); Ramadan/School-holiday presets.
 - Quote journey (prefilled package details) → BookingIntent records (`KT-…` refs)
 - Payment handoff: pay-operator-direct + evidence upload + bank details display
 
