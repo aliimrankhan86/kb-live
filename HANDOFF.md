@@ -1,4 +1,4 @@
-# KaabaTrip — AI Handoff Brief
+# PilgrimCompare — AI Handoff Brief
 
 > **Cold-start brief.** Give this file to any AI tool. Read top-to-bottom in 60 seconds, then you know what to do.
 > Full status: `STATUS.md` · Business: `BUSINESS.md` · Deep handover: `AI_NOTES.md` · Rules: `AGENTS.md`
@@ -7,9 +7,9 @@
 
 **Stack:** Next.js 15.5 (App Router, Server Components) · React 19 · TypeScript strict · Supabase (auth/Postgres/RLS/storage, `eu-west-2`) · Prisma · Tailwind · Zustand · Vitest + Playwright.
 
-**State (2026-06-10):** Branch `dev`. Tests 232/232 ✅. Build clean ✅. MockDB removed from payment/booking/analytics production paths. `FEATURE_USE_REAL_DB` now fail-fast. RLS audit complete — all 13 tables RLS-enabled, critical storage bucket anon-access fixed (migration 008), UPDATE WITH CHECK gaps fixed (migration 009).
+**State (2026-06-10):** Branch `dev`. Tests 232/232 ✅. Build clean ✅. MockDB removed from production paths. RLS audit complete. Transactional email suite live — `send.pilgrimcompare.co.uk` verified on Resend, `RESEND_API_KEY` in Vercel, 4 templates wired into quote-requests + booking-intents APIs.
 
-**The one thing blocking:** Remaining MockDB imports in `QuoteRequestWizard`, `OfferForm`, `admin/*` etc. + Vercel env var confirmation + Supabase email confirmation toggle ON. See `AI_NOTES.md` §10 for exact steps.
+**Remaining setup items:** (1) Supabase SMTP → Resend (host: `smtp.resend.com`, port 465, user: `resend`, pass: Resend API key). (2) Paste Email 1 confirm-signup template into Supabase Auth → Email Templates. (3) Set `NEXT_PUBLIC_SITE_URL=https://pilgrimcompare.co.uk` in Vercel. (4) Cloudflare `.com` → `.co.uk` redirect. See `AI_NOTES.md` for exact steps.
 
 **How to verify any change (mandatory before push):**
 ```bash

@@ -3,7 +3,7 @@
 > **Single rolling tracker.** Any AI/dev: read this for current state. Update it after work is **done + tested + verified** (see `CLAUDE.md` rule).
 > Detailed handover lives in `AI_NOTES.md`. Cold-start brief: `HANDOFF.md`. Business: `BUSINESS.md`.
 
-**Last verified:** 2026-06-10 (rebrand + domain wiring) · **Branch:** `dev` → `main` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
+**Last verified:** 2026-06-10 (email suite + domain verification) · **Branch:** `dev` → `main` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
 
 ---
 
@@ -80,6 +80,17 @@
 **Storage / images**
 - Migration `004_package_images_bucket.sql` **applied + verified** on Supabase (2026-06-08): public `package-images` bucket (5MB; jpeg/png/webp) + 4 RLS policies (public read; insert/update/delete only into own `{auth.uid()}/…` prefix). Matches `lib/api/storage.ts` path convention. Re-runnable via `scripts/apply-migration-004.mjs` (idempotent).
 
+**Transactional email suite (2026-06-10)**
+- `send.pilgrimcompare.co.uk` sending domain verified on Resend (Cloudflare DNS auto-configured)
+- `RESEND_API_KEY` added to Vercel (Production + Preview)
+- `lib/email/send.tsx` — Resend wrapper with 4 send functions (fire-and-forget, never throws)
+- `emails/EnquiryConfirmation.tsx` — customer enquiry confirmation with similar packages
+- `emails/OperatorEnquiryAlert.tsx` — operator alert, reply-to = customer email
+- `emails/BookingIntentConfirmation.tsx` — customer booking intent confirmation
+- `emails/PaymentEvidenceNotification.tsx` — operator payment evidence notification
+- Email 2+3 wired into `POST /api/quote-requests`; Email 4+5 wired into `POST /api/booking-intents`
+- All 4 templates tested end-to-end via `scripts/test-emails.mjs` ✅
+
 **Platform**
 - UK GDPR (privacy, terms, cookie consent, marketing consent)
 - SEO: JSON-LD, dynamic sitemap, city corridor pages (`/umrah/london|birmingham|manchester`)
@@ -98,8 +109,10 @@
 | --- | --- | --- |
 | Merge `dev` → `main` | PR #27 already merged | — |
 | Cloudflare `.com` → `.co.uk` redirect | Manual — see `AI_NOTES.md §11` | Dashboard action |
-| Vercel env vars | Set `NEXT_PUBLIC_SITE_URL=https://pilgrimcompare.co.uk` | Dashboard action |
+| Vercel env vars | `NEXT_PUBLIC_SITE_URL` still needs setting | Dashboard action |
 | Email mailboxes | Create `support/privacy/dpo/complaints@pilgrimcompare.co.uk` | Domain admin |
+| Supabase SMTP | Point Supabase Auth SMTP → Resend (host: `smtp.resend.com`, port 465, user: `resend`, pass: API key) | Supabase dashboard |
+| Supabase Email 1 template | Paste confirm-signup HTML into Supabase Auth → Email Templates | Supabase dashboard |
 
 ---
 

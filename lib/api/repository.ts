@@ -1305,6 +1305,12 @@ export const Repository = {
     return store().getOperatorById(id);
   },
 
+  /** Server-only: fetch a single package by ID without auth filtering. */
+  getPackageById: async (id: string): Promise<Package | undefined> => {
+    const all = await store().getPackages();
+    return all.find((p) => p.id === id);
+  },
+
   /** Server-only: fetch a single booking intent by ID without auth filtering. */
   getBookingIntentById: async (id: string): Promise<BookingIntent | undefined> => {
     const all = await store().getBookingIntents();
