@@ -121,7 +121,6 @@ export function Footer() {
         <div className="grid gap-1 md:grid-cols-3 md:gap-8">
           <Section title="Contact" defaultOpen isFirst forceOpen={isDesktop}>
             <address className="text-xs not-italic leading-relaxed text-[var(--textMuted)]">
-              Slough, Berkshire<br />
               United Kingdom<br />
               <a
                 href="mailto:support@pilgrimcompare.co.uk"
@@ -201,14 +200,15 @@ export function Footer() {
           <p>Governed by the laws of England and Wales.</p>
         </div>
 
-        {/* Legal entity disclosure — Companies Act 2006 §82 */}
+        {/* Legal entity disclosure — Companies Act 2006 §82
+            Registered office address intentionally omitted while founder
+            transitions to a non-residential registered office. See AI_NOTES §14. */}
         <p className="mt-3 text-[11px] leading-relaxed text-[var(--textMuted)]">
           PilgrimCompare is a trading name of{' '}
           <span className="text-[var(--text)]">Paramount Consultants Limited</span>, registered in
           England and Wales (company no.{' '}
           <span className="text-[var(--text)]">09679002</span>). VAT no.{' '}
-          <span className="text-[var(--text)]">GB 221 6154 46</span>. Registered office: Slough,
-          Berkshire, United Kingdom.
+          <span className="text-[var(--text)]">GB 221 6154 46</span>.
         </p>
       </div>
     </footer>

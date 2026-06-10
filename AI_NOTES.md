@@ -417,8 +417,17 @@ Mailboxes `support/privacy/dpo/complaints@pilgrimcompare.co.uk` → Cloudflare E
   - Section "PilgrimCompare Limited" → renamed to **"Contact"** (address + email only).
   - Dropped `Company Reg: [Registration in progress]` and `VAT: [To be completed]` placeholders — Companies Act 2006 §82 requires real registered name + number, never placeholders.
   - Copyright "© PilgrimCompare Limited" → "© PilgrimCompare".
-- **Added Companies Act 2006 §82 disclosure** under copyright row: *"PilgrimCompare is a trading name of **Paramount Consultants Limited**, registered in England and Wales (company no. **09679002**). VAT no. **GB 221 6154 46**. Registered office: Slough, Berkshire, United Kingdom."*
-  - **⚠ Follow-up needed**: registered office line uses partial address ("Slough, Berkshire"). §82 strictly requires the full street + postcode as on Companies House. Update when founder confirms full registered office address.
+- **Added Companies Act 2006 §82 disclosure** under copyright row: *"PilgrimCompare is a trading name of **Paramount Consultants Limited**, registered in England and Wales (company no. **09679002**). VAT no. **GB 221 6154 46**."*
+- **⚠ Open compliance gap — registered office address omitted from website intentionally.**
+  - Current Companies House registered office for Paramount Consultants Limited is the founder's **residential address** (25 Thurston Road). Publishing on the website would expose home address; not publishing leaves website partially non-compliant with Trading Disclosures Regs 2008 (which require registered office on the site).
+  - Note: residential address is already public on Companies House search regardless — so the privacy fix requires changing the registered office at Companies House, not just hiding it on the website.
+  - **Remediation plan (target: within 30 days of 2026-06-10)**:
+    1. Set up virtual / business registered office (e.g., Hoxton Mix, Mint Formations, accountant-bundled service — typical cost £40–200/yr).
+    2. File **Companies House form AD01** to update Paramount Consultants Limited's registered office.
+    3. Wait for Companies House to confirm (usually same day).
+    4. Add the new registered office line back to footer + uncomment the line in [Footer.tsx](components/layout/Footer.tsx).
+    5. Also restore "Slough, Berkshire" line in Contact section if the new registered office is in Slough (currently removed for consistency).
+  - **Risk while gap open**: practically zero. Trading Standards enforcement against pre-revenue solo Ltd companies for missing registered office on website is unheard of. Home-address exposure was the bigger risk.
 - **Added DPO contact** to Legal section: `mailto:dpo@pilgrimcompare.co.uk` ("Data Protection (DPO)"). GDPR Art 38 expects discoverable DPO contact; mailbox already forwarding per §9 of this doc.
 
 ### Trust strip layout fix (same session)
