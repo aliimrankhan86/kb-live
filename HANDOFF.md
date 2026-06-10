@@ -9,7 +9,7 @@
 
 **State (2026-06-10):** Branch `dev`. Tests 232/232 ✅. Build clean ✅. MockDB removed from production paths. RLS audit complete. Transactional email suite live — `send.pilgrimcompare.co.uk` verified on Resend, `RESEND_API_KEY` in Vercel, 4 templates wired into quote-requests + booking-intents APIs.
 
-**Remaining setup items:** (1) Supabase SMTP → Resend (host: `smtp.resend.com`, port 465, user: `resend`, pass: Resend API key). (2) Paste Email 1 confirm-signup template into Supabase Auth → Email Templates. (3) Set `NEXT_PUBLIC_SITE_URL=https://pilgrimcompare.co.uk` in Vercel. (4) Cloudflare `.com` → `.co.uk` redirect. See `AI_NOTES.md` for exact steps.
+**Remaining setup items:** Create email mailboxes `support/privacy/dpo/complaints@pilgrimcompare.co.uk` (domain admin action). All other setup items complete.
 
 **How to verify any change (mandatory before push):**
 ```bash

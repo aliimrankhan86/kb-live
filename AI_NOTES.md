@@ -944,9 +944,9 @@ The item "CI branch mismatch: `.github/workflows/ci.yml` runs on `main` and `dev
 
 ### Exact next step for next session
 
-All Gate 1 P0 blockers are resolved. CI is green. Branch protection is live.
+All Gate 1 P0 blockers are resolved. CI is green. Branch protection is live. Transactional email suite complete (see §13).
 
-**Next: Prompt 5 — Remaining MockDB removal pass.**
+**Next: Remaining MockDB removal pass.**
 
 Run `grep -rn "from.*mock-db" components/ app/` to get the live list. Components still importing MockDB:
 - `components/quote/QuoteRequestWizard.tsx`
@@ -959,6 +959,83 @@ Run `grep -rn "from.*mock-db" components/ app/` to get the live list. Components
 - `components/request/ComparisonTable.tsx`
 
 After MockDB pass, confirm:
-- Vercel production env vars: `FEATURE_USE_REAL_DB=true`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `NEXT_PUBLIC_SITE_URL=https://pilgrimcompare.co.uk`
 - Supabase Dashboard → Auth → Settings → "Enable email confirmations" ON
 - `app_metadata` role backfill for pre-2026-06-09 users
+
+---
+
+## 13. Transactional Email Suite — 2026-06-10 (Prompt 5)
+
+### What changed
+
+Full transactional email system built on Resend + React Email. Sending domain verified. All 5 emails configured. Supabase SMTP routed through Resend. Production redeployed with correct env vars. Cloudflare redirect confirmed active.
+
+### Files created
+
+| File | What |
+| --- | --- |
+| `lib/email/send.tsx` | Resend wrapper. `FROM = 'PilgrimCompare <notifications@send.pilgrimcompare.co.uk>'`. Exports: `sendEnquiryConfirmation`, `sendOperatorEnquiryAlert`, `sendBookingIntentConfirmation`, `sendPaymentEvidenceNotification`, `findSimilarPackages`, `quoteRefCode`. All send functions are fire-and-forget (catch internally, never throw). |
+| `emails/EnquiryConfirmation.tsx` | Email 2 — customer enquiry confirmation. Props: `customerName`, `packageName`, `operatorName`, `refCode`, `similarPackages: SimilarPackage[]`. Includes similar packages section if any. |
+| `emails/OperatorEnquiryAlert.tsx` | Email 3 — operator new enquiry alert. Props: `operatorEmail`, `operatorName`, `customerName`, `customerEmail`, `customerPhone?`, `packageName`, `travelDates`, `groupSize`, `message`, `refCode`. `reply-to` set to customer email in `send.tsx`. |
+| `emails/BookingIntentConfirmation.tsx` | Email 4 — customer booking intent confirmation. Props: `customerName`, `operatorName`, `packageName: string \| null`, `refCode`. |
+| `emails/PaymentEvidenceNotification.tsx` | Email 5 — operator payment evidence notification. Props: `operatorName`, `customerName`, `packageName: string \| null`, `refCode`. CTA links to `/operator/dashboard`. |
+| `scripts/test-emails.mjs` | Manual test script. Loads `.env.local`, sends 4 plain-HTML test emails. Usage: `node scripts/test-emails.mjs your@email.com`. |
+
+### Files modified
+
+| File | What changed |
+| --- | --- |
+| `app/api/quote-requests/route.ts` | Added `sendEnquiryConfirmation`, `sendOperatorEnquiryAlert`, `findSimilarPackages`, `quoteRefCode` imports. Fire-and-forget `sendQuoteEmails()` called after successful `Repository.createQuoteRequest()`. Sends Email 2 always; Email 3 only if operator email found. |
+| `app/api/booking-intents/route.ts` | Added `sendBookingIntentConfirmation`, `sendPaymentEvidenceNotification` imports. Fire-and-forget `sendBookingEmails()` called after successful `Repository.createBookingIntent()`. Sends Email 4 always; Email 5 only if `hasEvidence && operator found`. |
+| `lib/api/repository.ts` | Added `getPackageById(id: string): Promise<Package \| undefined>` — scans all published packages by ID. Used by `sendQuoteEmails` to resolve package name from `sourcePackageId`. |
+| `STATUS.md` | Added transactional email suite to Done section; marked Supabase SMTP, Email 1 template, NEXT_PUBLIC_SITE_URL, Cloudflare redirect all complete; removed from Pending table. |
+| `HANDOFF.md` | Updated State to mention email suite live; updated Remaining setup items to only list email mailboxes. |
+
+### Infrastructure actions (dashboard, not code)
+
+| Action | Status |
+| --- | --- |
+| Resend sending domain `send.pilgrimcompare.co.uk` | Verified ✅ (Cloudflare DNS auto-configured via OAuth) |
+| `RESEND_API_KEY` in Vercel (Production + Preview) | Set ✅ |
+| Vercel redeploy after RESEND_API_KEY | Done ✅ |
+| Supabase Auth SMTP → Resend | Host: `smtp.resend.com`, port 465, user: `resend`, pass: Resend API key ✅ |
+| Supabase Auth Email 1 confirm-signup template | Subject: `Confirm your PilgrimCompare email address`, branded HTML body with `{{ .ConfirmationURL }}` ✅ |
+| `NEXT_PUBLIC_SITE_URL=https://pilgrimcompare.co.uk` in Vercel | Was `https://api.example.com` — corrected ✅ |
+| Vercel redeploy after NEXT_PUBLIC_SITE_URL fix | Done, build clean (62 routes, 0 errors) ✅ |
+| Cloudflare `.com` → `.co.uk` redirect rule | Already existed and active — rule name "Redirect .com to .co.uk", dynamic `concat("https://pilgrimcompare.co.uk", ...)`, 301 permanent, preserve query string ✅ |
+
+### Email routing
+
+| Email | Trigger | From | Reply-to | To |
+| --- | --- | --- | --- | --- |
+| Email 1 (confirm signup) | Supabase Auth | Supabase → Resend SMTP | — | New user |
+| Email 2 (enquiry confirmation) | `POST /api/quote-requests` | `notifications@send.pilgrimcompare.co.uk` | `support@pilgrimcompare.co.uk` | Customer |
+| Email 3 (operator enquiry alert) | `POST /api/quote-requests` | `notifications@send.pilgrimcompare.co.uk` | Customer email | Operator |
+| Email 4 (booking intent) | `POST /api/booking-intents` | `notifications@send.pilgrimcompare.co.uk` | `support@pilgrimcompare.co.uk` | Customer |
+| Email 5 (payment evidence) | `POST /api/booking-intents` (with evidence) | `notifications@send.pilgrimcompare.co.uk` | `support@pilgrimcompare.co.uk` | Operator |
+
+### Test verification
+
+`node scripts/test-emails.mjs aliimrankhan86@googlemail.com` — all 4 emails delivered, Resend email IDs returned, confirmed in inbox ✅
+
+### Decisions made
+
+1. **Fire-and-forget pattern.** All send functions are `void asyncFn()` — emails never block or fail API responses. Internal try/catch logs to `console.error('[email] ...')` only.
+2. **`findSimilarPackages` included in Email 2 (customer confirmation).** Surfaces up to 3 other published packages matching the customer's star preference. Falls back to empty array — no template change needed.
+3. **Email 3 reply-to = customer email.** Operator replying directly to the alert email goes straight to the customer. No PilgrimCompare middleman for enquiry replies.
+4. **Email 1 is Supabase-managed (dashboard only).** React Email templates not used for auth emails — Supabase's own template system used. Subject and HTML pasted into Supabase Auth → Email Templates → Confirm signup.
+5. **`getPackageById` uses in-memory scan, not a direct DB query.** Calls `listPackages()` and filters by ID. Acceptable for now — package count is small and the call is inside a fire-and-forget function that won't block the response.
+
+### Open risks / known issues
+
+1. **Email mailboxes not yet created.** `support@pilgrimcompare.co.uk`, `privacy@pilgrimcompare.co.uk`, `dpo@pilgrimcompare.co.uk`, `complaints@pilgrimcompare.co.uk` — used in footer/privacy/terms and as reply-to. Must exist before going public or replies bounce. Domain admin action — outside code scope.
+2. **Supabase "Enable email confirmations" toggle.** Still needs turning ON in Supabase Dashboard → Auth → Settings before going public (see §0 P0 item and Gate 2). Without it, `email_confirmed_at` is set on signup automatically and the email-verification gate + Email 1 are no-ops.
+3. **Email 3 reply-to is customer email.** If a customer has a disposable/fake email, the operator reply-to bounces silently. Mitigated by the disposable-email block at signup (`lib/validation.ts`).
+4. **No email rate limiting yet.** A customer could spam the quote endpoint (triggering emails 2+3) at the rate-limiter cadence. The existing Upstash rate limit on `POST /api/quote-requests` provides the only throttle. Consider a per-user email cooldown if abuse is observed post-launch.
+
+### Exact next step for next session
+
+1. **Create email mailboxes** — `support/privacy/dpo/complaints@pilgrimcompare.co.uk` via domain admin panel. Required before going public.
+2. **Enable Supabase email confirmations** — Dashboard → Auth → Settings → "Enable email confirmations" ON. Also add `https://pilgrimcompare.co.uk/auth/confirm` to Redirect URLs allow-list.
+3. **Remaining MockDB removal pass** — `grep -rn "from.*mock-db" components/ app/` for live list. Components still importing MockDB: `QuoteRequestWizard`, `OfferForm`, `PaymentDetailsClient`, `OperatorLeadsClient`, `admin/*`, `PackagesBrowse`, `ComplaintForm`, `ComparisonTable`.
+4. **`app_metadata` role backfill** — any Supabase auth user created before 2026-06-09 defaults to `customer`. Backfill via service role admin API before launch.

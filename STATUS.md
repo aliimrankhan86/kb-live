@@ -90,6 +90,8 @@
 - `emails/PaymentEvidenceNotification.tsx` — operator payment evidence notification
 - Email 2+3 wired into `POST /api/quote-requests`; Email 4+5 wired into `POST /api/booking-intents`
 - All 4 templates tested end-to-end via `scripts/test-emails.mjs` ✅
+- Supabase Auth SMTP → Resend (`smtp.resend.com`, port 465, user: `resend`) ✅
+- Supabase Auth Email 1 (confirm signup) template → PilgrimCompare branded HTML ✅
 
 **Platform**
 - UK GDPR (privacy, terms, cookie consent, marketing consent)
@@ -97,7 +99,7 @@
 - A11y: WCAG 2.2 AA, ARIA, keyboard nav, 44px tap targets
 - Security: nonce-based CSP (replaced unsafe-inline), RLS migrations, rate limiting (Upstash)
 - RLS audit (2026-06-10): all 13 tables RLS-enabled; migration 008 fixed `evidence-files` + `operator-exports` storage buckets `{public}` → `{authenticated}` (critical); migration 009 added `WITH CHECK` to all 7 UPDATE policies (prevents ownership field mutation)
-- Rebrand + domain wiring (2026-06-10): brand `KaabaTrip` → `PilgrimCompare`; domain `pilgrimcompare.co.uk` wired in all page metadata, JSON-LD, robots, sitemap, `env.example` (`NEXT_PUBLIC_SITE_URL=https://pilgrimcompare.co.uk`); 25+ files updated; `tsc` + build pass. Cloudflare `.com` → `.co.uk` redirect rule must be added manually (see `AI_NOTES.md §11`).
+- Rebrand + domain wiring (2026-06-10): brand `KaabaTrip` → `PilgrimCompare`; domain `pilgrimcompare.co.uk` wired in all page metadata, JSON-LD, robots, sitemap; `NEXT_PUBLIC_SITE_URL=https://pilgrimcompare.co.uk` set in Vercel ✅; Cloudflare `.com` → `.co.uk` 301 redirect rule active ✅
 - `/settings` page: profile (editable name, email, avatar, role badge), security (password reset email), notification toggles (offer updates / booking updates / marketing), data export + account deletion (GDPR Art 20/17)
 - Mobile nav overhaul: icons, user card with avatar, "Get a Quote" as yellow CTA, active state left-border accent, danger-styled log out
 
@@ -108,11 +110,7 @@
 | Item | Status | Blocker |
 | --- | --- | --- |
 | Merge `dev` → `main` | PR #27 already merged | — |
-| Cloudflare `.com` → `.co.uk` redirect | Manual — see `AI_NOTES.md §11` | Dashboard action |
-| Vercel env vars | `NEXT_PUBLIC_SITE_URL` still needs setting | Dashboard action |
 | Email mailboxes | Create `support/privacy/dpo/complaints@pilgrimcompare.co.uk` | Domain admin |
-| Supabase SMTP | Point Supabase Auth SMTP → Resend (host: `smtp.resend.com`, port 465, user: `resend`, pass: API key) | Supabase dashboard |
-| Supabase Email 1 template | Paste confirm-signup HTML into Supabase Auth → Email Templates | Supabase dashboard |
 
 ---
 
