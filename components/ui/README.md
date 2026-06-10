@@ -1,6 +1,6 @@
 # Production-Ready Filter Overlay Component System
 
-A comprehensive, accessible, and performant filter overlay system that seamlessly integrates with the KaabaTrip design system and architecture patterns.
+A comprehensive, accessible, and performant filter overlay system that seamlessly integrates with the PilgrimCompare design system and architecture patterns.
 
 ## 🏗️ Architecture Overview
 

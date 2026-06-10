@@ -5,7 +5,7 @@
 **Audience:** Claude, Codex, Kimi, and any AI/developer taking over the project.
 
 **Next immediate action:**
-Q1 — KaabaTrip sweep, banned-phrase audit, dynamic departure cities
+Q1 — PilgrimCompare sweep, banned-phrase audit, dynamic departure cities
 Prompt file: `docs/PILGRIMCOMPARE_QUALITY_PROMPTS.md` → Q1
 Pre-req: `docs/PILGRIMCOMPARE_LANGUAGE_AND_LEGAL_STANDARDS.md` must be committed to repo first (founder manual task)
 
@@ -36,14 +36,14 @@ This file is the current handover source of truth. If another document conflicts
 Target: 5 operators onboarded, ~50 packages live. No code blockers for this gate — it is an operator acquisition and data-quality goal.
 
 **Pre-req before any operator onboarding:**
-- `/public/logo.svg` and `/public/text-logo.svg` still contain KaabaTrip — fix first (Q1 scope)
+- `/public/logo.svg` and `/public/text-logo.svg` still contain PilgrimCompare — fix first (Q1 scope)
 
 ---
 
 ## 1. Product Identity & Hard Rules
 
 ### Brand
-- **PilgrimCompare** — never KaabaTrip in user-facing copy, UI components, or code comments
+- **PilgrimCompare** — never PilgrimCompare in user-facing copy, UI components, or code comments
 - UK-first Umrah comparison and enquiry marketplace
 - Does not hold funds, take bookings, or issue ATOL certs
 - Missing data = **"Not provided"** — never infer, estimate, or fill in
@@ -147,12 +147,12 @@ Min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special character. Enforced i
 
 | Persona | Email | Password | Expected view |
 |---|---|---|---|
-| Customer | `customer@example.com` | `KaabaTrip!2026` | Customer nav + public flows |
-| Operator verified | `operator@example.com` | `KaabaTrip!2026` | Partner dashboard |
-| Operator new | `operator2@example.com` | `KaabaTrip!2026` | Onboarding status flows |
-| Admin | `admin@example.com` | `KaabaTrip!2026` | Admin audit flows |
+| Customer | `customer@example.com` | `PilgrimCompare!2026` | Customer nav + public flows |
+| Operator verified | `operator@example.com` | `PilgrimCompare!2026` | Partner dashboard |
+| Operator new | `operator2@example.com` | `PilgrimCompare!2026` | Onboarding status flows |
+| Admin | `admin@example.com` | `PilgrimCompare!2026` | Admin audit flows |
 
-`KaabaTrip!2026` is intentionally unchanged — it is a dev credential token, not user-facing copy.
+`PilgrimCompare!2026` is intentionally unchanged — it is a dev credential token, not user-facing copy.
 
 ### Auth bypass paths
 - `__e2e_user` cookie: active only when `E2E_TESTING=1`. `next.config.ts` compiles `E2E_TESTING=''` in all deployments — path is dead in production/preview.
@@ -253,7 +253,7 @@ Next.js App Router UI
 
 | Item | Status |
 |---|---|
-| `/public/logo.svg` + `/public/text-logo.svg` contain KaabaTrip | **OPEN — fix before operator onboarding (Q1 scope)** |
+| `/public/logo.svg` + `/public/text-logo.svg` contain PilgrimCompare | **OPEN — fix before operator onboarding (Q1 scope)** |
 | PaymentEvidence RLS — operator/admin read access | **UNCONFIRMED** — storage policies updated (migration 006) but evidence-review UI and signed-download route not built. Resolve before Gate 2 fully closed. |
 | `app_metadata` role backfill | Pre-2026-06-09 users default to `customer`. Backfill via service-role admin API before onboarding operators. |
 | Plausible analytics | Not wired — add `data-domain=pilgrimcompare.co.uk` in `app/layout.tsx` gated behind cookie consent. |
@@ -332,14 +332,14 @@ Mailboxes `support/privacy/dpo/complaints@pilgrimcompare.co.uk` → Cloudflare E
 |---|---|---|
 | Prompt 1 | MockDB removal + `FEATURE_USE_REAL_DB` fail-fast | ✅ Done |
 | Prompt 2 | RLS and grants audit — migrations 008 + 009 | ✅ Done |
-| Prompt 3 | Domain wiring + full KaabaTrip → PilgrimCompare rebrand | ✅ Done |
+| Prompt 3 | Domain wiring + full PilgrimCompare → PilgrimCompare rebrand | ✅ Done |
 | Prompt 4 | GitHub branch protection + CI workflow | ✅ Done |
 
 ### Quality pass queue — NEXT
 
 | Queue | Task | Pre-req |
 |---|---|---|
-| **Q1** ← next | KaabaTrip sweep + banned-phrase audit + dynamic departure cities + logo SVGs | `docs/PILGRIMCOMPARE_LANGUAGE_AND_LEGAL_STANDARDS.md` committed |
+| **Q1** ← next | PilgrimCompare sweep + banned-phrase audit + dynamic departure cities + logo SVGs | `docs/PILGRIMCOMPARE_LANGUAGE_AND_LEGAL_STANDARDS.md` committed |
 | Q2 | Legal pages `/terms` `/privacy` `/how-it-works` | Q1 done |
 | Q3 | IA/nav — header, footer, back buttons, breadcrumbs | Q1 done |
 | Q4 | Mobile polish 360/390/430px | Q3 done |
@@ -373,8 +373,8 @@ npx playwright test
 **Viewports:** 320px mobile · 1280px desktop
 
 **Auth smoke:**
-- Customer: `customer@example.com` / `KaabaTrip!2026` → redirects to `/`, customer nav visible
-- Partner: `operator@example.com` / `KaabaTrip!2026` → redirects to `/operator/dashboard`
+- Customer: `customer@example.com` / `PilgrimCompare!2026` → redirects to `/`, customer nav visible
+- Partner: `operator@example.com` / `PilgrimCompare!2026` → redirects to `/operator/dashboard`
 
 ---
 
@@ -390,4 +390,4 @@ npx playwright test
 8. Update `docs/NOW.md` and this file before handoff or push.
 
 **Current handoff intent (2026-06-10):**
-Prompts 1–4 complete. Infrastructure fully deployed. Gate 1 + Gate 2 done. Next session is Q1 — KaabaTrip sweep. Wait for `docs/PILGRIMCOMPARE_LANGUAGE_AND_LEGAL_STANDARDS.md` to be committed before starting Q1.
+Prompts 1–4 complete. Infrastructure fully deployed. Gate 1 + Gate 2 done. Next session is Q1 — PilgrimCompare sweep. Wait for `docs/PILGRIMCOMPARE_LANGUAGE_AND_LEGAL_STANDARDS.md` to be committed before starting Q1.

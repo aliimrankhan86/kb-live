@@ -1,4 +1,4 @@
-# CURSOR_CONTEXT (KaabaTrip)
+# CURSOR_CONTEXT (PilgrimCompare)
 
 ## Purpose of this file
 

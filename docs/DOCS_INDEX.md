@@ -13,7 +13,7 @@
 Any change to code, UX, tests, or workflow must include a docs update per this index.
 If a task changes behaviour and docs are not updated, the task is not complete.
 
-**AI agents must read `docs/AI_RUNBOOK.md` before any KaabaTrip product or implementation work.**
+**AI agents must read `docs/AI_RUNBOOK.md` before any PilgrimCompare product or implementation work.**
 `AI_RUNBOOK.md` is the single source of truth for constraints, active tasks, operating rules, and the claim/complete protocol. `docs/00_PRODUCT_CANON.md` remains the behavioural policy canon.
 
 ## Canonical docs

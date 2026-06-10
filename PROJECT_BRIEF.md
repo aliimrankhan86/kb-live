@@ -1,4 +1,4 @@
-# KaabaTrip — Full Project Brief (self-contained)
+# PilgrimCompare — Full Project Brief (self-contained)
 
 > **Paste this whole file into a Claude Project / ChatGPT Project / any AI chat.** It is standalone — no other files needed. Last verified **2026-06-08**.
 
@@ -16,9 +16,9 @@ Two modes:
 ---
 
 ## 2. Business & legal posture (non-negotiable — never violate in code or copy)
-- KaabaTrip is a **marketplace / enquiry system** — NOT a tour operator, NOT a payment processor.
+- PilgrimCompare is a **marketplace / enquiry system** — NOT a tour operator, NOT a payment processor.
 - Operators are the source of truth for package content, availability, pricing, fulfilment, payment records.
-- KaabaTrip does **not** collect, hold, transfer, escrow, or invoice customer funds.
+- PilgrimCompare does **not** collect, hold, transfer, escrow, or invoice customer funds.
 - **BookingIntent** (`KT-…` ref) = an intent/reference record, **not** a payment confirmation or final booking.
 - Customer payment is **pay-operator-direct**.
 - Trust claims use **stored facts only** (verification status, ATOL/ABTA numbers, company metadata, regions, profile completeness). **Never invent trust claims.** Missing data → show "Not provided".
@@ -54,10 +54,10 @@ Two modes:
 
 **Admin:** complaint triage · bank-change review queue · reconciliation CSV export · audit logs.
 
-**Auth:** Supabase + `/api/auth/me` (customer/operator/admin nav) · **dev persona login is localhost + automated-E2E ONLY** — never enabled on any deployed env (preview or production); no remote toggle, so the `KaabaTrip!2026` personas cannot be reached from a public URL · password show/hide · forgot password.
+**Auth:** Supabase + `/api/auth/me` (customer/operator/admin nav) · **dev persona login is localhost + automated-E2E ONLY** — never enabled on any deployed env (preview or production); no remote toggle, so the `PilgrimCompare!2026` personas cannot be reached from a public URL · password show/hide · forgot password.
 > ⚠️ **Dev login = local testing scaffold, NOT production code.** Must be physically removed before production launch (strip checklist in `AI_NOTES.md` §4). Gated to localhost only as of 2026-06-08; safe on deploys but still slated for removal.
 >
-> 🛠️ **Gotcha — "can't log in locally":** dev personas (`customer@example.com` / `operator@example.com` / `operator2@example.com` / `admin@example.com`, all `KaabaTrip!2026`) only work under **`npm run dev`** (`NODE_ENV=development`). A local **production build** (`npm run build` + `npm start` → `next start`) runs `NODE_ENV=production`, so `isDevAuthEnabled()` is false and sign-in returns **`401 AUTH_INVALID_CREDENTIALS`** — this is the hardening working as designed, not a bug. Fix = restart with `npm run dev`. Quick check: running process `next-server` (from `next start`) = login off; `next dev --turbopack` = login on.
+> 🛠️ **Gotcha — "can't log in locally":** dev personas (`customer@example.com` / `operator@example.com` / `operator2@example.com` / `admin@example.com`, all `PilgrimCompare!2026`) only work under **`npm run dev`** (`NODE_ENV=development`). A local **production build** (`npm run build` + `npm start` → `next start`) runs `NODE_ENV=production`, so `isDevAuthEnabled()` is false and sign-in returns **`401 AUTH_INVALID_CREDENTIALS`** — this is the hardening working as designed, not a bug. Fix = restart with `npm run dev`. Quick check: running process `next-server` (from `next start`) = login off; `next dev --turbopack` = login on.
 
 **Platform:** UK GDPR (privacy, terms, cookie consent, marketing consent) · SEO (JSON-LD, dynamic sitemap, city corridor pages `/umrah/london|birmingham|manchester`) · A11y WCAG 2.2 AA · security (nonce-based CSP, RLS migrations, rate limiting).
 
@@ -67,7 +67,7 @@ Two modes:
 | Item | Status | Blocker |
 | --- | --- | --- |
 | Apply migration `004_package_images_bucket.sql` to Supabase | ❗ code ready, NOT applied | needs Supabase DB access — creates `package-images` bucket (5MB; jpeg/png/webp). **Image upload is inert until applied.** |
-| Remove dev login scaffold before prod | ⚠️ must strip, do not ship | localhost-only & safe today, but personas + `KaabaTrip!2026` + `__dev_user` must be deleted pre-launch. Checklist: `AI_NOTES.md` §4. |
+| Remove dev login scaffold before prod | ⚠️ must strip, do not ship | localhost-only & safe today, but personas + `PilgrimCompare!2026` + `__dev_user` must be deleted pre-launch. Checklist: `AI_NOTES.md` §4. |
 | Merge `dev` → `main` | open | PR review |
 
 ## 7. ▶️ Next actions (in order)

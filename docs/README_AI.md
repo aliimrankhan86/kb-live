@@ -1,4 +1,4 @@
-# KaabaTrip — AI & Developer Onboarding
+# PilgrimCompare — AI & Developer Onboarding
 
 **Read this file first. It is the single entry point for any AI agent or developer.**
 
@@ -6,7 +6,7 @@
 
 ---
 
-## What is KaabaTrip?
+## What is PilgrimCompare?
 
 A two-sided marketplace for Umrah/Hajj pilgrimage packages. Travellers search, compare, shortlist, and express booking intent. Operators list packages, respond to leads, and track performance. See `docs/PRODUCT.md` for full product canon.
 

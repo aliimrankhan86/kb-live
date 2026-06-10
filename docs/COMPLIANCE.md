@@ -1,6 +1,6 @@
 # UK Compliance & Data Protection
 
-This document maps KaabaTrip's data handling, security, and consumer practices to UK legal requirements.
+This document maps PilgrimCompare's data handling, security, and consumer practices to UK legal requirements.
 
 ---
 
@@ -71,9 +71,9 @@ This document maps KaabaTrip's data handling, security, and consumer practices t
 
 ### 2.1 Package Travel Regulations 2018
 
-- KaabaTrip is a **comparison platform**, not the package organiser
+- PilgrimCompare is a **comparison platform**, not the package organiser
 - The **operator** is the contractual counterparty for the traveller
-- Clear disclosure on every page: _"KaabaTrip does not collect customer funds. You pay the operator directly."_
+- Clear disclosure on every page: _"PilgrimCompare does not collect customer funds. You pay the operator directly."_
 - Operator ATOL/ABTA numbers displayed where available
 - No "best price" or "guaranteed availability" claims
 
@@ -90,7 +90,7 @@ This document maps KaabaTrip's data handling, security, and consumer practices t
 
 - ATOL/ABTA fields are collected during operator onboarding (`OperatorRegistrationForm`)
 - A mandatory "Financial Protection Disclosure" section explains ATOL, ABTA, and no-protection scenarios
-- Operators must check a checkbox acknowledging that KaabaTrip displays their protection status prominently and that KaabaTrip does not verify credentials
+- Operators must check a checkbox acknowledging that PilgrimCompare displays their protection status prominently and that PilgrimCompare does not verify credentials
 - The checkbox is validated — form cannot submit without acknowledgment
 
 **Traveller-facing disclosure:**
@@ -98,21 +98,21 @@ This document maps KaabaTrip's data handling, security, and consumer practices t
 - Package detail page shows a **green badge** when ATOL/ABTA is present (with numbers)
 - Package detail page shows a **red alert banner** when no protection is listed
 - A dedicated "Important — Your Protection" panel explains:
-  - The operator (not KaabaTrip) is the seller
+  - The operator (not PilgrimCompare) is the seller
   - What ATOL/ABTA means for the traveller
   - A clear warning if no protection is listed
-  - A liability disclaimer stating KaabaTrip does not verify credentials
+  - A liability disclaimer stating PilgrimCompare does not verify credentials
 
 **Liability limitation (UK law compliant):**
 
-- "KaabaTrip is a comparison platform. We do not verify ATOL/ABTA credentials and are not responsible for the operator's financial protection status."
+- "PilgrimCompare is a comparison platform. We do not verify ATOL/ABTA credentials and are not responsible for the operator's financial protection status."
 - "Your contract is directly with the operator. Always confirm protection details in writing before paying."
 - This appears on every package detail page and in the operator registration form
 
 ### 2.3 Cooling-off / cancellation
 
 - BookingIntent creation is a **non-binding expression of interest**
-- No payment collected by KaabaTrip
+- No payment collected by PilgrimCompare
 - Cancellation terms are between traveller and operator
 - Complaint mechanism available for disputes
 
@@ -128,7 +128,7 @@ This document maps KaabaTrip's data handling, security, and consumer practices t
 
 ### 3.1 Payment handling
 
-- **KaabaTrip never holds customer funds**
+- **PilgrimCompare never holds customer funds**
 - Payment instructions are delivered in-app only (`delivery: 'in_app_only'`)
 - Bank details are repository-gated to BookingIntent parties
 - Bank changes require admin review + cooling period + audit logging
@@ -204,7 +204,7 @@ This document maps KaabaTrip's data handling, security, and consumer practices t
 
 - Every BookingIntent generates a unique immutable reference code (`KT-XXXXX`)
 - **Traveller obligation**: Must provide the reference code when paying the operator
-- **Consequence of omission**: If the reference is not provided, KaabaTrip cannot verify the booking originated through our platform. Any dispute becomes a matter solely between the traveller and the operator. KaabaTrip will not offer assistance, mediation, or complaint routing.
+- **Consequence of omission**: If the reference is not provided, PilgrimCompare cannot verify the booking originated through our platform. Any dispute becomes a matter solely between the traveller and the operator. PilgrimCompare will not offer assistance, mediation, or complaint routing.
 - **Terms coverage**: Section 7 (Booking reference and payment) of `/terms` documents this clearly
 - **UI coverage**: `PaymentInstructions` component displays the reference prominently with a warning callout
 
@@ -213,7 +213,7 @@ This document maps KaabaTrip's data handling, security, and consumer practices t
 ### 8.1 Operator registration
 
 - ATOL and ABTA fields are collected during `OperatorRegistrationForm`
-- Mandatory `atolAbtaAcknowledged` checkbox: operator confirms they understand KaabaTrip will display their protection status (or lack thereof) prominently
+- Mandatory `atolAbtaAcknowledged` checkbox: operator confirms they understand PilgrimCompare will display their protection status (or lack thereof) prominently
 - Financial Protection Disclosure section explains ATOL, ABTA, and no-protection scenarios
 
 ### 8.2 Package detail page
@@ -222,10 +222,10 @@ This document maps KaabaTrip's data handling, security, and consumer practices t
 - **Green badge** with ✓ for each protection type, showing the actual number
 - **Red warning banner** with ⚠ only when neither ATOL nor ABTA is listed
 - **"Important — Your Protection" panel** explains:
-  - The operator (not KaabaTrip) is the seller
+  - The operator (not PilgrimCompare) is the seller
   - What ATOL/ABTA means for the traveller
   - Clear warning if no protection is listed
-  - Liability disclaimer: KaabaTrip does not verify credentials
+  - Liability disclaimer: PilgrimCompare does not verify credentials
 
 ### 8.3 Operator verification (post-MVP)
 
