@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { BookingIntent, BookingPaymentEvidenceFile, QuoteRequest, Offer, OperatorProfile } from '@/lib/types';
-import { MockDB } from '@/lib/api/mock-db';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -17,12 +16,10 @@ import { ComparisonTable } from './ComparisonTable';
 import { PaymentInstructions } from './PaymentInstructions';
 import { ComplaintForm } from './ComplaintForm';
 import { handleOfferSelection } from '@/lib/comparison';
-import { Repository, RequestContext } from '@/lib/api/repository';
 import { createClient } from '@/lib/supabase/client';
 import { formatMoney } from '@/lib/i18n/format';
 import { CURRENCY_CHANGE_EVENT, getRegionSettings } from '@/lib/i18n/region';
 
-const customerContext: RequestContext = { userId: 'cust1', role: 'customer' };
 const EVIDENCE_BUCKET = 'payment-evidence';
 const MAX_EVIDENCE_BYTES = 10 * 1024 * 1024; // 10MB
 const ACCEPTED_EVIDENCE_MIME = ['image/jpeg', 'image/png', 'application/pdf'];
@@ -53,29 +50,14 @@ const sanitizeFileName = (name: string): string =>
   name.replace(/[^A-Za-z0-9._-]+/g, '_').replace(/^_+|_+$/g, '') || 'file';
 
 export function BookableButton({
-  operatorId,
   existingIntent,
   onProceed,
+  isBookable,
 }: {
-  operatorId: string;
   existingIntent: boolean;
   onProceed: () => void;
+  isBookable: boolean;
 }) {
-  const [bookable, setBookable] = useState(true);
-  const [checking, setChecking] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    Repository.isOperatorBookable(operatorId)
-      .then((result) => {
-        if (!cancelled) setBookable(result);
-      })
-      .finally(() => {
-        if (!cancelled) setChecking(false);
-      });
-    return () => { cancelled = true; };
-  }, [operatorId]);
-
   if (existingIntent) {
     return (
       <Button type="button" size="sm" disabled className="flex-1" data-testid="book-now-btn">
@@ -84,15 +66,7 @@ export function BookableButton({
     );
   }
 
-  if (checking) {
-    return (
-      <Button type="button" size="sm" disabled className="flex-1" data-testid="book-now-btn">
-        Checking...
-      </Button>
-    );
-  }
-
-  if (!bookable) {
+  if (!isBookable) {
     return (
       <Button
         type="button"
@@ -146,16 +120,32 @@ export function RequestDetail({ id }: { id: string }) {
 
   useEffect(() => {
     const load = async () => {
-      const req = await Repository.getRequestById(customerContext, id);
-      if (req) {
+      try {
+        const reqRes = await fetch(`/api/quote-requests/${id}`);
+        if (!reqRes.ok) return;
+        const { request: req } = await reqRes.json() as { request: QuoteRequest };
         setRequest(req);
-        const offs = await Repository.getOffersForRequest(customerContext, id);
-        setOffers(offs);
-        const ops = MockDB.getOperators();
-        setOperators(ops);
-        setBookingIntents(await Repository.getBookingIntents(customerContext));
+
+        const [offsRes, opsRes, intentsRes] = await Promise.all([
+          fetch(`/api/quote-requests/${id}/offers`),
+          fetch('/api/operators'),
+          fetch('/api/booking-intents'),
+        ]);
+        if (offsRes.ok) {
+          const { offers } = await offsRes.json() as { offers: Offer[] };
+          setOffers(offers);
+        }
+        if (opsRes.ok) {
+          const { operators } = await opsRes.json() as { operators: OperatorProfile[] };
+          setOperators(operators);
+        }
+        if (intentsRes.ok) {
+          const { bookingIntents } = await intentsRes.json() as { bookingIntents: BookingIntent[] };
+          setBookingIntents(bookingIntents);
+        }
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     load();
   }, [id]);
@@ -324,13 +314,12 @@ export function RequestDetail({ id }: { id: string }) {
       });
 
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json() as { bookingIntent: BookingIntent };
         newIntent = data.bookingIntent;
       } else {
-        newIntent = await Repository.createBookingIntent(customerContext, bookingPayload);
+        const errData = await response.json().catch(() => ({})) as { error?: string };
+        throw new Error(errData.error ?? 'Failed to create booking intent.');
       }
-
-      MockDB.saveBookingIntent(newIntent);
       setBookingIntents((current) => [newIntent, ...current.filter((intent) => intent.id !== newIntent.id)]);
       if (!newIntent.referenceCode) throw new Error('Reference code was not issued.');
       setActiveOfferForBooking(null);
@@ -491,12 +480,15 @@ export function RequestDetail({ id }: { id: string }) {
                       View Details
                     </Button>
                     <BookableButton
-                      operatorId={offer.operatorId}
                       existingIntent={Boolean(existingIntent)}
                       onProceed={() => {
                         resetBookingForm();
                         setActiveOfferForBooking(offer);
                       }}
+                      isBookable={
+                        getOperator(offer.operatorId)?.eligibilityFlags?.canReceiveBookings === true &&
+                        getOperator(offer.operatorId)?.eligibilityFlags?.bankDetailsActive === true
+                      }
                     />
                   </div>
                 </div>

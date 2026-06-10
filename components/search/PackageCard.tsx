@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Package } from '@/lib/mock-packages'
+import type { SearchPackageDisplay } from '@/components/search/search-utils'
 import type { OperatorProfile } from '@/lib/types'
 import { getRegionSettings } from '@/lib/i18n/region'
 import { formatPriceForRegion } from '@/lib/i18n/format'
@@ -17,7 +17,7 @@ interface InclusionChip {
 }
 
 interface PackageCardProps {
-  package: Package & { slug?: string }
+  package: SearchPackageDisplay
   isShortlisted?: boolean
   isCompareSelected?: boolean
   onAddToShortlist: (packageId: string) => void

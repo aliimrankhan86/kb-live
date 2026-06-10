@@ -1,28 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { MockDB } from '@/lib/api/mock-db';
-import { Repository } from '@/lib/api/repository';
 import type { BookingIntent, PaymentInstructions } from '@/lib/types';
 import { Badge } from '@/components/ui/Badge';
 
-const customerCtx = { userId: 'cust1', role: 'customer' as const };
-
 const PAY_OPERATOR_DIRECT_DISCLOSURE =
   'You pay the operator directly. KaabaTrip does not collect, hold, or transfer customer funds. The operator is the contracting party and is responsible for package fulfilment, payment records, and any payment outcome.';
-
-const RECENTLY_UPDATED_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
-
-const isRecentlyUpdated = (operatorId: string): boolean => {
-  const now = Date.now();
-  const entries = MockDB.getAuditLog();
-  return entries.some(
-    (entry) =>
-      entry.operatorId === operatorId &&
-      (entry.action === 'bank_change.activated' || entry.action === 'bank_change.approved') &&
-      new Date(entry.createdAt).getTime() > now - RECENTLY_UPDATED_WINDOW_MS
-  );
-};
 
 interface PaymentInstructionsProps {
   bookingIntent: BookingIntent;
@@ -33,11 +16,18 @@ export function PaymentInstructions({ bookingIntent }: PaymentInstructionsProps)
 
   useEffect(() => {
     let cancelled = false;
-    Repository.getPaymentInstructions(customerCtx, bookingIntent.id)
-      .then((instructions) => {
+    fetch(`/api/booking-intents/${bookingIntent.id}/payment-instructions`)
+      .then(async (res) => {
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({})) as { error?: string };
+          throw new Error(body.error ?? 'Payment instructions are unavailable');
+        }
+        return res.json() as Promise<{ instructions: PaymentInstructions }>;
+      })
+      .then(({ instructions }) => {
         if (!cancelled) setResult({ type: 'success', instructions });
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         if (!cancelled) {
           setResult({
             type: 'holding',
@@ -47,8 +37,6 @@ export function PaymentInstructions({ bookingIntent }: PaymentInstructionsProps)
       });
     return () => { cancelled = true; };
   }, [bookingIntent.id]);
-
-  const recentlyUpdated = result.type === 'success' ? isRecentlyUpdated(result.instructions.operatorId) : false;
 
   if (result.type === 'loading') {
     return (
@@ -87,35 +75,6 @@ export function PaymentInstructions({ bookingIntent }: PaymentInstructionsProps)
       className="space-y-4 rounded-md border border-[var(--borderSubtle)] bg-[rgba(255,255,255,0.04)] p-4"
       data-testid="payment-instructions"
     >
-      {recentlyUpdated && (
-        <div
-          role="alert"
-          className="flex items-start gap-2 rounded-md border border-[var(--warning)]/60 bg-[color:rgba(245,158,11,0.08)] px-3 py-2 text-sm"
-          data-testid="recently-updated-warning"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="mt-0.5 shrink-0 text-[var(--warning)]"
-            aria-hidden="true"
-          >
-            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-            <line x1="12" y1="9" x2="12" y2="13" />
-            <line x1="12" y1="17" x2="12.01" y2="17" />
-          </svg>
-          <span className="text-[var(--text)]">
-            Bank details were recently updated. Please double-check the information before transferring.
-          </span>
-        </div>
-      )}
-
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <p className="text-sm font-medium text-[var(--text)]">Pay {instructions.operatorName}</p>

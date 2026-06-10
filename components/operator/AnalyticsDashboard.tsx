@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { BarChart, ChartContainer } from '@/components/ui/Chart';
 import { Repository } from '@/lib/api/repository';
-import { MockDB } from '@/lib/api/mock-db';
 import type { AnalyticsEventCounts, AnalyticsTrendDay } from '@/lib/types';
 import { ANALYTICS_EVENT_TYPES } from '@/lib/types';
 
@@ -87,12 +86,7 @@ function Funnel({ summary }: { summary: AnalyticsEventCounts }) {
   );
 }
 
-function EmptyChart({ operatorId, onSeed }: { operatorId: string; onSeed: () => void }) {
-  const handleSeed = () => {
-    MockDB.seedAnalyticsForOperator(operatorId, 30);
-    onSeed();
-  };
-
+function EmptyChart() {
   return (
     <div className="flex flex-col items-center gap-3 py-10 text-center">
       <div className="flex h-14 w-14 items-center justify-center rounded-full border border-[var(--borderSubtle)] bg-[var(--surfaceDark)] text-[var(--textMuted)]">
@@ -104,13 +98,6 @@ function EmptyChart({ operatorId, onSeed }: { operatorId: string; onSeed: () => 
       <p className="max-w-xs text-xs text-[var(--textMuted)]">
         Events appear here once travellers view your packages and request quotes.
       </p>
-      <button
-        type="button"
-        onClick={handleSeed}
-        className="mt-1 rounded-md border border-[var(--borderSubtle)] bg-[var(--surfaceDark)] px-4 py-2 text-xs font-medium text-[var(--textMuted)] transition-colors hover:border-[var(--borderStrong)] hover:text-[var(--text)]"
-      >
-        Load sample data
-      </button>
     </div>
   );
 }
@@ -192,7 +179,7 @@ export function AnalyticsDashboard({ operatorId }: AnalyticsDashboardProps) {
         </>
       ) : (
         <ChartContainer title="Activity trend" subtitle="Key event volume by day" data-testid="analytics-trend">
-          <EmptyChart operatorId={operatorId} onSeed={loadData} />
+          <EmptyChart />
         </ChartContainer>
       )}
     </div>

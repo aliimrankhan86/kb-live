@@ -4,7 +4,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import type { Package as CataloguePackage, OperatorProfile } from '@/lib/types';
-import { Package } from '@/lib/mock-packages';
+import type { SearchPackageDisplay } from './search-utils';
 import { mapPackageToComparison, handleComparisonSelection } from '@/lib/comparison';
 import { ComparisonTable } from '@/components/request/ComparisonTable';
 import {
@@ -22,7 +22,7 @@ import styles from './packages.module.css';
 const SHORTLIST_STORAGE_KEY = 'kb_shortlist_packages';
 const uniqueIds = (ids: string[]) => Array.from(new Set(ids));
 
-export type SearchPackageDisplay = Package & { slug?: string };
+export type { SearchPackageDisplay } from './search-utils';
 
 type SortOption = 'price-asc' | 'price-desc' | 'rating' | 'distance';
 

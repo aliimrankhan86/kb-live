@@ -1,12 +1,14 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { MockDB } from '@/lib/api/mock-db';
 
 export function AnalyticsSeedButton({ operatorId }: { operatorId: string }) {
   const router = useRouter();
 
-  const handleSeed = () => {
+  if (process.env.NODE_ENV === 'production') return null;
+
+  const handleSeed = async () => {
+    const { MockDB } = await import('@/lib/api/mock-db');
     MockDB.seedAnalyticsForOperator(operatorId, 30);
     router.refresh();
   };
