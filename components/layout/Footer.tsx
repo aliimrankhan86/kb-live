@@ -11,8 +11,8 @@ export function Footer() {
         <div className="mb-8 flex flex-col items-center gap-3 sm:flex-row sm:items-start sm:gap-6">
           <Link href="/" className="flex items-center gap-2 shrink-0" aria-label="PilgrimCompare - Go to homepage">
             <Logo size={28} />
-            <span className="footer__wordmark" style={{ fontFamily: 'var(--font-exo2), system-ui, sans-serif', fontSize: '1.375rem', fontWeight: 700, letterSpacing: '-0.01em', lineHeight: 1 }}>
-              <span style={{ color: '#FFFFFF' }}>Pilgrim</span><span style={{ color: '#FFD31D' }}>Compare</span>
+            <span style={{ fontFamily: "var(--font-nunito), 'Nunito', system-ui, sans-serif", fontSize: '1.375rem', fontWeight: 800, letterSpacing: 0, lineHeight: 1, color: '#FFD31D', userSelect: 'none' }}>
+              PilgrimCompare
             </span>
           </Link>
           <p className="text-center text-xs text-[var(--textMuted)] sm:text-left sm:max-w-xs">

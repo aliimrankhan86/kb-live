@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Nunito } from "next/font/google";
 import "./globals.css";
 import { baseMetadata } from "@/lib/seo";
 import { exo2Font } from "@/lib/fonts";
@@ -11,6 +11,14 @@ import { JsonLdScript } from "@/lib/seo/json-ld";
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
+  preload: true,
+});
+
+const nunito = Nunito({
+  variable: "--font-nunito",
+  subsets: ["latin"],
+  weight: ["700", "800"],
   display: "swap",
   preload: true,
 });
@@ -44,7 +52,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en-GB" className={`${exo2Font.variable} ${inter.variable}`} suppressHydrationWarning>
+    <html lang="en-GB" className={`${exo2Font.variable} ${inter.variable} ${nunito.variable}`} suppressHydrationWarning>
       <body className="antialiased min-h-screen flex flex-col">
         <JsonLdScript data={travelAgencyJsonLd} />
         <a
