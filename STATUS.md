@@ -3,7 +3,7 @@
 > **Single rolling tracker.** Any AI/dev: read this for current state. Update it after work is **done + tested + verified** (see `CLAUDE.md` rule).
 > Detailed handover lives in `AI_NOTES.md`. Cold-start brief: `HANDOFF.md`. Business: `BUSINESS.md`.
 
-**Last verified:** 2026-06-10 (www redirect fix + infra verification) · **Branch:** `docs/session-4-notes` → `main` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
+**Last verified:** 2026-06-10 (wordmark rebrand + PR #34 dev→main merged) · **Branch:** `dev` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
 
 ---
 
@@ -100,7 +100,8 @@
 - A11y: WCAG 2.2 AA, ARIA, keyboard nav, 44px tap targets
 - Security: nonce-based CSP (replaced unsafe-inline), RLS migrations, rate limiting (Upstash)
 - RLS audit (2026-06-10): all 13 tables RLS-enabled; migration 008 fixed `evidence-files` + `operator-exports` storage buckets `{public}` → `{authenticated}` (critical); migration 009 added `WITH CHECK` to all 7 UPDATE policies (prevents ownership field mutation)
-- Rebrand + domain wiring (2026-06-10): brand `PilgrimCompare` → `PilgrimCompare`; domain `pilgrimcompare.co.uk` wired in all page metadata, JSON-LD, robots, sitemap; `NEXT_PUBLIC_SITE_URL=https://pilgrimcompare.co.uk` set in Vercel ✅; Cloudflare `.com` → `.co.uk` 301 redirect rule active ✅; `www.pilgrimcompare.com` CNAME (proxied) added → redirects to `pilgrimcompare.co.uk` ✅
+- Rebrand + domain wiring (2026-06-10): brand `KaabaTrip` → `PilgrimCompare`; domain `pilgrimcompare.co.uk` wired in all page metadata, JSON-LD, robots, sitemap; `NEXT_PUBLIC_SITE_URL=https://pilgrimcompare.co.uk` set in Vercel ✅; Cloudflare `.com` → `.co.uk` 301 redirect rule active ✅; `www.pilgrimcompare.com` CNAME (proxied) added → redirects to `pilgrimcompare.co.uk` ✅
+- **WordmarkLogo component (2026-06-10):** `components/graphics/WordmarkLogo.tsx` — inline SVG text wordmark, Nunito ExtraBold 800, `currentColor` fill (theme-flexible). Used in `Header` (desktop + mobile drawer) and `Footer`. Nunito loaded via `next/font/google` in `app/layout.tsx` (`--font-nunito`). Merged to `main` via PR #34.
 - `/settings` page: profile (editable name, email, avatar, role badge), security (password reset email), notification toggles (offer updates / booking updates / marketing), data export + account deletion (GDPR Art 20/17)
 - Mobile nav overhaul: icons, user card with avatar, "Get a Quote" as yellow CTA, active state left-border accent, danger-styled log out
 
@@ -110,18 +111,15 @@
 
 | Item | Status | Blocker |
 | --- | --- | --- |
-| Merge `dev` → `main` | PR #27 already merged | — |
+| Sync `main` → `dev` merge commit | PR needed (0 files changed, structural only) | Create PR `base:dev ← compare:main` on GitHub |
+| Q1 quality pass | Not started | `docs/PILGRIMCOMPARE_LANGUAGE_AND_LEGAL_STANDARDS.md` committed (founder task) |
 
 ---
 
 ## ▶️ Next actions (do in order)
 
-1. ✅ ~~Apply migration 004 to Supabase~~ — applied + verified 2026-06-08.
-2. ✅ ~~Open PR `dev` → `main`~~ — [PR #27](https://github.com/aliimrankhan86/kb-live/pull/27) open 2026-06-09.
-3. Review + merge PR #27 (run Playwright smoke 320px/1280px before merge).
-4. (then) groom backlog — see `docs/EXECUTION_QUEUE.md`.
-
-> **Queue status (2026-06-08):** EXECUTION_QUEUE Tasks 13/14/16 verified `[x]`; Task 17 `[~]` — gate green, only manual dev smoke + commit/push remain. No `[ ]` backlog left in the queue. Migration 004 applied → only Pending items are dev-login strip (pre-prod) + PR `dev`→`main`.
+1. Merge PR `main → dev` to bring `dev` in sync with `main` (1 commit, 0 files changed — the PR #34 merge commit).
+2. Start Q1 — PilgrimCompare language sweep + banned-phrase audit + dynamic departure cities. See `docs/PILGRIMCOMPARE_QUALITY_PROMPTS.md` → Q1.
 
 ---
 

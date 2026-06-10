@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import type { AuditLogEntry, BankChangeRequest, PaymentDetails } from '@/lib/types';
 import { Heading } from '@/components/ui/Heading';
 import { Text } from '@/components/ui/Text';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { BankChangeReviewCard } from '@/components/admin/BankChangeReviewCard';
 
 export default function BankChangeDetailPage() {
@@ -59,15 +60,13 @@ export default function BankChangeDetailPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-4 md:p-8">
-      <div className="flex items-center gap-4">
-        <button
-          type="button"
-          onClick={() => router.push('/admin/bank-changes')}
-          className="text-sm text-[var(--textMuted)] hover:text-[var(--text)]"
-        >
-          ← Back to queue
-        </button>
-      </div>
+      <Breadcrumb
+        items={[
+          { label: 'Admin', href: '/admin/complaints' },
+          { label: 'Bank changes', href: '/admin/bank-changes' },
+          { label: 'Review' },
+        ]}
+      />
 
       <Heading as={1} size="xl">
         Review bank change
