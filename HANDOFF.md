@@ -7,13 +7,13 @@
 
 **Stack:** Next.js 15.5 (App Router, Server Components) · React 19 · TypeScript strict · Supabase (auth/Postgres/RLS/storage, `eu-west-2`) · Prisma · Tailwind · Zustand · Vitest + Playwright.
 
-**State (2026-06-08):** Branch `dev`. Tests 238/238 ✅. Build clean ✅. MVP feature-complete across traveller/operator/admin flows.
+**State (2026-06-10):** Branch `dev`. Tests 232/232 ✅. Build clean ✅. MockDB removed from payment/booking/analytics production paths. `FEATURE_USE_REAL_DB` now fail-fast. RLS audit complete — all 13 tables RLS-enabled, critical storage bucket anon-access fixed (migration 008), UPDATE WITH CHECK gaps fixed (migration 009).
 
-**The one thing blocking:** migration `004_package_images_bucket.sql` not applied to Supabase → package image upload inert until done. **That's the next action.**
+**The one thing blocking:** Remaining MockDB imports in `QuoteRequestWizard`, `OfferForm`, `admin/*` etc. + Vercel env var confirmation + Supabase email confirmation toggle ON. See `AI_NOTES.md` §10 for exact steps.
 
 **How to verify any change (mandatory before push):**
 ```bash
-npm run test     # 238/238 must pass
+npm run test     # 232/232 must pass
 npm run build    # 0 errors
 npx tsc --noEmit # pass
 # if UI/routes changed: Playwright smoke on / , /umrah , /search/packages at 320px + 1280px

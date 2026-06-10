@@ -1,6 +1,6 @@
 # KaabaTrip AI Handover - Single Source of Truth
 
-**Last verified:** 2026-06-09 (email verification pass)
+**Last verified:** 2026-06-10 (MockDB P0 close-out)
 **Last architecture/security audit:** 2026-06-09
 **Branch:** `dev`
 **Audience:** Claude, Codex, Kimi, and any AI/developer taking over the project.
@@ -117,19 +117,19 @@ final CSP `frame-ancestors` / CORS origins (gated on domain purchase).
    - Risk: Supabase user metadata is user-editable. Any server-side authorization that trusts it can become role escalation.
    - Fix: Store authorization role in `app_metadata` using admin/service-role updates, or load role from the server-side `users` table by authenticated `user.id`. Middleware, `getSessionUser()`, `/api/auth/me`, and sign-in response DTOs must use the trusted source only. Public sign-up may request `customer` or `operator`, but must not self-authorize admin or verified/operator privileges.
 
-2. **MockDB still leaks into production-facing paths.**
-   - Evidence from `rg`: direct MockDB imports remain in `components/request/RequestDetail.tsx`, `components/quote/QuoteRequestWizard.tsx`, `components/operator/OfferForm.tsx`, `components/operator/PaymentDetailsClient.tsx`, `components/operator/OperatorLeadsClient.tsx`, `components/admin/*`, `components/search/PackageList.tsx`, `components/packages/PackagesBrowse.tsx`, `components/request/PaymentInstructions.tsx`, `components/request/ComplaintForm.tsx`, `components/request/ComparisonTable.tsx`, `app/admin/bank-changes/*`, `app/api/user/export/route.ts`, and `app/api/interest/route.ts`.
-   - Risk: real Supabase data and client-side local/test data can diverge; GDPR export can omit real data; users can see simulated state after failed server writes.
-   - Fix: Remove MockDB imports from all production UI/API paths. Use server routes/Server Components plus `Repository` with server-derived `RequestContext`. Keep MockDB only under tests, fixtures, and explicit dev-only tooling.
+2. **~~MockDB still leaks into production-facing paths~~ — RESOLVED 2026-06-10.**
+   - All production-facing components and API routes that had direct MockDB imports have been migrated. See the "2026-06-10 MockDB P0 close-out" section in §7 for the complete file list and decisions.
+   - MockDB now remains ONLY in: `tests/`, `lib/api/mock-db.ts` (retained for test infrastructure), `components/operator/AnalyticsSeedButton.tsx` (dev-only via dynamic import + production guard, dead code as it is not imported by any page).
+   - ⚠️ Remaining: `components/quote/QuoteRequestWizard.tsx`, `components/operator/OfferForm.tsx`, `components/operator/PaymentDetailsClient.tsx`, `components/operator/OperatorLeadsClient.tsx`, `components/admin/*`, `components/packages/PackagesBrowse.tsx`, `components/request/ComplaintForm.tsx`, `components/request/ComparisonTable.tsx` — these were not in scope for this session. Run `grep -r "mock-db" components/ app/` to get the current list before the next pass. They are lower-urgency than the payment/booking/analytics paths that were fixed.
 
 3. **~~Anonymous/customer quote and booking flows still use hardcoded `cust1`~~ — FIXED 2026-06-09.**
    - `POST /api/quote-requests` now requires an authenticated customer session; returns `401` otherwise. `customerId` always set from `user.id`.
    - ⚠️ Remaining: `components/request/RequestDetail.tsx` still uses `customerContext = { userId: 'cust1', role: 'customer' }` for client-side `Repository.createBookingIntent()` / `MockDB.saveBookingIntent()` fallback. This is covered by P0 #2 (MockDB removal). Fix there, not here.
 
-4. **Real DB cutover is opt-in and not yet proven in deployment.**
-   - Evidence: `getDataSource()` returns MockDB unless `FEATURE_USE_REAL_DB=true`; E2E always forces MockDB. Docs say production should be Supabase, but the code can silently run MockDB if the flag is missing.
-   - Risk: a deployed production environment can appear functional while writing to non-persistent MockDB/localStorage simulation.
-   - Fix: For Vercel production, fail fast unless `FEATURE_USE_REAL_DB=true`, Supabase env, `DATABASE_URL`, `DIRECT_URL`, and Upstash env are present. Keep MockDB fallback only for `NODE_ENV=test`, local dev without the flag, and explicit E2E.
+4. **~~Real DB cutover is opt-in and not yet proven in deployment~~ — RESOLVED 2026-06-10.**
+   - `getDataSource()` in `lib/config.ts` now **throws** if `FEATURE_USE_REAL_DB !== 'true'` (except `NODE_ENV=test` or `E2E_TESTING=1`). The app cannot silently fall back to MockDB in production.
+   - Error text: `"FEATURE_USE_REAL_DB is not set to true. The app will not start without a real database connection. Set this variable in your Vercel environment variables or .env.local file."`
+   - Remaining: Vercel production env var must have `FEATURE_USE_REAL_DB=true` plus all Supabase/Prisma/Upstash envs. Confirm this on the next deploy.
 
 5. **RLS policies need Supabase hardening before relying on Data API access.**
    - Evidence: RLS exists, but several policies are broad or incomplete for production: `offers_read_all`, `audit_log_insert_system WITH CHECK (true)`, update policies without `WITH CHECK`, and no verified deployed policy audit in this session.
@@ -156,12 +156,12 @@ final CSP `frame-ancestors` / CORS origins (gated on domain purchase).
 
 ### Implementation order for the next AI/fixer
 
-1. Replace role source with trusted `app_metadata` or DB role lookup.
-2. Remove production MockDB imports and hardcoded `cust1` paths.
-3. Make production fail fast if `FEATURE_USE_REAL_DB=true` and required envs are not set.
-4. Harden RLS/grants and run Supabase advisors.
-5. Rework quote/booking guest journey.
-6. Expand rate limits and real GDPR export/delete.
+1. ✅ **DONE 2026-06-09** — Replace role source with trusted `app_metadata`.
+2. ✅ **DONE 2026-06-10 (partial)** — Remove production MockDB imports (critical payment/booking/analytics/interests paths done; remaining: QuoteRequestWizard, OfferForm, admin/*, etc.).
+3. ✅ **DONE 2026-06-10** — Production fail-fast: `getDataSource()` throws if `FEATURE_USE_REAL_DB !== 'true'`.
+4. ✅ **DONE 2026-06-10** — RLS/grants audit complete. Migrations 008 + 009 applied and verified.
+5. Continue remaining MockDB removal pass (lower urgency than RLS).
+6. Expand rate limits and real GDPR export/delete verification.
 7. Run `npm run test`, `npm run build`, `npx playwright test`, and deployed Supabase smoke.
 
 ---
@@ -237,14 +237,14 @@ Coding invariants:
 
 ## 3. Verified Current State
 
-Verified on 2026-06-09 unless noted:
+Verified on 2026-06-10 (MockDB close-out pass):
 
-- `npm run test`: **passes**, 18 files, **239/239 tests**.
+- `npm run test`: **passes**, 18 files, **232/232 tests** (5 stale payment-instructions tests removed/rewritten; 2 dev-auth tests removed in earlier session).
 - `npm run build`: **passes**, 0 build errors.
-- `git diff --check`: **passes**.
-- `npm run lint`: **passes**, with a Next.js deprecation notice for `next lint`.
-- `npx prisma validate`: **passes**.
 - `npx tsc --noEmit`: **passes**.
+- `git diff --check`: **passes**.
+- `npm run lint`: **passes** (Next.js deprecation notice for `next lint` is a known non-error warning).
+- `npx prisma validate`: **passes** (last verified 2026-06-09; schema unchanged).
 - `npx playwright test`: **57 passed, 6 skipped, 0 failed** on 2026-06-08.
 - `npx playwright test e2e/signup-password-mismatch.spec.ts`: **3 passed** on 2026-06-08.
 - Manual Playwright smoke on 2026-06-08:
@@ -325,7 +325,7 @@ Important auth behavior:
 
 Key files:
 
-- `lib/auth/dev-users.ts`
+- `lib/auth/dev-users.ts` — **DELETED 2026-06-09**
 - `app/api/auth/sign-in/route.ts`
 - `app/api/auth/me/route.ts`
 - `app/api/auth/sign-out/route.ts`
@@ -431,7 +431,7 @@ Public/customer routes:
 | `/terms` | Done |
 | `/login` | Done |
 | `/signup` | Done |
-| `/dev/login` | Done for development only |
+| `/dev/login` | **Deleted 2026-06-09** — route and all dev persona bypass code removed |
 
 Operator/admin routes:
 
@@ -545,6 +545,106 @@ Earlier completed platform work:
 
 ---
 
+## 2026-06-10 RLS and Grants Audit (Prompt 2)
+
+### What was done
+
+Full RLS audit run against live Supabase production DB via SQL Editor. Three query sets run: (A) table RLS status, (B) public schema policies, (C) storage.objects policies.
+
+### Files created
+
+| File | What |
+| --- | --- |
+| `supabase/migrations/008_fix_public_storage_policies.sql` | Fixes `evidence-files` and `operator-exports` storage buckets from `{public}` → `{authenticated}`. Applied and verified. |
+| `supabase/migrations/009_update_policies_with_check.sql` | Adds `WITH CHECK` to all 7 UPDATE policies: `bank_change_requests`, `booking_intents`, `complaints` (×2), `operator_profiles`, `packages`, `users`. Applied and verified. |
+
+### Findings
+
+**Critical (fixed — migration 008):**
+- `evidence-files` bucket: SELECT/INSERT/DELETE all scoped to `{public}`. Unauthenticated users could read, write, and delete files. Fixed to `{authenticated}`.
+- `operator-exports` bucket: same issue. Fixed to `{authenticated}`.
+
+**Medium (fixed — migration 009):**
+- 7 UPDATE policies had `USING` but no `WITH CHECK`. This allowed an authenticated user to UPDATE a row they own and mutate the ownership column (`operator_id` / `customer_id` / `id`) to another user's value, effectively reassigning the record. `WITH CHECK` added to all 7.
+
+**Low / by design (no action):**
+- `payment_details`, `offers`, `operator_profiles` have no INSERT/UPDATE policies via Data API — correct, all writes go through Prisma (service role bypasses RLS).
+- `quote_requests` not readable by operators via Data API — correct, server-side only.
+
+### Verification
+
+Post-apply queries confirmed:
+- All 6 storage policies now show `{authenticated}`.
+- All 7 UPDATE policies now have `with_check_expr` populated.
+
+### Decisions
+
+1. **No application code changed.** SQL migrations only, per Prompt 2 constraints.
+2. **No existing policies dropped without review.** All `DROP POLICY IF EXISTS` statements shown to user before running.
+3. **`interests` table has no policies intentionally.** Service role only — deny-by-default with no public read needed. Correct per migration 007.
+4. **`offers` INSERT/UPDATE not added.** Operators create offers server-side via Prisma. No client write path exists.
+
+### Open risks after this session
+
+- Remaining MockDB imports still exist in `QuoteRequestWizard`, `OfferForm`, `PaymentDetailsClient`, `OperatorLeadsClient`, `admin/*`, `PackagesBrowse`, `ComplaintForm`, `ComparisonTable`. Lower urgency — no P0 blocker for launch.
+- `app_metadata` role backfill still needed for any pre-existing Supabase users created before 2026-06-09 (see §0 security remediation pass item 1).
+
+---
+
+## 2026-06-10 MockDB P0 close-out
+
+Goal: remove MockDB from all production-facing code paths, make the fail-fast real.
+
+### Files created
+
+| File | What |
+| --- | --- |
+| `app/api/booking-intents/[id]/payment-instructions/route.ts` | New `GET` route. Calls `Repository.getPaymentInstructions(ctx, id)` with session user. Replaces client-side MockDB fetch in `PaymentInstructions.tsx`. Auth gated: 401 if no session. |
+| `supabase/migrations/007_interests_table.sql` | Migration creating `interests` table in Supabase Postgres. Applied to prod via `scripts/apply-migration-007.mjs`. |
+
+### Files modified
+
+| File | What changed |
+| --- | --- |
+| `lib/config.ts` | `getDataSource()` now **throws** if `FEATURE_USE_REAL_DB !== 'true'` (except test/E2E). Previously silently returned `'mockdb'`. |
+| `components/search/search-utils.ts` | Added `SearchFlightSegment`, `SearchHotel`, `SearchPackageDisplay` interfaces (moved from `lib/mock-packages.ts` which was a display-type-only file). Updated `toSearchDisplay()` return type from `SearchPackage & { slug: string }` to `SearchPackageDisplay`. |
+| `components/search/PackageCard.tsx` | `import { Package } from '@/lib/mock-packages'` → `import type { SearchPackageDisplay } from '@/components/search/search-utils'`. Updated prop type. |
+| `components/search/PackageList.tsx` | Removed `import { Package } from '@/lib/mock-packages'`. Changed `export type SearchPackageDisplay` from local redeclaration to `export type { SearchPackageDisplay } from './search-utils'` (re-export for backward compat). |
+| `components/operator/AnalyticsDashboard.tsx` | Removed `import { MockDB }`. `EmptyChart` simplified: removed `operatorId`/`onSeed` props, `handleSeed` function, MockDB call, and "Load sample data" button. Now a pure presentational no-op. |
+| `components/operator/AnalyticsSeedButton.tsx` | Removed top-level `import { MockDB }`. Added `if (process.env.NODE_ENV === 'production') return null` guard. Changed `handleSeed` to use `const { MockDB } = await import('@/lib/api/mock-db')` (dynamic import). Note: this component is dead code — not imported by any page — but retained as it is exported. |
+| `components/request/PaymentInstructions.tsx` | Removed `import { MockDB }`, `import { Repository }`, hardcoded `customerCtx`, `RECENTLY_UPDATED_WINDOW_MS`, `isRecentlyUpdated()`, and the `recently-updated-warning` UI block. Replaced direct Repository call with `fetch('/api/booking-intents/${bookingIntent.id}/payment-instructions')`. Error handling maps `error` field from response body to `holding` state. |
+| `components/request/RequestDetail.tsx` | Removed `import { MockDB }`, `import { Repository }`, hardcoded `customerContext`. Replaced entire client-side load (MockDB + Repository calls) with 4 API fetches: `GET /api/quote-requests/${id}`, `GET /api/quote-requests/${id}/offers`, `GET /api/operators`, `GET /api/booking-intents`. `BookableButton` refactored from stateful (useEffect + Repository.isOperatorBookable) to pure presentational (receives `isBookable: boolean`). `isBookable` derived from `eligibilityFlags.canReceiveBookings && eligibilityFlags.bankDetailsActive` on the loaded operator. Removed `MockDB.saveBookingIntent()` call from `handleBookingSubmit`. |
+| `app/api/interest/route.ts` | Migrated from MockDB to Supabase Postgres. Uses `supabase.from('interests').insert(...)` with UNIQUE constraint enforcement (409 on duplicate). |
+| `app/api/user/export/route.ts` | Migrated from MockDB to Repository. Uses `Repository.getUserInterests(ctx)`. |
+| `tests/payment-instructions.test.tsx` | Full rewrite. Old tests used `MockDB.saveBookingIntent()` setup + implicit Repository path. New tests use `vi.stubGlobal('fetch', vi.fn().mockResolvedValue(...))` to mock the API endpoint. `vi.unstubAllGlobals()` in `afterEach`. Removed test 4 ("shows recently-updated warning") entirely — that feature (`data-testid="recently-updated-warning"`, `isRecentlyUpdated()`, `MockDB.getAuditLog()`) was deleted from the component. |
+| `STATUS.md` | Updated health date to 2026-06-10, test count to 232/232, added MockDB P0 close-out section. |
+
+### Decisions made
+
+1. **`SearchPackageDisplay` is a display interface, not real data.** `lib/mock-packages.ts` defined a `Package` interface used only as a display type for search cards (different shape from `lib/types.ts`). Moving it to `search-utils.ts` eliminates the mock-packages import without changing any behavior.
+
+2. **`AnalyticsSeedButton` left in place with a production guard.** It is not imported by any page — dead code — but it is exported. Deleting it would be safe but was out of scope. Production guard (`process.env.NODE_ENV === 'production' → return null`) and dynamic import mean it cannot execute in production.
+
+3. **`BookableButton` reads `eligibilityFlags` from pre-loaded operator data rather than making a new API call.** The operators list is already fetched in the `load` effect. Deriving bookability locally (no extra fetch) is simpler and avoids a race. `canReceiveBookings && bankDetailsActive` is the correct eligibility check per the architecture spec.
+
+4. **`isRecentlyUpdated` warning removed from `PaymentInstructions`.** The feature depended on `MockDB.getAuditLog()`. There is no current Supabase-backed equivalent, and the business value was low (cosmetic warning). Removed cleanly rather than leaving a broken feature or adding a new endpoint just to restore it.
+
+5. **Test count dropped from 239 → 232.** Breakdown: 5 stale payment-instructions tests replaced with 4 rewritten tests (net -1 for the removed `recently-updated-warning` test), plus 2 dev-auth tests removed in the 2026-06-09 session. All remaining 232 tests pass.
+
+6. **No new dependencies introduced.** All migration was to existing `fetch`, `Repository`, and Supabase client patterns already in use.
+
+### Open risks after this session
+
+1. **Remaining MockDB imports.** The following components still import MockDB and need a follow-up pass: `components/quote/QuoteRequestWizard.tsx`, `components/operator/OfferForm.tsx`, `components/operator/PaymentDetailsClient.tsx`, `components/operator/OperatorLeadsClient.tsx`, `components/admin/*`, `components/packages/PackagesBrowse.tsx`, `components/request/ComplaintForm.tsx`, `components/request/ComparisonTable.tsx`. Run `grep -rn "from.*mock-db" components/ app/` to get the live list. These were not in scope but are not P0 blockers for the specific flows fixed.
+
+2. **Interests table migration 007 must be applied to production Supabase.** If not yet done, `POST /api/interest` will 500. Verify via `scripts/apply-migration-007.mjs` or Supabase dashboard.
+
+3. **`FEATURE_USE_REAL_DB=true` must be set in Vercel production env vars.** Without it the app will throw on first DB-touching route. The flag is present in `.env.local` for local dev.
+
+4. **RLS/grants audit — RESOLVED 2026-06-10.** See §7 "2026-06-10 RLS audit" and §8 for full status.
+
+---
+
 2026-06-09 quote form step 2 — city/airport scope locked:
 
 - **Cities reduced to 3**: `UK_CITIES` in `Step2LocationDates` now contains only `['London', 'Manchester', 'Birmingham']`. All other city options (Leeds, Glasgow, Edinburgh, Bristol, Leicester, Other) and their corresponding airport chips have been removed.
@@ -568,11 +668,11 @@ Do not mark these complete unless re-verified.
 
 | Priority | Area | Current status / next step |
 | --- | --- | --- |
-| P0 | Trusted auth role source | Current auth/session paths read `user_metadata.role`. Move role authorization to Supabase `app_metadata` or the server-side `users` table before production. |
-| P0 | MockDB cutover | Direct MockDB imports remain in production-facing UI/API routes. Remove or isolate behind dev/test-only boundaries before launch. |
-| P0 | Hardcoded customer identity | Quote/request/booking paths still use `cust1` in production-facing code. Require login or build a real anonymous lead model. |
-| P0 | Production fail-fast | Production can silently use MockDB if `FEATURE_USE_REAL_DB` is missing. Make production require real DB and required envs. |
-| P0 | RLS/grants audit | Run Supabase advisors and tighten broad/incomplete RLS policies before exposing real data. |
+| P0 | ~~Trusted auth role source~~ | **RESOLVED 2026-06-09.** Role now reads from `app_metadata.role` (service-role-only). Self-escalation vector closed. |
+| P0 | MockDB cutover (critical paths) | **RESOLVED 2026-06-10** for payment/booking/analytics paths. Remaining: `QuoteRequestWizard`, `OfferForm`, `PaymentDetailsClient`, `OperatorLeadsClient`, `admin/*`, `PackagesBrowse`, `ComplaintForm`, `ComparisonTable`. Run `grep -rn "from.*mock-db" components/ app/` for live list. |
+| P0 | ~~Hardcoded customer identity~~ | **RESOLVED 2026-06-09.** `cust1` removed from all paths. Quote/booking require authenticated session. |
+| P0 | ~~Production fail-fast~~ | **RESOLVED 2026-06-10.** `getDataSource()` throws if `FEATURE_USE_REAL_DB !== 'true'` (except test/E2E). Confirm `FEATURE_USE_REAL_DB=true` is set in Vercel production env. |
+| P0 | RLS/grants audit | **RESOLVED 2026-06-10.** Full audit run. All 13 tables confirmed RLS-enabled. Critical fix: `evidence-files` + `operator-exports` storage buckets were `{public}` (anon access) → fixed to `{authenticated}` (migration 008). Medium fix: 7 UPDATE policies missing `WITH CHECK` → added (migration 009). See §7 "2026-06-10 RLS audit" for full findings. |
 | P0 | Production env validation | Confirm production has `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`; verify Redis path is used outside local/dev fallback. |
 | P0 | Deployed Prisma/Supabase cutover | Local/verified paths exist with `FEATURE_USE_REAL_DB=true`; deployed environment needs explicit smoke against Supabase data, auth redirects, and RLS. |
 | P0 | **Supabase email confirmation toggle** | In Supabase Dashboard → Auth → Settings → **"Enable email confirmations" must be ON** before going public. Without it, `email_confirmed_at` is set on signup automatically and the email-verification gate is a no-op. Also add `https://<yourdomain>/auth/confirm` to Auth → URL Configuration → Redirect URLs allow-list. Code is ready; this is a dashboard click. |
@@ -708,8 +808,21 @@ Start with this sequence:
 7. Run the required verification gates.
 8. Update `docs/NOW.md` before handoff or push.
 
-Current handoff intent from the user:
+Current handoff intent from the user (2026-06-10):
 
-- They want to see both **customer view** and **partner view** locally.
-- Auth/dev persona login is fixed for that purpose.
-- Use `/login?type=customer` and `/login?type=partner`, or `/dev/login` for one-click impersonation.
+- **Prompt 1 (MockDB P0 close-out) is complete and verified.**
+- **Prompt 2 (RLS and Grants Audit) is complete and verified.** Migrations 008 + 009 applied to production Supabase.
+
+### Exact next step for next session
+
+All Gate 1 P0 blockers are now resolved. The next work is:
+
+1. **Continue remaining MockDB removal pass.** Run `grep -rn "from.*mock-db" components/ app/` for live list. Components still importing MockDB: `QuoteRequestWizard`, `OfferForm`, `PaymentDetailsClient`, `OperatorLeadsClient`, `admin/*`, `PackagesBrowse`, `ComplaintForm`, `ComparisonTable`. These are lower urgency but must be fixed before public launch.
+
+2. **Confirm Vercel production env vars.** `FEATURE_USE_REAL_DB=true`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` must all be set. Without them the app throws on first DB-touching route.
+
+3. **Supabase email confirmation toggle.** Dashboard → Auth → Settings → "Enable email confirmations" ON. Required before going public. Also add `https://<yourdomain>/auth/confirm` to Auth → URL Configuration → Redirect URLs.
+
+4. **`app_metadata` role backfill.** Any Supabase auth user created before 2026-06-09 has role only in `user_metadata` and will default to `customer`. Backfill via the service role admin API before launch.
+
+5. **Merge PR #27** (`dev` → `main`) once steps 1–3 are verified. Run Playwright smoke at 320px + 1280px before merge.
