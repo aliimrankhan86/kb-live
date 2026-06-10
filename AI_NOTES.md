@@ -1,6 +1,6 @@
 # PilgrimCompare AI Handover — Single Source of Truth
 
-**Last verified:** 2026-06-10 (CI workflow + branch protection + infra verification)
+**Last verified:** 2026-06-10 (mobile UX pass: footer compaction + drawer overlay + scroll lock)
 **Branch:** `dev`
 **Audience:** Claude, Codex, Kimi, and any AI/developer taking over the project.
 
@@ -342,10 +342,96 @@ Mailboxes `support/privacy/dpo/complaints@pilgrimcompare.co.uk` → Cloudflare E
 |---|---|---|
 | **Q1** ← next | PilgrimCompare sweep + banned-phrase audit + dynamic departure cities | `docs/PILGRIMCOMPARE_LANGUAGE_AND_LEGAL_STANDARDS.md` committed |
 | Q2 | Legal pages `/terms` `/privacy` `/how-it-works` | Q1 done |
-| Q3 | IA/nav — header, footer, back buttons, breadcrumbs | Q1 done |
+| Q3 | IA/nav — header, footer, back buttons, breadcrumbs | Partial — footer + drawer done 2026-06-10 (see §13) |
 | Q4 | Mobile polish 360/390/430px | Q3 done |
 | Q5 | SEO — metadata, JSON-LD, sitemap | Q1 done |
 | Q6 | Ranking transparency + Featured infrastructure | Revenue model confirmed |
+
+---
+
+## 13. Mobile UX Pass — 2026-06-10
+
+### Problems addressed
+1. **Footer too tall on mobile** (~1100px) — 3-column stack with centered top block then left-aligned sections caused visual alignment break and excess scroll.
+2. **Section headings felt "right-aligned" / disconnected** — IA mismatch: top brand block centered (`flex-col items-center`) then sections switched to left-aligned, breaking eye anchor.
+3. **Mobile drawer overlay too subtle** — `rgba(0,0,0,0.6)` + 4px blur was barely perceptible; user did not notice it existed.
+4. **Background scroll while drawer open** — body could be scrolled behind the drawer, breaking the modal mental model.
+
+### Fixes applied
+- **[components/layout/Footer.tsx](components/layout/Footer.tsx)** — rewritten as client component.
+  - Left-aligned consistently across all breakpoints (no more centered→left jump).
+  - 3 sections now collapsible accordions on mobile (`<button aria-expanded aria-controls>` + `hidden` content div), force-open on desktop (≥768px) via `matchMedia` hook.
+  - First section ("PilgrimCompare Limited") open by default on mobile so contact info is immediately visible.
+  - Disclaimer condensed from 2 paragraphs to 1 (ATOL + ABTA verification merged inline).
+  - Copyright row collapsed from 2 rows to stacked column on mobile.
+  - Mobile footer height: ~1100px → ~671px (~40% reduction). Desktop unchanged in layout.
+- **[components/layout/header.module.css:88](components/layout/header.module.css:88)** — overlay strengthened: `rgba(0,0,0,0.72)` + `blur(8px) saturate(140%)`. Visually obvious without obscuring the drawer.
+- **[components/layout/Header.tsx](components/layout/Header.tsx)** — body scroll lock when drawer open: sets `position: fixed` on body + `overflow: hidden` on `html` + preserves scrollY and restores on close. Covers iOS Safari edge case where `body { overflow: hidden }` alone doesn't lock window scroll.
+
+### Verification
+- `npx tsc --noEmit`: pass
+- `npm run build`: 0 errors
+- `npm run test`: 232/232 pass
+- Manual: DOM inspection via dev preview — mobile accordions toggle correctly, desktop sections all open at ≥768px (verified `aria-expanded="true"` on all 3 at 826px viewport), drawer overlay visible + body scroll-locked when open.
+
+### Out of scope for this pass (deferred to Q3/Q4)
+- ~~Breadcrumbs on inner pages~~ — addressed in §14 below
+- ~~Back-button affordances on operator dashboard~~ — covered by dual-purpose Breadcrumb (§14)
+- Cross-page consistency audit of typography scale at 360px
+
+---
+
+## 14. UX Pass 2 — IA, sliders, steppers — 2026-06-10
+
+### Problems addressed
+1. **Stepper buttons 36×36px** in [UmrahSearchForm](components/umrah/UmrahSearchForm.tsx) — below the project's 44px tap-target rule (CLAUDE.md).
+2. **RangeSlider thumbs 24px desktop / 28px small mobile** — too small for confident thumb interaction; track wrapper only 40px tall.
+3. **No mobile back-affordance** on nested pages. Full breadcrumb trail at small viewports wastes horizontal space and gives tiny tap targets.
+4. **Three nested pages missing breadcrumbs entirely**: `/operator/settings/payment-details`, `/operator/onboarding/status`, `/admin/bank-changes/[id]` (latter had an ad-hoc "← Back to queue" button replaced for consistency).
+
+### Fixes applied
+- **[components/umrah/umrah-search-form.module.css:560](components/umrah/umrah-search-form.module.css:560)** — stepper buttons 36 → **44×44px** + `:active` scale feedback + explicit focus ring + `touch-action: manipulation`.
+- **[components/ui/RangeSlider.module.css](components/ui/RangeSlider.module.css)** — track wrapper 40 → **44px** (WCAG AAA touch target). Thumb 24 → **28px desktop, 32px mobile** (≤480px). Pointer-events on input kept as `none` so the second range input doesn't block the first thumb (keyboard focus still works — `pointer-events: none` only blocks pointer, not focus).
+- **[components/ui/Breadcrumb.tsx](components/ui/Breadcrumb.tsx)** — same component now renders two views:
+  - **Mobile (<640px / `sm:hidden`)**: compact `← {parent label}` with 44px min-height — doubles as wayfinding *and* back-affordance.
+  - **Desktop (≥640px / `sm:flex`)**: full breadcrumb trail (existing behavior). No API change — all existing usages just gain the mobile mode automatically.
+  - Targets the nearest ancestor item with an `href` (skipping the current page). Falls back to nothing if no parent has an href.
+- **Nested pages now have Breadcrumb**:
+  - [app/operator/settings/payment-details/page.tsx](app/operator/settings/payment-details/page.tsx) — Dashboard → Settings → Payment details
+  - [app/operator/onboarding/status/page.tsx](app/operator/onboarding/status/page.tsx) — Onboarding → Verification status
+  - [app/admin/bank-changes/[id]/page.tsx](app/admin/bank-changes/[id]/page.tsx) — Admin → Bank changes → Review (replaces ad-hoc back button)
+
+### Verification
+- `npx tsc --noEmit`: pass
+- `npm run test`: 232/232 pass
+- `npm run build`: 0 errors
+- Runtime (375px mobile preview): stepper buttons measured 44×44px, slider track wrapper 44px tall. Component renders mobile `← parent` link on `<640px` viewports via `sm:hidden` / `sm:flex` swap.
+
+### Out of scope (later passes)
+- Quote wizard step-back affordance (already has per-step Previous button — not duplicating)
+- Login/signup back-to-home (intentional — auth is a sink, header brand link covers exit)
+- Per-page IA audit of admin sub-pages beyond `/bank-changes/[id]`
+
+### Footer legal/contact cleanup (same session)
+- **Removed misleading legal entity framing** from footer ([Footer.tsx](components/layout/Footer.tsx)):
+  - Section "PilgrimCompare Limited" → renamed to **"Contact"** (address + email only).
+  - Dropped `Company Reg: [Registration in progress]` and `VAT: [To be completed]` placeholders — Companies Act 2006 §82 requires real registered name + number, never placeholders.
+  - Copyright "© PilgrimCompare Limited" → "© PilgrimCompare".
+- **Added Companies Act 2006 §82 disclosure** under copyright row: *"PilgrimCompare is a trading name of **Paramount Consultants Limited**, registered in England and Wales (company no. **09679002**). VAT no. **GB 221 6154 46**."*
+- **⚠ Open compliance gap — registered office address omitted from website intentionally.**
+  - Current Companies House registered office for Paramount Consultants Limited is the founder's **residential address** (25 Thurston Road). Publishing on the website would expose home address; not publishing leaves website partially non-compliant with Trading Disclosures Regs 2008 (which require registered office on the site).
+  - Note: residential address is already public on Companies House search regardless — so the privacy fix requires changing the registered office at Companies House, not just hiding it on the website.
+  - **Remediation plan (target: within 30 days of 2026-06-10)**:
+    1. Set up virtual / business registered office (e.g., Hoxton Mix, Mint Formations, accountant-bundled service — typical cost £40–200/yr).
+    2. File **Companies House form AD01** to update Paramount Consultants Limited's registered office.
+    3. Wait for Companies House to confirm (usually same day).
+    4. Add the new registered office line back to footer + uncomment the line in [Footer.tsx](components/layout/Footer.tsx).
+    5. Also restore "Slough, Berkshire" line in Contact section if the new registered office is in Slough (currently removed for consistency).
+  - **Risk while gap open**: practically zero. Trading Standards enforcement against pre-revenue solo Ltd companies for missing registered office on website is unheard of. Home-address exposure was the bigger risk.
+- **Added DPO contact** to Legal section: `mailto:dpo@pilgrimcompare.co.uk` ("Data Protection (DPO)"). GDPR Art 38 expects discoverable DPO contact; mailbox already forwarding per §9 of this doc.
+
+### Trust strip layout fix (same session)
+- **[components/marketing/Hero.module.css](components/marketing/Hero.module.css)** — Hero trust bar (Verified Operators / ATOL Protected / Transparent Pricing / Side-by-side Comparison) was using `flex-wrap + justify-center` which produced an uneven 2/1/1 stack at mobile widths. Switched to explicit grid: **2 cols at <768px**, **4 cols at ≥768px**. Allow text to wrap (no more ellipsis). Now balanced at every breakpoint.
 
 ### Automation suite — NOT started
 

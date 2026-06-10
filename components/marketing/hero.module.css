@@ -174,13 +174,12 @@
   cursor: not-allowed;
 }
 
-/* Trust Bar */
+/* Trust Bar — grid for balanced layout (2 cols mobile, 4 cols desktop) */
 .hero__trustBar {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 2rem;
-  padding: 1rem 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+  padding: 1rem 1.25rem;
   border-radius: 0.75rem;
   background: var(--surfaceDark);
   border: 1px solid var(--border);
@@ -194,8 +193,13 @@
   gap: 0.5rem;
   font-size: 0.875rem;
   color: var(--text);
-  white-space: nowrap;
   font-weight: 500;
+  min-width: 0;
+}
+
+.hero__trustItem span {
+  line-height: 1.25;
+  white-space: normal;
 }
 
 .hero__trustItem svg {
@@ -231,7 +235,8 @@
   }
 
   .hero__trustBar {
-    gap: 1.5rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem 1.5rem;
   }
 }
 
@@ -267,7 +272,8 @@
   }
 
   .hero__trustBar {
-    gap: 1rem 1.5rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem 1rem;
     padding: 0.875rem 1rem;
   }
 
@@ -295,7 +301,8 @@
   }
 
   .hero__trustBar {
-    gap: 0.75rem 1rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.625rem 0.875rem;
   }
 }
 

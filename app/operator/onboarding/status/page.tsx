@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 
 export default function VerificationStatusPage() {
   const searchParams = useSearchParams();
@@ -9,7 +10,15 @@ export default function VerificationStatusPage() {
   const status = (searchParams.get('status') as 'pending' | 'verified' | 'rejected') || 'pending';
 
   return (
-    <div className="mx-auto max-w-xl space-y-6 text-center" data-testid="verification-status-page">
+    <div className="mx-auto max-w-xl space-y-6" data-testid="verification-status-page">
+      <Breadcrumb
+        items={[
+          { label: 'Onboarding', href: '/operator/onboarding' },
+          { label: 'Verification status' },
+        ]}
+        className="text-left"
+      />
+    <div className="text-center space-y-6">
       {status === 'pending' && (
         <>
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[rgba(255,211,29,0.12)] text-[var(--yellow)]">
@@ -73,6 +82,7 @@ export default function VerificationStatusPage() {
           </div>
         </>
       )}
+      </div>
     </div>
   );
 }
