@@ -433,6 +433,10 @@ Mailboxes `support/privacy/dpo/complaints@pilgrimcompare.co.uk` → Cloudflare E
 ### Trust strip layout fix (same session)
 - **[components/marketing/Hero.module.css](components/marketing/Hero.module.css)** — Hero trust bar (Verified Operators / ATOL Protected / Transparent Pricing / Side-by-side Comparison) was using `flex-wrap + justify-center` which produced an uneven 2/1/1 stack at mobile widths. Switched to explicit grid: **2 cols at <768px**, **4 cols at ≥768px**. Allow text to wrap (no more ellipsis). Now balanced at every breakpoint.
 
+### Footer alignment fixes (same session)
+- **Legal disclosure paragraph** ([Footer.tsx:206](components/layout/Footer.tsx:206)) — centered using `flex justify-center` wrapper with `max-w-md` paragraph (text-center on paragraph itself didn't apply reliably; flex container ensures mobile centering).
+- **Copyright section** ([Footer.tsx:198](components/layout/Footer.tsx:198)) — mobile center-aligned (text-center on each `<p>`), desktop left-aligned with justify-between spread. Both lines now visually centered on <768px viewports.
+
 ### Automation suite — NOT started
 
 Prompts 5–13: email triggers, crons, Telegram alerts, operator data ingestion, target-list pipeline. Scope in `docs/PILGRIMCOMPARE_CLAUDE_CODE_PROMPTS.md` once committed.

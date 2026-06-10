@@ -195,9 +195,9 @@ export function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="mt-5 flex flex-col gap-1 border-t border-[var(--borderSubtle)] pt-4 text-xs text-[var(--textMuted)] md:flex-row md:items-center md:justify-between md:gap-2">
-          <p>&copy; {currentYear} PilgrimCompare. All rights reserved.</p>
-          <p>Governed by the laws of England and Wales.</p>
+        <div className="mt-5 flex flex-col gap-1 border-t border-[var(--borderSubtle)] pt-4 justify-center text-xs text-[var(--textMuted)] md:justify-between md:flex-row md:items-center md:gap-2">
+          <p className="text-center md:text-left">&copy; {currentYear} PilgrimCompare. All rights reserved.</p>
+          <p className="text-center md:text-left">Governed by the laws of England and Wales.</p>
         </div>
 
         {/* Legal entity disclosure — Companies Act 2006 §82
