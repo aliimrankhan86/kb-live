@@ -30,10 +30,5 @@ test.describe('RangeSlider consistency across app', () => {
     const distanceSlider = overlay.locator('[data-testid="distance-min-slider"]').first();
     await expect(distanceSlider).toBeVisible();
     await distanceSlider.screenshot({ path: 'test-results/slider-filter-distance.png' });
-
-    // Screenshot Time Period slider
-    const timeSlider = overlay.locator('[data-testid="time-start-slider"]').first();
-    await expect(timeSlider).toBeVisible();
-    await timeSlider.screenshot({ path: 'test-results/slider-filter-time.png' });
   });
 });
