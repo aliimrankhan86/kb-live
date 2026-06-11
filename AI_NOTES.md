@@ -1,7 +1,7 @@
 # PilgrimCompare AI Handover — Single Source of Truth
 
-**Last verified:** 2026-06-10 (mobile UX pass: footer compaction + drawer overlay + scroll lock)
-**Branch:** `dev`
+**Last verified:** 2026-06-11 (Supabase keep-alive cron + health endpoint DB ping)
+**Branch:** `chore/supabase-keep-alive` (off `dev`)
 **Audience:** Claude, Codex, Kimi, and any AI/developer taking over the project.
 
 **Next immediate action:**
@@ -544,5 +544,28 @@ npx playwright test
 7. Run required verification gates.
 8. Update `docs/NOW.md` and this file before handoff or push.
 
-**Current handoff intent (2026-06-10):**
-Prompts 1–4 complete. Infrastructure fully deployed. Gate 1 + Gate 2 done. Next session is Q1 — PilgrimCompare sweep. Wait for `docs/PILGRIMCOMPARE_LANGUAGE_AND_LEGAL_STANDARDS.md` to be committed before starting Q1.
+**Current handoff intent (2026-06-11):**
+Prompts 1–4 complete. Infrastructure fully deployed. Gate 1 + Gate 2 done. Keep-alive cron active. Next session is Q1 — PilgrimCompare sweep. Wait for `docs/PILGRIMCOMPARE_LANGUAGE_AND_LEGAL_STANDARDS.md` to be committed before starting Q1.
+
+---
+
+## 16. Supabase Keep-Alive Cron — 2026-06-11
+
+**Problem:** Supabase free tier auto-pauses any project after ~7 days of inactivity. Symptoms: `ETIMEDOUT` on both `:6543` (pgBouncer) and `:5432` (direct); DNS resolves but TCP drops. Confirmed 2026-06-11 — both ports timed out on `nc -z -w 5`.
+
+**Decision (founder-approved):** Vercel cron keep-alive for now; migrate to **Supabase Pro ($25/mo) when the first paying operator onboards.** Rationale: Pro removes auto-pause, adds daily backups, and gives a connection-pooling SLA — worth it once revenue is flowing, premature before.
+
+**What shipped (PR [#45](https://github.com/aliimrankhan86/kb-live/pull/45)):**
+
+- **[vercel.json](vercel.json)** — new file. Cron fires `GET /api/health` at 09:00 UTC every 3rd day (`0 9 */3 * *`). Three-day gap is well inside the 7-day pause window. Vercel crons are free on all plans.
+- **[app/api/health/route.ts](app/api/health/route.ts)** — upgraded from a static JSON stub to a real DB ping (`prisma.$queryRaw\`SELECT 1\``). Returns `{"status":"healthy","db":"ok"}` (HTTP 200) or `{"status":"degraded","db":"error","dbError":"…"}` (HTTP 503). The cron hit alone is enough to prevent pause; the 503 path surfaces any future DB issue.
+
+**Migration trigger:** open a Supabase Pro upgrade ticket the week the first operator pays. At that point also enable **Point-in-time recovery** and review connection pool limits.
+
+**🛠️ Gotcha — Supabase already paused?** Resume it manually: dashboard → project → "Resume project" (~60s). The cron only *prevents* pause; it can't un-pause a project that already went dormant.
+
+**Tests:** 235/235 — no new tests needed (the health endpoint is a thin wrapper; the DB integration is tested end-to-end by the keep-alive itself).
+
+**Will Vercel keep Supabase live?** Yes — **once manually resumed first.** The cron pings every 3 days; Supabase pauses after 7 days; 3 < 7 → stays awake permanently. The cron cannot cold-boot an already-paused project — that one manual resume is required. After that: no further action needed.
+
+**Can operator registration be recorded right now?** No — not while paused. Supabase Auth (signup API) and Postgres go down together when the project pauses. An operator trying to register would hit an error. Once resumed, the full flow works: Auth creates the user → Resend sends confirmation email (live regardless of DB state) → first login creates the operator profile in Postgres. Everything is wired and tested — it just needs the project awake.

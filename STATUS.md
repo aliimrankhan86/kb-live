@@ -3,7 +3,7 @@
 > **Single rolling tracker.** Any AI/dev: read this for current state. Update it after work is **done + tested + verified** (see `CLAUDE.md` rule).
 > Detailed handover lives in `AI_NOTES.md`. Cold-start brief: `HANDOFF.md`. Business: `BUSINESS.md`.
 
-**Last verified:** 2026-06-11 (decision-first UX pass — rich detail page, grouped comparison, visible filter chips; on top of the mobile UX overhaul) · **Branch:** `chore/remove-dead-filter-components` (off `dev`) → **PR [#41](https://github.com/aliimrankhan86/kb-live/pull/41) open to `dev`, CI green** · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
+**Last verified:** 2026-06-11 (Supabase keep-alive cron) · **Branch:** `chore/supabase-keep-alive` → **PR [#45](https://github.com/aliimrankhan86/kb-live/pull/45) open to `dev`** · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
 
 ---
 
@@ -29,6 +29,7 @@
 - **Results filter panel now functional** (was decorative): writes the real URL contract (budget £, hotel stars, season, distance band, direct flights); Ramadan/School-holiday presets.
 - **Decision-first depth (2026-06-11, PR #41, see AI_NOTES §15):** rich layman-friendly detail page with progressive disclosure (highlights, hotel names, exact distance + walk time, airline/stops, deposit + instalments, cancellation, group type; plain-language "What's included"); grouped collapsible comparison rows (cancellation/deposit/instalments/flights/group type side-by-side, factual per-attribute "Best" flags); visible removable filter chips + count badge. Desktop sticky decision rail + mobile sticky CTA. All from stored facts only.
 - **DB-unreachable resilience:** search page fails fast (Pool timeouts) + degrades to a calm "couldn't load / Try again" notice instead of a 150s hang / 500.
+- **Supabase keep-alive cron (2026-06-11, PR #45):** `vercel.json` cron hits `GET /api/health` every 3 days at 09:00 UTC — prevents free-tier auto-pause. Health endpoint upgraded to real DB ping (`SELECT 1`), returns 200 healthy / 503 degraded. **Migrate to Supabase Pro when first paying operator onboards.**
 - Quote journey (prefilled package details) → BookingIntent records (`KT-…` refs)
 - Payment handoff: pay-operator-direct + evidence upload + bank details display
 
