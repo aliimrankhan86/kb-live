@@ -481,6 +481,16 @@ Branch: `feature/umrah-mobile-ux-overhaul` (off `dev`, PR pending). Scope: the c
 - Live result-count in the filter "Show packages" CTA (needs the candidate count) — deferred.
 - ⚠️ **Process gotcha:** running `npm run build` while the Turbopack `npm run dev` server is up shares `.next` and can corrupt the dev server's chunks (it served a stale `handleFilterApply` ReferenceError). Stop the preview before a prod build, or restart the dev server afterwards.
 
+### 🛠️ Gotcha — `npm run dev` 500s on data pages = DB unreachable, not a code bug (2026-06-11)
+- **Symptom:** `GET /search/packages?type=umrah 500` after a ~150s hang; dev log shows `PrismaClientKnownRequestError … code: 'ETIMEDOUT'` at `lib/api/db/adapter.ts:349 getPackages → prisma.package.findMany()`.
+- **Root cause:** the dev box can't reach the Supabase pooler. Confirm with `nc -vz aws-0-eu-west-1.pooler.supabase.com 6543` (and `5432`) — both time out while general internet (`nc -vz 1.1.1.1 443`) works. Usually a **paused Supabase project** (resume it in the dashboard) or a **network/VPN/firewall blocking ports 5432/6543**. `DATABASE_URL` is correctly the pooled `:6543?pgbouncer=true`. Real data returns the moment connectivity is restored — no code change needed for that.
+- **Resilience fix shipped (so a blip never hangs/500s again):**
+  - **[lib/api/db/prisma.ts](lib/api/db/prisma.ts)** — `pg` Pool now sets `connectionTimeoutMillis: 10_000` (was unset → ~150s hang) + `statement_timeout: 15_000`. **Do not remove.** Note: the dev `globalForPrisma.prisma` singleton survives HMR, so after changing Pool config you must **restart** the dev server for it to take effect.
+  - **[app/search/packages/page.tsx](app/search/packages/page.tsx)** — catalogue load wrapped in `loadPackages()` (try/catch, covers `generateMetadata` + the page). On failure it `console.error`s and renders a calm "We couldn't load packages right now / Try again" notice (query preserved) instead of a 500.
+  - Verified DB-down: route went **500 in 150s → 200 in ~10s** with the notice.
+  - The Next dev overlay may show "2 Issues" while the DB is down — that's the two intentional `console.error`s (metadata + page), not a crash.
+  - Other data pages (`/packages`, operator dashboards) still hard-error on a DB outage — only the in-scope search page was hardened. Extend the same `loadPackages` pattern if needed.
+
 ---
 
 ## 11. Verification Playbook
