@@ -3,6 +3,7 @@
 
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import type { Package as CataloguePackage, OperatorProfile } from '@/lib/types';
 import type { SearchPackageDisplay } from './search-utils';
 import { mapPackageToComparison, handleComparisonSelection } from '@/lib/comparison';
@@ -16,8 +17,12 @@ import {
   OverlayTitle,
 } from '@/components/ui/Overlay';
 import PackageCard from './PackageCard';
-import { FilterOverlay, FilterState } from './FilterOverlay';
+import CompareBar, { type CompareBarItem } from './CompareBar';
+import { FilterOverlay } from './FilterOverlay';
 import styles from './packages.module.css';
+
+const COMPARE_MAX = 3;
+const COMPARE_MIN = 2;
 
 const SHORTLIST_STORAGE_KEY = 'kb_shortlist_packages';
 const uniqueIds = (ids: string[]) => Array.from(new Set(ids));
@@ -50,7 +55,9 @@ const PackageList: React.FC<PackageListProps> = ({
   const [showComparison, setShowComparison] = useState(false);
   const [operatorsById, setOperatorsById] = useState<Record<string, OperatorProfile>>({});
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [appliedFilters, setAppliedFilters] = useState<FilterState | null>(null);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [internalSort, setInternalSort] = useState<SortOption>('price-asc');
   const sortBy = sortByProp ?? internalSort;
   const [isSortOpen, setIsSortOpen] = useState(false);
@@ -129,14 +136,13 @@ const PackageList: React.FC<PackageListProps> = ({
     setIsFilterOpen(false);
   };
 
-  const handleFilterApply = (filters: FilterState) => {
-    setAppliedFilters(filters);
-    // Here you would typically filter the packages based on the applied filters
-    onFilter?.();
-  };
-
-  const handleFilterReset = () => {
-    setAppliedFilters(null);
+  // Clear all filter params from the URL — results re-filter automatically.
+  const handleClearFilters = () => {
+    const params = new URLSearchParams(searchParams?.toString() ?? '');
+    ['budgetMin', 'budgetMax', 'hotelStars', 'season', 'maxDistance', 'flightType'].forEach((k) =>
+      params.delete(k)
+    );
+    router.replace(`${pathname}?${params.toString()}`);
     onFilter?.();
   };
 
@@ -169,7 +175,7 @@ const PackageList: React.FC<PackageListProps> = ({
   const listPackages = shortlistOnly
     ? sortedPackages.filter((p) => shortlistedPackages.includes(p.id))
     : sortedPackages;
-  const compareDisabled = selectedCompareIds.length < 2;
+  const compareFull = selectedCompareIds.length >= COMPARE_MAX;
   const comparisonRows = useMemo(() => {
     if (!cataloguePackages?.length) return [];
     return cataloguePackages
@@ -177,116 +183,170 @@ const PackageList: React.FC<PackageListProps> = ({
       .map((p) => mapPackageToComparison(p, operatorsById[p.operatorId]));
   }, [cataloguePackages, operatorsById, selectedCompareIds]);
 
+  // Labels for the sticky compare bar — operator name keeps it human.
+  const compareItems = useMemo<CompareBarItem[]>(() => {
+    return selectedCompareIds.map((id) => {
+      const catPkg = cataloguePackages?.find((p) => p.id === id);
+      const operator = catPkg ? operatorsById[catPkg.operatorId] : undefined;
+      return {
+        id,
+        label: operator?.companyName ?? catPkg?.title ?? 'Selected package',
+      };
+    });
+  }, [selectedCompareIds, cataloguePackages, operatorsById]);
+
+  const openComparison = () => {
+    // Defer past the current event tick so Radix DismissableLayer doesn't treat
+    // this click as an "outside" click and immediately re-close the dialog.
+    if (selectedCompareIds.length >= COMPARE_MIN) {
+      setTimeout(() => setShowComparison(true), 0);
+    }
+  };
+
+  // Applied filters, as removable chips — makes filter state visible on the page
+  // (previously it vanished into the URL with no on-screen cue).
+  const activeFilters = useMemo(() => {
+    const sp = searchParams;
+    const chips: { id: string; label: string; keys: string[] }[] = [];
+    if (!sp) return chips;
+    const gbp = (v: string) => `£${Number(v).toLocaleString('en-GB')}`;
+    const bMin = sp.get('budgetMin');
+    const bMax = sp.get('budgetMax');
+    if (bMin || bMax) {
+      const label = bMin && bMax ? `${gbp(bMin)}–${gbp(bMax)}` : bMax ? `Up to ${gbp(bMax)}` : `From ${gbp(bMin as string)}`;
+      chips.push({ id: 'budget', label, keys: ['budgetMin', 'budgetMax'] });
+    }
+    const stars = sp.get('hotelStars');
+    if (stars) {
+      chips.push({ id: 'stars', label: `${stars.split(',').sort().join('★, ')}★ hotels`, keys: ['hotelStars'] });
+    }
+    const season = sp.get('season');
+    if (season && season !== 'flexible') {
+      chips.push({ id: 'season', label: season === 'ramadan' ? 'Ramadan' : season === 'school-holidays' ? 'School holidays' : season, keys: ['season'] });
+    }
+    const maxD = sp.get('maxDistance');
+    if (maxD) {
+      const m = Number(maxD);
+      chips.push({ id: 'dist', label: `Within ${m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${m} m`} of the Haram`, keys: ['maxDistance'] });
+    }
+    if (sp.get('flightType') === 'direct') {
+      chips.push({ id: 'flight', label: 'Direct flights only', keys: ['flightType'] });
+    }
+    return chips;
+  }, [searchParams]);
+
+  const removeFilter = (keys: string[]) => {
+    const params = new URLSearchParams(searchParams?.toString() ?? '');
+    keys.forEach((k) => params.delete(k));
+    router.replace(`${pathname}?${params.toString()}`);
+  };
+
   return (
     <div className={styles.searchContainer}>
       <header className={styles.searchHeader}>
-        <div className={styles.searchResults}>
-          Found {listPackages.length} packages matching your criteria
-        </div>
-        <div className={styles.searchControls}>
-          <button
-            className={styles.filterButton}
-            onClick={handleFilterClick}
-            aria-label="Filter packages"
-            data-testid="filter-button"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-              <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46 22,3" />
-            </svg>
-            Filter
-          </button>
-
-
-          <div className={styles.sortWrapper} ref={sortRef}>
+        <div className={styles.searchHeaderTop}>
+          <div className={styles.searchResults} aria-live="polite">
+            <strong>{listPackages.length}</strong> {listPackages.length === 1 ? 'package' : 'packages'} found
+          </div>
+          <div className={styles.searchControls}>
             <button
-              className={styles.sortButton}
-              onClick={() => setIsSortOpen(!isSortOpen)}
-              aria-expanded={isSortOpen}
-              aria-haspopup="listbox"
-              aria-label="Sort packages"
+              className={styles.filterButton}
+              onClick={handleFilterClick}
+              aria-label={activeFilters.length > 0 ? `Filter packages, ${activeFilters.length} active` : 'Filter packages'}
+              data-testid="filter-button"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                <path d="M3 6h18M7 12h10M10 18h4" />
+                <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46 22,3" />
               </svg>
-              Sort
+              Filter
+              {activeFilters.length > 0 && <span className={styles.filterCount}>{activeFilters.length}</span>}
             </button>
-            {isSortOpen && (
-              <div
-                className={styles.sortDropdown}
-                role="listbox"
-                aria-label="Sort options"
+
+            <div className={styles.sortWrapper} ref={sortRef}>
+              <button
+                className={styles.sortButton}
+                onClick={() => setIsSortOpen(!isSortOpen)}
+                aria-expanded={isSortOpen}
+                aria-haspopup="listbox"
+                aria-label="Sort packages"
               >
-                {([
-                  { value: 'price-asc' as SortOption, label: 'Price: Low to High' },
-                  { value: 'price-desc' as SortOption, label: 'Price: High to Low' },
-                  { value: 'rating' as SortOption, label: 'Rating' },
-                  { value: 'distance' as SortOption, label: 'Distance to Haram' },
-                ]).map((opt) => (
-                  <button
-                    key={opt.value}
-                    role="option"
-                    aria-selected={sortBy === opt.value}
-                    className={`${styles.sortOption} ${sortBy === opt.value ? styles.sortOptionActive : ''}`}
-                    onClick={() => {
-                      if (onSortChange) {
-                        onSortChange(opt.value);
-                      } else {
-                        setInternalSort(opt.value);
-                      }
-                      setIsSortOpen(false);
-                    }}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            )}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                  <path d="M3 6h18M7 12h10M10 18h4" />
+                </svg>
+                Sort
+              </button>
+              {isSortOpen && (
+                <div
+                  className={styles.sortDropdown}
+                  role="listbox"
+                  aria-label="Sort options"
+                >
+                  {([
+                    { value: 'price-asc' as SortOption, label: 'Price: Low to High' },
+                    { value: 'price-desc' as SortOption, label: 'Price: High to Low' },
+                    { value: 'rating' as SortOption, label: 'Hotel rating' },
+                    { value: 'distance' as SortOption, label: 'Closest to Haram' },
+                  ]).map((opt) => (
+                    <button
+                      key={opt.value}
+                      role="option"
+                      aria-selected={sortBy === opt.value}
+                      className={`${styles.sortOption} ${sortBy === opt.value ? styles.sortOptionActive : ''}`}
+                      onClick={() => {
+                        if (onSortChange) {
+                          onSortChange(opt.value);
+                        } else {
+                          setInternalSort(opt.value);
+                        }
+                        setIsSortOpen(false);
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-          <label className={styles.shortlistFilterLabel}>
-            <input
-              type="checkbox"
-              checked={shortlistOnly}
-              onChange={(e) => setShortlistOnly(e.target.checked)}
-              aria-label="Show shortlist only"
-            />
-            Shortlist only
-          </label>
-          <div
-            className={styles.shortlistCount}
-            data-testid="search-shortlist-count"
-            aria-live="polite"
-            aria-label={`${shortlistCount} packages in shortlist`}
-          >
-            {shortlistCount} in shortlist
+        </div>
+
+        {activeFilters.length > 0 && (
+          <div className={styles.activeFilters} aria-label="Active filters">
+            {activeFilters.map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                className={styles.filterChip}
+                onClick={() => removeFilter(f.keys)}
+                aria-label={`Remove filter: ${f.label}`}
+              >
+                {f.label}
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+                  <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            ))}
+            <button type="button" className={styles.clearFilters} onClick={handleClearFilters}>
+              Clear all
+            </button>
           </div>
+        )}
+
+        {shortlistCount > 0 && (
           <button
             type="button"
-            data-testid="search-compare-button"
-            className={styles.compareButton}
-            onClick={() => {
-              // Defer past current event tick so Radix DismissableLayer
-              // doesn't treat this button's click as an "outside" click
-              // and immediately close the dialog it just opened.
-              if (selectedCompareIds.length >= 2) {
-                setTimeout(() => setShowComparison(true), 0);
-              }
-            }}
-            disabled={compareDisabled}
-            aria-disabled={compareDisabled}
-            aria-describedby={compareDisabled ? 'search-compare-help' : undefined}
+            className={`${styles.savedChip} ${shortlistOnly ? styles.savedChipActive : ''}`}
+            onClick={() => setShortlistOnly((v) => !v)}
+            aria-pressed={shortlistOnly}
+            data-testid="search-shortlist-count"
           >
-            Compare ({selectedCompareIds.length})
+            <svg width="14" height="14" viewBox="0 0 24 24" fill={shortlistOnly ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+            </svg>
+            {shortlistOnly ? `Showing ${shortlistCount} saved` : `Saved (${shortlistCount})`}
           </button>
-        </div>
+        )}
       </header>
-      {compareDisabled && (
-        <p id="search-compare-help" className={styles.compareHelpText}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" style={{ flexShrink: 0 }}>
-            <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" />
-          </svg>
-          <span>Tick <strong>Compare</strong> on any <strong>2 packages</strong> to compare them side by side</span>
-        </p>
-      )}
       {compareMessage ? (
         <p role="status" data-testid="search-compare-message" className={styles.compareMessageText}>
           {compareMessage}
@@ -309,15 +369,18 @@ const PackageList: React.FC<PackageListProps> = ({
           </p>
           <button
             className={styles.emptyStateAction}
-            onClick={handleFilterReset}
+            onClick={handleClearFilters}
             aria-label="Reset all filters"
           >
-            Reset Filters
+            Reset filters
           </button>
         </div>
       )}
 
-      <section className={styles.packageList} aria-label="Search results">
+      <section
+        className={`${styles.packageList} ${compareItems.length > 0 ? styles.packageListWithBar : ''}`}
+        aria-label="Search results"
+      >
         {listPackages.map((pkg) => {
           const catPkg = cataloguePackages?.find((cp) => cp.id === pkg.id);
           const operator = catPkg ? operatorsById[catPkg.operatorId] : undefined;
@@ -336,6 +399,7 @@ const PackageList: React.FC<PackageListProps> = ({
               isCompareSelected={selectedCompareIds.includes(pkg.id)}
               onAddToShortlist={onToggleShortlist}
               onToggleCompare={onToggleCompare}
+              compareFull={compareFull}
               operator={operator}
               inclusions={inclusions}
               nightsMakkah={catPkg?.nightsMakkah}
@@ -346,12 +410,18 @@ const PackageList: React.FC<PackageListProps> = ({
         })}
       </section>
 
+      <CompareBar
+        items={compareItems}
+        min={COMPARE_MIN}
+        max={COMPARE_MAX}
+        onRemove={onToggleCompare}
+        onClear={() => { setSelectedCompareIds([]); setCompareMessage(''); }}
+        onCompare={openComparison}
+      />
+
       <FilterOverlay
         isOpen={isFilterOpen}
         onClose={handleFilterClose}
-        onApply={handleFilterApply}
-        onReset={handleFilterReset}
-        initialFilters={appliedFilters || undefined}
       />
       <Dialog open={showComparison} onOpenChange={setShowComparison}>
         <OverlayContent className="max-h-[min(92dvh,56rem)] w-[min(calc(100vw-1rem),68rem)] sm:w-[min(calc(100vw-2rem),68rem)]">
