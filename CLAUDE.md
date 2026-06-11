@@ -34,3 +34,8 @@ When a local problem turns out to be **expected behavior, not a bug**, capture i
 - UI/route change → Playwright smoke `/`, `/umrah`, `/search/packages` at 320px + 1280px
 - Small focused diffs, one concern per commit; add `data-testid` for Playwright targets
 - Never invent operator trust claims — stored facts only; missing = "Not provided"
+
+## Mandatory before raising a PR
+- Update **`AI_NOTES.md`** with what changed, why, any gotchas, and the new test count.
+- Update **`STATUS.md`** — move items Done, refresh Health date and branch/PR reference.
+- Commit the doc updates **on the same branch** before opening the PR so they land together.
