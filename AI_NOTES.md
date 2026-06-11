@@ -445,7 +445,7 @@ Prompts 5–13: email triggers, crons, Telegram alerts, operator data ingestion,
 
 ## 15. Umrah Mobile UX Overhaul — 2026-06-10
 
-Branch: `feature/umrah-mobile-ux-overhaul` (off `dev`, PR pending). Scope: the core business surfaces — `/search/packages` results, the compare experience, the filter panel, and `/umrah` form headings. Grounded in the `ui-ux-pro-max` + `make-interfaces-feel-better` + `accessibility` skills. Verified at 360/390px in the live preview; `npm run test` 232/232, `npm run build` 0 errors, `tsc` pass.
+Branch: `chore/remove-dead-filter-components` (off `dev`) → **PR [#41](https://github.com/aliimrankhan86/kb-live/pull/41) open to `dev`, CI green** (2026-06-11). Scope: the core business surfaces — `/search/packages` results, the compare experience, the filter panel, the `/umrah` form headings, **and the `/packages/[id]` detail page** (decision-detail pass below). Grounded in the `ui-ux-pro-max` + `make-interfaces-feel-better` + `accessibility` skills. Verified at 360/390px + 1280px in the live preview; `npm run test` **235/235**, `npm run build` 0 errors, `tsc` pass.
 
 ### Problems addressed (confirmed in code + live preview)
 1. **Two overlapping concepts collided.** Every card had **Save** (heart) *and* **Compare** (grid). The header *also* stacked a "Shortlist only" toggle, an "N in shortlist" counter, a disabled **Compare (0)** button (looked active), and a help banner with a cryptic ▣ grid icon. High cognitive load; users couldn't tell shortlist from compare.
