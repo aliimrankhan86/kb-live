@@ -27,6 +27,12 @@
 .DS_Store
 *.pem
 
+# editor swap / temp files (Vim, etc.)
+*.swp
+*.swo
+*.swn
+*~
+
 # debug
 npm-debug.log*
 yarn-debug.log*
