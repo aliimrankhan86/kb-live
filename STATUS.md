@@ -3,15 +3,15 @@
 > **Single rolling tracker.** Any AI/dev: read this for current state. Update it after work is **done + tested + verified** (see `CLAUDE.md` rule).
 > Detailed handover lives in `AI_NOTES.md`. Cold-start brief: `HANDOFF.md`. Business: `BUSINESS.md`.
 
-**Last verified:** 2026-06-10 (wordmark rebrand + PR #34 dev→main merged) · **Branch:** `dev` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
+**Last verified:** 2026-06-11 (decision-first UX pass — rich detail page, grouped comparison, visible filter chips; on top of the mobile UX overhaul) · **Branch:** `chore/remove-dead-filter-components` (off `dev`) → **PR [#41](https://github.com/aliimrankhan86/kb-live/pull/41) open to `dev`, CI green** · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
 
 ---
 
-## Health (verified 2026-06-10)
+## Health (verified 2026-06-11)
 
 | Check | State |
 | --- | --- |
-| `npm run test` | ✅ 232/232 pass (18 files) |
+| `npm run test` | ✅ 235/235 pass (19 files) |
 | `npm run build` | ✅ 0 errors (known Supabase Edge + webpack cache warnings only) |
 | `npx tsc --noEmit` | ✅ pass |
 | E2E `e2e/operator.spec.ts` | ✅ 30/30 pass (chromium + firefox + webkit) |
@@ -25,7 +25,10 @@
 - Package discovery: browse, sort, filter (budget, dates, hotel stars, Haram distance, flight type)
 - Umrah 4-step search form (date picker, traveller stepper, star select, budget slider)
 - Airport-level routing: LHR, LGW, BHX, MAN (departure + return), backend filters by airport code
-- Shortlist / compare up to 3 packages
+- **Compare-first results (mobile UX overhaul 2026-06-10, see AI_NOTES §15):** price-first cards, sticky compare bar, mobile-native 2-up comparison with "Lowest price" flag, decluttered header. Compare up to 3; Save demoted to a quiet bookmark.
+- **Results filter panel now functional** (was decorative): writes the real URL contract (budget £, hotel stars, season, distance band, direct flights); Ramadan/School-holiday presets.
+- **Decision-first depth (2026-06-11, PR #41, see AI_NOTES §15):** rich layman-friendly detail page with progressive disclosure (highlights, hotel names, exact distance + walk time, airline/stops, deposit + instalments, cancellation, group type; plain-language "What's included"); grouped collapsible comparison rows (cancellation/deposit/instalments/flights/group type side-by-side, factual per-attribute "Best" flags); visible removable filter chips + count badge. Desktop sticky decision rail + mobile sticky CTA. All from stored facts only.
+- **DB-unreachable resilience:** search page fails fast (Pool timeouts) + degrades to a calm "couldn't load / Try again" notice instead of a 150s hang / 500.
 - Quote journey (prefilled package details) → BookingIntent records (`KT-…` refs)
 - Payment handoff: pay-operator-direct + evidence upload + bank details display
 

@@ -443,6 +443,70 @@ Prompts 5–13: email triggers, crons, Telegram alerts, operator data ingestion,
 
 ---
 
+## 15. Umrah Mobile UX Overhaul — 2026-06-10
+
+Branch: `chore/remove-dead-filter-components` (off `dev`) → **PR [#41](https://github.com/aliimrankhan86/kb-live/pull/41) open to `dev`, CI green** (2026-06-11). Scope: the core business surfaces — `/search/packages` results, the compare experience, the filter panel, the `/umrah` form headings, **and the `/packages/[id]` detail page** (decision-detail pass below). Grounded in the `ui-ux-pro-max` + `make-interfaces-feel-better` + `accessibility` skills. Verified at 360/390px + 1280px in the live preview; `npm run test` **235/235**, `npm run build` 0 errors, `tsc` pass.
+
+### Problems addressed (confirmed in code + live preview)
+1. **Two overlapping concepts collided.** Every card had **Save** (heart) *and* **Compare** (grid). The header *also* stacked a "Shortlist only" toggle, an "N in shortlist" counter, a disabled **Compare (0)** button (looked active), and a help banner with a cryptic ▣ grid icon. High cognitive load; users couldn't tell shortlist from compare.
+2. **Cards ~2.5 screens tall**, dominated by placeholder noise ("Departure TBC / - / LHR → JED/MED" twice). Price — the thing people compare on — was buried below the fold.
+3. **Comparison was a 672px sideways-scrolling table** inside a dialog — you couldn't see two packages at once on a phone.
+4. **The filter panel did nothing.** `FilterOverlay` wrote to local React state with a shape `filterByParams` never read (it had a literal `// Here you would typically filter…` placeholder). It also priced in **USD** and offered **Christmas/Easter** presets — wrong audience for Umrah.
+
+### Decisions taken (founder-approved via AskUserQuestion)
+- **Compare-first + sticky bar** (demote Save to a quiet bookmark).
+- **Filters: make them fully work + localize** (GBP, Umrah-relevant presets).
+- **Mobile comparison: native side-by-side** with attribute labels (implemented as fit-to-width, no horizontal scroll — see note below).
+- **Scope: all of** results/cards, compare, filters & sort, `/umrah` form.
+
+### What changed
+- **[PackageCard.tsx](components/search/PackageCard.tsx)** — rewritten price-first (~1 screen). Flight placeholders condensed to a single quiet route/nights line (`TBC`/`-` suppressed via `isPlaceholder`). Compact hotel rows with 56px thumbnails. Save = quiet bookmark in the header (kept `data-testid="shortlist-toggle-…"`). Compare = a real word-labelled checkbox ("Compare" → "Selected", yellow tick); selected card gets a yellow glow border. Kept `data-testid="package-compare-toggle-…"`; added `package-view-…`. New `compareFull` prop disables the toggle when 3 are already picked.
+- **[CompareBar.tsx](components/search/CompareBar.tsx)** + module CSS — new sticky bottom bar (`position: fixed`, `env(safe-area-inset-bottom)`). Appears on first selection; says in plain words what to do ("Pick N more to compare" → "Ready — tap Compare"); shows operator-name chips with remove ×; Clear + Compare CTA (kept `data-testid="search-compare-button"`). The list reserves `padding-bottom` so the bar never hides the last card.
+- **[PackageList.tsx](components/search/PackageList.tsx)** — header decluttered to **count + Filter + Sort**. "Saved" is now a chip shown only when something is saved (kept `data-testid="search-shortlist-count"`). Removed the disabled compare button, the counter, and the help banner. Mounts `CompareBar`; opens the comparison dialog (kept the Radix `setTimeout(…,0)` defer). Empty-state "Reset filters" clears the filter URL params via `router.replace`.
+- **[ComparisonTable.tsx](components/request/ComparisonTable.tsx)** — responsive **fit-to-width** comparison (`table-fixed`, no horizontal scroll). Two packages sit side by side on a phone; a third just narrows the columns. Operator + price move into rich column headers; the cheapest column is flagged **"Lowest price"** and tinted. Shared by `/search`, `/packages`, and the offer flow → all three improve at once. Kept `data-testid="comparison-table"` + offer support.
+  - ⚠️ **Gotcha (don't "fix" back to inline CSS module here):** an early version used a sticky-label `<table>` with a `ComparisonTable.module.css`. Two problems: (a) the CSS-module import broke the `PackagesBrowse` **vitest** suite — Vite ran the file through Tailwind v4 PostCSS in the test env and threw "Invalid PostCSS Plugin"; the original component used inline Tailwind, which is why it had been fine. (b) Sticky cells in a `border-separate` table showed a faint compositing ghost of scrolled columns at the boundary on mobile. The fit-to-width + inline-Tailwind version avoids **both**. Keep ComparisonTable on inline Tailwind (no `.module.css`).
+  - **Decision-aid layer (2026-06-11):** the grid now *guides* the choice instead of making the user diff cells. Each dimension with an unambiguous "better" gets a factual flag — cheapest = yellow "Lowest price" (header), and green "✓ Best" on **best-rated hotels** (`hotelStarsValue` max), **closest to the Haram** (`distanceValue` min), **most included** (`inclusionsCount` max). Rows where every package is identical are **muted** so attention lands on real differences. **No "overall winner" / "our pick"** — that would be editorial ranking and breaks the neutral-sort rule (§1). Winners are only crowned when values genuinely differ (ties → none). `ComparisonRow` carries sortable values (`priceValue`/`hotelStarsValue`/`distanceValue`/`inclusionsCount`) populated from **both** `mapPackageToComparison` and `mapOfferToComparison` (so offers get the same treatment); package distance bands map to representative metres via a local `BAND_METERS` in `lib/comparison.ts`. Covered by **[tests/comparison-table.test.tsx](tests/comparison-table.test.tsx)** (markers on decisive rows only, none on identical/tie). The `✓ Best` marker has `data-testid="comparison-best"`.
+- **[FilterOverlay.tsx](components/search/FilterOverlay.tsx)** — rewritten self-contained: reads the live URL on open, and **Apply writes the real contract** `filterByParams` reads → results actually filter (`SearchPackagesClient` re-renders on URL change). Localized to **£**; controls are Budget (£300–£3,000+), Hotel rating **3/4/5 multi-select**, When you travel (**Any / Ramadan / School holidays** → `season`), Distance to the Haram (→ `maxDistance`), **Direct flights only** (→ `flightType`). Dropped the decorative dual `FilterState`/`onApply` plumbing. Kept `data-testid` `filter-overlay`/`filter-apply-btn`/`filter-reset-btn` and the shared `budget-min-slider`/`distance-min-slider` sliders.
+- **[search-utils.ts](components/search/search-utils.ts)** — `filterByParams` extended for **`maxDistance`** (distance bands → representative metres via `DISTANCE_BAND_METERS`) and **`flightType=direct`**. `toSearchDisplay` priceNote simplified to `per person` (the card shows a "from" pill).
+- **[umrah-search-form.module.css](components/umrah/umrah-search-form.module.css)** — step headings were `justify-content: space-between`, which shoved short headings ("When are you travelling?") to the far right. Switched to `flex-start`; the budget opt-out toggle still floats right via its own `margin-left:auto`.
+- **[e2e/slider-consistency.spec.ts](e2e/slider-consistency.spec.ts)** — dropped the `time-start-slider` screenshot (the month-range time slider was replaced by clearer season chips); budget + distance sliders unchanged.
+
+### Decision-detail pass (2026-06-11) — desktop + mobile depth
+Goal: help every user (incl. laymen) decide, by surfacing stored data the UI hid + adding neutral plain-language help. Hard rule held throughout: **stored facts only, never invent; missing = "Not provided"** — but *how* a blank shows depends on criticality.
+- **Package detail page** ([components/packages/PackageDetail.tsx](components/packages/PackageDetail.tsx)) rebuilt with **progressive disclosure + conditional rendering** (chosen over a flat "full breakdown" so it never overwhelms and never shows empty noise — the page scales with how much the operator provided):
+  - Surfaces previously-hidden stored fields: `highlights[]` (benefit pills), hotel **names**, **exact distance** + walking-time estimate, **airline** + direct/stopover, **room options**, **deposit** + **payment plan**, **cancellation policy**, **group type**.
+  - `What's included` shows visa/flights/transfers/meals as Included/Not-included **with a plain-language line each** + a "confirm in writing before paying" note.
+  - **Decision-critical blanks are flagged** (e.g. missing cancellation → "Not provided — ask before paying any deposit"); **good-to-know blanks are omitted** (no "Not provided" walls). The "Good to know" Tier-2 card only renders when there's data.
+  - **Desktop:** sticky right-rail decision card (`lg:grid-cols-[1fr_320px]`, rail is `position: sticky`). **Mobile:** sticky bottom CTA (safe-area aware). All existing detail test-ids preserved.
+  - Neutral copy + friendly formatters live in **[lib/packages/display.ts](lib/packages/display.ts)** (`INCLUSIONS`, `friendlyDistance`, `flightTypeLabel`, `groupTypeShort`, `roomOptionsLabel`). Reused by the comparison mappers — don't duplicate.
+- **Comparison gained grouped decision rows** ([ComparisonTable.tsx](components/request/ComparisonTable.tsx)): collapsible groups **Stay & hotels · Flights · What's included · Price & flexibility · Trip type & notes** (default expanded, header toggles `collapsed` Set). New rows: flights (direct/stops), deposit, pay-in-instalments, **cancellation (full text side by side)**, group type. `ComparisonRow` gained optional `flights/deposit/paymentPlan/cancellation/groupType` (populated from the package mapper; offers → "Not provided"). Best-flag/muted logic unchanged.
+- **Filters made visible** ([PackageList.tsx](components/search/PackageList.tsx)): applied filters now render as **removable chips** under the header (each ✕ drops that param; "Clear all" resets), and the Filter button shows a **count badge**. Derived from the URL so they stay in sync with the panel + search form. Fixes the IA gap where filter state vanished into the URL.
+- Coverage: `tests/comparison-table.test.tsx` still green with the grouped/extra rows. Verified at **1280px** (detail 2-col rail via geometry; grouped compare; filter chips + removal) and **390px**.
+- ⚠️ Preview note: the screenshot tool got flaky mid-session (scroll/capture desync + timeouts); restarting the preview server cleared it. DOM/geometry asserts via `preview_eval` are a reliable fallback.
+
+### Filter URL contract (the working one — reuse, don't reinvent)
+`type` · `season` (`ramadan` | `school-holidays` | `flexible`) · `budgetMin` · `budgetMax` · `hotelStars` (CSV of 3/4/5) · `maxDistance` (metres; bands map near≈400 / medium≈1200 / far≈2500) · `flightType=direct` · `departureAirport`. The `/umrah` form GET-submits these; the results FilterOverlay now writes the same set. Changing the URL re-runs `filterByParams` in `SearchPackagesClient`.
+
+### Verified end-to-end in preview (390px)
+6→3 results when "5 star" applied (URL `?type=umrah&hotelStars=5`); compare selection highlights cards + reveals the sticky bar; 2-up and 3-up comparisons render with no horizontal scroll and the correct "Lowest price" flag; clean console after a dev restart.
+
+### Out of scope / follow-ups
+- Orphaned old filter sub-components under `components/search/filters/*` and `components/ui/FilterOverlay*` are no longer imported by the search page (dead code; safe cleanup later). `components/search/README.md` still documents the old decorative `FilterState` API — update when touched.
+- Live result-count in the filter "Show packages" CTA (needs the candidate count) — deferred.
+- ⚠️ **Process gotcha:** running `npm run build` while the Turbopack `npm run dev` server is up shares `.next` and can corrupt the dev server's chunks (it served a stale `handleFilterApply` ReferenceError). Stop the preview before a prod build, or restart the dev server afterwards.
+
+### 🛠️ Gotcha — `npm run dev` 500s on data pages = DB unreachable, not a code bug (2026-06-11)
+- **Symptom:** `GET /search/packages?type=umrah 500` after a ~150s hang; dev log shows `PrismaClientKnownRequestError … code: 'ETIMEDOUT'` at `lib/api/db/adapter.ts:349 getPackages → prisma.package.findMany()`.
+- **Root cause:** the dev box can't reach the Supabase pooler. Confirm with `nc -vz aws-0-eu-west-1.pooler.supabase.com 6543` (and `5432`) — both time out while general internet (`nc -vz 1.1.1.1 443`) works. Usually a **paused Supabase project** (resume it in the dashboard) or a **network/VPN/firewall blocking ports 5432/6543**. `DATABASE_URL` is correctly the pooled `:6543?pgbouncer=true`. Real data returns the moment connectivity is restored — no code change needed for that.
+- **Resilience fix shipped (so a blip never hangs/500s again):**
+  - **[lib/api/db/prisma.ts](lib/api/db/prisma.ts)** — `pg` Pool now sets `connectionTimeoutMillis: 10_000` (was unset → ~150s hang) + `statement_timeout: 15_000`. **Do not remove.** Note: the dev `globalForPrisma.prisma` singleton survives HMR, so after changing Pool config you must **restart** the dev server for it to take effect.
+  - **[app/search/packages/page.tsx](app/search/packages/page.tsx)** — catalogue load wrapped in `loadPackages()` (try/catch, covers `generateMetadata` + the page). On failure it `console.error`s and renders a calm "We couldn't load packages right now / Try again" notice (query preserved) instead of a 500.
+  - Verified DB-down: route went **500 in 150s → 200 in ~10s** with the notice.
+  - The Next dev overlay may show "2 Issues" while the DB is down — that's the two intentional `console.error`s (metadata + page), not a crash.
+  - Other data pages (`/packages`, operator dashboards) still hard-error on a DB outage — only the in-scope search page was hardened. Extend the same `loadPackages` pattern if needed.
+
+---
+
 ## 11. Verification Playbook
 
 ```bash

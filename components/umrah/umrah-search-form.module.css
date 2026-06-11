@@ -54,7 +54,10 @@
   align-items: center;
   gap: 0.625rem;
   margin-bottom: 0.75rem;
-  justify-content: space-between;
+  /* Keep the step number + heading left-aligned on every step. Only the budget
+     toggle floats right (margin-left:auto on that element). space-between used
+     to shove short headings to the far right, which read as misaligned. */
+  justify-content: flex-start;
 }
 
 .searchForm__stepNumber {

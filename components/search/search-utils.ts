@@ -99,8 +99,35 @@ export function filterByParams(
     next = next.filter((p) => p.departureAirport === departureAirport);
   }
 
+  // Distance to the Haram — distance bands map to representative metres so a
+  // metre-based slider can filter the near/medium/far data honestly.
+  const maxDistance = Number(params.get('maxDistance'));
+  if (Number.isFinite(maxDistance) && maxDistance > 0) {
+    next = next.filter((p) => {
+      const closest = Math.min(
+        DISTANCE_BAND_METERS[p.distanceBandMakkah] ?? Infinity,
+        DISTANCE_BAND_METERS[p.distanceBandMadinah] ?? Infinity
+      );
+      return closest <= maxDistance;
+    });
+  }
+
+  // Direct flights only.
+  if (params.get('flightType') === 'direct') {
+    next = next.filter((p) => p.flightType === 'direct');
+  }
+
   return next;
 }
+
+// Representative metres for each distance band — used so a continuous slider can
+// filter banded distance data. Tuned to the band labels shown to travellers.
+export const DISTANCE_BAND_METERS: Record<string, number> = {
+  near: 400,
+  medium: 1200,
+  far: 2500,
+  unknown: Infinity,
+};
 
 export function toSearchDisplay(pkg: CataloguePackage): SearchPackageDisplay {
   const dist = (b: string) =>
@@ -129,6 +156,6 @@ export function toSearchDisplay(pkg: CataloguePackage): SearchPackageDisplay {
     },
     price: pkg.pricePerPerson,
     currency: pkg.currency,
-    priceNote: pkg.priceType === 'from' ? 'From per person' : 'Per person',
+    priceNote: 'per person',
   };
 }

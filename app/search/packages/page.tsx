@@ -3,8 +3,24 @@ import { Suspense } from 'react';
 import { SearchPackagesClient } from '@/components/search/SearchPackagesClient';
 import { filterByParams } from '@/components/search/search-utils';
 import { Repository } from '@/lib/api/repository';
+import type { Package as CataloguePackage } from '@/lib/types';
 import { JsonLdScript, faqPageJsonLd, graphJsonLd, searchResultsJsonLd, webPageJsonLd } from '@/lib/seo/json-ld';
 import styles from '@/components/search/packages.module.css';
+
+/**
+ * Load the catalogue, but never let a database blip turn the page into a hard
+ * 500. On failure we return an empty list + an error flag so the page can show
+ * a friendly "try again" notice instead. (Root cause of an outage is usually
+ * DB connectivity — e.g. a paused Supabase project — not the page itself.)
+ */
+async function loadPackages(): Promise<{ packages: CataloguePackage[]; failed: boolean }> {
+  try {
+    return { packages: await Repository.listPackages(), failed: false };
+  } catch (err) {
+    console.error('[search/packages] Failed to load packages from the database:', err);
+    return { packages: [], failed: true };
+  }
+}
 
 interface SearchPackagesPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -26,7 +42,7 @@ export async function generateMetadata({ searchParams }: SearchPackagesPageProps
   const params = await searchParams;
   const type = getStringParam(params, 'type');
   const season = getStringParam(params, 'season');
-  const allPackages = await Repository.listPackages();
+  const { packages: allPackages } = await loadPackages();
   const count = filterByParams(allPackages, buildUrlParams(params)).length;
   const packageType = type === 'hajj' ? 'Hajj' : type === 'umrah' ? 'Umrah' : 'Hajj and Umrah';
   const seasonLabel = season && season !== 'flexible' ? ` ${season.replace('-', ' ')}` : '';
@@ -50,7 +66,35 @@ export async function generateMetadata({ searchParams }: SearchPackagesPageProps
 
 export default async function SearchPackagesPage({ searchParams }: SearchPackagesPageProps) {
   const params = await searchParams;
-  const allPackages = await Repository.listPackages();
+  const { packages: allPackages, failed } = await loadPackages();
+
+  // If the catalogue couldn't load (usually a database connectivity blip),
+  // show a calm "try again" state rather than a 500.
+  if (failed) {
+    return (
+      <main className={styles.searchPage}>
+        <h1 className="sr-only">Search Results - Hajj and Umrah Packages</h1>
+        <div className={styles.searchContainer}>
+          <div className={styles.emptyState} role="alert">
+            <div className={styles.emptyStateIcon}>
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                <path d="M12 8v4M12 16h.01" />
+              </svg>
+            </div>
+            <h2 className={styles.emptyStateTitle}>We couldn&apos;t load packages right now</h2>
+            <p className={styles.emptyStateText}>
+              This is usually a brief connection hiccup. Please refresh in a moment — your search
+              is still saved in the address bar.
+            </p>
+            <a className={styles.emptyStateAction} href={`/search/packages?${buildUrlParams(params).toString()}`}>
+              Try again
+            </a>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   // Pre-filter server-side for SEO — count and JSON-LD use real package data.
   const urlParams = buildUrlParams(params);
