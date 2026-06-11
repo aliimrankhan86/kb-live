@@ -106,6 +106,78 @@
   background: rgba(255, 211, 29, 0.08);
 }
 
+/* Filter count badge inside the Filter button */
+.filterCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.375rem;
+  margin-left: 0.125rem;
+  background: var(--yellow);
+  color: var(--bg);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Active-filter chips row — shows what's applied, each removable */
+.activeFilters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filterChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 34px;
+  padding: 0 0.5rem 0 0.75rem;
+  background: rgba(255, 211, 29, 0.1);
+  border: 1px solid rgba(255, 211, 29, 0.35);
+  border-radius: 999px;
+  color: var(--text);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.filterChip:hover {
+  background: rgba(255, 211, 29, 0.16);
+  border-color: var(--yellow);
+}
+
+.filterChip svg {
+  color: var(--textMuted);
+  flex-shrink: 0;
+}
+
+.filterChip:hover svg {
+  color: var(--text);
+}
+
+.clearFilters {
+  min-height: 34px;
+  padding: 0 0.5rem;
+  background: transparent;
+  border: none;
+  color: var(--textMuted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.clearFilters:hover {
+  color: var(--text);
+}
+
 .compareMessageText {
   font-size: 0.875rem;
   color: var(--yellow);

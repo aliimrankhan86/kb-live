@@ -203,6 +203,44 @@ const PackageList: React.FC<PackageListProps> = ({
     }
   };
 
+  // Applied filters, as removable chips — makes filter state visible on the page
+  // (previously it vanished into the URL with no on-screen cue).
+  const activeFilters = useMemo(() => {
+    const sp = searchParams;
+    const chips: { id: string; label: string; keys: string[] }[] = [];
+    if (!sp) return chips;
+    const gbp = (v: string) => `£${Number(v).toLocaleString('en-GB')}`;
+    const bMin = sp.get('budgetMin');
+    const bMax = sp.get('budgetMax');
+    if (bMin || bMax) {
+      const label = bMin && bMax ? `${gbp(bMin)}–${gbp(bMax)}` : bMax ? `Up to ${gbp(bMax)}` : `From ${gbp(bMin as string)}`;
+      chips.push({ id: 'budget', label, keys: ['budgetMin', 'budgetMax'] });
+    }
+    const stars = sp.get('hotelStars');
+    if (stars) {
+      chips.push({ id: 'stars', label: `${stars.split(',').sort().join('★, ')}★ hotels`, keys: ['hotelStars'] });
+    }
+    const season = sp.get('season');
+    if (season && season !== 'flexible') {
+      chips.push({ id: 'season', label: season === 'ramadan' ? 'Ramadan' : season === 'school-holidays' ? 'School holidays' : season, keys: ['season'] });
+    }
+    const maxD = sp.get('maxDistance');
+    if (maxD) {
+      const m = Number(maxD);
+      chips.push({ id: 'dist', label: `Within ${m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${m} m`} of the Haram`, keys: ['maxDistance'] });
+    }
+    if (sp.get('flightType') === 'direct') {
+      chips.push({ id: 'flight', label: 'Direct flights only', keys: ['flightType'] });
+    }
+    return chips;
+  }, [searchParams]);
+
+  const removeFilter = (keys: string[]) => {
+    const params = new URLSearchParams(searchParams?.toString() ?? '');
+    keys.forEach((k) => params.delete(k));
+    router.replace(`${pathname}?${params.toString()}`);
+  };
+
   return (
     <div className={styles.searchContainer}>
       <header className={styles.searchHeader}>
@@ -214,13 +252,14 @@ const PackageList: React.FC<PackageListProps> = ({
             <button
               className={styles.filterButton}
               onClick={handleFilterClick}
-              aria-label="Filter packages"
+              aria-label={activeFilters.length > 0 ? `Filter packages, ${activeFilters.length} active` : 'Filter packages'}
               data-testid="filter-button"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46 22,3" />
               </svg>
               Filter
+              {activeFilters.length > 0 && <span className={styles.filterCount}>{activeFilters.length}</span>}
             </button>
 
             <div className={styles.sortWrapper} ref={sortRef}>
@@ -270,6 +309,28 @@ const PackageList: React.FC<PackageListProps> = ({
             </div>
           </div>
         </div>
+
+        {activeFilters.length > 0 && (
+          <div className={styles.activeFilters} aria-label="Active filters">
+            {activeFilters.map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                className={styles.filterChip}
+                onClick={() => removeFilter(f.keys)}
+                aria-label={`Remove filter: ${f.label}`}
+              >
+                {f.label}
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+                  <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            ))}
+            <button type="button" className={styles.clearFilters} onClick={handleClearFilters}>
+              Clear all
+            </button>
+          </div>
+        )}
 
         {shortlistCount > 0 && (
           <button
