@@ -16,12 +16,58 @@ interface Feature {
   key: keyof ComparisonRow;
   rank?: RankKey;
   dir?: 'min' | 'max';
-  /** sr-only context appended to the winning value, e.g. "closest to the Haram". */
-  best?: string;
+  best?: string; // sr-only context, e.g. "closest to the Haram"
 }
+
+interface Group {
+  title: string;
+  rows: Feature[];
+}
+
+// Grouped so a longer comparison stays scannable. Price + operator live in the
+// column header. `rank`/`dir`/`best` mark the factual winner on dimensions with
+// an unambiguous "better"; everything else is informational.
+const GROUPS: Group[] = [
+  {
+    title: 'Stay & hotels',
+    rows: [
+      { label: 'Total nights', key: 'totalNights' },
+      { label: 'Makkah / Madinah', key: 'splitNights' },
+      { label: 'Hotel rating', key: 'hotelRating', rank: 'hotelStarsValue', dir: 'max', best: 'best-rated hotels' },
+      { label: 'Distance to Haram', key: 'distance', rank: 'distanceValue', dir: 'min', best: 'closest to the Haram' },
+      { label: 'Room options', key: 'occupancy' },
+    ],
+  },
+  {
+    title: 'Flights',
+    rows: [{ label: 'Flights', key: 'flights' }],
+  },
+  {
+    title: "What's included",
+    rows: [{ label: 'Included', key: 'inclusions', rank: 'inclusionsCount', dir: 'max', best: 'most included' }],
+  },
+  {
+    title: 'Price & flexibility',
+    rows: [
+      { label: 'Deposit to book', key: 'deposit' },
+      { label: 'Pay in instalments', key: 'paymentPlan' },
+      { label: 'Cancellation', key: 'cancellation' },
+    ],
+  },
+  {
+    title: 'Trip type & notes',
+    rows: [
+      { label: 'Group type', key: 'groupType' },
+      { label: 'Notes', key: 'notes' },
+    ],
+  },
+];
+
+const LOWEST_BG = 'bg-[#211d10]';
 
 export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
   const [operators, setOperators] = useState<Record<string, OperatorProfile>>({});
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetch('/api/operators')
@@ -34,24 +80,14 @@ export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
   }, []);
 
   const comparisonRows = rows ?? offers.map((o) => mapOfferToComparison(o, operators[o.operatorId]));
+  const colCount = comparisonRows.length + 1;
 
-  // Price + operator live in the column header, so they're not repeated as rows.
-  // `rank`/`dir`/`best` mark the factual winner on dimensions with an
-  // unambiguous "better" (closest, best-rated, most included). Ambiguous rows
-  // (nights, occupancy) are left unranked on purpose.
-  const features: Feature[] = [
-    { label: 'Total nights', key: 'totalNights' },
-    { label: 'Makkah / Madinah', key: 'splitNights' },
-    { label: 'Hotel rating', key: 'hotelRating', rank: 'hotelStarsValue', dir: 'max', best: 'best-rated hotels' },
-    { label: 'Distance to Haram', key: 'distance', rank: 'distanceValue', dir: 'min', best: 'closest to the Haram' },
-    { label: 'Room occupancy', key: 'occupancy' },
-    { label: "What's included", key: 'inclusions', rank: 'inclusionsCount', dir: 'max', best: 'most included' },
-    { label: 'Notes', key: 'notes' },
-  ];
+  const cellText = (r: ComparisonRow, key: keyof ComparisonRow): string => {
+    const v = r[key];
+    return v == null ? 'Not provided' : String(v);
+  };
 
-  const n = comparisonRows.length;
-
-  // Cheapest column → header "Lowest price" flag + a subtle column tint.
+  // Cheapest column → header "Lowest price" flag + subtle tint.
   const priceVals = comparisonRows.map((r) => r.priceValue);
   const validPrices = priceVals.filter((p): p is number => typeof p === 'number');
   const lowestPrice =
@@ -59,8 +95,6 @@ export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
       ? Math.min(...validPrices)
       : null;
 
-  // Winning column indices for a ranked row — only when the values genuinely
-  // differ (so we never crown a "winner" when everything is equal).
   const winnersFor = (rank: RankKey, dir: 'min' | 'max'): Set<number> => {
     const vals = comparisonRows.map((r) => r[rank] as number | null);
     const valid = vals.filter((v): v is number => typeof v === 'number');
@@ -74,7 +108,15 @@ export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
     return winners;
   };
 
-  const LOWEST_BG = 'bg-[#211d10]';
+  const toggle = (title: string) =>
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      if (next.has(title)) next.delete(title);
+      else next.add(title);
+      return next;
+    });
+
+  let dataRow = 0; // running index for zebra striping across groups
 
   return (
     <div className="w-full" data-testid="comparison-table">
@@ -124,66 +166,94 @@ export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
             })}
           </tr>
         </thead>
-        <tbody>
-          {features.map((feature, rowIndex) => {
-            const even = rowIndex % 2 === 1;
-            const displays = comparisonRows.map((r) => String(r[feature.key]));
-            // A row where every package shows the same value isn't a decision
-            // point — mute it so attention goes where they actually differ.
-            const allSame = n > 1 && displays.every((d) => d === displays[0]);
-            const winners = feature.rank && feature.dir && !allSame ? winnersFor(feature.rank, feature.dir) : new Set<number>();
-
-            return (
-              <tr key={feature.key}>
-                <th
-                  scope="row"
-                  className={`bg-[var(--surfaceDark)] border-b border-[var(--borderSubtle)] px-2.5 py-3 align-top text-xs font-semibold leading-snug [overflow-wrap:anywhere] sm:px-4 sm:text-[0.8125rem] ${
-                    allSame ? 'text-[rgba(255,255,255,0.35)]' : 'text-[var(--textMuted)]'
-                  }`}
-                >
-                  {feature.label}
-                </th>
-                {comparisonRows.map((row, i) => {
-                  const value = row[feature.key];
-                  const isMissing = value === 'Not provided';
-                  const isLowest = lowestPrice !== null && row.priceValue === lowestPrice;
-                  const isWinner = winners.has(i);
-                  const bg = isWinner
-                    ? 'bg-[#1c2a14]'
-                    : isLowest
-                      ? LOWEST_BG
-                      : even
-                        ? 'bg-[#181818]'
-                        : 'bg-[var(--surfaceDark)]';
-                  const text = allSame
-                    ? 'text-[rgba(255,255,255,0.4)]'
-                    : isWinner
-                      ? 'text-[#7dd97d] font-semibold'
-                      : isMissing
-                        ? 'text-[var(--textMuted)]'
-                        : 'text-[var(--text)]';
-                  return (
-                    <td
-                      key={`${row.id}-${feature.key}`}
-                      className={`border-b border-l border-[var(--borderSubtle)] px-2.5 py-3 align-top leading-relaxed [overflow-wrap:anywhere] sm:px-4 ${bg} ${text}`}
+        {GROUPS.map((group) => {
+          const isCollapsed = collapsed.has(group.title);
+          return (
+            <tbody key={group.title}>
+              <tr>
+                <th colSpan={colCount} scope="colgroup" className="border-b border-[var(--borderSubtle)] bg-[#161616] p-0">
+                  <button
+                    type="button"
+                    onClick={() => toggle(group.title)}
+                    aria-expanded={!isCollapsed}
+                    className="flex w-full items-center gap-2 px-2.5 py-2 text-left text-xs font-bold uppercase tracking-wide text-[var(--textMuted)] transition-colors hover:text-[var(--text)] sm:px-4"
+                  >
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      aria-hidden="true"
+                      className={`transition-transform ${isCollapsed ? '-rotate-90' : ''}`}
                     >
-                      {isWinner && (
-                        <span data-testid="comparison-best" className="mb-0.5 flex items-center gap-1 text-[0.625rem] font-bold uppercase tracking-wide text-[#7dd97d]">
-                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" aria-hidden="true">
-                            <path d="M20 6L9 17l-5-5" />
-                          </svg>
-                          Best
-                          <span className="sr-only"> — {feature.best}</span>
-                        </span>
-                      )}
-                      {value}
-                    </td>
+                      <path d="M6 9l6 6 6-6" />
+                    </svg>
+                    {group.title}
+                  </button>
+                </th>
+              </tr>
+              {!isCollapsed &&
+                group.rows.map((feature) => {
+                  const even = dataRow++ % 2 === 1;
+                  const displays = comparisonRows.map((r) => cellText(r, feature.key));
+                  const allSame = comparisonRows.length > 1 && displays.every((d) => d === displays[0]);
+                  const winners =
+                    feature.rank && feature.dir && !allSame ? winnersFor(feature.rank, feature.dir) : new Set<number>();
+                  return (
+                    <tr key={feature.key}>
+                      <th
+                        scope="row"
+                        className={`bg-[var(--surfaceDark)] border-b border-[var(--borderSubtle)] px-2.5 py-3 align-top text-xs font-semibold leading-snug [overflow-wrap:anywhere] sm:px-4 sm:text-[0.8125rem] ${
+                          allSame ? 'text-[rgba(255,255,255,0.35)]' : 'text-[var(--textMuted)]'
+                        }`}
+                      >
+                        {feature.label}
+                      </th>
+                      {comparisonRows.map((row, i) => {
+                        const value = displays[i];
+                        const isMissing = value === 'Not provided';
+                        const isLowest = lowestPrice !== null && row.priceValue === lowestPrice;
+                        const isWinner = winners.has(i);
+                        const bg = isWinner
+                          ? 'bg-[#1c2a14]'
+                          : isLowest
+                            ? LOWEST_BG
+                            : even
+                              ? 'bg-[#181818]'
+                              : 'bg-[var(--surfaceDark)]';
+                        const text = allSame
+                          ? 'text-[rgba(255,255,255,0.4)]'
+                          : isWinner
+                            ? 'text-[#7dd97d] font-semibold'
+                            : isMissing
+                              ? 'text-[var(--textMuted)]'
+                              : 'text-[var(--text)]';
+                        return (
+                          <td
+                            key={`${row.id}-${feature.key}`}
+                            className={`border-b border-l border-[var(--borderSubtle)] px-2.5 py-3 align-top leading-relaxed [overflow-wrap:anywhere] sm:px-4 ${bg} ${text}`}
+                          >
+                            {isWinner && (
+                              <span data-testid="comparison-best" className="mb-0.5 flex items-center gap-1 text-[0.625rem] font-bold uppercase tracking-wide text-[#7dd97d]">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" aria-hidden="true">
+                                  <path d="M20 6L9 17l-5-5" />
+                                </svg>
+                                Best
+                                <span className="sr-only"> — {feature.best}</span>
+                              </span>
+                            )}
+                            {value}
+                          </td>
+                        );
+                      })}
+                    </tr>
                   );
                 })}
-              </tr>
-            );
-          })}
-        </tbody>
+            </tbody>
+          );
+        })}
       </table>
     </div>
   );

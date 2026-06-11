@@ -1,6 +1,7 @@
 import { Offer, OperatorProfile, Package } from './types';
 import { getRegionSettings } from './i18n/region';
 import { formatDistance, formatPriceForRegion, parseDistanceKm } from './i18n/format';
+import { flightTypeLabel, groupTypeShort } from './packages/display';
 
 export interface ComparisonRow {
   id: string;
@@ -19,6 +20,13 @@ export interface ComparisonRow {
   hotelStarsValue: number | null;
   distanceValue: number | null; // metres; lower = closer to the Haram
   inclusionsCount: number;
+  // Extra decision rows (grouped in the comparison view). Optional so existing
+  // callers/tests stay valid; the view shows 'Not provided' when absent.
+  flights?: string;
+  deposit?: string;
+  paymentPlan?: string;
+  cancellation?: string;
+  groupType?: string;
 }
 
 // Representative metres per distance band, so banded package data can be ranked
@@ -64,6 +72,12 @@ export function mapOfferToComparison(offer: Offer, operator?: OperatorProfile): 
     hotelStarsValue: offer.hotelStars ?? null,
     distanceValue: distanceKm != null ? distanceKm * 1000 : null,
     inclusionsCount: inclusionsList.length,
+    // Offers don't carry these fields — shown as 'Not provided' in the grid.
+    flights: 'Not provided',
+    deposit: 'Not provided',
+    paymentPlan: 'Not provided',
+    cancellation: 'Not provided',
+    groupType: 'Not provided',
   };
 }
 
@@ -124,6 +138,19 @@ export function mapPackageToComparison(pkg: Package, operator?: OperatorProfile)
     hotelStarsValue: avg(starValues),
     distanceValue: bandMeters.length ? Math.min(...bandMeters) : null,
     inclusionsCount: inclusionsList.length,
+    flights: flightTypeLabel(pkg.flightType) ?? 'Not provided',
+    deposit:
+      typeof pkg.depositAmount === 'number'
+        ? formatPriceForRegion(pkg.depositAmount, pkg.currency, settings).formatted
+        : 'Not provided',
+    paymentPlan:
+      typeof pkg.paymentPlanAvailable === 'boolean'
+        ? pkg.paymentPlanAvailable
+          ? 'Available'
+          : 'Not available'
+        : 'Not provided',
+    cancellation: pkg.cancellationPolicy || 'Not provided',
+    groupType: groupTypeShort(pkg.groupType) ?? 'Not provided',
   };
 }
 
