@@ -8,7 +8,16 @@ import { PrismaClient } from '@/lib/generated/prisma/client';
 
 function createPrismaClient() {
   const connectionString = process.env.DATABASE_URL;
-  const pool = new Pool({ connectionString });
+  const pool = new Pool({
+    connectionString,
+    // Fail fast when the database is unreachable instead of hanging on the
+    // default (no timeout → ~150s before ETIMEDOUT). Keeps a DB blip from
+    // freezing a request for minutes. Generous enough to absorb a Supabase
+    // cold start, short enough that callers can degrade gracefully.
+    connectionTimeoutMillis: 10_000,
+    // Cap individual statements so a slow/locked query can't hang a request.
+    statement_timeout: 15_000,
+  });
   const adapter = new PrismaPg(pool);
   return new PrismaClient({ adapter });
 }
