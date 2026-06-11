@@ -565,3 +565,7 @@ Prompts 1–4 complete. Infrastructure fully deployed. Gate 1 + Gate 2 done. Kee
 **🛠️ Gotcha — Supabase already paused?** Resume it manually: dashboard → project → "Resume project" (~60s). The cron only *prevents* pause; it can't un-pause a project that already went dormant.
 
 **Tests:** 235/235 — no new tests needed (the health endpoint is a thin wrapper; the DB integration is tested end-to-end by the keep-alive itself).
+
+**Will Vercel keep Supabase live?** Yes — **once manually resumed first.** The cron pings every 3 days; Supabase pauses after 7 days; 3 < 7 → stays awake permanently. The cron cannot cold-boot an already-paused project — that one manual resume is required. After that: no further action needed.
+
+**Can operator registration be recorded right now?** No — not while paused. Supabase Auth (signup API) and Postgres go down together when the project pauses. An operator trying to register would hit an error. Once resumed, the full flow works: Auth creates the user → Resend sends confirmation email (live regardless of DB state) → first login creates the operator profile in Postgres. Everything is wired and tested — it just needs the project awake.
