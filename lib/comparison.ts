@@ -13,7 +13,21 @@ export interface ComparisonRow {
   occupancy: string;
   inclusions: string;
   notes: string;
+  // Sortable values so the comparison view can flag the factual "best" on each
+  // dimension (cheapest / closest / best-rated / most-included). Null = unknown.
+  priceValue: number | null;
+  hotelStarsValue: number | null;
+  distanceValue: number | null; // metres; lower = closer to the Haram
+  inclusionsCount: number;
 }
+
+// Representative metres per distance band, so banded package data can be ranked
+// against offers that store an actual distance. Kept local to avoid a
+// lib → components import.
+const BAND_METERS: Record<string, number> = { near: 400, medium: 1200, far: 2500 };
+
+const avg = (nums: number[]): number | null =>
+  nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : null;
 
 export function mapOfferToComparison(offer: Offer, operator?: OperatorProfile): ComparisonRow {
   const settings = getRegionSettings();
@@ -46,6 +60,10 @@ export function mapOfferToComparison(offer: Offer, operator?: OperatorProfile): 
     occupancy: supportedOccupancy.join(', ') || 'Not provided',
     inclusions: inclusionsList.length > 0 ? inclusionsList.join(', ') : 'Not provided',
     notes: offer.notes || 'Not provided',
+    priceValue: offer.currency && Number.isFinite(offer.pricePerPerson) ? offer.pricePerPerson : null,
+    hotelStarsValue: offer.hotelStars ?? null,
+    distanceValue: distanceKm != null ? distanceKm * 1000 : null,
+    inclusionsCount: inclusionsList.length,
   };
 }
 
@@ -84,6 +102,13 @@ export function mapPackageToComparison(pkg: Package, operator?: OperatorProfile)
     ? `From ${priceInfo.formatted}`
     : priceInfo.formatted;
 
+  const starValues = [pkg.hotelMakkahStars, pkg.hotelMadinahStars].filter(
+    (s): s is 3 | 4 | 5 => typeof s === 'number'
+  );
+  const bandMeters = [pkg.distanceBandMakkah, pkg.distanceBandMadinah]
+    .map((b) => BAND_METERS[b])
+    .filter((m): m is number => typeof m === 'number');
+
   return {
     id: pkg.id,
     price: pkg.currency && Number.isFinite(pkg.pricePerPerson) ? price : 'Not provided',
@@ -95,6 +120,10 @@ export function mapPackageToComparison(pkg: Package, operator?: OperatorProfile)
     occupancy: supportedOccupancy.join(', ') || 'Not provided',
     inclusions: inclusionsList.length > 0 ? inclusionsList.join(', ') : 'Not provided',
     notes: pkg.notes || 'Not provided',
+    priceValue: pkg.currency && Number.isFinite(pkg.pricePerPerson) ? pkg.pricePerPerson : null,
+    hotelStarsValue: avg(starValues),
+    distanceValue: bandMeters.length ? Math.min(...bandMeters) : null,
+    inclusionsCount: inclusionsList.length,
   };
 }
 
