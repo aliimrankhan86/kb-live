@@ -81,7 +81,6 @@ Operators pay. Travellers are always free. Funds never flow through the platform
 
 ### Read before every session
 1. `AGENTS.md`
-2. `docs/README_AI.md`
 3. `docs/NOW.md`
 4. This `AI_NOTES.md`
 5. `.agents/skills/supabase/SKILL.md`
@@ -535,7 +534,7 @@ npx playwright test
 
 ## 12. How the Next AI Should Work
 
-1. Read `AGENTS.md`, `docs/README_AI.md`, `docs/NOW.md`, this file, `.agents/skills/supabase/SKILL.md`, `.agents/skills/supabase-postgres-best-practices/SKILL.md`.
+1. Read `AGENTS.md`, `docs/NOW.md`, this file, `.agents/skills/supabase/SKILL.md`, `.agents/skills/supabase-postgres-best-practices/SKILL.md`.
 2. Run `git status -sb`.
 3. Do not revert uncommitted user/agent work.
 4. If a doc conflicts with verified state here, update the doc — do not undo implementation.
