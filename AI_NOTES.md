@@ -340,8 +340,8 @@ Mailboxes `support/privacy/dpo/complaints@pilgrimcompare.co.uk` → Cloudflare E
 | Queue | Task | Pre-req |
 |---|---|---|
 | ~~Q1~~ ✅ | PilgrimCompare sweep + banned-phrase audit + dynamic departure cities | Done 2026-06-12 — see §17 |
-| **Q2** ← next | Legal pages `/terms` `/privacy` `/how-it-works` | Q1 done |
-| Q3 | IA/nav — header, footer, back buttons, breadcrumbs | Partial — footer + drawer done 2026-06-10 (see §13) |
+| ~~Q2~~ ✅ | Legal pages `/terms` `/privacy` `/how-it-works` | Done 2026-06-12 — see §18 |
+| **Q3** ← next | IA/nav — header, footer, back buttons, breadcrumbs | Partial — footer + drawer done 2026-06-10 (see §13) |
 | Q4 | Mobile polish 360/390/430px | Q3 done |
 | Q5 | SEO — metadata, JSON-LD, sitemap | Q1 done |
 | Q6 | Ranking transparency + Featured infrastructure | Revenue model confirmed |
@@ -544,7 +544,7 @@ npx playwright test
 8. Update `docs/NOW.md` and this file before handoff or push.
 
 **Current handoff intent (2026-06-12):**
-Q1 complete (see §17). Next session is Q2 — legal pages (`/terms`, `/privacy`, `/how-it-works`). Test count: 235/235.
+Q2 complete (see §18). Next session is Q3 — IA/nav pass (header, footer, back buttons, breadcrumbs). Test count: 238/238.
 
 ---
 
@@ -610,4 +610,36 @@ Replaced all hardcoded `['London', 'Birmingham', 'Manchester']` city lists with 
 
 **Validation:** `npx tsc --noEmit` pass · `npm run test` 235/235 · `npm run build` 0 errors · all corridor pages render as `ƒ` (dynamic) in build output.
 
-**Next:** Q2 — legal pages (`/terms`, `/privacy`, `/how-it-works`). Test count: 235/235.
+---
+
+## 18. Q2 Legal Pages — 2026-06-12
+
+**Branch:** `feat/q1-brand-legal-cleanup` (same branch — Q2 added as additional commits).
+
+### What shipped
+
+**`lib/legal.ts`** — new file. Single source of truth for legal entity details. Exports `LEGAL_ENTITY_BLOCK` const with companyName, tradingName, companyNumber, vatNumber, registeredCountry, contactEmail, registeredOffice (empty string pending virtual office — see §14). Used by `/terms`, `/privacy`, and `Footer.tsx` so entity details are updated in one place.
+
+**`tests/legal.test.ts`** — new test. Guards companyName, companyNumber, contactEmail against accidental blank-out. Will fail CI if any of the three become empty strings.
+
+**`app/terms/page.tsx`** — full rewrite. Previous page had: wrong company name ("PilgrimCompare Limited"), fake company number ("[Registration in progress]"), incorrect ATOL claim ("does not independently verify" — contradicted §7 of standards which says we do check), no `LEGAL REVIEW` tags on liability clauses, `new Date()` hydration issue. Rewrite contains all 11 elements from standards §10.1: entity block from `LEGAL_ENTITY_BLOCK`, verbatim §1 "what the service is" paragraph, PTR 2018 positioning, operator content/accuracy with correct verification statement from §7, verbatim §4 three standard copy lines, no-advice section, acceptable use + suspension, liability with 12× `{/* LEGAL REVIEW */}` tags, no-reviews policy, complaints split (platform vs booking), governing law. Static `LAST_UPDATED = '12 June 2026'` constant (no hydration issue). TOC with anchor links for mobile usability (`scroll-mt-20` clears sticky header).
+
+**`app/privacy/page.tsx`** — full rewrite. Previous page had: wrong controller name, missing the mandatory verbatim operator data-sharing disclosure from §10.3, Supabase region stated as "London" (it's EU West/Ireland), cookie statement incorrectly said "optional analytics cookies" (Plausible is cookieless — no consent needed). Rewrite: controller identity from `LEGAL_ENTITY_BLOCK`, mandatory verbatim disclosure ("When you send an enquiry, your contact details are shared with the operator you enquire with. From that point the operator is an independent data controller...") rendered in a highlighted box, correct Supabase region, Plausible cookieless statement, strictly-necessary-only cookie table (one auth session cookie), ICO complaint route with phone number.
+
+**`app/how-it-works/page.tsx`** — new file. Plain-English 5-step model per §10.5. §7 verification statement verbatim. All three §4 standard copy lines. Mobile-first, existing design tokens only. Static server component, no client JS.
+
+**`components/layout/Footer.tsx`** — three targeted edits: (1) imported `LEGAL_ENTITY_BLOCK` from `lib/legal.ts`; (2) replaced hardcoded entity disclosure paragraph with `LEGAL_ENTITY_BLOCK` values; (3) Legal links updated: added `/how-it-works`, renamed "Terms & Conditions" → "Terms of Use", removed stale `/terms#cookies` (cookie info now in Privacy Policy).
+
+### 🛠️ Gotcha — pre-existing cookie banner copy contradiction
+The `CookieConsent` component still says "Analytics cookies help us understand how our site is used." This contradicts the updated Privacy Policy (Plausible is cookieless, no analytics cookies). Deferred — scope is a separate Q3/Q4 banner copy fix. The legal pages themselves are accurate; the banner is technically inaccurate but low enforcement risk at pre-revenue stage.
+
+### Validation
+- `npx tsc --noEmit` pass
+- `npm run test` 238/238 (3 new tests in `tests/legal.test.ts`)
+- `npm run build` 0 errors — `/how-it-works`, `/terms`, `/privacy` all render as `ƒ` (dynamic)
+- All three pages verified at 390px in preview: no horizontal scroll, correct entity values, verbatim copy present
+- Footer entity block reads from `LEGAL_ENTITY_BLOCK`: "PilgrimCompare is a trading name of Paramount Consultants Limited, registered in England and Wales (company no. 09679002). VAT no. GB 221 6154 46."
+- 12× `{/* LEGAL REVIEW */}` tags confirmed in `app/terms/page.tsx` — all in §8 liability section
+- 0 browser console errors
+
+**Next:** Q3 — IA/nav pass (header, footer, back buttons, breadcrumbs). Test count: 238/238.

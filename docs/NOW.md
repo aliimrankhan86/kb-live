@@ -7,16 +7,31 @@
 ## Branch & goal
 
 - **Branch:** `feat/q1-brand-legal-cleanup` (off `dev`) → PR → `dev` → `main`
-- **Goal:** Q1 complete. Next: Q2 legal pages (`/terms`, `/privacy`, `/how-it-works`).
-- **Current source-of-truth note:** Q1 verified 2026-06-12. Full detail in `AI_NOTES.md` §17.
+- **Goal:** Q2 complete — legal pages live. Next: Q3 IA/nav pass.
+- **Current source-of-truth note:** Q2 verified 2026-06-12. Full detail in `AI_NOTES.md` §18.
 - **Canonical handover:** `AI_NOTES.md` is the single source of truth for verified status, implementation posture, and pending areas.
 
 ## What works (verified)
 
-- **Tests**: `npm run test` passes (19 files, 235/235 tests) — verified 2026-06-12.
+- **Tests**: `npm run test` passes (20 files, 238/238 tests) — verified 2026-06-12.
 - **Build**: `npm run build` passes with 0 errors — verified 2026-06-12.
 - **TypeScript**: `npx tsc --noEmit` passes — verified 2026-06-12.
 - **Architecture decision**: Supabase + Prisma + Upstash Redis is the correct target/production architecture. MockDB is not the production architecture, but production-facing MockDB imports remain and are now documented as launch blockers in `AI_NOTES.md` §0.
+
+## Changes made in this session (2026-06-12 — Q2 Legal Pages)
+
+| Task | What | Files |
+| ---- | ---- | ----- |
+| STEP1 lib/legal.ts | Created single source of truth for entity details. `LEGAL_ENTITY_BLOCK` exports companyName, companyNumber, vatNumber, tradingName, registeredCountry, contactEmail, registeredOffice (empty pending virtual office — see AI_NOTES.md §14). | `lib/legal.ts` |
+| STEP2 Legal entity guard test | New Vitest test blocks PR merge if companyName, companyNumber, or contactEmail is ever accidentally cleared. | `tests/legal.test.ts` |
+| STEP3 /terms rewrite | Full rewrite of existing page (had wrong company name "PilgrimCompare Limited", fake reg number "[Registration in progress]", wrong ATOL claims, no LEGAL REVIEW tags, hydration bug from `new Date()`). Now: correct entity from LEGAL_ENTITY_BLOCK, all 11 §10.1 elements, verbatim §1/§4/§7 copy, TOC anchor nav, static LAST_UPDATED constant, 12× `{/* LEGAL REVIEW */}` tags on liability section. | `app/terms/page.tsx` |
+| STEP4 /privacy rewrite | Full rewrite (had wrong controller name, missing mandatory verbatim operator data-sharing disclosure, wrong Supabase region "London" → "EU West / Ireland", wrong cookie statement saying "optional analytics cookies" — Plausible is cookieless). Now: correct controller from LEGAL_ENTITY_BLOCK, mandatory verbatim disclosure in highlighted block, Plausible cookieless statement, strictly-necessary-only cookie table. | `app/privacy/page.tsx` |
+| STEP5 /how-it-works | New page. 5-step model per §10.5, §7 verification statement verbatim, all three §4 standard copy lines, mobile-first existing tokens. | `app/how-it-works/page.tsx` |
+| STEP6 Footer wiring | Import LEGAL_ENTITY_BLOCK (entity block no longer hardcoded). Added `/how-it-works` link to Legal section. Removed stale `/terms#cookies` link (cookie info now in Privacy Policy). | `components/layout/Footer.tsx` |
+
+**Verification:** `npx tsc --noEmit` pass · `npm run test` 238/238 · `npm run build` 0 errors · all three pages verified at 390px in preview · footer Legal links confirmed: How it works / Terms of Use / Privacy Policy · entity block reads from lib/legal.ts · 0 console errors.
+
+**LEGAL REVIEW tag count:** 12 in `app/terms/page.tsx` — all in liability section (§8). Run `grep -n "LEGAL REVIEW" app/terms/page.tsx` to list for solicitor review.
 
 ## Changes made in this session (2026-06-12 — Q1 Brand & Legal Cleanup)
 
