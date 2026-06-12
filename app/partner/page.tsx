@@ -38,54 +38,96 @@ export default function PartnerLandingPage() {
       <JsonLdScript data={pageJsonLd} />
       <main className="min-h-screen">
 
-        {/* Already a partner? — persistent top nudge */}
-        <div className="border-b border-[var(--border)] bg-[var(--panel)] px-4 py-3">
-          <div className="mx-auto flex max-w-5xl items-center justify-between gap-3">
-            <p className="text-sm text-[var(--textMuted)]">
-              Already registered with PilgrimCompare?
-            </p>
-            <Link
-              href="/login?redirect=/operator/dashboard"
-              className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-[var(--border)] px-4 py-1.5 text-sm font-medium text-[var(--text)] transition-colors hover:border-[var(--yellow)] hover:text-[var(--yellow)]"
-              data-testid="partner-signin-top"
-            >
-              Sign in to your dashboard
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-            </Link>
-          </div>
-        </div>
+        {/* ── SPLIT HERO — both paths above the fold ── */}
+        <section className="border-b border-[var(--border)] bg-[var(--surfaceDark)] px-4 py-14 md:py-20">
+          <div className="mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-5 md:gap-12">
 
-        {/* Hero — new operators */}
-        <section className="relative border-b border-[var(--border)] bg-[var(--surfaceDark)] px-4 py-20 text-center">
-          <div className="mx-auto max-w-3xl">
-            <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-[var(--yellow)]">
-              For Travel Operators
-            </p>
-            <h1 className="text-3xl font-bold leading-tight text-[var(--text)] md:text-5xl">
-              Reach Thousands of UK Muslims Planning Umrah &amp; Hajj
-            </h1>
-            <p className="mt-5 text-lg text-[var(--textMuted)]">
-              List your verified packages on PilgrimCompare — the UK Umrah &amp; Hajj comparison and enquiry platform.
-              No upfront fees. Transparent commission. UK-focused audience.
-            </p>
-            <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Link
-                href="/operator/onboarding"
-                className="inline-flex min-h-[48px] items-center justify-center rounded-lg bg-[var(--yellow)] px-8 py-3 text-base font-semibold text-[var(--bg)] transition-opacity hover:opacity-90"
-                data-testid="partner-cta-apply"
-              >
-                Apply as an Operator
-              </Link>
-              <Link
-                href="/operators/al-hidayah-travel"
-                className="inline-flex min-h-[48px] items-center justify-center rounded-lg border border-[var(--border)] px-8 py-3 text-base font-medium text-[var(--text)] transition-colors hover:border-[var(--yellow)] hover:text-[var(--yellow)]"
-                data-testid="partner-cta-preview"
-              >
-                See Example Profile
-              </Link>
+            {/* Left — new operators (primary path) */}
+            <div className="md:col-span-3">
+              <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-[var(--yellow)]">
+                For Travel Operators
+              </p>
+              <h1 className="text-3xl font-bold leading-tight text-[var(--text)] md:text-4xl lg:text-5xl">
+                Reach Thousands of UK Muslims Planning Umrah &amp; Hajj
+              </h1>
+              <p className="mt-5 text-lg leading-relaxed text-[var(--textMuted)]">
+                List your verified packages on PilgrimCompare — the UK&apos;s Umrah &amp; Hajj comparison platform.
+                No upfront fees. Transparent commission. ATOL/ABTA verified operators only.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-4">
+                <Link
+                  href="/operator/onboarding"
+                  className="inline-flex min-h-[48px] items-center justify-center rounded-lg bg-[var(--yellow)] px-8 py-3 text-base font-semibold text-[var(--bg)] transition-opacity hover:opacity-90"
+                  data-testid="partner-cta-apply"
+                >
+                  Apply as an Operator
+                </Link>
+                <Link
+                  href="/operators/al-hidayah-travel"
+                  className="inline-flex min-h-[48px] items-center justify-center rounded-lg border border-[var(--border)] px-6 py-3 text-base font-medium text-[var(--text)] transition-colors hover:border-[var(--yellow)] hover:text-[var(--yellow)]"
+                  data-testid="partner-cta-preview"
+                >
+                  See Example Profile
+                </Link>
+              </div>
             </div>
+
+            {/* Right — existing operators (secondary path, same visual weight as hero) */}
+            <div className="md:col-span-2">
+              <div className="rounded-xl border border-[var(--border)] bg-[var(--panel)] p-6 md:p-7">
+                {/* Label */}
+                <span className="inline-block rounded-full bg-[var(--yellow)]/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[var(--yellow)]">
+                  Already a partner?
+                </span>
+
+                <h2 className="mt-4 text-xl font-semibold text-[var(--text)]">
+                  Sign in to your operator dashboard
+                </h2>
+                <p className="mt-2 text-sm text-[var(--textMuted)]">
+                  Manage packages, view leads, track enquiries, and update your ATOL/ABTA details.
+                </p>
+
+                {/* Dashboard quick-access list */}
+                <ul className="mt-5 space-y-2.5">
+                  {[
+                    'Respond to traveller enquiries',
+                    'Add or update your packages',
+                    'View analytics &amp; conversions',
+                  ].map((item) => (
+                    <li key={item} className="flex items-center gap-2.5 text-sm text-[var(--textMuted)]">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0 text-[var(--yellow)]" aria-hidden="true">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                      <span dangerouslySetInnerHTML={{ __html: item }} />
+                    </li>
+                  ))}
+                </ul>
+
+                <Link
+                  href="/login?redirect=/operator/dashboard"
+                  className="mt-6 inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-lg border border-[var(--border)] px-6 py-3 text-base font-semibold text-[var(--text)] transition-colors hover:border-[var(--yellow)] hover:text-[var(--yellow)]"
+                  data-testid="partner-signin-main"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                    <polyline points="10 17 15 12 10 7" />
+                    <line x1="15" y1="12" x2="3" y2="12" />
+                  </svg>
+                  Sign in to Dashboard
+                </Link>
+
+                <p className="mt-3 text-center text-xs text-[var(--textMuted)]">
+                  Account issues?{' '}
+                  <a
+                    href="mailto:operators@pilgrimcompare.co.uk"
+                    className="underline underline-offset-2 hover:text-[var(--yellow)]"
+                  >
+                    Contact operator support
+                  </a>
+                </p>
+              </div>
+            </div>
+
           </div>
         </section>
 
@@ -132,7 +174,7 @@ export default function PartnerLandingPage() {
           </div>
         </section>
 
-        {/* Requirements — what we need from operators */}
+        {/* Requirements */}
         <section className="border-t border-[var(--border)] px-4 py-16">
           <div className="mx-auto max-w-4xl">
             <div className="mb-2 text-center">
@@ -179,7 +221,7 @@ export default function PartnerLandingPage() {
           </div>
         </section>
 
-        {/* How it works — new operators */}
+        {/* How it works */}
         <section className="border-t border-[var(--border)] px-4 py-16">
           <div className="mx-auto max-w-4xl">
             <div className="mb-2 text-center">
@@ -215,7 +257,7 @@ export default function PartnerLandingPage() {
           </div>
         </section>
 
-        {/* Trust */}
+        {/* Trust / compliance */}
         <section className="border-t border-[var(--border)] px-4 py-16">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-2xl font-semibold text-[var(--text)]">Built for UK Compliance</h2>
@@ -227,87 +269,7 @@ export default function PartnerLandingPage() {
           </div>
         </section>
 
-        {/* ── EXISTING PARTNER SIGN-IN ── */}
-        <section className="border-t border-[var(--border)] bg-[var(--surfaceDark)] px-4 py-16">
-          <div className="mx-auto max-w-4xl">
-            <div className="mb-2 text-center">
-              <span className="inline-block rounded-full bg-[var(--yellow)]/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[var(--yellow)]">
-                Already with us
-              </span>
-            </div>
-            <h2 className="text-center text-2xl font-semibold text-[var(--text)]">Welcome Back</h2>
-            <p className="mx-auto mt-3 max-w-xl text-center text-sm text-[var(--textMuted)]">
-              If you&apos;re already a verified operator on PilgrimCompare, sign in to manage your packages, view leads, and update your profile.
-            </p>
-
-            <div className="mx-auto mt-10 max-w-xl rounded-xl border border-[var(--border)] bg-[var(--panel)] p-8">
-              <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-8">
-                {/* Icon */}
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[var(--yellow)]/10 text-[var(--yellow)]">
-                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden="true">
-                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-                    <polyline points="10 17 15 12 10 7" />
-                    <line x1="15" y1="12" x2="3" y2="12" />
-                  </svg>
-                </div>
-
-                {/* Content */}
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-[var(--text)]">Operator Dashboard</h3>
-                  <p className="mt-1.5 text-sm text-[var(--textMuted)]">
-                    Access your leads, manage packages, view analytics, and update your operator profile.
-                  </p>
-
-                  {/* Dashboard feature list */}
-                  <ul className="mt-4 space-y-2">
-                    {[
-                      'View and respond to traveller enquiries',
-                      'Add or update Umrah & Hajj packages',
-                      'Track your enquiry conversion rate',
-                      'Manage your ATOL/ABTA details',
-                    ].map((item) => (
-                      <li key={item} className="flex items-center gap-2 text-sm text-[var(--textMuted)]">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0 text-[var(--yellow)]" aria-hidden="true">
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-
-                  <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                    <Link
-                      href="/login?redirect=/operator/dashboard"
-                      className="inline-flex min-h-[48px] items-center justify-center rounded-lg bg-[var(--yellow)] px-8 py-3 text-base font-semibold text-[var(--bg)] transition-opacity hover:opacity-90"
-                      data-testid="partner-signin-main"
-                    >
-                      Sign in to Dashboard
-                    </Link>
-                    <Link
-                      href="/login"
-                      className="inline-flex min-h-[48px] items-center justify-center rounded-lg border border-[var(--border)] px-6 py-3 text-sm font-medium text-[var(--textMuted)] transition-colors hover:border-[var(--yellow)] hover:text-[var(--text)]"
-                      data-testid="partner-signin-plain"
-                    >
-                      Sign in without redirect
-                    </Link>
-                  </div>
-
-                  <p className="mt-4 text-xs text-[var(--textMuted)]">
-                    Account issues?{' '}
-                    <a
-                      href="mailto:operators@pilgrimcompare.co.uk"
-                      className="underline underline-offset-2 hover:text-[var(--yellow)]"
-                    >
-                      Contact operator support
-                    </a>
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Final CTA — new operators */}
+        {/* Final CTA */}
         <section className="border-t border-[var(--border)] px-4 py-16">
           <div className="mx-auto max-w-xl text-center">
             <h2 className="text-2xl font-semibold text-[var(--text)]">Ready to Grow Your Business?</h2>
@@ -322,13 +284,13 @@ export default function PartnerLandingPage() {
               Apply as an Operator
             </Link>
             <p className="mt-4 text-sm text-[var(--textMuted)]">
-              Already registered?{' '}
+              Already a partner?{' '}
               <Link
                 href="/login?redirect=/operator/dashboard"
                 className="font-medium text-[var(--yellow)] underline-offset-2 hover:underline"
                 data-testid="partner-signin-footer"
               >
-                Sign in instead
+                Sign in to your dashboard
               </Link>
             </p>
           </div>
