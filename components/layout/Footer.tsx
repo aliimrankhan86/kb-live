@@ -238,9 +238,13 @@ export function Footer({ cities = [] }: { cities?: string[] }) {
         </div>
 
         {/* Copyright */}
-        <div className="mt-5 flex flex-col gap-1 border-t border-[var(--borderSubtle)] pt-4 justify-center text-xs text-[var(--textMuted)] md:justify-between md:flex-row md:items-center md:gap-2">
-          <p className="text-center md:text-left">&copy; {currentYear} PilgrimCompare. All rights reserved.</p>
-          <p className="text-center md:text-left">Governed by the laws of England and Wales.</p>
+        <div className="mt-5 border-t border-[var(--borderSubtle)] pt-4 text-xs text-[var(--textMuted)]">
+          {/* Mobile: stacked centered | Desktop: single left-anchored line */}
+          <p className="text-center md:text-left">
+            <span>&copy; {currentYear} PilgrimCompare. All rights reserved.</span>
+            <span className="hidden md:inline"> &middot; </span>
+            <span className="block md:inline">Governed by the laws of England and Wales.</span>
+          </p>
         </div>
 
         {/* Legal entity disclosure — Companies Act 2006 §82 */}
