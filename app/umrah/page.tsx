@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import { UmrahSearchForm } from '@/components/umrah/UmrahSearchForm'
 import Link from 'next/link'
 import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
+import { Repository } from '@/lib/api/repository'
 
 export const metadata: Metadata = {
   title: 'Umrah Packages 2026 from the UK - Compare Operators',
@@ -59,7 +60,9 @@ const umrahJsonLd = graphJsonLd([
   faqPageJsonLd(umrahFaqs),
 ])
 
-export default function UmrahPage() {
+export default async function UmrahPage() {
+  const departureCities = await Repository.getDistinctDepartureCities()
+
   return (
     <>
       <JsonLdScript data={umrahJsonLd} />
@@ -86,9 +89,7 @@ export default function UmrahPage() {
               Umrah cost guide →
             </Link>
             {[
-              { label: 'From London', href: '/umrah/london' },
-              { label: 'From Birmingham', href: '/umrah/birmingham' },
-              { label: 'From Manchester', href: '/umrah/manchester' },
+              ...departureCities.map((city) => ({ label: `From ${city}`, href: `/umrah/${city.toLowerCase()}` })),
               { label: 'Ramadan Umrah 2027', href: '/umrah/ramadan' },
             ].map(({ label, href }) => (
               <Link key={href} href={href} className="rounded-lg border border-[var(--border)] bg-[var(--surfaceDark)] px-3 py-1.5 text-xs font-medium text-[var(--textMuted)] hover:text-[var(--text)] hover:border-[var(--yellow)]/40 transition-colors">

@@ -3,16 +3,16 @@
 > **Single rolling tracker.** Any AI/dev: read this for current state. Update it after work is **done + tested + verified** (see `CLAUDE.md` rule).
 > Detailed handover lives in `AI_NOTES.md`. Cold-start brief: `HANDOFF.md`. Business: `BUSINESS.md`.
 
-**Last verified:** 2026-06-11 (Supabase keep-alive cron) · **Branch:** `chore/supabase-keep-alive` → **PR [#45](https://github.com/aliimrankhan86/kb-live/pull/45) open to `dev`** · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
+**Last verified:** 2026-06-12 (Q1 brand & legal cleanup) · **Branch:** `feat/q1-brand-legal-cleanup` → PR → `dev` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
 
 ---
 
-## Health (verified 2026-06-11)
+## Health (verified 2026-06-12)
 
 | Check | State |
 | --- | --- |
 | `npm run test` | ✅ 235/235 pass (19 files) |
-| `npm run build` | ✅ 0 errors (known Supabase Edge + webpack cache warnings only) |
+| `npm run build` | ✅ 0 errors |
 | `npx tsc --noEmit` | ✅ pass |
 | E2E `e2e/operator.spec.ts` | ✅ 30/30 pass (chromium + firefox + webkit) |
 | Lint | ✅ clean |
@@ -104,7 +104,7 @@
 - A11y: WCAG 2.2 AA, ARIA, keyboard nav, 44px tap targets
 - Security: nonce-based CSP (replaced unsafe-inline), RLS migrations, rate limiting (Upstash)
 - RLS audit (2026-06-10): all 13 tables RLS-enabled; migration 008 fixed `evidence-files` + `operator-exports` storage buckets `{public}` → `{authenticated}` (critical); migration 009 added `WITH CHECK` to all 7 UPDATE policies (prevents ownership field mutation)
-- Rebrand + domain wiring (2026-06-10): brand `KaabaTrip` → `PilgrimCompare`; domain `pilgrimcompare.co.uk` wired in all page metadata, JSON-LD, robots, sitemap; `NEXT_PUBLIC_SITE_URL=https://pilgrimcompare.co.uk` set in Vercel ✅; Cloudflare `.com` → `.co.uk` 301 redirect rule active ✅; `www.pilgrimcompare.com` CNAME (proxied) added → redirects to `pilgrimcompare.co.uk` ✅
+- Rebrand + domain wiring (2026-06-10): brand renamed to `PilgrimCompare`; domain `pilgrimcompare.co.uk` wired in all page metadata, JSON-LD, robots, sitemap; `NEXT_PUBLIC_SITE_URL=https://pilgrimcompare.co.uk` set in Vercel ✅; Cloudflare `.com` → `.co.uk` 301 redirect rule active ✅; `www.pilgrimcompare.com` CNAME (proxied) added → redirects to `pilgrimcompare.co.uk` ✅
 - **WordmarkLogo component (2026-06-10):** `components/graphics/WordmarkLogo.tsx` — inline SVG text wordmark, Nunito ExtraBold 800, `currentColor` fill (theme-flexible). Used in `Header` (desktop + mobile drawer) and `Footer`. Nunito loaded via `next/font/google` in `app/layout.tsx` (`--font-nunito`). Merged to `main` via PR #34.
 - `/settings` page: profile (editable name, email, avatar, role badge), security (password reset email), notification toggles (offer updates / booking updates / marketing), data export + account deletion (GDPR Art 20/17)
 - Mobile nav overhaul: icons, user card with avatar, "Get a Quote" as yellow CTA, active state left-border accent, danger-styled log out
@@ -115,15 +115,18 @@
 
 | Item | Status | Blocker |
 | --- | --- | --- |
-| Sync `main` → `dev` merge commit | PR needed (0 files changed, structural only) | Create PR `base:dev ← compare:main` on GitHub |
-| Q1 quality pass | Not started | `docs/PILGRIMCOMPARE_LANGUAGE_AND_LEGAL_STANDARDS.md` committed (founder task) |
+| Q1 quality pass — KaabaTrip eradication | ✅ Done 2026-06-12 | — |
+| Q1 quality pass — banned-phrase audit (ATOL blanket claims, Partner→Operator) | ✅ Done 2026-06-12 | — |
+| Q1 quality pass — dynamic departure cities | ✅ Done 2026-06-12 | — |
+| Raise PR `feat/q1-brand-legal-cleanup` → `dev` | ⏳ Pending | — |
+| Q2 — legal pages (`/terms`, `/privacy`, `/how-it-works`) | Not started | Q1 PR merged |
 
 ---
 
 ## ▶️ Next actions (do in order)
 
-1. Merge PR `main → dev` to bring `dev` in sync with `main` (1 commit, 0 files changed — the PR #34 merge commit).
-2. Start Q1 — PilgrimCompare language sweep + banned-phrase audit + dynamic departure cities. See `docs/PILGRIMCOMPARE_QUALITY_PROMPTS.md` → Q1.
+1. Raise PR `feat/q1-brand-legal-cleanup` → `dev` and merge after CI passes.
+2. Start Q2 — legal pages (`/terms`, `/privacy`, `/how-it-works`). See `docs/PILGRIMCOMPARE_QUALITY_PROMPTS.md` → Q2.
 
 ---
 

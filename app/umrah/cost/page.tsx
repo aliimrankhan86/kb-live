@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
+import { Repository } from '@/lib/api/repository'
 
 export const metadata: Metadata = {
   title: 'How Much Does an Umrah Package Cost from the UK? 2026–2027 Guide',
@@ -73,7 +74,9 @@ const pageJsonLd = graphJsonLd([
   faqPageJsonLd(faqs),
 ])
 
-export default function UmrahCostPage() {
+export default async function UmrahCostPage() {
+  const departureCities = await Repository.getDistinctDepartureCities()
+
   return (
     <>
       <JsonLdScript data={pageJsonLd} />
@@ -322,9 +325,7 @@ export default function UmrahCostPage() {
             </p>
             <div className="flex flex-wrap gap-2">
               {[
-                { label: 'Umrah from London', href: '/umrah/london' },
-                { label: 'Umrah from Birmingham', href: '/umrah/birmingham' },
-                { label: 'Umrah from Manchester', href: '/umrah/manchester' },
+                ...departureCities.map((city) => ({ label: `Umrah from ${city}`, href: `/umrah/${city.toLowerCase()}` })),
                 { label: 'Ramadan Umrah 2027', href: '/umrah/ramadan' },
                 { label: 'All Umrah packages', href: '/umrah' },
               ].map(({ label, href }) => (

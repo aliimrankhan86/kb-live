@@ -20,7 +20,7 @@ Do **not** spawn new status/progress docs — these three are canonical. `AI_NOT
 When a local problem turns out to be **expected behavior, not a bug**, capture it once as a 🛠️ **Gotcha** note and keep `PROJECT_BRIEF.md`, `AI_NOTES.md`, and `STATUS.md` in sync (one synced set — change one, update the other two same pass).
 
 ## Known gotchas (read before debugging "broken" local behavior)
-- **Dev login fails locally → check the server, not the code.** Dev personas (`customer@example.com` / `operator@example.com` / `operator2@example.com` / `admin@example.com`, all `KaabaTrip!2026`) only work under `npm run dev` (`NODE_ENV=development`). A local prod build (`npm run build` + `npm start` → `next start`) runs `NODE_ENV=production`, so `isDevAuthEnabled()` is false and sign-in returns `401 AUTH_INVALID_CREDENTIALS` **by design**. Fix = restart with `npm run dev`. Full note: `PROJECT_BRIEF.md` §5, `AI_NOTES.md` §4.
+- **Dev login fails locally → check the server, not the code.** Dev personas (`customer@example.com` / `operator@example.com` / `operator2@example.com` / `admin@example.com`, all `PilgrimCompare!2026`) only work under `npm run dev` (`NODE_ENV=development`). A local prod build (`npm run build` + `npm start` → `next start`) runs `NODE_ENV=production`, so `isDevAuthEnabled()` is false and sign-in returns `401 AUTH_INVALID_CREDENTIALS` **by design**. Fix = restart with `npm run dev`. Full note: `PROJECT_BRIEF.md` §5, `AI_NOTES.md` §4.
 
 ## Git branching strategy (mandatory)
 - **Never push directly to `main` or `dev`** — both are protected, require PR + CI green.

@@ -332,15 +332,15 @@ Mailboxes `support/privacy/dpo/complaints@pilgrimcompare.co.uk` → Cloudflare E
 |---|---|---|
 | Prompt 1 | MockDB removal + `FEATURE_USE_REAL_DB` fail-fast | ✅ Done |
 | Prompt 2 | RLS and grants audit — migrations 008 + 009 | ✅ Done |
-| Prompt 3 | Domain wiring + full KaabaTrip → PilgrimCompare rebrand | ✅ Done |
+| Prompt 3 | Domain wiring + full rebrand to PilgrimCompare | ✅ Done |
 | Prompt 4 | GitHub branch protection + CI workflow | ✅ Done |
 
 ### Quality pass queue — NEXT
 
 | Queue | Task | Pre-req |
 |---|---|---|
-| **Q1** ← next | PilgrimCompare sweep + banned-phrase audit + dynamic departure cities | `docs/PILGRIMCOMPARE_LANGUAGE_AND_LEGAL_STANDARDS.md` committed |
-| Q2 | Legal pages `/terms` `/privacy` `/how-it-works` | Q1 done |
+| ~~Q1~~ ✅ | PilgrimCompare sweep + banned-phrase audit + dynamic departure cities | Done 2026-06-12 — see §17 |
+| **Q2** ← next | Legal pages `/terms` `/privacy` `/how-it-works` | Q1 done |
 | Q3 | IA/nav — header, footer, back buttons, breadcrumbs | Partial — footer + drawer done 2026-06-10 (see §13) |
 | Q4 | Mobile polish 360/390/430px | Q3 done |
 | Q5 | SEO — metadata, JSON-LD, sitemap | Q1 done |
@@ -543,8 +543,8 @@ npx playwright test
 7. Run required verification gates.
 8. Update `docs/NOW.md` and this file before handoff or push.
 
-**Current handoff intent (2026-06-11):**
-Prompts 1–4 complete. Infrastructure fully deployed. Gate 1 + Gate 2 done. Keep-alive cron active. Next session is Q1 — PilgrimCompare sweep. Wait for `docs/PILGRIMCOMPARE_LANGUAGE_AND_LEGAL_STANDARDS.md` to be committed before starting Q1.
+**Current handoff intent (2026-06-12):**
+Q1 complete (see §17). Next session is Q2 — legal pages (`/terms`, `/privacy`, `/how-it-works`). Test count: 235/235.
 
 ---
 
@@ -568,3 +568,46 @@ Prompts 1–4 complete. Infrastructure fully deployed. Gate 1 + Gate 2 done. Kee
 **Will Vercel keep Supabase live?** Yes — **once manually resumed first.** The cron pings every 3 days; Supabase pauses after 7 days; 3 < 7 → stays awake permanently. The cron cannot cold-boot an already-paused project — that one manual resume is required. After that: no further action needed.
 
 **Can operator registration be recorded right now?** No — not while paused. Supabase Auth (signup API) and Postgres go down together when the project pauses. An operator trying to register would hit an error. Once resumed, the full flow works: Auth creates the user → Resend sends confirmation email (live regardless of DB state) → first login creates the operator profile in Postgres. Everything is wired and tested — it just needs the project awake.
+
+---
+
+## 17. Q1 Brand & Legal Cleanup — 2026-06-12
+
+**Branch:** `feat/q1-brand-legal-cleanup` (off `dev`). Three commits, one PR.
+
+### Step 1 — KaabaTrip eradication
+Searched entire repo case-insensitively for `kaabatrip`, `kaaba-trip`, `kaaba_trip`. Found 14 live occurrences across: `public/site.webmanifest`, `scripts/check-upstash.mjs`, `next.config.ts` (comment only), `tests/auth-components.test.tsx`, `CLAUDE.md`, `AI_NOTES.md`, `STATUS.md`, `docs/NOW.md`, `docs/00_PRODUCT_CANON.md`, `docs/AI_RUNBOOK.md`, `docs/APP_STRUCTURE.md`, `docs/MASTER_PLAN.md`, `docs/PHASE_2_AUDIT.md`, `docs/02_REPO_MAP.md`, `docs/10_PROMPT_TEMPLATES.md`, `docs/CURSOR_CONTEXT.md`, `docs/DOCS_INDEX.md`, `docs/README_AI.md`, `docs/REPO_MAP.md`, `components/auth/LOGIN_MODAL_IMPLEMENTATION.md`, `.clinerules`. Fixed all. `docs/_archive/` left as historical record per founder decision. `docs/PILGRIMCOMPARE_QUALITY_PROMPTS.md` retained intentional references (they describe what to search for, not brand usage). `grep -ri "kaabatrip" .` returns zero hits outside those files.
+
+**🛠️ Gotcha:** `KAABATRIP_ENABLE_DEV_AUTH` was a comment-only reference, not a real env var — confirmed by grep. Dev auth is gated on `localhost` hostname + `E2E_TESTING=true`, not an env var toggle. Comment updated to reflect reality.
+
+### Step 2 — Banned-phrase audit
+Searched all user-facing strings against `docs/PILGRIMCOMPARE_LANGUAGE_AND_LEGAL_STANDARDS.md` §5 + additional terms. Found and fixed 11 violations:
+
+- `Hero.tsx` — `ATOL Protected` trust badge → `ATOL Numbers Checked`; `Become a Partner` CTA → `List Your Packages`
+- `UmrahSearchForm.tsx` — `ATOL Protected` badge → `ATOL Numbers Checked`
+- `app/hajj/page.tsx` — metadata + JSON-LD: removed `"ATOL and ABTA protected"` → `"ATOL and ABTA status checked before listing"`
+- `app/umrah/ramadan/page.tsx` — metadata + JSON-LD: removed blanket ATOL/visa claims → `"ATOL status checked before listing"`
+- `components/auth/LoginForm.tsx` — `Partner Login` → `Operator Login`; `Partner` tab → `Operator`; signup link `?type=partner` → `?type=operator` (backward compat: resolveLoginType accepts both)
+- `components/auth/SignUpForm.tsx` — `Partner Registration` → `Operator Registration`; description updated; submit button → `Register as an Operator`; sign-in link → `?type=operator`
+- `app/login/page.tsx`, `app/signup/page.tsx` — metadata updated
+- `tests/auth-components.test.tsx` — 5 assertions updated to match new copy
+
+**Tests:** 235/235 after fixes (4 were failing before test fixture update).
+
+### Step 3 — Dynamic departure cities
+Replaced all hardcoded `['London', 'Birmingham', 'Manchester']` city lists with server-side queries.
+
+**New method:** `Repository.getDistinctDepartureCities(): Promise<string[]>` — queries `Package WHERE status = 'published' AND departureAirport NOT NULL`, maps airport codes to city names via `UK_DEPARTURE_AIRPORTS` in `lib/airports.ts`, deduplicates, sorts. Implemented in both `lib/api/db/adapter.ts` (Prisma) and `lib/api/repository.ts` mockStore (for tests/mock mode).
+
+**Pages updated (all made `async`):**
+- `app/page.tsx`, `app/umrah/page.tsx`, `app/umrah/cost/page.tsx`, `app/umrah/ramadan/page.tsx` — city nav links now derived from live data only; zero live packages → zero city links rendered
+- `app/umrah/london/page.tsx`, `/birmingham`, `/manchester` — check if city present in live data; if not, renders empty state notice: "No packages currently listed from [city]. New operators are being added."
+- `components/quote/steps/Step2LocationDates.tsx` — hardcoded `UK_CITIES` removed; now accepts `cities: string[]` prop
+- `components/quote/QuoteRequestWizard.tsx` — threads `cities` prop to Step2
+- `app/quote/page.tsx` — made async, fetches live cities, passes to wizard
+
+**Open risk:** `CityCorridor.tsx` line 34 still says "Verified UK operators with ATOL or ABTA protection" — borderline, deferred to Q3/review (founder said leave in Step 2 review).
+
+**Validation:** `npx tsc --noEmit` pass · `npm run test` 235/235 · `npm run build` 0 errors · all corridor pages render as `ƒ` (dynamic) in build output.
+
+**Next:** Q2 — legal pages (`/terms`, `/privacy`, `/how-it-works`). Test count: 235/235.

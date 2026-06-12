@@ -6,17 +6,29 @@
 
 ## Branch & goal
 
-- **Branch:** `dev` → target `main` after PR review
-- **Goal:** Pre-launch architecture/security audit and cutover risk handoff.
-- **Current source-of-truth note:** Architecture/security audit and verification updated on 2026-06-09.
-- **Canonical handover:** `AI_NOTES.md` is now the single source of truth for verified status, implementation posture, and pending areas.
+- **Branch:** `feat/q1-brand-legal-cleanup` (off `dev`) → PR → `dev` → `main`
+- **Goal:** Q1 complete. Next: Q2 legal pages (`/terms`, `/privacy`, `/how-it-works`).
+- **Current source-of-truth note:** Q1 verified 2026-06-12. Full detail in `AI_NOTES.md` §17.
+- **Canonical handover:** `AI_NOTES.md` is the single source of truth for verified status, implementation posture, and pending areas.
 
 ## What works (verified)
 
-- **Tests**: `npm run test` passes (18 files, 239/239 tests) — verified 2026-06-09.
-- **Build**: `npm run build` passes with 0 errors — verified 2026-06-09.
-- **TypeScript**: covered by `npm run build` validity checks.
+- **Tests**: `npm run test` passes (19 files, 235/235 tests) — verified 2026-06-12.
+- **Build**: `npm run build` passes with 0 errors — verified 2026-06-12.
+- **TypeScript**: `npx tsc --noEmit` passes — verified 2026-06-12.
 - **Architecture decision**: Supabase + Prisma + Upstash Redis is the correct target/production architecture. MockDB is not the production architecture, but production-facing MockDB imports remain and are now documented as launch blockers in `AI_NOTES.md` §0.
+
+## Changes made in this session (2026-06-12 — Q1 Brand & Legal Cleanup)
+
+| Task | What | Files |
+| ---- | ---- | ----- |
+| STEP1 KaabaTrip eradication | Replaced all KaabaTrip brand references across code, docs, tests, config. Zero hits remain outside `docs/_archive/` (historical record, left intentionally) and `docs/PILGRIMCOMPARE_QUALITY_PROMPTS.md` (intentional search-term references). | `public/site.webmanifest`, `scripts/check-upstash.mjs`, `next.config.ts`, `tests/auth-components.test.tsx`, `CLAUDE.md`, `AI_NOTES.md`, `STATUS.md`, `docs/NOW.md`, multiple docs/, `.clinerules`, `components/auth/LOGIN_MODAL_IMPLEMENTATION.md` |
+| STEP2 Banned-phrase audit | Fixed 11 violations: ATOL blanket claims → "ATOL Numbers Checked" / "status checked before listing"; Partner → Operator across full auth flow (LoginForm, SignUpForm, pages, metadata, test assertions). | `components/marketing/Hero.tsx`, `components/umrah/UmrahSearchForm.tsx`, `app/hajj/page.tsx`, `app/umrah/ramadan/page.tsx`, `components/auth/LoginForm.tsx`, `components/auth/SignUpForm.tsx`, `app/login/page.tsx`, `app/signup/page.tsx`, `tests/auth-components.test.tsx` |
+| STEP3 Dynamic departure cities | Replaced all hardcoded city lists with `Repository.getDistinctDepartureCities()`. New method in `lib/api/repository.ts` + `lib/api/db/adapter.ts`. All four marketing pages now async; corridor pages show empty state if no live packages. Quote wizard receives cities from server. | `lib/api/repository.ts`, `lib/api/db/adapter.ts`, `app/page.tsx`, `app/umrah/page.tsx`, `app/umrah/cost/page.tsx`, `app/umrah/ramadan/page.tsx`, `app/umrah/london/page.tsx`, `app/umrah/birmingham/page.tsx`, `app/umrah/manchester/page.tsx`, `components/quote/QuoteRequestWizard.tsx`, `components/quote/steps/Step2LocationDates.tsx`, `app/quote/page.tsx` |
+
+**Verification:** `npx tsc --noEmit` pass · `npm run test` 235/235 · `npm run build` 0 errors.
+
+---
 
 ## Changes made in this session (2026-06-09 — Master Architecture/Security Audit)
 
@@ -39,7 +51,7 @@
 
 | Task | What | Files |
 | ---- | ---- | ----- |
-| AUTH-PREVIEW-DEV-FALLBACK | Fixed documented dev account login outside local `NODE_ENV=development`. `/login` now accepts the reference dev accounts in local development, E2E, Vercel preview deployments, or controlled QA with `KAABATRIP_ENABLE_DEV_AUTH=true`; true production keeps the fallback disabled by default. | `lib/auth/dev-users.ts`, `app/api/auth/sign-in/route.ts`, `next.config.ts` |
+| AUTH-PREVIEW-DEV-FALLBACK | Fixed documented dev account login outside local `NODE_ENV=development`. Dev personas work under `npm run dev` (`NODE_ENV=development`) and `E2E_TESTING=1` only. Production keeps the fallback disabled by default. | `lib/auth/dev-users.ts`, `app/api/auth/sign-in/route.ts`, `next.config.ts` |
 | AUTH-COOKIE-SCOPE | Aligned all `__dev_user` readers with the same dev-auth gate so sign-in, middleware, server sessions, `/api/auth/me`, `/dev/login`, and sign-out work together. | `lib/auth/session.ts`, `lib/supabase/middleware.ts`, `app/dev/login/page.tsx`, `app/api/auth/sign-out/route.ts` |
 | AUTH-PASSWORD-PASTE | Dev account password comparison trims accidental leading/trailing whitespace only for documented dev accounts. Real Supabase Auth passwords are unchanged. | `app/api/auth/sign-in/route.ts` |
 | AUTH-DOCS | Updated handover/status docs so they no longer say the documented `/login` dev account fallback is local-development only. | `AI_NOTES.md`, `docs/README_AI.md`, `docs/NOW.md`, `STATUS.md`, `PROJECT_BRIEF.md` |

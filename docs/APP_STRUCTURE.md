@@ -17,7 +17,7 @@ Complete map of every screen, route, and user flow in the PilgrimCompare applica
 │  /                   [DONE]        /operator/onboarding      [DONE]  │
 │  /umrah              [DONE]        /operator/dashboard       [DONE]  │
 │  /hajj               [DONE]        /operator/packages        [DONE]  │
-│  /umrah/ramadan      [DONE]        package wizard in-page    [PARTIAL]│
+│  /umrah/ramadan      [DONE]        /operator/packages/new    [TODO]  │
 │  /search/packages    [DONE]        /operator/leads           [DONE]  │
 │  /packages           [DONE]        /operator/analytics       [PARTIAL]│
 │  /packages/[slug]    [DONE]        /operator/profile         [DONE]  │
@@ -196,8 +196,8 @@ START (operator visits site)
            │ operator clicks [Create Package]
            ▼
 ┌──────────────────────────────────────────┐
-│  Package wizard on /operator/packages    │
-│  [PARTIAL: implemented, E2E failing]     │
+│  /operator/packages/new  [TODO]          │
+│  (or overlay on /operator/packages)      │
 │                                          │
 │  Multi-step wizard:                      │
 │  Step 1: Basic info (title, type, dates) │
@@ -282,7 +282,7 @@ START (operator visits site)
 | Verification status | `app/operator/onboarding/status/page.tsx` | `VerificationStatus`       | DONE                                   |
 | Dashboard home      | `app/operator/dashboard/page.tsx`         | `OperatorDashboard`        | DONE                                   |
 | Package list        | `app/operator/packages/page.tsx`          | `OperatorPackagesList`     | DONE                                   |
-| Package wizard      | `app/operator/packages/page.tsx`          | `PackageWizard`            | PARTIAL — implemented in-page; operator E2E failing |
+| Package wizard      | `app/operator/packages/new/page.tsx`      | `PackageWizard`            | TODO — currently `PackageForm` is flat |
 | Leads/enquiries     | `app/operator/leads/page.tsx`             | `LeadsList`, `OfferForm`   | DONE                                   |
 | Analytics           | `app/operator/analytics/page.tsx`         | `AnalyticsDashboard`       | PARTIAL — 3 basic stat cards           |
 | Profile             | `app/operator/profile/page.tsx`           | `OperatorProfileForm`      | DONE                                   |
@@ -291,7 +291,7 @@ START (operator visits site)
 
 ## 4. Shared layout for operator pages
 
-Operator pages use the shared `app/operator/layout.tsx` wrapper with sidebar navigation.
+Currently each operator page is standalone. They need a shared layout with sidebar navigation.
 
 ### Target: `app/operator/layout.tsx`
 
@@ -315,11 +315,11 @@ Operator pages use the shared `app/operator/layout.tsx` wrapper with sidebar nav
 └─────────────────────────────────────────────────────┘
 ```
 
-### Current files
+### Files to create
 
 - `app/operator/layout.tsx` — shared layout wrapping all `/operator/*` routes.
 - `components/operator/OperatorSidebar.tsx` — sidebar nav component.
-- Mobile navigation is handled inside the sidebar/layout implementation; there is no separate `OperatorMobileNav.tsx` file.
+- `components/operator/OperatorMobileNav.tsx` — mobile hamburger + slide-out.
 
 ---
 
@@ -355,15 +355,31 @@ Components must **never** call `MockDB` directly (except `MockDB.setCurrentUser`
 
 ---
 
-## 6. Current remaining work (summary)
+## 6. What needs to be built (summary)
 
-| #   | Feature                                  | Area                          | Current state |
-| --- | ---------------------------------------- | ----------------------------- | ------------- |
-| 1   | Operator package E2E                     | `/operator/packages`          | Failing: route redirects to `/` in Chromium test run |
-| 2   | Playwright browser setup                 | local E2E                     | Firefox/WebKit binaries missing locally |
-| 3   | Package wizard persistence wiring        | `/operator/packages`          | Wizard is implemented in-page; newly-created packages are held in page state |
-| 4   | SEO structured-data helper consolidation | public pages                  | JSON-LD renders, but helper usage is inconsistent |
-| 5   | Validation utility functions             | `lib/validation.ts`           | Zod schemas exist; queue-requested utility validators are missing |
-| 6   | Enhanced analytics                       | `/operator/analytics`         | Partial: basic stat cards only |
+### Must-have (MVP for merge to main-v2)
+
+| #   | Feature                                  | Route                         | Est. complexity |
+| --- | ---------------------------------------- | ----------------------------- | --------------- |
+| 1   | Operator layout (sidebar)                | `app/operator/layout.tsx`     | Small           |
+| 2   | Evolve types (OperatorProfile + Package) | `lib/types.ts`                | Small           |
+| 3   | Update MockDB seed data                  | `lib/api/mock-db.ts`          | Small           |
+| 4   | Operator registration form               | `/operator/onboarding`        | Medium          |
+| 5   | Verification status screen               | `/operator/onboarding/status` | Small           |
+| 6   | Dashboard home (enhanced)                | `/operator/dashboard`         | Medium          |
+| 7   | Package list (wired to real data)        | `/operator/packages`          | Medium          |
+| 8   | Package creation wizard                  | `/operator/packages/new`      | Large           |
+| 9   | Leads page                               | `/operator/leads`             | Medium          |
+| 10  | Operator profile editor                  | `/operator/profile`           | Medium          |
+
+### Nice-to-have (post-MVP)
+
+| #   | Feature                          | Route                 | Est. complexity |
+| --- | -------------------------------- | --------------------- | --------------- |
+| 11  | Enhanced analytics               | `/operator/analytics` | Medium          |
+| 12  | Package cards with operator info | `/search/packages`    | Small           |
+| 13  | SEO structured data (JSON-LD)    | All public pages      | Medium          |
+| 14  | Public operator profile enhanced | `/operators/[slug]`   | Small           |
+| 15  | Package completeness scoring     | operator dashboard    | Small           |
 
 See `docs/EXECUTION_QUEUE.md` for the exact build order with specs for each task.
