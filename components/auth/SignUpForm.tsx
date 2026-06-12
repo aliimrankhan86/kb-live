@@ -182,7 +182,7 @@ export function SignUpForm() {
           role="tab"
           aria-selected={role === 'customer'}
           onClick={() => setRole('customer')}
-          className={`rounded-md border px-3 py-2.5 text-sm font-medium transition-colors ${
+          className={`min-h-[44px] rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
             role === 'customer'
               ? 'border-[var(--yellow)] bg-[rgba(255,211,29,0.12)] text-[var(--text)]'
               : 'border-[var(--borderSubtle)] text-[var(--textMuted)] hover:border-[var(--borderStrong)]'
@@ -196,24 +196,24 @@ export function SignUpForm() {
           role="tab"
           aria-selected={role === 'operator'}
           onClick={() => setRole('operator')}
-          className={`rounded-md border px-3 py-2.5 text-sm font-medium transition-colors ${
+          className={`min-h-[44px] rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
             role === 'operator'
               ? 'border-[var(--yellow)] bg-[rgba(255,211,29,0.12)] text-[var(--text)]'
               : 'border-[var(--borderSubtle)] text-[var(--textMuted)] hover:border-[var(--borderStrong)]'
           }`}
           data-testid="signup-role-operator"
         >
-          Partner
+          Operator
         </button>
       </div>
 
       <div>
         <h1 className="text-2xl font-semibold text-[var(--text)]">
-          {isPartner ? 'Partner Registration' : 'Create Account'}
+          {isPartner ? 'Operator Registration' : 'Create Account'}
         </h1>
         <p className="mt-1 text-sm text-[var(--textMuted)]">
           {isPartner
-            ? 'Register your travel company and start receiving bookings from UK travellers.'
+            ? 'Register your travel company to list packages and receive enquiries from UK travellers.'
             : 'Join PilgrimCompare to compare packages, save favourites, and request quotes.'}
         </p>
       </div>
@@ -339,13 +339,13 @@ export function SignUpForm() {
         className="w-full"
         data-testid="signup-submit"
       >
-        {loading ? 'Creating account…' : isPartner ? 'Register as Partner' : 'Create Account'}
+        {loading ? 'Creating account…' : isPartner ? 'Register as an Operator' : 'Create Account'}
       </Button>
 
       <p className="text-center text-sm text-[var(--textMuted)]">
         Already have an account?{' '}
         <Link
-          href={isPartner ? '/login?type=partner' : '/login?type=customer'}
+          href={isPartner ? '/login?type=operator' : '/login?type=customer'}
           className="text-[var(--yellow)] hover:underline"
         >
           Sign in

@@ -1,227 +1,253 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { LEGAL_ENTITY_BLOCK } from '@/lib/legal';
 
 export const metadata: Metadata = {
-  title: 'Terms & Conditions',
+  title: 'Terms of Use | PilgrimCompare',
   description:
-    'PilgrimCompare Terms and Conditions. UK travel comparison platform terms covering booking, payments, ATOL/ABTA, consumer rights, and data protection.',
+    'Terms of Use for PilgrimCompare — a UK comparison and enquiry service for Umrah travel packages from verified operators.',
   alternates: { canonical: '/terms' },
   robots: { index: true, follow: true },
+  openGraph: {
+    title: 'Terms of Use | PilgrimCompare',
+    description: 'Terms of Use for PilgrimCompare — a UK comparison and enquiry service for Umrah travel packages.',
+    url: 'https://pilgrimcompare.co.uk/terms',
+    siteName: 'PilgrimCompare',
+    type: 'website',
+    locale: 'en_GB',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Terms of Use | PilgrimCompare',
+    description: 'Terms of Use for PilgrimCompare — a UK comparison and enquiry service for Umrah travel packages.',
+  },
 };
+
+const LAST_UPDATED = '12 June 2026';
 
 export default function TermsPage() {
   return (
     <main className="min-h-screen bg-[var(--background)] text-[var(--text)]">
       <div className="mx-auto max-w-3xl px-4 py-12">
-        <h1 className="mb-6 text-3xl font-bold">Terms & Conditions</h1>
-        <p className="mb-8 text-sm text-[var(--textMuted)]">
-          Last updated: {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })} &nbsp;|&nbsp; Version: 1.0
-        </p>
+        <h1 className="mb-2 text-3xl font-bold">Terms of Use</h1>
+        <p className="mb-8 text-sm text-[var(--textMuted)]">Last updated: {LAST_UPDATED}</p>
 
-        <section className="mb-8">
-          <h2 className="mb-3 text-xl font-semibold">1. About PilgrimCompare</h2>
-          <p className="mb-3 text-sm leading-relaxed">
-          PilgrimCompare Limited (&ldquo;PilgrimCompare&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;) is a UK-registered travel comparison
-          platform. Our registered office is at Slough, Berkshire, United Kingdom.
-          Company registration number: [Registration in progress].
-          </p>
-          <p className="text-sm leading-relaxed">
-            <strong>Important:</strong> PilgrimCompare is a comparison platform only. We do not
-            organise, sell, or fulfil travel packages. Your contract for any travel package
-            is directly with the travel operator you select. We do not collect, hold, or
-            transfer customer funds.
-          </p>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="mb-3 text-xl font-semibold">2. Definitions</h2>
-          <ul className="list-disc pl-5 text-sm leading-relaxed space-y-1">
-            <li>
-              <strong>&ldquo;Platform&rdquo;</strong> means the PilgrimCompare website and any related
-              services.
-            </li>
-            <li>
-              <strong>&ldquo;Operator&rdquo;</strong> means a travel company listed on our platform
-              that offers pilgrimage packages.
-            </li>
-            <li>
-              <strong>&ldquo;Traveller&rdquo;</strong> or <strong>&ldquo;Customer&rdquo;</strong> means a person
-              using our platform to search for or request quotes for pilgrimage packages.
-            </li>
-            <li>
-              <strong>&ldquo;Booking Intent&rdquo;</strong> means a non-binding expression of
-              interest submitted by a traveller to an operator via our platform.
-            </li>
-            <li>
-              <strong>&ldquo;Quote Request&rdquo;</strong> means a request for pricing and package
-              information submitted by a traveller.
-            </li>
-          </ul>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="mb-3 text-xl font-semibold">3. Platform nature and limitations</h2>
-          <p className="mb-3 text-sm leading-relaxed">
-            PilgrimCompare acts solely as an intermediary comparison platform. We:
-          </p>
-          <ul className="list-disc pl-5 text-sm leading-relaxed space-y-1">
-            <li>Do not verify ATOL or ABTA credentials independently.</li>
-            <li>Do not guarantee the accuracy of operator listings or pricing.</li>
-            <li>Do not guarantee availability of any package.</li>
-            <li>Do not set or enforce operator cancellation or refund policies.</li>
-            <li>Do not collect, hold, or transfer customer payments.</li>
-          </ul>
-          <p className="mt-3 text-sm leading-relaxed">
-            All payments are made directly between the traveller and the operator.
-            PilgrimCompare is not party to any contract between a traveller and an operator.
-          </p>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="mb-3 text-xl font-semibold">4. ATOL and ABTA protection</h2>
-          <p className="mb-3 text-sm leading-relaxed">
-            Where operators display ATOL or ABTA numbers on our platform, this information
-            is provided by the operator. PilgrimCompare does not independently verify these
-            credentials.
-          </p>
-          <ul className="list-disc pl-5 text-sm leading-relaxed space-y-1">
-            <li>
-              <strong>ATOL (Air Travel Organiser&apos;s Licence):</strong> Issued by the UK
-              Civil Aviation Authority (CAA). Provides financial protection for flight-based
-              packages. Verify at{' '}
-              <a
-                href="https://www.caa.co.uk/atol-protection"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline text-[var(--accent)]"
-              >
-                caa.co.uk/atol-protection
-              </a>.
-            </li>
-            <li>
-              <strong>ABTA (Association of British Travel Agents):</strong> Membership
-              indicates adherence to ABTA&apos;s Code of Conduct. Verify at{' '}
-              <a
-                href="https://www.abta.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline text-[var(--accent)]"
-              >
-                abta.com
-              </a>.
-            </li>
-          </ul>
-          <p className="mt-3 text-sm leading-relaxed text-[var(--textWarning)]">
-            <strong>Warning:</strong> If an operator does not display ATOL or ABTA
-            protection, your booking may not be financially protected. Always confirm
-            protection details directly with the operator before paying.
-          </p>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="mb-3 text-xl font-semibold">5. Traveller obligations</h2>
-          <p className="mb-3 text-sm leading-relaxed">
-            By using our platform, you agree to:
-          </p>
-          <ul className="list-disc pl-5 text-sm leading-relaxed space-y-1">
-            <li>Provide accurate and truthful information in quote requests.</li>
-            <li>Be at least 16 years of age, or have parental/guardian consent.</li>
-            <li>Verify ATOL/ABTA protection directly with the operator before booking.</li>
-            <li>Confirm all package details, inclusions, and terms directly with the operator.</li>
-            <li>Make payments directly to the operator, not to PilgrimCompare.</li>
-          </ul>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="mb-3 text-xl font-semibold">6. Operator obligations</h2>
-          <p className="mb-3 text-sm leading-relaxed">
-            Operators listed on our platform agree to:
-          </p>
-          <ul className="list-disc pl-5 text-sm leading-relaxed space-y-1">
-            <li>Provide accurate and up-to-date company and package information.</li>
-            <li>Display valid ATOL and/or ABTA numbers where applicable.</li>
-            <li>Respond to quote requests in a timely and professional manner.</li>
-            <li>Handle all payments, refunds, and cancellations directly with travellers.</li>
-            <li>Comply with all applicable UK laws, including the Package Travel Regulations 2018.</li>
-            <li>
-              Acknowledge that PilgrimCompare does not verify credentials and that they are
-              solely responsible for their financial protection status.
-            </li>
-          </ul>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="mb-3 text-xl font-semibold">7. Booking reference and payment</h2>
-          <p className="mb-3 text-sm leading-relaxed">
-            The booking process on PilgrimCompare works as follows:
-          </p>
-          <ol className="list-decimal pl-5 text-sm leading-relaxed space-y-1">
-            <li>You submit a quote request with your travel preferences.</li>
-            <li>Verified operators may respond with offers.</li>
-            <li>You select an offer and submit a Booking Intent (non-binding).</li>
-            <li>The operator provides payment instructions directly.</li>
-            <li>You pay the operator directly. PilgrimCompare is not involved in the payment and takes no commission.</li>
+        <nav aria-label="Contents" className="mb-8 rounded-lg border border-[var(--borderSubtle)] bg-[var(--surface)] p-4">
+          <p className="mb-2 text-sm font-semibold">Contents</p>
+          <ol className="list-decimal pl-5 text-sm space-y-1">
+            <li><a href="#who-we-are" className="underline text-[var(--accent)]">Who we are</a></li>
+            <li><a href="#what-the-service-is" className="underline text-[var(--accent)]">What the service is</a></li>
+            <li><a href="#what-we-are-not" className="underline text-[var(--accent)]">What we are not</a></li>
+            <li><a href="#operator-content" className="underline text-[var(--accent)]">Operator content and accuracy</a></li>
+            <li><a href="#reference-codes" className="underline text-[var(--accent)]">Reference codes</a></li>
+            <li><a href="#no-advice" className="underline text-[var(--accent)]">No advice</a></li>
+            <li><a href="#acceptable-use" className="underline text-[var(--accent)]">Acceptable use and account terms</a></li>
+            <li><a href="#liability" className="underline text-[var(--accent)]">Liability</a></li>
+            <li><a href="#reviews" className="underline text-[var(--accent)]">Reviews and ratings</a></li>
+            <li><a href="#complaints" className="underline text-[var(--accent)]">Complaints</a></li>
+            <li><a href="#governing-law" className="underline text-[var(--accent)]">Governing law</a></li>
           </ol>
-          <p className="mt-3 text-sm leading-relaxed">
-            <strong>Important — Your PilgrimCompare reference:</strong> When you submit a Booking Intent,
-            PilgrimCompare issues a unique reference code (e.g., KT-XXXXX). You must provide this reference
-            to the operator when making payment. If you do not provide our reference, we cannot verify
-            that the booking originated through our platform. In such cases, any dispute is a matter
-            between you and the operator directly. PilgrimCompare will not be able to offer assistance,
-            mediation, or complaint routing.
-          </p>
-          <p className="mt-3 text-sm leading-relaxed">
-            All prices shown are in GBP (£) unless otherwise stated. Prices may be marked
-            as &ldquo;exact&rdquo;, &ldquo;from&rdquo;, or &ldquo;fixed&rdquo;. A &ldquo;from&rdquo; price indicates the starting
-            price and the actual cost may vary based on your specific requirements.
-          </p>
-        </section>
+        </nav>
 
-        <section className="mb-8">
-          <h2 className="mb-3 text-xl font-semibold">8. Cancellations and refunds</h2>
+        <section id="who-we-are" className="mb-8 scroll-mt-20">
+          <h2 className="mb-3 text-xl font-semibold">1. Who we are</h2>
           <p className="mb-3 text-sm leading-relaxed">
-            Cancellation and refund terms are determined by the individual operator and
-            must be confirmed before payment. PilgrimCompare does not process cancellations or
-            refunds.
+            {LEGAL_ENTITY_BLOCK.tradingName} is a trading name of{' '}
+            <strong>{LEGAL_ENTITY_BLOCK.companyName}</strong>, registered in{' '}
+            {LEGAL_ENTITY_BLOCK.registeredCountry}, company number{' '}
+            {LEGAL_ENTITY_BLOCK.companyNumber}. VAT number: {LEGAL_ENTITY_BLOCK.vatNumber}.
           </p>
+          {/* TODO: add registered office line once virtual office is set up — see AI_NOTES.md §14 */}
           <p className="text-sm leading-relaxed">
-            Under the Package Travel Regulations 2018, you may have statutory rights to
-            cancel in certain circumstances. These rights are between you and the operator.
-            For more information, visit the{' '}
+            Contact:{' '}
             <a
-              href="https://www.citizensadvice.org.uk/consumer/holiday-cancellations/"
-              target="_blank"
-              rel="noopener noreferrer"
+              href={`mailto:${LEGAL_ENTITY_BLOCK.contactEmail}`}
               className="underline text-[var(--accent)]"
             >
-              Citizens Advice website
-            </a>.
+              {LEGAL_ENTITY_BLOCK.contactEmail}
+            </a>
           </p>
         </section>
 
-        <section className="mb-8">
-          <h2 className="mb-3 text-xl font-semibold">9. Complaints</h2>
-          <p className="mb-3 text-sm leading-relaxed">
-            If you have a complaint about an operator or your booking:
+        <section id="what-the-service-is" className="mb-8 scroll-mt-20">
+          <h2 className="mb-3 text-xl font-semibold">2. What the service is</h2>
+          <p className="text-sm leading-relaxed">
+            PilgrimCompare is a UK comparison and enquiry service for Umrah travel packages. We
+            list packages from independent, verified UK travel operators so you can compare them
+            side by side and send enquiries directly. We are not a travel agent, tour operator,
+            or organiser. We do not sell travel, take bookings, or handle payments. Your booking,
+            contract, and payment are always with the operator you choose.
           </p>
-          <ol className="list-decimal pl-5 text-sm leading-relaxed space-y-1">
-            <li>First, contact the operator directly to resolve the issue.</li>
+        </section>
+
+        <section id="what-we-are-not" className="mb-8 scroll-mt-20">
+          <h2 className="mb-3 text-xl font-semibold">3. What we are not</h2>
+          <p className="mb-3 text-sm leading-relaxed">
+            PilgrimCompare is not a travel agent, tour operator, organiser, agent, or merchant
+            of record. We do not:
+          </p>
+          <ul className="mb-3 list-disc pl-5 text-sm leading-relaxed space-y-1">
+            <li>Take, hold, route, or facilitate any customer payment.</li>
             <li>
-              If unresolved, you may submit a complaint via our platform (for logged-in
-              users with an active Booking Intent).
+              Conclude or confirm any booking. Submitting an enquiry or booking intent does not
+              create a travel contract.
+            </li>
+            <li>Issue tickets, vouchers, or ATOL Certificates.</li>
+            <li>Bundle services from multiple operators.</li>
+            <li>Set, negotiate, or guarantee prices, availability, or inventory.</li>
+          </ul>
+          <p className="text-sm leading-relaxed">
+            The obligations of a tour organiser under the Package Travel and Linked Travel
+            Arrangements Regulations 2018 sit with the operator, not with PilgrimCompare.
+            PilgrimCompare is not party to any contract between you and an operator.
+          </p>
+        </section>
+
+        <section id="operator-content" className="mb-8 scroll-mt-20">
+          <h2 className="mb-3 text-xl font-semibold">4. Operator content and accuracy</h2>
+          <p className="mb-3 text-sm leading-relaxed">
+            Operators supply and are responsible for all package data: prices, inclusions,
+            dates, hotel details, flight information, and terms. We display this data in good
+            faith. Where information has not been supplied by the operator it is shown as{' '}
+            <strong>&ldquo;Not provided&rdquo;</strong>. We do not infer, estimate, or fill in
+            missing data.
+          </p>
+          <p className="mb-3 text-sm leading-relaxed">
+            Before any operator is listed, we check: (1) their ATOL number against the
+            CAA&apos;s public register, (2) their company status at Companies House, (3) that
+            they have a real, verifiable UK trading address. Verification confirms these checks
+            at the time of listing. It is not a guarantee of service quality, financial
+            protection for your specific booking, or future conduct.
+          </p>
+          <p className="text-sm leading-relaxed">
+            Prices are displayed exactly as provided by the operator and attributed to them.
+            Always confirm all package details, inclusions, and final price directly with the
+            operator before paying.
+          </p>
+        </section>
+
+        <section id="reference-codes" className="mb-8 scroll-mt-20">
+          <h2 className="mb-3 text-xl font-semibold">5. Reference codes</h2>
+          <p className="mb-3 text-sm leading-relaxed">
+            When you send an enquiry or express a booking intent, PilgrimCompare issues a
+            unique reference code. The following applies to all reference codes:
+          </p>
+          <ul className="list-disc pl-5 text-sm leading-relaxed space-y-2">
+            <li>You pay the operator directly. PilgrimCompare does not receive or hold your payment.</li>
+            <li>Your travel contract, cancellations and refunds are with the operator named on this page.</li>
+            <li>Your PilgrimCompare reference code is a tracking code, not a payment receipt.</li>
+          </ul>
+        </section>
+
+        <section id="no-advice" className="mb-8 scroll-mt-20">
+          <h2 className="mb-3 text-xl font-semibold">6. No advice</h2>
+          <p className="text-sm leading-relaxed">
+            Nothing on PilgrimCompare constitutes travel advice, visa advice, financial advice,
+            or religious guidance. Information about visa requirements, travel conditions, or
+            religious compliance is provided for general reference only, sourced from
+            operator-supplied data, and may not be current or applicable to your specific
+            circumstances. Always verify requirements independently and consult qualified
+            advisers where needed.
+          </p>
+        </section>
+
+        <section id="acceptable-use" className="mb-8 scroll-mt-20">
+          <h2 className="mb-3 text-xl font-semibold">7. Acceptable use and account terms</h2>
+          <p className="mb-3 text-sm leading-relaxed">By using PilgrimCompare, you agree to:</p>
+          <ul className="mb-4 list-disc pl-5 text-sm leading-relaxed space-y-1">
+            <li>Provide accurate and truthful information in all enquiries and account details.</li>
+            <li>Be at least 16 years old, or have parental or guardian consent.</li>
+            <li>Use the platform only for lawful purposes and in accordance with these terms.</li>
+            <li>
+              Not submit false or duplicate enquiries, or misuse complaint or dispute processes.
             </li>
             <li>
-              We will route your complaint to the operator and, where necessary, to our
-              admin team for triage.
+              Keep your account credentials secure and notify us promptly of any unauthorised
+              access.
             </li>
+          </ul>
+          <p className="text-sm leading-relaxed">
+            We may suspend or terminate your account at any time if we reasonably believe you
+            have breached these terms, engaged in fraudulent or abusive activity, or pose a risk
+            to other users or to operators. Operators may have their verification status
+            suspended for misrepresentation or breach of the operator agreement.
+          </p>
+        </section>
+
+        {/* LEGAL REVIEW */}
+        <section id="liability" className="mb-8 scroll-mt-20">
+          <h2 className="mb-3 text-xl font-semibold">8. Liability</h2>
+          {/* LEGAL REVIEW */}
+          <p className="mb-3 text-sm leading-relaxed">
+            To the maximum extent permitted by applicable law, PilgrimCompare and{' '}
+            {LEGAL_ENTITY_BLOCK.companyName} exclude liability for:
+          </p>
+          {/* LEGAL REVIEW */}
+          <ul className="mb-4 list-disc pl-5 text-sm leading-relaxed space-y-1">
+            {/* LEGAL REVIEW */}
             <li>
-              PilgrimCompare logs and routes complaints but does not adjudicate disputes or
-              enforce resolutions.
+              Any loss, cost, or damage arising from the performance, accuracy, or conduct of
+              any operator listed on the platform.
             </li>
-          </ol>
-          <p className="mt-3 text-sm leading-relaxed">
-            For ABTA members, you may also use the ABTA arbitration scheme. For ATOL
-            holders, contact the CAA. For general consumer advice, contact{' '}
+            {/* LEGAL REVIEW */}
+            <li>
+              The accuracy of operator-supplied package data beyond our stated verification
+              checks (Section 4 above).
+            </li>
+            {/* LEGAL REVIEW */}
+            <li>
+              Any indirect, consequential, or special loss arising from use of the platform.
+            </li>
+            {/* LEGAL REVIEW */}
+            <li>Loss of profit, loss of data, or loss of business opportunity.</li>
+          </ul>
+          {/* LEGAL REVIEW */}
+          <p className="mb-3 text-sm leading-relaxed">
+            Nothing in these terms excludes or limits our liability for:
+          </p>
+          {/* LEGAL REVIEW */}
+          <ul className="list-disc pl-5 text-sm leading-relaxed space-y-1">
+            {/* LEGAL REVIEW */}
+            <li>Death or personal injury caused by our negligence.</li>
+            {/* LEGAL REVIEW */}
+            <li>Fraud or fraudulent misrepresentation.</li>
+            {/* LEGAL REVIEW */}
+            <li>
+              Any liability that cannot lawfully be excluded under the Consumer Rights Act 2015
+              or any other applicable law.
+            </li>
+          </ul>
+        </section>
+
+        <section id="reviews" className="mb-8 scroll-mt-20">
+          <h2 className="mb-3 text-xl font-semibold">9. Reviews and ratings</h2>
+          <p className="text-sm leading-relaxed">
+            PilgrimCompare does not currently publish user reviews or ratings. When a review
+            system is introduced, only reviews tied to a verified PilgrimCompare reference code
+            will be published. No reviews will be written, commissioned, edited for sentiment,
+            or selectively suppressed. Operators cannot pay to alter or remove reviews.
+          </p>
+        </section>
+
+        <section id="complaints" className="mb-8 scroll-mt-20">
+          <h2 className="mb-3 text-xl font-semibold">10. Complaints</h2>
+          <p className="mb-3 text-sm leading-relaxed">
+            <strong>Complaints about the platform:</strong> Contact us at{' '}
+            <a
+              href="mailto:support@pilgrimcompare.co.uk"
+              className="underline text-[var(--accent)]"
+            >
+              support@pilgrimcompare.co.uk
+            </a>.
+          </p>
+          <p className="mb-3 text-sm leading-relaxed">
+            <strong>Complaints about a booking:</strong> Your contract and dispute rights are
+            with the operator directly. Contact the operator in the first instance. If
+            unresolved, we will help route your complaint to the operator; we do not adjudicate
+            disputes or enforce resolutions.
+          </p>
+          <p className="text-sm leading-relaxed">
+            For further support:{' '}
             <a
               href="https://www.citizensadvice.org.uk"
               target="_blank"
@@ -242,150 +268,24 @@ export default function TermsPage() {
           </p>
         </section>
 
-        <section className="mb-8">
-          <h2 className="mb-3 text-xl font-semibold">10. Marketing and data use</h2>
-          <p className="mb-3 text-sm leading-relaxed">
-            We collect and store your contact details and travel preferences to operate
-            our platform and match you with operators.
-          </p>
-          <p className="mb-3 text-sm leading-relaxed">
-            <strong>Marketing:</strong> We will only send you promotional emails about
-            new packages, deals, or platform updates if you have given explicit consent.
-            You can opt in during sign-up or in your account settings. You can withdraw
-            consent at any time by emailing{' '}
-            <a href="mailto:privacy@pilgrimcompare.co.uk" className="underline text-[var(--accent)]">
-              privacy@pilgrimcompare.co.uk
-            </a>{' '}
-            or clicking the unsubscribe link in any marketing email.
-          </p>
+        <section id="governing-law" className="mb-8 scroll-mt-20">
+          <h2 className="mb-3 text-xl font-semibold">11. Governing law</h2>
           <p className="text-sm leading-relaxed">
-            We retain your data in accordance with our{' '}
-            <Link href="/privacy" className="underline text-[var(--accent)]">Privacy Policy</Link>.
-            Marketing consent records are retained indefinitely as proof of consent
-            under UK GDPR.
+            These terms are governed by the laws of England and Wales. Any dispute arising from
+            your use of PilgrimCompare is subject to the exclusive jurisdiction of the courts of
+            England and Wales.
           </p>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="mb-3 text-xl font-semibold">11. Cookies</h2>
-          <p className="mb-3 text-sm leading-relaxed">
-            We use cookies in accordance with the Privacy and Electronic Communications
-            Regulations (PECR) and UK GDPR. By using our platform, you consent to our
-            use of cookies as described below.
-          </p>
-          <table className="w-full text-left text-sm mt-3 border border-[var(--borderSubtle)]">
-            <thead className="bg-[var(--surface)]">
-              <tr>
-                <th className="px-3 py-2 border-b border-[var(--borderSubtle)]">Cookie</th>
-                <th className="px-3 py-2 border-b border-[var(--borderSubtle)]">Purpose</th>
-                <th className="px-3 py-2 border-b border-[var(--borderSubtle)]">Type</th>
-                <th className="px-3 py-2 border-b border-[var(--borderSubtle)]">Duration</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="border-b border-[var(--borderSubtle)]">
-                <td className="px-3 py-2">kb_session</td>
-                <td className="px-3 py-2">Authentication and session management</td>
-                <td className="px-3 py-2">Essential</td>
-                <td className="px-3 py-2">Session + 7 days refresh</td>
-              </tr>
-              <tr>
-                <td className="px-3 py-2">kb_cookie_consent_v1</td>
-                <td className="px-3 py-2">Records your cookie consent choices</td>
-                <td className="px-3 py-2">Essential</td>
-                <td className="px-3 py-2">1 year</td>
-              </tr>
-            </tbody>
-          </table>
-          <p className="mt-3 text-sm leading-relaxed">
-            Analytics cookies will be added post-MVP and will require separate consent.
-            You can manage your cookie preferences via the cookie banner or by contacting us.
-          </p>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="mb-3 text-xl font-semibold">12. Intellectual property</h2>
-          <p className="text-sm leading-relaxed">
-            All content on the PilgrimCompare platform, including text, graphics, logos, and
-            software, is the property of PilgrimCompare Limited or its licensors and is
-            protected by UK and international copyright laws. You may not reproduce,
-            distribute, or create derivative works without our express written permission.
-          </p>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="mb-3 text-xl font-semibold">13. Limitation of liability</h2>
-          <p className="mb-3 text-sm leading-relaxed">
-            To the maximum extent permitted by law:
-          </p>
-          <ul className="list-disc pl-5 text-sm leading-relaxed space-y-1">
-            <li>
-              PilgrimCompare is not liable for any loss, damage, or expense arising from your
-              use of the platform or any travel package booked through an operator.
-            </li>
-            <li>
-              We do not guarantee the quality, safety, or legality of any operator&apos;s
-              services.
-            </li>
-            <li>
-              Our total liability to you for any claim arising from your use of the
-              platform shall not exceed £100.
-            </li>
-            <li>
-              Nothing in these terms excludes or limits our liability for death or
-              personal injury caused by our negligence, fraud, or any other liability
-              that cannot be excluded under UK law.
-            </li>
-          </ul>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="mb-3 text-xl font-semibold">14. Account suspension and termination</h2>
-          <p className="text-sm leading-relaxed">
-            We reserve the right to suspend or terminate your account at any time if we
-            believe you have violated these terms, engaged in fraudulent activity, or
-            pose a risk to other users or the platform. Operators may have their
-            verification status revoked for misrepresentation or failure to comply with
-            UK consumer law.
-          </p>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="mb-3 text-xl font-semibold">15. Governing law and jurisdiction</h2>
-          <p className="text-sm leading-relaxed">
-            These Terms & Conditions are governed by the laws of England and Wales.
-            Any dispute arising from these terms or your use of the platform shall be
-            subject to the exclusive jurisdiction of the courts of England and Wales.
-          </p>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="mb-3 text-xl font-semibold">16. Changes to these terms</h2>
-          <p className="text-sm leading-relaxed">
-            We may update these Terms & Conditions from time to time. We will notify
-            you of significant changes via email or a prominent notice on the platform.
-            Continued use of the platform after changes constitutes acceptance of the
-            revised terms.
-          </p>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="mb-3 text-xl font-semibold">17. Contact us</h2>
-          <p className="text-sm leading-relaxed">
-            For any questions about these Terms & Conditions, please contact us:
-          </p>
-          <address className="mt-3 text-sm not-italic leading-relaxed text-[var(--textMuted)]">
-            PilgrimCompare Limited<br />
-            Slough, Berkshire<br />
-            United Kingdom<br />
-            Email: <a href="mailto:support@pilgrimcompare.co.uk" className="underline text-[var(--accent)]">support@pilgrimcompare.co.uk</a>
-          </address>
         </section>
 
         <p className="mt-12 text-xs text-[var(--textMuted)]">
-          These Terms & Conditions are governed by the laws of England and Wales.
-          By using the PilgrimCompare platform, you acknowledge that you have read,
-          understood, and agree to be bound by these terms.
+          By using PilgrimCompare you confirm you have read and understood these terms.{' '}
+          <Link href="/privacy" className="underline text-[var(--accent)]">
+            Privacy Policy
+          </Link>{' '}
+          ·{' '}
+          <Link href="/how-it-works" className="underline text-[var(--accent)]">
+            How it works
+          </Link>
         </p>
       </div>
     </main>

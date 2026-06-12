@@ -1,4 +1,5 @@
 import { prisma } from './prisma';
+import { UK_DEPARTURE_AIRPORTS } from '@/lib/airports';
 import type {
   AnalyticsEvent,
   AuditLogEntry,
@@ -140,6 +141,7 @@ const mapQuoteRequest = (qr: PrismaQuoteRequest): QuoteRequest => ({
   occupancy: qr.occupancy as QuoteRequest['occupancy'],
   inclusions: qr.inclusions as QuoteRequest['inclusions'],
   notes: qr.notes ?? undefined,
+  sourceOperatorId: qr.sourceOperatorId ?? undefined,
 });
 
 const mapOffer = (o: PrismaOffer): Offer => ({
@@ -221,6 +223,7 @@ const mapPackage = (pkg: PrismaPackage): Package => ({
   inclusions: pkg.inclusions as unknown as Package['inclusions'],
   notes: pkg.notes ?? undefined,
   images: pkg.images,
+  isFeatured: pkg.isFeatured,
 });
 
 const mapComplaint = (c: PrismaComplaint): Complaint => ({
@@ -269,6 +272,7 @@ export const DBAdapter = {
       occupancy: pj(req.occupancy),
       inclusions: pj(req.inclusions),
       notes: req.notes ?? null,
+      sourceOperatorId: req.sourceOperatorId ?? null,
     };
     const saved = await prisma.quoteRequest.upsert({
       where: { id: req.id },
@@ -347,6 +351,20 @@ export const DBAdapter = {
   // Packages
   getPackages: async (): Promise<Package[]> =>
     (await prisma.package.findMany()).map(mapPackage),
+
+  getDistinctDepartureCities: async (): Promise<string[]> => {
+    const rows = await prisma.package.findMany({
+      where: { status: 'published', departureAirport: { not: null } },
+      select: { departureAirport: true },
+    });
+    const citySet = new Set<string>();
+    for (const row of rows) {
+      if (!row.departureAirport) continue;
+      const airport = UK_DEPARTURE_AIRPORTS.find((a) => a.code === row.departureAirport);
+      if (airport) citySet.add(airport.city);
+    }
+    return [...citySet].sort();
+  },
 
   savePackage: async (pkg: Package): Promise<Package> => {
     const data = {

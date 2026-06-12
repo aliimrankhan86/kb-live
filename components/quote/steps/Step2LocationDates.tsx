@@ -2,8 +2,6 @@
 
 import { useQuoteRequestStore } from '@/lib/store/quote-request';
 
-const UK_CITIES = ['London', 'Manchester', 'Birmingham'];
-
 const AIRPORTS: { code: string; name: string; city: string }[] = [
   { code: 'LHR', name: 'Heathrow', city: 'London' },
   { code: 'LGW', name: 'Gatwick', city: 'London' },
@@ -15,7 +13,7 @@ const chipBase = 'cursor-pointer rounded-lg border px-3 py-2 text-sm font-medium
 const chipActive = 'border-[#FFD31D] bg-[rgba(255,211,29,0.12)] text-[#FFFFFF]';
 const chipInactive = 'border-[rgba(255,255,255,0.1)] text-[rgba(255,255,255,0.64)] hover:border-[rgba(255,255,255,0.3)]';
 
-export function Step2LocationDates() {
+export function Step2LocationDates({ cities }: { cities: string[] }) {
   const { draft, setDraft } = useQuoteRequestStore();
   const isCustomDates = draft.season === 'custom';
   const selectedCity = draft.departureCity || '';
@@ -31,7 +29,7 @@ export function Step2LocationDates() {
         <h2 className="text-xl font-semibold text-[#FFFFFF]">Departure City</h2>
         <p className="mt-1 text-sm text-[rgba(255,255,255,0.64)]">Which city are you flying from?</p>
         <div className="mt-4 flex flex-wrap gap-2">
-          {UK_CITIES.map((city) => (
+          {cities.map((city) => (
             <button
               key={city}
               type="button"

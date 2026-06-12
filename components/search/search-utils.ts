@@ -30,6 +30,7 @@ export interface SearchPackageDisplay {
   price: number;
   currency: string;
   priceNote: string;
+  isFeatured: boolean;
 }
 
 const PLACEHOLDER_IMAGE =
@@ -157,5 +158,6 @@ export function toSearchDisplay(pkg: CataloguePackage): SearchPackageDisplay {
     price: pkg.pricePerPerson,
     currency: pkg.currency,
     priceNote: 'per person',
+    isFeatured: pkg.isFeatured ?? false,
   };
 }

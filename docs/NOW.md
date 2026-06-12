@@ -6,17 +6,135 @@
 
 ## Branch & goal
 
-- **Branch:** `dev` → target `main` after PR review
-- **Goal:** Pre-launch architecture/security audit and cutover risk handoff.
-- **Current source-of-truth note:** Architecture/security audit and verification updated on 2026-06-09.
-- **Canonical handover:** `AI_NOTES.md` is now the single source of truth for verified status, implementation posture, and pending areas.
+- **Branch:** `dev` (clean — Q1–Q6 + Prompts 5 + 6 all merged)
+- **Goal:** Prompts 5 + 6 complete — transactional email suite and cron job suite live. Next: Gate 3 operator onboarding. Run DB migration SQL (§23) in Supabase before deploying.
+- **Current source-of-truth note:** Prompt 6 verified 2026-06-12. Full detail in `AI_NOTES.md` §23.
+- **Canonical handover:** `AI_NOTES.md` is the single source of truth for verified status, implementation posture, and pending areas.
 
 ## What works (verified)
 
-- **Tests**: `npm run test` passes (18 files, 239/239 tests) — verified 2026-06-09.
-- **Build**: `npm run build` passes with 0 errors — verified 2026-06-09.
-- **TypeScript**: covered by `npm run build` validity checks.
+- **Tests**: `npm run test` passes (24 files, 1,818/1,818 tests) — verified 2026-06-12.
+- **Build**: `npm run build` passes with 0 errors — verified 2026-06-12.
+- **TypeScript**: `npx tsc --noEmit` passes — verified 2026-06-12.
 - **Architecture decision**: Supabase + Prisma + Upstash Redis is the correct target/production architecture. MockDB is not the production architecture, but production-facing MockDB imports remain and are now documented as launch blockers in `AI_NOTES.md` §0.
+
+## Changes made in this session (2026-06-12 — Prompts 5 + 6: Email + Cron Suite)
+
+| Task | What | Files |
+| ---- | ---- | ----- |
+| Schema | `source_operator_id`, `nudge_sent_at` → `quote_requests`; `outcome_followup_sent_at` → `booking_intents` | `prisma/schema.prisma` |
+| Adapter | `mapQuoteRequest` + `saveRequest` persist `sourceOperatorId` | `lib/api/db/adapter.ts` |
+| Email fix | Greeting `"Assalamualaikum"` → `"Salaam"` | `emails/EnquiryConfirmation.tsx` |
+| New templates | Operator nudge + outcome followup | `emails/OperatorNudge.tsx`, `emails/OutcomeFollowup.tsx` |
+| New send fns | `sendOperatorNudge`, `sendOutcomeFollowup` | `lib/email/send.tsx` |
+| Cron auth | `verifyCronSecret` — `Authorization: Bearer {CRON_SECRET}` | `lib/cron-auth.ts` |
+| Cron 1 | Nudge operator 48 h after unanswered enquiry — daily 08:00 UTC | `app/api/cron/nudge-operators/route.ts` |
+| Cron 2 | Outcome followup 10–14 days after booking intent — daily 09:00 UTC | `app/api/cron/outcome-followup/route.ts` |
+| Cron 3 | Expire packages with past `dateWindow.end` — daily 02:00 UTC | `app/api/cron/expire-packages/route.ts` |
+| Outcomes | One-tap outcome endpoint; writes `BookingOutcome` (never deleted) | `app/api/outcomes/[intentId]/route.ts` |
+| vercel.json | 3 new cron schedules registered | `vercel.json` |
+| Tests | 8 new tests: `verifyCronSecret` + 401 guard per cron route | `tests/cron-auth.test.ts` |
+
+**⚠️ DB migration required before deploy** — run in Supabase SQL editor:
+```sql
+ALTER TABLE quote_requests ADD COLUMN IF NOT EXISTS source_operator_id TEXT;
+ALTER TABLE quote_requests ADD COLUMN IF NOT EXISTS nudge_sent_at TIMESTAMPTZ;
+ALTER TABLE booking_intents ADD COLUMN IF NOT EXISTS outcome_followup_sent_at TIMESTAMPTZ;
+```
+
+**Verification:** `npx tsc --noEmit` pass · `npm run test` 1,818/1,818 (24 files) · `npm run build` 0 errors.
+
+---
+
+## Changes made in this session (2026-06-12 — Q6 Ranking Transparency + Featured Infrastructure)
+
+| Task | What | Files |
+| ---- | ---- | ----- |
+| TASK1 neutral sort | `lib/ranking.ts`: `scorePackage` (45% completeness + 35% recency + 20% response rate) + `sortByScore`. `Repository.listPackages` calls `sortByScore` server-side. | `lib/ranking.ts`, `lib/api/repository.ts` |
+| TASK2 disclosure | `NEUTRAL_SORT_DISCLOSURE` near every sort control, linked to `/how-we-rank`. `'relevance'` sort option added to PackageList preserving server order. | `components/search/PackageList.tsx`, `components/packages/PackagesBrowse.tsx` |
+| TASK3 /how-we-rank | Full DMCC Act 2024 §20 disclosure page: 4 criteria cards, Featured rules (max 2, labelled), §7 verification verbatim. Indexed, sitemap, footer link. | `app/how-we-rank/page.tsx`, `app/sitemap.ts`, `components/layout/Footer.tsx` |
+| TASK4 Featured infra | DB column `is_featured`, `isFeatured` in type/adapter. `FEATURE_FEATURED_SLOTS` flag (server-only). `FeaturedBadge` component. PackageList: featured section above neutral, capped at 2, flag-gated. | `prisma/schema.prisma`, `lib/types.ts`, `lib/api/db/adapter.ts`, `lib/config.ts`, `.env.example`, `components/search/FeaturedBadge.tsx`, `components/search/PackageList.tsx`, `app/search/packages/page.tsx` |
+| TASK5 tests | 11 ranking tests, 10 featured-slot tests, /how-we-rank metadata + star-char guard in banned-phrases. PostCSS config fixed for Vite/Vitest. | `tests/ranking.test.ts`, `tests/featured-slots.test.tsx`, `tests/banned-phrases.test.ts`, `postcss.config.mjs` |
+
+**Verification:** `npx tsc --noEmit` pass · `npm run test` 1,810/1,810 (23 files) · `npm run build` 0 errors.
+
+## Changes made in this session (2026-06-12 — Q5 SEO Pass)
+
+| Task | What | Files |
+| ---- | ---- | ----- |
+| Base metadata | Removed banned phrases from default description | `lib/seo.ts` |
+| Root layout JSON-LD | Organization + WebSite via helper; removed wrong inline TravelAgency schema | `app/layout.tsx` |
+| Homepage JSON-LD | Removed duplicate org/site schemas (now in layout); fixed FAQ copy | `app/page.tsx` |
+| Packages list | Title, canonical, OG+Twitter, WebPage JSON-LD | `app/packages/page.tsx` |
+| Package detail | Title pattern, Twitter card with image | `app/packages/[slug]/page.tsx` |
+| Operator profile | Twitter card | `app/operators/[slug]/page.tsx` |
+| Search results | Dynamic Twitter card with count+type | `app/search/packages/page.tsx` |
+| Corridor pages (3) | `generateMetadata()` async; dynamic noindex on zero supply; title/JSON-LD de-banned | `app/umrah/london/page.tsx`, `app/umrah/birmingham/page.tsx`, `app/umrah/manchester/page.tsx` |
+| Auth/Quote/Showcase | `robots: { index: false }` on all utility pages | `app/login/page.tsx`, `app/signup/page.tsx`, `app/quote/page.tsx`, `app/showcase/page.tsx` |
+| How-it-works | OG+Twitter, WebPage+FAQ JSON-LD wired into JSX | `app/how-it-works/page.tsx` |
+| Terms/Privacy | OG+Twitter added | `app/terms/page.tsx`, `app/privacy/page.tsx` |
+| Partner page | Twitter card; banned copy removed; WebPage JSON-LD | `app/partner/page.tsx` |
+| Sitemap | Corridor pages conditional on live supply; added /how-it-works, /partner | `app/sitemap.ts` |
+| Robots | Added /showcase to disallow | `app/robots.ts` |
+| Content rules | `BANNED_METADATA_PHRASES` + `NEUTRAL_SORT_DISCLOSURE` exports | `lib/content-rules.ts` (new) |
+| Banned-phrase CI | 1,425 assertions; fails CI if banned phrase in any metadata constant | `tests/banned-phrases.test.ts` (new) |
+
+**Verification:** `npx tsc --noEmit` pass · `npm run test` 1,425/1,425 (21 files) · `npm run build` 0 errors.
+
+## Changes made in this session (2026-06-12 — Q4 Mobile Polish)
+
+| Task | What | Files |
+| ---- | ---- | ----- |
+| GROUP1 Home/Umrah tap targets | Corridor + FAQ nav links `inline-flex min-h-[44px]` | `app/page.tsx`, `app/umrah/page.tsx` |
+| GROUP2 Search UI tap targets | savedChip/filterChip/clearFilters 44px; CompareBar chipRemove hit area expanded to 44px | `components/search/packages.module.css`, `components/search/CompareBar.module.css` |
+| GROUP3 ComparisonTable overflow | `overflow-x:auto` wrapper; `min-w-[320px]` table | `components/request/ComparisonTable.tsx` |
+| GROUP4 Quote steps a11y | Step4 room inputs: id/htmlFor/min-h-44/inputMode; Step5 label→textarea linked; data-sharing disclosure added | `components/quote/steps/Step4GroupBudget.tsx`, `components/quote/steps/Step5Review.tsx` |
+| GROUP6 Confirmation clipboard | New `ReferenceCodeDisplay` client component; confirmation page uses it | `components/request/ReferenceCodeDisplay.tsx`, `app/requests/[id]/confirmation/page.tsx` |
+| GROUP7 Auth tap targets | Login/signup tab buttons + forgot-password/back links `min-h-[44px]` | `components/auth/LoginForm.tsx`, `components/auth/SignUpForm.tsx` |
+| GROUP8 CookieConsent | Accurate copy (no analytics cookies); removed analytics table row; 'Accept all' → 'Accept'; all buttons min-h-[44px]; table `overflow-x:auto` | `components/compliance/CookieConsent.tsx` |
+
+**Verification:** `npx tsc --noEmit` pass · `npm run test` 238/238 · `npm run build` 0 errors.
+
+## Changes made in this session (2026-06-12 — Q3 IA/Nav Pass)
+
+| Task | What | Files |
+| ---- | ---- | ----- |
+| STEP1 Primary nav | Replaced `Umrah / Hajj / Get a Quote` with `Packages / Compare / How it works`. Compare → `/search/packages`. For Partners → For Operators. New path icons. | `components/layout/Header.tsx` |
+| STEP2 Footer | Added `cities` prop; verbatim "what we do" paragraph; dynamic "Departing from" city links in Platform section. | `components/layout/Footer.tsx` |
+| STEP3 Layout wiring | Root layout async; fetches `Repository.getDistinctDepartureCities()` with try/catch; passes to Footer. | `app/layout.tsx` |
+| STEP4 Breadcrumbs | Breadcrumb added to Ramadan, Cost guide pages. CityCorridor gets optional `breadcrumbItems` prop + breadcrumb before h1; duplicate `<Header />` removed. Corridor pages (London, Birmingham, Manchester) pass breadcrumb items. | `app/umrah/ramadan/page.tsx`, `app/umrah/cost/page.tsx`, `components/marketing/CityCorridor.tsx`, `app/umrah/london/page.tsx`, `app/umrah/birmingham/page.tsx`, `app/umrah/manchester/page.tsx` |
+| STEP5 Confirmation breadcrumb | Breadcrumb at top of booking confirmation page. | `app/requests/[id]/confirmation/page.tsx` |
+| STEP6 Sidebar back links | OperatorSidebar: "Back to PilgrimCompare" link. AdminSidebar: new component with active highlighting + back link. Admin layout wired to AdminSidebar. | `components/operator/OperatorSidebar.tsx`, `components/admin/AdminSidebar.tsx`, `app/admin/layout.tsx` |
+| FIX Unused var | Pre-existing lint warning in ComparisonTable removed. | `components/request/ComparisonTable.tsx` |
+
+**Verification:** `npx tsc --noEmit` pass · `npm run test` 238/238 · `npm run build` 0 errors · desktop nav/footer confirmed in preview · mobile drawer confirmed at 390px · breadcrumbs visible on corridor + confirmation pages.
+
+## Changes made in this session (2026-06-12 — Q2 Legal Pages)
+
+| Task | What | Files |
+| ---- | ---- | ----- |
+| STEP1 lib/legal.ts | Created single source of truth for entity details. `LEGAL_ENTITY_BLOCK` exports companyName, companyNumber, vatNumber, tradingName, registeredCountry, contactEmail, registeredOffice (empty pending virtual office — see AI_NOTES.md §14). | `lib/legal.ts` |
+| STEP2 Legal entity guard test | New Vitest test blocks PR merge if companyName, companyNumber, or contactEmail is ever accidentally cleared. | `tests/legal.test.ts` |
+| STEP3 /terms rewrite | Full rewrite of existing page (had wrong company name "PilgrimCompare Limited", fake reg number "[Registration in progress]", wrong ATOL claims, no LEGAL REVIEW tags, hydration bug from `new Date()`). Now: correct entity from LEGAL_ENTITY_BLOCK, all 11 §10.1 elements, verbatim §1/§4/§7 copy, TOC anchor nav, static LAST_UPDATED constant, 12× `{/* LEGAL REVIEW */}` tags on liability section. | `app/terms/page.tsx` |
+| STEP4 /privacy rewrite | Full rewrite (had wrong controller name, missing mandatory verbatim operator data-sharing disclosure, wrong Supabase region "London" → "EU West / Ireland", wrong cookie statement saying "optional analytics cookies" — Plausible is cookieless). Now: correct controller from LEGAL_ENTITY_BLOCK, mandatory verbatim disclosure in highlighted block, Plausible cookieless statement, strictly-necessary-only cookie table. | `app/privacy/page.tsx` |
+| STEP5 /how-it-works | New page. 5-step model per §10.5, §7 verification statement verbatim, all three §4 standard copy lines, mobile-first existing tokens. | `app/how-it-works/page.tsx` |
+| STEP6 Footer wiring | Import LEGAL_ENTITY_BLOCK (entity block no longer hardcoded). Added `/how-it-works` link to Legal section. Removed stale `/terms#cookies` link (cookie info now in Privacy Policy). | `components/layout/Footer.tsx` |
+
+**Verification:** `npx tsc --noEmit` pass · `npm run test` 238/238 · `npm run build` 0 errors · all three pages verified at 390px in preview · footer Legal links confirmed: How it works / Terms of Use / Privacy Policy · entity block reads from lib/legal.ts · 0 console errors.
+
+**LEGAL REVIEW tag count:** 12 in `app/terms/page.tsx` — all in liability section (§8). Run `grep -n "LEGAL REVIEW" app/terms/page.tsx` to list for solicitor review.
+
+## Changes made in this session (2026-06-12 — Q1 Brand & Legal Cleanup)
+
+| Task | What | Files |
+| ---- | ---- | ----- |
+| STEP1 KaabaTrip eradication | Replaced all KaabaTrip brand references across code, docs, tests, config. Zero hits remain outside `docs/_archive/` (historical record, left intentionally) and `docs/PILGRIMCOMPARE_QUALITY_PROMPTS.md` (intentional search-term references). | `public/site.webmanifest`, `scripts/check-upstash.mjs`, `next.config.ts`, `tests/auth-components.test.tsx`, `CLAUDE.md`, `AI_NOTES.md`, `STATUS.md`, `docs/NOW.md`, multiple docs/, `.clinerules`, `components/auth/LOGIN_MODAL_IMPLEMENTATION.md` |
+| STEP2 Banned-phrase audit | Fixed 11 violations: ATOL blanket claims → "ATOL Numbers Checked" / "status checked before listing"; Partner → Operator across full auth flow (LoginForm, SignUpForm, pages, metadata, test assertions). | `components/marketing/Hero.tsx`, `components/umrah/UmrahSearchForm.tsx`, `app/hajj/page.tsx`, `app/umrah/ramadan/page.tsx`, `components/auth/LoginForm.tsx`, `components/auth/SignUpForm.tsx`, `app/login/page.tsx`, `app/signup/page.tsx`, `tests/auth-components.test.tsx` |
+| STEP3 Dynamic departure cities | Replaced all hardcoded city lists with `Repository.getDistinctDepartureCities()`. New method in `lib/api/repository.ts` + `lib/api/db/adapter.ts`. All four marketing pages now async; corridor pages show empty state if no live packages. Quote wizard receives cities from server. | `lib/api/repository.ts`, `lib/api/db/adapter.ts`, `app/page.tsx`, `app/umrah/page.tsx`, `app/umrah/cost/page.tsx`, `app/umrah/ramadan/page.tsx`, `app/umrah/london/page.tsx`, `app/umrah/birmingham/page.tsx`, `app/umrah/manchester/page.tsx`, `components/quote/QuoteRequestWizard.tsx`, `components/quote/steps/Step2LocationDates.tsx`, `app/quote/page.tsx` |
+
+**Verification:** `npx tsc --noEmit` pass · `npm run test` 235/235 · `npm run build` 0 errors.
+
+---
 
 ## Changes made in this session (2026-06-09 — Master Architecture/Security Audit)
 
@@ -39,7 +157,7 @@
 
 | Task | What | Files |
 | ---- | ---- | ----- |
-| AUTH-PREVIEW-DEV-FALLBACK | Fixed documented dev account login outside local `NODE_ENV=development`. `/login` now accepts the reference dev accounts in local development, E2E, Vercel preview deployments, or controlled QA with `KAABATRIP_ENABLE_DEV_AUTH=true`; true production keeps the fallback disabled by default. | `lib/auth/dev-users.ts`, `app/api/auth/sign-in/route.ts`, `next.config.ts` |
+| AUTH-PREVIEW-DEV-FALLBACK | Fixed documented dev account login outside local `NODE_ENV=development`. Dev personas work under `npm run dev` (`NODE_ENV=development`) and `E2E_TESTING=1` only. Production keeps the fallback disabled by default. | `lib/auth/dev-users.ts`, `app/api/auth/sign-in/route.ts`, `next.config.ts` |
 | AUTH-COOKIE-SCOPE | Aligned all `__dev_user` readers with the same dev-auth gate so sign-in, middleware, server sessions, `/api/auth/me`, `/dev/login`, and sign-out work together. | `lib/auth/session.ts`, `lib/supabase/middleware.ts`, `app/dev/login/page.tsx`, `app/api/auth/sign-out/route.ts` |
 | AUTH-PASSWORD-PASTE | Dev account password comparison trims accidental leading/trailing whitespace only for documented dev accounts. Real Supabase Auth passwords are unchanged. | `app/api/auth/sign-in/route.ts` |
 | AUTH-DOCS | Updated handover/status docs so they no longer say the documented `/login` dev account fallback is local-development only. | `AI_NOTES.md`, `docs/README_AI.md`, `docs/NOW.md`, `STATUS.md`, `PROJECT_BRIEF.md` |

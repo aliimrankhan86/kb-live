@@ -5,6 +5,7 @@ import { filterByParams } from '@/components/search/search-utils';
 import { Repository } from '@/lib/api/repository';
 import type { Package as CataloguePackage } from '@/lib/types';
 import { JsonLdScript, faqPageJsonLd, graphJsonLd, searchResultsJsonLd, webPageJsonLd } from '@/lib/seo/json-ld';
+import { FEATURE_FEATURED_SLOTS } from '@/lib/config';
 import styles from '@/components/search/packages.module.css';
 
 /**
@@ -60,6 +61,11 @@ export async function generateMetadata({ searchParams }: SearchPackagesPageProps
       siteName: 'PilgrimCompare',
       type: 'website',
       locale: 'en_GB',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${count} ${packageType}${seasonLabel} Packages | PilgrimCompare`,
+      description: `Compare ${count} ${packageType.toLowerCase()} packages by price, hotels, distance to Haram, and inclusions.`,
     },
   };
 }
@@ -153,7 +159,7 @@ export default async function SearchPackagesPage({ searchParams }: SearchPackage
           </main>
         }
       >
-        <SearchPackagesClient allPackages={allPackages} />
+        <SearchPackagesClient allPackages={allPackages} featuredSlotsEnabled={FEATURE_FEATURED_SLOTS} />
       </Suspense>
     </>
   );

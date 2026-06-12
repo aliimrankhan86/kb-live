@@ -1,13 +1,12 @@
 # PilgrimCompare AI Handover — Single Source of Truth
 
-**Last verified:** 2026-06-10 (mobile UX pass: footer compaction + drawer overlay + scroll lock)
-**Branch:** `dev`
+**Last verified:** 2026-06-12 (Prompt 5 + 6 — transactional email + cron suite — 1,818 tests, 0 build errors)
+**Branch:** `dev` (clean — Q1–Q6 all merged via PRs)
 **Audience:** Claude, Codex, Kimi, and any AI/developer taking over the project.
 
 **Next immediate action:**
-Q1 — PilgrimCompare sweep, banned-phrase audit, dynamic departure cities
-Prompt file: `docs/PILGRIMCOMPARE_QUALITY_PROMPTS.md` → Q1
-Pre-req: `docs/PILGRIMCOMPARE_LANGUAGE_AND_LEGAL_STANDARDS.md` must be committed to repo first (founder manual task)
+Gate 3 — operator onboarding. Run the 3 DB migration SQL statements in §23 against Supabase before deploying. Then begin operator acquisition.
+See §10 + §23 for queue context.
 
 This file is the current handover source of truth. If another document conflicts with a verified statement here, treat that other document as stale and update it before changing implementation.
 
@@ -81,7 +80,6 @@ Operators pay. Travellers are always free. Funds never flow through the platform
 
 ### Read before every session
 1. `AGENTS.md`
-2. `docs/README_AI.md`
 3. `docs/NOW.md`
 4. This `AI_NOTES.md`
 5. `.agents/skills/supabase/SKILL.md`
@@ -119,12 +117,10 @@ Operators pay. Travellers are always free. Funds never flow through the platform
 
 ## 4. Verified Current State
 
-**Verified 2026-06-10:**
-- `npm run test`: **232/232 passes**, 18 files
+**Verified 2026-06-12 (Prompt 5 + 6 — transactional email + cron suite):**
+- `npm run test`: **1,818/1,818 passes**, 24 files
 - `npm run build`: **0 errors**
 - `npx tsc --noEmit`: **passes**
-- `npm run lint`: **passes**
-- `npx prisma validate`: **passes** (schema unchanged since 2026-06-09)
 - `npx playwright test`: 57 passed, 6 skipped, 0 failed (last full run 2026-06-08)
 
 **Stack:**
@@ -333,19 +329,21 @@ Mailboxes `support/privacy/dpo/complaints@pilgrimcompare.co.uk` → Cloudflare E
 |---|---|---|
 | Prompt 1 | MockDB removal + `FEATURE_USE_REAL_DB` fail-fast | ✅ Done |
 | Prompt 2 | RLS and grants audit — migrations 008 + 009 | ✅ Done |
-| Prompt 3 | Domain wiring + full KaabaTrip → PilgrimCompare rebrand | ✅ Done |
+| Prompt 3 | Domain wiring + full rebrand to PilgrimCompare | ✅ Done |
 | Prompt 4 | GitHub branch protection + CI workflow | ✅ Done |
+| Prompt 5 | Transactional email suite (5 emails, React Email, Resend) | ✅ Done 2026-06-12 — see §23 |
+| Prompt 6 | Cron job suite (3 crons + outcomes endpoint + idempotency) | ✅ Done 2026-06-12 — see §23 |
 
 ### Quality pass queue — NEXT
 
 | Queue | Task | Pre-req |
 |---|---|---|
-| **Q1** ← next | PilgrimCompare sweep + banned-phrase audit + dynamic departure cities | `docs/PILGRIMCOMPARE_LANGUAGE_AND_LEGAL_STANDARDS.md` committed |
-| Q2 | Legal pages `/terms` `/privacy` `/how-it-works` | Q1 done |
-| Q3 | IA/nav — header, footer, back buttons, breadcrumbs | Partial — footer + drawer done 2026-06-10 (see §13) |
-| Q4 | Mobile polish 360/390/430px | Q3 done |
-| Q5 | SEO — metadata, JSON-LD, sitemap | Q1 done |
-| Q6 | Ranking transparency + Featured infrastructure | Revenue model confirmed |
+| ~~Q1~~ ✅ | PilgrimCompare sweep + banned-phrase audit + dynamic departure cities | Done 2026-06-12 — see §17 |
+| ~~Q2~~ ✅ | Legal pages `/terms` `/privacy` `/how-it-works` | Done 2026-06-12 — see §18 |
+| ~~Q3~~ ✅ | IA/nav — header, footer, back buttons, breadcrumbs | Done 2026-06-12 — see §19 |
+| ~~Q4~~ ✅ | Mobile polish 360/390/430px | Done 2026-06-12 — see §20 |
+| ~~Q5~~ ✅ | SEO — metadata, JSON-LD, sitemap, banned-phrase CI | Done 2026-06-12 — see §21 |
+| ~~Q6~~ ✅ | Ranking transparency + Featured infrastructure | Done 2026-06-12 — see §22 |
 
 ---
 
@@ -535,7 +533,7 @@ npx playwright test
 
 ## 12. How the Next AI Should Work
 
-1. Read `AGENTS.md`, `docs/README_AI.md`, `docs/NOW.md`, this file, `.agents/skills/supabase/SKILL.md`, `.agents/skills/supabase-postgres-best-practices/SKILL.md`.
+1. Read `AGENTS.md`, `docs/NOW.md`, this file, `.agents/skills/supabase/SKILL.md`, `.agents/skills/supabase-postgres-best-practices/SKILL.md`.
 2. Run `git status -sb`.
 3. Do not revert uncommitted user/agent work.
 4. If a doc conflicts with verified state here, update the doc — do not undo implementation.
@@ -544,5 +542,445 @@ npx playwright test
 7. Run required verification gates.
 8. Update `docs/NOW.md` and this file before handoff or push.
 
-**Current handoff intent (2026-06-10):**
-Prompts 1–4 complete. Infrastructure fully deployed. Gate 1 + Gate 2 done. Next session is Q1 — PilgrimCompare sweep. Wait for `docs/PILGRIMCOMPARE_LANGUAGE_AND_LEGAL_STANDARDS.md` to be committed before starting Q1.
+**Current handoff intent (2026-06-12):**
+Q2 complete (see §18). Next session is Q3 — IA/nav pass (header, footer, back buttons, breadcrumbs). Test count: 238/238.
+
+---
+
+## 16. Supabase Keep-Alive Cron — 2026-06-11
+
+**Problem:** Supabase free tier auto-pauses any project after ~7 days of inactivity. Symptoms: `ETIMEDOUT` on both `:6543` (pgBouncer) and `:5432` (direct); DNS resolves but TCP drops. Confirmed 2026-06-11 — both ports timed out on `nc -z -w 5`.
+
+**Decision (founder-approved):** Vercel cron keep-alive for now; migrate to **Supabase Pro ($25/mo) when the first paying operator onboards.** Rationale: Pro removes auto-pause, adds daily backups, and gives a connection-pooling SLA — worth it once revenue is flowing, premature before.
+
+**What shipped (PR [#45](https://github.com/aliimrankhan86/kb-live/pull/45)):**
+
+- **[vercel.json](vercel.json)** — new file. Cron fires `GET /api/health` at 09:00 UTC every 3rd day (`0 9 */3 * *`). Three-day gap is well inside the 7-day pause window. Vercel crons are free on all plans.
+- **[app/api/health/route.ts](app/api/health/route.ts)** — upgraded from a static JSON stub to a real DB ping (`prisma.$queryRaw\`SELECT 1\``). Returns `{"status":"healthy","db":"ok"}` (HTTP 200) or `{"status":"degraded","db":"error","dbError":"…"}` (HTTP 503). The cron hit alone is enough to prevent pause; the 503 path surfaces any future DB issue.
+
+**Migration trigger:** open a Supabase Pro upgrade ticket the week the first operator pays. At that point also enable **Point-in-time recovery** and review connection pool limits.
+
+**🛠️ Gotcha — Supabase already paused?** Resume it manually: dashboard → project → "Resume project" (~60s). The cron only *prevents* pause; it can't un-pause a project that already went dormant.
+
+**Tests:** 235/235 — no new tests needed (the health endpoint is a thin wrapper; the DB integration is tested end-to-end by the keep-alive itself).
+
+**Will Vercel keep Supabase live?** Yes — **once manually resumed first.** The cron pings every 3 days; Supabase pauses after 7 days; 3 < 7 → stays awake permanently. The cron cannot cold-boot an already-paused project — that one manual resume is required. After that: no further action needed.
+
+**Can operator registration be recorded right now?** No — not while paused. Supabase Auth (signup API) and Postgres go down together when the project pauses. An operator trying to register would hit an error. Once resumed, the full flow works: Auth creates the user → Resend sends confirmation email (live regardless of DB state) → first login creates the operator profile in Postgres. Everything is wired and tested — it just needs the project awake.
+
+---
+
+## 17. Q1 Brand & Legal Cleanup — 2026-06-12
+
+**Branch:** `feat/q1-brand-legal-cleanup` (off `dev`). Three commits, one PR.
+
+### Step 1 — KaabaTrip eradication
+Searched entire repo case-insensitively for `kaabatrip`, `kaaba-trip`, `kaaba_trip`. Found 14 live occurrences across: `public/site.webmanifest`, `scripts/check-upstash.mjs`, `next.config.ts` (comment only), `tests/auth-components.test.tsx`, `CLAUDE.md`, `AI_NOTES.md`, `STATUS.md`, `docs/NOW.md`, `docs/00_PRODUCT_CANON.md`, `docs/AI_RUNBOOK.md`, `docs/APP_STRUCTURE.md`, `docs/MASTER_PLAN.md`, `docs/PHASE_2_AUDIT.md`, `docs/02_REPO_MAP.md`, `docs/10_PROMPT_TEMPLATES.md`, `docs/CURSOR_CONTEXT.md`, `docs/DOCS_INDEX.md`, `docs/README_AI.md`, `docs/REPO_MAP.md`, `components/auth/LOGIN_MODAL_IMPLEMENTATION.md`, `.clinerules`. Fixed all. `docs/_archive/` left as historical record per founder decision. `docs/PILGRIMCOMPARE_QUALITY_PROMPTS.md` retained intentional references (they describe what to search for, not brand usage). `grep -ri "kaabatrip" .` returns zero hits outside those files.
+
+**🛠️ Gotcha:** `KAABATRIP_ENABLE_DEV_AUTH` was a comment-only reference, not a real env var — confirmed by grep. Dev auth is gated on `localhost` hostname + `E2E_TESTING=true`, not an env var toggle. Comment updated to reflect reality.
+
+### Step 2 — Banned-phrase audit
+Searched all user-facing strings against `docs/PILGRIMCOMPARE_LANGUAGE_AND_LEGAL_STANDARDS.md` §5 + additional terms. Found and fixed 11 violations:
+
+- `Hero.tsx` — `ATOL Protected` trust badge → `ATOL Numbers Checked`; `Become a Partner` CTA → `List Your Packages`
+- `UmrahSearchForm.tsx` — `ATOL Protected` badge → `ATOL Numbers Checked`
+- `app/hajj/page.tsx` — metadata + JSON-LD: removed `"ATOL and ABTA protected"` → `"ATOL and ABTA status checked before listing"`
+- `app/umrah/ramadan/page.tsx` — metadata + JSON-LD: removed blanket ATOL/visa claims → `"ATOL status checked before listing"`
+- `components/auth/LoginForm.tsx` — `Partner Login` → `Operator Login`; `Partner` tab → `Operator`; signup link `?type=partner` → `?type=operator` (backward compat: resolveLoginType accepts both)
+- `components/auth/SignUpForm.tsx` — `Partner Registration` → `Operator Registration`; description updated; submit button → `Register as an Operator`; sign-in link → `?type=operator`
+- `app/login/page.tsx`, `app/signup/page.tsx` — metadata updated
+- `tests/auth-components.test.tsx` — 5 assertions updated to match new copy
+
+**Tests:** 235/235 after fixes (4 were failing before test fixture update).
+
+### Step 3 — Dynamic departure cities
+Replaced all hardcoded `['London', 'Birmingham', 'Manchester']` city lists with server-side queries.
+
+**New method:** `Repository.getDistinctDepartureCities(): Promise<string[]>` — queries `Package WHERE status = 'published' AND departureAirport NOT NULL`, maps airport codes to city names via `UK_DEPARTURE_AIRPORTS` in `lib/airports.ts`, deduplicates, sorts. Implemented in both `lib/api/db/adapter.ts` (Prisma) and `lib/api/repository.ts` mockStore (for tests/mock mode).
+
+**Pages updated (all made `async`):**
+- `app/page.tsx`, `app/umrah/page.tsx`, `app/umrah/cost/page.tsx`, `app/umrah/ramadan/page.tsx` — city nav links now derived from live data only; zero live packages → zero city links rendered
+- `app/umrah/london/page.tsx`, `/birmingham`, `/manchester` — check if city present in live data; if not, renders empty state notice: "No packages currently listed from [city]. New operators are being added."
+- `components/quote/steps/Step2LocationDates.tsx` — hardcoded `UK_CITIES` removed; now accepts `cities: string[]` prop
+- `components/quote/QuoteRequestWizard.tsx` — threads `cities` prop to Step2
+- `app/quote/page.tsx` — made async, fetches live cities, passes to wizard
+
+**Open risk:** `CityCorridor.tsx` line 34 still says "Verified UK operators with ATOL or ABTA protection" — borderline, deferred to Q3/review (founder said leave in Step 2 review).
+
+**Validation:** `npx tsc --noEmit` pass · `npm run test` 235/235 · `npm run build` 0 errors · all corridor pages render as `ƒ` (dynamic) in build output.
+
+---
+
+## 18. Q2 Legal Pages — 2026-06-12
+
+**Branch:** `feat/q1-brand-legal-cleanup` (same branch — Q2 added as additional commits).
+
+### What shipped
+
+**`lib/legal.ts`** — new file. Single source of truth for legal entity details. Exports `LEGAL_ENTITY_BLOCK` const with companyName, tradingName, companyNumber, vatNumber, registeredCountry, contactEmail, registeredOffice (empty string pending virtual office — see §14). Used by `/terms`, `/privacy`, and `Footer.tsx` so entity details are updated in one place.
+
+**`tests/legal.test.ts`** — new test. Guards companyName, companyNumber, contactEmail against accidental blank-out. Will fail CI if any of the three become empty strings.
+
+**`app/terms/page.tsx`** — full rewrite. Previous page had: wrong company name ("PilgrimCompare Limited"), fake company number ("[Registration in progress]"), incorrect ATOL claim ("does not independently verify" — contradicted §7 of standards which says we do check), no `LEGAL REVIEW` tags on liability clauses, `new Date()` hydration issue. Rewrite contains all 11 elements from standards §10.1: entity block from `LEGAL_ENTITY_BLOCK`, verbatim §1 "what the service is" paragraph, PTR 2018 positioning, operator content/accuracy with correct verification statement from §7, verbatim §4 three standard copy lines, no-advice section, acceptable use + suspension, liability with 12× `{/* LEGAL REVIEW */}` tags, no-reviews policy, complaints split (platform vs booking), governing law. Static `LAST_UPDATED = '12 June 2026'` constant (no hydration issue). TOC with anchor links for mobile usability (`scroll-mt-20` clears sticky header).
+
+**`app/privacy/page.tsx`** — full rewrite. Previous page had: wrong controller name, missing the mandatory verbatim operator data-sharing disclosure from §10.3, Supabase region stated as "London" (it's EU West/Ireland), cookie statement incorrectly said "optional analytics cookies" (Plausible is cookieless — no consent needed). Rewrite: controller identity from `LEGAL_ENTITY_BLOCK`, mandatory verbatim disclosure ("When you send an enquiry, your contact details are shared with the operator you enquire with. From that point the operator is an independent data controller...") rendered in a highlighted box, correct Supabase region, Plausible cookieless statement, strictly-necessary-only cookie table (one auth session cookie), ICO complaint route with phone number.
+
+**`app/how-it-works/page.tsx`** — new file. Plain-English 5-step model per §10.5. §7 verification statement verbatim. All three §4 standard copy lines. Mobile-first, existing design tokens only. Static server component, no client JS.
+
+**`components/layout/Footer.tsx`** — three targeted edits: (1) imported `LEGAL_ENTITY_BLOCK` from `lib/legal.ts`; (2) replaced hardcoded entity disclosure paragraph with `LEGAL_ENTITY_BLOCK` values; (3) Legal links updated: added `/how-it-works`, renamed "Terms & Conditions" → "Terms of Use", removed stale `/terms#cookies` (cookie info now in Privacy Policy).
+
+### 🛠️ Gotcha — pre-existing cookie banner copy contradiction
+The `CookieConsent` component still says "Analytics cookies help us understand how our site is used." This contradicts the updated Privacy Policy (Plausible is cookieless, no analytics cookies). Deferred — scope is a separate Q3/Q4 banner copy fix. The legal pages themselves are accurate; the banner is technically inaccurate but low enforcement risk at pre-revenue stage.
+
+### Validation
+- `npx tsc --noEmit` pass
+- `npm run test` 238/238 (3 new tests in `tests/legal.test.ts`)
+- `npm run build` 0 errors — `/how-it-works`, `/terms`, `/privacy` all render as `ƒ` (dynamic)
+- All three pages verified at 390px in preview: no horizontal scroll, correct entity values, verbatim copy present
+- Footer entity block reads from `LEGAL_ENTITY_BLOCK`: "PilgrimCompare is a trading name of Paramount Consultants Limited, registered in England and Wales (company no. 09679002). VAT no. GB 221 6154 46."
+- 12× `{/* LEGAL REVIEW */}` tags confirmed in `app/terms/page.tsx` — all in §8 liability section
+- 0 browser console errors
+
+---
+
+## 19. Q3 IA/Nav Pass — 2026-06-12
+
+**Branch:** `feat/q3-ia-nav` (off `dev`).
+
+### What shipped
+
+**`components/layout/Header.tsx`** — Primary nav restructured from `Umrah / Hajj / Get a Quote` to `Packages / Compare / How it works`. Compare → `/search/packages` (existing route, no new route needed). Guest secondary link renamed `For Partners` → `For Operators`. Three new path icons added to `ICONS` object (`packages`, `compare`, `howItWorks`).
+
+**`components/layout/Footer.tsx`** — Three targeted changes: (1) added `cities?: string[]` prop; (2) replaced brand tagline with verbatim "what we do" paragraph per §10.1 (comparison + enquiry service, not a travel agent, no payments); (3) dynamic "Departing from" block inside Platform section renders `<Link href="/umrah/{city.toLowerCase()}">` per city — only shown when `cities.length > 0`.
+
+**`app/layout.tsx`** — Made async. Fetches `Repository.getDistinctDepartureCities()` at layout level with try/catch (empty array fallback on DB failure). Passes result to `<Footer cities={departureCities} />`. No SSR penalty on first byte — query is cheap + cached.
+
+**`components/marketing/CityCorridor.tsx`** — Removed duplicate `<Header />` render (layout already provides it). Added optional `breadcrumbItems?: BreadcrumbItem[]` prop. Renders `<Breadcrumb>` inside `<article>` before the `<h1>` when provided.
+
+**Breadcrumbs added to:**
+- `app/umrah/london/page.tsx` — Home / Umrah / London
+- `app/umrah/birmingham/page.tsx` — Home / Umrah / Birmingham
+- `app/umrah/manchester/page.tsx` — Home / Umrah / Manchester
+- `app/umrah/ramadan/page.tsx` — Home / Umrah / Ramadan Umrah
+- `app/umrah/cost/page.tsx` — Home / Umrah / Cost guide
+- `app/requests/[id]/confirmation/page.tsx` — Home / My requests / Request / Confirmation
+
+**`components/operator/OperatorSidebar.tsx`** — "Back to PilgrimCompare" `<Link href="/">` added at bottom. 44px tap target, chevron-left icon, muted→normal hover colour, closes mobile drawer on click.
+
+**`components/admin/AdminSidebar.tsx`** — New `'use client'` component. Active nav highlighting via `usePathname()` (exact match + prefix match). aria-current="page" on active item. "Back to PilgrimCompare" link. Email displayed in footer.
+
+**`app/admin/layout.tsx`** — Replaced inline static nav HTML with `<AdminSidebar userEmail={user.email} />`.
+
+**`components/request/ComparisonTable.tsx`** — Fixed pre-existing unused variable lint warning (`(row, i)` → `(row)` on header column map).
+
+### 🛠️ Gotchas
+
+- **Turbopack + `npm run build` conflict**: Running `npm run build` while `npm run dev` (Turbopack) is up corrupts `.next/static/development/_buildManifest.js.tmp.*`, causing ISE on all pages. Fix: stop dev server, delete `.next/static/development/`, restart. Documented in §15.
+- **`<a>` lint error on internal links**: Next.js `@next/next/no-html-link-for-pages` rejects `<a href="/">` for internal routes. Both sidebar back links needed `<Link>` from `next/link`.
+- **CityCorridor double-header**: Component previously rendered its own `<Header />` — this caused two headers on all corridor pages. Removed in this pass.
+
+### Validation
+- `npx tsc --noEmit` pass
+- `npm run test` 238/238 (no new tests; 3 existing legal tests already in count)
+- `npm run build` 0 errors
+- Desktop: header `Packages / Compare / How it works` confirmed; footer "what we do" paragraph + "DEPARTING FROM London" confirmed
+- Mobile 390px: hamburger drawer shows `Packages / Compare / How it works / For Operators`; `/umrah/london` shows `← Umrah` compact back affordance; breadcrumb trail on desktop
+
+**Next:** Q4 — mobile polish. Test count: 238/238.
+
+---
+
+## 20. Q4 Mobile Polish — 2026-06-12
+
+**Branch:** `feat/q4-mobile-polish` (off `dev`).
+
+### Audit (360/390/430px)
+
+| # | Route | Defect | Fix |
+|---|-------|--------|-----|
+| 1 | `/` | Corridor nav links `py-3` < 44px tap target | `inline-flex min-h-[44px]` |
+| 2 | `/umrah` | FAQ nav links `py-1.5` < 44px tap target | `inline-flex min-h-[44px]` |
+| 3 | `/search/packages` | `.savedChip` 36px, `.filterChip` 34px, `.clearFilters` 34px | `min-height: 44px` in packages.module.css |
+| 4 | `/search/packages` | CompareBar `.chipRemove` 24×24px icon-only button | `padding:10px; margin:-10px; box-sizing:content-box` |
+| 5 | `/search/packages` | ComparisonTable wraps to 1 col on 3-package narrow view | `overflow-x:auto` wrapper + `min-w-[320px]` table |
+| 6 | Quote step 4 | Room count inputs no `id`/`htmlFor`; `py-1` < 44px; no `inputMode` | `id`, `htmlFor`, `min-h-[44px]`, `inputMode="numeric"` |
+| 7 | Quote step 5 | `<h2>Additional Notes</h2>` not linked to textarea; no data-sharing disclosure | `<label htmlFor>` + textarea `id`; disclosure box added |
+| 8 | `/requests/[id]/confirmation` | No copy-to-clipboard on reference code | New `ReferenceCodeDisplay` client component |
+| 9 | `/login` | Tab buttons `py-2.5` < 44px; forgot-pwd/back links tiny | `min-h-[44px]` on all three |
+| 10 | `/signup` | Tab buttons `py-2.5` < 44px | `min-h-[44px]` |
+| 11 | CookieConsent | Buttons 38px; copy claims analytics cookies (contradicts Privacy Policy); table overflows narrow | `min-h-[44px]`; remove analytics copy; `overflow-x:auto` on table |
+
+### What shipped
+
+**`app/page.tsx`** — corridor nav links: `inline-flex min-h-[44px] items-center justify-center`.
+
+**`app/umrah/page.tsx`** — FAQ nav links: `inline-flex min-h-[44px] items-center`.
+
+**`components/search/packages.module.css`** — `.savedChip`, `.filterChip`, `.clearFilters`: `min-height: 44px`.
+
+**`components/search/CompareBar.module.css`** — `.chipRemove`: `padding:10px; margin:-10px -4px -10px -6px; box-sizing:content-box` expands 24px visual to 44px hit area.
+
+**`components/request/ComparisonTable.tsx`** — outer div `overflow-x-auto`; table `min-w-[320px]`. Kept on inline Tailwind (no .module.css — see §15 gotcha).
+
+**`components/quote/steps/Step4GroupBudget.tsx`** — room inputs: `id`, `htmlFor`, `min-h-[44px]`, `inputMode="numeric"`, `py-2`.
+
+**`components/quote/steps/Step5Review.tsx`** — `<h2>` → `<label htmlFor="quote-notes">`; textarea `id="quote-notes"`; data-sharing disclosure box added per legal standards.
+
+**`components/request/ReferenceCodeDisplay.tsx`** — new `'use client'` component. Copy button 44px, `aria-live="polite"` feedback, `data-testid="copy-reference-code"`, `operatorName` prop for contextual message.
+
+**`app/requests/[id]/confirmation/page.tsx`** — imports and renders `<ReferenceCodeDisplay referenceCode={referenceCode} operatorName={operatorName} />`.
+
+**`components/auth/LoginForm.tsx`** — tabs: `min-h-[44px]`; forgot-password/back-to-signin: `inline-flex min-h-[44px] items-center`.
+
+**`components/auth/SignUpForm.tsx`** — tabs: `min-h-[44px]`.
+
+**`components/compliance/CookieConsent.tsx`** — all buttons `min-h-[44px]`; removed false analytics-cookie copy (Plausible is cookieless); removed analytics table row; relabelled "Accept all" → "Accept"; `overflow-x:auto` on details table wrapper.
+
+### 🛠️ Gotchas
+
+- **ComparisonTable + CSS module**: must stay on inline Tailwind only. Adding a .module.css import breaks the PackagesBrowse vitest suite (Vite runs file through Tailwind v4 PostCSS in test env → throws). See §15.
+- **Clipboard requires client component**: `navigator.clipboard.writeText` is browser-only. Confirmation page is a Server Component, so clipboard state lives in the separate `ReferenceCodeDisplay` client component.
+
+### Validation
+
+- `npx tsc --noEmit` pass
+- `npm run test` 238/238
+- `npm run build` 0 errors
+
+---
+
+## 21. Q5 SEO Pass — 2026-06-12
+
+**Branch:** `feat/q5-seo` (off `feat/q4-mobile-polish`) → PR → `dev`
+
+### Scope
+
+Full SEO audit and remediation for all public routes: metadata, JSON-LD structured data, sitemap, robots, OG/Twitter cards, noindex rules, and a banned-phrase CI guard.
+
+### What shipped
+
+| Task | What | Files |
+|------|------|-------|
+| Base metadata fix | Removed banned phrases ("best", "unforgettable") from `lib/seo.ts` default description | `lib/seo.ts` |
+| Root layout JSON-LD | Replaced hardcoded wrong `TravelAgency` schema with `graphJsonLd([organizationJsonLd(), websiteJsonLd()])` via helper | `app/layout.tsx` |
+| Homepage JSON-LD | Removed duplicate Organization+WebSite (now in layout); fixed FAQ answer copy ("records enquiry intent"); graph = WebPage + FAQPage | `app/page.tsx` |
+| Packages list | Proper title, canonical, OG+Twitter, WebPage JSON-LD | `app/packages/page.tsx` |
+| Package detail | Title pattern `"${pkg.title} by ${operator} | Compare on PilgrimCompare"`, Twitter card with image | `app/packages/[slug]/page.tsx` |
+| Operator profile | Twitter card with operator name and status | `app/operators/[slug]/page.tsx` |
+| Search results | Dynamic Twitter card with package count and type | `app/search/packages/page.tsx` |
+| Corridor pages (3) | Converted to `generateMetadata()` async; dynamic noindex when city has zero live supply; removed "Compare & Book" from titles and JSON-LD | `app/umrah/london/page.tsx`, `app/umrah/birmingham/page.tsx`, `app/umrah/manchester/page.tsx` |
+| Auth pages | `robots: { index: false, follow: false }` + typed metadata | `app/login/page.tsx`, `app/signup/page.tsx` |
+| Quote page | `robots: { index: false, follow: false }` | `app/quote/page.tsx` |
+| Showcase page | `robots: { index: false, follow: false }` | `app/showcase/page.tsx` |
+| How-it-works | OG+Twitter, WebPage+FAQ JSON-LD, `<JsonLdScript>` wired into JSX | `app/how-it-works/page.tsx` |
+| Terms / Privacy | OG+Twitter added to existing metadata | `app/terms/page.tsx`, `app/privacy/page.tsx` |
+| Partner (operator) | Twitter card; removed banned copy ("thousands", "Apply as a Partner", "Start Receiving Bookings"); WebPage JSON-LD | `app/partner/page.tsx` |
+| Sitemap | Corridor pages conditional on live DB supply; added `/how-it-works`, `/partner`; DB failure → omit dynamic pages | `app/sitemap.ts` |
+| Robots | Added `/showcase` to disallow list | `app/robots.ts` |
+| Content rules | `BANNED_METADATA_PHRASES` (34 phrases from standards §5/§11/§14) + `NEUTRAL_SORT_DISCLOSURE` | `lib/content-rules.ts` (new) |
+| Banned-phrase CI | 1,425 assertions covering all static metadata string constants; fails CI if any banned phrase appears | `tests/banned-phrases.test.ts` (new) |
+
+### JSON-LD schema inventory (post-Q5)
+
+| Route | Schemas emitted |
+|-------|----------------|
+| All pages (layout) | `Organization` + `WebSite` |
+| `/` | `WebPage` + `FAQPage` |
+| `/packages` | `WebPage` |
+| `/packages/[slug]` | `WebPage` + `Product` + `Offer` (seller = operator) |
+| `/operators/[slug]` | `WebPage` + `TravelAgency` |
+| `/search/packages` | `WebPage` + `ItemList` |
+| `/umrah/london|birmingham|manchester` | `WebPage` + `BreadcrumbList` |
+| `/how-it-works` | `WebPage` + `FAQPage` |
+| `/partner` | `WebPage` |
+
+### 🛠️ Gotchas
+
+- **Corridor noindex is live supply-gated**: `generateMetadata()` calls `Repository.getDistinctDepartureCities()` at request time. If DB is unavailable it catches and defaults to `index: false` (safe). When supply arrives, next request re-indexes automatically — no code change needed.
+- **No AggregateRating anywhere**: standards doc prohibits it; no reviews exist. Do not add until real review data exists.
+- **Seller in Product schema = operator, not PilgrimCompare**: enforced in `packageJsonLd()` helper; do not change.
+- **`NEUTRAL_SORT_DISCLOSURE` must be placed near the sort control** on all package list/search pages (DMCC Act 2024 Schedule 20). Already present on `/packages` and `/search/packages`.
+
+### Validation
+
+- `npx tsc --noEmit` pass
+- `npm run test` 1,425/1,425 (21 files)
+- `npm run build` 0 errors
+
+---
+
+## 22. Q6 Ranking Transparency + Featured Infrastructure — 2026-06-12
+
+### What changed
+
+**TASK 1 — Server-side neutral sort (`lib/ranking.ts`, `lib/api/repository.ts`)**
+- New `lib/ranking.ts`: `scorePackage(pkg, responseRate?)` and `sortByScore(packages[])`.
+- Score = 45% data completeness (16 optional fields) + 35% price recency (full ≤7 days, zero ≥90 days) + 20% operator response rate (neutral 0.5 until real data).
+- `isFeatured` has zero weight — never affects neutral score.
+- `Repository.listPackages()` now calls `sortByScore()` before returning; all pages receive pre-sorted packages server-side.
+
+**TASK 2 — Neutral sort disclosure (`components/search/PackageList.tsx`, `components/packages/PackagesBrowse.tsx`)**
+- `NEUTRAL_SORT_DISCLOSURE` from `lib/content-rules` rendered near every sort control, linked to `/how-we-rank`.
+- `data-testid="sort-disclosure"` on both pages for Playwright targeting.
+- `PackageList` adds `'relevance'` sort option (preserves server order).
+
+**TASK 3 — `/how-we-rank` page (`app/how-we-rank/page.tsx`)**
+- Full DMCC Act 2024 Schedule 20 disclosure: 4 numbered criteria cards, Featured listing rules (max 2, labelled, "Paid placement" note, excluded from count), §7 verification statement verbatim as blockquote.
+- Indexed, canonical `/how-we-rank`, WebPage JSON-LD, added to `app/sitemap.ts` and `components/layout/Footer.tsx` LEGAL_LINKS.
+
+**TASK 4 — Featured infrastructure**
+- `prisma/schema.prisma`: `isFeatured Boolean @default(false) @map("is_featured")` — SQL applied (`ADD COLUMN IF NOT EXISTS`).
+- `lib/types.ts`: `isFeatured?: boolean` added to `Package`.
+- `lib/api/db/adapter.ts`: `mapPackage` maps `isFeatured`.
+- `lib/config.ts`: `FEATURE_FEATURED_SLOTS` flag (default `false`); server-side only — never read client-side.
+- `.env.example`: documents all env vars including `FEATURE_FEATURED_SLOTS=false`.
+- `components/search/FeaturedBadge.tsx`: yellow star badge, `data-testid="featured-badge"`.
+- `components/search/PackageList.tsx`: featured section (`data-testid="featured-section"`) above neutral list, capped at `FEATURED_MAX = 2`, visible only when `featuredSlotsEnabled=true` prop (server-evaluated).
+- `app/search/packages/page.tsx`: evaluates `FEATURE_FEATURED_SLOTS` server-side, passes as `featuredSlotsEnabled` prop.
+
+**TASK 5 — Tests**
+- `tests/ranking.test.ts`: 11 tests — `scorePackage` (range, recency, completeness, isFeatured no-op, response rate) and `sortByScore` (order, immutability, empty, isFeatured no-op).
+- `tests/featured-slots.test.tsx`: 10 tests — featured section render/absent, paid-placement label, `/how-we-rank` link, cap at 2, exclusion from neutral list, disclosure always present.
+- `tests/banned-phrases.test.ts`: `/how-we-rank` metadata strings added; star-character guard (★ ☆ ⭐ 🌟) on all metadata keys.
+- `postcss.config.mjs`: switched to object plugin syntax (`{ '@tailwindcss/postcss': {} }`) — compatible with both Next.js webpack and Vite/Vitest PostCSS loading.
+
+### Key constraints upheld
+- `FEATURE_FEATURED_SLOTS` evaluated server-side only; passed as `featuredSlotsEnabled: boolean` prop — never imported or read in client components.
+- No payment/billing code added — infrastructure only.
+- `isFeatured` has no weight in `scorePackage` — confirmed by test.
+- "Priority placement" phrase never used; featured copy is "Paid placement — not ranked by our neutral criteria."
+
+### Commits (branch `feat/q6-ranking-transparency`)
+1. `feat(ranking): server-side neutral sort score`
+2. `feat(config): add FEATURE_FEATURED_SLOTS flag + .env.example`
+3. `feat(schema): add isFeatured to Package — schema, type, mapper`
+4. `feat(ui): FeaturedBadge component + CSS for disclosure and featured section`
+5. `feat(ui): disclosure line + Featured slots in PackageList and PackagesBrowse`
+6. `feat(transparency): add /how-we-rank page, sitemap entry, footer link`
+7. `feat(tests): Q6 test suite — ranking, featured slots, banned phrases`
+
+### Validation
+
+- `npx tsc --noEmit` pass
+- `npm run test` 1,810/1,810 (23 files)
+- `npm run build` 0 errors
+
+---
+
+## 23. Prompt 5 + 6 — Transactional Email + Cron Suite — 2026-06-12
+
+**Branch:** `dev` (commits on top of Q6 merge).
+
+### Prompt 5 — Transactional email suite (all 5 emails)
+
+**Pre-existing (found in codebase):**
+- `lib/email/send.tsx` — Resend client wrapper, fire-and-forget sends, `findSimilarPackages`, `quoteRefCode`
+- `emails/EnquiryConfirmation.tsx`, `OperatorEnquiryAlert.tsx`, `BookingIntentConfirmation.tsx`, `PaymentEvidenceNotification.tsx`
+- Emails 2–5 already wired in `app/api/quote-requests/route.ts` and `app/api/booking-intents/route.ts`
+
+**Changes in this session:**
+- `emails/EnquiryConfirmation.tsx` — fixed greeting `"Assalamualaikum"` → `"Salaam"` per spec
+- `lib/email/send.tsx` — added `sendOperatorNudge` and `sendOutcomeFollowup` (needed by Prompt 6 crons)
+- `emails/OperatorNudge.tsx` — new template (48h reminder to operator, reply-to = customer)
+- `emails/OutcomeFollowup.tsx` — new template (did your booking go ahead? 3 plain-text links)
+
+**Email 1 — Supabase Auth confirm signup:**
+Do not build in code — paste the HTML below into Supabase dashboard → Authentication → Email Templates → Confirm signup. The existing Resend SMTP config sends it automatically.
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Confirm your email — PilgrimCompare</title>
+</head>
+<body style="background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:0;padding:24px;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;">
+    <tr>
+      <td style="background:#ffffff;border-radius:8px;padding:32px;">
+        <p style="font-size:18px;font-weight:700;color:#1a1a1a;margin:0 0 24px;">PilgrimCompare</p>
+        <p style="font-size:15px;color:#333;line-height:1.6;margin:0 0 12px;">Salaam,</p>
+        <p style="font-size:15px;color:#333;line-height:1.6;margin:0 0 20px;">
+          Thank you for joining PilgrimCompare. Please confirm your email address to complete your registration.
+        </p>
+        <table cellpadding="0" cellspacing="0" style="margin:24px 0;">
+          <tr>
+            <td style="background:#1a1a1a;border-radius:6px;padding:14px 28px;">
+              <a href="{{ .ConfirmationURL }}" style="color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;display:inline-block;">
+                Confirm email address
+              </a>
+            </td>
+          </tr>
+        </table>
+        <p style="font-size:13px;color:#666;line-height:1.5;margin:0 0 12px;">
+          Or copy and paste this link into your browser:
+        </p>
+        <p style="font-size:12px;color:#888;word-break:break-all;margin:0 0 24px;">
+          {{ .ConfirmationURL }}
+        </p>
+        <hr style="border:none;border-top:1px solid #eee;margin:24px 0;" />
+        <p style="font-size:13px;color:#999;margin:0 0 4px;">
+          If you did not create an account on PilgrimCompare, you can safely ignore this email.
+        </p>
+        <p style="font-size:12px;color:#aaa;margin:4px 0;">
+          PilgrimCompare &middot; pilgrimcompare.co.uk
+        </p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+```
+
+### Prompt 6 — Cron job suite
+
+**New files:**
+- `lib/cron-auth.ts` — `verifyCronSecret(request)` checks `Authorization: Bearer {CRON_SECRET}`
+- `app/api/cron/nudge-operators/route.ts` — daily 08:00 UTC; finds open enquiries >48h old with no nudge; sends `OperatorNudge` email; marks `nudgeSentAt`. Idempotent.
+- `app/api/cron/outcome-followup/route.ts` — daily 09:00 UTC; finds BookingIntents 10–14 days old with no outcome and no followup sent; sends `OutcomeFollowup` email; marks `outcomeFollowupSentAt`. Idempotent.
+- `app/api/cron/expire-packages/route.ts` — daily 02:00 UTC; raw SQL `WHERE (date_window->>'end')::date < CURRENT_DATE`; sets `status = 'expired'` (never deletes). Idempotent.
+- `app/api/outcomes/[intentId]/route.ts` — one-tap GET endpoint linked from outcome followup email; writes `BookingOutcome` record (`booked` → `travelled`, `not_booked` → `cancelled_customer`); "deciding" acknowledged without DB write; returns HTML thank-you page. BookingOutcome records are never deleted (billing evidence).
+- `vercel.json` — 3 new cron entries added alongside health cron.
+- `tests/cron-auth.test.ts` — 8 unit tests covering `verifyCronSecret` + 401 guard on each cron route.
+
+**Schema changes (3 new columns):**
+
+⚠️ **Run this SQL in Supabase dashboard before deploying** (Settings → SQL Editor):
+
+```sql
+ALTER TABLE quote_requests ADD COLUMN IF NOT EXISTS source_operator_id TEXT;
+ALTER TABLE quote_requests ADD COLUMN IF NOT EXISTS nudge_sent_at TIMESTAMPTZ;
+ALTER TABLE booking_intents ADD COLUMN IF NOT EXISTS outcome_followup_sent_at TIMESTAMPTZ;
+```
+
+- `prisma/schema.prisma` updated with all 3 fields; `npx prisma generate` run locally (CI also runs it).
+- `lib/api/db/adapter.ts` — `mapQuoteRequest` and `saveRequest` now include `sourceOperatorId` so the nudge cron can look up the correct operator from a stored enquiry.
+
+### Manual testing (run after deploying)
+
+**Cron routes via curl:**
+```bash
+# Replace CRON_SECRET with the value in Vercel env vars
+curl -H "Authorization: Bearer $CRON_SECRET" https://pilgrimcompare.co.uk/api/cron/nudge-operators
+curl -H "Authorization: Bearer $CRON_SECRET" https://pilgrimcompare.co.uk/api/cron/outcome-followup
+curl -H "Authorization: Bearer $CRON_SECRET" https://pilgrimcompare.co.uk/api/cron/expire-packages
+```
+
+Expected response: `{"ok":true,"nudged":0}` / `{"ok":true,"sent":0}` / `{"ok":true,"expired":0}` when no records match (correct at initial deploy — no real enquiries yet).
+
+**Test email send (Resend test mode):**
+Use Resend dashboard → Logs to confirm email delivery after submitting a test quote request.
+
+### 🛠️ Gotchas
+
+- `source_operator_id` on `quote_requests` is populated for enquiries submitted via the package detail page (`sourceOperatorId` from the quote form). General browse enquiries without a source package will have `NULL` and won't receive an operator nudge — this is correct.
+- Package expiry cron uses raw SQL (`$queryRaw` + `updateMany`) because Prisma doesn't support JSON path expressions in `where` clauses. Do not convert to ORM-style query.
+- `BookingOutcome` has `@unique` on `bookingIntentId`. The outcomes endpoint is idempotent: if an outcome already exists it returns 200 without creating a duplicate.
+- Prompts 7, 8, 9 (Telegram alerts, automation, operator data ingestion) are deferred until after live testing of Prompts 5 + 6.
+
+### Validation
+
+- `npx tsc --noEmit` pass
+- `npm run test` 1,818/1,818 (24 files, 8 new cron-auth tests)
+- `npm run build` 0 errors

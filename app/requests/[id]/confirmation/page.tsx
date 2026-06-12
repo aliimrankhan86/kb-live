@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Repository } from '@/lib/api/repository';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
+import { ReferenceCodeDisplay } from '@/components/request/ReferenceCodeDisplay';
 
 export default async function BookingConfirmationPage({
   params,
@@ -24,22 +26,16 @@ export default async function BookingConfirmationPage({
       className="min-h-screen bg-[var(--background)] px-4 py-12"
     >
       <div className="mx-auto max-w-xl space-y-8">
+        <Breadcrumb
+          items={[
+            { label: 'Home', href: '/' },
+            { label: 'My requests', href: '/requests' },
+            { label: 'Request', href: `/requests/${id}` },
+            { label: 'Confirmation' },
+          ]}
+        />
         {/* Reference code */}
-        <div className="rounded-xl border border-[var(--yellow)] bg-[rgba(255,211,29,0.06)] px-6 py-8 text-center">
-          <p className="text-sm font-medium uppercase tracking-wide text-[var(--yellow)]">
-            Booking reference
-          </p>
-          <p
-            className="mt-2 font-mono text-3xl font-bold tracking-widest text-[var(--yellow)]"
-            aria-label={`Booking reference code ${referenceCode}`}
-          >
-            {referenceCode}
-          </p>
-          <p className="mt-3 text-sm text-[var(--textMuted)]">
-            Your enquiry has been submitted to{' '}
-            <strong className="text-[var(--text)]">{operatorName}</strong>.
-          </p>
-        </div>
+        <ReferenceCodeDisplay referenceCode={referenceCode} operatorName={operatorName} />
 
         {/* Trust lines */}
         <section aria-labelledby="trust-heading">

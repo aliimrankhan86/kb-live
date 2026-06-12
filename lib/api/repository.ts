@@ -1,4 +1,6 @@
 import { MockDB } from './mock-db';
+import { sortByScore } from '@/lib/ranking';
+import { UK_DEPARTURE_AIRPORTS } from '@/lib/airports';
 import {
   ANALYTICS_EVENT_TYPES,
   AnalyticsEvent,
@@ -63,6 +65,15 @@ const mockStore = {
   deletePackage: (id: string) => Promise.resolve(MockDB.deletePackage(id)),
   getBookingOutcomes: () => Promise.resolve(MockDB.getBookingOutcomes()),
   saveBookingOutcome: (bo: BookingOutcome) => Promise.resolve(MockDB.saveBookingOutcome(bo)),
+  getDistinctDepartureCities: (): Promise<string[]> => {
+    const citySet = new Set<string>();
+    for (const pkg of MockDB.getPackages()) {
+      if (pkg.status !== 'published' || !pkg.departureAirport) continue;
+      const airport = UK_DEPARTURE_AIRPORTS.find((a) => a.code === pkg.departureAirport);
+      if (airport) citySet.add(airport.city);
+    }
+    return Promise.resolve([...citySet].sort());
+  },
 };
 
 /**
@@ -1095,7 +1106,7 @@ export const Repository = {
 
   listPackages: async (): Promise<Package[]> => {
     const all = await store().getPackages();
-    return all.filter((p) => p.status === 'published');
+    return sortByScore(all.filter((p) => p.status === 'published'));
   },
 
   getPackageBySlug: async (slug: string): Promise<Package | undefined> => {
@@ -1592,4 +1603,7 @@ export const Repository = {
     const outcomes = await store().getBookingOutcomes();
     return outcomes.find((o) => o.bookingIntentId === bookingIntentId);
   },
+
+  getDistinctDepartureCities: (): Promise<string[]> =>
+    store().getDistinctDepartureCities(),
 };

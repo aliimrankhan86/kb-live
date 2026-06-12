@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useMemo, useState, useTransition } from 'react'
 import type { Package, OperatorProfile } from '@/lib/types'
+import { NEUTRAL_SORT_DISCLOSURE } from '@/lib/content-rules'
 import { mapPackageToComparison, handleComparisonSelection } from '@/lib/comparison'
 import { ComparisonTable } from '@/components/request/ComparisonTable'
 import { CURRENCY_CHANGE_EVENT, getRegionSettings } from '@/lib/i18n/region'
@@ -204,6 +205,15 @@ export function PackagesBrowse({ packages, error }: PackagesBrowseProps) {
             <option value="price-asc">Lowest to highest</option>
             <option value="price-desc">Highest to lowest</option>
           </select>
+          <p className="text-xs text-[var(--textMuted)]" data-testid="sort-disclosure">
+            {NEUTRAL_SORT_DISCLOSURE}{' '}
+            <a
+              href="/how-we-rank"
+              className="underline underline-offset-2 hover:text-[var(--text)] focus-visible:outline-2 focus-visible:outline-[var(--yellow)] focus-visible:outline-offset-2"
+            >
+              How we rank
+            </a>
+          </p>
         </div>
 
         <div className="flex flex-col gap-2">

@@ -285,7 +285,7 @@ describe('LoginModal', () => {
 
 ```env
 # .env.local
-NEXT_PUBLIC_API_URL=https://api.kaabatrip.com
+NEXT_PUBLIC_API_URL=https://pilgrimcompare.co.uk
 AUTH_SECRET=your-secret-key
 ```
 

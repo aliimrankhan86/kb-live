@@ -1,7 +1,16 @@
+import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { QuoteRequestWizard } from '@/components/quote/QuoteRequestWizard';
+import { Repository } from '@/lib/api/repository';
 
-export default function QuotePage() {
+export const metadata: Metadata = {
+  title: 'Request a Quote | PilgrimCompare',
+  robots: { index: false, follow: false },
+};
+
+export default async function QuotePage() {
+  const departureCities = await Repository.getDistinctDepartureCities();
+
   return (
     <>
       <main className="min-h-screen bg-[var(--background)] py-12 px-4 sm:px-6 lg:px-8">
@@ -22,7 +31,7 @@ export default function QuotePage() {
               </div>
             }
           >
-            <QuoteRequestWizard />
+            <QuoteRequestWizard cities={departureCities} />
           </Suspense>
         </div>
       </main>

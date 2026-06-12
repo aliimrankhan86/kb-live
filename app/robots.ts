@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/quote', '/requests', '/operator', '/admin', '/settings'],
+        disallow: ['/quote', '/requests', '/operator', '/admin', '/settings', '/showcase'],
       },
       // Explicit allow for AI crawlers — increases citation visibility in AI-generated answers.
       // Allowing these bots means our Umrah/Hajj content can be cited by ChatGPT, Perplexity,

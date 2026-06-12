@@ -11,7 +11,7 @@ type LoginTab = 'customer' | 'partner';
 type ReturnedRole = 'customer' | 'operator' | 'admin';
 
 function resolveLoginType(value: string | null): LoginTab {
-  return value === 'partner' ? 'partner' : 'customer';
+  return value === 'partner' || value === 'operator' ? 'partner' : 'customer';
 }
 
 function getRedirectForRole(role: ReturnedRole, redirect: string | null): string {
@@ -161,7 +161,7 @@ export function LoginForm() {
           <button
             type="button"
             onClick={() => { setShowForgot(false); setError(''); setForgotSent(false); }}
-            className="text-[var(--yellow)] hover:underline"
+            className="inline-flex min-h-[44px] items-center text-[var(--yellow)] hover:underline"
             data-testid="login-back-to-signin"
           >
             Back to Sign In
@@ -180,7 +180,7 @@ export function LoginForm() {
           role="tab"
           aria-selected={activeTab === 'customer'}
           onClick={() => setActiveTab('customer')}
-          className={`rounded-md border px-3 py-2.5 text-sm font-medium transition-colors ${
+          className={`min-h-[44px] rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
             activeTab === 'customer'
               ? 'border-[var(--yellow)] bg-[rgba(255,211,29,0.12)] text-[var(--text)]'
               : 'border-[var(--borderSubtle)] text-[var(--textMuted)] hover:border-[var(--borderStrong)]'
@@ -194,20 +194,20 @@ export function LoginForm() {
           role="tab"
           aria-selected={activeTab === 'partner'}
           onClick={() => setActiveTab('partner')}
-          className={`rounded-md border px-3 py-2.5 text-sm font-medium transition-colors ${
+          className={`min-h-[44px] rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
             activeTab === 'partner'
               ? 'border-[var(--yellow)] bg-[rgba(255,211,29,0.12)] text-[var(--text)]'
               : 'border-[var(--borderSubtle)] text-[var(--textMuted)] hover:border-[var(--borderStrong)]'
           }`}
           data-testid="login-tab-partner"
         >
-          Partner
+          Operator
         </button>
       </div>
 
       <div>
         <h1 className="text-2xl font-semibold text-[var(--text)]">
-          {isPartner ? 'Partner Login' : 'Traveller Login'}
+          {isPartner ? 'Operator Login' : 'Traveller Login'}
         </h1>
         <p className="mt-1 text-sm text-[var(--textMuted)]">
           {isPartner
@@ -263,7 +263,7 @@ export function LoginForm() {
           <button
             type="button"
             onClick={() => setShowForgot(true)}
-            className="text-xs text-[var(--textMuted)] hover:text-[var(--yellow)] transition-colors"
+            className="inline-flex min-h-[44px] items-center text-xs text-[var(--textMuted)] hover:text-[var(--yellow)] transition-colors"
             data-testid="login-forgot-password"
           >
             Forgot your password?
@@ -278,8 +278,8 @@ export function LoginForm() {
       <p className="text-center text-sm text-[var(--textMuted)]">
         {isPartner ? (
           <>
-            Don{'\''}t have a partner account?{' '}
-            <Link href="/signup?type=partner" className="text-[var(--yellow)] hover:underline">
+            Don{'\''}t have an operator account?{' '}
+            <Link href="/signup?type=operator" className="text-[var(--yellow)] hover:underline">
               Register your company
             </Link>
           </>

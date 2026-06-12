@@ -3,16 +3,16 @@
 > **Single rolling tracker.** Any AI/dev: read this for current state. Update it after work is **done + tested + verified** (see `CLAUDE.md` rule).
 > Detailed handover lives in `AI_NOTES.md`. Cold-start brief: `HANDOFF.md`. Business: `BUSINESS.md`.
 
-**Last verified:** 2026-06-11 (decision-first UX pass — rich detail page, grouped comparison, visible filter chips; on top of the mobile UX overhaul) · **Branch:** `chore/remove-dead-filter-components` (off `dev`) → **PR [#41](https://github.com/aliimrankhan86/kb-live/pull/41) open to `dev`, CI green** · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
+**Last verified:** 2026-06-12 (Q4 mobile polish) · **Branch:** `feat/q4-mobile-polish` → PR → `dev` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
 
 ---
 
-## Health (verified 2026-06-11)
+## Health (verified 2026-06-12)
 
 | Check | State |
 | --- | --- |
-| `npm run test` | ✅ 235/235 pass (19 files) |
-| `npm run build` | ✅ 0 errors (known Supabase Edge + webpack cache warnings only) |
+| `npm run test` | ✅ 238/238 pass (20 files) |
+| `npm run build` | ✅ 0 errors |
 | `npx tsc --noEmit` | ✅ pass |
 | E2E `e2e/operator.spec.ts` | ✅ 30/30 pass (chromium + firefox + webkit) |
 | Lint | ✅ clean |
@@ -29,6 +29,7 @@
 - **Results filter panel now functional** (was decorative): writes the real URL contract (budget £, hotel stars, season, distance band, direct flights); Ramadan/School-holiday presets.
 - **Decision-first depth (2026-06-11, PR #41, see AI_NOTES §15):** rich layman-friendly detail page with progressive disclosure (highlights, hotel names, exact distance + walk time, airline/stops, deposit + instalments, cancellation, group type; plain-language "What's included"); grouped collapsible comparison rows (cancellation/deposit/instalments/flights/group type side-by-side, factual per-attribute "Best" flags); visible removable filter chips + count badge. Desktop sticky decision rail + mobile sticky CTA. All from stored facts only.
 - **DB-unreachable resilience:** search page fails fast (Pool timeouts) + degrades to a calm "couldn't load / Try again" notice instead of a 150s hang / 500.
+- **Supabase keep-alive cron (2026-06-11, PR #45):** `vercel.json` cron hits `GET /api/health` every 3 days at 09:00 UTC — prevents free-tier auto-pause. Health endpoint upgraded to real DB ping (`SELECT 1`), returns 200 healthy / 503 degraded. **Migrate to Supabase Pro when first paying operator onboards.**
 - Quote journey (prefilled package details) → BookingIntent records (`KT-…` refs)
 - Payment handoff: pay-operator-direct + evidence upload + bank details display
 
@@ -103,7 +104,7 @@
 - A11y: WCAG 2.2 AA, ARIA, keyboard nav, 44px tap targets
 - Security: nonce-based CSP (replaced unsafe-inline), RLS migrations, rate limiting (Upstash)
 - RLS audit (2026-06-10): all 13 tables RLS-enabled; migration 008 fixed `evidence-files` + `operator-exports` storage buckets `{public}` → `{authenticated}` (critical); migration 009 added `WITH CHECK` to all 7 UPDATE policies (prevents ownership field mutation)
-- Rebrand + domain wiring (2026-06-10): brand `KaabaTrip` → `PilgrimCompare`; domain `pilgrimcompare.co.uk` wired in all page metadata, JSON-LD, robots, sitemap; `NEXT_PUBLIC_SITE_URL=https://pilgrimcompare.co.uk` set in Vercel ✅; Cloudflare `.com` → `.co.uk` 301 redirect rule active ✅; `www.pilgrimcompare.com` CNAME (proxied) added → redirects to `pilgrimcompare.co.uk` ✅
+- Rebrand + domain wiring (2026-06-10): brand renamed to `PilgrimCompare`; domain `pilgrimcompare.co.uk` wired in all page metadata, JSON-LD, robots, sitemap; `NEXT_PUBLIC_SITE_URL=https://pilgrimcompare.co.uk` set in Vercel ✅; Cloudflare `.com` → `.co.uk` 301 redirect rule active ✅; `www.pilgrimcompare.com` CNAME (proxied) added → redirects to `pilgrimcompare.co.uk` ✅
 - **WordmarkLogo component (2026-06-10):** `components/graphics/WordmarkLogo.tsx` — inline SVG text wordmark, Nunito ExtraBold 800, `currentColor` fill (theme-flexible). Used in `Header` (desktop + mobile drawer) and `Footer`. Nunito loaded via `next/font/google` in `app/layout.tsx` (`--font-nunito`). Merged to `main` via PR #34.
 - `/settings` page: profile (editable name, email, avatar, role badge), security (password reset email), notification toggles (offer updates / booking updates / marketing), data export + account deletion (GDPR Art 20/17)
 - Mobile nav overhaul: icons, user card with avatar, "Get a Quote" as yellow CTA, active state left-border accent, danger-styled log out
@@ -114,15 +115,20 @@
 
 | Item | Status | Blocker |
 | --- | --- | --- |
-| Sync `main` → `dev` merge commit | PR needed (0 files changed, structural only) | Create PR `base:dev ← compare:main` on GitHub |
-| Q1 quality pass | Not started | `docs/PILGRIMCOMPARE_LANGUAGE_AND_LEGAL_STANDARDS.md` committed (founder task) |
+| Q1 quality pass — KaabaTrip eradication | ✅ Done 2026-06-12 | — |
+| Q1 quality pass — banned-phrase audit (ATOL blanket claims, Partner→Operator) | ✅ Done 2026-06-12 | — |
+| Q1 quality pass — dynamic departure cities | ✅ Done 2026-06-12 | — |
+| Q2 — legal pages (`/terms`, `/privacy`, `/how-it-works`) | ✅ Done 2026-06-12 | — |
+| Q3 — IA/nav pass | ✅ Done 2026-06-12 | — |
+| Q4 — mobile polish 360/390/430px | ✅ Done 2026-06-12 | — |
+| Q5 — SEO metadata, JSON-LD, sitemap | Not started | Q1 done |
 
 ---
 
 ## ▶️ Next actions (do in order)
 
-1. Merge PR `main → dev` to bring `dev` in sync with `main` (1 commit, 0 files changed — the PR #34 merge commit).
-2. Start Q1 — PilgrimCompare language sweep + banned-phrase audit + dynamic departure cities. See `docs/PILGRIMCOMPARE_QUALITY_PROMPTS.md` → Q1.
+1. Raise PR `feat/q4-mobile-polish` → `dev` and merge after CI passes.
+2. Start Q5 — SEO pass (metadata, JSON-LD, sitemap). See `docs/PILGRIMCOMPARE_QUALITY_PROMPTS.md` → Q5.
 
 ---
 

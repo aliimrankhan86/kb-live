@@ -111,6 +111,19 @@ export function OperatorSidebar({ operatorName, verificationStatus, userRole, us
           <p className={`mt-1 text-xs ${statusBadge.color}`}>{statusBadge.text}</p>
           <p className="mt-2 text-xs text-[rgba(255,255,255,0.5)]">{userName}</p>
         </div>
+
+        <div className="mt-4 border-t border-[rgba(255,255,255,0.1)] pt-4">
+          <Link
+            href="/"
+            className="flex min-h-[44px] items-center gap-2 rounded-md px-3 py-2 text-xs text-[rgba(255,255,255,0.5)] hover:text-[rgba(255,255,255,0.85)] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFD31D]"
+            onClick={() => setMobileOpen(false)}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+            Back to PilgrimCompare
+          </Link>
+        </div>
       </aside>
     </>
   );

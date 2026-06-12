@@ -20,30 +20,30 @@ export async function generateMetadata({
       const price = `£${pkg.pricePerPerson.toLocaleString('en-GB')}`
       const hotelStars = Math.max(pkg.hotelMakkahStars ?? 0, pkg.hotelMadinahStars ?? 0)
 
+      const ogDescription = `${packageType} package by ${operatorName}. ${pkg.totalNights} nights, ${price} per person. Compare inclusions and send an enquiry.`
       return {
-        title: `${pkg.title} - ${packageType} Package`,
-        description: `${pkg.title} by ${operatorName}. ${pkg.totalNights} nights, ${hotelStars || 'listed'} star hotels, ${price} per person. Compare inclusions and request a quote.`,
+        title: `${pkg.title} by ${operatorName} | Compare on PilgrimCompare`,
+        description: `${pkg.title} by ${operatorName}. ${pkg.totalNights} nights, ${hotelStars ? `${hotelStars}-star hotels,` : ''} ${price} per person. Compare inclusions and send an enquiry.`,
         alternates: {
           canonical: `/packages/${pkg.slug}`,
         },
-        openGraph: pkg.images?.[0]
-          ? {
-              title: `${pkg.title} | PilgrimCompare`,
-              description: `${packageType} package from ${operatorName} with ${pkg.totalNights} nights and transparent package details.`,
-              url: `https://pilgrimcompare.co.uk/packages/${pkg.slug}`,
-              siteName: 'PilgrimCompare',
-              type: 'website',
-              locale: 'en_GB',
-              images: [{ url: pkg.images[0], width: 1200, height: 630, alt: pkg.title }],
-            }
-          : {
-              title: `${pkg.title} | PilgrimCompare`,
-              description: `${packageType} package from ${operatorName} with ${pkg.totalNights} nights and transparent package details.`,
-              url: `https://pilgrimcompare.co.uk/packages/${pkg.slug}`,
-              siteName: 'PilgrimCompare',
-              type: 'website',
-              locale: 'en_GB',
-            },
+        openGraph: {
+          title: `${pkg.title} by ${operatorName} | PilgrimCompare`,
+          description: ogDescription,
+          url: `https://pilgrimcompare.co.uk/packages/${pkg.slug}`,
+          siteName: 'PilgrimCompare',
+          type: 'website',
+          locale: 'en_GB',
+          ...(pkg.images?.[0]
+            ? { images: [{ url: pkg.images[0], width: 1200, height: 630, alt: pkg.title }] }
+            : {}),
+        },
+        twitter: {
+          card: 'summary_large_image',
+          title: `${pkg.title} by ${operatorName} | PilgrimCompare`,
+          description: ogDescription,
+          ...(pkg.images?.[0] ? { images: [pkg.images[0]] } : {}),
+        },
       }
     }
   } catch {

@@ -1,9 +1,12 @@
 import { Suspense } from 'react';
 import { SignUpForm } from '@/components/auth/SignUpForm';
 
-export const metadata = {
-  title: 'Create Account',
-  description: 'Sign up for a PilgrimCompare traveller or partner account',
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Create Account | PilgrimCompare',
+  description: 'Sign up for a PilgrimCompare traveller or operator account.',
+  robots: { index: false, follow: false },
 };
 
 export default function SignUpPage() {

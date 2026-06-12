@@ -2,8 +2,6 @@
 
 **Read this file first. It is the single entry point for any AI agent or developer.**
 
-**Current canonical handover:** `AI_NOTES.md` is the single source of truth for verified status, pending areas, and Claude handoff context. If this file or another doc conflicts with a verified statement in `AI_NOTES.md`, update the stale doc instead of undoing implementation.
-
 ---
 
 ## What is PilgrimCompare?
@@ -12,21 +10,19 @@ A two-sided marketplace for Umrah/Hajj pilgrimage packages. Travellers search, c
 
 ## Current state
 
-- **Branch:** `dev`
-- **Stack:** Next.js 15.5.19 (App Router), React 19, Tailwind v4, TypeScript strict, Vitest 4.1.8, Playwright
-- **Verified 2026-06-09:** `npm run test` passes (18 files, 239/239). `npm run build` passes with 0 errors. `npm run lint` passes with a Next.js deprecation notice for `next lint`; `npx prisma validate` passes.
-- **E2E 2026-06-08:** `npx playwright test` passes with 57 passed, 6 skipped, 0 failed. `e2e/signup-password-mismatch.spec.ts` passes 3/3.
-- **Data:** Target production architecture is Supabase Postgres/Auth/Storage + Prisma + Upstash Redis. MockDB remains valid for unit tests and controlled E2E/dev simulation, but the 2026-06-09 audit found direct MockDB imports still present in production-facing UI/API paths. See `AI_NOTES.md` §0 before launch work.
-- **Auth:** Supabase SSR/auth endpoints and middleware are wired. `/login` supports documented dev persona credentials only in local development or automated E2E (`E2E_TESTING=1`). Vercel preview and production must use real Supabase Auth; there is no remote dev-auth toggle.
-- **Operator side:** Onboarding, dashboard, leads, profile, payment settings, bank-review admin, complaints, package CSV, the 8-step package wizard, and real-event operator analytics exist. Admin reconciliation exists but needs explicit business/export verification before it is treated as complete.
+- **Branch:** `ux-option-a`
+- **Stack:** Next.js 15.5.3 (App Router), React 19, Tailwind v4, TypeScript strict, Vitest, Playwright
+- **Build:** Passes. 17 unit tests green. Console clean.
+- **Data:** MockDB (localStorage-backed). No real backend yet.
+- **Auth:** None. MockDB.currentUser is simulated. No protected routes.
+- **Operator side:** Shells exist for dashboard/packages/analytics. Full build plan in `docs/EXECUTION_QUEUE.md`.
 
 ## Localisation
 
-- MVP public pricing is GBP-only. Do not convert visible package prices from browser locale, timezone, or localStorage during SSR/client hydration.
-- Region and currency infrastructure exists in `lib/i18n/region.ts` and `lib/i18n/format.ts`, but browser-based currency selection is future scope.
+- Currency, distance units, and language adapt to the user's location (detected via `navigator.language` + `Intl.DateTimeFormat().resolvedOptions().timeZone`).
 - Supported languages: English (default), French, Arabic. Language switcher in header.
-- Current display settings are deterministic: `en-GB`, GBP, miles. This prevents hydration mismatches where the server renders GBP and the browser rerenders USD/EUR.
-- Implementation: `lib/i18n/region.ts` (future detection + deterministic MVP settings), `lib/i18n/format.ts` (formatting + conversion utilities).
+- UK user sees GBP + UK airports + miles. French user sees EUR + km. UAE user sees AED + km.
+- Implementation: `lib/i18n/region.ts` (detection), `lib/i18n/format.ts` (formatting + conversion).
 - Full spec: `docs/I18N.md`.
 
 ## Routes
@@ -39,30 +35,17 @@ See `docs/APP_STRUCTURE.md` for full journey maps and wireframes.
 | `/umrah` | Search preferences form. Submits to `/search/packages`. | Done |
 | `/hajj` | Hajj landing. | Done |
 | `/umrah/ramadan` | Ramadan landing. | Done |
-| `/umrah/london` | London SEO corridor page. | Done |
-| `/umrah/birmingham` | Birmingham SEO corridor page. | Done |
-| `/umrah/manchester` | Manchester SEO corridor page. | Done |
 | `/search/packages` | Results + shortlist + compare. | Done |
-| `/packages` | Package browse page. | Done |
 | `/packages/[slug]` | Package detail page. | Done |
 | `/operators/[slug]` | Operator public profile. | Done |
 | `/quote` | 5-step quote wizard. | Done |
 | `/requests/[id]` | Request tracker + offers. | Done |
-| `/settings` | Customer GDPR export/delete settings. | Done |
-| `/privacy` | UK GDPR privacy policy. | Done |
-| `/terms` | Platform terms and conditions. | Done |
-| `/operator/onboarding` | Operator registration form. | Done |
-| `/operator/onboarding/status` | Operator verification status screen. | Done |
-| `/operator/dashboard` | Operator home with stats, activity, quick actions. | Done |
-| `/operator/packages` | Package list, CSV import/export, 8-step wizard. | Done |
-| `/operator/leads` | Lead/enquiry management and offer response flow. | Done |
-| `/operator/analytics` | Event-backed analytics dashboard. | Done; deeper business insights future scope |
-| `/operator/profile` | Profile editor. | Done |
-| `/operator/settings` | Operator settings index. | Done |
-| `/operator/settings/payment-details` | Bank details with change request, cooling period, audit log. | Done |
-| `/admin/bank-changes` | Admin bank change review queue. | Done |
-| `/admin/bank-changes/[id]` | Admin bank change review detail. | Done |
-| `/admin/complaints` | Admin complaints triage. | Done |
+| `/operator/onboarding` | Operator registration form. | TODO |
+| `/operator/dashboard` | Operator home with stats. | Partial |
+| `/operator/packages` | Package CRUD. | Partial |
+| `/operator/leads` | Lead/enquiry management. | TODO |
+| `/operator/analytics` | Stats dashboard. | Partial |
+| `/operator/profile` | Profile editor. | TODO |
 
 ## Key code locations
 

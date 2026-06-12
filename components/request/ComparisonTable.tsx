@@ -119,8 +119,8 @@ export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
   let dataRow = 0; // running index for zebra striping across groups
 
   return (
-    <div className="w-full" data-testid="comparison-table">
-      <table className="w-full table-fixed border-separate border-spacing-0 text-left text-sm text-[var(--text)] sm:text-[0.9375rem]">
+    <div className="w-full overflow-x-auto" data-testid="comparison-table">
+      <table className="w-full min-w-[320px] table-fixed border-separate border-spacing-0 text-left text-sm text-[var(--text)] sm:text-[0.9375rem]">
         <caption className="sr-only">Package comparison. Best value on each row is marked.</caption>
         <colgroup>
           <col className="w-[5.75rem] sm:w-36" />
@@ -133,7 +133,7 @@ export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
             <th scope="col" className="bg-[var(--surfaceDark)] border-b border-[var(--borderSubtle)]">
               <span className="sr-only">Feature</span>
             </th>
-            {comparisonRows.map((row, i) => {
+            {comparisonRows.map((row) => {
               const headerLabel =
                 row.operatorName && row.operatorName !== 'Not provided'
                   ? row.operatorName

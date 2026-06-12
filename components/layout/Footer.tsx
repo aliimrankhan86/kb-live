@@ -4,17 +4,20 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Logo } from '@/components/graphics/Logo';
 import { WordmarkLogo } from '@/components/graphics/WordmarkLogo';
+import { LEGAL_ENTITY_BLOCK } from '@/lib/legal';
 
 const LEGAL_LINKS = [
-  { href: '/terms', label: 'Terms & Conditions' },
+  { href: '/how-it-works', label: 'How it works' },
+  { href: '/how-we-rank', label: 'How we rank' },
+  { href: '/terms', label: 'Terms of Use' },
   { href: '/privacy', label: 'Privacy Policy' },
-  { href: '/terms#cookies', label: 'Cookie Policy' },
 ];
 
 const PLATFORM_LINKS = [
+  { href: '/packages', label: 'Browse Packages' },
+  { href: '/search/packages', label: 'Compare Packages' },
   { href: '/quote', label: 'Get a Quote' },
-  { href: '/search/packages', label: 'Search Packages' },
-  { href: '/partner', label: 'For Partners' },
+  { href: '/partner', label: 'For Operators' },
 ];
 
 const linkClass =
@@ -95,7 +98,7 @@ function Section({
   );
 }
 
-export function Footer() {
+export function Footer({ cities = [] }: { cities?: string[] }) {
   const currentYear = new Date().getFullYear();
   const isDesktop = useIsDesktop();
 
@@ -112,8 +115,12 @@ export function Footer() {
             <Logo size={26} />
             <WordmarkLogo height={24} style={{ color: 'var(--wordmark-color, var(--yellow, #FFD31D))' }} />
           </Link>
-          <p className="text-xs leading-relaxed text-[var(--textMuted)] md:max-w-xs">
-            Compare Umrah and Hajj packages from verified UK travel operators.
+          <p className="text-xs leading-relaxed text-[var(--textMuted)] md:max-w-sm">
+            PilgrimCompare is a UK comparison and enquiry service for Umrah travel packages. We list
+            packages from independent, verified UK travel operators so you can compare them side by
+            side and send enquiries directly. We are not a travel agent, tour operator, or organiser.
+            We do not sell travel, take bookings, or handle payments. Your booking, contract, and
+            payment are always with the operator you choose.
           </p>
         </div>
 
@@ -163,6 +170,25 @@ export function Footer() {
                 </li>
               ))}
             </ul>
+            {cities.length > 0 && (
+              <div className="mt-4">
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--textMuted)]">
+                  Departing from
+                </p>
+                <ul className="space-y-2 text-xs">
+                  {cities.map(city => (
+                    <li key={city}>
+                      <Link
+                        href={`/umrah/${city.toLowerCase()}`}
+                        className={linkClass}
+                      >
+                        {city}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </Section>
         </div>
 
@@ -202,13 +228,15 @@ export function Footer() {
 
         {/* Legal entity disclosure — Companies Act 2006 §82
             Registered office address intentionally omitted while founder
-            transitions to a non-residential registered office. See AI_NOTES §14. */}
+            transitions to a non-residential registered office. See AI_NOTES §14.
+            TODO: add registeredOffice line once LEGAL_ENTITY_BLOCK.registeredOffice is set. */}
         <p className="mt-3 text-center text-[11px] leading-relaxed text-[var(--textMuted)]">
-          PilgrimCompare is a trading name of{' '}
-          <span className="text-[var(--text)]">Paramount Consultants Limited</span>, registered in
-          England and Wales (company no.{' '}
-          <span className="text-[var(--text)]">09679002</span>). VAT no.{' '}
-          <span className="text-[var(--text)]">GB 221 6154 46</span>.
+          {LEGAL_ENTITY_BLOCK.tradingName} is a trading name of{' '}
+          <span className="text-[var(--text)]">{LEGAL_ENTITY_BLOCK.companyName}</span>, registered
+          in {LEGAL_ENTITY_BLOCK.registeredCountry} (company no.{' '}
+          <span className="text-[var(--text)]">{LEGAL_ENTITY_BLOCK.companyNumber}</span>). VAT
+          no.{' '}
+          <span className="text-[var(--text)]">{LEGAL_ENTITY_BLOCK.vatNumber}</span>.
         </p>
       </div>
     </footer>

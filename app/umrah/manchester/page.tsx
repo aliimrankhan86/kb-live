@@ -1,20 +1,31 @@
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
 import { CityCorridor } from '@/components/marketing/CityCorridor'
 import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
+import { Repository } from '@/lib/api/repository'
 
-export const metadata: Metadata = {
-  title: 'Umrah Packages from Manchester 2026 – Compare & Book',
-  description:
-    'Browse and compare Umrah packages departing from Manchester Airport (MAN). Verified UK operators, hotels near Haram, flights included. Request a quote now.',
-  alternates: { canonical: '/umrah/manchester' },
-  openGraph: {
-    title: 'Umrah Packages from Manchester 2026 – Compare & Book | PilgrimCompare',
-    description: 'Compare Umrah packages departing from Manchester MAN with verified UK operators.',
-    url: 'https://pilgrimcompare.co.uk/umrah/manchester',
-    siteName: 'PilgrimCompare',
-    type: 'website',
-    locale: 'en_GB',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const cities = await Repository.getDistinctDepartureCities().catch(() => [] as string[])
+  const hasSupply = cities.includes('Manchester')
+  return {
+    title: 'Umrah Packages from Manchester 2026 – Compare UK Operators | PilgrimCompare',
+    description:
+      'Browse and compare Umrah packages departing from Manchester Airport (MAN). Verified UK operators, hotels near Haram, and ATOL details displayed.',
+    alternates: { canonical: '/umrah/manchester' },
+    robots: hasSupply ? { index: true, follow: true } : { index: false, follow: true },
+    openGraph: {
+      title: 'Umrah Packages from Manchester 2026 | PilgrimCompare',
+      description: 'Compare Umrah packages departing from Manchester MAN with verified UK operators.',
+      url: 'https://pilgrimcompare.co.uk/umrah/manchester',
+      siteName: 'PilgrimCompare',
+      type: 'website',
+      locale: 'en_GB',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'Umrah Packages from Manchester 2026 | PilgrimCompare',
+      description: 'Compare Umrah packages departing from Manchester MAN with verified UK operators.',
+    },
+  }
 }
 
 const faqs = [
@@ -43,7 +54,7 @@ const faqs = [
 const pageJsonLd = graphJsonLd([
   webPageJsonLd({
     path: '/umrah/manchester',
-    name: 'Umrah Packages from Manchester 2026 – Compare & Book | PilgrimCompare',
+    name: 'Umrah Packages from Manchester 2026 – Compare UK Operators | PilgrimCompare',
     description:
       'Compare Umrah packages departing from Manchester Airport MAN with verified UK operators.',
   }),
@@ -55,16 +66,29 @@ const pageJsonLd = graphJsonLd([
   faqPageJsonLd(faqs),
 ])
 
-export default function ManchesterUmrahPage() {
+export default async function ManchesterUmrahPage() {
+  const departureCities = await Repository.getDistinctDepartureCities()
+  const hasPackages = departureCities.includes('Manchester')
+
   return (
     <>
       <JsonLdScript data={pageJsonLd} />
+      {!hasPackages && (
+        <p className="mx-auto mt-8 max-w-3xl px-4 rounded-lg border border-[var(--border)] bg-[var(--surfaceDark)] py-4 text-sm text-[var(--textMuted)]">
+          No packages currently listed from Manchester. New operators are being added.
+        </p>
+      )}
       <CityCorridor
         city="Manchester"
         h1="Umrah Packages from Manchester"
         intro="Find Umrah packages departing from Manchester Airport (MAN). Compare verified UK operators side by side, filter by hotel rating and distance to Haram, and request a quote in minutes."
         queryParams="?type=umrah&departureCity=Manchester"
         faqs={faqs}
+        breadcrumbItems={[
+          { label: 'Home', href: '/' },
+          { label: 'Umrah', href: '/umrah' },
+          { label: 'Manchester' },
+        ]}
       />
     </>
   )

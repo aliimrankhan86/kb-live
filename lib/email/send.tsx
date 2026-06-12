@@ -5,6 +5,8 @@ import EnquiryConfirmation from '@/emails/EnquiryConfirmation';
 import OperatorEnquiryAlert from '@/emails/OperatorEnquiryAlert';
 import BookingIntentConfirmation from '@/emails/BookingIntentConfirmation';
 import PaymentEvidenceNotification from '@/emails/PaymentEvidenceNotification';
+import OperatorNudge from '@/emails/OperatorNudge';
+import OutcomeFollowup from '@/emails/OutcomeFollowup';
 
 const FROM = 'PilgrimCompare <notifications@send.pilgrimcompare.co.uk>';
 const SUPPORT_REPLY = 'support@pilgrimcompare.co.uk';
@@ -149,6 +151,68 @@ export async function sendBookingIntentConfirmation(params: {
     if (error) console.error('[email] sendBookingIntentConfirmation error:', error);
   } catch (err) {
     console.error('[email] sendBookingIntentConfirmation failed:', err);
+  }
+}
+
+export async function sendOperatorNudge(params: {
+  operatorEmail: string;
+  operatorName: string;
+  customerName: string;
+  customerEmail: string;
+  packageName: string;
+  hoursOld: number;
+  refCode: string;
+}): Promise<void> {
+  try {
+    const { error } = await resendClient().emails.send({
+      from: FROM,
+      to: params.operatorEmail,
+      replyTo: params.customerEmail,
+      subject: `Reminder — you have an unanswered PilgrimCompare enquiry`,
+      react: (
+        <OperatorNudge
+          operatorName={params.operatorName}
+          customerName={params.customerName}
+          customerEmail={params.customerEmail}
+          packageName={params.packageName}
+          hoursOld={params.hoursOld}
+          refCode={params.refCode}
+        />
+      ),
+    });
+    if (error) console.error('[email] sendOperatorNudge error:', error);
+  } catch (err) {
+    console.error('[email] sendOperatorNudge failed:', err);
+  }
+}
+
+export async function sendOutcomeFollowup(params: {
+  customerEmail: string;
+  customerName: string;
+  operatorName: string;
+  packageName: string;
+  refCode: string;
+  intentId: string;
+}): Promise<void> {
+  try {
+    const { error } = await resendClient().emails.send({
+      from: FROM,
+      to: params.customerEmail,
+      replyTo: SUPPORT_REPLY,
+      subject: `Did your Umrah booking with ${params.operatorName} go ahead?`,
+      react: (
+        <OutcomeFollowup
+          customerName={params.customerName}
+          operatorName={params.operatorName}
+          packageName={params.packageName}
+          refCode={params.refCode}
+          intentId={params.intentId}
+        />
+      ),
+    });
+    if (error) console.error('[email] sendOutcomeFollowup error:', error);
+  } catch (err) {
+    console.error('[email] sendOutcomeFollowup failed:', err);
   }
 }
 

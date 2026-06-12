@@ -77,17 +77,30 @@ export function Step5Review() {
       </div>
 
       <div>
-        <h2 className="text-xl font-semibold text-[#FFFFFF]">Additional Notes</h2>
+        <label htmlFor="quote-notes" className="block text-xl font-semibold text-[#FFFFFF]">
+          Additional Notes
+        </label>
         <p className="mt-1 text-sm text-[rgba(255,255,255,0.64)]">
           Any specific requirements? (Accessibility, dietary needs, etc.)
         </p>
         <textarea
+          id="quote-notes"
           value={draft.notes || ''}
           onChange={(e) => setDraft({ notes: e.target.value })}
           rows={4}
           className="mt-4 block w-full rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] px-4 py-3 text-[#FFFFFF] placeholder-[rgba(255,255,255,0.4)] focus:border-[#FFD31D] focus:outline-none focus:ring-1 focus:ring-[#FFD31D]"
           placeholder="e.g. Need wheelchair assistance, ocean view preferred..."
         />
+      </div>
+
+      {/* Data-sharing disclosure — required before submit */}
+      <div className="rounded-lg border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] px-4 py-3 text-sm text-[rgba(255,255,255,0.64)]">
+        <p>
+          <strong className="text-[rgba(255,255,255,0.9)]">Before you submit:</strong> your contact
+          details and request will be shared with the operator you enquire with. They will use your
+          details to respond to your enquiry. Your travel contract, cancellations and refunds are
+          with the operator directly — not PilgrimCompare.
+        </p>
       </div>
     </div>
   );

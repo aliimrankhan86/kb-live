@@ -43,11 +43,13 @@ export function Step4GroupBudget() {
             { id: 'quad', label: 'Quad' },
           ].map((room) => (
             <div key={room.id} className="rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] p-4 text-center">
-              <label className="block text-sm font-medium text-[rgba(255,255,255,0.8)]">
+              <label htmlFor={`room-${room.id}`} className="block text-sm font-medium text-[rgba(255,255,255,0.8)]">
                 {room.label}
               </label>
               <input
+                id={`room-${room.id}`}
                 type="number"
+                inputMode="numeric"
                 min="0"
                 value={draft.occupancy?.[room.id as keyof typeof draft.occupancy] || 0}
                 onChange={(e) =>
@@ -56,7 +58,7 @@ export function Step4GroupBudget() {
                     parseInt(e.target.value) || 0
                   )
                 }
-                className="mt-2 block w-full rounded border border-[rgba(255,255,255,0.1)] bg-transparent px-2 py-1 text-center text-[#FFFFFF] focus:border-[#FFD31D] focus:outline-none"
+                className="mt-2 block min-h-[44px] w-full rounded border border-[rgba(255,255,255,0.1)] bg-transparent px-2 py-2 text-center text-[#FFFFFF] focus:border-[#FFD31D] focus:outline-none"
               />
             </div>
           ))}

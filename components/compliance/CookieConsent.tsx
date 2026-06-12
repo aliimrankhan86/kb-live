@@ -73,10 +73,8 @@ export function CookieConsent() {
           <div className="flex-1">
             <p className="text-sm text-[var(--text)]">
               <strong className="block text-base mb-1">We value your privacy</strong>
-              PilgrimCompare uses cookies to operate this site and improve your experience.
-              Essential cookies are required for authentication and security.
-              Analytics cookies help us understand how our site is used.
-              By continuing to browse, you agree to our use of cookies.
+              PilgrimCompare uses one essential cookie for authentication and session security.
+              We do not use analytics cookies — our analytics tool (Plausible) is cookieless.
               {' '}
               <Link
                 href="/privacy"
@@ -97,8 +95,8 @@ export function CookieConsent() {
             </p>
 
             {showDetails && (
-              <div className="mt-3 rounded-md border border-[var(--borderSubtle)] bg-[var(--surface)] p-3 text-sm">
-                <table className="w-full text-left">
+              <div className="mt-3 overflow-x-auto rounded-md border border-[var(--borderSubtle)] bg-[var(--surface)] p-3 text-sm">
+                <table className="w-full min-w-[360px] text-left">
                   <thead>
                     <tr className="border-b border-[var(--borderSubtle)]">
                       <th className="py-2 pr-4 font-semibold">Cookie type</th>
@@ -107,15 +105,10 @@ export function CookieConsent() {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="border-b border-[var(--borderSubtle)]">
+                    <tr>
                       <td className="py-2 pr-4">Essential</td>
                       <td className="py-2 pr-4">Authentication, session security, CSRF protection</td>
                       <td className="py-2">Session + 7 days refresh</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 pr-4">Analytics</td>
-                      <td className="py-2 pr-4">Understand site usage (post-MVP only)</td>
-                      <td className="py-2">Up to 2 years</td>
                     </tr>
                   </tbody>
                 </table>
@@ -126,24 +119,24 @@ export function CookieConsent() {
           <div className="flex flex-wrap items-center gap-2 md:flex-col md:items-stretch lg:flex-row">
             <button
               onClick={() => setShowDetails(!showDetails)}
-              className="rounded-md border border-[var(--borderSubtle)] px-4 py-2 text-sm text-[var(--text)] hover:bg-[rgba(255,255,255,0.06)]"
+              className="min-h-[44px] rounded-md border border-[var(--borderSubtle)] px-4 py-2 text-sm text-[var(--text)] hover:bg-[rgba(255,255,255,0.06)]"
               data-testid="cookie-details-toggle"
             >
               {showDetails ? 'Hide details' : 'Manage cookies'}
             </button>
             <button
               onClick={handleAcceptEssential}
-              className="rounded-md border border-[var(--yellow)] bg-[var(--yellow)] px-4 py-2 text-sm font-semibold text-black shadow-[0_0_0_1px_rgba(255,211,29,0.25)] hover:brightness-95"
+              className="min-h-[44px] rounded-md border border-[var(--borderSubtle)] px-4 py-2 text-sm font-medium text-[var(--text)] hover:bg-[rgba(255,255,255,0.06)]"
               data-testid="cookie-essential-only"
             >
               Essential only
             </button>
             <button
               onClick={handleAcceptAll}
-              className="rounded-md border border-[var(--borderSubtle)] px-4 py-2 text-sm font-medium text-[var(--text)] hover:bg-[rgba(255,255,255,0.06)]"
+              className="min-h-[44px] rounded-md border border-[var(--yellow)] bg-[var(--yellow)] px-4 py-2 text-sm font-semibold text-black shadow-[0_0_0_1px_rgba(255,211,29,0.25)] hover:brightness-95"
               data-testid="cookie-accept-all"
             >
-              Accept all
+              Accept
             </button>
           </div>
         </div>

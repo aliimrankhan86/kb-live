@@ -7,6 +7,25 @@
 export const FEATURE_USE_REAL_DB =
   process.env.FEATURE_USE_REAL_DB === 'true';
 
+/**
+ * Whether Featured package slots are active in the list UI.
+ *
+ * Default FALSE — no operator is featured at launch.
+ *
+ * When true: up to 2 Featured packages appear ABOVE the neutral-sorted list,
+ * in a visually distinct section labelled "Featured" at the slot itself.
+ * Featured packages are excluded from the neutral-sorted results count.
+ * Featured status does NOT affect the neutral sort score (scorePackage).
+ *
+ * NEVER read this flag client-side. Evaluate on the server and pass the
+ * result as a `featuredSlotsEnabled: boolean` prop to list components.
+ *
+ * Set to true only when at least one operator has isFeatured=true in the DB
+ * and the phase-2 Featured placement terms have been agreed and disclosed.
+ */
+export const FEATURE_FEATURED_SLOTS =
+  process.env.FEATURE_FEATURED_SLOTS === 'true';
+
 /** Whether we're running in test mode (Vitest) */
 export const IS_TEST_ENV = process.env.NODE_ENV === 'test';
 
