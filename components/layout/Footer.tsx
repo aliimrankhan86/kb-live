@@ -4,11 +4,12 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Logo } from '@/components/graphics/Logo';
 import { WordmarkLogo } from '@/components/graphics/WordmarkLogo';
+import { LEGAL_ENTITY_BLOCK } from '@/lib/legal';
 
 const LEGAL_LINKS = [
-  { href: '/terms', label: 'Terms & Conditions' },
+  { href: '/how-it-works', label: 'How it works' },
+  { href: '/terms', label: 'Terms of Use' },
   { href: '/privacy', label: 'Privacy Policy' },
-  { href: '/terms#cookies', label: 'Cookie Policy' },
 ];
 
 const PLATFORM_LINKS = [
@@ -202,13 +203,15 @@ export function Footer() {
 
         {/* Legal entity disclosure — Companies Act 2006 §82
             Registered office address intentionally omitted while founder
-            transitions to a non-residential registered office. See AI_NOTES §14. */}
+            transitions to a non-residential registered office. See AI_NOTES §14.
+            TODO: add registeredOffice line once LEGAL_ENTITY_BLOCK.registeredOffice is set. */}
         <p className="mt-3 text-center text-[11px] leading-relaxed text-[var(--textMuted)]">
-          PilgrimCompare is a trading name of{' '}
-          <span className="text-[var(--text)]">Paramount Consultants Limited</span>, registered in
-          England and Wales (company no.{' '}
-          <span className="text-[var(--text)]">09679002</span>). VAT no.{' '}
-          <span className="text-[var(--text)]">GB 221 6154 46</span>.
+          {LEGAL_ENTITY_BLOCK.tradingName} is a trading name of{' '}
+          <span className="text-[var(--text)]">{LEGAL_ENTITY_BLOCK.companyName}</span>, registered
+          in {LEGAL_ENTITY_BLOCK.registeredCountry} (company no.{' '}
+          <span className="text-[var(--text)]">{LEGAL_ENTITY_BLOCK.companyNumber}</span>). VAT
+          no.{' '}
+          <span className="text-[var(--text)]">{LEGAL_ENTITY_BLOCK.vatNumber}</span>.
         </p>
       </div>
     </footer>

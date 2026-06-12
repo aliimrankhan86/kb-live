@@ -61,3 +61,8 @@ test-results/
 /lib/generated/prisma
 prisma/.env
 docs.zip
+
+# Stale doc paths — untracked, kept locally only
+docs/01_STATUS.md
+docs/EXECUTION_QUEUE.md
+docs/_archive/
