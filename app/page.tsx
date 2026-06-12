@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Hero } from '@/components/marketing/Hero'
-import { JsonLdScript, faqPageJsonLd, graphJsonLd, organizationJsonLd, webPageJsonLd, websiteJsonLd } from '@/lib/seo/json-ld'
+import { JsonLdScript, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
 import { Repository } from '@/lib/api/repository'
 
 const STATIC_CORRIDOR_LINKS = [
@@ -36,24 +36,22 @@ export const metadata: Metadata = {
 }
 
 const homeJsonLd = graphJsonLd([
-  organizationJsonLd(),
-  websiteJsonLd(),
   webPageJsonLd({
     path: '/',
-    name: 'PilgrimCompare - Compare Hajj and Umrah Packages',
+    name: 'PilgrimCompare — Compare Hajj and Umrah Packages from UK Operators',
     description:
-      'PilgrimCompare helps UK travellers compare Hajj and Umrah packages by price, hotel proximity, inclusions, and operator trust signals.',
+      'Compare Hajj and Umrah packages from UK travel operators by price, hotel proximity, inclusions, and operator trust signals.',
   }),
   faqPageJsonLd([
     {
       question: 'What does PilgrimCompare compare?',
       answer:
-        'PilgrimCompare compares Hajj and Umrah packages by price, departure route, hotel details, inclusions, nights split, and visible operator trust signals such as verification, ATOL, and ABTA details where provided.',
+        'PilgrimCompare compares Hajj and Umrah packages by price, departure route, hotel details, inclusions, nights split, and visible operator trust signals such as verification status, ATOL number, and ABTA details where provided.',
     },
     {
       question: 'Does PilgrimCompare take payment for packages?',
       answer:
-        'PilgrimCompare records booking intent and helps travellers compare operators. Package payment is made directly to the travel operator, and travellers should use the PilgrimCompare reference when paying.',
+        'No. PilgrimCompare is a comparison and enquiry service. You pay the operator directly. PilgrimCompare does not receive or hold your payment.',
     },
   ]),
 ])
