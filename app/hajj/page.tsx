@@ -6,7 +6,7 @@ import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, webPageJson
 export const metadata: Metadata = {
   title: 'Hajj Packages 2027 from the UK – Coming Soon',
   description:
-    'Compare Hajj packages for 2027 from verified UK operators. ATOL and ABTA protected. Register your interest and be first to know when packages go live.',
+    'Compare Hajj packages for 2027 from verified UK operators. ATOL and ABTA status checked before listing. Register your interest and be first to know when packages go live.',
   keywords: ['Hajj packages 2027', 'Hajj packages UK', 'Hajj 2027', 'ATOL Hajj packages', 'UK Hajj operators'],
   alternates: {
     canonical: '/hajj',
@@ -50,7 +50,7 @@ const hajjPageJsonLd = graphJsonLd([
     path: '/hajj',
     name: 'Hajj Packages 2027 from the UK – Coming Soon | PilgrimCompare',
     description:
-      'Compare Hajj packages for 2027 from verified UK operators with ATOL and ABTA protection.',
+      'Compare Hajj packages for 2027 from verified UK operators. ATOL and ABTA status checked before listing.',
   }),
   breadcrumbJsonLd([
     { name: 'Home', path: '/' },

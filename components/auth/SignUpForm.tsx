@@ -203,17 +203,17 @@ export function SignUpForm() {
           }`}
           data-testid="signup-role-operator"
         >
-          Partner
+          Operator
         </button>
       </div>
 
       <div>
         <h1 className="text-2xl font-semibold text-[var(--text)]">
-          {isPartner ? 'Partner Registration' : 'Create Account'}
+          {isPartner ? 'Operator Registration' : 'Create Account'}
         </h1>
         <p className="mt-1 text-sm text-[var(--textMuted)]">
           {isPartner
-            ? 'Register your travel company and start receiving bookings from UK travellers.'
+            ? 'Register your travel company to list packages and receive enquiries from UK travellers.'
             : 'Join PilgrimCompare to compare packages, save favourites, and request quotes.'}
         </p>
       </div>
@@ -339,13 +339,13 @@ export function SignUpForm() {
         className="w-full"
         data-testid="signup-submit"
       >
-        {loading ? 'Creating account…' : isPartner ? 'Register as Partner' : 'Create Account'}
+        {loading ? 'Creating account…' : isPartner ? 'Register as an Operator' : 'Create Account'}
       </Button>
 
       <p className="text-center text-sm text-[var(--textMuted)]">
         Already have an account?{' '}
         <Link
-          href={isPartner ? '/login?type=partner' : '/login?type=customer'}
+          href={isPartner ? '/login?type=operator' : '/login?type=customer'}
           className="text-[var(--yellow)] hover:underline"
         >
           Sign in

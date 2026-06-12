@@ -11,7 +11,7 @@ type LoginTab = 'customer' | 'partner';
 type ReturnedRole = 'customer' | 'operator' | 'admin';
 
 function resolveLoginType(value: string | null): LoginTab {
-  return value === 'partner' ? 'partner' : 'customer';
+  return value === 'partner' || value === 'operator' ? 'partner' : 'customer';
 }
 
 function getRedirectForRole(role: ReturnedRole, redirect: string | null): string {
@@ -201,13 +201,13 @@ export function LoginForm() {
           }`}
           data-testid="login-tab-partner"
         >
-          Partner
+          Operator
         </button>
       </div>
 
       <div>
         <h1 className="text-2xl font-semibold text-[var(--text)]">
-          {isPartner ? 'Partner Login' : 'Traveller Login'}
+          {isPartner ? 'Operator Login' : 'Traveller Login'}
         </h1>
         <p className="mt-1 text-sm text-[var(--textMuted)]">
           {isPartner
@@ -278,8 +278,8 @@ export function LoginForm() {
       <p className="text-center text-sm text-[var(--textMuted)]">
         {isPartner ? (
           <>
-            Don{'\''}t have a partner account?{' '}
-            <Link href="/signup?type=partner" className="text-[var(--yellow)] hover:underline">
+            Don{'\''}t have an operator account?{' '}
+            <Link href="/signup?type=operator" className="text-[var(--yellow)] hover:underline">
               Register your company
             </Link>
           </>

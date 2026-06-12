@@ -37,7 +37,7 @@ describe('LoginForm', () => {
 
     // Switch to Partner
     fireEvent.click(screen.getByTestId('login-tab-partner'));
-    expect(screen.getByText('Partner Login')).toBeInTheDocument();
+    expect(screen.getByText('Operator Login')).toBeInTheDocument();
     expect(screen.getByTestId('login-tab-partner')).toHaveAttribute('aria-selected', 'true');
 
     // Switch back to Traveller
@@ -136,7 +136,7 @@ describe('LoginForm', () => {
   it('has partner signup link in partner tab', () => {
     render(<LoginForm />);
     fireEvent.click(screen.getByTestId('login-tab-partner'));
-    expect(screen.getByText('Register your company')).toHaveAttribute('href', '/signup?type=partner');
+    expect(screen.getByText('Register your company')).toHaveAttribute('href', '/signup?type=operator');
   });
 });
 
@@ -159,13 +159,13 @@ describe('SignUpForm', () => {
   it('toggles role between customer and operator', () => {
     render(<SignUpForm />);
     // Default from URLSearchParams is operator (Partner)
-    expect(screen.getByRole('heading', { name: 'Partner Registration' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Operator Registration' })).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('signup-role-customer'));
     expect(screen.getByRole('heading', { name: 'Create Account' })).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('signup-role-operator'));
-    expect(screen.getByRole('heading', { name: 'Partner Registration' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Operator Registration' })).toBeInTheDocument();
   });
 
   it('shows password mismatch error when passwords do not match', async () => {
@@ -225,7 +225,7 @@ describe('SignUpForm', () => {
   it('links to login with correct type param based on role', () => {
     render(<SignUpForm />);
     // Default is partner
-    expect(screen.getByText('Sign in')).toHaveAttribute('href', '/login?type=partner');
+    expect(screen.getByText('Sign in')).toHaveAttribute('href', '/login?type=operator');
 
     fireEvent.click(screen.getByTestId('signup-role-customer'));
     expect(screen.getByText('Sign in')).toHaveAttribute('href', '/login?type=customer');

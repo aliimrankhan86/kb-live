@@ -5,7 +5,7 @@ import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, webPageJson
 export const metadata: Metadata = {
   title: 'Ramadan Umrah Packages 2027 from the UK',
   description:
-    'Compare Ramadan Umrah packages from verified UK operators for 2027. Perform Umrah during the holiest month with ATOL-protected operators — hotels near the Grand Mosque, flights, and visa included.',
+    'Compare Ramadan Umrah packages from verified UK operators for 2027. Perform Umrah during the holiest month — hotels near the Grand Mosque, flights included. ATOL status checked before listing.',
   alternates: { canonical: '/umrah/ramadan' },
   openGraph: {
     title: 'Ramadan Umrah Packages 2027 from the UK | PilgrimCompare',
@@ -46,7 +46,7 @@ const pageJsonLd = graphJsonLd([
     path: '/umrah/ramadan',
     name: 'Ramadan Umrah Packages 2027 from the UK | PilgrimCompare',
     description:
-      'Compare Ramadan Umrah packages from verified UK operators for 2027. Hotels near the Grand Mosque, flights, ATOL protected.',
+      'Compare Ramadan Umrah packages from verified UK operators for 2027. Hotels near the Grand Mosque, flights included. ATOL status checked before listing.',
   }),
   breadcrumbJsonLd([
     { name: 'Home', path: '/' },

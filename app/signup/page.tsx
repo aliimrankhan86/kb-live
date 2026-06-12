@@ -3,7 +3,7 @@ import { SignUpForm } from '@/components/auth/SignUpForm';
 
 export const metadata = {
   title: 'Create Account',
-  description: 'Sign up for a PilgrimCompare traveller or partner account',
+  description: 'Sign up for a PilgrimCompare traveller or operator account',
 };
 
 export default function SignUpPage() {
