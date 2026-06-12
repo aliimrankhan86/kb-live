@@ -1,4 +1,5 @@
 import { MockDB } from './mock-db';
+import { sortByScore } from '@/lib/ranking';
 import { UK_DEPARTURE_AIRPORTS } from '@/lib/airports';
 import {
   ANALYTICS_EVENT_TYPES,
@@ -1105,7 +1106,7 @@ export const Repository = {
 
   listPackages: async (): Promise<Package[]> => {
     const all = await store().getPackages();
-    return all.filter((p) => p.status === 'published');
+    return sortByScore(all.filter((p) => p.status === 'published'));
   },
 
   getPackageBySlug: async (slug: string): Promise<Package | undefined> => {
