@@ -42,6 +42,16 @@
   --color-warning: #F59E0B;
   --color-error: #EF4444;
   --color-info: #38BDF8;
+
+  /* Header / nav tokens — theme-aware */
+  --color-header-surface: rgba(11, 11, 11, 0.95);
+  --color-header-border: rgba(255, 255, 255, 0.08);
+  --color-nav-hover: rgba(255, 255, 255, 0.05);
+  --color-nav-hover-border: rgba(255, 255, 255, 0.10);
+  --color-section-label: rgba(255, 255, 255, 0.35);
+  --color-user-card-bg: rgba(255, 255, 255, 0.04);
+  --color-user-card-border: rgba(255, 255, 255, 0.07);
+  --color-user-email: rgba(255, 255, 255, 0.45);
 }
 
 html,
@@ -89,4 +99,14 @@ body {
   --color-warning: #D97706;
   --color-error: #B91C1C;
   --color-info: #005F61;
+
+  /* Header / nav overrides for light theme */
+  --color-header-surface: rgba(255, 255, 255, 0.97);
+  --color-header-border: #FFD31D;
+  --color-nav-hover: rgba(10, 105, 55, 0.07);
+  --color-nav-hover-border: rgba(10, 105, 55, 0.15);
+  --color-section-label: #6B7280;
+  --color-user-card-bg: #F9F7F2;
+  --color-user-card-border: #E2E0D8;
+  --color-user-email: #6B7280;
 }

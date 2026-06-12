@@ -43,13 +43,21 @@ body::before {
   display: none;
 }
 
-/* Light theme: scrollbar track is near-invisible on white — adjust to dark tint */
+/* Light theme: prophetic green scrollbar thumb, warm-stone track */
 [data-theme="light"] * {
-  scrollbar-color: var(--yellow) rgba(0, 0, 0, 0.08);
+  scrollbar-color: var(--primary) rgba(0, 0, 0, 0.08);
 }
 
 [data-theme="light"] *::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] *::-webkit-scrollbar-thumb {
+  background: var(--primary);
+}
+
+[data-theme="light"] *::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary-dark);
 }
 
 /* Ensure all direct children sit above the overlay.
