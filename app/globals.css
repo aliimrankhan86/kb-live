@@ -13,8 +13,9 @@
 body {
   background: var(--bg);
   background-image: url('/kaaba-bg2.svg');
-  background-size: 55%;
-  background-position: center 35%;
+  /* Positioned in lower viewport — minarets appear below content fold, not over it */
+  background-size: 44%;
+  background-position: center 72%;
   background-repeat: no-repeat;
   background-attachment: fixed;
   color: var(--text);
@@ -24,25 +25,25 @@ body {
   position: relative;
 }
 
-/* Dark overlay subdues the Kaaba background so content remains the focus */
+/* Dark overlay subdues the Kaaba — stronger than before so minarets are a ghost only */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background: rgba(10, 10, 10, 0.72);
+  background: rgba(10, 10, 10, 0.88);
   z-index: 0;
   pointer-events: none;
 }
 
-/* Light theme: Madinah-palette Kaaba watermark replaces the dark version */
+/* Light theme: very-light-fill SVG + heavy ivory veil = subtle etched watermark */
 [data-theme="light"] body {
   background-image: url('/kaaba-bg-light.svg');
-  background-size: 48%;
-  background-position: center 38%;
+  background-size: 42%;
+  background-position: center 70%;
 }
 
 [data-theme="light"] body::before {
-  background: rgba(246, 244, 238, 0.88);
+  background: rgba(246, 244, 238, 0.84);
 }
 
 /* Light theme: prophetic green scrollbar thumb, warm-stone track */
