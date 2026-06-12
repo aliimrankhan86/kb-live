@@ -6,9 +6,9 @@
 
 ## Branch & goal
 
-- **Branch:** `feat/q1-brand-legal-cleanup` (off `dev`) → PR → `dev` → `main`
-- **Goal:** Q2 complete — legal pages live. Next: Q3 IA/nav pass.
-- **Current source-of-truth note:** Q2 verified 2026-06-12. Full detail in `AI_NOTES.md` §18.
+- **Branch:** `feat/q3-ia-nav` (off `dev`) → PR → `dev` → `main`
+- **Goal:** Q3 complete — IA/nav pass. Next: Q4 mobile polish.
+- **Current source-of-truth note:** Q3 verified 2026-06-12. Full detail in `AI_NOTES.md` §19.
 - **Canonical handover:** `AI_NOTES.md` is the single source of truth for verified status, implementation posture, and pending areas.
 
 ## What works (verified)
@@ -17,6 +17,20 @@
 - **Build**: `npm run build` passes with 0 errors — verified 2026-06-12.
 - **TypeScript**: `npx tsc --noEmit` passes — verified 2026-06-12.
 - **Architecture decision**: Supabase + Prisma + Upstash Redis is the correct target/production architecture. MockDB is not the production architecture, but production-facing MockDB imports remain and are now documented as launch blockers in `AI_NOTES.md` §0.
+
+## Changes made in this session (2026-06-12 — Q3 IA/Nav Pass)
+
+| Task | What | Files |
+| ---- | ---- | ----- |
+| STEP1 Primary nav | Replaced `Umrah / Hajj / Get a Quote` with `Packages / Compare / How it works`. Compare → `/search/packages`. For Partners → For Operators. New path icons. | `components/layout/Header.tsx` |
+| STEP2 Footer | Added `cities` prop; verbatim "what we do" paragraph; dynamic "Departing from" city links in Platform section. | `components/layout/Footer.tsx` |
+| STEP3 Layout wiring | Root layout async; fetches `Repository.getDistinctDepartureCities()` with try/catch; passes to Footer. | `app/layout.tsx` |
+| STEP4 Breadcrumbs | Breadcrumb added to Ramadan, Cost guide pages. CityCorridor gets optional `breadcrumbItems` prop + breadcrumb before h1; duplicate `<Header />` removed. Corridor pages (London, Birmingham, Manchester) pass breadcrumb items. | `app/umrah/ramadan/page.tsx`, `app/umrah/cost/page.tsx`, `components/marketing/CityCorridor.tsx`, `app/umrah/london/page.tsx`, `app/umrah/birmingham/page.tsx`, `app/umrah/manchester/page.tsx` |
+| STEP5 Confirmation breadcrumb | Breadcrumb at top of booking confirmation page. | `app/requests/[id]/confirmation/page.tsx` |
+| STEP6 Sidebar back links | OperatorSidebar: "Back to PilgrimCompare" link. AdminSidebar: new component with active highlighting + back link. Admin layout wired to AdminSidebar. | `components/operator/OperatorSidebar.tsx`, `components/admin/AdminSidebar.tsx`, `app/admin/layout.tsx` |
+| FIX Unused var | Pre-existing lint warning in ComparisonTable removed. | `components/request/ComparisonTable.tsx` |
+
+**Verification:** `npx tsc --noEmit` pass · `npm run test` 238/238 · `npm run build` 0 errors · desktop nav/footer confirmed in preview · mobile drawer confirmed at 390px · breadcrumbs visible on corridor + confirmation pages.
 
 ## Changes made in this session (2026-06-12 — Q2 Legal Pages)
 

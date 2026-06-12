@@ -74,6 +74,11 @@ export default async function ManchesterUmrahPage() {
         intro="Find Umrah packages departing from Manchester Airport (MAN). Compare verified UK operators side by side, filter by hotel rating and distance to Haram, and request a quote in minutes."
         queryParams="?type=umrah&departureCity=Manchester"
         faqs={faqs}
+        breadcrumbItems={[
+          { label: 'Home', href: '/' },
+          { label: 'Umrah', href: '/umrah' },
+          { label: 'Manchester' },
+        ]}
       />
     </>
   )

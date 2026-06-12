@@ -341,8 +341,8 @@ Mailboxes `support/privacy/dpo/complaints@pilgrimcompare.co.uk` → Cloudflare E
 |---|---|---|
 | ~~Q1~~ ✅ | PilgrimCompare sweep + banned-phrase audit + dynamic departure cities | Done 2026-06-12 — see §17 |
 | ~~Q2~~ ✅ | Legal pages `/terms` `/privacy` `/how-it-works` | Done 2026-06-12 — see §18 |
-| **Q3** ← next | IA/nav — header, footer, back buttons, breadcrumbs | Partial — footer + drawer done 2026-06-10 (see §13) |
-| Q4 | Mobile polish 360/390/430px | Q3 done |
+| ~~Q3~~ ✅ | IA/nav — header, footer, back buttons, breadcrumbs | Done 2026-06-12 — see §19 |
+| **Q4** ← next | Mobile polish 360/390/430px | Q3 done |
 | Q5 | SEO — metadata, JSON-LD, sitemap | Q1 done |
 | Q6 | Ranking transparency + Featured infrastructure | Revenue model confirmed |
 
@@ -641,5 +641,50 @@ The `CookieConsent` component still says "Analytics cookies help us understand h
 - Footer entity block reads from `LEGAL_ENTITY_BLOCK`: "PilgrimCompare is a trading name of Paramount Consultants Limited, registered in England and Wales (company no. 09679002). VAT no. GB 221 6154 46."
 - 12× `{/* LEGAL REVIEW */}` tags confirmed in `app/terms/page.tsx` — all in §8 liability section
 - 0 browser console errors
+
+---
+
+## 19. Q3 IA/Nav Pass — 2026-06-12
+
+**Branch:** `feat/q3-ia-nav` (off `dev`).
+
+### What shipped
+
+**`components/layout/Header.tsx`** — Primary nav restructured from `Umrah / Hajj / Get a Quote` to `Packages / Compare / How it works`. Compare → `/search/packages` (existing route, no new route needed). Guest secondary link renamed `For Partners` → `For Operators`. Three new path icons added to `ICONS` object (`packages`, `compare`, `howItWorks`).
+
+**`components/layout/Footer.tsx`** — Three targeted changes: (1) added `cities?: string[]` prop; (2) replaced brand tagline with verbatim "what we do" paragraph per §10.1 (comparison + enquiry service, not a travel agent, no payments); (3) dynamic "Departing from" block inside Platform section renders `<Link href="/umrah/{city.toLowerCase()}">` per city — only shown when `cities.length > 0`.
+
+**`app/layout.tsx`** — Made async. Fetches `Repository.getDistinctDepartureCities()` at layout level with try/catch (empty array fallback on DB failure). Passes result to `<Footer cities={departureCities} />`. No SSR penalty on first byte — query is cheap + cached.
+
+**`components/marketing/CityCorridor.tsx`** — Removed duplicate `<Header />` render (layout already provides it). Added optional `breadcrumbItems?: BreadcrumbItem[]` prop. Renders `<Breadcrumb>` inside `<article>` before the `<h1>` when provided.
+
+**Breadcrumbs added to:**
+- `app/umrah/london/page.tsx` — Home / Umrah / London
+- `app/umrah/birmingham/page.tsx` — Home / Umrah / Birmingham
+- `app/umrah/manchester/page.tsx` — Home / Umrah / Manchester
+- `app/umrah/ramadan/page.tsx` — Home / Umrah / Ramadan Umrah
+- `app/umrah/cost/page.tsx` — Home / Umrah / Cost guide
+- `app/requests/[id]/confirmation/page.tsx` — Home / My requests / Request / Confirmation
+
+**`components/operator/OperatorSidebar.tsx`** — "Back to PilgrimCompare" `<Link href="/">` added at bottom. 44px tap target, chevron-left icon, muted→normal hover colour, closes mobile drawer on click.
+
+**`components/admin/AdminSidebar.tsx`** — New `'use client'` component. Active nav highlighting via `usePathname()` (exact match + prefix match). aria-current="page" on active item. "Back to PilgrimCompare" link. Email displayed in footer.
+
+**`app/admin/layout.tsx`** — Replaced inline static nav HTML with `<AdminSidebar userEmail={user.email} />`.
+
+**`components/request/ComparisonTable.tsx`** — Fixed pre-existing unused variable lint warning (`(row, i)` → `(row)` on header column map).
+
+### 🛠️ Gotchas
+
+- **Turbopack + `npm run build` conflict**: Running `npm run build` while `npm run dev` (Turbopack) is up corrupts `.next/static/development/_buildManifest.js.tmp.*`, causing ISE on all pages. Fix: stop dev server, delete `.next/static/development/`, restart. Documented in §15.
+- **`<a>` lint error on internal links**: Next.js `@next/next/no-html-link-for-pages` rejects `<a href="/">` for internal routes. Both sidebar back links needed `<Link>` from `next/link`.
+- **CityCorridor double-header**: Component previously rendered its own `<Header />` — this caused two headers on all corridor pages. Removed in this pass.
+
+### Validation
+- `npx tsc --noEmit` pass
+- `npm run test` 238/238 (no new tests; 3 existing legal tests already in count)
+- `npm run build` 0 errors
+- Desktop: header `Packages / Compare / How it works` confirmed; footer "what we do" paragraph + "DEPARTING FROM London" confirmed
+- Mobile 390px: hamburger drawer shows `Packages / Compare / How it works / For Operators`; `/umrah/london` shows `← Umrah` compact back affordance; breadcrumb trail on desktop
 
 **Next:** Q3 — IA/nav pass (header, footer, back buttons, breadcrumbs). Test count: 238/238.

@@ -7,6 +7,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CookieConsent } from "@/components/compliance/CookieConsent";
 import { JsonLdScript } from "@/lib/seo/json-ld";
+import { Repository } from "@/lib/api/repository";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -46,11 +47,18 @@ const travelAgencyJsonLd = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  let departureCities: string[] = [];
+  try {
+    departureCities = await Repository.getDistinctDepartureCities();
+  } catch {
+    // DB unavailable — footer renders without city links
+  }
+
   return (
     <html lang="en-GB" className={`${exo2Font.variable} ${inter.variable} ${nunito.variable}`} suppressHydrationWarning>
       <body className="antialiased min-h-screen flex flex-col">
@@ -65,7 +73,7 @@ export default function RootLayout({
         <main id="main-content" className="flex-1">
           {children}
         </main>
-        <Footer />
+        <Footer cities={departureCities} />
         <CookieConsent />
       </body>
     </html>

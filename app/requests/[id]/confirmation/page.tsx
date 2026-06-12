@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Repository } from '@/lib/api/repository';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 
 export default async function BookingConfirmationPage({
   params,
@@ -24,6 +25,14 @@ export default async function BookingConfirmationPage({
       className="min-h-screen bg-[var(--background)] px-4 py-12"
     >
       <div className="mx-auto max-w-xl space-y-8">
+        <Breadcrumb
+          items={[
+            { label: 'Home', href: '/' },
+            { label: 'My requests', href: '/requests' },
+            { label: 'Request', href: `/requests/${id}` },
+            { label: 'Confirmation' },
+          ]}
+        />
         {/* Reference code */}
         <div className="rounded-xl border border-[var(--yellow)] bg-[rgba(255,211,29,0.06)] px-6 py-8 text-center">
           <p className="text-sm font-medium uppercase tracking-wide text-[var(--yellow)]">

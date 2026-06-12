@@ -74,6 +74,11 @@ export default async function LondonUmrahPage() {
         intro="Find Umrah packages departing from London Heathrow, Gatwick, and Stansted. Compare verified UK operators side by side, filter by hotel rating and distance to Haram, and request a quote in minutes."
         queryParams="?type=umrah&departureCity=London"
         faqs={faqs}
+        breadcrumbItems={[
+          { label: 'Home', href: '/' },
+          { label: 'Umrah', href: '/umrah' },
+          { label: 'London' },
+        ]}
       />
     </>
   )

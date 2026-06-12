@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
 import { Repository } from '@/lib/api/repository'
+import { Breadcrumb } from '@/components/ui/Breadcrumb'
 
 export const metadata: Metadata = {
   title: 'How Much Does an Umrah Package Cost from the UK? 2026–2027 Guide',
@@ -82,6 +83,14 @@ export default async function UmrahCostPage() {
       <JsonLdScript data={pageJsonLd} />
       <main className="min-h-screen bg-[var(--background)] px-4 py-12 md:py-20">
         <article className="mx-auto max-w-3xl">
+          <Breadcrumb
+            className="mb-6"
+            items={[
+              { label: 'Home', href: '/' },
+              { label: 'Umrah', href: '/umrah' },
+              { label: 'Cost guide' },
+            ]}
+          />
           <h1 className="text-3xl md:text-4xl font-bold text-[var(--text)] mb-6">
             How Much Does an Umrah Package Cost from the UK?
           </h1>
