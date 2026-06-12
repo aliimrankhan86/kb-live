@@ -84,7 +84,7 @@
 .hero__ctaSection:hover {
   border-color: var(--yellow);
   transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(255, 211, 29, 0.15);
+  box-shadow: 0 12px 40px color-mix(in srgb, var(--yellow) 15%, transparent);
 }
 
 .hero__ctaSectionDisabled {
