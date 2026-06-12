@@ -46,7 +46,7 @@ async function main() {
   }
   console.log('Redis ping: OK');
 
-  const probeKey = `kaabatrip:upstash-connectivity:${randomUUID()}`;
+  const probeKey = `pilgrimcompare:upstash-connectivity:${randomUUID()}`;
   const result = await limiter.limit(probeKey);
   console.log('Rate limiter probe:', {
     success: result.success,

@@ -91,7 +91,7 @@ describe('LoginForm', () => {
 
     render(<LoginForm />);
     fireEvent.change(screen.getByTestId('login-email'), { target: { value: 'customer@example.com' } });
-    fireEvent.change(screen.getByTestId('login-password'), { target: { value: 'KaabaTrip!2026' } });
+    fireEvent.change(screen.getByTestId('login-password'), { target: { value: 'PilgrimCompare!2026' } });
     fireEvent.click(screen.getByTestId('login-submit'));
 
     await waitFor(() => {
@@ -108,7 +108,7 @@ describe('LoginForm', () => {
     render(<LoginForm />);
     fireEvent.click(screen.getByTestId('login-tab-partner'));
     fireEvent.change(screen.getByTestId('login-email'), { target: { value: 'operator@example.com' } });
-    fireEvent.change(screen.getByTestId('login-password'), { target: { value: 'KaabaTrip!2026' } });
+    fireEvent.change(screen.getByTestId('login-password'), { target: { value: 'PilgrimCompare!2026' } });
     fireEvent.click(screen.getByTestId('login-submit'));
 
     await waitFor(() => {

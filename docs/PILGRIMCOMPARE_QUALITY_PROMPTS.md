@@ -13,8 +13,8 @@ Before anything: read AI_NOTES.md and docs/PILGRIMCOMPARE_LANGUAGE_AND_LEGAL_STA
 
 Task, in this order:
 
-STEP 1 — PilgrimCompare eradication:
-1. Run a case-insensitive repo-wide search for: pilgrimcompare, kaaba-trip, kaaba_trip, PilgrimCompare, KAABATRIP. Search all file types including .svg, .json, .md, .env.example, test fixtures, seed data, email templates.
+STEP 1 — KaabaTrip eradication:
+1. Run a case-insensitive repo-wide search for: kaabatrip, kaaba-trip, kaaba_trip, KaabaTrip, KAABATRIP. Search all file types including .svg, .json, .md, .env.example, test fixtures, seed data, email templates.
 2. Replace every occurrence with the PilgrimCompare equivalent. Known offenders: /public/logo.svg and /public/text-logo.svg contain PilgrimCompare branding. Recreate both as clean PilgrimCompare SVGs: wordmark "PilgrimCompare" in the existing brand font/colour tokens (inspect Tailwind config and existing components for the brand colour; do not invent a new palette). Keep viewBox proportions compatible with current usage so layout does not shift.
 3. Check favicon, apple-touch-icon, manifest.json (name, short_name), OG images, and any hardcoded social handles or email addresses.
 4. Output a table: file, old reference, what you changed.

@@ -39,7 +39,7 @@
 
 | Task | What | Files |
 | ---- | ---- | ----- |
-| AUTH-PREVIEW-DEV-FALLBACK | Fixed documented dev account login outside local `NODE_ENV=development`. `/login` now accepts the reference dev accounts in local development, E2E, Vercel preview deployments, or controlled QA with `KAABATRIP_ENABLE_DEV_AUTH=true`; true production keeps the fallback disabled by default. | `lib/auth/dev-users.ts`, `app/api/auth/sign-in/route.ts`, `next.config.ts` |
+| AUTH-PREVIEW-DEV-FALLBACK | Fixed documented dev account login outside local `NODE_ENV=development`. Dev personas work under `npm run dev` (`NODE_ENV=development`) and `E2E_TESTING=1` only. Production keeps the fallback disabled by default. | `lib/auth/dev-users.ts`, `app/api/auth/sign-in/route.ts`, `next.config.ts` |
 | AUTH-COOKIE-SCOPE | Aligned all `__dev_user` readers with the same dev-auth gate so sign-in, middleware, server sessions, `/api/auth/me`, `/dev/login`, and sign-out work together. | `lib/auth/session.ts`, `lib/supabase/middleware.ts`, `app/dev/login/page.tsx`, `app/api/auth/sign-out/route.ts` |
 | AUTH-PASSWORD-PASTE | Dev account password comparison trims accidental leading/trailing whitespace only for documented dev accounts. Real Supabase Auth passwords are unchanged. | `app/api/auth/sign-in/route.ts` |
 | AUTH-DOCS | Updated handover/status docs so they no longer say the documented `/login` dev account fallback is local-development only. | `AI_NOTES.md`, `docs/README_AI.md`, `docs/NOW.md`, `STATUS.md`, `PROJECT_BRIEF.md` |

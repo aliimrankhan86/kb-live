@@ -332,7 +332,7 @@ Mailboxes `support/privacy/dpo/complaints@pilgrimcompare.co.uk` → Cloudflare E
 |---|---|---|
 | Prompt 1 | MockDB removal + `FEATURE_USE_REAL_DB` fail-fast | ✅ Done |
 | Prompt 2 | RLS and grants audit — migrations 008 + 009 | ✅ Done |
-| Prompt 3 | Domain wiring + full KaabaTrip → PilgrimCompare rebrand | ✅ Done |
+| Prompt 3 | Domain wiring + full rebrand to PilgrimCompare | ✅ Done |
 | Prompt 4 | GitHub branch protection + CI workflow | ✅ Done |
 
 ### Quality pass queue — NEXT

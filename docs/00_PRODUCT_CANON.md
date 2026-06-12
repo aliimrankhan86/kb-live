@@ -102,4 +102,4 @@ Skip-proof acknowledgement must include:
 
 ## Naming
 
-Project name may change in future, but docs and code refer to "PilgrimCompare" for now.
+Brand name: PilgrimCompare.
