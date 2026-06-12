@@ -20,7 +20,7 @@
   gap: 0.75rem;
   margin-bottom: 1.25rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid var(--borderSubtle, rgba(255, 255, 255, 0.1));
+  border-bottom: 1px solid var(--borderSubtle);
 }
 
 .searchHeaderTop {
@@ -51,7 +51,7 @@
 .filterButton,
 .sortButton {
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--borderSubtle);
   color: var(--text);
   padding: 0 1rem;
   min-height: 44px;
@@ -67,13 +67,13 @@
 
 .filterButton:hover,
 .sortButton:hover {
-  border-color: var(--yellow);
-  color: var(--yellow);
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 .filterButton:focus-visible,
 .sortButton:focus-visible {
-  outline: 2px solid var(--yellow);
+  outline: 2px solid var(--focusRing);
   outline-offset: 2px;
 }
 
@@ -86,7 +86,7 @@
   min-height: 44px;
   padding: 0 0.75rem;
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid var(--borderSubtle);
   border-radius: 999px;
   color: var(--textMuted);
   font-size: 0.8125rem;
@@ -97,13 +97,13 @@
 
 .savedChip:hover {
   color: var(--text);
-  border-color: rgba(255, 255, 255, 0.32);
+  border-color: var(--borderStrong);
 }
 
 .savedChipActive {
-  color: var(--yellow);
-  border-color: var(--yellow);
-  background: rgba(255, 211, 29, 0.08);
+  color: var(--primary);
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
 }
 
 /* Filter count badge inside the Filter button */
@@ -115,8 +115,8 @@
   height: 1.25rem;
   padding: 0 0.375rem;
   margin-left: 0.125rem;
-  background: var(--yellow);
-  color: var(--bg);
+  background: var(--primary);
+  color: var(--color-text-on-brand);
   border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 700;
@@ -137,8 +137,8 @@
   gap: 0.375rem;
   min-height: 44px;
   padding: 0 0.5rem 0 0.75rem;
-  background: rgba(255, 211, 29, 0.1);
-  border: 1px solid rgba(255, 211, 29, 0.35);
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent);
   border-radius: 999px;
   color: var(--text);
   font-size: 0.8125rem;
@@ -148,8 +148,8 @@
 }
 
 .filterChip:hover {
-  background: rgba(255, 211, 29, 0.16);
-  border-color: var(--yellow);
+  background: color-mix(in srgb, var(--primary) 16%, transparent);
+  border-color: var(--primary);
 }
 
 .filterChip svg {
@@ -180,7 +180,7 @@
 
 .compareMessageText {
   font-size: 0.875rem;
-  color: var(--yellow);
+  color: var(--primary);
   margin: 0 0 1rem;
 }
 
@@ -199,7 +199,7 @@
 /* ─── Package card ─────────────────────────────────────────────────────── */
 .packageCard {
   background: var(--surfaceDark);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--borderSubtle);
   border-radius: 1rem;
   overflow: hidden;
   min-width: 0;
@@ -207,20 +207,20 @@
 }
 
 .packageCard:hover {
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: var(--borderStrong);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .packageCardSelected {
-  border-color: var(--yellow);
-  box-shadow: 0 0 0 1px var(--yellow), 0 6px 24px rgba(255, 211, 29, 0.12);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary), 0 6px 24px color-mix(in srgb, var(--primary) 12%, transparent);
 }
 
 /* Card header: operator + trust, with quiet Save bookmark */
 .cardHeader {
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid color-mix(in srgb, var(--text) 6%, transparent);
+  background: color-mix(in srgb, var(--text) 2%, transparent);
 }
 
 .operatorBlock {
@@ -279,15 +279,15 @@
 
 .saveButton:hover {
   color: var(--text);
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--text) 5%, transparent);
 }
 
 .saveButtonActive {
-  color: var(--yellow);
+  color: var(--primary);
 }
 
 .saveButton:focus-visible {
-  outline: 2px solid var(--yellow);
+  outline: 2px solid var(--focusRing);
   outline-offset: 2px;
 }
 
@@ -315,7 +315,7 @@
 
 .priceFrom {
   font-size: 0.75rem;
-  color: var(--yellow);
+  color: var(--primary);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -354,19 +354,19 @@
 
 .tripPill {
   color: var(--text);
-  background: rgba(255, 211, 29, 0.08);
-  border: 1px solid rgba(255, 211, 29, 0.18);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary) 18%, transparent);
 }
 
 .tripPill svg {
-  color: var(--yellow);
+  color: var(--primary);
   flex-shrink: 0;
 }
 
 .tripPillMuted {
   color: var(--textMuted);
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, var(--text) 4%, transparent);
+  border: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
 }
 
 /* Hotels — compact rows with thumbnails */
@@ -375,7 +375,7 @@
   flex-direction: column;
   gap: 0.625rem;
   padding-top: 0.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid color-mix(in srgb, var(--text) 6%, transparent);
 }
 
 .hotelRow {
@@ -390,7 +390,7 @@
   flex-shrink: 0;
   border-radius: 0.5rem;
   object-fit: cover;
-  background: rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, var(--text) 8%, transparent);
 }
 
 .hotelInfo {
@@ -442,7 +442,7 @@
 }
 
 .starEmpty {
-  fill: rgba(255, 255, 255, 0.2);
+  fill: color-mix(in srgb, var(--text) 20%, transparent);
 }
 
 .ratingText {
@@ -460,7 +460,7 @@
 }
 
 .hotelDistance svg {
-  color: var(--yellow);
+  color: var(--primary);
 }
 
 /* Inclusions */
@@ -470,7 +470,7 @@
   align-items: center;
   gap: 0.375rem;
   padding-top: 0.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid color-mix(in srgb, var(--text) 6%, transparent);
 }
 
 .inclusionsLabel {
@@ -496,7 +496,7 @@
   min-height: 46px;
   padding: 0 0.875rem;
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--borderSubtle);
   border-radius: 0.625rem;
   color: var(--text);
   font-size: 0.9375rem;
@@ -507,13 +507,13 @@
 }
 
 .compareToggle:hover {
-  border-color: var(--yellow);
+  border-color: var(--primary);
 }
 
 .compareToggleActive {
-  border-color: var(--yellow);
-  background: rgba(255, 211, 29, 0.1);
-  color: var(--yellow);
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  color: var(--primary);
 }
 
 .compareToggleDisabled {
@@ -522,7 +522,7 @@
 }
 
 .compareToggleDisabled:hover {
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: var(--borderSubtle);
 }
 
 .compareCheckbox {
@@ -539,9 +539,9 @@
   width: 20px;
   height: 20px;
   flex-shrink: 0;
-  border: 2px solid rgba(255, 255, 255, 0.35);
+  border: 2px solid color-mix(in srgb, var(--text) 35%, transparent);
   border-radius: 0.3125rem;
-  color: var(--bg);
+  color: var(--color-text-on-brand);
   transition: all 0.15s ease;
 }
 
@@ -551,8 +551,8 @@
 }
 
 .compareToggleActive .compareBox {
-  background: var(--yellow);
-  border-color: var(--yellow);
+  background: var(--primary);
+  border-color: var(--primary);
 }
 
 .compareToggleActive .compareBox svg {
@@ -560,7 +560,7 @@
 }
 
 .compareCheckbox:focus-visible + .compareBox {
-  outline: 2px solid var(--yellow);
+  outline: 2px solid var(--focusRing);
   outline-offset: 2px;
 }
 
@@ -576,9 +576,9 @@
   flex: 1 1 auto;
   min-height: 46px;
   padding: 0 1rem;
-  background: var(--yellow);
+  background: var(--primary);
   border: none;
-  color: var(--bg);
+  color: var(--color-text-on-brand);
   border-radius: 0.625rem;
   font-size: 0.9375rem;
   font-weight: 700;
@@ -588,12 +588,12 @@
 }
 
 .primaryAction:hover {
-  background: #ffe36b;
+  background: var(--color-primary-dark);
   transform: translateY(-1px);
 }
 
 .primaryAction:focus-visible {
-  outline: 2px solid var(--yellow);
+  outline: 2px solid var(--focusRing);
   outline-offset: 2px;
 }
 
@@ -619,7 +619,7 @@
 }
 
 .sortDisclosureLink:focus-visible {
-  outline: 2px solid var(--yellow);
+  outline: 2px solid var(--focusRing);
   outline-offset: 2px;
   border-radius: 2px;
 }
@@ -635,7 +635,7 @@
   gap: 0.5rem;
   margin-bottom: 0.75rem;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(255, 211, 29, 0.2);
+  border-bottom: 1px solid color-mix(in srgb, var(--primary) 20%, transparent);
 }
 
 .featuredSectionLabel {
@@ -643,7 +643,7 @@
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--yellow);
+  color: var(--primary);
 }
 
 .featuredSectionNote {
@@ -685,11 +685,11 @@
 }
 
 .sortOption:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: color-mix(in srgb, var(--text) 6%, transparent);
 }
 
 .sortOptionActive {
-  color: var(--yellow);
+  color: var(--primary);
   font-weight: 600;
 }
 
@@ -704,7 +704,7 @@
   margin: 1rem 0;
   border: 1px dashed var(--border);
   border-radius: 1rem;
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in srgb, var(--text) 2%, transparent);
 }
 
 .emptyStateIcon {
@@ -735,8 +735,8 @@
   gap: 0.375rem;
   min-height: 44px;
   background: transparent;
-  border: 1.5px solid var(--yellow);
-  color: var(--yellow);
+  border: 1.5px solid var(--primary);
+  color: var(--primary);
   padding: 0.625rem 1.5rem;
   border-radius: 0.625rem;
   font-size: 0.9375rem;
@@ -746,8 +746,8 @@
 }
 
 .emptyStateAction:hover {
-  background: var(--yellow);
-  color: var(--bg);
+  background: var(--primary);
+  color: var(--color-text-on-brand);
 }
 
 /* ─── Wider screens: hotels side by side, roomier actions ─────────────── */
