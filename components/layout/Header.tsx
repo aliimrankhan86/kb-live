@@ -230,7 +230,7 @@ export function Header({ className = '' }: { className?: string }) {
         {/* Brand */}
         <Link href="/" className={styles.header__brand} aria-label="PilgrimCompare - Go to homepage">
           <Logo size={32} />
-          <WordmarkLogo className={styles.header__textLogo} height={30} />
+          <WordmarkLogo className={styles.header__textLogo} height={30} pilgrimColor={isLight ? '#111827' : undefined} />
         </Link>
 
         {/* Desktop Navigation */}
@@ -401,7 +401,7 @@ export function Header({ className = '' }: { className?: string }) {
           <div className={styles.header__mobileDrawerHeader}>
             <Link href="/" className={styles.header__mobileBrand} onClick={() => setMobileDrawerOpen(false)}>
               <Logo size={28} />
-              <WordmarkLogo className={styles.header__textLogoMobile} height={26} />
+              <WordmarkLogo className={styles.header__textLogoMobile} height={26} pilgrimColor={isLight ? '#111827' : undefined} />
             </Link>
             <button
               className={styles.header__mobileClose}
