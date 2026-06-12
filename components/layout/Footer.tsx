@@ -75,14 +75,14 @@ function Section({
     <div
       className={`border-t border-[var(--borderSubtle)] py-3 md:border-0 md:py-0 ${
         isLast ? 'border-b md:border-b-0' : ''
-      } ${isFirst ? '' : ''}`}
+      }`}
     >
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
         aria-expanded={expanded}
         aria-controls={contentId}
-        className="flex w-full items-center justify-between text-left text-sm font-semibold text-[var(--text)] md:cursor-default"
+        className="flex w-full items-center justify-between text-left text-sm font-semibold text-[var(--text)] md:cursor-default md:pointer-events-none"
       >
         <span>{title}</span>
         <Chevron open={expanded} />
@@ -98,34 +98,51 @@ function Section({
   );
 }
 
+function BrandBlock() {
+  return (
+    <>
+      <Link
+        href="/"
+        className="flex shrink-0 items-center gap-2"
+        aria-label="PilgrimCompare - Go to homepage"
+      >
+        <Logo size={26} />
+        <WordmarkLogo height={24} style={{ color: 'var(--wordmark-color, var(--yellow, #FFD31D))' }} />
+      </Link>
+      <p className="text-xs leading-relaxed text-[var(--textMuted)]">
+        PilgrimCompare is a UK comparison and enquiry service for Umrah travel packages. We list
+        packages from independent, verified UK travel operators so you can compare them side by
+        side and send enquiries directly. We are not a travel agent, tour operator, or organiser.
+        We do not sell travel, take bookings, or handle payments. Your booking, contract, and
+        payment are always with the operator you choose.
+      </p>
+    </>
+  );
+}
+
 export function Footer({ cities = [] }: { cities?: string[] }) {
   const currentYear = new Date().getFullYear();
   const isDesktop = useIsDesktop();
 
   return (
     <footer className="border-t border-[var(--borderSubtle)] bg-[var(--surfaceDark)]" role="contentinfo">
-      <div className="mx-auto max-w-6xl px-5 py-8 md:px-6 md:py-10">
-        {/* Brand block — left-aligned across all breakpoints */}
-        <div className="mb-6 flex flex-col gap-2 md:mb-8 md:flex-row md:items-start md:gap-6">
-          <Link
-            href="/"
-            className="flex shrink-0 items-center gap-2"
-            aria-label="PilgrimCompare - Go to homepage"
-          >
-            <Logo size={26} />
-            <WordmarkLogo height={24} style={{ color: 'var(--wordmark-color, var(--yellow, #FFD31D))' }} />
-          </Link>
-          <p className="text-xs leading-relaxed text-[var(--textMuted)] md:max-w-sm">
-            PilgrimCompare is a UK comparison and enquiry service for Umrah travel packages. We list
-            packages from independent, verified UK travel operators so you can compare them side by
-            side and send enquiries directly. We are not a travel agent, tour operator, or organiser.
-            We do not sell travel, take bookings, or handle payments. Your booking, contract, and
-            payment are always with the operator you choose.
-          </p>
+      <div className="mx-auto max-w-6xl px-5 py-8 md:px-8 md:py-12">
+
+        {/* Mobile brand block — shown only on mobile, above the accordions */}
+        <div className="mb-6 flex flex-col gap-3 md:hidden">
+          <BrandBlock />
         </div>
 
-        {/* Sections — accordions on mobile, open grid on desktop */}
-        <div className="grid gap-1 md:grid-cols-3 md:gap-8">
+        {/* Main grid:
+            Mobile  — single-column stacked accordions
+            Desktop — 4-col: [brand 2fr] [contact 1fr] [legal 1fr] [platform 1fr] */}
+        <div className="grid gap-1 md:grid-cols-[2fr_1fr_1fr_1fr] md:gap-10 md:items-start">
+
+          {/* Brand col — desktop only */}
+          <div className="hidden md:flex md:flex-col md:gap-4">
+            <BrandBlock />
+          </div>
+
           <Section title="Contact" defaultOpen isFirst forceOpen={isDesktop}>
             <address className="text-xs not-italic leading-relaxed text-[var(--textMuted)]">
               United Kingdom<br />
@@ -192,8 +209,8 @@ export function Footer({ cities = [] }: { cities?: string[] }) {
           </Section>
         </div>
 
-        {/* Disclaimer — single condensed block */}
-        <div className="mt-6 border-t border-[var(--borderSubtle)] pt-5 md:mt-8 md:pt-6">
+        {/* Disclaimer */}
+        <div className="mt-6 border-t border-[var(--borderSubtle)] pt-5 md:mt-10 md:pt-6">
           <p className="text-xs leading-relaxed text-[var(--textMuted)]">
             <strong className="text-[var(--text)]">Important:</strong> PilgrimCompare is a comparison
             platform only. We do not organise, sell, or fulfil travel packages and do not collect, hold,
@@ -221,16 +238,17 @@ export function Footer({ cities = [] }: { cities?: string[] }) {
         </div>
 
         {/* Copyright */}
-        <div className="mt-5 flex flex-col gap-1 border-t border-[var(--borderSubtle)] pt-4 justify-center text-xs text-[var(--textMuted)] md:justify-between md:flex-row md:items-center md:gap-2">
-          <p className="text-center md:text-left">&copy; {currentYear} PilgrimCompare. All rights reserved.</p>
-          <p className="text-center md:text-left">Governed by the laws of England and Wales.</p>
+        <div className="mt-5 border-t border-[var(--borderSubtle)] pt-4 text-xs text-[var(--textMuted)]">
+          {/* Mobile: stacked centered | Desktop: single left-anchored line */}
+          <p className="text-center md:text-left">
+            <span>&copy; {currentYear} PilgrimCompare. All rights reserved.</span>
+            <span className="hidden md:inline"> &middot; </span>
+            <span className="block md:inline">Governed by the laws of England and Wales.</span>
+          </p>
         </div>
 
-        {/* Legal entity disclosure — Companies Act 2006 §82
-            Registered office address intentionally omitted while founder
-            transitions to a non-residential registered office. See AI_NOTES §14.
-            TODO: add registeredOffice line once LEGAL_ENTITY_BLOCK.registeredOffice is set. */}
-        <p className="mt-3 text-center text-[11px] leading-relaxed text-[var(--textMuted)]">
+        {/* Legal entity disclosure — Companies Act 2006 §82 */}
+        <p className="mt-3 text-center text-[11px] leading-relaxed text-[var(--textMuted)] md:text-left">
           {LEGAL_ENTITY_BLOCK.tradingName} is a trading name of{' '}
           <span className="text-[var(--text)]">{LEGAL_ENTITY_BLOCK.companyName}</span>, registered
           in {LEGAL_ENTITY_BLOCK.registeredCountry} (company no.{' '}
