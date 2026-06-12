@@ -260,6 +260,44 @@
   outline-offset: 2px;
 }
 
+/* Theme toggle row in mobile drawer */
+.header__mobileThemeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 52px;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  color: #ffffff;
+  color: var(--text, #ffffff);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  font-family: var(--font-exo2);
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: background 0.15s ease;
+}
+
+.header__mobileThemeRow:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.header__mobileThemeRow:focus-visible {
+  outline: 2px solid var(--focusRing);
+  outline-offset: 2px;
+}
+
+.header__mobileThemeLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 /* Danger link — Log out */
 .header__mobileNavLinkDanger {
   display: flex;
