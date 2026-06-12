@@ -6,17 +6,40 @@
 
 ## Branch & goal
 
-- **Branch:** `feat/q4-mobile-polish` (off `dev`) → PR → `dev` → `main`
-- **Goal:** Q4 complete — mobile polish 360/390/430px. Next: Q5 SEO pass.
-- **Current source-of-truth note:** Q4 verified 2026-06-12. Full detail in `AI_NOTES.md` §20.
+- **Branch:** `feat/q5-seo` (off `feat/q4-mobile-polish`) → PR → `dev` → `main`
+- **Goal:** Q5 complete — SEO metadata, structured data, sitemap, robots, OG/Twitter, banned-phrase CI test. Next: Q6 ranking transparency + Featured infrastructure.
+- **Current source-of-truth note:** Q5 verified 2026-06-12. Full detail in `AI_NOTES.md` §21.
 - **Canonical handover:** `AI_NOTES.md` is the single source of truth for verified status, implementation posture, and pending areas.
 
 ## What works (verified)
 
-- **Tests**: `npm run test` passes (20 files, 238/238 tests) — verified 2026-06-12.
+- **Tests**: `npm run test` passes (21 files, 1,425/1,425 tests) — verified 2026-06-12.
 - **Build**: `npm run build` passes with 0 errors — verified 2026-06-12.
 - **TypeScript**: `npx tsc --noEmit` passes — verified 2026-06-12.
 - **Architecture decision**: Supabase + Prisma + Upstash Redis is the correct target/production architecture. MockDB is not the production architecture, but production-facing MockDB imports remain and are now documented as launch blockers in `AI_NOTES.md` §0.
+
+## Changes made in this session (2026-06-12 — Q5 SEO Pass)
+
+| Task | What | Files |
+| ---- | ---- | ----- |
+| Base metadata | Removed banned phrases from default description | `lib/seo.ts` |
+| Root layout JSON-LD | Organization + WebSite via helper; removed wrong inline TravelAgency schema | `app/layout.tsx` |
+| Homepage JSON-LD | Removed duplicate org/site schemas (now in layout); fixed FAQ copy | `app/page.tsx` |
+| Packages list | Title, canonical, OG+Twitter, WebPage JSON-LD | `app/packages/page.tsx` |
+| Package detail | Title pattern, Twitter card with image | `app/packages/[slug]/page.tsx` |
+| Operator profile | Twitter card | `app/operators/[slug]/page.tsx` |
+| Search results | Dynamic Twitter card with count+type | `app/search/packages/page.tsx` |
+| Corridor pages (3) | `generateMetadata()` async; dynamic noindex on zero supply; title/JSON-LD de-banned | `app/umrah/london/page.tsx`, `app/umrah/birmingham/page.tsx`, `app/umrah/manchester/page.tsx` |
+| Auth/Quote/Showcase | `robots: { index: false }` on all utility pages | `app/login/page.tsx`, `app/signup/page.tsx`, `app/quote/page.tsx`, `app/showcase/page.tsx` |
+| How-it-works | OG+Twitter, WebPage+FAQ JSON-LD wired into JSX | `app/how-it-works/page.tsx` |
+| Terms/Privacy | OG+Twitter added | `app/terms/page.tsx`, `app/privacy/page.tsx` |
+| Partner page | Twitter card; banned copy removed; WebPage JSON-LD | `app/partner/page.tsx` |
+| Sitemap | Corridor pages conditional on live supply; added /how-it-works, /partner | `app/sitemap.ts` |
+| Robots | Added /showcase to disallow | `app/robots.ts` |
+| Content rules | `BANNED_METADATA_PHRASES` + `NEUTRAL_SORT_DISCLOSURE` exports | `lib/content-rules.ts` (new) |
+| Banned-phrase CI | 1,425 assertions; fails CI if banned phrase in any metadata constant | `tests/banned-phrases.test.ts` (new) |
+
+**Verification:** `npx tsc --noEmit` pass · `npm run test` 1,425/1,425 (21 files) · `npm run build` 0 errors.
 
 ## Changes made in this session (2026-06-12 — Q4 Mobile Polish)
 

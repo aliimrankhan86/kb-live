@@ -1,13 +1,12 @@
 # PilgrimCompare AI Handover — Single Source of Truth
 
-**Last verified:** 2026-06-11 (Supabase keep-alive cron + health endpoint DB ping)
-**Branch:** `chore/supabase-keep-alive` (off `dev`)
+**Last verified:** 2026-06-12 (Q5 SEO pass — 1,425 tests, 0 build errors)
+**Branch:** `feat/q5-seo` (off `feat/q4-mobile-polish`) → PR → `dev`
 **Audience:** Claude, Codex, Kimi, and any AI/developer taking over the project.
 
 **Next immediate action:**
-Q1 — PilgrimCompare sweep, banned-phrase audit, dynamic departure cities
-Prompt file: `docs/PILGRIMCOMPARE_QUALITY_PROMPTS.md` → Q1
-Pre-req: `docs/PILGRIMCOMPARE_LANGUAGE_AND_LEGAL_STANDARDS.md` must be committed to repo first (founder manual task)
+Q6 — Ranking transparency + Featured infrastructure (revenue model confirmed)
+See §10 for queue context.
 
 This file is the current handover source of truth. If another document conflicts with a verified statement here, treat that other document as stale and update it before changing implementation.
 
@@ -118,12 +117,10 @@ Operators pay. Travellers are always free. Funds never flow through the platform
 
 ## 4. Verified Current State
 
-**Verified 2026-06-10:**
-- `npm run test`: **232/232 passes**, 18 files
+**Verified 2026-06-12 (Q5 SEO pass):**
+- `npm run test`: **1,425/1,425 passes**, 21 files
 - `npm run build`: **0 errors**
 - `npx tsc --noEmit`: **passes**
-- `npm run lint`: **passes**
-- `npx prisma validate`: **passes** (schema unchanged since 2026-06-09)
 - `npx playwright test`: 57 passed, 6 skipped, 0 failed (last full run 2026-06-08)
 
 **Stack:**
@@ -343,8 +340,8 @@ Mailboxes `support/privacy/dpo/complaints@pilgrimcompare.co.uk` → Cloudflare E
 | ~~Q2~~ ✅ | Legal pages `/terms` `/privacy` `/how-it-works` | Done 2026-06-12 — see §18 |
 | ~~Q3~~ ✅ | IA/nav — header, footer, back buttons, breadcrumbs | Done 2026-06-12 — see §19 |
 | ~~Q4~~ ✅ | Mobile polish 360/390/430px | Done 2026-06-12 — see §20 |
-| **Q5** ← next | SEO — metadata, JSON-LD, sitemap | Q1 done |
-| Q6 | Ranking transparency + Featured infrastructure | Revenue model confirmed |
+| ~~Q5~~ ✅ | SEO — metadata, JSON-LD, sitemap, banned-phrase CI | Done 2026-06-12 — see §21 |
+| **Q6** ← next | Ranking transparency + Featured infrastructure | Revenue model confirmed |
 
 ---
 
@@ -746,4 +743,64 @@ The `CookieConsent` component still says "Analytics cookies help us understand h
 
 - `npx tsc --noEmit` pass
 - `npm run test` 238/238
+- `npm run build` 0 errors
+
+---
+
+## 21. Q5 SEO Pass — 2026-06-12
+
+**Branch:** `feat/q5-seo` (off `feat/q4-mobile-polish`) → PR → `dev`
+
+### Scope
+
+Full SEO audit and remediation for all public routes: metadata, JSON-LD structured data, sitemap, robots, OG/Twitter cards, noindex rules, and a banned-phrase CI guard.
+
+### What shipped
+
+| Task | What | Files |
+|------|------|-------|
+| Base metadata fix | Removed banned phrases ("best", "unforgettable") from `lib/seo.ts` default description | `lib/seo.ts` |
+| Root layout JSON-LD | Replaced hardcoded wrong `TravelAgency` schema with `graphJsonLd([organizationJsonLd(), websiteJsonLd()])` via helper | `app/layout.tsx` |
+| Homepage JSON-LD | Removed duplicate Organization+WebSite (now in layout); fixed FAQ answer copy ("records enquiry intent"); graph = WebPage + FAQPage | `app/page.tsx` |
+| Packages list | Proper title, canonical, OG+Twitter, WebPage JSON-LD | `app/packages/page.tsx` |
+| Package detail | Title pattern `"${pkg.title} by ${operator} | Compare on PilgrimCompare"`, Twitter card with image | `app/packages/[slug]/page.tsx` |
+| Operator profile | Twitter card with operator name and status | `app/operators/[slug]/page.tsx` |
+| Search results | Dynamic Twitter card with package count and type | `app/search/packages/page.tsx` |
+| Corridor pages (3) | Converted to `generateMetadata()` async; dynamic noindex when city has zero live supply; removed "Compare & Book" from titles and JSON-LD | `app/umrah/london/page.tsx`, `app/umrah/birmingham/page.tsx`, `app/umrah/manchester/page.tsx` |
+| Auth pages | `robots: { index: false, follow: false }` + typed metadata | `app/login/page.tsx`, `app/signup/page.tsx` |
+| Quote page | `robots: { index: false, follow: false }` | `app/quote/page.tsx` |
+| Showcase page | `robots: { index: false, follow: false }` | `app/showcase/page.tsx` |
+| How-it-works | OG+Twitter, WebPage+FAQ JSON-LD, `<JsonLdScript>` wired into JSX | `app/how-it-works/page.tsx` |
+| Terms / Privacy | OG+Twitter added to existing metadata | `app/terms/page.tsx`, `app/privacy/page.tsx` |
+| Partner (operator) | Twitter card; removed banned copy ("thousands", "Apply as a Partner", "Start Receiving Bookings"); WebPage JSON-LD | `app/partner/page.tsx` |
+| Sitemap | Corridor pages conditional on live DB supply; added `/how-it-works`, `/partner`; DB failure → omit dynamic pages | `app/sitemap.ts` |
+| Robots | Added `/showcase` to disallow list | `app/robots.ts` |
+| Content rules | `BANNED_METADATA_PHRASES` (34 phrases from standards §5/§11/§14) + `NEUTRAL_SORT_DISCLOSURE` | `lib/content-rules.ts` (new) |
+| Banned-phrase CI | 1,425 assertions covering all static metadata string constants; fails CI if any banned phrase appears | `tests/banned-phrases.test.ts` (new) |
+
+### JSON-LD schema inventory (post-Q5)
+
+| Route | Schemas emitted |
+|-------|----------------|
+| All pages (layout) | `Organization` + `WebSite` |
+| `/` | `WebPage` + `FAQPage` |
+| `/packages` | `WebPage` |
+| `/packages/[slug]` | `WebPage` + `Product` + `Offer` (seller = operator) |
+| `/operators/[slug]` | `WebPage` + `TravelAgency` |
+| `/search/packages` | `WebPage` + `ItemList` |
+| `/umrah/london|birmingham|manchester` | `WebPage` + `BreadcrumbList` |
+| `/how-it-works` | `WebPage` + `FAQPage` |
+| `/partner` | `WebPage` |
+
+### 🛠️ Gotchas
+
+- **Corridor noindex is live supply-gated**: `generateMetadata()` calls `Repository.getDistinctDepartureCities()` at request time. If DB is unavailable it catches and defaults to `index: false` (safe). When supply arrives, next request re-indexes automatically — no code change needed.
+- **No AggregateRating anywhere**: standards doc prohibits it; no reviews exist. Do not add until real review data exists.
+- **Seller in Product schema = operator, not PilgrimCompare**: enforced in `packageJsonLd()` helper; do not change.
+- **`NEUTRAL_SORT_DISCLOSURE` must be placed near the sort control** on all package list/search pages (DMCC Act 2024 Schedule 20). Already present on `/packages` and `/search/packages`.
+
+### Validation
+
+- `npx tsc --noEmit` pass
+- `npm run test` 1,425/1,425 (21 files)
 - `npm run build` 0 errors
