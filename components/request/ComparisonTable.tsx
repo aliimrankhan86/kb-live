@@ -133,7 +133,7 @@ export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
             <th scope="col" className="bg-[var(--surfaceDark)] border-b border-[var(--borderSubtle)]">
               <span className="sr-only">Feature</span>
             </th>
-            {comparisonRows.map((row, i) => {
+            {comparisonRows.map((row) => {
               const headerLabel =
                 row.operatorName && row.operatorName !== 'Not provided'
                   ? row.operatorName

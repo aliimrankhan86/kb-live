@@ -113,7 +113,7 @@ export function OperatorSidebar({ operatorName, verificationStatus, userRole, us
         </div>
 
         <div className="mt-4 border-t border-[rgba(255,255,255,0.1)] pt-4">
-          <a
+          <Link
             href="/"
             className="flex min-h-[44px] items-center gap-2 rounded-md px-3 py-2 text-xs text-[rgba(255,255,255,0.5)] hover:text-[rgba(255,255,255,0.85)] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFD31D]"
             onClick={() => setMobileOpen(false)}
@@ -122,7 +122,7 @@ export function OperatorSidebar({ operatorName, verificationStatus, userRole, us
               <path d="M15 18l-6-6 6-6" />
             </svg>
             Back to PilgrimCompare
-          </a>
+          </Link>
         </div>
       </aside>
     </>
