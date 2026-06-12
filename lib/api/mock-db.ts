@@ -365,7 +365,7 @@ const SEED_PACKAGES: Package[] = [
     inclusions: { visa: true, flights: true, transfers: true, meals: false },
     notes: 'Great value for flexible dates.',
     images: [
-      'https://images.unsplash.com/photo-1591608511725-1f6d3d07f4c3?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80',
     ],
   },
   {
@@ -443,7 +443,7 @@ const SEED_PACKAGES: Package[] = [
     roomOccupancyOptions: { single: false, double: true, triple: true, quad: true },
     inclusions: { visa: true, flights: true, transfers: true, meals: false },
     images: [
-      'https://images.unsplash.com/photo-1591608511725-1f6d3d07f4c3?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80',
     ],
   },
   {

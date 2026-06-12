@@ -296,7 +296,7 @@ async function main() {
       },
       inclusions: ['visa', 'flights', 'hotel', 'transfers'],
       images: [
-        'https://images.unsplash.com/photo-1591608511725-1f6d3d07f4c3?auto=format&fit=crop&w=800&q=80',
+        'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80',
       ],
     },
     update: {},
