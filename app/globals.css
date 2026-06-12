@@ -42,7 +42,7 @@ body::before {
 }
 
 [data-theme="light"] body::before {
-  background: rgba(246, 244, 238, 0.55);
+  background: rgba(246, 244, 238, 0.88);
 }
 
 /* Light theme: prophetic green scrollbar thumb, warm-stone track */
