@@ -3,7 +3,7 @@
 > **Single rolling tracker.** Any AI/dev: read this for current state. Update it after work is **done + tested + verified** (see `CLAUDE.md` rule).
 > Detailed handover lives in `AI_NOTES.md`. Cold-start brief: `HANDOFF.md`. Business: `BUSINESS.md`.
 
-**Last verified:** 2026-06-12 (light theme — all 7 steps) · **Branch:** `feature/light-theme` (PR pending → dev) · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
+**Last verified:** 2026-06-13 (light theme + search redesign + pagination — merged to dev + main) · **Branch:** `main` (clean) · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
 
 ---
 
@@ -15,8 +15,8 @@
 | `npm run build` | ✅ 0 errors |
 | `npx tsc --noEmit` | ✅ pass |
 | E2E `e2e/operator.spec.ts` | ✅ 30/30 pass (chromium + firefox + webkit) |
-| Production deploy | ✅ PR #54 → main, Vercel live 2026-06-12 |
-| Light theme branch | ✅ `feature/light-theme` — 7/7 steps done, PR pending |
+| Production deploy | ✅ main — Vercel live 2026-06-13 (light theme + search + pagination) |
+| Light theme | ✅ merged to dev + main 2026-06-13 |
 
 ---
 
@@ -126,7 +126,9 @@
 | Q6 — ranking transparency, Featured slots | ✅ Done 2026-06-12 (PR #52) | — |
 | Prompt 5 — transactional email suite (6 templates) | ✅ Done 2026-06-12 (PR #53) | — |
 | Prompt 6 — cron jobs + outcomes endpoint | ✅ Done 2026-06-12 (PR #53) | — |
-| Light theme (Madinah) — 7-step implementation | ✅ Done 2026-06-12 (`feature/light-theme`, PR pending) | — |
+| Light theme (Madinah) — 7-step implementation | ✅ Done 2026-06-13 (merged to dev + main) | — |
+| Search header redesign (world-class) | ✅ Done 2026-06-13 (merged to dev + main) | — |
+| Search results pagination (5/page) | ✅ Done 2026-06-13 (merged to dev + main) | — |
 | Plausible analytics wiring | ⏳ Not started | — |
 | `app_metadata.role` backfill (pre-2026-06-09 users) | ⏳ Not started | Needs Supabase SQL |
 | Registered office address in footer | ⏳ Not started | Awaiting virtual office |
@@ -138,7 +140,7 @@
 
 ## ▶️ Next actions (do in order)
 
-1. **Merge light theme:** PR `feature/light-theme` → `dev` → `main`.
+1. ~~**Merge light theme:** PR `feature/light-theme` → `dev` → `main`.~~ ✅ Done 2026-06-13.
 2. **Operational smoke test:** curl all 3 cron endpoints with `CRON_SECRET` from Vercel env vars.
 3. **First real enquiry:** submit test quote → confirm Emails 2+3 arrive via Resend logs.
 4. **Onboard first operator** via `/operator/onboarding`.

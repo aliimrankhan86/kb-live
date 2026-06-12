@@ -1034,3 +1034,60 @@ Use Resend dashboard → Logs to confirm email delivery after submitting a test 
 - `npx tsc --noEmit` pass
 - `npm run test` 1,818/1,818 (24 files, 8 new cron-auth tests)
 - `npm run build` 0 errors
+
+---
+
+## 25. Light Theme Refinements + Search Redesign + Pagination — 2026-06-13
+
+**Branch:** `feature/light-theme` (merged → dev → main 2026-06-13)
+**Commits:** `3fe92da` → `62908a4` (7 commits on top of §24)
+**Full reference:** `docs/light-theme.md`
+**Tests:** 1,818/1,818 pass · build 0 errors · `npx tsc --noEmit` clean
+
+### Changes on top of §24
+
+**Partner page CTA upgrade (`app/partner/page.tsx`)**
+- "Sign in to Dashboard" changed from ghost outline → filled green button (`bg-[var(--primary)]`)
+- Adapts correctly: gold in dark theme, prophetic green in light theme
+
+**ThemeToggle labeled (`components/theme/ThemeToggle.tsx`)**
+- Changed from icon-only to labeled pill: Moon+"Dark" in light mode, Sun+"Light" in dark mode
+- Shows the target mode (not current) — standard UX convention
+- `minHeight: 44px` maintained for touch target compliance
+
+**Background approach finalised**
+- Iterated through 4 approaches for light theme background (Kaaba SVG at various overlays)
+- Final resolution: **dark** keeps `kaaba-bg2.svg` at 80% overlay / `center 40%`; **light** uses clean `linear-gradient(160deg, #F8F6F1 0%, #EDE8DC 55%, #F4F0E7 100%)` — no SVG, no overlay
+- `[data-theme="light"] body { background-image: none }` + `body::before { display: none }` in `globals.css`
+
+**Dead Unsplash photo fix (`lib/api/mock-db.ts`, `prisma/seed.ts`)**
+- `photo-1591608511725-1f6d3d07f4c3` (deleted by Unsplash) → `photo-1542314831-068cd1dbfeeb`
+
+**Search header world-class redesign**
+- `components/search/packages.module.css`: big `1.875rem`/`800` count in `var(--yellow)`, surface-fill buttons with shadow, disclosure inline below count, tight single-row layout
+- `components/search/PackageList.tsx`: disclosure `<p>` moved inside `.searchResults`, `savedChip` moved into `.searchControls`, JSX restructured
+
+**Pagination (5 per page)**
+- `PACKAGES_PER_PAGE = 5` constant; `currentPage` state; `pagedPackages` slice
+- Resets to page 1 on sort, filter, or shortlist-only change
+- Uses existing `components/ui/Pagination` component
+- `window.scrollTo({ top: 0, behavior: 'smooth' })` on page change
+
+**Additional packages**
+- `mock-db.ts`: SEED_PACKAGES bumped to version 5, added pkg10–pkg17 (umrah + hajj variety, all operators)
+- `prisma/seed.ts`: added pkg7–pkg14 (upsert-safe), seeded to Supabase via `DATABASE_URL=<direct> npm run db:seed`
+- Result: 12 umrah packages visible on `/search/packages?type=umrah` → 3 pagination pages
+
+### Gotchas
+
+- **Supabase PgBouncer vs direct URL:** `npm run db:seed` must use `DIRECT_URL` (port 5432), not `DATABASE_URL` (PgBouncer port 6543) — PgBouncer rejects certain Prisma operations. Prefix: `DATABASE_URL="<direct-url>" npm run db:seed`.
+- **`kaaba-bg-light.svg`** was created and iterated but ultimately unused in the final light theme. File still in `public/` — safe to delete if desired.
+- **Quote wizard `#FFD31D`** — 5 step files still have hardcoded gold hex for the step indicator ring. Low priority; only affects light-mode users in the quote wizard. See `docs/light-theme.md §10`.
+- **Logo in light mode** — `text-logo-light.svg` exists but `WordmarkLogo.tsx` still renders the dark wordmark in both themes (dark text is sufficiently readable on ivory). Update when you want pixel-perfect brand expression in light mode.
+
+### Validation
+
+- `npm run test` 1,818/1,818 (24 files, unchanged count)
+- `npx tsc --noEmit` pass
+- `npm run build` 0 errors
+- Merged: `feature/light-theme` → `dev` → `main` (2026-06-13)
