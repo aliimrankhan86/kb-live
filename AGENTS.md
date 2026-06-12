@@ -6,16 +6,17 @@ This file tells any AI agent or developer exactly what they can touch, how to pr
 
 ## Hard rules
 
-1. **Read `docs/README_AI.md` and `docs/NOW.md` before doing anything.**
+1. **Read `AI_NOTES.md` and `docs/NOW.md` before doing anything.**
 2. **Read `docs/UX_GUIDELINES.md` before editing any UI component.**
 3. **Read `docs/SEO.md` before adding or changing any public route.**
 4. **Read `docs/OPERATOR_ONBOARDING.md` before working on operator features.**
-5. Only read and modify files listed in **Allowed files** for your scope.
-6. If you need a file not listed, ask first.
-7. Keep diffs small and focused. One concern per commit.
-8. Add stable `data-testid` attributes for anything Playwright will test.
-9. Accessibility is required: labels, keyboard support, focus management, clear errors.
-10. **Update the relevant doc(s) when your changes affect the spec** (e.g., new fields → update `OPERATOR_ONBOARDING.md`, new route → update `SEO.md`).
+5. **Read `AI_NOTES.md` §6 (Architecture) and `AI_NOTES.md` §7 (Feature Map) before working on any layout, shared component, or route structure.**
+6. Only read and modify files listed in **Allowed files** for your scope.
+7. If you need a file not listed, ask first.
+8. Keep diffs small and focused. One concern per commit.
+9. Add stable `data-testid` attributes for anything Playwright will test.
+10. Accessibility is required: labels, keyboard support, focus management, clear errors.
+11. **Update the relevant doc(s) when your changes affect the spec** (e.g., new fields → update `OPERATOR_ONBOARDING.md`, new route → update `SEO.md`).
 
 ## MANDATORY: Before every push
 
@@ -71,11 +72,11 @@ If you skip this, the push will be reverted.
 - `next.config.ts`
 - `tsconfig.json`
 - `docs/NOW.md` (MUST update before push)
-- `docs/README_AI.md`
 - `docs/UX_GUIDELINES.md` (MUST update when adding UI patterns)
 - `docs/SEO.md` (MUST update when adding routes)
 - `docs/OPERATOR_ONBOARDING.md` (MUST update when changing operator schema)
 - `docs/*.md`
+- `AI_NOTES.md`
 - `QA.md`
 
 ## Checks before handoff
