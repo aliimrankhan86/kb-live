@@ -3,7 +3,7 @@
 > **Single rolling tracker.** Any AI/dev: read this for current state. Update it after work is **done + tested + verified** (see `CLAUDE.md` rule).
 > Detailed handover lives in `AI_NOTES.md`. Cold-start brief: `HANDOFF.md`. Business: `BUSINESS.md`.
 
-**Last verified:** 2026-06-12 (Q4 mobile polish) · **Branch:** `feat/q4-mobile-polish` → PR → `dev` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
+**Last verified:** 2026-06-12 (Q1–Q6 + Prompts 5–6 production deploy) · **Branch:** `main` (PR #54 merged) · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
 
 ---
 
@@ -11,11 +11,11 @@
 
 | Check | State |
 | --- | --- |
-| `npm run test` | ✅ 238/238 pass (20 files) |
+| `npm run test` | ✅ 1,818/1,818 pass (24 files) |
 | `npm run build` | ✅ 0 errors |
 | `npx tsc --noEmit` | ✅ pass |
 | E2E `e2e/operator.spec.ts` | ✅ 30/30 pass (chromium + firefox + webkit) |
-| Lint | ✅ clean |
+| Production deploy | ✅ PR #54 → main, Vercel live 2026-06-12 |
 
 ---
 
@@ -121,14 +121,25 @@
 | Q2 — legal pages (`/terms`, `/privacy`, `/how-it-works`) | ✅ Done 2026-06-12 | — |
 | Q3 — IA/nav pass | ✅ Done 2026-06-12 | — |
 | Q4 — mobile polish 360/390/430px | ✅ Done 2026-06-12 | — |
-| Q5 — SEO metadata, JSON-LD, sitemap | Not started | Q1 done |
+| Q5 — SEO metadata, JSON-LD, sitemap | ✅ Done 2026-06-12 (PR #51) | — |
+| Q6 — ranking transparency, Featured slots | ✅ Done 2026-06-12 (PR #52) | — |
+| Prompt 5 — transactional email suite (6 templates) | ✅ Done 2026-06-12 (PR #53) | — |
+| Prompt 6 — cron jobs + outcomes endpoint | ✅ Done 2026-06-12 (PR #53) | — |
+| Plausible analytics wiring | ⏳ Not started | — |
+| `app_metadata.role` backfill (pre-2026-06-09 users) | ⏳ Not started | Needs Supabase SQL |
+| Registered office address in footer | ⏳ Not started | Awaiting virtual office |
+| Prompt 7 — Telegram operator alerts | ⏳ Not started | Prompts 5+6 live |
+| Prompt 8 — automation / operator data ingestion | ⏳ Not started | — |
+| Google Workspace upgrade | ⏳ Not started | First operator onboard |
 
 ---
 
 ## ▶️ Next actions (do in order)
 
-1. Raise PR `feat/q4-mobile-polish` → `dev` and merge after CI passes.
-2. Start Q5 — SEO pass (metadata, JSON-LD, sitemap). See `docs/PILGRIMCOMPARE_QUALITY_PROMPTS.md` → Q5.
+1. **Operational smoke test:** curl all 3 cron endpoints with `CRON_SECRET` from Vercel env vars.
+2. **First real enquiry:** submit test quote → confirm Emails 2+3 arrive via Resend logs.
+3. **Onboard first operator** via `/operator/onboarding`.
+4. Start Prompt 7 (Telegram alerts) once Prompts 5+6 confirmed working end-to-end.
 
 ---
 

@@ -7,13 +7,13 @@
 
 **Stack:** Next.js 15.5 (App Router, Server Components) · React 19 · TypeScript strict · Supabase (auth/Postgres/RLS/storage, `eu-west-2`) · Prisma · Tailwind · Zustand · Vitest + Playwright.
 
-**State (2026-06-10):** Branch `dev` (1 commit behind `main` — pending structural sync PR). Tests 232/232 ✅. Build clean ✅. MockDB removed from production paths. RLS audit complete. Transactional email suite live. All domain redirects working — `pilgrimcompare.com` and `www.pilgrimcompare.com` both 301 to `pilgrimcompare.co.uk`. Supabase email confirmations ON. **WordmarkLogo** component live in Header + Footer (`components/graphics/WordmarkLogo.tsx`, Nunito ExtraBold 800, `currentColor`). PR #34 merged to `main`.
+**State (2026-06-12):** Production on `main` (PR #54 merged). Tests 1,818/1,818 ✅. Build clean ✅. Q1–Q6 quality passes complete. Full transactional email suite live (6 templates via Resend). 3 Vercel cron jobs active (nudge-operators 08:00, outcome-followup 09:00, expire-packages 02:00 UTC). CRON_SECRET auth on all cron routes. `/how-we-rank` ranking transparency page live. Sitemap + footer updated. All domain redirects working. Supabase email confirmations branded.
 
-**Remaining setup items:** None — all setup complete. Email mailboxes `support/privacy/dpo/complaints@pilgrimcompare.co.uk` live via Cloudflare Email Routing (→ Gmail). Upgrade to Google Workspace when onboarding real operators.
+**Remaining setup items:** Operational only — curl-test 3 cron endpoints with CRON_SECRET, submit test enquiry to verify email delivery, onboard first operator. Email mailboxes live via Cloudflare Email Routing (→ Gmail). Upgrade to Google Workspace when onboarding real operators.
 
 **How to verify any change (mandatory before push):**
 ```bash
-npm run test     # 232/232 must pass
+npm run test     # 1,818/1,818 must pass
 npm run build    # 0 errors
 npx tsc --noEmit # pass
 # if UI/routes changed: Playwright smoke on / , /umrah , /search/packages at 320px + 1280px
