@@ -220,7 +220,7 @@ export function SignUpForm() {
 
       {passwordError && (
         <div
-          className="rounded-md border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400"
+          className="rounded-md border border-[var(--color-error)]/30 bg-[var(--color-error)]/10 px-4 py-3 text-sm text-[var(--color-error)]"
           role="alert"
           data-testid="signup-password-mismatch"
         >
@@ -230,7 +230,7 @@ export function SignUpForm() {
 
       {error && (
         <div
-          className="rounded-md border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400"
+          className="rounded-md border border-[var(--color-error)]/30 bg-[var(--color-error)]/10 px-4 py-3 text-sm text-[var(--color-error)]"
           role="alert"
           data-testid="signup-error"
         >

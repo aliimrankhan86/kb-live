@@ -27,7 +27,7 @@ export function WizardStep6Policies({ data, onChange, error }: Props) {
       </div>
 
       {error && (
-        <div role="alert" className="rounded border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        <div role="alert" className="rounded border border-[var(--color-error)]/30 bg-[var(--color-error)]/10 px-4 py-3 text-sm text-[var(--color-error)]">
           {error}
         </div>
       )}
@@ -49,7 +49,7 @@ export function WizardStep6Policies({ data, onChange, error }: Props) {
         />
         <div className="mt-1 flex justify-between text-xs text-[var(--textMuted)]">
           <span>{charCount < 10 && charCount > 0 ? 'Minimum 10 characters' : ''}</span>
-          <span className={charCount > 1000 ? 'text-red-400' : ''}>{charCount}/1000</span>
+          <span className={charCount > 1000 ? 'text-[var(--color-error)]' : ''}>{charCount}/1000</span>
         </div>
       </div>
 

@@ -38,7 +38,7 @@ export function PackageCsvExport({ operatorId }: { operatorId: string }) {
       onClick={handleExport}
       disabled={exporting}
       data-testid="package-csv-export-btn"
-      className="rounded border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
+      className="rounded border border-[var(--color-border-subtle)] bg-[var(--color-surface)] px-4 py-2 text-sm font-medium text-[var(--color-text-primary)] hover:bg-[var(--color-surface-subtle)] focus:outline-none focus:ring-2 focus:ring-[var(--color-success)] focus:ring-offset-2 transition-colors disabled:opacity-50"
     >
       {exporting ? 'Exporting...' : 'Export CSV'}
     </button>

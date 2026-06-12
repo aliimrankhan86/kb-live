@@ -37,9 +37,9 @@ export function OperatorSidebar({ operatorName, verificationStatus, userRole, us
   const statusBadge = verificationStatus === 'verified'
     ? { text: 'Verified', color: 'text-emerald-400' }
     : verificationStatus === 'pending'
-    ? { text: 'Pending', color: 'text-amber-400' }
+    ? { text: 'Pending', color: 'text-[var(--color-warning)]' }
     : verificationStatus === 'rejected'
-    ? { text: 'Rejected', color: 'text-red-400' }
+    ? { text: 'Rejected', color: 'text-[var(--color-error)]' }
     : { text: 'Unverified', color: 'text-[rgba(255,255,255,0.5)]' };
 
   const visibleNavItems = navItems.filter((item) => !item.adminOnly || userRole === 'admin');

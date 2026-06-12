@@ -258,7 +258,7 @@ export function PackagesBrowse({ packages, error }: PackagesBrowseProps) {
           <div
             role="alert"
             data-testid="compare-message"
-            className="rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-100"
+            className="rounded border border-[var(--color-warning)]/30 bg-[var(--color-warning)]/10 px-3 py-2 text-xs text-[var(--color-warning)]"
           >
             {compareMessage}
           </div>
@@ -266,8 +266,8 @@ export function PackagesBrowse({ packages, error }: PackagesBrowseProps) {
       </div>
 
       {error ? (
-        <div role="alert" className="rounded border border-red-500/30 bg-red-500/10 px-4 py-3">
-          <p className="text-sm text-red-100">{error}</p>
+        <div role="alert" className="rounded border border-[var(--color-error)]/30 bg-[var(--color-error)]/10 px-4 py-3">
+          <p className="text-sm text-[var(--color-error)]">{error}</p>
         </div>
       ) : null}
 

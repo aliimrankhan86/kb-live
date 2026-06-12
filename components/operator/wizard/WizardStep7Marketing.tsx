@@ -102,7 +102,7 @@ export function WizardStep7Marketing({ data, onChange, error }: Props) {
       </div>
 
       {error && (
-        <div role="alert" className="rounded border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        <div role="alert" className="rounded border border-[var(--color-error)]/30 bg-[var(--color-error)]/10 px-4 py-3 text-sm text-[var(--color-error)]">
           {error}
         </div>
       )}
@@ -133,7 +133,7 @@ export function WizardStep7Marketing({ data, onChange, error }: Props) {
                   type="button"
                   onClick={() => removeHighlight(i)}
                   aria-label={`Remove highlight ${i + 1}`}
-                  className="flex h-8 w-8 items-center justify-center rounded border border-[rgba(255,255,255,0.1)] text-[var(--textMuted)] hover:border-red-500/50 hover:text-red-400 transition-colors"
+                  className="flex h-8 w-8 items-center justify-center rounded border border-[rgba(255,255,255,0.1)] text-[var(--textMuted)] hover:border-[var(--color-error)]/50 hover:text-[var(--color-error)] transition-colors"
                 >
                   ×
                 </button>
@@ -184,7 +184,7 @@ export function WizardStep7Marketing({ data, onChange, error }: Props) {
         )}
 
         {uploadError && (
-          <p role="alert" className="mb-2 text-xs text-red-400">{uploadError}</p>
+          <p role="alert" className="mb-2 text-xs text-[var(--color-error)]">{uploadError}</p>
         )}
 
         <input

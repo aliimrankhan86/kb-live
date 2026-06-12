@@ -223,7 +223,7 @@ export default async function UmrahCostPage() {
             </h2>
             <ul className="space-y-3 text-sm text-[var(--textMuted)]">
               <li className="flex items-start gap-3">
-                <span className="text-red-400 font-bold mt-0.5" aria-label="Highest prices">
+                <span className="text-[var(--color-error)] font-bold mt-0.5" aria-label="Highest prices">
                   ↑↑
                 </span>
                 <span>
@@ -241,7 +241,7 @@ export default async function UmrahCostPage() {
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-green-400 font-bold mt-0.5" aria-label="Lowest prices">
+                <span className="text-[var(--color-success)] font-bold mt-0.5" aria-label="Lowest prices">
                   ↓
                 </span>
                 <span>

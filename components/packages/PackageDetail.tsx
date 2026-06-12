@@ -142,7 +142,7 @@ export function PackageDetail({ pkg, operator }: PackageDetailProps) {
                 const included = pkg.inclusions[key]
                 return (
                   <li key={key} className="flex gap-2.5">
-                    <span className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full ${included ? 'bg-green-500/15 text-green-400' : 'bg-[rgba(255,255,255,0.06)] text-[var(--textMuted)]'}`} aria-hidden="true">
+                    <span className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full ${included ? 'bg-[var(--color-success)]/15 text-[var(--color-success)]' : 'bg-[rgba(255,255,255,0.06)] text-[var(--textMuted)]'}`} aria-hidden="true">
                       {included ? (
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 6L9 17l-5-5" /></svg>
                       ) : (
@@ -151,7 +151,7 @@ export function PackageDetail({ pkg, operator }: PackageDetailProps) {
                     </span>
                     <span className="min-w-0">
                       <span className="text-sm font-medium text-[var(--text)]">
-                        {label}: <span className={included ? 'text-green-400' : 'text-[var(--textMuted)]'}>{included ? 'Included' : 'Not included'}</span>
+                        {label}: <span className={included ? 'text-[var(--color-success)]' : 'text-[var(--textMuted)]'}>{included ? 'Included' : 'Not included'}</span>
                       </span>
                       <span className="mt-0.5 block text-xs leading-snug text-[var(--textMuted)]">{help}</span>
                     </span>
@@ -249,18 +249,18 @@ export function PackageDetail({ pkg, operator }: PackageDetailProps) {
             <div className="mt-3 space-y-2 text-sm leading-relaxed text-[var(--textMuted)]">
               {operator?.atolNumber ? (
                 <p>
-                  <span className="font-bold text-green-400">✓</span> ATOL {operator.atolNumber}{' '}
+                  <span className="font-bold text-[var(--color-success)]">✓</span> ATOL {operator.atolNumber}{' '}
                   {operator.atolVerifiedAt
-                    ? <span className="text-xs text-green-400" data-testid="atol-verified-badge">(Verified by PilgrimCompare)</span>
+                    ? <span className="text-xs text-[var(--color-success)]" data-testid="atol-verified-badge">(Verified by PilgrimCompare)</span>
                     : <span className="text-xs text-[var(--textMuted)]" data-testid="atol-self-reported">(Self-reported)</span>}
                   {' '}— UK financial protection for flight-inclusive trips. You should receive an ATOL certificate with your confirmation.
                 </p>
               ) : null}
               {operator?.abtaMemberNumber ? (
                 <p>
-                  <span className="font-bold text-green-400">✓</span> ABTA {operator.abtaMemberNumber}{' '}
+                  <span className="font-bold text-[var(--color-success)]">✓</span> ABTA {operator.abtaMemberNumber}{' '}
                   {operator.abtaVerifiedAt
-                    ? <span className="text-xs text-green-400" data-testid="abta-verified-badge">(Verified by PilgrimCompare)</span>
+                    ? <span className="text-xs text-[var(--color-success)]" data-testid="abta-verified-badge">(Verified by PilgrimCompare)</span>
                     : <span className="text-xs text-[var(--textMuted)]" data-testid="abta-self-reported">(Self-reported)</span>}
                   {' '}— dispute resolution and booking protection.
                 </p>
@@ -329,7 +329,7 @@ function Fact({ term, value, hint }: { term: string; value: string; hint?: strin
 }
 
 function RailFact({ label, sub, tone }: { label: string; sub?: string; tone?: 'good' | 'warn' }) {
-  const color = tone === 'good' ? 'text-green-400' : tone === 'warn' ? 'text-[var(--danger)]' : 'text-[var(--text)]'
+  const color = tone === 'good' ? 'text-[var(--color-success)]' : tone === 'warn' ? 'text-[var(--danger)]' : 'text-[var(--text)]'
   return (
     <li className="flex items-start gap-2">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" strokeWidth="2.5" aria-hidden="true" className="mt-0.5 flex-shrink-0"><path d="M20 6L9 17l-5-5" /></svg>

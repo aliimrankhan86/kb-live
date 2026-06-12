@@ -38,16 +38,16 @@ describe('InclusionChip', () => {
     expect(chip).toHaveTextContent('Visa');
   });
 
-  it('included chip has green styling class', () => {
+  it('included chip has success token styling class', () => {
     render(<InclusionChip chip={{ label: 'Flights', included: true }} />);
     const chip = screen.getByTestId('inclusion-chip-flights');
-    expect(chip.className).toContain('green');
+    expect(chip.className).toContain('color-success');
   });
 
-  it('excluded chip does not have green styling', () => {
+  it('excluded chip does not have success token styling', () => {
     render(<InclusionChip chip={{ label: 'Meals', included: false }} />);
     const chip = screen.getByTestId('inclusion-chip-meals');
-    expect(chip.className).not.toContain('green-500');
+    expect(chip.className).not.toContain('color-success');
   });
 
   it('renders checkmark symbol for included chip', () => {
