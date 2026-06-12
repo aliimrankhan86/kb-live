@@ -3,7 +3,7 @@
 > **Single rolling tracker.** Any AI/dev: read this for current state. Update it after work is **done + tested + verified** (see `CLAUDE.md` rule).
 > Detailed handover lives in `AI_NOTES.md`. Cold-start brief: `HANDOFF.md`. Business: `BUSINESS.md`.
 
-**Last verified:** 2026-06-12 (Q1 brand & legal cleanup) · **Branch:** `feat/q1-brand-legal-cleanup` → PR → `dev` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
+**Last verified:** 2026-06-12 (Q4 mobile polish) · **Branch:** `feat/q4-mobile-polish` → PR → `dev` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
 
 ---
 
@@ -11,7 +11,7 @@
 
 | Check | State |
 | --- | --- |
-| `npm run test` | ✅ 235/235 pass (19 files) |
+| `npm run test` | ✅ 238/238 pass (20 files) |
 | `npm run build` | ✅ 0 errors |
 | `npx tsc --noEmit` | ✅ pass |
 | E2E `e2e/operator.spec.ts` | ✅ 30/30 pass (chromium + firefox + webkit) |
@@ -118,15 +118,17 @@
 | Q1 quality pass — KaabaTrip eradication | ✅ Done 2026-06-12 | — |
 | Q1 quality pass — banned-phrase audit (ATOL blanket claims, Partner→Operator) | ✅ Done 2026-06-12 | — |
 | Q1 quality pass — dynamic departure cities | ✅ Done 2026-06-12 | — |
-| Raise PR `feat/q1-brand-legal-cleanup` → `dev` | ⏳ Pending | — |
-| Q2 — legal pages (`/terms`, `/privacy`, `/how-it-works`) | Not started | Q1 PR merged |
+| Q2 — legal pages (`/terms`, `/privacy`, `/how-it-works`) | ✅ Done 2026-06-12 | — |
+| Q3 — IA/nav pass | ✅ Done 2026-06-12 | — |
+| Q4 — mobile polish 360/390/430px | ✅ Done 2026-06-12 | — |
+| Q5 — SEO metadata, JSON-LD, sitemap | Not started | Q1 done |
 
 ---
 
 ## ▶️ Next actions (do in order)
 
-1. Raise PR `feat/q1-brand-legal-cleanup` → `dev` and merge after CI passes.
-2. Start Q2 — legal pages (`/terms`, `/privacy`, `/how-it-works`). See `docs/PILGRIMCOMPARE_QUALITY_PROMPTS.md` → Q2.
+1. Raise PR `feat/q4-mobile-polish` → `dev` and merge after CI passes.
+2. Start Q5 — SEO pass (metadata, JSON-LD, sitemap). See `docs/PILGRIMCOMPARE_QUALITY_PROMPTS.md` → Q5.
 
 ---
 

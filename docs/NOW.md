@@ -6,9 +6,9 @@
 
 ## Branch & goal
 
-- **Branch:** `feat/q3-ia-nav` (off `dev`) → PR → `dev` → `main`
-- **Goal:** Q3 complete — IA/nav pass. Next: Q4 mobile polish.
-- **Current source-of-truth note:** Q3 verified 2026-06-12. Full detail in `AI_NOTES.md` §19.
+- **Branch:** `feat/q4-mobile-polish` (off `dev`) → PR → `dev` → `main`
+- **Goal:** Q4 complete — mobile polish 360/390/430px. Next: Q5 SEO pass.
+- **Current source-of-truth note:** Q4 verified 2026-06-12. Full detail in `AI_NOTES.md` §20.
 - **Canonical handover:** `AI_NOTES.md` is the single source of truth for verified status, implementation posture, and pending areas.
 
 ## What works (verified)
@@ -17,6 +17,20 @@
 - **Build**: `npm run build` passes with 0 errors — verified 2026-06-12.
 - **TypeScript**: `npx tsc --noEmit` passes — verified 2026-06-12.
 - **Architecture decision**: Supabase + Prisma + Upstash Redis is the correct target/production architecture. MockDB is not the production architecture, but production-facing MockDB imports remain and are now documented as launch blockers in `AI_NOTES.md` §0.
+
+## Changes made in this session (2026-06-12 — Q4 Mobile Polish)
+
+| Task | What | Files |
+| ---- | ---- | ----- |
+| GROUP1 Home/Umrah tap targets | Corridor + FAQ nav links `inline-flex min-h-[44px]` | `app/page.tsx`, `app/umrah/page.tsx` |
+| GROUP2 Search UI tap targets | savedChip/filterChip/clearFilters 44px; CompareBar chipRemove hit area expanded to 44px | `components/search/packages.module.css`, `components/search/CompareBar.module.css` |
+| GROUP3 ComparisonTable overflow | `overflow-x:auto` wrapper; `min-w-[320px]` table | `components/request/ComparisonTable.tsx` |
+| GROUP4 Quote steps a11y | Step4 room inputs: id/htmlFor/min-h-44/inputMode; Step5 label→textarea linked; data-sharing disclosure added | `components/quote/steps/Step4GroupBudget.tsx`, `components/quote/steps/Step5Review.tsx` |
+| GROUP6 Confirmation clipboard | New `ReferenceCodeDisplay` client component; confirmation page uses it | `components/request/ReferenceCodeDisplay.tsx`, `app/requests/[id]/confirmation/page.tsx` |
+| GROUP7 Auth tap targets | Login/signup tab buttons + forgot-password/back links `min-h-[44px]` | `components/auth/LoginForm.tsx`, `components/auth/SignUpForm.tsx` |
+| GROUP8 CookieConsent | Accurate copy (no analytics cookies); removed analytics table row; 'Accept all' → 'Accept'; all buttons min-h-[44px]; table `overflow-x:auto` | `components/compliance/CookieConsent.tsx` |
+
+**Verification:** `npx tsc --noEmit` pass · `npm run test` 238/238 · `npm run build` 0 errors.
 
 ## Changes made in this session (2026-06-12 — Q3 IA/Nav Pass)
 

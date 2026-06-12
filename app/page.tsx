@@ -80,7 +80,7 @@ export default async function Home() {
             <Link
               key={href}
               href={href}
-              className="rounded-lg border border-[var(--border)] bg-[var(--surfaceDark)] px-4 py-3 text-sm font-medium text-[var(--text)] hover:border-[var(--yellow)]/40 hover:text-[var(--yellow)] transition-colors text-center"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surfaceDark)] px-4 py-2 text-sm font-medium text-[var(--text)] hover:border-[var(--yellow)]/40 hover:text-[var(--yellow)] transition-colors text-center"
             >
               {label}
             </Link>

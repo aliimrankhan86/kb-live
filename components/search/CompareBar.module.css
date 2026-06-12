@@ -89,8 +89,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  /* Visual size 24px; tap target expanded to 44px via padding + negative margin */
   width: 24px;
   height: 24px;
+  padding: 10px;
+  margin: -10px -4px -10px -6px;
+  box-sizing: content-box;
   border: none;
   background: transparent;
   color: var(--textMuted);

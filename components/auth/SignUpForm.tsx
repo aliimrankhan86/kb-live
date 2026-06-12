@@ -182,7 +182,7 @@ export function SignUpForm() {
           role="tab"
           aria-selected={role === 'customer'}
           onClick={() => setRole('customer')}
-          className={`rounded-md border px-3 py-2.5 text-sm font-medium transition-colors ${
+          className={`min-h-[44px] rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
             role === 'customer'
               ? 'border-[var(--yellow)] bg-[rgba(255,211,29,0.12)] text-[var(--text)]'
               : 'border-[var(--borderSubtle)] text-[var(--textMuted)] hover:border-[var(--borderStrong)]'
@@ -196,7 +196,7 @@ export function SignUpForm() {
           role="tab"
           aria-selected={role === 'operator'}
           onClick={() => setRole('operator')}
-          className={`rounded-md border px-3 py-2.5 text-sm font-medium transition-colors ${
+          className={`min-h-[44px] rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
             role === 'operator'
               ? 'border-[var(--yellow)] bg-[rgba(255,211,29,0.12)] text-[var(--text)]'
               : 'border-[var(--borderSubtle)] text-[var(--textMuted)] hover:border-[var(--borderStrong)]'
