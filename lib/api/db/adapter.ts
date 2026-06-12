@@ -1,4 +1,5 @@
 import { prisma } from './prisma';
+import { UK_DEPARTURE_AIRPORTS } from '@/lib/airports';
 import type {
   AnalyticsEvent,
   AuditLogEntry,
@@ -347,6 +348,20 @@ export const DBAdapter = {
   // Packages
   getPackages: async (): Promise<Package[]> =>
     (await prisma.package.findMany()).map(mapPackage),
+
+  getDistinctDepartureCities: async (): Promise<string[]> => {
+    const rows = await prisma.package.findMany({
+      where: { status: 'published', departureAirport: { not: null } },
+      select: { departureAirport: true },
+    });
+    const citySet = new Set<string>();
+    for (const row of rows) {
+      if (!row.departureAirport) continue;
+      const airport = UK_DEPARTURE_AIRPORTS.find((a) => a.code === row.departureAirport);
+      if (airport) citySet.add(airport.city);
+    }
+    return [...citySet].sort();
+  },
 
   savePackage: async (pkg: Package): Promise<Package> => {
     const data = {

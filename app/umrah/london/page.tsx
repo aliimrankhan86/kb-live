@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import { CityCorridor } from '@/components/marketing/CityCorridor'
 import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
+import { Repository } from '@/lib/api/repository'
 
 export const metadata: Metadata = {
   title: 'Umrah Packages from London 2026 – Compare & Book',
@@ -55,10 +56,18 @@ const pageJsonLd = graphJsonLd([
   faqPageJsonLd(faqs),
 ])
 
-export default function LondonUmrahPage() {
+export default async function LondonUmrahPage() {
+  const departureCities = await Repository.getDistinctDepartureCities()
+  const hasPackages = departureCities.includes('London')
+
   return (
     <>
       <JsonLdScript data={pageJsonLd} />
+      {!hasPackages && (
+        <p className="mx-auto mt-8 max-w-3xl px-4 rounded-lg border border-[var(--border)] bg-[var(--surfaceDark)] py-4 text-sm text-[var(--textMuted)]">
+          No packages currently listed from London. New operators are being added.
+        </p>
+      )}
       <CityCorridor
         city="London"
         h1="Umrah Packages from London"

@@ -15,7 +15,7 @@ import { QuoteRequest } from '@/lib/types';
 import { parseQuotePrefillParams } from '@/lib/quote-prefill';
 import { Button } from '@/components/ui';
 
-export function QuoteRequestWizard() {
+export function QuoteRequestWizard({ cities }: { cities: string[] }) {
   const { draft, step, nextStep, prevStep, reset, setDraft } = useQuoteRequestStore();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -88,7 +88,7 @@ export function QuoteRequestWizard() {
       case 1:
         return <Step1TypeSeason />;
       case 2:
-        return <Step2LocationDates />;
+        return <Step2LocationDates cities={cities} />;
       case 3:
         return <Step3StayDetails />;
       case 4:

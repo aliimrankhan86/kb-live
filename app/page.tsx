@@ -2,11 +2,9 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Hero } from '@/components/marketing/Hero'
 import { JsonLdScript, faqPageJsonLd, graphJsonLd, organizationJsonLd, webPageJsonLd, websiteJsonLd } from '@/lib/seo/json-ld'
+import { Repository } from '@/lib/api/repository'
 
-const corridorLinks = [
-  { label: 'Umrah from London', href: '/umrah/london' },
-  { label: 'Umrah from Birmingham', href: '/umrah/birmingham' },
-  { label: 'Umrah from Manchester', href: '/umrah/manchester' },
+const STATIC_CORRIDOR_LINKS = [
   { label: 'Ramadan Umrah 2027', href: '/umrah/ramadan' },
   { label: 'Umrah cost guide', href: '/umrah/cost' },
   { label: 'Hajj packages 2027', href: '/hajj' },
@@ -60,7 +58,14 @@ const homeJsonLd = graphJsonLd([
   ]),
 ])
 
-export default function Home() {
+export default async function Home() {
+  const departureCities = await Repository.getDistinctDepartureCities()
+  const cityLinks = departureCities.map((city) => ({
+    label: `Umrah from ${city}`,
+    href: `/umrah/${city.toLowerCase()}`,
+  }))
+  const corridorLinks = [...cityLinks, ...STATIC_CORRIDOR_LINKS]
+
   return (
     <>
       <JsonLdScript data={homeJsonLd} />
