@@ -3,16 +3,16 @@
 > **Single rolling tracker.** Any AI/dev: read this for current state. Update it after work is **done + tested + verified** (see `CLAUDE.md` rule).
 > Detailed handover lives in `AI_NOTES.md`. Cold-start brief: `HANDOFF.md`. Business: `BUSINESS.md`.
 
-**Last verified:** 2026-06-11 (Supabase keep-alive cron) · **Branch:** `chore/supabase-keep-alive` → **PR [#45](https://github.com/aliimrankhan86/kb-live/pull/45) open to `dev`** · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
+**Last verified:** 2026-06-12 (Q1 brand & legal cleanup) · **Branch:** `feat/q1-brand-legal-cleanup` → PR → `dev` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
 
 ---
 
-## Health (verified 2026-06-11)
+## Health (verified 2026-06-12)
 
 | Check | State |
 | --- | --- |
 | `npm run test` | ✅ 235/235 pass (19 files) |
-| `npm run build` | ✅ 0 errors (known Supabase Edge + webpack cache warnings only) |
+| `npm run build` | ✅ 0 errors |
 | `npx tsc --noEmit` | ✅ pass |
 | E2E `e2e/operator.spec.ts` | ✅ 30/30 pass (chromium + firefox + webkit) |
 | Lint | ✅ clean |
@@ -115,15 +115,18 @@
 
 | Item | Status | Blocker |
 | --- | --- | --- |
-| Sync `main` → `dev` merge commit | PR needed (0 files changed, structural only) | Create PR `base:dev ← compare:main` on GitHub |
-| Q1 quality pass | Not started | `docs/PILGRIMCOMPARE_LANGUAGE_AND_LEGAL_STANDARDS.md` committed (founder task) |
+| Q1 quality pass — KaabaTrip eradication | ✅ Done 2026-06-12 | — |
+| Q1 quality pass — banned-phrase audit (ATOL blanket claims, Partner→Operator) | ✅ Done 2026-06-12 | — |
+| Q1 quality pass — dynamic departure cities | ✅ Done 2026-06-12 | — |
+| Raise PR `feat/q1-brand-legal-cleanup` → `dev` | ⏳ Pending | — |
+| Q2 — legal pages (`/terms`, `/privacy`, `/how-it-works`) | Not started | Q1 PR merged |
 
 ---
 
 ## ▶️ Next actions (do in order)
 
-1. Merge PR `main → dev` to bring `dev` in sync with `main` (1 commit, 0 files changed — the PR #34 merge commit).
-2. Start Q1 — PilgrimCompare language sweep + banned-phrase audit + dynamic departure cities. See `docs/PILGRIMCOMPARE_QUALITY_PROMPTS.md` → Q1.
+1. Raise PR `feat/q1-brand-legal-cleanup` → `dev` and merge after CI passes.
+2. Start Q2 — legal pages (`/terms`, `/privacy`, `/how-it-works`). See `docs/PILGRIMCOMPARE_QUALITY_PROMPTS.md` → Q2.
 
 ---
 
