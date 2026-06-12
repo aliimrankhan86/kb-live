@@ -161,7 +161,7 @@ export function LoginForm() {
           <button
             type="button"
             onClick={() => { setShowForgot(false); setError(''); setForgotSent(false); }}
-            className="text-[var(--yellow)] hover:underline"
+            className="inline-flex min-h-[44px] items-center text-[var(--yellow)] hover:underline"
             data-testid="login-back-to-signin"
           >
             Back to Sign In
@@ -180,7 +180,7 @@ export function LoginForm() {
           role="tab"
           aria-selected={activeTab === 'customer'}
           onClick={() => setActiveTab('customer')}
-          className={`rounded-md border px-3 py-2.5 text-sm font-medium transition-colors ${
+          className={`min-h-[44px] rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
             activeTab === 'customer'
               ? 'border-[var(--yellow)] bg-[rgba(255,211,29,0.12)] text-[var(--text)]'
               : 'border-[var(--borderSubtle)] text-[var(--textMuted)] hover:border-[var(--borderStrong)]'
@@ -194,7 +194,7 @@ export function LoginForm() {
           role="tab"
           aria-selected={activeTab === 'partner'}
           onClick={() => setActiveTab('partner')}
-          className={`rounded-md border px-3 py-2.5 text-sm font-medium transition-colors ${
+          className={`min-h-[44px] rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
             activeTab === 'partner'
               ? 'border-[var(--yellow)] bg-[rgba(255,211,29,0.12)] text-[var(--text)]'
               : 'border-[var(--borderSubtle)] text-[var(--textMuted)] hover:border-[var(--borderStrong)]'
@@ -263,7 +263,7 @@ export function LoginForm() {
           <button
             type="button"
             onClick={() => setShowForgot(true)}
-            className="text-xs text-[var(--textMuted)] hover:text-[var(--yellow)] transition-colors"
+            className="inline-flex min-h-[44px] items-center text-xs text-[var(--textMuted)] hover:text-[var(--yellow)] transition-colors"
             data-testid="login-forgot-password"
           >
             Forgot your password?
