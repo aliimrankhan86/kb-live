@@ -1,12 +1,54 @@
 import type { Metadata } from 'next';
+import { JsonLdScript, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld';
 
 export const metadata: Metadata = {
   title: 'How PilgrimCompare Works | Compare Umrah Packages from Verified UK Operators',
   description:
-    'Compare Umrah packages side by side, send an enquiry to your chosen operator, and book directly. PilgrimCompare is a comparison and enquiry service — not a travel agent.',
+    'Compare Umrah packages side by side, send an enquiry to your chosen operator, and pay them directly. PilgrimCompare is a comparison and enquiry service — not a travel agent.',
   alternates: { canonical: '/how-it-works' },
   robots: { index: true, follow: true },
+  openGraph: {
+    title: 'How PilgrimCompare Works | Compare Umrah Packages',
+    description:
+      'Compare Umrah packages, send an enquiry to your chosen operator, and pay them directly. Not a travel agent — a comparison service.',
+    url: 'https://pilgrimcompare.co.uk/how-it-works',
+    siteName: 'PilgrimCompare',
+    type: 'website',
+    locale: 'en_GB',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'How PilgrimCompare Works | Compare Umrah Packages',
+    description:
+      'Compare Umrah packages, send an enquiry, and pay the operator directly. Comparison and enquiry service — not a travel agent.',
+  },
 };
+
+const pageJsonLd = graphJsonLd([
+  webPageJsonLd({
+    path: '/how-it-works',
+    name: 'How PilgrimCompare Works — Compare Umrah Packages from Verified UK Operators',
+    description:
+      'PilgrimCompare is a UK comparison and enquiry service for Umrah packages. Compare operators, send an enquiry, pay the operator directly.',
+  }),
+  faqPageJsonLd([
+    {
+      question: 'Is PilgrimCompare a travel agent?',
+      answer:
+        'No. PilgrimCompare is a comparison and enquiry service. We list packages from independent, verified UK travel operators so you can compare them side by side and send enquiries directly. We do not sell travel, take bookings, or handle payments.',
+    },
+    {
+      question: 'Who do I pay for an Umrah package found on PilgrimCompare?',
+      answer:
+        'You pay the operator directly. PilgrimCompare does not receive or hold your payment. Your travel contract, cancellations, and refunds are with the operator you choose.',
+    },
+    {
+      question: 'What does my PilgrimCompare reference code mean?',
+      answer:
+        'Your PilgrimCompare reference code is a tracking code, not a payment receipt. It allows both you and PilgrimCompare to track your enquiry.',
+    },
+  ]),
+]);
 
 const STEPS = [
   {
@@ -43,6 +85,8 @@ const STEPS = [
 
 export default function HowItWorksPage() {
   return (
+    <>
+    <JsonLdScript data={pageJsonLd} />
     <main className="min-h-screen bg-[var(--background)] text-[var(--text)]">
       <div className="mx-auto max-w-3xl px-4 py-12">
         <h1 className="mb-3 text-3xl font-bold">How PilgrimCompare Works</h1>
@@ -119,5 +163,6 @@ export default function HowItWorksPage() {
         </section>
       </div>
     </main>
+    </>
   );
 }
