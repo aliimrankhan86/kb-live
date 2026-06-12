@@ -8,6 +8,7 @@ import { Footer } from "@/components/layout/Footer";
 import { CookieConsent } from "@/components/compliance/CookieConsent";
 import { JsonLdScript, graphJsonLd, organizationJsonLd, websiteJsonLd } from "@/lib/seo/json-ld";
 import { Repository } from "@/lib/api/repository";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -48,6 +49,13 @@ export default async function RootLayout({
 
   return (
     <html lang="en-GB" className={`${exo2Font.variable} ${inter.variable} ${nunito.variable}`} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className="antialiased min-h-screen flex flex-col">
         <JsonLdScript data={siteJsonLd} />
         <a
@@ -56,12 +64,14 @@ export default async function RootLayout({
         >
           Skip to main content
         </a>
-        <Header />
-        <main id="main-content" className="flex-1">
-          {children}
-        </main>
-        <Footer cities={departureCities} />
-        <CookieConsent />
+        <ThemeProvider>
+          <Header />
+          <main id="main-content" className="flex-1">
+            {children}
+          </main>
+          <Footer cities={departureCities} />
+          <CookieConsent />
+        </ThemeProvider>
       </body>
     </html>
   );
