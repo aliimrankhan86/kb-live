@@ -73,7 +73,7 @@ export function HajjInterestForm() {
         <p
           id="hajj-form-status"
           role={status === 'error' ? 'alert' : 'status'}
-          className={`text-sm mb-6 ${status === 'error' ? 'text-[var(--danger)]' : 'text-green-400'}`}
+          className={`text-sm mb-6 ${status === 'error' ? 'text-[var(--danger)]' : 'text-[var(--color-success)]'}`}
           data-testid="hajj-form-message"
         >
           {message}

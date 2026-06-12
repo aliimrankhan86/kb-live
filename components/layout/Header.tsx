@@ -7,6 +7,9 @@ import { Logo } from '@/components/graphics/Logo';
 import { WordmarkLogo } from '@/components/graphics/WordmarkLogo';
 import type { UserRole } from '@/lib/types';
 import styles from './header.module.css';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
+import { useTheme } from '@/components/theme/ThemeProvider';
+import { Sun, Moon } from 'lucide-react';
 
 interface AuthUser {
   id: string;
@@ -179,6 +182,9 @@ export function Header({ className = '' }: { className?: string }) {
     return () => drawer.removeEventListener('keydown', handleTab);
   }, [mobileDrawerOpen]);
 
+  const { theme, toggleTheme } = useTheme();
+  const isLight = theme === 'light';
+
   const isOperator = user?.role === 'operator';
   const isAdmin = user?.role === 'admin';
   const isCustomer = user?.role === 'customer';
@@ -224,7 +230,7 @@ export function Header({ className = '' }: { className?: string }) {
         {/* Brand */}
         <Link href="/" className={styles.header__brand} aria-label="PilgrimCompare - Go to homepage">
           <Logo size={32} />
-          <WordmarkLogo className={styles.header__textLogo} height={30} />
+          <WordmarkLogo className={styles.header__textLogo} height={30} pilgrimColor={isLight ? '#111827' : undefined} />
         </Link>
 
         {/* Desktop Navigation */}
@@ -345,6 +351,7 @@ export function Header({ className = '' }: { className?: string }) {
               Sign in
             </Link>
           )}
+          <ThemeToggle />
         </nav>
 
         {/* Mobile Hamburger */}
@@ -394,7 +401,7 @@ export function Header({ className = '' }: { className?: string }) {
           <div className={styles.header__mobileDrawerHeader}>
             <Link href="/" className={styles.header__mobileBrand} onClick={() => setMobileDrawerOpen(false)}>
               <Logo size={28} />
-              <WordmarkLogo className={styles.header__textLogoMobile} height={26} />
+              <WordmarkLogo className={styles.header__textLogoMobile} height={26} pilgrimColor={isLight ? '#111827' : undefined} />
             </Link>
             <button
               className={styles.header__mobileClose}
@@ -410,6 +417,19 @@ export function Header({ className = '' }: { className?: string }) {
 
           {/* Nav section */}
           <nav className={styles.header__mobileNav} aria-label="Mobile menu">
+
+            {/* Theme toggle — above all nav links */}
+            <button
+              onClick={toggleTheme}
+              className={styles.header__mobileThemeRow}
+              aria-label={isLight ? 'Switch to dark theme' : 'Switch to light theme'}
+              data-testid="mobile-theme-toggle"
+            >
+              <span className={styles.header__mobileThemeLabel}>
+                {isLight ? <Moon size={18} aria-hidden="true" /> : <Sun size={18} aria-hidden="true" />}
+                {isLight ? 'Dark theme' : 'Light theme'}
+              </span>
+            </button>
 
             {/* Core nav links */}
             <div className={styles.header__mobileSectionLabel}>Explore</div>

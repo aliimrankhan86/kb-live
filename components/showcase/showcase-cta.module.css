@@ -61,25 +61,25 @@
   background: transparent;
   color: var(--yellow);
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(255, 211, 29, 0.3);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--primary) 30%, transparent);
 }
 
 .cta__button:focus {
-  outline: 2px solid var(--yellow);
+  outline: 2px solid var(--focusRing);
   outline-offset: 2px;
 }
 
 .cta__buttonSecondary {
   background: transparent;
   color: var(--text);
-  border-color: rgba(255, 255, 255, 0.3);
+  border-color: var(--borderStrong);
 }
 
 .cta__buttonSecondary:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: color-mix(in srgb, var(--text) 10%, transparent);
   color: var(--text);
-  border-color: rgba(255, 255, 255, 0.5);
-  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.1);
+  border-color: color-mix(in srgb, var(--text) 50%, transparent);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--text) 10%, transparent);
 }
 
 /* Responsive styles */
@@ -87,20 +87,20 @@
   .cta {
     padding: 3rem 0 4rem;
   }
-  
+
   .cta__title {
     font-size: 2rem;
   }
-  
+
   .cta__description {
     font-size: 1rem;
     margin-bottom: 2rem;
   }
-  
+
   .cta__buttons {
     gap: 0.75rem;
   }
-  
+
   .cta__button {
     padding: 0.875rem 1.5rem;
     font-size: 0.9rem;
@@ -112,23 +112,23 @@
   .cta__container {
     padding: 0 1rem;
   }
-  
+
   .cta__title {
     font-size: 1.75rem;
     margin-bottom: 1rem;
   }
-  
+
   .cta__description {
     font-size: 0.9rem;
     margin-bottom: 1.5rem;
   }
-  
+
   .cta__buttons {
     flex-direction: column;
     align-items: center;
     gap: 0.75rem;
   }
-  
+
   .cta__button {
     width: 100%;
     max-width: 300px;
@@ -140,15 +140,15 @@
   .cta {
     padding: 2rem 0 3rem;
   }
-  
+
   .cta__title {
     font-size: 1.5rem;
   }
-  
+
   .cta__description {
     font-size: 0.85rem;
   }
-  
+
   .cta__button {
     padding: 0.75rem 1.25rem;
     font-size: 0.85rem;

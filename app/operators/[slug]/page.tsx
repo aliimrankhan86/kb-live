@@ -60,9 +60,9 @@ export async function generateMetadata({
 
 const renderNotFound = (message: string) => (
   <section className="w-full max-w-3xl mx-auto px-4 py-16">
-    <div role="alert" className="rounded border border-red-500/30 bg-red-500/10 px-5 py-4">
+    <div role="alert" className="rounded border border-[var(--color-error)]/30 bg-[var(--color-error)]/10 px-5 py-4">
       <h1 className="text-2xl font-semibold text-[var(--text)]">Operator not found</h1>
-      <p className="mt-2 text-sm text-red-100">{message}</p>
+      <p className="mt-2 text-sm text-[var(--color-error)]">{message}</p>
     </div>
   </section>
 )

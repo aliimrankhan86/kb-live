@@ -138,7 +138,7 @@ export function LoginForm() {
 
             {error && (
               <div
-                className="rounded-md border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400"
+                className="rounded-md border border-[var(--color-error)]/30 bg-[var(--color-error)]/10 px-4 py-3 text-sm text-[var(--color-error)]"
                 role="alert"
                 data-testid="login-forgot-error"
               >
@@ -218,7 +218,7 @@ export function LoginForm() {
 
       {error && (
         <div
-          className="rounded-md border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400 space-y-1"
+          className="rounded-md border border-[var(--color-error)]/30 bg-[var(--color-error)]/10 px-4 py-3 text-sm text-[var(--color-error)] space-y-1"
           role="alert"
           data-testid="login-error"
         >
@@ -227,7 +227,7 @@ export function LoginForm() {
             <p>
               <Link
                 href={`/verify-email?email=${encodeURIComponent(email)}`}
-                className="underline text-red-300 hover:text-red-200"
+                className="underline text-[var(--color-error)] hover:text-[var(--color-error)]"
               >
                 Resend verification email
               </Link>

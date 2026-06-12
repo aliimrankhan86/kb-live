@@ -21,7 +21,7 @@
   left: 0;
   width: 100%;
   height: 8px;
-  background: #2D2D2D;
+  background: var(--color-surface-subtle);
   border-radius: 6px;
   transform: translateY(-50%);
   z-index: 1;
@@ -64,13 +64,13 @@
   -webkit-appearance: none;
   width: 28px;
   height: 28px;
-  background: #D4AF37;
+  background: var(--color-accent-gold);
   border-radius: 50%;
   cursor: pointer;
-  border: 2px solid #1A1A1A;
+  border: 2px solid var(--color-surface);
   box-shadow:
     0 2px 6px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.08);
+    0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
   pointer-events: auto;
   position: relative;
@@ -81,7 +81,7 @@
   transform: scale(1.15);
   box-shadow:
     0 4px 12px rgba(0, 0, 0, 0.5),
-    0 0 0 2px rgba(255, 255, 255, 0.15);
+    0 0 0 2px color-mix(in srgb, var(--text) 15%, transparent);
 }
 
 /* Thumb — Firefox */
@@ -89,13 +89,13 @@
   appearance: none;
   width: 28px;
   height: 28px;
-  background: #D4AF37;
+  background: var(--color-accent-gold);
   border-radius: 50%;
   cursor: pointer;
-  border: 2px solid #1A1A1A;
+  border: 2px solid var(--color-surface);
   box-shadow:
     0 2px 6px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.08);
+    0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
   pointer-events: auto;
   position: relative;
@@ -106,17 +106,17 @@
   transform: scale(1.15);
   box-shadow:
     0 4px 12px rgba(0, 0, 0, 0.5),
-    0 0 0 2px rgba(255, 255, 255, 0.15);
+    0 0 0 2px color-mix(in srgb, var(--text) 15%, transparent);
 }
 
 /* Focus visible */
 .rangeInput:focus-visible::-webkit-slider-thumb {
-  outline: 2px solid var(--yellow);
+  outline: 2px solid var(--focusRing);
   outline-offset: 2px;
 }
 
 .rangeInput:focus-visible::-moz-range-thumb {
-  outline: 2px solid var(--yellow);
+  outline: 2px solid var(--focusRing);
   outline-offset: 2px;
 }
 

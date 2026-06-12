@@ -225,7 +225,7 @@ export function OperatorProfileForm({ operator }: Props) {
         <Button onClick={handleSave} disabled={saving} data-testid="profile-save">
           {saving ? 'Saving...' : 'Save Changes'}
         </Button>
-        {saved && <span className="text-sm text-green-500" role="status">Saved successfully</span>}
+        {saved && <span className="text-sm text-[var(--color-success)]" role="status">Saved successfully</span>}
       </div>
     </div>
   );

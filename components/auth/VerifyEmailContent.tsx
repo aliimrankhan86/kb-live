@@ -75,9 +75,9 @@ export function VerifyEmailContent() {
       {email && (
         <div className="space-y-2">
           {resendStatus === 'sent' ? (
-            <p className="text-sm text-green-400">Verification email sent! Check your inbox.</p>
+            <p className="text-sm text-[var(--color-success)]">Verification email sent! Check your inbox.</p>
           ) : resendStatus === 'error' ? (
-            <p className="text-sm text-red-400">Something went wrong. Please try again.</p>
+            <p className="text-sm text-[var(--color-error)]">Something went wrong. Please try again.</p>
           ) : null}
           <Button
             variant="secondary"

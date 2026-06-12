@@ -217,7 +217,7 @@ export function PackageWizard({ initialData, onSuccess, onCancel }: Props) {
                   ? 'bg-[var(--yellow)] text-black font-semibold'
                   : i < step
                   ? errors[i]
-                    ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
+                    ? 'bg-[var(--color-error)]/20 text-[var(--color-error)] hover:bg-[var(--color-error)]/30'
                     : 'bg-[rgba(255,255,255,0.1)] text-[var(--text)] hover:bg-[rgba(255,255,255,0.15)]'
                   : 'bg-[rgba(255,255,255,0.04)] text-[var(--textMuted)] hover:bg-[rgba(255,255,255,0.08)]'
               }`}

@@ -45,7 +45,7 @@ export function OperatorPackagesList({
         </div>
       ) : error ? (
         <div className="py-10 text-center" role="alert">
-          <p className="text-red-500">{error}</p>
+          <p className="text-[var(--color-error)]">{error}</p>
           {onRetry ? (
             <button
               type="button"
@@ -132,7 +132,7 @@ export function OperatorPackagesList({
                           type="button"
                           onClick={() => onDelete(pkg.id)}
                           data-testid={`operator-package-delete-${pkg.id}`}
-                          className="rounded bg-red-500/10 px-3 py-1.5 text-sm text-red-500 hover:bg-red-500/20"
+                          className="rounded bg-[var(--color-error)]/10 px-3 py-1.5 text-sm text-[var(--color-error)] hover:bg-[var(--color-error)]/20"
                         >
                           Delete
                         </button>

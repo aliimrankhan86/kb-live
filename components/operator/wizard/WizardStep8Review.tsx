@@ -53,14 +53,14 @@ export function WizardStep8Review({ data, onSaveDraft, onPublish, isSaving, erro
       </div>
 
       {error && (
-        <div role="alert" className="rounded border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        <div role="alert" className="rounded border border-[var(--color-error)]/30 bg-[var(--color-error)]/10 px-4 py-3 text-sm text-[var(--color-error)]">
           {error}
         </div>
       )}
 
       {/* Publish-blocking warnings */}
       {missingForPublish.length > 0 && (
-        <div className="rounded border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
+        <div className="rounded border border-[var(--color-warning)]/30 bg-[var(--color-warning)]/10 px-4 py-3 text-sm text-[var(--color-warning)]">
           <p className="font-medium mb-1">Required to publish:</p>
           <ul className="list-disc list-inside space-y-0.5">
             {missingForPublish.map((m) => <li key={m}>{m}</li>)}
