@@ -3,13 +3,16 @@
 Any AI/agent working here: this file auto-loads. Obey it.
 
 ## Read first (the front door)
+
 1. `HANDOFF.md` — 60-second cold-start brief
 2. `STATUS.md` — current done / pending / next
 3. `BUSINESS.md` — the why (business + legal posture)
 4. `AGENTS.md` — hard rules + allowed-files scopes (deeper detail in `AI_NOTES.md`, `docs/`)
 
 ## Mandatory: keep the docs live
+
 After any unit of work that is **done + tested + verified** (passes `npm run test` **and** `npm run build`):
+
 - Update **`STATUS.md`** — move item Pending/Next → Done, refresh the Health date.
 - If product state shifted, sync **`HANDOFF.md`**.
 - Only touch **`BUSINESS.md`** on real strategy change.
@@ -20,9 +23,19 @@ Do **not** spawn new status/progress docs — these three are canonical. `AI_NOT
 When a local problem turns out to be **expected behavior, not a bug**, capture it once as a 🛠️ **Gotcha** note and keep `PROJECT_BRIEF.md`, `AI_NOTES.md`, and `STATUS.md` in sync (one synced set — change one, update the other two same pass).
 
 ## Known gotchas (read before debugging "broken" local behavior)
+
 - **Dev login fails locally → check the server, not the code.** Dev personas (`customer@example.com` / `operator@example.com` / `operator2@example.com` / `admin@example.com`, all `PilgrimCompare!2026`) only work under `npm run dev` (`NODE_ENV=development`). A local prod build (`npm run build` + `npm start` → `next start`) runs `NODE_ENV=production`, so `isDevAuthEnabled()` is false and sign-in returns `401 AUTH_INVALID_CREDENTIALS` **by design**. Fix = restart with `npm run dev`. Full note: `PROJECT_BRIEF.md` §5, `AI_NOTES.md` §4.
 
+## Execution rules (mandatory every session)
+
+- **Discuss and plan before writing any code.** State the approach, list exact files to be touched, wait for go-ahead.
+- **Work backwards from acceptance criteria** before starting each step. If the goal is unclear, ask once then proceed with stated assumptions.
+- **If verification fails, debug internally.** Do not ask what to try next. Form a hypothesis, test it, report the outcome.
+- **One concern per commit.** No TODOs, no empty returns, no placeholder code. Every commit must pass `npm run test` and `npm run build`.
+- **`/compact` at ~50% context.** Before compacting, write current goal, completed steps, changed files, open risks, and next step into the summary.
+
 ## Git branching strategy (mandatory)
+
 - **Never push directly to `main` or `dev`** — both are protected, require PR + CI green.
 - Flow: `feature/your-branch` → PR → **`dev`** → (when approved) PR → `main`.
 - All new work branches off `dev`. All PRs target `dev` first.
@@ -30,12 +43,14 @@ When a local problem turns out to be **expected behavior, not a bug**, capture i
 - Before creating a PR, always `git fetch origin` first to ensure local refs are current.
 
 ## Non-negotiable before every push (from AGENTS.md)
+
 - `npm run test` green · `npm run build` 0 errors · `npx tsc --noEmit` pass
 - UI/route change → Playwright smoke `/`, `/umrah`, `/search/packages` at 320px + 1280px
 - Small focused diffs, one concern per commit; add `data-testid` for Playwright targets
 - Never invent operator trust claims — stored facts only; missing = "Not provided"
 
 ## Mandatory before raising a PR
+
 - Update **`AI_NOTES.md`** with what changed, why, any gotchas, and the new test count.
 - Update **`STATUS.md`** — move items Done, refresh Health date and branch/PR reference.
 - Commit the doc updates **on the same branch** before opening the PR so they land together.
