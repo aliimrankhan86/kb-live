@@ -1,9 +1,12 @@
 import { Suspense } from 'react';
 import { LoginForm } from '@/components/auth/LoginForm';
 
-export const metadata = {
-  title: 'Sign In',
-  description: 'Sign in to your PilgrimCompare traveller or operator account',
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Sign In | PilgrimCompare',
+  description: 'Sign in to your PilgrimCompare traveller or operator account.',
+  robots: { index: false, follow: false },
 };
 
 export default function LoginPage() {
