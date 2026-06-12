@@ -41,6 +41,11 @@ export async function generateMetadata({
           type: 'profile',
           locale: 'en_GB',
         },
+        twitter: {
+          card: 'summary_large_image',
+          title: `${operator.companyName} — ${statusLabel} UK Umrah Operator | PilgrimCompare`,
+          description: `Compare published packages, departure airports, and trust signals for ${operator.companyName}.`,
+        },
       }
     }
   } catch {

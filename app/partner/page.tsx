@@ -1,25 +1,41 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
+import { JsonLdScript, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
 
 export const metadata: Metadata = {
   title: 'List Your Umrah & Hajj Packages on PilgrimCompare',
-  description: 'Join PilgrimCompare as a verified operator. Reach thousands of UK Muslims planning Umrah and Hajj. No upfront fees. ATOL and ABTA operators welcome.',
+  description: 'Join PilgrimCompare as a verified operator. Reach UK Muslims planning Umrah and Hajj. No upfront fees. ATOL and ABTA operators welcome.',
   alternates: {
     canonical: '/partner',
   },
   openGraph: {
-    title: 'List Your Umrah & Hajj Packages | PilgrimCompare Partners',
+    title: 'List Your Umrah & Hajj Packages | PilgrimCompare',
     description: 'Reach UK travellers planning Umrah and Hajj. Verified operators only. No upfront fees.',
     url: 'https://pilgrimcompare.co.uk/partner',
     siteName: 'PilgrimCompare',
     type: 'website',
     locale: 'en_GB',
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'List Your Umrah & Hajj Packages | PilgrimCompare',
+    description: 'Reach UK travellers planning Umrah and Hajj. Verified operators only. No upfront fees.',
+  },
 }
+
+const pageJsonLd = graphJsonLd([
+  webPageJsonLd({
+    path: '/partner',
+    name: 'List Your Umrah & Hajj Packages on PilgrimCompare',
+    description:
+      'Join PilgrimCompare as a verified operator. Reach UK Muslims planning Umrah and Hajj. No upfront fees.',
+  }),
+])
 
 export default function PartnerLandingPage() {
   return (
     <>
+      <JsonLdScript data={pageJsonLd} />
       <main className="min-h-screen">
         {/* Hero */}
         <section className="relative border-b border-[var(--border)] bg-[var(--surfaceDark)] px-4 py-20 text-center">
@@ -31,7 +47,7 @@ export default function PartnerLandingPage() {
               Reach Thousands of UK Muslims Planning Umrah & Hajj
             </h1>
             <p className="mt-5 text-lg text-[var(--textMuted)]">
-              List your verified packages on PilgrimCompare — the UK{"'"}s trusted Umrah & Hajj comparison platform.
+              List your verified packages on PilgrimCompare — the UK Umrah & Hajj comparison and enquiry platform.
               No upfront fees. Transparent commission. UK-focused audience.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -40,7 +56,7 @@ export default function PartnerLandingPage() {
                 className="inline-flex min-h-[48px] items-center justify-center rounded-lg bg-[var(--yellow)] px-8 py-3 text-base font-semibold text-[var(--bg)] transition-opacity hover:opacity-90"
                 data-testid="partner-cta-apply"
               >
-                Apply as a Partner
+                Apply as an Operator
               </Link>
               <Link
                 href="/operators/al-hidayah-travel"
@@ -90,7 +106,7 @@ export default function PartnerLandingPage() {
               </div>
               <h3 className="text-lg font-semibold text-[var(--text)]">No Upfront Fees</h3>
               <p className="mt-2 text-sm text-[var(--textMuted)]">
-                Simple commission on confirmed bookings. No listing fees, no hidden charges.
+                Simple commission on confirmed enquiries. No listing fees, no hidden charges.
               </p>
             </div>
           </div>
@@ -104,7 +120,7 @@ export default function PartnerLandingPage() {
               {[
                 { step: '1', title: 'Apply', desc: 'Complete the registration form with your company details, ATOL/ABTA numbers, and package offerings.' },
                 { step: '2', title: 'Get Verified', desc: 'Our team reviews your application within 1–2 business days. We verify your financial protection status.' },
-                { step: '3', title: 'Start Receiving Bookings', desc: 'Once approved, your packages appear in search results and travellers can request quotes directly.' },
+                { step: '3', title: 'Start receiving enquiries', desc: 'Once approved, your packages appear in search results and travellers can send enquiries directly to you.' },
               ].map((item) => (
                 <div key={item.step} className="relative rounded-lg border border-[var(--border)] bg-[var(--panel)] p-5">
                   <span className="absolute -top-3 left-4 inline-flex h-6 w-6 items-center justify-center rounded-full bg-[var(--yellow)] text-xs font-bold text-[var(--bg)]">
@@ -142,7 +158,7 @@ export default function PartnerLandingPage() {
               className="mt-6 inline-flex min-h-[48px] items-center justify-center rounded-lg bg-[var(--yellow)] px-10 py-3 text-base font-semibold text-[var(--bg)] transition-opacity hover:opacity-90"
               data-testid="partner-cta-bottom"
             >
-              Apply as a Partner
+              Apply as an Operator
             </Link>
           </div>
         </section>

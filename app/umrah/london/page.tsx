@@ -1,21 +1,31 @@
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
 import { CityCorridor } from '@/components/marketing/CityCorridor'
 import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
 import { Repository } from '@/lib/api/repository'
 
-export const metadata: Metadata = {
-  title: 'Umrah Packages from London 2026 – Compare & Book',
-  description:
-    'Browse and compare Umrah packages departing from London Heathrow, Gatwick, and Stansted. Verified UK operators, hotels near Haram, flights included. Request a quote now.',
-  alternates: { canonical: '/umrah/london' },
-  openGraph: {
-    title: 'Umrah Packages from London 2026 – Compare & Book | PilgrimCompare',
-    description: 'Compare Umrah packages from London airports with verified UK operators.',
-    url: 'https://pilgrimcompare.co.uk/umrah/london',
-    siteName: 'PilgrimCompare',
-    type: 'website',
-    locale: 'en_GB',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const cities = await Repository.getDistinctDepartureCities().catch(() => [] as string[])
+  const hasSupply = cities.includes('London')
+  return {
+    title: 'Umrah Packages from London 2026 – Compare UK Operators | PilgrimCompare',
+    description:
+      'Browse and compare Umrah packages departing from London Heathrow and Gatwick. Verified UK operators, hotels near Haram, and ATOL details displayed.',
+    alternates: { canonical: '/umrah/london' },
+    robots: hasSupply ? { index: true, follow: true } : { index: false, follow: true },
+    openGraph: {
+      title: 'Umrah Packages from London 2026 | PilgrimCompare',
+      description: 'Compare Umrah packages departing from London with verified UK operators.',
+      url: 'https://pilgrimcompare.co.uk/umrah/london',
+      siteName: 'PilgrimCompare',
+      type: 'website',
+      locale: 'en_GB',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'Umrah Packages from London 2026 | PilgrimCompare',
+      description: 'Compare Umrah packages departing from London with verified UK operators.',
+    },
+  }
 }
 
 const faqs = [
@@ -44,9 +54,9 @@ const faqs = [
 const pageJsonLd = graphJsonLd([
   webPageJsonLd({
     path: '/umrah/london',
-    name: 'Umrah Packages from London 2026 – Compare & Book | PilgrimCompare',
+    name: 'Umrah Packages from London 2026 – Compare UK Operators | PilgrimCompare',
     description:
-      'Compare Umrah packages departing from London Heathrow, Gatwick, and Stansted with verified UK operators.',
+      'Compare Umrah packages departing from London Heathrow and Gatwick with verified UK operators.',
   }),
   breadcrumbJsonLd([
     { name: 'Home', path: '/' },
