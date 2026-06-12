@@ -21,7 +21,10 @@ import CompareBar, { type CompareBarItem } from './CompareBar';
 import { FilterOverlay } from './FilterOverlay';
 import { FeaturedBadge } from './FeaturedBadge';
 import { NEUTRAL_SORT_DISCLOSURE } from '@/lib/content-rules';
+import { Pagination } from '@/components/ui/Pagination';
 import styles from './packages.module.css';
+
+const PACKAGES_PER_PAGE = 5;
 
 const COMPARE_MAX = 3;
 const COMPARE_MIN = 2;
@@ -68,6 +71,7 @@ const PackageList: React.FC<PackageListProps> = ({
   const sortBy = sortByProp ?? internalSort;
   const [isSortOpen, setIsSortOpen] = useState(false);
   const sortRef = useRef<HTMLDivElement>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Close sort dropdown on outside click
   useEffect(() => {
@@ -80,6 +84,11 @@ const PackageList: React.FC<PackageListProps> = ({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isSortOpen]);
+
+  // Reset to page 1 when sort or filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [sortBy, searchParams, shortlistOnly]);
 
   useEffect(() => {
     fetch('/api/operators')
@@ -202,6 +211,13 @@ const PackageList: React.FC<PackageListProps> = ({
   const listPackages = shortlistOnly
     ? sortedPackages.filter((p) => shortlistedPackages.includes(p.id))
     : sortedPackages;
+
+  const totalPages = Math.ceil(listPackages.length / PACKAGES_PER_PAGE);
+  const pagedPackages = listPackages.slice(
+    (currentPage - 1) * PACKAGES_PER_PAGE,
+    currentPage * PACKAGES_PER_PAGE
+  );
+
   const compareFull = selectedCompareIds.length >= COMPARE_MAX;
   const comparisonRows = useMemo(() => {
     if (!cataloguePackages?.length) return [];
@@ -461,7 +477,7 @@ const PackageList: React.FC<PackageListProps> = ({
         className={`${styles.packageList} ${compareItems.length > 0 ? styles.packageListWithBar : ''}`}
         aria-label="Search results"
       >
-        {listPackages.map((pkg) => {
+        {pagedPackages.map((pkg) => {
           const catPkg = cataloguePackages?.find((cp) => cp.id === pkg.id);
           const operator = catPkg ? operatorsById[catPkg.operatorId] : undefined;
           const inclusions = catPkg ? [
@@ -489,6 +505,19 @@ const PackageList: React.FC<PackageListProps> = ({
           );
         })}
       </section>
+
+      {totalPages > 1 && (
+        <div className={styles.paginationRow}>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={(page) => {
+              setCurrentPage(page);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        </div>
+      )}
 
       <CompareBar
         items={compareItems}

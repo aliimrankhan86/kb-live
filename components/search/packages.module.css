@@ -218,6 +218,12 @@
   padding-bottom: 8rem;
 }
 
+.paginationRow {
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem 0 2rem;
+}
+
 /* ─── Package card ─────────────────────────────────────────────────────── */
 .packageCard {
   background: var(--surfaceDark);
