@@ -272,17 +272,46 @@ const PackageList: React.FC<PackageListProps> = ({
     <div className={styles.searchContainer}>
       <header className={styles.searchHeader}>
         <div className={styles.searchHeaderTop}>
+          {/* Left: big count number + meta disclosure stacked */}
           <div className={styles.searchResults} aria-live="polite">
-            <strong>{listPackages.length}</strong> {listPackages.length === 1 ? 'package' : 'packages'} found
+            <div className={styles.searchResultsCount}>
+              <strong>{listPackages.length}</strong>
+              <span className={styles.searchResultsLabel}>
+                {listPackages.length === 1 ? 'package' : 'packages'} found
+              </span>
+            </div>
+            <p className={styles.sortDisclosure} data-testid="sort-disclosure">
+              {NEUTRAL_SORT_DISCLOSURE}{' '}
+              <a href="/how-we-rank" className={styles.sortDisclosureLink}>
+                How we rank
+              </a>
+            </p>
           </div>
+
+          {/* Right: Saved chip + Filter + Sort in one row */}
           <div className={styles.searchControls}>
+            {shortlistCount > 0 && (
+              <button
+                type="button"
+                className={`${styles.savedChip} ${shortlistOnly ? styles.savedChipActive : ''}`}
+                onClick={() => setShortlistOnly((v) => !v)}
+                aria-pressed={shortlistOnly}
+                data-testid="search-shortlist-count"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill={shortlistOnly ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                </svg>
+                {shortlistOnly ? `Showing ${shortlistCount} saved` : `Saved (${shortlistCount})`}
+              </button>
+            )}
+
             <button
               className={styles.filterButton}
               onClick={handleFilterClick}
               aria-label={activeFilters.length > 0 ? `Filter packages, ${activeFilters.length} active` : 'Filter packages'}
               data-testid="filter-button"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46 22,3" />
               </svg>
               Filter
@@ -297,7 +326,7 @@ const PackageList: React.FC<PackageListProps> = ({
                 aria-haspopup="listbox"
                 aria-label="Sort packages"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                   <path d="M3 6h18M7 12h10M10 18h4" />
                 </svg>
                 Sort
@@ -338,14 +367,6 @@ const PackageList: React.FC<PackageListProps> = ({
           </div>
         </div>
 
-        {/* Neutral sort disclosure — DMCC Act 2024 Schedule 20 */}
-        <p className={styles.sortDisclosure} data-testid="sort-disclosure">
-          {NEUTRAL_SORT_DISCLOSURE}{' '}
-          <a href="/how-we-rank" className={styles.sortDisclosureLink}>
-            How we rank
-          </a>
-        </p>
-
         {activeFilters.length > 0 && (
           <div className={styles.activeFilters} aria-label="Active filters">
             {activeFilters.map((f) => (
@@ -366,21 +387,6 @@ const PackageList: React.FC<PackageListProps> = ({
               Clear all
             </button>
           </div>
-        )}
-
-        {shortlistCount > 0 && (
-          <button
-            type="button"
-            className={`${styles.savedChip} ${shortlistOnly ? styles.savedChipActive : ''}`}
-            onClick={() => setShortlistOnly((v) => !v)}
-            aria-pressed={shortlistOnly}
-            data-testid="search-shortlist-count"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill={shortlistOnly ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" aria-hidden="true">
-              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-            </svg>
-            {shortlistOnly ? `Showing ${shortlistCount} saved` : `Saved (${shortlistCount})`}
-          </button>
         )}
       </header>
       {compareMessage ? (
