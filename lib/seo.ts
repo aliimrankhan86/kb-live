@@ -5,7 +5,7 @@ export const baseMetadata: Metadata = {
     default: 'PilgrimCompare - Compare Hajj & Umrah Packages from UK Operators',
     template: '%s | PilgrimCompare'
   },
-  description: 'Discover the best Hajj and Umrah packages for your spiritual journey to the Holy Land. Expert guidance, comfortable accommodations, and unforgettable experiences.',
+  description: 'Compare Hajj and Umrah packages from verified UK travel operators. Review prices, hotels near Haram, inclusions, and ATOL details before requesting a quote.',
   keywords: ['Hajj', 'Umrah', 'Islamic pilgrimage', 'Mecca', 'Medina', 'Kaaba', 'spiritual journey'],
   authors: [{ name: 'PilgrimCompare' }],
   creator: 'PilgrimCompare',
@@ -24,7 +24,7 @@ export const baseMetadata: Metadata = {
     locale: 'en_GB',
     url: 'https://pilgrimcompare.co.uk',
     title: 'PilgrimCompare - Compare Hajj & Umrah Packages from UK Operators',
-    description: 'Discover the best Hajj and Umrah packages for your spiritual journey to the Holy Land.',
+    description: 'Compare Hajj and Umrah packages from verified UK travel operators. Review prices, hotels near Haram, inclusions, and ATOL details.',
     siteName: 'PilgrimCompare',
     images: [
       {
@@ -38,7 +38,7 @@ export const baseMetadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'PilgrimCompare - Compare Hajj & Umrah Packages from UK Operators',
-    description: 'Discover the best Hajj and Umrah packages for your spiritual journey to the Holy Land.',
+    description: 'Compare Hajj and Umrah packages from verified UK travel operators. Review prices, hotels near Haram, inclusions, and ATOL details.',
     images: ['/og.png'],
   },
   robots: {
