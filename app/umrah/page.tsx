@@ -85,14 +85,14 @@ export default async function UmrahPage() {
           </div>
           {/* Internal links — cost guide and city corridors */}
           <nav aria-label="Related guides" className="mt-6 pt-5 border-t border-[var(--border)] flex flex-wrap gap-2">
-            <Link href="/umrah/cost" className="rounded-lg border border-[var(--yellow)]/30 bg-[var(--yellow)]/5 px-3 py-1.5 text-xs font-medium text-[var(--yellow)] hover:bg-[var(--yellow)]/10 transition-colors">
+            <Link href="/umrah/cost" className="inline-flex min-h-[44px] items-center rounded-lg border border-[var(--yellow)]/30 bg-[var(--yellow)]/5 px-3 py-2 text-xs font-medium text-[var(--yellow)] hover:bg-[var(--yellow)]/10 transition-colors">
               Umrah cost guide →
             </Link>
             {[
               ...departureCities.map((city) => ({ label: `From ${city}`, href: `/umrah/${city.toLowerCase()}` })),
               { label: 'Ramadan Umrah 2027', href: '/umrah/ramadan' },
             ].map(({ label, href }) => (
-              <Link key={href} href={href} className="rounded-lg border border-[var(--border)] bg-[var(--surfaceDark)] px-3 py-1.5 text-xs font-medium text-[var(--textMuted)] hover:text-[var(--text)] hover:border-[var(--yellow)]/40 transition-colors">
+              <Link key={href} href={href} className="inline-flex min-h-[44px] items-center rounded-lg border border-[var(--border)] bg-[var(--surfaceDark)] px-3 py-2 text-xs font-medium text-[var(--textMuted)] hover:text-[var(--text)] hover:border-[var(--yellow)]/40 transition-colors">
                 {label}
               </Link>
             ))}
