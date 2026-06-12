@@ -105,7 +105,7 @@ export default function PartnerLandingPage() {
 
                 <Link
                   href="/login?redirect=/operator/dashboard"
-                  className="mt-6 inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-lg border border-[var(--border)] px-6 py-3 text-base font-semibold text-[var(--text)] transition-colors hover:border-[var(--yellow)] hover:text-[var(--yellow)]"
+                  className="mt-6 inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-lg bg-[var(--primary)] px-6 py-3 text-base font-semibold text-[var(--bg)] transition-all hover:brightness-90"
                   data-testid="partner-signin-main"
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">

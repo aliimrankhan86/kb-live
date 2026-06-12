@@ -34,13 +34,15 @@ body::before {
   pointer-events: none;
 }
 
-/* Light theme: suppress dark decorative elements */
+/* Light theme: Madinah-palette Kaaba watermark replaces the dark version */
 [data-theme="light"] body {
-  background-image: none;
+  background-image: url('/kaaba-bg-light.svg');
+  background-size: 48%;
+  background-position: center 38%;
 }
 
 [data-theme="light"] body::before {
-  display: none;
+  background: rgba(246, 244, 238, 0.55);
 }
 
 /* Light theme: prophetic green scrollbar thumb, warm-stone track */
