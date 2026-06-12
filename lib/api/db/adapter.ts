@@ -141,6 +141,7 @@ const mapQuoteRequest = (qr: PrismaQuoteRequest): QuoteRequest => ({
   occupancy: qr.occupancy as QuoteRequest['occupancy'],
   inclusions: qr.inclusions as QuoteRequest['inclusions'],
   notes: qr.notes ?? undefined,
+  sourceOperatorId: qr.sourceOperatorId ?? undefined,
 });
 
 const mapOffer = (o: PrismaOffer): Offer => ({
@@ -271,6 +272,7 @@ export const DBAdapter = {
       occupancy: pj(req.occupancy),
       inclusions: pj(req.inclusions),
       notes: req.notes ?? null,
+      sourceOperatorId: req.sourceOperatorId ?? null,
     };
     const saved = await prisma.quoteRequest.upsert({
       where: { id: req.id },

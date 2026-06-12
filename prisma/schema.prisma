@@ -307,7 +307,9 @@ model QuoteRequest {
   budgetRange        Json?    @map("budget_range")
   occupancy          Json
   inclusions         Json
-  notes              String?
+  notes                String?
+  sourceOperatorId     String?   @map("source_operator_id")
+  nudgeSentAt          DateTime? @map("nudge_sent_at")
 
   // Relations
   customer User    @relation(fields: [customerId], references: [id])
@@ -353,6 +355,7 @@ model BookingIntent {
   skipProofAcknowledged Boolean?      @map("skip_proof_acknowledged")
   proofSkippedAt        DateTime?     @map("proof_skipped_at")
   notes                 String?
+  outcomeFollowupSentAt DateTime?     @map("outcome_followup_sent_at")
 
   // Relations
   offer      Offer       @relation(fields: [offerId], references: [id])
