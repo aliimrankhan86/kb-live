@@ -222,6 +222,7 @@ const mapPackage = (pkg: PrismaPackage): Package => ({
   inclusions: pkg.inclusions as unknown as Package['inclusions'],
   notes: pkg.notes ?? undefined,
   images: pkg.images,
+  isFeatured: pkg.isFeatured,
 });
 
 const mapComplaint = (c: PrismaComplaint): Complaint => ({

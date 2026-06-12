@@ -414,6 +414,7 @@ model Package {
   inclusions                 Json
   notes                      String?
   images                     String[]
+  isFeatured                 Boolean  @default(false) @map("is_featured")
 
   // Relations
   operator        OperatorProfile  @relation(fields: [operatorId], references: [id])
