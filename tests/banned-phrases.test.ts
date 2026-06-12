@@ -83,6 +83,14 @@ const METADATA_STRINGS: Record<string, string> = {
   'partner.og.title': 'List Your Umrah & Hajj Packages | PilgrimCompare',
   'partner.og.description': 'Reach UK travellers planning Umrah and Hajj. Verified operators only. No upfront fees.',
 
+  // app/how-we-rank/page.tsx
+  'how-we-rank.title': 'How We Rank Packages | PilgrimCompare',
+  'how-we-rank.description': 'PilgrimCompare ranks packages by data completeness, price recency, and operator response rate. No operator pays for ranking position in our default results.',
+  'how-we-rank.og.title': 'How We Rank Packages | PilgrimCompare',
+  'how-we-rank.og.description': 'Transparent ranking criteria for Umrah and Hajj packages on PilgrimCompare. Default sort is neutral — no paid placement in organic results.',
+  'how-we-rank.twitter.title': 'How We Rank Packages | PilgrimCompare',
+  'how-we-rank.twitter.description': 'Transparent ranking: completeness, recency, response rate. No operator pays for position in default results.',
+
   // app/login/page.tsx
   'login.title': 'Sign In | PilgrimCompare',
   'login.description': 'Sign in to your PilgrimCompare traveller or operator account.',
@@ -111,6 +119,21 @@ describe('BANNED_METADATA_PHRASES — lib/content-rules integrity', () => {
       expect(lower, `NEUTRAL_SORT_DISCLOSURE contains banned phrase: "${phrase}"`).not.toContain(phrase)
     }
   })
+})
+
+describe('Star character guard — metadata must not use decorative rating stars', () => {
+  const STAR_CHARS = ['★', '☆', '⭐', '🌟']
+
+  for (const [key, value] of Object.entries(METADATA_STRINGS)) {
+    for (const star of STAR_CHARS) {
+      it(`"${key}" must not contain star character: "${star}"`, () => {
+        expect(
+          value,
+          `Star character "${star}" found in metadata key "${key}":\n  "${value}"`
+        ).not.toContain(star)
+      })
+    }
+  }
 })
 
 describe('Metadata banned-phrase scan', () => {

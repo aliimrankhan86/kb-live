@@ -9,14 +9,15 @@ import styles from './packages.module.css';
 
 interface SearchPackagesClientProps {
   allPackages: CataloguePackage[];
+  featuredSlotsEnabled: boolean;
 }
 
-const VALID_SORTS = ['price-asc', 'price-desc', 'rating', 'distance'] as const;
+const VALID_SORTS = ['relevance', 'price-asc', 'price-desc', 'rating', 'distance'] as const;
 type SortOption = typeof VALID_SORTS[number];
 const toSortOption = (v: string | null): SortOption =>
-  VALID_SORTS.includes(v as SortOption) ? (v as SortOption) : 'price-asc';
+  VALID_SORTS.includes(v as SortOption) ? (v as SortOption) : 'relevance';
 
-export function SearchPackagesClient({ allPackages }: SearchPackagesClientProps) {
+export function SearchPackagesClient({ allPackages, featuredSlotsEnabled }: SearchPackagesClientProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -50,6 +51,7 @@ export function SearchPackagesClient({ allPackages }: SearchPackagesClientProps)
         cataloguePackages={filteredPackages}
         sortBy={sortBy}
         onSortChange={handleSortChange}
+        featuredSlotsEnabled={featuredSlotsEnabled}
       />
     </main>
   );

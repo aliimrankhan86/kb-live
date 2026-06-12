@@ -8,6 +8,7 @@ import { LEGAL_ENTITY_BLOCK } from '@/lib/legal';
 
 const LEGAL_LINKS = [
   { href: '/how-it-works', label: 'How it works' },
+  { href: '/how-we-rank', label: 'How we rank' },
   { href: '/terms', label: 'Terms of Use' },
   { href: '/privacy', label: 'Privacy Policy' },
 ];

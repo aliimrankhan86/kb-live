@@ -6,17 +6,29 @@
 
 ## Branch & goal
 
-- **Branch:** `feat/q5-seo` (off `feat/q4-mobile-polish`) → PR → `dev` → `main`
-- **Goal:** Q5 complete — SEO metadata, structured data, sitemap, robots, OG/Twitter, banned-phrase CI test. Next: Q6 ranking transparency + Featured infrastructure.
-- **Current source-of-truth note:** Q5 verified 2026-06-12. Full detail in `AI_NOTES.md` §21.
+- **Branch:** `feat/q6-ranking-transparency` (off `dev`) → PR → `dev` → `main`
+- **Goal:** Q6 complete — neutral sort, DMCC disclosure, /how-we-rank page, Featured infrastructure. Quality prompt queue Q1–Q6 all done. Next: Gate 3 operator onboarding.
+- **Current source-of-truth note:** Q6 verified 2026-06-12. Full detail in `AI_NOTES.md` §22.
 - **Canonical handover:** `AI_NOTES.md` is the single source of truth for verified status, implementation posture, and pending areas.
 
 ## What works (verified)
 
-- **Tests**: `npm run test` passes (21 files, 1,425/1,425 tests) — verified 2026-06-12.
+- **Tests**: `npm run test` passes (23 files, 1,810/1,810 tests) — verified 2026-06-12.
 - **Build**: `npm run build` passes with 0 errors — verified 2026-06-12.
 - **TypeScript**: `npx tsc --noEmit` passes — verified 2026-06-12.
 - **Architecture decision**: Supabase + Prisma + Upstash Redis is the correct target/production architecture. MockDB is not the production architecture, but production-facing MockDB imports remain and are now documented as launch blockers in `AI_NOTES.md` §0.
+
+## Changes made in this session (2026-06-12 — Q6 Ranking Transparency + Featured Infrastructure)
+
+| Task | What | Files |
+| ---- | ---- | ----- |
+| TASK1 neutral sort | `lib/ranking.ts`: `scorePackage` (45% completeness + 35% recency + 20% response rate) + `sortByScore`. `Repository.listPackages` calls `sortByScore` server-side. | `lib/ranking.ts`, `lib/api/repository.ts` |
+| TASK2 disclosure | `NEUTRAL_SORT_DISCLOSURE` near every sort control, linked to `/how-we-rank`. `'relevance'` sort option added to PackageList preserving server order. | `components/search/PackageList.tsx`, `components/packages/PackagesBrowse.tsx` |
+| TASK3 /how-we-rank | Full DMCC Act 2024 §20 disclosure page: 4 criteria cards, Featured rules (max 2, labelled), §7 verification verbatim. Indexed, sitemap, footer link. | `app/how-we-rank/page.tsx`, `app/sitemap.ts`, `components/layout/Footer.tsx` |
+| TASK4 Featured infra | DB column `is_featured`, `isFeatured` in type/adapter. `FEATURE_FEATURED_SLOTS` flag (server-only). `FeaturedBadge` component. PackageList: featured section above neutral, capped at 2, flag-gated. | `prisma/schema.prisma`, `lib/types.ts`, `lib/api/db/adapter.ts`, `lib/config.ts`, `.env.example`, `components/search/FeaturedBadge.tsx`, `components/search/PackageList.tsx`, `app/search/packages/page.tsx` |
+| TASK5 tests | 11 ranking tests, 10 featured-slot tests, /how-we-rank metadata + star-char guard in banned-phrases. PostCSS config fixed for Vite/Vitest. | `tests/ranking.test.ts`, `tests/featured-slots.test.tsx`, `tests/banned-phrases.test.ts`, `postcss.config.mjs` |
+
+**Verification:** `npx tsc --noEmit` pass · `npm run test` 1,810/1,810 (23 files) · `npm run build` 0 errors.
 
 ## Changes made in this session (2026-06-12 — Q5 SEO Pass)
 

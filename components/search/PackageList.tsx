@@ -19,17 +19,20 @@ import {
 import PackageCard from './PackageCard';
 import CompareBar, { type CompareBarItem } from './CompareBar';
 import { FilterOverlay } from './FilterOverlay';
+import { FeaturedBadge } from './FeaturedBadge';
+import { NEUTRAL_SORT_DISCLOSURE } from '@/lib/content-rules';
 import styles from './packages.module.css';
 
 const COMPARE_MAX = 3;
 const COMPARE_MIN = 2;
+const FEATURED_MAX = 2;
 
 const SHORTLIST_STORAGE_KEY = 'kb_shortlist_packages';
 const uniqueIds = (ids: string[]) => Array.from(new Set(ids));
 
 export type { SearchPackageDisplay } from './search-utils';
 
-type SortOption = 'price-asc' | 'price-desc' | 'rating' | 'distance';
+type SortOption = 'relevance' | 'price-asc' | 'price-desc' | 'rating' | 'distance';
 
 
 interface PackageListProps {
@@ -38,6 +41,8 @@ interface PackageListProps {
   onFilter?: () => void;
   sortBy?: SortOption;
   onSortChange?: (sort: SortOption) => void;
+  /** Evaluated server-side from FEATURE_FEATURED_SLOTS env var. Never pass client state here. */
+  featuredSlotsEnabled?: boolean;
 }
 
 const PackageList: React.FC<PackageListProps> = ({
@@ -46,6 +51,7 @@ const PackageList: React.FC<PackageListProps> = ({
   onFilter,
   sortBy: sortByProp,
   onSortChange,
+  featuredSlotsEnabled = false,
 }) => {
   const [shortlistedPackages, setShortlistedPackages] = useState<string[]>([]);
   const [shortlistLoaded, setShortlistLoaded] = useState(false);
@@ -58,7 +64,7 @@ const PackageList: React.FC<PackageListProps> = ({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [internalSort, setInternalSort] = useState<SortOption>('price-asc');
+  const [internalSort, setInternalSort] = useState<SortOption>('relevance');
   const sortBy = sortByProp ?? internalSort;
   const [isSortOpen, setIsSortOpen] = useState(false);
   const sortRef = useRef<HTMLDivElement>(null);
@@ -150,10 +156,31 @@ const PackageList: React.FC<PackageListProps> = ({
 
   const shortlistCount = shortlistedPackages.length;
 
-  // Sort packages
+  // Split featured from normal when flag is on.
+  // Featured packages are excluded from the neutral sort and shown above it.
+  const featuredPackages = useMemo(
+    () =>
+      featuredSlotsEnabled && !shortlistOnly
+        ? packages.filter((p) => p.isFeatured).slice(0, FEATURED_MAX)
+        : [],
+    [packages, featuredSlotsEnabled, shortlistOnly]
+  );
+
+  const normalPackages = useMemo(
+    () =>
+      featuredSlotsEnabled
+        ? packages.filter((p) => !p.isFeatured)
+        : packages,
+    [packages, featuredSlotsEnabled]
+  );
+
+  // Sort normal packages (featured are already above, not sorted with normal results)
   const sortedPackages = useMemo(() => {
-    const sorted = [...packages];
+    const sorted = [...normalPackages];
     switch (sortBy) {
+      case 'relevance':
+        // Server already applied neutral quality sort — preserve that order.
+        return sorted;
       case 'price-asc':
         return sorted.sort((a, b) => a.price - b.price);
       case 'price-desc':
@@ -170,7 +197,7 @@ const PackageList: React.FC<PackageListProps> = ({
       default:
         return sorted;
     }
-  }, [packages, sortBy]);
+  }, [normalPackages, sortBy]);
 
   const listPackages = shortlistOnly
     ? sortedPackages.filter((p) => shortlistedPackages.includes(p.id))
@@ -282,6 +309,7 @@ const PackageList: React.FC<PackageListProps> = ({
                   aria-label="Sort options"
                 >
                   {([
+                    { value: 'relevance' as SortOption, label: 'Relevance (default)' },
                     { value: 'price-asc' as SortOption, label: 'Price: Low to High' },
                     { value: 'price-desc' as SortOption, label: 'Price: High to Low' },
                     { value: 'rating' as SortOption, label: 'Hotel rating' },
@@ -309,6 +337,14 @@ const PackageList: React.FC<PackageListProps> = ({
             </div>
           </div>
         </div>
+
+        {/* Neutral sort disclosure — DMCC Act 2024 Schedule 20 */}
+        <p className={styles.sortDisclosure} data-testid="sort-disclosure">
+          {NEUTRAL_SORT_DISCLOSURE}{' '}
+          <a href="/how-we-rank" className={styles.sortDisclosureLink}>
+            How we rank
+          </a>
+        </p>
 
         {activeFilters.length > 0 && (
           <div className={styles.activeFilters} aria-label="Active filters">
@@ -375,6 +411,44 @@ const PackageList: React.FC<PackageListProps> = ({
             Reset filters
           </button>
         </div>
+      )}
+
+      {/* Featured section — above neutral results, capped at 2, flag-gated */}
+      {featuredPackages.length > 0 && (
+        <section className={styles.featuredSection} aria-label="Featured packages" data-testid="featured-section">
+          <header className={styles.featuredSectionHeader}>
+            <FeaturedBadge />
+            <span className={styles.featuredSectionNote}>
+              Paid placement — not ranked by our neutral criteria.{' '}
+              <a href="/how-we-rank" className={styles.sortDisclosureLink}>
+                How we rank
+              </a>
+            </span>
+          </header>
+          {featuredPackages.map((pkg) => {
+            const catPkg = cataloguePackages?.find((cp) => cp.id === pkg.id);
+            const operator = catPkg ? operatorsById[catPkg.operatorId] : undefined;
+            const inclusions = catPkg ? [
+              { label: 'Visa', included: catPkg.inclusions?.visa ?? false },
+              { label: 'Flights', included: catPkg.inclusions?.flights ?? false },
+              { label: 'Transfers', included: catPkg.inclusions?.transfers ?? false },
+              { label: 'Meals', included: catPkg.inclusions?.meals ?? false },
+            ].filter((chip) => chip.included) : undefined;
+            return (
+              <PackageCard
+                key={pkg.id}
+                package={pkg}
+                isShortlisted={shortlistedPackages.includes(pkg.id)}
+                isCompareSelected={selectedCompareIds.includes(pkg.id)}
+                onAddToShortlist={onToggleShortlist}
+                onToggleCompare={onToggleCompare}
+                compareFull={compareFull}
+                operator={operator}
+                inclusions={inclusions}
+              />
+            );
+          })}
+        </section>
       )}
 
       <section
