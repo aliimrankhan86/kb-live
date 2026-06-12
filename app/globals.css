@@ -34,6 +34,24 @@ body::before {
   pointer-events: none;
 }
 
+/* Light theme: suppress dark decorative elements */
+[data-theme="light"] body {
+  background-image: none;
+}
+
+[data-theme="light"] body::before {
+  display: none;
+}
+
+/* Light theme: scrollbar track is near-invisible on white — adjust to dark tint */
+[data-theme="light"] * {
+  scrollbar-color: var(--yellow) rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] *::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.08);
+}
+
 /* Ensure all direct children sit above the overlay.
    Must be in @layer base so Tailwind utility classes (e.g. .fixed) in the
    utilities layer can override position on portaled elements (Radix dialogs). */
