@@ -3,6 +3,18 @@
     {
       "path": "/api/health",
       "schedule": "0 9 */3 * *"
+    },
+    {
+      "path": "/api/cron/nudge-operators",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/outcome-followup",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/expire-packages",
+      "schedule": "0 2 * * *"
     }
   ]
 }

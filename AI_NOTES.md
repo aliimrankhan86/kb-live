@@ -1,12 +1,12 @@
 # PilgrimCompare AI Handover — Single Source of Truth
 
-**Last verified:** 2026-06-12 (Q5 SEO pass — 1,425 tests, 0 build errors)
-**Branch:** `feat/q5-seo` (off `feat/q4-mobile-polish`) → PR → `dev`
+**Last verified:** 2026-06-12 (Prompt 5 + 6 — transactional email + cron suite — 1,818 tests, 0 build errors)
+**Branch:** `dev` (clean — Q1–Q6 all merged via PRs)
 **Audience:** Claude, Codex, Kimi, and any AI/developer taking over the project.
 
 **Next immediate action:**
-Q6 — Ranking transparency + Featured infrastructure (revenue model confirmed)
-See §10 for queue context.
+Gate 3 — operator onboarding. Run the 3 DB migration SQL statements in §23 against Supabase before deploying. Then begin operator acquisition.
+See §10 + §23 for queue context.
 
 This file is the current handover source of truth. If another document conflicts with a verified statement here, treat that other document as stale and update it before changing implementation.
 
@@ -117,8 +117,8 @@ Operators pay. Travellers are always free. Funds never flow through the platform
 
 ## 4. Verified Current State
 
-**Verified 2026-06-12 (Q5 SEO pass):**
-- `npm run test`: **1,425/1,425 passes**, 21 files
+**Verified 2026-06-12 (Prompt 5 + 6 — transactional email + cron suite):**
+- `npm run test`: **1,818/1,818 passes**, 24 files
 - `npm run build`: **0 errors**
 - `npx tsc --noEmit`: **passes**
 - `npx playwright test`: 57 passed, 6 skipped, 0 failed (last full run 2026-06-08)
@@ -331,6 +331,8 @@ Mailboxes `support/privacy/dpo/complaints@pilgrimcompare.co.uk` → Cloudflare E
 | Prompt 2 | RLS and grants audit — migrations 008 + 009 | ✅ Done |
 | Prompt 3 | Domain wiring + full rebrand to PilgrimCompare | ✅ Done |
 | Prompt 4 | GitHub branch protection + CI workflow | ✅ Done |
+| Prompt 5 | Transactional email suite (5 emails, React Email, Resend) | ✅ Done 2026-06-12 — see §23 |
+| Prompt 6 | Cron job suite (3 crons + outcomes endpoint + idempotency) | ✅ Done 2026-06-12 — see §23 |
 
 ### Quality pass queue — NEXT
 
@@ -861,4 +863,124 @@ Full SEO audit and remediation for all public routes: metadata, JSON-LD structur
 
 - `npx tsc --noEmit` pass
 - `npm run test` 1,810/1,810 (23 files)
+- `npm run build` 0 errors
+
+---
+
+## 23. Prompt 5 + 6 — Transactional Email + Cron Suite — 2026-06-12
+
+**Branch:** `dev` (commits on top of Q6 merge).
+
+### Prompt 5 — Transactional email suite (all 5 emails)
+
+**Pre-existing (found in codebase):**
+- `lib/email/send.tsx` — Resend client wrapper, fire-and-forget sends, `findSimilarPackages`, `quoteRefCode`
+- `emails/EnquiryConfirmation.tsx`, `OperatorEnquiryAlert.tsx`, `BookingIntentConfirmation.tsx`, `PaymentEvidenceNotification.tsx`
+- Emails 2–5 already wired in `app/api/quote-requests/route.ts` and `app/api/booking-intents/route.ts`
+
+**Changes in this session:**
+- `emails/EnquiryConfirmation.tsx` — fixed greeting `"Assalamualaikum"` → `"Salaam"` per spec
+- `lib/email/send.tsx` — added `sendOperatorNudge` and `sendOutcomeFollowup` (needed by Prompt 6 crons)
+- `emails/OperatorNudge.tsx` — new template (48h reminder to operator, reply-to = customer)
+- `emails/OutcomeFollowup.tsx` — new template (did your booking go ahead? 3 plain-text links)
+
+**Email 1 — Supabase Auth confirm signup:**
+Do not build in code — paste the HTML below into Supabase dashboard → Authentication → Email Templates → Confirm signup. The existing Resend SMTP config sends it automatically.
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Confirm your email — PilgrimCompare</title>
+</head>
+<body style="background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:0;padding:24px;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;">
+    <tr>
+      <td style="background:#ffffff;border-radius:8px;padding:32px;">
+        <p style="font-size:18px;font-weight:700;color:#1a1a1a;margin:0 0 24px;">PilgrimCompare</p>
+        <p style="font-size:15px;color:#333;line-height:1.6;margin:0 0 12px;">Salaam,</p>
+        <p style="font-size:15px;color:#333;line-height:1.6;margin:0 0 20px;">
+          Thank you for joining PilgrimCompare. Please confirm your email address to complete your registration.
+        </p>
+        <table cellpadding="0" cellspacing="0" style="margin:24px 0;">
+          <tr>
+            <td style="background:#1a1a1a;border-radius:6px;padding:14px 28px;">
+              <a href="{{ .ConfirmationURL }}" style="color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;display:inline-block;">
+                Confirm email address
+              </a>
+            </td>
+          </tr>
+        </table>
+        <p style="font-size:13px;color:#666;line-height:1.5;margin:0 0 12px;">
+          Or copy and paste this link into your browser:
+        </p>
+        <p style="font-size:12px;color:#888;word-break:break-all;margin:0 0 24px;">
+          {{ .ConfirmationURL }}
+        </p>
+        <hr style="border:none;border-top:1px solid #eee;margin:24px 0;" />
+        <p style="font-size:13px;color:#999;margin:0 0 4px;">
+          If you did not create an account on PilgrimCompare, you can safely ignore this email.
+        </p>
+        <p style="font-size:12px;color:#aaa;margin:4px 0;">
+          PilgrimCompare &middot; pilgrimcompare.co.uk
+        </p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+```
+
+### Prompt 6 — Cron job suite
+
+**New files:**
+- `lib/cron-auth.ts` — `verifyCronSecret(request)` checks `Authorization: Bearer {CRON_SECRET}`
+- `app/api/cron/nudge-operators/route.ts` — daily 08:00 UTC; finds open enquiries >48h old with no nudge; sends `OperatorNudge` email; marks `nudgeSentAt`. Idempotent.
+- `app/api/cron/outcome-followup/route.ts` — daily 09:00 UTC; finds BookingIntents 10–14 days old with no outcome and no followup sent; sends `OutcomeFollowup` email; marks `outcomeFollowupSentAt`. Idempotent.
+- `app/api/cron/expire-packages/route.ts` — daily 02:00 UTC; raw SQL `WHERE (date_window->>'end')::date < CURRENT_DATE`; sets `status = 'expired'` (never deletes). Idempotent.
+- `app/api/outcomes/[intentId]/route.ts` — one-tap GET endpoint linked from outcome followup email; writes `BookingOutcome` record (`booked` → `travelled`, `not_booked` → `cancelled_customer`); "deciding" acknowledged without DB write; returns HTML thank-you page. BookingOutcome records are never deleted (billing evidence).
+- `vercel.json` — 3 new cron entries added alongside health cron.
+- `tests/cron-auth.test.ts` — 8 unit tests covering `verifyCronSecret` + 401 guard on each cron route.
+
+**Schema changes (3 new columns):**
+
+⚠️ **Run this SQL in Supabase dashboard before deploying** (Settings → SQL Editor):
+
+```sql
+ALTER TABLE quote_requests ADD COLUMN IF NOT EXISTS source_operator_id TEXT;
+ALTER TABLE quote_requests ADD COLUMN IF NOT EXISTS nudge_sent_at TIMESTAMPTZ;
+ALTER TABLE booking_intents ADD COLUMN IF NOT EXISTS outcome_followup_sent_at TIMESTAMPTZ;
+```
+
+- `prisma/schema.prisma` updated with all 3 fields; `npx prisma generate` run locally (CI also runs it).
+- `lib/api/db/adapter.ts` — `mapQuoteRequest` and `saveRequest` now include `sourceOperatorId` so the nudge cron can look up the correct operator from a stored enquiry.
+
+### Manual testing (run after deploying)
+
+**Cron routes via curl:**
+```bash
+# Replace CRON_SECRET with the value in Vercel env vars
+curl -H "Authorization: Bearer $CRON_SECRET" https://pilgrimcompare.co.uk/api/cron/nudge-operators
+curl -H "Authorization: Bearer $CRON_SECRET" https://pilgrimcompare.co.uk/api/cron/outcome-followup
+curl -H "Authorization: Bearer $CRON_SECRET" https://pilgrimcompare.co.uk/api/cron/expire-packages
+```
+
+Expected response: `{"ok":true,"nudged":0}` / `{"ok":true,"sent":0}` / `{"ok":true,"expired":0}` when no records match (correct at initial deploy — no real enquiries yet).
+
+**Test email send (Resend test mode):**
+Use Resend dashboard → Logs to confirm email delivery after submitting a test quote request.
+
+### 🛠️ Gotchas
+
+- `source_operator_id` on `quote_requests` is populated for enquiries submitted via the package detail page (`sourceOperatorId` from the quote form). General browse enquiries without a source package will have `NULL` and won't receive an operator nudge — this is correct.
+- Package expiry cron uses raw SQL (`$queryRaw` + `updateMany`) because Prisma doesn't support JSON path expressions in `where` clauses. Do not convert to ORM-style query.
+- `BookingOutcome` has `@unique` on `bookingIntentId`. The outcomes endpoint is idempotent: if an outcome already exists it returns 200 without creating a duplicate.
+- Prompts 7, 8, 9 (Telegram alerts, automation, operator data ingestion) are deferred until after live testing of Prompts 5 + 6.
+
+### Validation
+
+- `npx tsc --noEmit` pass
+- `npm run test` 1,818/1,818 (24 files, 8 new cron-auth tests)
 - `npm run build` 0 errors

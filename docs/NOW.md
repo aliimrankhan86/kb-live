@@ -6,17 +6,45 @@
 
 ## Branch & goal
 
-- **Branch:** `feat/q6-ranking-transparency` (off `dev`) → PR → `dev` → `main`
-- **Goal:** Q6 complete — neutral sort, DMCC disclosure, /how-we-rank page, Featured infrastructure. Quality prompt queue Q1–Q6 all done. Next: Gate 3 operator onboarding.
-- **Current source-of-truth note:** Q6 verified 2026-06-12. Full detail in `AI_NOTES.md` §22.
+- **Branch:** `dev` (clean — Q1–Q6 + Prompts 5 + 6 all merged)
+- **Goal:** Prompts 5 + 6 complete — transactional email suite and cron job suite live. Next: Gate 3 operator onboarding. Run DB migration SQL (§23) in Supabase before deploying.
+- **Current source-of-truth note:** Prompt 6 verified 2026-06-12. Full detail in `AI_NOTES.md` §23.
 - **Canonical handover:** `AI_NOTES.md` is the single source of truth for verified status, implementation posture, and pending areas.
 
 ## What works (verified)
 
-- **Tests**: `npm run test` passes (23 files, 1,810/1,810 tests) — verified 2026-06-12.
+- **Tests**: `npm run test` passes (24 files, 1,818/1,818 tests) — verified 2026-06-12.
 - **Build**: `npm run build` passes with 0 errors — verified 2026-06-12.
 - **TypeScript**: `npx tsc --noEmit` passes — verified 2026-06-12.
 - **Architecture decision**: Supabase + Prisma + Upstash Redis is the correct target/production architecture. MockDB is not the production architecture, but production-facing MockDB imports remain and are now documented as launch blockers in `AI_NOTES.md` §0.
+
+## Changes made in this session (2026-06-12 — Prompts 5 + 6: Email + Cron Suite)
+
+| Task | What | Files |
+| ---- | ---- | ----- |
+| Schema | `source_operator_id`, `nudge_sent_at` → `quote_requests`; `outcome_followup_sent_at` → `booking_intents` | `prisma/schema.prisma` |
+| Adapter | `mapQuoteRequest` + `saveRequest` persist `sourceOperatorId` | `lib/api/db/adapter.ts` |
+| Email fix | Greeting `"Assalamualaikum"` → `"Salaam"` | `emails/EnquiryConfirmation.tsx` |
+| New templates | Operator nudge + outcome followup | `emails/OperatorNudge.tsx`, `emails/OutcomeFollowup.tsx` |
+| New send fns | `sendOperatorNudge`, `sendOutcomeFollowup` | `lib/email/send.tsx` |
+| Cron auth | `verifyCronSecret` — `Authorization: Bearer {CRON_SECRET}` | `lib/cron-auth.ts` |
+| Cron 1 | Nudge operator 48 h after unanswered enquiry — daily 08:00 UTC | `app/api/cron/nudge-operators/route.ts` |
+| Cron 2 | Outcome followup 10–14 days after booking intent — daily 09:00 UTC | `app/api/cron/outcome-followup/route.ts` |
+| Cron 3 | Expire packages with past `dateWindow.end` — daily 02:00 UTC | `app/api/cron/expire-packages/route.ts` |
+| Outcomes | One-tap outcome endpoint; writes `BookingOutcome` (never deleted) | `app/api/outcomes/[intentId]/route.ts` |
+| vercel.json | 3 new cron schedules registered | `vercel.json` |
+| Tests | 8 new tests: `verifyCronSecret` + 401 guard per cron route | `tests/cron-auth.test.ts` |
+
+**⚠️ DB migration required before deploy** — run in Supabase SQL editor:
+```sql
+ALTER TABLE quote_requests ADD COLUMN IF NOT EXISTS source_operator_id TEXT;
+ALTER TABLE quote_requests ADD COLUMN IF NOT EXISTS nudge_sent_at TIMESTAMPTZ;
+ALTER TABLE booking_intents ADD COLUMN IF NOT EXISTS outcome_followup_sent_at TIMESTAMPTZ;
+```
+
+**Verification:** `npx tsc --noEmit` pass · `npm run test` 1,818/1,818 (24 files) · `npm run build` 0 errors.
+
+---
 
 ## Changes made in this session (2026-06-12 — Q6 Ranking Transparency + Featured Infrastructure)
 

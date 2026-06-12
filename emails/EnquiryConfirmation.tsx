@@ -50,7 +50,7 @@ export default function EnquiryConfirmation({
       <Body style={body}>
         <Container style={container}>
           <Heading style={logo}>PilgrimCompare</Heading>
-          <Text style={text}>Assalamualaikum {firstName},</Text>
+          <Text style={text}>Salaam {firstName},</Text>
           <Text style={text}>
             Your enquiry about <strong>{packageName}</strong> has been sent to{' '}
             <strong>{operatorName}</strong>. They typically respond within 48 hours,
