@@ -342,8 +342,8 @@ Mailboxes `support/privacy/dpo/complaints@pilgrimcompare.co.uk` → Cloudflare E
 | ~~Q1~~ ✅ | PilgrimCompare sweep + banned-phrase audit + dynamic departure cities | Done 2026-06-12 — see §17 |
 | ~~Q2~~ ✅ | Legal pages `/terms` `/privacy` `/how-it-works` | Done 2026-06-12 — see §18 |
 | ~~Q3~~ ✅ | IA/nav — header, footer, back buttons, breadcrumbs | Done 2026-06-12 — see §19 |
-| **Q4** ← next | Mobile polish 360/390/430px | Q3 done |
-| Q5 | SEO — metadata, JSON-LD, sitemap | Q1 done |
+| ~~Q4~~ ✅ | Mobile polish 360/390/430px | Done 2026-06-12 — see §20 |
+| **Q5** ← next | SEO — metadata, JSON-LD, sitemap | Q1 done |
 | Q6 | Ranking transparency + Featured infrastructure | Revenue model confirmed |
 
 ---
@@ -687,4 +687,63 @@ The `CookieConsent` component still says "Analytics cookies help us understand h
 - Desktop: header `Packages / Compare / How it works` confirmed; footer "what we do" paragraph + "DEPARTING FROM London" confirmed
 - Mobile 390px: hamburger drawer shows `Packages / Compare / How it works / For Operators`; `/umrah/london` shows `← Umrah` compact back affordance; breadcrumb trail on desktop
 
-**Next:** Q3 — IA/nav pass (header, footer, back buttons, breadcrumbs). Test count: 238/238.
+**Next:** Q4 — mobile polish. Test count: 238/238.
+
+---
+
+## 20. Q4 Mobile Polish — 2026-06-12
+
+**Branch:** `feat/q4-mobile-polish` (off `dev`).
+
+### Audit (360/390/430px)
+
+| # | Route | Defect | Fix |
+|---|-------|--------|-----|
+| 1 | `/` | Corridor nav links `py-3` < 44px tap target | `inline-flex min-h-[44px]` |
+| 2 | `/umrah` | FAQ nav links `py-1.5` < 44px tap target | `inline-flex min-h-[44px]` |
+| 3 | `/search/packages` | `.savedChip` 36px, `.filterChip` 34px, `.clearFilters` 34px | `min-height: 44px` in packages.module.css |
+| 4 | `/search/packages` | CompareBar `.chipRemove` 24×24px icon-only button | `padding:10px; margin:-10px; box-sizing:content-box` |
+| 5 | `/search/packages` | ComparisonTable wraps to 1 col on 3-package narrow view | `overflow-x:auto` wrapper + `min-w-[320px]` table |
+| 6 | Quote step 4 | Room count inputs no `id`/`htmlFor`; `py-1` < 44px; no `inputMode` | `id`, `htmlFor`, `min-h-[44px]`, `inputMode="numeric"` |
+| 7 | Quote step 5 | `<h2>Additional Notes</h2>` not linked to textarea; no data-sharing disclosure | `<label htmlFor>` + textarea `id`; disclosure box added |
+| 8 | `/requests/[id]/confirmation` | No copy-to-clipboard on reference code | New `ReferenceCodeDisplay` client component |
+| 9 | `/login` | Tab buttons `py-2.5` < 44px; forgot-pwd/back links tiny | `min-h-[44px]` on all three |
+| 10 | `/signup` | Tab buttons `py-2.5` < 44px | `min-h-[44px]` |
+| 11 | CookieConsent | Buttons 38px; copy claims analytics cookies (contradicts Privacy Policy); table overflows narrow | `min-h-[44px]`; remove analytics copy; `overflow-x:auto` on table |
+
+### What shipped
+
+**`app/page.tsx`** — corridor nav links: `inline-flex min-h-[44px] items-center justify-center`.
+
+**`app/umrah/page.tsx`** — FAQ nav links: `inline-flex min-h-[44px] items-center`.
+
+**`components/search/packages.module.css`** — `.savedChip`, `.filterChip`, `.clearFilters`: `min-height: 44px`.
+
+**`components/search/CompareBar.module.css`** — `.chipRemove`: `padding:10px; margin:-10px -4px -10px -6px; box-sizing:content-box` expands 24px visual to 44px hit area.
+
+**`components/request/ComparisonTable.tsx`** — outer div `overflow-x-auto`; table `min-w-[320px]`. Kept on inline Tailwind (no .module.css — see §15 gotcha).
+
+**`components/quote/steps/Step4GroupBudget.tsx`** — room inputs: `id`, `htmlFor`, `min-h-[44px]`, `inputMode="numeric"`, `py-2`.
+
+**`components/quote/steps/Step5Review.tsx`** — `<h2>` → `<label htmlFor="quote-notes">`; textarea `id="quote-notes"`; data-sharing disclosure box added per legal standards.
+
+**`components/request/ReferenceCodeDisplay.tsx`** — new `'use client'` component. Copy button 44px, `aria-live="polite"` feedback, `data-testid="copy-reference-code"`, `operatorName` prop for contextual message.
+
+**`app/requests/[id]/confirmation/page.tsx`** — imports and renders `<ReferenceCodeDisplay referenceCode={referenceCode} operatorName={operatorName} />`.
+
+**`components/auth/LoginForm.tsx`** — tabs: `min-h-[44px]`; forgot-password/back-to-signin: `inline-flex min-h-[44px] items-center`.
+
+**`components/auth/SignUpForm.tsx`** — tabs: `min-h-[44px]`.
+
+**`components/compliance/CookieConsent.tsx`** — all buttons `min-h-[44px]`; removed false analytics-cookie copy (Plausible is cookieless); removed analytics table row; relabelled "Accept all" → "Accept"; `overflow-x:auto` on details table wrapper.
+
+### 🛠️ Gotchas
+
+- **ComparisonTable + CSS module**: must stay on inline Tailwind only. Adding a .module.css import breaks the PackagesBrowse vitest suite (Vite runs file through Tailwind v4 PostCSS in test env → throws). See §15.
+- **Clipboard requires client component**: `navigator.clipboard.writeText` is browser-only. Confirmation page is a Server Component, so clipboard state lives in the separate `ReferenceCodeDisplay` client component.
+
+### Validation
+
+- `npx tsc --noEmit` pass
+- `npm run test` 238/238
+- `npm run build` 0 errors
