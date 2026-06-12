@@ -257,7 +257,7 @@ describe('OperatorSidebar', () => {
         userName="New User"
       />
     );
-    expect(screen.getByText('Pending')).toHaveClass('text-amber-400');
+    expect(screen.getByText('Pending')).toHaveClass('text-[var(--color-warning)]');
   });
 
   it('renders admin role correctly', () => {

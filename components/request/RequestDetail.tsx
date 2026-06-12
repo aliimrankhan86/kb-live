@@ -355,7 +355,7 @@ export function RequestDetail({ id }: { id: string }) {
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-[#FFFFFF]">Quote Request #{request.id.slice(0, 8)}</h1>
         <span className={`rounded-full px-3 py-1 text-sm font-medium capitalize ${
-          request.status === 'open' ? 'bg-blue-500/10 text-blue-500' : 'bg-green-500/10 text-green-500'
+          request.status === 'open' ? 'bg-blue-500/10 text-blue-500' : 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
         }`}>
           {request.status}
         </span>

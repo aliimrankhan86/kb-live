@@ -10,7 +10,7 @@ const TIER_COPY: Record<OperatorTier, { label: string; description: string; colo
     label: 'Verified',
     description:
       'We have checked this operator’s ATOL or ABTA registration and confirmed their identity.',
-    colour: 'text-green-300 border-green-500/30 bg-green-500/10',
+    colour: 'text-[var(--color-success)] border-[var(--color-success)]/30 bg-[var(--color-success)]/10',
   },
   verified_plus: {
     label: 'Verified+',

@@ -42,7 +42,7 @@ export function WizardStep5Inclusions({ data, onChange, error }: Props) {
       </div>
 
       {error && (
-        <div role="alert" className="rounded border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        <div role="alert" className="rounded border border-[var(--color-error)]/30 bg-[var(--color-error)]/10 px-4 py-3 text-sm text-[var(--color-error)]">
           {error}
         </div>
       )}

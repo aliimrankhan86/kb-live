@@ -160,7 +160,7 @@ export function OperatorDashboard({ operatorId }: { operatorId: string }) {
           <div className="space-y-2">
             {activity.map((item, i) => (
               <div key={i} className="flex items-center gap-3 rounded-md border border-[var(--borderSubtle)] bg-[var(--surfaceDark)] px-4 py-3">
-                <span className={`h-2 w-2 rounded-full ${item.type === 'lead' ? 'bg-blue-400' : item.type === 'offer' ? 'bg-[var(--yellow)]' : 'bg-green-400'}`} aria-hidden="true" />
+                <span className={`h-2 w-2 rounded-full ${item.type === 'lead' ? 'bg-blue-400' : item.type === 'offer' ? 'bg-[var(--yellow)]' : 'bg-[var(--color-success)]'}`} aria-hidden="true" />
                 <span className="flex-1 text-sm text-[var(--text)]">{item.title}</span>
                 <span className="text-xs text-[var(--textMuted)]">{relativeTime(item.date)}</span>
               </div>
@@ -192,7 +192,7 @@ export function OperatorDashboard({ operatorId }: { operatorId: string }) {
                 <span
                   className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${
                     pkg.status === 'published'
-                      ? 'bg-green-500/10 text-green-400'
+                      ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
                       : 'bg-[rgba(255,255,255,0.08)] text-[var(--textMuted)]'
                   }`}
                 >

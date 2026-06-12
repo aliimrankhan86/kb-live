@@ -62,7 +62,7 @@ function HotelSection({
 
         <div>
           <label htmlFor={`${prefix}-stars`} className="mb-1.5 block text-sm font-medium text-[var(--textMuted)]">
-            Star rating <span aria-hidden="true" className="text-red-400">*</span>
+            Star rating <span aria-hidden="true" className="text-[var(--color-error)]">*</span>
           </label>
           <select
             id={`${prefix}-stars`}
@@ -79,7 +79,7 @@ function HotelSection({
 
         <div>
           <label htmlFor={`${prefix}-nights`} className="mb-1.5 block text-sm font-medium text-[var(--textMuted)]">
-            Nights <span aria-hidden="true" className="text-red-400">*</span>
+            Nights <span aria-hidden="true" className="text-[var(--color-error)]">*</span>
           </label>
           <input
             id={`${prefix}-nights`}
@@ -139,7 +139,7 @@ export function WizardStep3Hotels({ data, onChange, error }: Props) {
       </div>
 
       {error && (
-        <div role="alert" className="rounded border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        <div role="alert" className="rounded border border-[var(--color-error)]/30 bg-[var(--color-error)]/10 px-4 py-3 text-sm text-[var(--color-error)]">
           {error}
         </div>
       )}

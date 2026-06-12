@@ -17,7 +17,7 @@ export function WizardStep1Basics({ data, onChange, error }: Props) {
       </div>
 
       {error && (
-        <div role="alert" className="rounded border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        <div role="alert" className="rounded border border-[var(--color-error)]/30 bg-[var(--color-error)]/10 px-4 py-3 text-sm text-[var(--color-error)]">
           {error}
         </div>
       )}
@@ -25,7 +25,7 @@ export function WizardStep1Basics({ data, onChange, error }: Props) {
       {/* Title */}
       <div>
         <label htmlFor="pkg-title" className="mb-1.5 block text-sm font-medium text-[var(--textMuted)]">
-          Package title <span aria-hidden="true" className="text-red-400">*</span>
+          Package title <span aria-hidden="true" className="text-[var(--color-error)]">*</span>
         </label>
         <input
           id="pkg-title"
@@ -44,7 +44,7 @@ export function WizardStep1Basics({ data, onChange, error }: Props) {
       {/* Pilgrimage type */}
       <div>
         <label htmlFor="pkg-type" className="mb-1.5 block text-sm font-medium text-[var(--textMuted)]">
-          Type <span aria-hidden="true" className="text-red-400">*</span>
+          Type <span aria-hidden="true" className="text-[var(--color-error)]">*</span>
         </label>
         <select
           id="pkg-type"

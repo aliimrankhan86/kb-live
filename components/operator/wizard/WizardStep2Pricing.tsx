@@ -17,7 +17,7 @@ export function WizardStep2Pricing({ data, onChange, error }: Props) {
       </div>
 
       {error && (
-        <div role="alert" className="rounded border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        <div role="alert" className="rounded border border-[var(--color-error)]/30 bg-[var(--color-error)]/10 px-4 py-3 text-sm text-[var(--color-error)]">
           {error}
         </div>
       )}
@@ -26,7 +26,7 @@ export function WizardStep2Pricing({ data, onChange, error }: Props) {
         {/* Price per person */}
         <div>
           <label htmlFor="pkg-price" className="mb-1.5 block text-sm font-medium text-[var(--textMuted)]">
-            Price per person (£) <span aria-hidden="true" className="text-red-400">*</span>
+            Price per person (£) <span aria-hidden="true" className="text-[var(--color-error)]">*</span>
           </label>
           <input
             id="pkg-price"
@@ -45,7 +45,7 @@ export function WizardStep2Pricing({ data, onChange, error }: Props) {
         {/* Price type */}
         <div>
           <label htmlFor="pkg-price-type" className="mb-1.5 block text-sm font-medium text-[var(--textMuted)]">
-            Price type <span aria-hidden="true" className="text-red-400">*</span>
+            Price type <span aria-hidden="true" className="text-[var(--color-error)]">*</span>
           </label>
           <select
             id="pkg-price-type"

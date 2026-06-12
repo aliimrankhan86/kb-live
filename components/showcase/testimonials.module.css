@@ -27,8 +27,8 @@
 }
 
 .testimonial {
-  background: rgba(17, 17, 17, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: color-mix(in srgb, var(--surfaceDark) 60%, transparent);
+  border: 1px solid var(--borderSubtle);
   border-radius: 1rem;
   padding: 2rem;
   transition: all 0.3s ease;
@@ -37,8 +37,8 @@
 
 .testimonial:hover {
   transform: translateY(-4px);
-  border-color: rgba(255, 211, 29, 0.3);
-  box-shadow: 0 8px 32px rgba(255, 211, 29, 0.1);
+  border-color: color-mix(in srgb, var(--primary) 30%, transparent);
+  box-shadow: 0 8px 32px color-mix(in srgb, var(--primary) 10%, transparent);
 }
 
 .testimonial__rating {
@@ -83,12 +83,12 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
   }
-  
+
   .testimonials__title {
     font-size: 2rem;
     margin-bottom: 2rem;
   }
-  
+
   .testimonial {
     padding: 1.5rem;
   }
@@ -98,33 +98,33 @@
   .testimonials {
     padding: 3rem 0;
   }
-  
+
   .testimonials__container {
     padding: 0 1rem;
   }
-  
+
   .testimonials__grid {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-  
+
   .testimonials__title {
     font-size: 1.75rem;
     margin-bottom: 1.5rem;
   }
-  
+
   .testimonial {
     padding: 1.25rem;
   }
-  
+
   .testimonial__text {
     font-size: 0.9rem;
   }
-  
+
   .testimonial__name {
     font-size: 0.9rem;
   }
-  
+
   .testimonial__location {
     font-size: 0.8rem;
   }
@@ -134,19 +134,19 @@
   .testimonials__title {
     font-size: 1.5rem;
   }
-  
+
   .testimonial {
     padding: 1rem;
   }
-  
+
   .testimonial__rating {
     margin-bottom: 1rem;
   }
-  
+
   .testimonial__star {
     font-size: 1rem;
   }
-  
+
   .testimonial__text {
     font-size: 0.85rem;
     margin-bottom: 1rem;

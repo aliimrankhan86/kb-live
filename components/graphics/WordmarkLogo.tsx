@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react'
 interface WordmarkLogoProps {
   className?: string
   color?: string
+  pilgrimColor?: string
   height?: number
   style?: CSSProperties
 }
@@ -10,6 +11,7 @@ interface WordmarkLogoProps {
 export function WordmarkLogo({
   className = '',
   color = 'currentColor',
+  pilgrimColor,
   height = 32,
   style,
 }: WordmarkLogoProps) {
@@ -30,10 +32,13 @@ export function WordmarkLogo({
         fontFamily="'Nunito', 'Nunito Variable', system-ui, sans-serif"
         fontSize="30"
         fontWeight="800"
-        fill={color}
+        fill={pilgrimColor ? undefined : color}
         letterSpacing="0"
       >
-        PilgrimCompare
+        {pilgrimColor
+          ? <><tspan fill={pilgrimColor}>Pilgrim</tspan><tspan fill={color}>Compare</tspan></>
+          : 'PilgrimCompare'
+        }
       </text>
     </svg>
   )

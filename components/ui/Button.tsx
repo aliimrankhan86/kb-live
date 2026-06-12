@@ -17,7 +17,7 @@ interface ButtonStyleOptions {
 }
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary: 'bg-[var(--yellow)] text-black hover:brightness-95',
+  primary: 'bg-[var(--yellow)] text-[var(--color-text-on-brand)] hover:brightness-95',
   secondary: 'bg-[var(--surfaceDark)] text-[var(--text)] border border-[var(--borderSubtle)] hover:border-[var(--borderStrong)]',
   ghost: 'bg-transparent text-[var(--text)] hover:bg-[rgba(255,255,255,0.08)]',
   danger: 'bg-[var(--danger)] text-white hover:brightness-110',

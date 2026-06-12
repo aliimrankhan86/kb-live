@@ -41,15 +41,15 @@ export function OperatorProfileDetail({ operator, packages }: OperatorProfileDet
         {/* ATOL/ABTA Protection Badges */}
         <div className="mt-3 flex flex-wrap gap-2" data-testid="operator-protection-badges">
           {operator.atolNumber && (
-            <div className="inline-flex items-center gap-2 rounded-md border border-green-500/30 bg-green-500/10 px-3 py-1.5 text-sm">
-              <span aria-hidden="true" className="text-green-400 font-bold">✓</span>
-              <span className="text-green-300">ATOL {operator.atolNumber}</span>
+            <div className="inline-flex items-center gap-2 rounded-md border border-[var(--color-success)]/30 bg-[var(--color-success)]/10 px-3 py-1.5 text-sm">
+              <span aria-hidden="true" className="text-[var(--color-success)] font-bold">✓</span>
+              <span className="text-[var(--color-success)]">ATOL {operator.atolNumber}</span>
             </div>
           )}
           {operator.abtaMemberNumber && (
-            <div className="inline-flex items-center gap-2 rounded-md border border-green-500/30 bg-green-500/10 px-3 py-1.5 text-sm">
-              <span aria-hidden="true" className="text-green-400 font-bold">✓</span>
-              <span className="text-green-300">ABTA {operator.abtaMemberNumber}</span>
+            <div className="inline-flex items-center gap-2 rounded-md border border-[var(--color-success)]/30 bg-[var(--color-success)]/10 px-3 py-1.5 text-sm">
+              <span aria-hidden="true" className="text-[var(--color-success)] font-bold">✓</span>
+              <span className="text-[var(--color-success)]">ABTA {operator.abtaMemberNumber}</span>
             </div>
           )}
           {!operator.atolNumber && !operator.abtaMemberNumber && (

@@ -131,7 +131,7 @@ export function PackageCsvImport({ operatorId, onImport }: { operatorId: string;
         </div>
 
         {unmappedRequired.length > 0 && (
-          <p className="text-xs text-red-400" role="alert">
+          <p className="text-xs text-[var(--color-error)]" role="alert">
             Still required: {unmappedRequired.join(', ')}
           </p>
         )}
@@ -189,14 +189,14 @@ export function PackageCsvImport({ operatorId, onImport }: { operatorId: string;
           data-testid="package-csv-import-result"
         >
           {result.saved.length > 0 && (
-            <p className="text-green-400">
+            <p className="text-[var(--color-success)]">
               <strong>{result.saved.length}</strong> package{result.saved.length !== 1 ? 's' : ''} imported.
             </p>
           )}
           {result.errors.length > 0 && (
             <div className={result.saved.length > 0 ? 'mt-2' : ''}>
-              <p className="font-medium text-red-400">{result.errors.length} error{result.errors.length !== 1 ? 's' : ''}:</p>
-              <ul className="mt-1 space-y-0.5 pl-3 text-red-400/80">
+              <p className="font-medium text-[var(--color-error)]">{result.errors.length} error{result.errors.length !== 1 ? 's' : ''}:</p>
+              <ul className="mt-1 space-y-0.5 pl-3 text-[var(--color-error)]/80">
                 {result.errors.map((err, i) => (
                   <li key={i}>Row {err.row}: {err.reason}</li>
                 ))}

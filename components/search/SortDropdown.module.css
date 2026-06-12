@@ -11,7 +11,7 @@
 .button {
   width: 100%;
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--borderSubtle);
   color: var(--text);
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
@@ -28,26 +28,26 @@
 }
 
 .button:hover:not(.buttonDisabled) {
-  border-color: var(--yellow);
-  color: var(--yellow);
-  background: rgba(255, 211, 29, 0.05);
+  border-color: var(--primary);
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 5%, transparent);
 }
 
 .button:focus {
-  outline: 2px solid var(--yellow);
+  outline: 2px solid var(--focusRing);
   outline-offset: 2px;
 }
 
 .buttonOpen {
-  border-color: var(--yellow);
-  color: var(--yellow);
-  background: rgba(255, 211, 29, 0.1);
+  border-color: var(--primary);
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
 }
 
 .buttonDisabled {
   opacity: 0.5;
   cursor: not-allowed;
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--text) 5%, transparent);
 }
 
 .buttonContent {
@@ -79,7 +79,7 @@
 
 .chevronOpen {
   transform: rotate(180deg);
-  color: var(--yellow);
+  color: var(--primary);
 }
 
 /* Dropdown Options */
@@ -89,7 +89,7 @@
   left: 0;
   right: 0;
   background: var(--bg);
-  border: 1px solid var(--yellow);
+  border: 1px solid var(--primary);
   border-radius: 0.5rem;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
   z-index: 1000;
@@ -106,17 +106,17 @@
 }
 
 .options::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
+  background: color-mix(in srgb, var(--text) 10%, transparent);
   border-radius: 3px;
 }
 
 .options::-webkit-scrollbar-thumb {
-  background: var(--yellow);
+  background: var(--primary);
   border-radius: 3px;
 }
 
 .options::-webkit-scrollbar-thumb:hover {
-  background: #e6c200;
+  background: var(--color-primary-dark);
 }
 
 /* Individual Option */
@@ -129,7 +129,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: left;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid color-mix(in srgb, var(--text) 5%, transparent);
 }
 
 .option:last-child {
@@ -137,26 +137,26 @@
 }
 
 .option:hover {
-  background: rgba(255, 211, 29, 0.1);
-  color: var(--yellow);
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  color: var(--primary);
 }
 
 .option:focus {
-  outline: 2px solid var(--yellow);
+  outline: 2px solid var(--focusRing);
   outline-offset: -2px;
-  background: rgba(255, 211, 29, 0.15);
-  color: var(--yellow);
+  background: color-mix(in srgb, var(--primary) 15%, transparent);
+  color: var(--primary);
 }
 
 .optionSelected {
-  background: rgba(255, 211, 29, 0.15);
-  color: var(--yellow);
-  border-left: 3px solid var(--yellow);
+  background: color-mix(in srgb, var(--primary) 15%, transparent);
+  color: var(--primary);
+  border-left: 3px solid var(--primary);
 }
 
 .optionFocused {
-  background: rgba(255, 211, 29, 0.1);
-  color: var(--yellow);
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  color: var(--primary);
 }
 
 .optionContent {
@@ -187,7 +187,7 @@
 
 .checkIcon {
   flex-shrink: 0;
-  color: var(--yellow);
+  color: var(--primary);
 }
 
 .optionDescription {
@@ -214,20 +214,20 @@
   .dropdown {
     max-width: 100%;
   }
-  
+
   .button {
     padding: 0.875rem 1rem;
     font-size: 0.9rem;
   }
-  
+
   .optionContent {
     padding: 1.25rem;
   }
-  
+
   .optionHeader {
     font-size: 0.9rem;
   }
-  
+
   .optionDescription {
     font-size: 0.8rem;
   }
@@ -238,11 +238,11 @@
     padding: 1rem;
     min-height: 48px; /* Larger touch targets on mobile */
   }
-  
+
   .optionContent {
     padding: 1.5rem;
   }
-  
+
   .options {
     max-height: 250px; /* Prevent overflow on small screens */
   }
@@ -253,11 +253,11 @@
   .button {
     border-width: 2px;
   }
-  
+
   .button:focus {
     outline-width: 3px;
   }
-  
+
   .option:focus {
     outline-width: 3px;
   }
@@ -270,15 +270,8 @@
   .chevron {
     transition: none;
   }
-  
+
   .options {
     animation: none;
-  }
-}
-
-/* Dark mode optimizations (already dark, but ensuring consistency) */
-@media (prefers-color-scheme: dark) {
-  .options {
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
   }
 }
