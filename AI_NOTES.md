@@ -341,7 +341,7 @@ Mailboxes `support/privacy/dpo/complaints@pilgrimcompare.co.uk` → Cloudflare E
 | ~~Q3~~ ✅ | IA/nav — header, footer, back buttons, breadcrumbs | Done 2026-06-12 — see §19 |
 | ~~Q4~~ ✅ | Mobile polish 360/390/430px | Done 2026-06-12 — see §20 |
 | ~~Q5~~ ✅ | SEO — metadata, JSON-LD, sitemap, banned-phrase CI | Done 2026-06-12 — see §21 |
-| **Q6** ← next | Ranking transparency + Featured infrastructure | Revenue model confirmed |
+| ~~Q6~~ ✅ | Ranking transparency + Featured infrastructure | Done 2026-06-12 — see §22 |
 
 ---
 
@@ -803,4 +803,62 @@ Full SEO audit and remediation for all public routes: metadata, JSON-LD structur
 
 - `npx tsc --noEmit` pass
 - `npm run test` 1,425/1,425 (21 files)
+- `npm run build` 0 errors
+
+---
+
+## 22. Q6 Ranking Transparency + Featured Infrastructure — 2026-06-12
+
+### What changed
+
+**TASK 1 — Server-side neutral sort (`lib/ranking.ts`, `lib/api/repository.ts`)**
+- New `lib/ranking.ts`: `scorePackage(pkg, responseRate?)` and `sortByScore(packages[])`.
+- Score = 45% data completeness (16 optional fields) + 35% price recency (full ≤7 days, zero ≥90 days) + 20% operator response rate (neutral 0.5 until real data).
+- `isFeatured` has zero weight — never affects neutral score.
+- `Repository.listPackages()` now calls `sortByScore()` before returning; all pages receive pre-sorted packages server-side.
+
+**TASK 2 — Neutral sort disclosure (`components/search/PackageList.tsx`, `components/packages/PackagesBrowse.tsx`)**
+- `NEUTRAL_SORT_DISCLOSURE` from `lib/content-rules` rendered near every sort control, linked to `/how-we-rank`.
+- `data-testid="sort-disclosure"` on both pages for Playwright targeting.
+- `PackageList` adds `'relevance'` sort option (preserves server order).
+
+**TASK 3 — `/how-we-rank` page (`app/how-we-rank/page.tsx`)**
+- Full DMCC Act 2024 Schedule 20 disclosure: 4 numbered criteria cards, Featured listing rules (max 2, labelled, "Paid placement" note, excluded from count), §7 verification statement verbatim as blockquote.
+- Indexed, canonical `/how-we-rank`, WebPage JSON-LD, added to `app/sitemap.ts` and `components/layout/Footer.tsx` LEGAL_LINKS.
+
+**TASK 4 — Featured infrastructure**
+- `prisma/schema.prisma`: `isFeatured Boolean @default(false) @map("is_featured")` — SQL applied (`ADD COLUMN IF NOT EXISTS`).
+- `lib/types.ts`: `isFeatured?: boolean` added to `Package`.
+- `lib/api/db/adapter.ts`: `mapPackage` maps `isFeatured`.
+- `lib/config.ts`: `FEATURE_FEATURED_SLOTS` flag (default `false`); server-side only — never read client-side.
+- `.env.example`: documents all env vars including `FEATURE_FEATURED_SLOTS=false`.
+- `components/search/FeaturedBadge.tsx`: yellow star badge, `data-testid="featured-badge"`.
+- `components/search/PackageList.tsx`: featured section (`data-testid="featured-section"`) above neutral list, capped at `FEATURED_MAX = 2`, visible only when `featuredSlotsEnabled=true` prop (server-evaluated).
+- `app/search/packages/page.tsx`: evaluates `FEATURE_FEATURED_SLOTS` server-side, passes as `featuredSlotsEnabled` prop.
+
+**TASK 5 — Tests**
+- `tests/ranking.test.ts`: 11 tests — `scorePackage` (range, recency, completeness, isFeatured no-op, response rate) and `sortByScore` (order, immutability, empty, isFeatured no-op).
+- `tests/featured-slots.test.tsx`: 10 tests — featured section render/absent, paid-placement label, `/how-we-rank` link, cap at 2, exclusion from neutral list, disclosure always present.
+- `tests/banned-phrases.test.ts`: `/how-we-rank` metadata strings added; star-character guard (★ ☆ ⭐ 🌟) on all metadata keys.
+- `postcss.config.mjs`: switched to object plugin syntax (`{ '@tailwindcss/postcss': {} }`) — compatible with both Next.js webpack and Vite/Vitest PostCSS loading.
+
+### Key constraints upheld
+- `FEATURE_FEATURED_SLOTS` evaluated server-side only; passed as `featuredSlotsEnabled: boolean` prop — never imported or read in client components.
+- No payment/billing code added — infrastructure only.
+- `isFeatured` has no weight in `scorePackage` — confirmed by test.
+- "Priority placement" phrase never used; featured copy is "Paid placement — not ranked by our neutral criteria."
+
+### Commits (branch `feat/q6-ranking-transparency`)
+1. `feat(ranking): server-side neutral sort score`
+2. `feat(config): add FEATURE_FEATURED_SLOTS flag + .env.example`
+3. `feat(schema): add isFeatured to Package — schema, type, mapper`
+4. `feat(ui): FeaturedBadge component + CSS for disclosure and featured section`
+5. `feat(ui): disclosure line + Featured slots in PackageList and PackagesBrowse`
+6. `feat(transparency): add /how-we-rank page, sitemap entry, footer link`
+7. `feat(tests): Q6 test suite — ranking, featured slots, banned phrases`
+
+### Validation
+
+- `npx tsc --noEmit` pass
+- `npm run test` 1,810/1,810 (23 files)
 - `npm run build` 0 errors
