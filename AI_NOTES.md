@@ -967,6 +967,56 @@ curl -H "Authorization: Bearer $CRON_SECRET" https://pilgrimcompare.co.uk/api/cr
 curl -H "Authorization: Bearer $CRON_SECRET" https://pilgrimcompare.co.uk/api/cron/expire-packages
 ```
 
+---
+
+## 24. Light Theme (Madinah) — 2026-06-12
+
+**Branch:** `feature/light-theme` (5 commits: `631ebb6` → `7d7910d`)
+**Spec:** `light-theme.md` (project root, committed `b4213b7`)
+**Tests:** 1,818/1,818 pass · build 0 errors · `npx tsc --noEmit` clean
+
+### What was built
+
+A Madinah-inspired optional light theme, additive-only — dark theme completely unchanged.
+
+**Step 2 — Token set (`styles/tokens.css` + `app/globals.css`)**
+- 16 new `--color-*` semantic tokens added to `:root` (dark defaults)
+- `[data-theme="light"]` block overrides both legacy (`--bg`, `--text`, etc.) and new semantic tokens with Madinah warm-stone / prophetic-green palette
+- `globals.css`: `[data-theme="light"] body { background-image: none }` + `body::before { display: none }` suppress Kaaba SVG and dark overlay
+
+**Step 3 — ThemeProvider + flash prevention (`components/theme/ThemeProvider.tsx`, `app/layout.tsx`)**
+- `ThemeProvider` React context with `useTheme()` hook; SSR-safe (initialises to `'dark'`, resolves from `localStorage` on mount)
+- Blocking inline `<script>` in `<head>` sets `data-theme` before hydration — no flash; `suppressHydrationWarning` already present on `<html>`
+- `localStorage` key `'theme'`, values `'light'`/`'dark'`; dark is default for null
+- `prefers-color-scheme` intentionally ignored per spec
+
+**Step 4 — ThemeToggle (`components/theme/ThemeToggle.tsx`, `Header.tsx`, `header.module.css`)**
+- `lucide-react` added as dependency (Sun/Moon icons — only Lucide usage in codebase)
+- Desktop: icon button in header right cluster, all token colors, 44×44px tap target
+- Mobile: labeled row above "Explore" nav links in hamburger drawer
+- `aria-label` updates dynamically ("Switch to light/dark theme")
+
+**Step 5 — Wordmark (`public/text-logo-light.svg`, `components/graphics/WordmarkLogo.tsx`, `Header.tsx`)**
+- `text-logo-light.svg` created (identical to `text-logo.svg`, "Pilgrim" tspan `#111827` instead of `#FFFFFF`)
+- `WordmarkLogo` extended with optional `pilgrimColor` prop — when set, splits into two `<tspan>` elements; backward-compatible (no prop = original single-fill behavior)
+- Header passes `pilgrimColor="#111827"` in light mode for both desktop and mobile drawer wordmarks
+
+**Step 6 — Semantic color token audit (32 files)**
+- Replaced `bg-red-500/10`, `text-red-400`, `border-red-500/30` etc. with `var(--color-error)` across 29 components
+- Same for green → `var(--color-success)` and amber → `var(--color-warning)`
+- `PackageCsvExport.tsx`: `bg-white text-slate-700 border-slate-300` → surface/text-primary/border-subtle tokens
+- Intentionally NOT changed: `hover:bg-red-500` (solid destructive delete overlay in WizardStep7Marketing), `bg-white` toggle thumb (WizardStep4Flights)
+- 2 tests updated to assert on token class names instead of old Tailwind color names
+
+**Step 7 — Lucide icon audit**
+- Only `Sun`/`Moon` exist (Step 4). Both inherit `color: var(--text)` from their parent elements. No hardcoded colors. No changes needed.
+
+### Gotchas
+
+- **`@theme inline` conflict:** `globals.css` maps `--color-bg: var(--bg)` and `--color-text-muted: var(--textMuted)`. These were NOT added to `:root` as new tokens to avoid circular refs. They ARE set directly in `[data-theme="light"]` (higher specificity wins regardless).
+- **WordmarkLogo vs text-logo.svg:** Header uses `WordmarkLogo` (inline SVG, Nunito 800), not `<img src="/text-logo.svg">` (Exo 2 700). Swapping `src` would change font and cause layout shift. Extended the component instead. `text-logo-light.svg` exists per spec but is not currently rendered anywhere.
+- **`lucide-react` added to `package.json`** — justified by spec requirement for Sun/Moon icons. No other icon library added.
+
 Expected response: `{"ok":true,"nudged":0}` / `{"ok":true,"sent":0}` / `{"ok":true,"expired":0}` when no records match (correct at initial deploy — no real enquiries yet).
 
 **Test email send (Resend test mode):**
