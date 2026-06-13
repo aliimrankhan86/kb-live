@@ -24,8 +24,15 @@ const compact = <T>(items: Array<T | undefined | false | null>): T[] => items.fi
 export function packageJsonLd(pkg: Package, operatorName: string): Record<string, unknown> {
   const nightsMakkah = pkg.nightsMakkah ?? Math.ceil((pkg.totalNights ?? 0) / 2);
   const nightsMadinah = pkg.nightsMadinah ?? Math.floor((pkg.totalNights ?? 0) / 2);
-  const hotelMakkahStars = pkg.hotelMakkahStars ?? 0;
-  const hotelMadinahStars = pkg.hotelMadinahStars ?? 0;
+  // Operator-supplied star ratings only. When absent they are omitted from the
+  // schema entirely — never emitted as 0 or a default (data-integrity rule).
+  const hasMakkahStars = typeof pkg.hotelMakkahStars === 'number';
+  const hasMadinahStars = typeof pkg.hotelMadinahStars === 'number';
+  const hotelStarsParts = [
+    hasMakkahStars ? `${pkg.hotelMakkahStars}★ Makkah` : null,
+    hasMadinahStars ? `${pkg.hotelMadinahStars}★ Madinah` : null,
+  ].filter(Boolean);
+  const hotelDescription = hotelStarsParts.length ? ` Hotels: ${hotelStarsParts.join(', ')}.` : '';
   const startDate = pkg.dateWindow?.start;
   const endDate = pkg.dateWindow?.end;
   const packageUrl = `${BASE_URL}/packages/${pkg.slug}`;
@@ -35,7 +42,7 @@ export function packageJsonLd(pkg: Package, operatorName: string): Record<string
     '@type': 'Product',
     '@id': `${packageUrl}#product`,
     name: pkg.title,
-    description: `${pkg.pilgrimageType} package – ${pkg.totalNights} nights (${nightsMakkah} Makkah, ${nightsMadinah} Madinah). Hotels: ${hotelMakkahStars}★ Makkah, ${hotelMadinahStars}★ Madinah.`,
+    description: `${pkg.pilgrimageType} package – ${pkg.totalNights} nights (${nightsMakkah} Makkah, ${nightsMadinah} Madinah).${hotelDescription}`,
     sku: pkg.id,
     image: compact([...(pkg.images ?? [])]),
     brand: {
@@ -73,6 +80,20 @@ export function packageJsonLd(pkg: Package, operatorName: string): Record<string
         name: 'Madinah nights',
         value: String(nightsMadinah),
       },
+      hasMakkahStars
+        ? {
+            '@type': 'PropertyValue',
+            name: 'Makkah hotel rating',
+            value: String(pkg.hotelMakkahStars),
+          }
+        : undefined,
+      hasMadinahStars
+        ? {
+            '@type': 'PropertyValue',
+            name: 'Madinah hotel rating',
+            value: String(pkg.hotelMadinahStars),
+          }
+        : undefined,
       pkg.departureAirport
         ? {
             '@type': 'PropertyValue',

@@ -487,6 +487,13 @@
   color: var(--textMuted);
 }
 
+/* Honest empty state for operator data the card cannot infer (name/rating). */
+.notProvided {
+  font-size: 0.75rem;
+  font-style: italic;
+  color: var(--textMuted);
+}
+
 .hotelDistance svg {
   color: var(--primary);
 }

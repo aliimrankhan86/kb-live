@@ -275,6 +275,10 @@ Next.js App Router UI
 | `KT-` reference prefix | Existing DB records use this. Rename only post-launch after migration. `/terms` copy references `KT-XXXXX` — update when prefix changes. |
 | Docs consistency | Some docs contain stale historical status. Update when touched; do not regress implementation to match stale docs. |
 
+### Future features — flagged, NOT approved for build
+
+- **Hotel data enrichment** logged as a FUTURE feature, NOT approved for build — must be scoped against standards §9 before any work (three distinct states: operator-stated / verified-with-source / Not provided; never silent-fill; operator can correct; disclose to users). The "Not provided" baseline from this fix is its prerequisite. Knowledge base Section 8 + 15 updated.
+
 ---
 
 ## 9. Infrastructure Reference
@@ -1136,3 +1140,30 @@ Rebuilt the homepage (`app/page.tsx`) from Hero-only (3 CTA cards + a routes nav
 
 ### Next step
 Founder review of the redesign in both themes, then open PR `feature/homepage-redesign` → `dev`. Update `STATUS.md`/`HANDOFF.md` on the same branch before the PR.
+
+---
+
+## 27. Data Integrity — "Not provided" for missing operator facts — 2026-06-13
+
+**Branch:** `fix/data-integrity-not-provided` (off `dev`).
+**Tests:** 1,825/1,825 pass (26 files, +7 new) · `tsc --noEmit` clean · `npm run build` 0 errors.
+
+### Why
+A read-only audit found user-facing surfaces that **inferred** operator-supplied fields when missing, violating the hard rule *missing = "Not provided", never inferred* (`AGENTS.md`; standards §9/§12). Fixed the live fabrications; documented the rest as scope boundaries.
+
+### What changed (one concern per commit)
+1. **Package cards** (`components/search/search-utils.ts`, `PackageCard.tsx`, `packages.module.css`, `PackageList.tsx`):
+   - `SearchHotel.name`/`rating` are now `string | null` / `number | null`. `toSearchDisplay` passes `hotelMakkah/MadinahName ?? null` and `hotelMakkah/MadinahStars ?? null` — **was** `?? pkg.title` (hotel name fell back to the package title) and `?? 4` (stars defaulted to 4).
+   - Card renders **"Not provided"** (italic, muted, new `.notProvided` class) for a null name or rating instead of fabricated stars / a borrowed title.
+   - Rating-sort treats missing as 0 **for ordering only** (sorts to the bottom; the card still shows "Not provided"). Compare-toggle aria-label switched from `hotel.name` → operator company name (null-safe).
+2. **Package JSON-LD** (`lib/seo/json-ld.ts`): `packageJsonLd` defaulted missing stars to `0` and emitted "0★" in the Product description. Now the hotels sentence is built only from stars that exist, and a `Makkah/Madinah hotel rating` PropertyValue is emitted **per city only when present**. Missing = property **absent** (not null, not 0, not empty) — verified by emitting the JSON-LD for a stars-less package: `additionalProperty` carries only Pilgrimage type + nights, no rating property; description has no `★`.
+3. **Quote prefill** (`lib/quote-prefill.ts`): `createQuotePrefillUrl` set `hotelStars` to `?? 4`, pre-seeding the enquiry with a fabricated preference. Now set **only** when a real rating exists, otherwise omitted.
+
+### Explicitly out of scope (deliberate)
+- `quote-prefill` inclusions `?? true` / `distancePreference` — seed the **customer's own enquiry-form preferences**, not displayed operator facts. Belongs with the operator-form task.
+- `PackageDetail.tsx` `?★` — already honest (shows unknown, not a fabricated number). Left as-is.
+- JSON-LD nights/price `??` defaults — **dead code** (`totalNights`/`nightsMakkah`/`nightsMadinah`/`pricePerPerson` are required `number` in `lib/types.ts`, so the fallbacks never fire). Left untouched to keep the diff tight.
+- Operator-form **entry defaults** (4-star / medium distance / small-group pre-selected in the wizard) — upstream data-quality risk (a skipped field can save a default as if confirmed). Separate task.
+
+### Future feature — flagged, NOT approved
+- **Hotel data enrichment** logged in §8 (Open Risks → Future features): must be scoped against standards §9 before any work (three distinct states: operator-stated / verified-with-source / Not provided; never silent-fill; operator can correct; disclose to users). The "Not provided" baseline from **this** fix is its prerequisite.

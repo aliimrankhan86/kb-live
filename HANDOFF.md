@@ -7,13 +7,13 @@
 
 **Stack:** Next.js 15.5 (App Router, Server Components) · React 19 · TypeScript strict · Supabase (auth/Postgres/RLS/storage, `eu-west-2`) · Prisma · Tailwind · Zustand · Vitest + Playwright.
 
-**State (2026-06-12):** Production on `main` (PR #54 merged). Tests 1,818/1,818 ✅. Build clean ✅. Q1–Q6 quality passes complete. Full transactional email suite live (6 templates via Resend). 3 Vercel cron jobs active (nudge-operators 08:00, outcome-followup 09:00, expire-packages 02:00 UTC). CRON_SECRET auth on all cron routes. `/how-we-rank` ranking transparency page live. Sitemap + footer updated. All domain redirects working. Supabase email confirmations branded.
+**State (2026-06-13):** Production on `main` (PR #54). Tests 1,825/1,825 ✅. Build clean ✅. Light theme + search redesign + pagination on `main`. Homepage redesign (audience routing + live compare preview) merged to `dev` (PR #63). Data-integrity "Not provided" fix on `fix/data-integrity-not-provided` (PR → dev pending) — package cards, package JSON-LD, and quote prefill no longer infer missing hotel name/stars. Q1–Q6 quality passes complete. Full transactional email suite live (6 templates via Resend). 3 Vercel cron jobs active. `/how-we-rank` ranking transparency page live.
 
 **Remaining setup items:** Operational only — curl-test 3 cron endpoints with CRON_SECRET, submit test enquiry to verify email delivery, onboard first operator. Email mailboxes live via Cloudflare Email Routing (→ Gmail). Upgrade to Google Workspace when onboarding real operators.
 
 **How to verify any change (mandatory before push):**
 ```bash
-npm run test     # 1,818/1,818 must pass
+npm run test     # 1,825/1,825 must pass
 npm run build    # 0 errors
 npx tsc --noEmit # pass
 # if UI/routes changed: Playwright smoke on / , /umrah , /search/packages at 320px + 1280px

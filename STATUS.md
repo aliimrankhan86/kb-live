@@ -3,15 +3,15 @@
 > **Single rolling tracker.** Any AI/dev: read this for current state. Update it after work is **done + tested + verified** (see `CLAUDE.md` rule).
 > Detailed handover lives in `AI_NOTES.md`. Cold-start brief: `HANDOFF.md`. Business: `BUSINESS.md`.
 
-**Last verified:** 2026-06-13 (light theme + search redesign + pagination — merged to dev + main) · **Branch:** `main` (clean) · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
+**Last verified:** 2026-06-13 (data-integrity "Not provided" fix) · **Branch:** `fix/data-integrity-not-provided` (PR → dev pending) · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
 
 ---
 
-## Health (verified 2026-06-12)
+## Health (verified 2026-06-13)
 
 | Check | State |
 | --- | --- |
-| `npm run test` | ✅ 1,818/1,818 pass (24 files) |
+| `npm run test` | ✅ 1,825/1,825 pass (26 files) |
 | `npm run build` | ✅ 0 errors |
 | `npx tsc --noEmit` | ✅ pass |
 | E2E `e2e/operator.spec.ts` | ✅ 30/30 pass (chromium + firefox + webkit) |
@@ -129,6 +129,8 @@
 | Light theme (Madinah) — 7-step implementation | ✅ Done 2026-06-13 (merged to dev + main) | — |
 | Search header redesign (world-class) | ✅ Done 2026-06-13 (merged to dev + main) | — |
 | Search results pagination (5/page) | ✅ Done 2026-06-13 (merged to dev + main) | — |
+| Homepage redesign — audience routing + live compare preview | ✅ Done 2026-06-13 (PR #63 → dev) | — |
+| Data integrity — "Not provided" for missing hotel name/stars (cards, JSON-LD, quote prefill) | ✅ Done 2026-06-13 (PR → dev pending, see AI_NOTES §27) | — |
 | Plausible analytics wiring | ⏳ Not started | — |
 | `app_metadata.role` backfill (pre-2026-06-09 users) | ⏳ Not started | Needs Supabase SQL |
 | Registered office address in footer | ⏳ Not started | Awaiting virtual office |
