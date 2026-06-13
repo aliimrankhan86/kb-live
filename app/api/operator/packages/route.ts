@@ -3,73 +3,7 @@ import { getSessionUser } from '@/lib/auth/session';
 import { Repository } from '@/lib/api/repository';
 import { mapErrorToResponse } from '@/lib/errors';
 import type { Package } from '@/lib/types';
-import { AIRPORT_CODES } from '@/lib/airports';
-import { z } from 'zod';
-
-// ─── Zod schema ──────────────────────────────────────────────────────────────
-
-const inclusionsSchema = z.object({
-  visa: z.boolean(),
-  flights: z.boolean(),
-  transfers: z.boolean(),
-  meals: z.boolean(),
-});
-
-const roomOccupancySchema = z.object({
-  single: z.boolean(),
-  double: z.boolean(),
-  triple: z.boolean(),
-  quad: z.boolean(),
-});
-
-const airportCodeSchema = z.enum(AIRPORT_CODES);
-
-const packageSchema = z.object({
-  // Step 1 — required
-  title: z.string().min(5, 'Title must be at least 5 characters').max(120, 'Title must be 120 characters or fewer'),
-  pilgrimageType: z.enum(['umrah', 'hajj']),
-  // Step 1 — optional
-  seasonLabel: z.string().max(80).optional(),
-  dateWindow: z.object({
-    start: z.string().default(''),
-    end: z.string().default(''),
-  }).optional(),
-  // Step 2 — required
-  pricePerPerson: z.number().positive('Price must be greater than 0'),
-  priceType: z.enum(['exact', 'from', 'fixed']),
-  currency: z.literal('GBP').default('GBP'),
-  // Step 2 — optional
-  depositAmount: z.number().nonnegative().optional(),
-  paymentPlanAvailable: z.boolean().optional(),
-  // Step 3
-  nightsMakkah: z.number().int().min(1, 'Makkah nights must be at least 1'),
-  nightsMadinah: z.number().int().min(1, 'Madinah nights must be at least 1'),
-  totalNights: z.number().int().min(2),
-  hotelMakkahName: z.string().optional(),
-  hotelMakkahStars: z.union([z.literal(3), z.literal(4), z.literal(5)]).optional(),
-  distanceBandMakkah: z.enum(['near', 'medium', 'far', 'unknown']).default('medium'),
-  distanceToHaramMakkahMetres: z.number().int().nonnegative().optional(),
-  hotelMadinahName: z.string().optional(),
-  hotelMadinahStars: z.union([z.literal(3), z.literal(4), z.literal(5)]).optional(),
-  distanceBandMadinah: z.enum(['near', 'medium', 'far', 'unknown']).default('medium'),
-  distanceToHaramMadinahMetres: z.number().int().nonnegative().optional(),
-  // Step 4
-  airline: z.string().optional(),
-  departureAirport: airportCodeSchema.optional(),
-  flightType: z.enum(['direct', 'one-stop', 'multi-stop']).optional(),
-  // Step 5
-  inclusions: inclusionsSchema.default({ visa: false, flights: false, transfers: false, meals: false }),
-  roomOccupancyOptions: roomOccupancySchema.default({ single: false, double: true, triple: true, quad: true }),
-  // Step 6
-  cancellationPolicy: z.string().max(1000).optional(),
-  groupType: z.enum(['private', 'small-group', 'large-group']).optional(),
-  // Step 7
-  highlights: z.array(z.string().max(200)).max(5).optional(),
-  notes: z.string().max(2000).optional(),
-  images: z.array(z.string().url()).max(8).optional(),
-  // Step 8 — publish status
-  status: z.enum(['draft', 'published']).default('draft'),
-});
+import { packageSchema, updatePackageSchema } from '@/lib/operator/package-schema';
 
 // ─── POST — create package ────────────────────────────────────────────────────
 
@@ -151,9 +85,7 @@ export async function DELETE(_request: NextRequest) {
 
 // ─── PATCH — update package ───────────────────────────────────────────────────
 
-const updateSchema = packageSchema.partial().extend({
-  id: z.string().min(1, 'Package ID required'),
-});
+const updateSchema = updatePackageSchema;
 
 export async function PATCH(request: NextRequest) {
   try {

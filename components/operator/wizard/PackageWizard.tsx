@@ -47,15 +47,16 @@ const VALIDATORS: ((data: Partial<Package>) => string | null)[] = [
 
 // ─── Defaults ─────────────────────────────────────────────────────────────────
 
+// Only fields the operator cannot meaningfully "skip" are seeded. Hotel stars,
+// distance band, and group type are deliberately NOT seeded — a skipped value
+// must persist as genuinely unset (→ "Not provided"), never a painted default.
+// (Inclusions keep all-false: the safe, non-over-claiming direction. See AI_NOTES §28.)
 const DEFAULT_DATA: Partial<Package> = {
   pilgrimageType: 'umrah',
   priceType: 'from',
   currency: 'GBP',
   inclusions: { visa: false, flights: false, transfers: false, meals: false },
   roomOccupancyOptions: { single: false, double: true, triple: true, quad: true },
-  distanceBandMakkah: 'medium',
-  distanceBandMadinah: 'medium',
-  groupType: 'small-group',
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
