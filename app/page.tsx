@@ -1,10 +1,17 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { Hero } from '@/components/marketing/Hero'
+import { ValueProps } from '@/components/marketing/ValueProps'
+import { HowItWorks } from '@/components/marketing/HowItWorks'
+import { TrustBlock } from '@/components/marketing/TrustBlock'
+import { DepartureCities } from '@/components/marketing/DepartureCities'
+import { FAQ } from '@/components/marketing/FAQ'
+import { HomeCTA } from '@/components/marketing/HomeCTA'
+import { Reveal } from '@/components/marketing/Reveal'
 import { JsonLdScript, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
+import { HOME_FAQS } from '@/lib/content-rules'
 import { Repository } from '@/lib/api/repository'
 
-const STATIC_CORRIDOR_LINKS = [
+const GUIDE_LINKS = [
   { label: 'Ramadan Umrah 2027', href: '/umrah/ramadan' },
   { label: 'Umrah cost guide', href: '/umrah/cost' },
   { label: 'Hajj packages 2027', href: '/hajj' },
@@ -42,49 +49,40 @@ const homeJsonLd = graphJsonLd([
     description:
       'Compare Hajj and Umrah packages from UK travel operators by price, hotel proximity, inclusions, and operator trust signals.',
   }),
-  faqPageJsonLd([
-    {
-      question: 'What does PilgrimCompare compare?',
-      answer:
-        'PilgrimCompare compares Hajj and Umrah packages by price, departure route, hotel details, inclusions, nights split, and visible operator trust signals such as verification status, ATOL number, and ABTA details where provided.',
-    },
-    {
-      question: 'Does PilgrimCompare take payment for packages?',
-      answer:
-        'No. PilgrimCompare is a comparison and enquiry service. You pay the operator directly. PilgrimCompare does not receive or hold your payment.',
-    },
-  ]),
+  // Same source array as the visible <FAQ> below, so the markup is never orphaned.
+  faqPageJsonLd(HOME_FAQS),
 ])
 
 export default async function Home() {
-  const departureCities = await Repository.getDistinctDepartureCities()
-  const cityLinks = departureCities.map((city) => ({
-    label: `Umrah from ${city}`,
-    href: `/umrah/${city.toLowerCase()}`,
-  }))
-  const corridorLinks = [...cityLinks, ...STATIC_CORRIDOR_LINKS]
+  let departureCities: string[] = []
+  try {
+    departureCities = await Repository.getDistinctDepartureCities()
+  } catch {
+    // DB unavailable — the departure-cities section renders its honest empty state.
+  }
 
   return (
     <>
       <JsonLdScript data={homeJsonLd} />
       <Hero />
-      {/* Internal navigation — links homepage to corridor and guide pages for SEO and user discovery */}
-      <section className="mx-auto max-w-4xl px-4 py-8 border-t border-[var(--border)]">
-        <h2 className="text-sm font-semibold text-[var(--textMuted)] uppercase tracking-wide mb-4">
-          Popular routes and guides
-        </h2>
-        <nav aria-label="Popular Umrah routes" className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {corridorLinks.map(({ label, href }) => (
-            <Link
-              key={href}
-              href={href}
-              className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surfaceDark)] px-4 py-2 text-sm font-medium text-[var(--text)] hover:border-[var(--yellow)]/40 hover:text-[var(--yellow)] transition-colors text-center"
-            >
-              {label}
-            </Link>
-          ))}
-        </nav>
-      </section>
+      <Reveal>
+        <ValueProps />
+      </Reveal>
+      <Reveal>
+        <HowItWorks />
+      </Reveal>
+      <Reveal>
+        <TrustBlock />
+      </Reveal>
+      <Reveal>
+        <DepartureCities cities={departureCities} guideLinks={GUIDE_LINKS} />
+      </Reveal>
+      <Reveal>
+        <FAQ items={HOME_FAQS} />
+      </Reveal>
+      <Reveal>
+        <HomeCTA />
+      </Reveal>
     </>
   )
 }
