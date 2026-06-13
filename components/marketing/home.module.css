@@ -336,6 +336,140 @@
   outline-offset: 3px;
 }
 
+/* --- Audience router (3 equal paths) --- */
+.audienceGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.audienceCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surfaceDark);
+  padding: 1.5rem;
+  box-shadow: var(--shadowSoft);
+  text-decoration: none;
+  transition: border-color 0.25s ease, transform 0.25s ease;
+}
+
+.audienceCard:hover {
+  border-color: color-mix(in srgb, var(--yellow) 45%, transparent);
+  transform: translateY(-3px);
+}
+
+.audienceCard:focus-visible {
+  outline: 2px solid var(--focusRing);
+  outline-offset: 3px;
+}
+
+.badge {
+  align-self: flex-start;
+  display: inline-block;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--yellow) 14%, transparent);
+  color: var(--yellow);
+}
+
+.audienceTitle {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0.5rem 0 0;
+}
+
+.audienceText {
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--textMuted);
+  margin: 0;
+  flex-grow: 1;
+}
+
+.audienceAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 44px;
+  margin-top: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+/* --- Compare preview (renders only with >= 2 live packages) --- */
+.previewWrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.previewTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  overflow: hidden;
+  background: var(--surfaceDark);
+}
+
+.previewTable th,
+.previewTable td {
+  padding: 0.75rem;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.previewTable tr:last-child th,
+.previewTable tr:last-child td {
+  border-bottom: none;
+}
+
+.previewLabelCol {
+  width: 30%;
+}
+
+.previewRowLabel {
+  color: var(--textMuted);
+  font-weight: 600;
+  font-size: 0.8125rem;
+}
+
+.previewTitle {
+  display: block;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+}
+
+.previewPrice {
+  display: block;
+  font-weight: 800;
+  color: var(--yellow);
+  font-size: 1rem;
+}
+
+.previewCell {
+  color: var(--text);
+}
+
+.previewFoot {
+  margin-top: 1.25rem;
+}
+
 /* --- Section divider --- */
 .divider {
   border-top: 1px solid var(--border);
@@ -345,7 +479,8 @@
 @media (max-width: 900px) {
   .grid,
   .steps,
-  .ctaBand {
+  .ctaBand,
+  .audienceGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -363,7 +498,8 @@
 @media (max-width: 560px) {
   .grid,
   .steps,
-  .ctaBand {
+  .ctaBand,
+  .audienceGrid {
     grid-template-columns: 1fr;
   }
 }
@@ -372,11 +508,13 @@
   .card,
   .cityLink,
   .ctaButton,
-  .inlineLink {
+  .inlineLink,
+  .audienceCard {
     transition: none;
   }
 
-  .card:hover {
+  .card:hover,
+  .audienceCard:hover {
     transform: none;
   }
 }

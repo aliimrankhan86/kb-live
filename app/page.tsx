@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import { Hero } from '@/components/marketing/Hero'
+import { AudienceRouter } from '@/components/marketing/AudienceRouter'
+import { ComparePreview } from '@/components/marketing/ComparePreview'
 import { ValueProps } from '@/components/marketing/ValueProps'
 import { HowItWorks } from '@/components/marketing/HowItWorks'
 import { TrustBlock } from '@/components/marketing/TrustBlock'
@@ -9,6 +11,7 @@ import { HomeCTA } from '@/components/marketing/HomeCTA'
 import { Reveal } from '@/components/marketing/Reveal'
 import { JsonLdScript, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
 import { HOME_FAQS } from '@/lib/content-rules'
+import type { Package } from '@/lib/types'
 import { Repository } from '@/lib/api/repository'
 
 const GUIDE_LINKS = [
@@ -61,10 +64,25 @@ export default async function Home() {
     // DB unavailable — the departure-cities section renders its honest empty state.
   }
 
+  let packages: Package[] = []
+  try {
+    packages = await Repository.listPackages()
+  } catch {
+    // DB unavailable — the compare preview simply does not render.
+  }
+  // Live-data only: the preview appears solely when at least two real packages exist.
+  const showPreview = packages.length >= 2
+
   return (
     <>
       <JsonLdScript data={homeJsonLd} />
       <Hero />
+      <AudienceRouter />
+      {showPreview && (
+        <Reveal>
+          <ComparePreview packages={packages} />
+        </Reveal>
+      )}
       <Reveal>
         <ValueProps />
       </Reveal>
