@@ -194,8 +194,13 @@ const PackageList: React.FC<PackageListProps> = ({
         return sorted.sort((a, b) => a.price - b.price);
       case 'price-desc':
         return sorted.sort((a, b) => b.price - a.price);
-      case 'rating':
-        return sorted.sort((a, b) => (b.makkahHotel.rating + b.madinaHotel.rating) - (a.makkahHotel.rating + a.madinaHotel.rating));
+      case 'rating': {
+        // Missing ratings are not inferred — they sort to the bottom (treated as
+        // 0 for ordering only; the card still shows "Not provided").
+        const ratingScore = (p: typeof sorted[number]) =>
+          (p.makkahHotel.rating ?? 0) + (p.madinaHotel.rating ?? 0);
+        return sorted.sort((a, b) => ratingScore(b) - ratingScore(a));
+      }
       case 'distance':
         // Prefer near hotels (simple heuristic)
         return sorted.sort((a, b) => {

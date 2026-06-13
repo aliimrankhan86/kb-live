@@ -60,3 +60,44 @@ export const BANNED_METADATA_PHRASES: string[] = [
  */
 export const NEUTRAL_SORT_DISCLOSURE =
   'Sorted by relevance and listing quality. No operator pays for ranking.'
+
+/**
+ * Verification statement — the approved §7 wording, verbatim.
+ *
+ * Single source of truth so the statement reads identically everywhere the
+ * "Verified" badge links or expands to it (§7 requires consistency). Reference
+ * this constant; never paraphrase or summarise it.
+ */
+export const VERIFICATION_STATEMENT =
+  "Before any operator is listed, we check: (1) their ATOL number against the CAA's public register, (2) their company status at Companies House, (3) that they have a real, verifiable UK trading address. Verification confirms these checks at the time of listing. It is not a guarantee of service quality, financial protection for your specific booking, or future conduct."
+
+/**
+ * One-line model description (§1 / §12). States what the service is and is not.
+ * Used as the homepage hero supporting line.
+ */
+export const MODEL_DESCRIPTION =
+  'Compare Umrah and Hajj packages from verified UK operators, then enquire directly. We are a comparison and enquiry service, not a travel agent, and we never take payment.'
+
+/**
+ * §4 standard copy line carried on the homepage trust block.
+ * Verbatim — do not paraphrase.
+ */
+export const PAYMENT_STANDARD_LINE =
+  'You pay the operator directly. PilgrimCompare does not receive or hold your payment.'
+
+/**
+ * Homepage FAQ — defined once and fed to BOTH the FAQPage JSON-LD and the
+ * visible on-page FAQ section, so the structured data is never orphaned.
+ */
+export const HOME_FAQS: { question: string; answer: string }[] = [
+  {
+    question: 'What does PilgrimCompare compare?',
+    answer:
+      'PilgrimCompare compares Hajj and Umrah packages by price, departure route, hotel details, inclusions, nights split, and visible operator trust signals such as verification status, ATOL number, and ABTA details where provided.',
+  },
+  {
+    question: 'Does PilgrimCompare take payment for packages?',
+    answer:
+      'No. PilgrimCompare is a comparison and enquiry service. You pay the operator directly. PilgrimCompare does not receive or hold your payment.',
+  },
+]

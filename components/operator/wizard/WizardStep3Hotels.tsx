@@ -32,13 +32,13 @@ function HotelSection({
   city: string;
   prefix: string;
   nameValue: string;
-  starsValue: 3 | 4 | 5;
+  starsValue: 3 | 4 | 5 | undefined;
   distanceValue: 'near' | 'medium' | 'far' | 'unknown';
   nightsValue: number;
   distMetresValue: number | undefined;
   onNameChange: (v: string) => void;
-  onStarsChange: (v: 3 | 4 | 5) => void;
-  onDistanceChange: (v: 'near' | 'medium' | 'far') => void;
+  onStarsChange: (v: 3 | 4 | 5 | undefined) => void;
+  onDistanceChange: (v: 'near' | 'medium' | 'far' | 'unknown') => void;
   onNightsChange: (v: number) => void;
   onDistMetresChange: (v: number | undefined) => void;
 }) {
@@ -62,15 +62,22 @@ function HotelSection({
 
         <div>
           <label htmlFor={`${prefix}-stars`} className="mb-1.5 block text-sm font-medium text-[var(--textMuted)]">
-            Star rating <span aria-hidden="true" className="text-[var(--color-error)]">*</span>
+            Star rating
           </label>
           <select
             id={`${prefix}-stars`}
             data-testid={`${prefix}-stars`}
-            value={starsValue}
-            onChange={(e) => onStarsChange(parseInt(e.target.value) as 3 | 4 | 5)}
+            // Starts empty (placeholder) — no painted default. Unset persists as
+            // "Not provided"; "Not sure / not rated" is the explicit unset choice.
+            value={starsValue ?? ''}
+            onChange={(e) => {
+              const v = e.target.value;
+              onStarsChange(v === '' || v === 'not-rated' ? undefined : (parseInt(v) as 3 | 4 | 5));
+            }}
             className="w-full rounded border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] px-3 py-2 text-sm text-[var(--text)] focus:border-[var(--yellow)] focus:outline-none"
           >
+            <option value="" disabled>Select hotel class</option>
+            <option value="not-rated">Not sure / not rated</option>
             {STAR_OPTIONS.map((s) => (
               <option key={s} value={s}>{s} stars</option>
             ))}
@@ -97,10 +104,13 @@ function HotelSection({
           <select
             id={`${prefix}-distance`}
             data-testid={`${prefix}-distance`}
-            value={distanceValue === 'unknown' ? 'medium' : distanceValue}
-            onChange={(e) => onDistanceChange(e.target.value as 'near' | 'medium' | 'far')}
+            // 'unknown' is the honest unset value (renders "Not provided"); shown
+            // as "Not specified" rather than silently coerced to 'medium'.
+            value={distanceValue}
+            onChange={(e) => onDistanceChange(e.target.value as 'near' | 'medium' | 'far' | 'unknown')}
             className="w-full rounded border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] px-3 py-2 text-sm text-[var(--text)] focus:border-[var(--yellow)] focus:outline-none"
           >
+            <option value="unknown">Not specified</option>
             {DISTANCE_OPTIONS.map((d) => (
               <option key={d.value} value={d.value}>{d.label}</option>
             ))}
@@ -148,8 +158,8 @@ export function WizardStep3Hotels({ data, onChange, error }: Props) {
         city="Makkah"
         prefix="makkah"
         nameValue={data.hotelMakkahName ?? ''}
-        starsValue={data.hotelMakkahStars ?? 4}
-        distanceValue={data.distanceBandMakkah ?? 'medium'}
+        starsValue={data.hotelMakkahStars}
+        distanceValue={data.distanceBandMakkah ?? 'unknown'}
         nightsValue={data.nightsMakkah ?? 0}
         distMetresValue={data.distanceToHaramMakkahMetres}
         onNameChange={(v) => onChange({ hotelMakkahName: v })}
@@ -163,8 +173,8 @@ export function WizardStep3Hotels({ data, onChange, error }: Props) {
         city="Madinah"
         prefix="madinah"
         nameValue={data.hotelMadinahName ?? ''}
-        starsValue={data.hotelMadinahStars ?? 4}
-        distanceValue={data.distanceBandMadinah ?? 'medium'}
+        starsValue={data.hotelMadinahStars}
+        distanceValue={data.distanceBandMadinah ?? 'unknown'}
         nightsValue={data.nightsMadinah ?? 0}
         distMetresValue={data.distanceToHaramMadinahMetres}
         onNameChange={(v) => onChange({ hotelMadinahName: v })}

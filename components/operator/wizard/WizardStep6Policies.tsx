@@ -8,15 +8,19 @@ interface Props {
   error: string | null;
 }
 
-const GROUP_TYPES: { value: Package['groupType']; label: string; description: string }[] = [
-  { value: 'private', label: 'Private', description: 'Dedicated group for your party only' },
-  { value: 'small-group', label: 'Small group', description: 'Shared with up to ~15 pilgrims' },
-  { value: 'large-group', label: 'Large group', description: 'Shared with 16+ pilgrims' },
+// 'Not specified' (value: undefined) is offered explicitly and is the starting
+// state — no painted default. A skipped group type persists as unset and reads
+// as "Not provided" downstream. The `key` gives each radio a stable DOM value.
+const GROUP_OPTIONS: { value: Package['groupType']; key: string; label: string; description: string }[] = [
+  { value: undefined, key: 'unspecified', label: 'Not specified', description: 'Leave blank — shown to pilgrims as "Not provided".' },
+  { value: 'private', key: 'private', label: 'Private', description: 'Dedicated group for your party only' },
+  { value: 'small-group', key: 'small-group', label: 'Small group', description: 'Shared with up to ~15 pilgrims' },
+  { value: 'large-group', key: 'large-group', label: 'Large group', description: 'Shared with 16+ pilgrims' },
 ];
 
 export function WizardStep6Policies({ data, onChange, error }: Props) {
   const policy = data.cancellationPolicy ?? '';
-  const groupType = data.groupType ?? 'small-group';
+  const groupType = data.groupType;
   const charCount = policy.length;
 
   return (
@@ -57,9 +61,9 @@ export function WizardStep6Policies({ data, onChange, error }: Props) {
       <div>
         <h3 className="mb-3 text-sm font-semibold text-[var(--text)] uppercase tracking-wide">Group type</h3>
         <div className="space-y-2">
-          {GROUP_TYPES.map(({ value, label, description }) => (
+          {GROUP_OPTIONS.map(({ value, key, label, description }) => (
             <label
-              key={value}
+              key={key}
               className={`flex cursor-pointer items-center gap-3 rounded border px-4 py-3 transition-colors ${
                 groupType === value
                   ? 'border-[var(--yellow)]/50 bg-[var(--yellow)]/10'
@@ -69,8 +73,8 @@ export function WizardStep6Policies({ data, onChange, error }: Props) {
               <input
                 type="radio"
                 name="group-type"
-                data-testid={`wizard-group-${value}`}
-                value={value}
+                data-testid={`wizard-group-${key}`}
+                value={key}
                 checked={groupType === value}
                 onChange={() => onChange({ groupType: value })}
                 className="h-4 w-4 accent-[var(--yellow)]"
