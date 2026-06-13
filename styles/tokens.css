@@ -52,6 +52,14 @@
   --color-user-card-bg: rgba(255, 255, 255, 0.04);
   --color-user-card-border: rgba(255, 255, 255, 0.07);
   --color-user-email: rgba(255, 255, 255, 0.45);
+
+  /* Comparison table tokens */
+  --comparison-section-bg: #161616;
+  --comparison-even-bg: #181818;
+  --comparison-lowest-bg: rgba(255, 211, 29, 0.08);
+  --comparison-winner-bg: rgba(34, 197, 94, 0.10);
+  --comparison-winner-text: #7dd97d;
+  --comparison-dim-text: rgba(255, 255, 255, 0.35);
 }
 
 html,
@@ -110,4 +118,12 @@ body {
   --color-user-card-bg: #F9F7F2;
   --color-user-card-border: #E2E0D8;
   --color-user-email: #6B7280;
+
+  /* Comparison table overrides */
+  --comparison-section-bg: #EDE8DC;
+  --comparison-even-bg: #F4F1EA;
+  --comparison-lowest-bg: rgba(138, 104, 0, 0.08);
+  --comparison-winner-bg: rgba(10, 105, 55, 0.08);
+  --comparison-winner-text: #0A6937;
+  --comparison-dim-text: rgba(0, 0, 0, 0.30);
 }
