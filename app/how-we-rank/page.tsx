@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { JsonLdScript, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld';
+import { VERIFICATION_STATEMENT } from '@/lib/content-rules';
 
 export const metadata: Metadata = {
   title: 'How We Rank Packages | PilgrimCompare',
@@ -228,12 +229,7 @@ export default function HowWeRankPage() {
               How we verify operators
             </h2>
             <blockquote className="rounded-lg border-l-4 border-[var(--yellow)] bg-[var(--surfaceDark)] px-5 py-4 text-sm text-[var(--textMuted)]">
-              Before any operator is listed, we check: (1) their ATOL number
-              against the CAA&rsquo;s public register, (2) their company status at
-              Companies House, (3) that they have a real, verifiable UK trading
-              address. Verification confirms these checks at the time of listing.
-              It is not a guarantee of service quality, financial protection for
-              your specific booking, or future conduct.
+              {VERIFICATION_STATEMENT}
             </blockquote>
           </section>
 

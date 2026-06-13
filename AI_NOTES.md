@@ -1091,3 +1091,48 @@ Use Resend dashboard → Logs to confirm email delivery after submitting a test 
 - `npx tsc --noEmit` pass
 - `npm run build` 0 errors
 - Merged: `feature/light-theme` → `dev` → `main` (2026-06-13)
+
+---
+
+## 26. Homepage Contemporary Redesign — 2026-06-13
+
+**Branch:** `feature/homepage-redesign` (off `dev`). **Not yet PR'd.**
+**Tests:** 1,818/1,818 pass · `npx tsc --noEmit` clean · `npm run build` 0 errors.
+
+### What changed
+Rebuilt the homepage (`app/page.tsx`) from Hero-only (3 CTA cards + a routes nav) into a calm, multi-section contemporary layout with restrained scroll-reveal motion. Token-only throughout — dark stays the default, light fully works. No new npm dependencies.
+
+**New section flow:** Hero → ValueProps → HowItWorks → TrustBlock → DepartureCities → FAQ → HomeCTA (global Header/Footer unchanged).
+
+### Files touched
+- `app/page.tsx` — composes the new sections; metadata + OG/Twitter **unchanged**; FAQ array (`HOME_FAQS`) feeds BOTH the `FAQPage` JSON-LD and the visible `<FAQ>` (de-orphans the schema); `getDistinctDepartureCities()` reused (not duplicated) and now wrapped in try/catch → honest empty state on DB blip.
+- `components/marketing/Hero.tsx` + `hero.module.css` — H1 kept **verbatim** (SEO-load-bearing); model line from `MODEL_DESCRIPTION`; primary CTA "Compare packages" → `/search/packages` (canonical list), secondary "How it works" → `/how-it-works`; trust strip "Verified operators" now links to `/how-we-rank#verification-heading`. Removed the old 3 CTA cards (Umrah → primary CTA, Operator + Hajj → HomeCTA). Fixed the one hardcoded colour (`rgba(0,0,0,0.4)` trust-bar shadow → `var(--shadowSoft)`).
+- **New** `components/marketing/`: `ValueProps.tsx`, `HowItWorks.tsx`, `TrustBlock.tsx`, `DepartureCities.tsx`, `FAQ.tsx`, `HomeCTA.tsx`, `Reveal.tsx`, `home.module.css` — all token-only.
+- `components/marketing/Reveal.tsx` — client IntersectionObserver fade+translate; adds `.reveal` only on the client and only when motion is allowed (progressive enhancement: no-JS / reduced-motion → fully visible). Opacity+transform only → no CLS.
+- `app/globals.css` — `.reveal` / `.reveal--visible` rules + `prefers-reduced-motion` guard.
+- `lib/content-rules.ts` — added `VERIFICATION_STATEMENT` (verbatim §7), `MODEL_DESCRIPTION` (§1), `PAYMENT_STANDARD_LINE` (§4 verbatim), `HOME_FAQS`.
+- `app/how-we-rank/page.tsx` — now renders `{VERIFICATION_STATEMENT}` from the shared constant (single source of truth; per the redesign decision to reference verbatim from both homepage and how-we-rank).
+
+### Decisions
+- **H1 unchanged**, verbatim — already compliant + SEO-load-bearing.
+- **Verification statement: extracted to a shared constant**, referenced verbatim from homepage `TrustBlock` and `/how-we-rank`. No paraphrase/summary written anywhere. `terms` + `how-it-works` keep their own inline copies (out of homepage scope).
+- **Primary CTA → `/search/packages`** (canonical comparison surface; `/umrah` is a search-form landing page, kept discoverable via the guides row).
+- **Hajj 2027 "register your interest" retained** in the HomeCTA band → `/hajj`.
+- **FAQPage de-orphaned** by adding a visible FAQ rendering the same 2 Q&As (single `HOME_FAQS` source).
+- **No new design tokens added** — every colour resolved from existing `styles/tokens.css` tokens.
+
+### Verification performed
+- `tsc` clean · 1,818 tests pass (banned-phrase guard included) · build 0 errors.
+- Playwright @390px both themes: `scrollWidth == innerWidth` (390/390), zero overflow offenders.
+- `prefers-reduced-motion: reduce`: 0 elements left in `.reveal` hidden state (no motion).
+- Scroll test: all 6 below-fold sections reach `.reveal--visible` (none stuck hidden).
+- On-page compliance asserted present: H1 verbatim, model line, §7 statement verbatim, §4 payment line, "No operator pays for ranking" + `/how-we-rank` link, visible FAQ, Hajj 2027.
+- Visual check (screenshots) dark + light, desktop + mobile — both themes render correctly (light = prophetic-green CTA, amber icons, ivory bg).
+
+### Open risks / notes
+- `STATUS.md` / `HANDOFF.md` not yet updated (branch not merged) — sync on PR.
+- No Playwright spec committed for the homepage reveal/overflow (checked via throwaway scripts). Add to e2e suite when the Playwright suite next expands (testid hooks are stable section ids).
+- `terms` + `how-it-works` still carry their own inline §7 copy (pre-existing duplication; intentionally left out of homepage scope — fold into `VERIFICATION_STATEMENT` in a later cleanup).
+
+### Next step
+Founder review of the redesign in both themes, then open PR `feature/homepage-redesign` → `dev`. Update `STATUS.md`/`HANDOFF.md` on the same branch before the PR.
