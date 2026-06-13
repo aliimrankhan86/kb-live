@@ -9,9 +9,9 @@ const AIRPORTS: { code: string; name: string; city: string }[] = [
   { code: 'BHX', name: 'Birmingham', city: 'Birmingham' },
 ];
 
-const chipBase = 'cursor-pointer rounded-lg border px-3 py-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FFD31D]';
-const chipActive = 'border-[#FFD31D] bg-[rgba(255,211,29,0.12)] text-[#FFFFFF]';
-const chipInactive = 'border-[rgba(255,255,255,0.1)] text-[rgba(255,255,255,0.64)] hover:border-[rgba(255,255,255,0.3)]';
+const chipBase = 'cursor-pointer rounded-lg border px-3 py-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focusRing)]';
+const chipActive = 'border-[var(--primary)] bg-[var(--color-primary-soft)] text-[var(--text)]';
+const chipInactive = 'border-[var(--borderSubtle)] text-[var(--textMuted)] hover:border-[var(--borderStrong)]';
 
 export function Step2LocationDates({ cities }: { cities: string[] }) {
   const { draft, setDraft } = useQuoteRequestStore();
@@ -26,8 +26,8 @@ export function Step2LocationDates({ cities }: { cities: string[] }) {
     <div className="space-y-8">
       {/* Departure city */}
       <div>
-        <h2 className="text-xl font-semibold text-[#FFFFFF]">Departure City</h2>
-        <p className="mt-1 text-sm text-[rgba(255,255,255,0.64)]">Which city are you flying from?</p>
+        <h2 className="text-xl font-semibold text-[var(--text)]">Departure City</h2>
+        <p className="mt-1 text-sm text-[var(--textMuted)]">Which city are you flying from?</p>
         <div className="mt-4 flex flex-wrap gap-2">
           {cities.map((city) => (
             <button
@@ -45,8 +45,8 @@ export function Step2LocationDates({ cities }: { cities: string[] }) {
       {/* Departure airport */}
       {selectedCity && (
         <div>
-          <h2 className="text-xl font-semibold text-[#FFFFFF]">Departure Airport</h2>
-          <p className="mt-1 text-sm text-[rgba(255,255,255,0.64)]">Which airport will you fly from?</p>
+          <h2 className="text-xl font-semibold text-[var(--text)]">Departure Airport</h2>
+          <p className="mt-1 text-sm text-[var(--textMuted)]">Which airport will you fly from?</p>
           <div className="mt-4 flex flex-wrap gap-2">
             {relevantAirports.map((airport) => (
               <button
@@ -60,18 +60,18 @@ export function Step2LocationDates({ cities }: { cities: string[] }) {
               </button>
             ))}
           </div>
-          <p className="mt-3 text-xs text-[rgba(255,255,255,0.4)]">Your return flight will depart from the same airport.</p>
+          <p className="mt-3 text-xs text-[var(--textMuted)]">Your return flight will depart from the same airport.</p>
         </div>
       )}
 
       {/* Travel dates */}
       {isCustomDates && (
         <div>
-          <h2 className="text-xl font-semibold text-[#FFFFFF]">Travel Dates</h2>
-          <p className="mt-1 text-sm text-[rgba(255,255,255,0.64)]">When would you like to depart and return?</p>
+          <h2 className="text-xl font-semibold text-[var(--text)]">Travel Dates</h2>
+          <p className="mt-1 text-sm text-[var(--textMuted)]">When would you like to depart and return?</p>
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="travel-start-date" className="mb-2 block text-sm font-medium text-[rgba(255,255,255,0.8)]">
+              <label htmlFor="travel-start-date" className="mb-2 block text-sm font-medium text-[var(--color-text-secondary)]">
                 Start Date
               </label>
               <input
@@ -79,11 +79,11 @@ export function Step2LocationDates({ cities }: { cities: string[] }) {
                 id="travel-start-date"
                 value={draft.dateWindow?.start || ''}
                 onChange={(e) => setDraft({ dateWindow: { ...draft.dateWindow, start: e.target.value, flexible: false } })}
-                className="block w-full rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] px-4 py-3 text-[#FFFFFF] focus:border-[#FFD31D] focus:outline-none focus:ring-1 focus:ring-[#FFD31D]"
+                className="block w-full rounded-lg border border-[var(--borderSubtle)] bg-[var(--color-surface-subtle)] px-4 py-3 text-[var(--text)] focus:border-[var(--focusRing)] focus:outline-none focus:ring-1 focus:ring-[var(--focusRing)]"
               />
             </div>
             <div>
-              <label htmlFor="travel-end-date" className="mb-2 block text-sm font-medium text-[rgba(255,255,255,0.8)]">
+              <label htmlFor="travel-end-date" className="mb-2 block text-sm font-medium text-[var(--color-text-secondary)]">
                 End Date
               </label>
               <input
@@ -91,7 +91,7 @@ export function Step2LocationDates({ cities }: { cities: string[] }) {
                 id="travel-end-date"
                 value={draft.dateWindow?.end || ''}
                 onChange={(e) => setDraft({ dateWindow: { ...draft.dateWindow, end: e.target.value, flexible: false } })}
-                className="block w-full rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] px-4 py-3 text-[#FFFFFF] focus:border-[#FFD31D] focus:outline-none focus:ring-1 focus:ring-[#FFD31D]"
+                className="block w-full rounded-lg border border-[var(--borderSubtle)] bg-[var(--color-surface-subtle)] px-4 py-3 text-[var(--text)] focus:border-[var(--focusRing)] focus:outline-none focus:ring-1 focus:ring-[var(--focusRing)]"
               />
             </div>
           </div>
@@ -99,16 +99,16 @@ export function Step2LocationDates({ cities }: { cities: string[] }) {
       )}
 
       {!isCustomDates && (
-        <div className="rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] p-4">
+        <div className="rounded-lg border border-[var(--borderSubtle)] bg-[var(--color-surface-subtle)] p-4">
           <label className="flex items-center gap-3 cursor-pointer">
             <input
               type="checkbox"
               id="flexible-dates"
               checked={draft.dateWindow?.flexible ?? true}
               onChange={(e) => setDraft({ dateWindow: { ...draft.dateWindow, flexible: e.target.checked } })}
-              className="h-4 w-4 rounded border-[rgba(255,255,255,0.3)] bg-[rgba(255,255,255,0.05)] text-[#FFD31D] focus:ring-[#FFD31D]"
+              className="h-4 w-4 rounded border-[var(--borderStrong)] bg-[var(--color-surface-subtle)] text-[var(--primary)] focus:ring-[var(--focusRing)]"
             />
-            <span className="text-sm font-medium text-[#FFFFFF]">My dates are flexible within the selected season</span>
+            <span className="text-sm font-medium text-[var(--text)]">My dates are flexible within the selected season</span>
           </label>
         </div>
       )}
