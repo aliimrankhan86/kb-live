@@ -229,8 +229,8 @@ export function Header({ className = '' }: { className?: string }) {
       <div className={styles.header__container}>
         {/* Brand */}
         <Link href="/" className={styles.header__brand} aria-label="PilgrimCompare - Go to homepage">
-          <Logo size={32} />
-          <WordmarkLogo className={styles.header__textLogo} height={30} pilgrimColor={isLight ? '#111827' : undefined} />
+          <Logo size={32} isLight={isLight} />
+          <WordmarkLogo className={styles.header__textLogo} height={30} pilgrimColor={isLight ? 'var(--color-text-primary)' : undefined} />
         </Link>
 
         {/* Desktop Navigation */}
@@ -400,8 +400,8 @@ export function Header({ className = '' }: { className?: string }) {
           {/* Drawer header */}
           <div className={styles.header__mobileDrawerHeader}>
             <Link href="/" className={styles.header__mobileBrand} onClick={() => setMobileDrawerOpen(false)}>
-              <Logo size={28} />
-              <WordmarkLogo className={styles.header__textLogoMobile} height={26} pilgrimColor={isLight ? '#111827' : undefined} />
+              <Logo size={28} isLight={isLight} />
+              <WordmarkLogo className={styles.header__textLogoMobile} height={26} pilgrimColor={isLight ? 'var(--color-text-primary)' : undefined} />
             </Link>
             <button
               className={styles.header__mobileClose}
