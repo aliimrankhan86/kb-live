@@ -44,8 +44,10 @@ export const createQuotePrefillUrl = (pkg: Package) => {
   params.set('nightsMakkah', String(pkg.nightsMakkah))
   params.set('nightsMadinah', String(pkg.nightsMadinah))
 
-  const hotelStars = pkg.hotelMakkahStars ?? pkg.hotelMadinahStars ?? 4
-  params.set('hotelStars', String(hotelStars))
+  // Seed the star preference only from a real operator-supplied rating. When
+  // neither hotel has stars, leave it unset rather than fabricating a default.
+  const hotelStars = pkg.hotelMakkahStars ?? pkg.hotelMadinahStars
+  if (typeof hotelStars === 'number') params.set('hotelStars', String(hotelStars))
   params.set('distancePreference', normalizeDistance(pkg.distanceBandMakkah))
 
   params.set('visa', String(pkg.inclusions?.visa ?? true))
