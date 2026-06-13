@@ -1167,3 +1167,42 @@ A read-only audit found user-facing surfaces that **inferred** operator-supplied
 
 ### Future feature — flagged, NOT approved
 - **Hotel data enrichment** logged in §8 (Open Risks → Future features): must be scoped against standards §9 before any work (three distinct states: operator-stated / verified-with-source / Not provided; never silent-fill; operator can correct; disclose to users). The "Not provided" baseline from **this** fix is its prerequisite.
+
+---
+
+## 28. Operator Form — no silent defaults for skipped fields — 2026-06-13
+
+**Branch:** `fix/operator-form-no-silent-defaults` (off `dev`).
+**Tests:** 1,830/1,830 pass (27 files, +5 new) · `tsc --noEmit` clean · `npm run build` 0 errors.
+
+### Why
+The §27 fix made the *display* honest. This closes the upstream hole: the package wizard manufactured values for fields the operator skipped, so the DB stored a confident default (4-star / medium distance / small-group) as if the operator had confirmed it. The adapter was already honest (`?? null`) — the fabrication lived in `DEFAULT_DATA` and the Zod `.default()` calls. A skipped field must now persist as genuinely unset → render "Not provided" everywhere (matching §27 / PR #64).
+
+### Scope — three fields only
+**Hotel stars · distance band · group type.** Inclusions are OUT of scope (see deferred follow-up below).
+
+### What changed
+- **Zod schema extracted** to `lib/operator/package-schema.ts` (imported by `app/api/operator/packages/route.ts`; makes the defaults unit-testable). Distance `.default('medium')` → **`.default('unknown')`** — `'unknown'` is the existing "Not provided" sentinel (`comparison.ts:108-109`, `friendlyDistance` → null). Stars and `groupType` keep **no default** (`.optional()`).
+- **`PackageWizard.tsx` `DEFAULT_DATA`**: removed the `distanceBandMakkah/Madinah: 'medium'` and `groupType: 'small-group'` seeds (stars were never seeded).
+- **`WizardStep3Hotels.tsx`** — stars: removed the `?? 4` UI paint; select now starts on a disabled **"Select hotel class"** placeholder, with an explicit **"Not sure / not rated"** option → `undefined`. Removed the misleading required `*` on stars. Distance: removed the `'unknown' → 'medium'` display coercion; added a **"Not specified"** option (= `'unknown'`); parent default `?? 'unknown'`.
+- **`WizardStep6Policies.tsx`** — group type: removed the `?? 'small-group'` default; added a **"Not specified"** radio (value `undefined`) as the starting state.
+- **`WizardStep8Review.tsx`** — distance rows show "Not set" when `'unknown'` (instead of the literal "unknown"). Stars/group already showed "Not set" for unset.
+
+### Verified end to end (package created skipping all three)
+- Schema persists: stars `undefined`, distance `'unknown'`, groupType `undefined`.
+- Adapter writes: stars `null`, distance `'unknown'`, groupType `null` (`adapter.ts:385,386,400`).
+- Pilgrim sees (comparison grid): **"Not provided"** for hotel rating, distance, and group type.
+- Chosen values pass through unchanged (5★ / near / Private → rendered).
+- Theme/layout: only `<option>`/radio additions to existing token-styled selects — no new colours, no width/layout change, so both themes + 390px are unaffected (existing operator e2e still green). Pre-existing hardcoded `rgba(255,255,255,…)` wizard inputs left untouched per scope; new additions are token-only.
+
+### Existing data (report only — NO migration this task)
+Counts of records currently holding the old default-equivalent value (seed-authored; live DB not queried):
+- `lib/api/mock-db.ts` (17 pkgs): stars=4 → 8 Makkah / 9 Madinah; distance='medium' → 7 Makkah / 3 Madinah; groupType='small-group' → 6/17.
+- `prisma/seed.ts` (14 pkgs): stars=4 → 5 Makkah / 5 Madinah; distance uses an out-of-type vocabulary (`'0-500m'`/`'500m-1km'`/`'1km+'`), 0 `'medium'`; no `groupType` set.
+- `supabase/seed.sql`: 0 package records.
+Existing-data cleanup (whether to null-out these seed defaults) is a **separate later task** — not done here.
+
+### Deferred / flagged as separate tasks
+- **Inclusions three-state model (follow-up):** inclusions still default all-false. That direction is safe (it under-claims — never marks something included that the operator didn't confirm), so it was left as-is. A proper three-state model (included / not included / not specified) is a separate follow-up.
+- **Distance vocabulary reconciliation (separate task):** three vocabularies coexist — the type enum (`near|medium|far|unknown`), the wizard labels, and the DB seed strings (`'0-500m'` etc. in `prisma/seed.ts`, outside the enum). This fix deliberately did **not** touch the vocabulary; reconciling them is its own task.
+- **Edit-mode clearing limitation:** PATCH uses `packageSchema.partial()` and `JSON.stringify` drops `undefined`, so clearing a previously-set optional field (e.g. changing 5★ back to "Not sure") via edit does not persist a null. The type models these as `?:` (optional), not nullable, so explicit-null clearing is out of scope here. Create-flow (the task's focus) is unaffected.
