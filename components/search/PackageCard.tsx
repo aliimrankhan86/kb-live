@@ -57,21 +57,32 @@ const PackageCard: React.FC<PackageCardProps> = ({
     [pkg.currency, pkg.price, regionSettings]
   )
 
-  const renderStars = (rating: number, label: string) => (
-    <span className={styles.hotelRating} role="img" aria-label={`${rating} out of 5 stars, ${label}`}>
-      {[1, 2, 3, 4, 5].map((i) => (
-        <svg
-          key={i}
-          className={i <= rating ? styles.star : styles.starEmpty}
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-        </svg>
-      ))}
-      <span className={styles.ratingText}>{rating}/5</span>
-    </span>
-  )
+  const renderStars = (rating: number | null, label: string) => {
+    // Operator has not supplied a star rating — state that honestly rather than
+    // rendering a fabricated default. (Data-integrity rule: missing = Not provided.)
+    if (rating == null) {
+      return (
+        <span className={styles.notProvided} aria-label={`Hotel rating not provided, ${label}`}>
+          Not provided
+        </span>
+      )
+    }
+    return (
+      <span className={styles.hotelRating} role="img" aria-label={`${rating} out of 5 stars, ${label}`}>
+        {[1, 2, 3, 4, 5].map((i) => (
+          <svg
+            key={i}
+            className={i <= rating ? styles.star : styles.starEmpty}
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+          </svg>
+        ))}
+        <span className={styles.ratingText}>{rating}/5</span>
+      </span>
+    )
+  }
 
   const totalNights = (nightsMakkah ?? 0) + (nightsMadinah ?? 0)
   const nightsLabel = totalNights > 0
@@ -104,7 +115,9 @@ const PackageCard: React.FC<PackageCardProps> = ({
       />
       <div className={styles.hotelInfo}>
         <span className={styles.hotelLocation}>{hotel.location}</span>
-        <span className={styles.hotelName}>{hotel.name}</span>
+        <span className={hotel.name ? styles.hotelName : styles.notProvided}>
+          {hotel.name ?? 'Not provided'}
+        </span>
         <div className={styles.hotelMeta}>
           {renderStars(hotel.rating, hotel.location)}
           {!isPlaceholder(hotel.distance) && (
@@ -224,7 +237,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
             disabled={compareLocked}
             data-testid={`package-compare-toggle-${pkg.id}`}
             onChange={() => onToggleCompare(pkg.id)}
-            aria-label={isCompareSelected ? `Remove ${pkg.makkahHotel.name} package from comparison` : `Select ${pkg.makkahHotel.name} package to compare`}
+            aria-label={isCompareSelected ? `Remove ${operator?.companyName ?? 'this'} package from comparison` : `Select ${operator?.companyName ?? 'this'} package to compare`}
           />
           <span className={styles.compareBox} aria-hidden="true">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" aria-hidden="true">
