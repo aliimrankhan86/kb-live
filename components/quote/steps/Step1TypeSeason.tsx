@@ -18,8 +18,8 @@ export function Step1TypeSeason() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-xl font-semibold text-[#FFFFFF]">Select Pilgrimage Type</h2>
-        <p className="mt-1 text-sm text-[rgba(255,255,255,0.64)]">
+        <h2 className="text-xl font-semibold text-[var(--text)]">Select Pilgrimage Type</h2>
+        <p className="mt-1 text-sm text-[var(--textMuted)]">
           Are you planning for Umrah or Hajj?
         </p>
         <div className="mt-4 grid grid-cols-2 gap-4">
@@ -28,8 +28,8 @@ export function Step1TypeSeason() {
             className={clsx(
               'rounded-xl border p-6 text-center transition-all',
               draft.type === 'umrah'
-                ? 'border-[#FFD31D] bg-[rgba(255,211,29,0.1)] text-[#FFD31D]'
-                : 'border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] text-[#FFFFFF] hover:bg-[rgba(255,255,255,0.1)]'
+                ? 'border-[var(--primary)] bg-[var(--color-primary-soft)] text-[var(--primary)]'
+                : 'border-[var(--borderSubtle)] bg-[var(--color-surface-subtle)] text-[var(--text)] hover:bg-[var(--borderSubtle)]'
             )}
           >
             <span className="block text-lg font-medium">Umrah</span>
@@ -39,8 +39,8 @@ export function Step1TypeSeason() {
             className={clsx(
               'rounded-xl border p-6 text-center transition-all',
               draft.type === 'hajj'
-                ? 'border-[#FFD31D] bg-[rgba(255,211,29,0.1)] text-[#FFD31D]'
-                : 'border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] text-[#FFFFFF] hover:bg-[rgba(255,255,255,0.1)]'
+                ? 'border-[var(--primary)] bg-[var(--color-primary-soft)] text-[var(--primary)]'
+                : 'border-[var(--borderSubtle)] bg-[var(--color-surface-subtle)] text-[var(--text)] hover:bg-[var(--borderSubtle)]'
             )}
           >
             <span className="block text-lg font-medium">Hajj</span>
@@ -49,8 +49,8 @@ export function Step1TypeSeason() {
       </div>
 
       <div>
-        <h2 className="text-xl font-semibold text-[#FFFFFF]">Select Season</h2>
-        <p className="mt-1 text-sm text-[rgba(255,255,255,0.64)]">
+        <h2 className="text-xl font-semibold text-[var(--text)]">Select Season</h2>
+        <p className="mt-1 text-sm text-[var(--textMuted)]">
           When are you planning to travel?
         </p>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -66,19 +66,19 @@ export function Step1TypeSeason() {
               className={clsx(
                 'flex flex-col items-start rounded-xl border p-4 text-left transition-all',
                 draft.season === option.id
-                  ? 'border-[#FFD31D] bg-[rgba(255,211,29,0.1)]'
-                  : 'border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] hover:bg-[rgba(255,255,255,0.1)]'
+                  ? 'border-[var(--primary)] bg-[var(--color-primary-soft)]'
+                  : 'border-[var(--borderSubtle)] bg-[var(--color-surface-subtle)] hover:bg-[var(--borderSubtle)]'
               )}
             >
               <span
                 className={clsx(
                   'font-medium',
-                  draft.season === option.id ? 'text-[#FFD31D]' : 'text-[#FFFFFF]'
+                  draft.season === option.id ? 'text-[var(--primary)]' : 'text-[var(--text)]'
                 )}
               >
                 {option.label}
               </span>
-              <span className="text-sm text-[rgba(255,255,255,0.64)]">{option.desc}</span>
+              <span className="text-sm text-[var(--textMuted)]">{option.desc}</span>
             </button>
           ))}
         </div>

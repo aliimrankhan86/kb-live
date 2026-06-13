@@ -12,9 +12,9 @@ const STATUS_LABEL: Record<QuoteRequest['status'], string> = {
 };
 
 const STATUS_COLOR: Record<QuoteRequest['status'], string> = {
-  open: '#FFD31D',
-  responded: '#4ade80',
-  closed: 'rgba(255,255,255,0.4)',
+  open: 'var(--yellow)',
+  responded: 'var(--color-success)',
+  closed: 'var(--textMuted)',
 };
 
 function formatDate(iso: string) {
@@ -72,7 +72,7 @@ export default function RequestsPage() {
           )}
 
           {error && (
-            <p style={{ color: '#f87171', textAlign: 'center', padding: '3rem 0' }}>{error}</p>
+            <p style={{ color: 'var(--color-error)', textAlign: 'center', padding: '3rem 0' }}>{error}</p>
           )}
 
           {!loading && !error && requests.length === 0 && (
