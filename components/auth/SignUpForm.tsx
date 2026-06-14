@@ -123,6 +123,7 @@ export function SignUpForm() {
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [termsAgreed, setTermsAgreed] = useState(false);
   const [error, setError] = useState('');
+  const [isDuplicateEmail, setIsDuplicateEmail] = useState(false);
   const [passwordError, setPasswordError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -132,6 +133,7 @@ export function SignUpForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setIsDuplicateEmail(false);
     setPasswordError('');
     setLoading(true);
 
@@ -157,7 +159,11 @@ export function SignUpForm() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || 'Registration failed');
+        if (data.code === 'AUTH_EMAIL_ALREADY_EXISTS') {
+          setIsDuplicateEmail(true);
+        } else {
+          setError(data.error || 'Registration failed');
+        }
         setLoading(false);
         return;
       }
@@ -228,13 +234,26 @@ export function SignUpForm() {
         </div>
       )}
 
-      {error && (
+      {(isDuplicateEmail || error) && (
         <div
           className="rounded-md border border-[var(--color-error)]/30 bg-[var(--color-error)]/10 px-4 py-3 text-sm text-[var(--color-error)]"
           role="alert"
           data-testid="signup-error"
         >
-          {error}
+          {isDuplicateEmail ? (
+            <>
+              An account with this email already exists.{' '}
+              <Link
+                href={role === 'operator' ? '/login?type=operator' : '/login?type=customer'}
+                className="underline font-medium"
+              >
+                Sign in instead
+              </Link>
+              .
+            </>
+          ) : (
+            error
+          )}
         </div>
       )}
 
