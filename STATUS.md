@@ -3,7 +3,7 @@
 > **Single rolling tracker.** Any AI/dev: read this for current state. Update it after work is **done + tested + verified** (see `CLAUDE.md` rule).
 > Detailed handover lives in `AI_NOTES.md`. Cold-start brief: `HANDOFF.md`. Business: `BUSINESS.md`.
 
-**Last verified:** 2026-06-14 (duplicate email error, knowledge base) · **Branch:** `dev` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
+**Last verified:** 2026-06-14 (signup duplicate-email 500 + PKCE confirm link — real fixes) · **Branch:** `dev` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
 
 ---
 
@@ -11,7 +11,7 @@
 
 | Check | State |
 | --- | --- |
-| `npm run test` | ✅ 1,830/1,830 pass (27 files) |
+| `npm run test` | ✅ 1,833/1,833 pass (28 files) |
 | `npm run build` | ✅ 0 errors |
 | `npx tsc --noEmit` | ✅ pass |
 | E2E `e2e/operator.spec.ts` | ✅ 30/30 pass (chromium + firefox + webkit) |
@@ -132,7 +132,8 @@
 | Homepage redesign — audience routing + live compare preview | ✅ Done 2026-06-13 (PR #63 → dev) | — |
 | Data integrity — "Not provided" for missing hotel name/stars (cards, JSON-LD, quote prefill) | ✅ Done 2026-06-13 (PR #64 → dev, see AI_NOTES §27) | — |
 | Operator form — no silent defaults for skipped stars/distance/group type | ✅ Done 2026-06-13 (PR → dev pending, see AI_NOTES §28) | — |
-| Duplicate email signup shows specific error with sign-in link | ✅ Done 2026-06-14 (dev, see AI_NOTES §29) | — |
+| Duplicate email signup shows specific error with sign-in link | ✅ Done 2026-06-14 (real fix: empty-identities detection, AI_NOTES §31) | — |
+| Email confirm link signs user in (PKCE `code` callback) | ✅ Done 2026-06-14 (AI_NOTES §31) | — |
 | Inclusions three-state model (included / not / not specified) | ⏳ Not started | Follow-up to §28 |
 | Distance vocabulary reconciliation (enum vs wizard vs DB '0-500m') | ⏳ Not started | Separate task (flagged §28) |
 | Existing-data cleanup — null out seed default stars/distance/group | ⏳ Not started | Separate task (flagged §28) |

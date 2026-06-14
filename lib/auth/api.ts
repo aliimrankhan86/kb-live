@@ -25,10 +25,11 @@ export async function apiSignUp(input: SignUpInput) {
     email: input.email,
     password: input.password,
     options: {
-        // emailRedirectTo ensures the confirmation email links to /auth/confirm, which
-        // calls verifyOtp and sets session cookies on the redirect response. Without
-        // this, Supabase falls back to the dashboard Site URL (homepage) and the
-        // session is never established after the user clicks the confirmation link.
+        // emailRedirectTo ensures the confirmation email links back to /auth/confirm,
+        // which establishes the session (exchangeCodeForSession for PKCE, or verifyOtp
+        // for token_hash) and sets cookies on the redirect response. Without this,
+        // Supabase falls back to the dashboard Site URL (homepage) and the session is
+        // never established after the user clicks the confirmation link.
         emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/confirm`,
         // NOTE: role is deliberately NOT stored in user_metadata. user_metadata is
         // editable by the user via supabase.auth.updateUser({ data }), so trusting it
@@ -53,6 +54,18 @@ export async function apiSignUp(input: SignUpInput) {
       throw new AppError({ code: 'AUTH_EMAIL_ALREADY_EXISTS', status: 409 });
     }
     throw new Error(error.message);
+  }
+
+  // ANTI-ENUMERATION: when "Confirm email" is enabled, Supabase does NOT return
+  // an error for an already-registered email. To prevent email enumeration it
+  // returns error=null plus an obfuscated user whose `identities` array is empty
+  // (a real new signup always has at least one identity). We must detect this
+  // here — otherwise the code below tries to updateUserById() on the fake user
+  // and throws a 500 ("Something went wrong"). Treat empty identities as a
+  // duplicate and surface the friendly AUTH_EMAIL_ALREADY_EXISTS message.
+  // See: https://supabase.com/docs/reference/javascript/auth-signup
+  if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+    throw new AppError({ code: 'AUTH_EMAIL_ALREADY_EXISTS', status: 409 });
   }
 
   // SECURITY: write the authorization role to app_metadata, which only the service
