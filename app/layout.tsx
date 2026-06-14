@@ -9,6 +9,7 @@ import { CookieConsent } from "@/components/compliance/CookieConsent";
 import { JsonLdScript, graphJsonLd, organizationJsonLd, websiteJsonLd } from "@/lib/seo/json-ld";
 import { Repository } from "@/lib/api/repository";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { headers } from "next/headers";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -47,10 +48,15 @@ export default async function RootLayout({
     // DB unavailable — footer renders without city links
   }
 
+  // Nonce set by middleware CSP. The inline theme script below must carry it,
+  // otherwise the strict 'script-src' nonce policy blocks it (no 'unsafe-inline').
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
+
   return (
     <html lang="en-GB" className={`${exo2Font.variable} ${inter.variable} ${nunito.variable}`} suppressHydrationWarning>
       <head>
         <script
+          nonce={nonce}
           suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem('theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');}catch(e){}})();`,

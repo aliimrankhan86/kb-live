@@ -34,15 +34,18 @@ body::before {
   pointer-events: none;
 }
 
-/* Light theme: clean warm-ivory gradient — no architectural overlay competing with content */
+/* Light theme: keep the same kaaba silhouette as dark mode, but barely-there.
+   We reuse the base body's background-image (the SVG) and only swap the base
+   colour, then let body::before lay a heavy warm-ivory wash over it so the
+   architecture reads as a faint atmospheric ghost — never enough contrast to
+   interfere with text (all content sits at z-index:1, above the overlay). */
 [data-theme="light"] body {
-  background: linear-gradient(160deg, #F8F6F1 0%, #EDE8DC 55%, #F4F0E7 100%);
-  background-image: none;
-  background-attachment: initial;
+  background-color: #EDE8DC;
 }
 
 [data-theme="light"] body::before {
-  display: none;
+  display: block;
+  background: linear-gradient(160deg, rgba(248, 246, 241, 0.93) 0%, rgba(237, 232, 220, 0.93) 55%, rgba(244, 240, 231, 0.93) 100%);
 }
 
 /* Light theme: prophetic green scrollbar thumb, warm-stone track */

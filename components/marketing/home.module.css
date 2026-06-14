@@ -8,10 +8,12 @@
   box-sizing: border-box;
 }
 
-/* Closing CTA hugs the section above it (e.g. FAQ) instead of doubling
-   the 3.5rem section padding into a ~7rem void. */
+/* Closing CTA hugs the section above it (e.g. FAQ). Zeroing its own top
+   padding still left the FAQ's 3.5rem bottom padding as a visible void, so we
+   also pull the CTA up into that padding to land on a tight ~1.5rem gap. */
 .sectionTightTop {
   padding-top: 0;
+  margin-top: -2rem;
 }
 
 .sectionHead {
@@ -494,6 +496,14 @@
 @media (max-width: 768px) {
   .section {
     padding: 2.75rem 1rem;
+  }
+
+  /* The shorthand `.section` padding above re-introduces a top padding on
+     mobile, so we must re-zero it here (otherwise the CTA detaches from the
+     FAQ again). Smaller section padding also means a smaller pull. */
+  .sectionTightTop {
+    padding-top: 0;
+    margin-top: -1.5rem;
   }
 
   .cityGrid {
