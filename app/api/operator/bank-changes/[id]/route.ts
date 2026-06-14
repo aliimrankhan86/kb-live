@@ -6,7 +6,7 @@ import { mapErrorToResponse } from '@/lib/errors';
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getSessionUser();
-    if (!user || user.role !== 'operator') {
+    if (!user || (user.role !== 'operator' && user.role !== 'admin')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
     const { id } = await params;
