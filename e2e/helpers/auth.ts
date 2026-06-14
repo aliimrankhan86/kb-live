@@ -62,3 +62,11 @@ export async function setTestUser(page: Page, role: TestUserRole): Promise<void>
 export async function clearTestUser(page: Page): Promise<void> {
   await page.context().clearCookies({ name: '__e2e_user' });
 }
+
+/**
+ * Reset server-side MockDB transient state (bank changes, requests, offers,
+ * booking intents). Call between serial tests that mutate shared state.
+ */
+export async function resetMockDB(page: Page): Promise<void> {
+  await page.request.post('http://127.0.0.1:3001/api/e2e/reset');
+}

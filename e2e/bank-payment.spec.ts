@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { setTestUser } from './helpers/auth';
+import { setTestUser, resetMockDB } from './helpers/auth';
 
 test.describe.configure({ mode: 'serial' });
 
@@ -79,24 +79,27 @@ test.describe('Bank onboarding and payment flows', () => {
 
   test('payment instructions visible after booking intent creation', async ({ page }) => {
     test.setTimeout(60000);
-    // Ensure clean state — previous test may have modified bank change state
+    // Reset server MockDB so bank change state from previous test is cleared
+    await resetMockDB(page);
     await page.goto('/');
     await page.evaluate(() => localStorage.clear());
 
-    // Create quote request
+    // Create quote request as customer (API requires customer role)
+    await setTestUser(page, 'customer');
     await page.goto('/quote');
-    // Use getByRole('button') to avoid matching the header nav "Umrah" link
     await page.getByRole('button', { name: /^Umrah$/i }).click();
-    // Wait for React state update (type → season section re-renders)
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(200);
     await page.getByRole('button', { name: /Flexible Dates/i }).click();
     await page.click('text=Next Step');
-    await page.fill('input[placeholder="e.g. London, Manchester"]', 'London');
+    // Step 2: city chip → airport chip
+    await page.getByRole('button', { name: 'London' }).click();
+    await expect(page.getByRole('button', { name: /LHR/i })).toBeVisible({ timeout: 3000 });
+    await page.getByRole('button', { name: /LHR/i }).click();
     await page.click('text=Next Step');
     await page.fill('input[type="number"] >> nth=0', '5');
     await page.fill('input[type="number"] >> nth=1', '5');
-    await page.click('text=4 Stars');
-    await page.click('text=Medium');
+    await page.getByRole('button', { name: '4 Stars' }).click();
+    await page.getByRole('button', { name: 'Medium' }).click();
     await page.click('text=Next Step');
     await page.click('text=Next Step');
     await Promise.all([
@@ -106,7 +109,8 @@ test.describe('Bank onboarding and payment flows', () => {
 
     const requestUrl = page.url();
 
-    // Operator submits offer via leads page (reply overlay is on /operator/leads)
+    // Operator submits offer — use operator role (leads API requires operator, not admin)
+    await setTestUser(page, 'operator');
     await page.goto('/operator/leads');
     await page.waitForLoadState('domcontentloaded');
     await expect(page.locator('[data-testid^="lead-card-"]').first()).toBeVisible({ timeout: 10000 });
@@ -116,7 +120,8 @@ test.describe('Bank onboarding and payment flows', () => {
     await page.click('text=Send Offer');
     await expect(page.getByText('Reply to Quote Request')).not.toBeVisible();
 
-    // Customer creates booking intent
+    // Customer creates booking intent — switch back to customer role
+    await setTestUser(page, 'customer');
     await page.goto(requestUrl);
     await page.waitForLoadState('domcontentloaded');
     await page.reload();
@@ -150,6 +155,8 @@ test.describe('Bank onboarding and payment flows', () => {
   });
 
   test('admin rejects bank change with required reason', async ({ page }) => {
+    // Reset server MockDB so bank change state from previous tests is cleared
+    await resetMockDB(page);
     // Create another change request
     await page.goto('/operator/settings/payment-details');
     await page.waitForLoadState('domcontentloaded');
@@ -196,6 +203,8 @@ test.describe('Bank onboarding and payment flows', () => {
   });
 
   test('operator can cancel pending change request', async ({ page }) => {
+    // Reset server MockDB so bank change state from previous tests is cleared
+    await resetMockDB(page);
     // Create a change request
     await page.goto('/operator/settings/payment-details');
     await page.waitForLoadState('domcontentloaded');

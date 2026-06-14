@@ -1209,26 +1209,80 @@ Existing-data cleanup (whether to null-out these seed defaults) is a **separate 
 
 ---
 
-## 29. Duplicate email signup error + header logo link + knowledge base — 2026-06-14
+## 29. App Readiness Audit — 2026-06-14
 
-**Branch:** `dev`
+**Branch:** `qa/app-readiness-audit` (off `dev`).
+**Tests:** 1,830/1,830 Vitest · 19/21 Playwright (2 skipped, 0 failed) · `tsc --noEmit` clean · `npm run build` 0 errors.
+
+### Why
+Full end-to-end readiness audit before launch. Covered all automated emails, both user journeys (pilgrim + operator) via Playwright, operator data isolation, and known UI issues.
+
+### Bugs found and fixed
+
+#### 1. Admin role rejected on operator API endpoints
+`operatorAdmin` test user (id=op1, role=admin) could not access payment details, bank changes, or audit log because all four endpoints only accepted `role === 'operator'`. Required for any admin user who also has an operator account. Fixed: accept `role === 'admin'` alongside `role === 'operator'` in:
+- `app/api/operator/payment-details/route.ts` (GET + POST)
+- `app/api/operator/bank-changes/route.ts` (POST)
+- `app/api/operator/bank-changes/[id]/route.ts` (DELETE)
+- `app/api/operator/audit-log/route.ts` (GET)
+
+#### 2. Email send crash in production ("b is not a function")
+All six `sendXxx` functions in `lib/email/send.tsx` were passing `react: <Component />` to Resend. Resend v6 does `await import('@react-email/render')` internally. In the Next.js production bundle that module resolves through `@react-email/components` but not as a direct top-level import, causing `b is not a function` at runtime. Fixed: import `render` from `@react-email/components` directly, pre-render each template to HTML, and pass `html:` to Resend instead.
+
+#### 3. MockDB server-side persistence missing (create→read E2E flows broken)
+`getStorage`/`setStorage` in `lib/api/mock-db.ts` were no-ops on the server (`typeof window === 'undefined'` → returned defaults / did nothing). Any E2E test that called one API to create a record and then a separate API to read it back would find nothing. Fixed: added a `serverMemory` Map (process-scoped) as the server-side store. MockDB now persists across API requests within the same Next.js server process.
+
+#### 4. Rate limiter blocked E2E quote submissions with 429
+The in-memory rate limiter (`MAX_ATTEMPTS=5, WINDOW_MS=15min`) is shared across all E2E test runs within the same server process. After 5 quote submissions the limiter blocks further requests, causing `bank-payment.spec.ts` test 2 to fail with "Too many attempts". Fixed: `checkRateLimit()` returns `{ limited: false }` immediately when `E2E_TESTING === '1'`.
+
+#### 5. Serial E2E state bleed (bank change cooling → no request-change-btn)
+`bank-payment.spec.ts` runs 4 tests serially. Test 1 approves a bank change → state becomes "cooling period" (7 days). Tests 3 and 4 expect `request-change-btn` (active state) but find the cooling UI instead. Fixed:
+- Added `resetE2EState()` export to `lib/api/mock-db.ts` that clears transient collections from `serverMemory`
+- Added `app/api/e2e/reset/route.ts` POST endpoint (404 unless `E2E_TESTING=1`)
+- Added `resetMockDB(page)` helper to `e2e/helpers/auth.ts`
+- Call `resetMockDB()` at the start of tests 2, 3, and 4
+
+#### 6. E2E flow tests matched stale quote wizard UI
+`e2e/flow.spec.ts` and `e2e/bank-payment.spec.ts` test 2 used `input[placeholder="e.g. London, Manchester"]` selectors. The quote wizard step 2 was redesigned to use chip buttons (city → airport chip chain) — no text input. Tests failed at step 2. Fixed: use `getByRole('button', { name: 'London' })` and `getByRole('button', { name: /LHR/i })`.
+
+#### 7. Comparison table price selector pointed at tbody (prices in thead)
+`flow.spec.ts` checked a specific tbody cell for currency. Package comparison renders offer prices in `<thead>` columns, not tbody rows. Fixed: `expect(comparisonTable).toContainText(/[£$€]/)`.
+
+### What was NOT broken (verified clean)
+- KaabaTrip text/logos: zero occurrences across all source, SVGs, emails, and components. Already removed.
+- Email branding: all 6 templates render as "PilgrimCompare", correct FROM address, legal disclaimers present.
+- Operator data isolation: each operator's leads API filters by `operatorId === user.id`; confirmed via seed data (op1 and op2 have separate package/offer sets).
+- Hotel star rendering: `PackageCard` already shows "Not provided" for null ratings (fixed in §27).
+- `/packages` (browse catalogue) vs `/search/packages` (filterable compare view): intentionally two separate pages, not a duplication bug.
+- Mobile viewport: quote wizard, package cards, comparison table, booking intent dialog all render within 390px without overflow or broken layout.
+
+### Gotchas
+- **E2E reset endpoint is protected by `E2E_TESTING=1`** — in production it returns 404. Never enables state mutation for real users.
+- **Rate limit bypass is also `E2E_TESTING=1`-gated** — production Upstash path is unaffected.
+- **`serverMemory` is process-scoped** — resets on every server restart (each `npm run build && next start` in Playwright's webServer starts fresh). Between serial tests within a run, state persists and must be explicitly reset via `/api/e2e/reset`.
+- **2 skipped Playwright tests** — `operator.spec.ts` has two tests marked `test.skip` deliberately (pre-existing); they are not failures.
+
+---
+
+## 30. Duplicate email signup error + header logo link + knowledge base — 2026-06-14
+
+**Branch:** `dev` (via PR #69)
 **Tests:** 1,830/1,830 pass (27 files, 0 new tests) · `tsc --noEmit` clean · `npm run build` clean.
 
-### Duplicate email signup error (Task 1)
+### Duplicate email signup error
 - `lib/errors.ts` — added `AUTH_EMAIL_ALREADY_EXISTS` error code + user-facing message.
 - `lib/auth/api.ts` — `apiSignUp` now detects Supabase "User already registered" / "email_address_already_registered" error messages and throws `AppError({ code: 'AUTH_EMAIL_ALREADY_EXISTS', status: 409 })` instead of a plain `Error` (which was masked to the generic INTERNAL_ERROR).
 - `components/auth/SignUpForm.tsx` — added `isDuplicateEmail` state; on `AUTH_EMAIL_ALREADY_EXISTS` response code, renders "An account with this email already exists. [Sign in instead]." with a link to `/login?type=operator` or `/login?type=customer` depending on role tab. All other error paths unchanged.
 
-### Header logo link (Task 2)
+### Header logo link
 Already implemented in prior work — `Header.tsx` line 231 wraps both Logo + WordmarkLogo in `<Link href="/" aria-label="PilgrimCompare - Go to homepage">`. No change needed.
 
-### Quote email investigation (Task 3) — findings only, no code change
+### Quote email investigation — findings only, no code change
 **RESEND_API_KEY:** present in `.env.local` ✓
-**FROM domain:** `send.pilgrimcompare.co.uk` — verified on Resend per §§ in Done list above ✓
-**Email 2 (customer confirmation):** fires on every quote submission — no operator condition. If not arriving, check Resend dashboard logs for send errors. Most likely cause locally: dev `localhost` quotes bypass no env guard, but Resend may rate-limit or sandbox them.
-**Email 3 (operator alert):** fires **only** when `sourcePackageId` or `sourceOperatorId` is present on the quote and resolves to an operator with a non-null `contactEmail`. A quote submitted from `/quote` without targeting a specific package/operator → Email 3 is intentionally skipped.
-**Seed operator emails:** `hello@zamzamtravel.example.com` uses `.example.com` (reserved TLD) — Resend will reject sends to this address. `info@alhidayah.com` and `sales@makkahtours.com` are real-looking but likely unreachable domains.
-**Fix required:** For Email 3 to fire in production for real enquiries: ensure quote is submitted with a valid `sourcePackageId`/`sourceOperatorId`, and the resolved operator has a real `contactEmail`. For local testing: update seed operator emails to a Resend-verified test inbox.
+**FROM domain:** `send.pilgrimcompare.co.uk` — verified on Resend ✓
+**Email 2 (customer confirmation):** fires on every quote submission — no operator condition. Check Resend dashboard logs if not arriving.
+**Email 3 (operator alert):** fires **only** when `sourcePackageId` or `sourceOperatorId` resolves to an operator with a non-null `contactEmail`. Quote from `/quote` with no source → Email 3 intentionally skipped.
+**Seed operator emails:** `hello@zamzamtravel.example.com` uses `.example.com` (reserved TLD) — Resend rejects. Fix: update seed to a real monitored inbox for local testing.
 
-### Knowledge Base (Task 4)
-Created `PILGRIMCOMPARE_KNOWLEDGE_BASE.md` (root) with section 5 Technical State — test counts 1,830 unit / 19 E2E passing / 2 skipped / build clean / tsc clean.
+### Knowledge Base
+Created `PILGRIMCOMPARE_KNOWLEDGE_BASE.md` (root) with section 5 Technical State — 1,830 unit / 19 E2E passing / 2 skipped / build + tsc clean.

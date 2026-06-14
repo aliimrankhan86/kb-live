@@ -69,6 +69,8 @@ async function getUpstashLimiter() {
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 export async function checkRateLimit(identifier: string): Promise<{ limited: boolean; retryAfter?: number }> {
+  if (process.env.E2E_TESTING === '1') return { limited: false };
+
   const limiter = await getUpstashLimiter();
 
   if (limiter) {
