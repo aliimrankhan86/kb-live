@@ -1286,3 +1286,44 @@ Already implemented in prior work — `Header.tsx` line 231 wraps both Logo + Wo
 
 ### Knowledge Base
 Created `PILGRIMCOMPARE_KNOWLEDGE_BASE.md` (root) with section 5 Technical State — 1,830 unit / 19 E2E passing / 2 skipped / build + tsc clean.
+
+## 31. Signup duplicate-email 500 + PKCE confirm link — real root causes — 2026-06-14
+
+**Branch:** `fix/signup-duplicate-and-pkce-confirm` → dev → main
+**Tests:** 1,833/1,833 pass (28 files, +3 new) · `tsc --noEmit` clean · `npm run build` clean.
+
+Both bugs from §30 were still broken **in production** after PR #74. The §30 fix
+targeted the wrong Supabase behaviour. Real root causes below.
+
+### Bug 1 — duplicate email shows 500 "Something went wrong" (not the friendly 409)
+- **Root cause: Supabase anti-enumeration.** With "Confirm email" **enabled**,
+  `auth.signUp()` on an already-registered email returns **`error: null`** and an
+  obfuscated `data.user` whose **`identities` array is empty**. The `error.code`
+  check from §30/PR #74 never fired (there is no error). Code fell into the
+  service-role block, called `admin.auth.admin.updateUserById()` on the fake user,
+  which threw → masked to `INTERNAL_ERROR` (500) → "Something went wrong".
+- **Fix (`lib/auth/api.ts`):** after `signUp`, if `data.user.identities.length === 0`,
+  throw `AppError({ code: 'AUTH_EMAIL_ALREADY_EXISTS', status: 409 })` **before** the
+  service-role block. The `error.code` / message checks are kept as a fallback for
+  the confirmation-disabled case.
+- **Proof:** `tests/auth-signup-duplicate.test.ts` — 3 tests mock the Supabase
+  clients and assert (a) error-code path → 409, (b) empty-identities path → 409 and
+  `updateUserById` is NOT called, (c) genuine signup (non-empty identities) → role
+  written. Deterministic; no live email needed.
+
+### Bug 2 — confirm link → "Verification link invalid or expired"
+- **Root cause: PKCE flow.** `@supabase/ssr` defaults to `flowType: 'pkce'`. The
+  confirmation email's `ConfirmationURL` routes through Supabase's `/auth/v1/verify`
+  endpoint, which redirects to **`/auth/confirm?code=<auth_code>`**. The old route
+  only handled `?token_hash=&type=`, found neither, and fell straight through to the
+  `invalid_link` redirect — failed 100% of the time.
+- **Fix (`app/auth/confirm/route.ts`):** handle **both** callback shapes —
+  `code` → `exchangeCodeForSession(code)` (PKCE), and `token_hash`+`type` →
+  `verifyOtp()` (OTP template). Session cookies written onto the redirect response
+  as before.
+- **Caveat (PKCE, inherent):** `exchangeCodeForSession` needs the `code_verifier`
+  cookie set on the *same browser* during `signUp`. Same-device works; cross-device
+  (sign up desktop, open email on phone) does not. For cross-device robustness,
+  switch the Supabase "Confirm signup" email template URL to:
+  `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup` — the route
+  already supports that path via `verifyOtp`.
