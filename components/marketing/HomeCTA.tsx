@@ -8,7 +8,7 @@ import styles from './home.module.css'
  */
 export function HomeCTA() {
   return (
-    <section className={styles.section} aria-labelledby="home-cta-heading">
+    <section className={`${styles.section} ${styles.sectionTightTop}`} aria-labelledby="home-cta-heading">
       <div className={styles.ctaCard}>
         <h2 id="home-cta-heading" className={styles.ctaCardTitle}>
           Ready to compare?
