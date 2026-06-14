@@ -25,6 +25,11 @@ export async function apiSignUp(input: SignUpInput) {
     email: input.email,
     password: input.password,
     options: {
+        // emailRedirectTo ensures the confirmation email links to /auth/confirm, which
+        // calls verifyOtp and sets session cookies on the redirect response. Without
+        // this, Supabase falls back to the dashboard Site URL (homepage) and the
+        // session is never established after the user clicks the confirmation link.
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/confirm`,
         // NOTE: role is deliberately NOT stored in user_metadata. user_metadata is
         // editable by the user via supabase.auth.updateUser({ data }), so trusting it
         // for authorization would allow self-escalation. Role goes to app_metadata below.
@@ -37,14 +42,17 @@ export async function apiSignUp(input: SignUpInput) {
     },
   });
   if (error) {
-    const msg = error.message ?? '';
+    const code = (error as { code?: string }).code ?? '';
+    const msg = error.message?.toLowerCase() ?? '';
     if (
-      msg.toLowerCase().includes('user already registered') ||
-      msg.toLowerCase().includes('email_address_already_registered')
+      code === 'user_already_exists' ||
+      code === 'email_exists' ||
+      msg.includes('user already registered') ||
+      msg.includes('email_address_already_registered')
     ) {
       throw new AppError({ code: 'AUTH_EMAIL_ALREADY_EXISTS', status: 409 });
     }
-    throw new Error(msg);
+    throw new Error(error.message);
   }
 
   // SECURITY: write the authorization role to app_metadata, which only the service
