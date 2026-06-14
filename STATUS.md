@@ -3,7 +3,7 @@
 > **Single rolling tracker.** Any AI/dev: read this for current state. Update it after work is **done + tested + verified** (see `CLAUDE.md` rule).
 > Detailed handover lives in `AI_NOTES.md`. Cold-start brief: `HANDOFF.md`. Business: `BUSINESS.md`.
 
-**Last verified:** 2026-06-14 (cookie-banner / mobile-nav overlap + signup duplicate-email copy) · **Branch:** `dev` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
+**Last verified:** 2026-06-14 (packages UX redesign + CSP nonce + light-theme bg + FAQ gap + mobile sort crop) · **Branch:** `fix/packages-ux-csp-light-theme` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
 
 ---
 
@@ -23,6 +23,8 @@
 ## ✅ Done (shipped & verified)
 
 **Traveller flow**
+- **`/packages` browse redesign (2026-06-14, branch `fix/packages-ux-csp-light-theme`):** rewritten to reuse the polished `PackageCard` + sticky `CompareBar` + comparison dialog from `/search` (one consistent card language, low cognitive load). Segmented pilgrimage-type control, clean season/sort selects, Saved chip. Verified light + dark, mobile + desktop; compare 2→table flow works. Unit tests preserved; `e2e/catalogue.spec.ts` testids updated to the shared contracts.
+- **Cross-cutting polish (same branch):** CSP nonce now applied to the inline theme script in `app/layout.tsx` (fixes `script-src` inline-execution block); light theme re-shows the kaaba SVG as a faint ghost under an ivory wash (readability-safe); FAQ→CTA homepage gap tightened to ~20px (mobile media-query was clobbering `sectionTightTop` padding); mobile sort dropdown on `/search/packages` no longer crops (left-anchored + viewport-clamped ≤768px). **Header IA decision:** no separate "Home" link — the logo already links home (universal convention); a second link adds clutter without discoverability gain.
 - Package discovery: browse, sort, filter (budget, dates, hotel stars, Haram distance, flight type)
 - Umrah 4-step search form (date picker, traveller stepper, star select, budget slider)
 - Airport-level routing: LHR, LGW, BHX, MAN (departure + return), backend filters by airport code

@@ -728,6 +728,18 @@
   font-weight: 600;
 }
 
+/* On mobile the result count is long, so the Filter/Sort controls wrap onto
+   their own left-aligned row. A right-anchored menu then extends off the LEFT
+   edge of the screen (the reported crop). Anchor it to the button's left edge
+   instead and clamp to the viewport so every option stays fully visible. */
+@media (max-width: 768px) {
+  .sortDropdown {
+    left: 0;
+    right: auto;
+    max-width: calc(100vw - 1.5rem);
+  }
+}
+
 /* ─── Empty state ──────────────────────────────────────────────────────── */
 .emptyState {
   display: flex;

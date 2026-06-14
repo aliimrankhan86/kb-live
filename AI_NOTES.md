@@ -12,6 +12,22 @@ This file is the current handover source of truth. If another document conflicts
 
 ---
 
+## §UX/CSP/theme polish — 2026-06-14 (branch `fix/packages-ux-csp-light-theme`)
+
+Six recurring issues fixed in one branch, all browser-verified (light+dark, mobile 375px + desktop):
+
+1. **`/packages` redesign** — `components/packages/PackagesBrowse.tsx` was raw Tailwind with `<select>`s and bland cards. Rewritten to reuse the gold-standard `PackageCard` + `CompareBar` + comparison `Dialog` from `/search` (via `toSearchDisplay()` mapper) so both routes share one card language. New toolbar: segmented pilgrimage-type control (primary filter), season/sort selects, Saved chip. New stylesheet `components/packages/packagesBrowse.module.css` (token-only). Compare-first flow (select 2–3 → sticky bar → side-by-side table) now matches `/search`.
+   - **Test contracts:** unit `tests/packages-browse.test.tsx` unchanged (shortlist-filter / shortlist-count / shortlist-empty kept on the page; shortlist-toggle-* + package-card-* now come from `PackageCard`). `e2e/catalogue.spec.ts` updated: `package-compare-checkbox-*`→`package-compare-toggle-*`, `packages-compare-button`→`search-compare-button` (only visible after ≥1 selected), `package-link-*`→`package-view-*`.
+2. **CSP inline-script block** — the flash-prevent theme `<script>` in `app/layout.tsx` had no nonce, so the strict `script-src 'self' 'nonce-…'` (no `unsafe-inline`) blocked it. Now reads `x-nonce` from `headers()` and sets `nonce={nonce}`. (`JsonLdScript` already nonces itself; Next's own scripts inherit the middleware nonce.)
+3. **Light-theme background** — `app/globals.css` previously set `background-image:none` in light. Now keeps the base kaaba SVG and only swaps `background-color`; `body::before` lays a ~0.93 ivory wash so the architecture reads as a faint ghost without hurting text contrast (content sits at z-index:1).
+4. **FAQ→CTA gap** — `sectionTightTop`'s `padding-top:0` was being clobbered on mobile by the `@media(max-width:768px) .section{padding:…}` shorthand. Re-zeroed inside the media query + small negative pull. Gap now ~20px both breakpoints.
+5. **Mobile sort crop** — `/search` `.sortDropdown` was right-anchored; when the controls wrap to a left-aligned row on mobile it overflowed the left viewport edge. Added `@media(max-width:768px)` → `left:0; right:auto; max-width:calc(100vw-1.5rem)`.
+6. **Header IA** — decision: **no separate Home link.** Logo already links `/` (universal convention); a second link is redundant clutter.
+
+Test/build baseline unchanged: 1,833 unit tests pass, `tsc` clean, `npm run build` 0 errors.
+
+---
+
 ## 0. Gate Status
 
 ### Gate 1 — Safe to merge dev → main ✅ DONE
