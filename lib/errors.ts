@@ -8,6 +8,7 @@ export type ErrorCode =
   | 'AUTH_INVALID_CREDENTIALS'
   | 'AUTH_EMAIL_NOT_CONFIRMED'
   | 'AUTH_EMAIL_NOT_VERIFIED'
+  | 'AUTH_EMAIL_ALREADY_EXISTS'
   | 'UNAUTHORIZED'
   | 'FORBIDDEN'
   | 'VALIDATION_ERROR'
@@ -26,6 +27,7 @@ const USER_FACING_MESSAGES: Record<ErrorCode, string> = {
   AUTH_INVALID_CREDENTIALS: 'Invalid email or password.',
   AUTH_EMAIL_NOT_CONFIRMED: 'Please verify your email address before signing in. Check your inbox for a verification link.',
   AUTH_EMAIL_NOT_VERIFIED: 'Please verify your email address before performing this action.',
+  AUTH_EMAIL_ALREADY_EXISTS: 'An account with this email already exists. Please sign in instead.',
   UNAUTHORIZED: 'You are not authorised to perform this action.',
   FORBIDDEN: 'You do not have permission to access this resource.',
   VALIDATION_ERROR: 'Please check your input and try again.',

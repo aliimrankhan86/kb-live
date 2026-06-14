@@ -1261,3 +1261,28 @@ The in-memory rate limiter (`MAX_ATTEMPTS=5, WINDOW_MS=15min`) is shared across 
 - **Rate limit bypass is also `E2E_TESTING=1`-gated** — production Upstash path is unaffected.
 - **`serverMemory` is process-scoped** — resets on every server restart (each `npm run build && next start` in Playwright's webServer starts fresh). Between serial tests within a run, state persists and must be explicitly reset via `/api/e2e/reset`.
 - **2 skipped Playwright tests** — `operator.spec.ts` has two tests marked `test.skip` deliberately (pre-existing); they are not failures.
+
+---
+
+## 30. Duplicate email signup error + header logo link + knowledge base — 2026-06-14
+
+**Branch:** `dev` (via PR #69)
+**Tests:** 1,830/1,830 pass (27 files, 0 new tests) · `tsc --noEmit` clean · `npm run build` clean.
+
+### Duplicate email signup error
+- `lib/errors.ts` — added `AUTH_EMAIL_ALREADY_EXISTS` error code + user-facing message.
+- `lib/auth/api.ts` — `apiSignUp` now detects Supabase "User already registered" / "email_address_already_registered" error messages and throws `AppError({ code: 'AUTH_EMAIL_ALREADY_EXISTS', status: 409 })` instead of a plain `Error` (which was masked to the generic INTERNAL_ERROR).
+- `components/auth/SignUpForm.tsx` — added `isDuplicateEmail` state; on `AUTH_EMAIL_ALREADY_EXISTS` response code, renders "An account with this email already exists. [Sign in instead]." with a link to `/login?type=operator` or `/login?type=customer` depending on role tab. All other error paths unchanged.
+
+### Header logo link
+Already implemented in prior work — `Header.tsx` line 231 wraps both Logo + WordmarkLogo in `<Link href="/" aria-label="PilgrimCompare - Go to homepage">`. No change needed.
+
+### Quote email investigation — findings only, no code change
+**RESEND_API_KEY:** present in `.env.local` ✓
+**FROM domain:** `send.pilgrimcompare.co.uk` — verified on Resend ✓
+**Email 2 (customer confirmation):** fires on every quote submission — no operator condition. Check Resend dashboard logs if not arriving.
+**Email 3 (operator alert):** fires **only** when `sourcePackageId` or `sourceOperatorId` resolves to an operator with a non-null `contactEmail`. Quote from `/quote` with no source → Email 3 intentionally skipped.
+**Seed operator emails:** `hello@zamzamtravel.example.com` uses `.example.com` (reserved TLD) — Resend rejects. Fix: update seed to a real monitored inbox for local testing.
+
+### Knowledge Base
+Created `PILGRIMCOMPARE_KNOWLEDGE_BASE.md` (root) with section 5 Technical State — 1,830 unit / 19 E2E passing / 2 skipped / build + tsc clean.

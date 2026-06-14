@@ -16,7 +16,7 @@ export const Logo: React.FC<LogoProps> = ({
 }) => {
   return (
     <Image
-      src={isLight ? '/text-logo-light.svg' : '/logo.svg'}
+      src="/logo.svg"
       alt="PilgrimCompare Logo"
       width={size}
       height={size}
