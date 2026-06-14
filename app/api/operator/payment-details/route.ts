@@ -19,7 +19,7 @@ const detailsSchema = z.object({
 export async function GET() {
   try {
     const user = await getSessionUser();
-    if (!user || user.role !== 'operator') {
+    if (!user || (user.role !== 'operator' && user.role !== 'admin')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
     const ctx = { userId: user.id, role: 'operator' as const };
@@ -51,7 +51,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const user = await getSessionUser();
-    if (!user || user.role !== 'operator') {
+    if (!user || (user.role !== 'operator' && user.role !== 'admin')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
     const body = await request.json();

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Resend } from 'resend';
+import { render } from '@react-email/components';
 import type { Package, QuoteRequest } from '@/lib/types';
 import EnquiryConfirmation from '@/emails/EnquiryConfirmation';
 import OperatorEnquiryAlert from '@/emails/OperatorEnquiryAlert';
@@ -67,20 +68,21 @@ export async function sendEnquiryConfirmation(params: {
   similarPackages: SimilarPackage[];
 }): Promise<void> {
   try {
+    const html = await render(
+      <EnquiryConfirmation
+        customerName={params.customerName}
+        packageName={params.packageName}
+        operatorName={params.operatorName}
+        refCode={params.refCode}
+        similarPackages={params.similarPackages}
+      />
+    );
     const { error } = await resendClient().emails.send({
       from: FROM,
       to: params.customerEmail,
       replyTo: SUPPORT_REPLY,
       subject: `Your Umrah enquiry is on its way — reference ${params.refCode}`,
-      react: (
-        <EnquiryConfirmation
-          customerName={params.customerName}
-          packageName={params.packageName}
-          operatorName={params.operatorName}
-          refCode={params.refCode}
-          similarPackages={params.similarPackages}
-        />
-      ),
+      html,
     });
     if (error) console.error('[email] sendEnquiryConfirmation error:', error);
   } catch (err) {
@@ -101,24 +103,25 @@ export async function sendOperatorEnquiryAlert(params: {
   refCode: string;
 }): Promise<void> {
   try {
+    const html = await render(
+      <OperatorEnquiryAlert
+        operatorName={params.operatorName}
+        customerName={params.customerName}
+        customerEmail={params.customerEmail}
+        customerPhone={params.customerPhone}
+        packageName={params.packageName}
+        travelDates={params.travelDates}
+        groupSize={params.groupSize}
+        message={params.message}
+        refCode={params.refCode}
+      />
+    );
     const { error } = await resendClient().emails.send({
       from: FROM,
       to: params.operatorEmail,
       replyTo: params.customerEmail,
       subject: `New enquiry from PilgrimCompare — ${params.customerName}, ${params.packageName}`,
-      react: (
-        <OperatorEnquiryAlert
-          operatorName={params.operatorName}
-          customerName={params.customerName}
-          customerEmail={params.customerEmail}
-          customerPhone={params.customerPhone}
-          packageName={params.packageName}
-          travelDates={params.travelDates}
-          groupSize={params.groupSize}
-          message={params.message}
-          refCode={params.refCode}
-        />
-      ),
+      html,
     });
     if (error) console.error('[email] sendOperatorEnquiryAlert error:', error);
   } catch (err) {
@@ -134,19 +137,20 @@ export async function sendBookingIntentConfirmation(params: {
   refCode: string;
 }): Promise<void> {
   try {
+    const html = await render(
+      <BookingIntentConfirmation
+        customerName={params.customerName}
+        operatorName={params.operatorName}
+        packageName={params.packageName}
+        refCode={params.refCode}
+      />
+    );
     const { error } = await resendClient().emails.send({
       from: FROM,
       to: params.customerEmail,
       replyTo: SUPPORT_REPLY,
       subject: `Booking intent created — reference ${params.refCode}`,
-      react: (
-        <BookingIntentConfirmation
-          customerName={params.customerName}
-          operatorName={params.operatorName}
-          packageName={params.packageName}
-          refCode={params.refCode}
-        />
-      ),
+      html,
     });
     if (error) console.error('[email] sendBookingIntentConfirmation error:', error);
   } catch (err) {
@@ -164,21 +168,22 @@ export async function sendOperatorNudge(params: {
   refCode: string;
 }): Promise<void> {
   try {
+    const html = await render(
+      <OperatorNudge
+        operatorName={params.operatorName}
+        customerName={params.customerName}
+        customerEmail={params.customerEmail}
+        packageName={params.packageName}
+        hoursOld={params.hoursOld}
+        refCode={params.refCode}
+      />
+    );
     const { error } = await resendClient().emails.send({
       from: FROM,
       to: params.operatorEmail,
       replyTo: params.customerEmail,
       subject: `Reminder — you have an unanswered PilgrimCompare enquiry`,
-      react: (
-        <OperatorNudge
-          operatorName={params.operatorName}
-          customerName={params.customerName}
-          customerEmail={params.customerEmail}
-          packageName={params.packageName}
-          hoursOld={params.hoursOld}
-          refCode={params.refCode}
-        />
-      ),
+      html,
     });
     if (error) console.error('[email] sendOperatorNudge error:', error);
   } catch (err) {
@@ -195,20 +200,21 @@ export async function sendOutcomeFollowup(params: {
   intentId: string;
 }): Promise<void> {
   try {
+    const html = await render(
+      <OutcomeFollowup
+        customerName={params.customerName}
+        operatorName={params.operatorName}
+        packageName={params.packageName}
+        refCode={params.refCode}
+        intentId={params.intentId}
+      />
+    );
     const { error } = await resendClient().emails.send({
       from: FROM,
       to: params.customerEmail,
       replyTo: SUPPORT_REPLY,
       subject: `Did your Umrah booking with ${params.operatorName} go ahead?`,
-      react: (
-        <OutcomeFollowup
-          customerName={params.customerName}
-          operatorName={params.operatorName}
-          packageName={params.packageName}
-          refCode={params.refCode}
-          intentId={params.intentId}
-        />
-      ),
+      html,
     });
     if (error) console.error('[email] sendOutcomeFollowup error:', error);
   } catch (err) {
@@ -224,19 +230,20 @@ export async function sendPaymentEvidenceNotification(params: {
   refCode: string;
 }): Promise<void> {
   try {
+    const html = await render(
+      <PaymentEvidenceNotification
+        operatorName={params.operatorName}
+        customerName={params.customerName}
+        packageName={params.packageName}
+        refCode={params.refCode}
+      />
+    );
     const { error } = await resendClient().emails.send({
       from: FROM,
       to: params.operatorEmail,
       replyTo: SUPPORT_REPLY,
       subject: `Payment evidence received — ${params.customerName}, ${params.packageName ?? 'package'}`,
-      react: (
-        <PaymentEvidenceNotification
-          operatorName={params.operatorName}
-          customerName={params.customerName}
-          packageName={params.packageName}
-          refCode={params.refCode}
-        />
-      ),
+      html,
     });
     if (error) console.error('[email] sendPaymentEvidenceNotification error:', error);
   } catch (err) {
