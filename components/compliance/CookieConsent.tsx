@@ -66,7 +66,7 @@ export function CookieConsent() {
       aria-label="Cookie consent"
       aria-modal="true"
       data-testid="cookie-consent-banner"
-      className="fixed bottom-0 left-0 right-0 z-50 border-t border-[var(--borderSubtle)] bg-[var(--surfaceDark)] p-4 shadow-2xl"
+      className="fixed bottom-0 left-0 right-0 z-40 border-t border-[var(--borderSubtle)] bg-[var(--surfaceDark)] p-4 shadow-2xl"
     >
       <div className="mx-auto max-w-6xl">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
@@ -133,7 +133,7 @@ export function CookieConsent() {
             </button>
             <button
               onClick={handleAcceptAll}
-              className="min-h-[44px] rounded-md border border-[var(--yellow)] bg-[var(--yellow)] px-4 py-2 text-sm font-semibold text-black shadow-[0_0_0_1px_rgba(255,211,29,0.25)] hover:brightness-95"
+              className="min-h-[44px] rounded-md border border-[var(--primary)] bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-[var(--color-text-on-brand)] hover:brightness-95"
               data-testid="cookie-accept-all"
             >
               Accept

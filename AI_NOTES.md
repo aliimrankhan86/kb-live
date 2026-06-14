@@ -1327,3 +1327,57 @@ targeted the wrong Supabase behaviour. Real root causes below.
   switch the Supabase "Confirm signup" email template URL to:
   `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup` — the route
   already supports that path via `verifyOtp`.
+
+## 32. Cookie banner / mobile-nav overlap + signup duplicate-email copy — 2026-06-14
+
+**Branch:** `fix/cookie-banner-nav-overlap-signin-copy` → dev → main
+**Tests:** 1,833/1,833 pass (28 files) · `tsc --noEmit` clean · `npm run build` clean.
+UI-only; no logic touched. Verified in browser preview at 390px + desktop.
+
+### Task 1 — cookie banner covered mobile drawer nav items
+- **Root cause: stacking-context trap.** `components/layout/Header.tsx` renders
+  `<header>` with `position: sticky; z-index: 50` (`header.module.css:3-5`), which
+  **creates a stacking context**. The mobile overlay (z-60) and drawer (z-70) live
+  *inside* that context, so their z-index only ranks them within the header — the
+  whole header still sits at root z-50. `CookieConsent` is a **sibling rendered
+  after `<Header>`** in `app/layout.tsx` and was also `z-50` at root → equal z-index,
+  later in DOM → painted **on top of** the drawer, covering the bottom nav items
+  ("Sign in" / "Create account").
+- **Fix (`components/compliance/CookieConsent.tsx`):** banner `z-50` → `z-40`. Now
+  the entire header context (drawer included) ranks above the banner; when the drawer
+  opens it covers the banner. One-class change, lowest risk.
+- **Desktop unchanged:** the sticky header (top) and banner (bottom) never overlap
+  spatially, so z-40 vs z-50 makes no visible difference — verified at desktop width.
+
+### Task 2 — duplicate-email "Sign in instead" copy was dismissive/ambiguous
+- **Context already available:** `SignUpForm` holds `role` state (`'customer'|'operator'`),
+  seeded from the `?type=` URL param. The duplicate-email link was **already**
+  type-specific (`/login?type=operator` vs `/login?type=customer`) from §30/§31 work —
+  only the wording needed fixing.
+- **Fix (`components/auth/SignUpForm.tsx`):** message rewritten to
+  "Looks like you already have an account. **Sign in to your {operator|traveller}
+  account** to continue." — link text is the destination-aware phrase, no em dashes,
+  short, obvious. "traveller" matches the signup tab label (the customer tab reads
+  "Traveller"). No change to 409 detection (`lib/auth/api.ts`) or route logic.
+
+### Task 3 — light-theme cookie "Accept" button was muddy/low-contrast
+- **Root cause:** the Accept button hardcoded `bg-[var(--yellow)] text-black`. In
+  light theme `--yellow` resolves to **`#8A6800`** (dark olive — see
+  `styles/tokens.css:101`), so the primary cookie action rendered muddy brown with
+  black text: low contrast, not prominent.
+- **Fix (`components/compliance/CookieConsent.tsx`):** switch the Accept button to
+  the theme CTA token — `bg-[var(--primary)] text-[var(--color-text-on-brand)]`
+  (border to match). `--primary` = `#FFD31D` (dark) / `#0A6937` green (light);
+  `--color-text-on-brand` = `#000` (dark) / `#F9FAFB` (light). Result: **dark
+  unchanged** (yellow + black), **light = brand green + near-white (~6.5:1, AA)**,
+  consistent with the site "Compare packages" CTA. Removed the hardcoded
+  `rgba(255,211,29,…)` shadow ring (a light-mode token violation).
+
+### Task 4 — "Common questions" to "Ready to compare?" had a disproportionate gap
+- **Root cause:** `FAQ` and `HomeCTA` are two consecutive `.section`s, each with
+  `padding: 3.5rem` top+bottom (`components/marketing/home.module.css`). Stacked,
+  that doubled into a ~7rem (~156px card-to-card) void after a short 2-card FAQ.
+- **Fix:** added `.sectionTightTop { padding-top: 0 }` and applied it to the
+  closing `HomeCTA` section so it hugs the FAQ above it (one section's rhythm,
+  ~100px card-to-card) instead of doubling. Closing CTA reads as the natural next
+  step after the questions, in both themes.
