@@ -1206,3 +1206,58 @@ Existing-data cleanup (whether to null-out these seed defaults) is a **separate 
 - **Inclusions three-state model (follow-up):** inclusions still default all-false. That direction is safe (it under-claims — never marks something included that the operator didn't confirm), so it was left as-is. A proper three-state model (included / not included / not specified) is a separate follow-up.
 - **Distance vocabulary reconciliation (separate task):** three vocabularies coexist — the type enum (`near|medium|far|unknown`), the wizard labels, and the DB seed strings (`'0-500m'` etc. in `prisma/seed.ts`, outside the enum). This fix deliberately did **not** touch the vocabulary; reconciling them is its own task.
 - **Edit-mode clearing limitation:** PATCH uses `packageSchema.partial()` and `JSON.stringify` drops `undefined`, so clearing a previously-set optional field (e.g. changing 5★ back to "Not sure") via edit does not persist a null. The type models these as `?:` (optional), not nullable, so explicit-null clearing is out of scope here. Create-flow (the task's focus) is unaffected.
+
+---
+
+## 29. App Readiness Audit — 2026-06-14
+
+**Branch:** `qa/app-readiness-audit` (off `dev`).
+**Tests:** 1,830/1,830 Vitest · 19/21 Playwright (2 skipped, 0 failed) · `tsc --noEmit` clean · `npm run build` 0 errors.
+
+### Why
+Full end-to-end readiness audit before launch. Covered all automated emails, both user journeys (pilgrim + operator) via Playwright, operator data isolation, and known UI issues.
+
+### Bugs found and fixed
+
+#### 1. Admin role rejected on operator API endpoints
+`operatorAdmin` test user (id=op1, role=admin) could not access payment details, bank changes, or audit log because all four endpoints only accepted `role === 'operator'`. Required for any admin user who also has an operator account. Fixed: accept `role === 'admin'` alongside `role === 'operator'` in:
+- `app/api/operator/payment-details/route.ts` (GET + POST)
+- `app/api/operator/bank-changes/route.ts` (POST)
+- `app/api/operator/bank-changes/[id]/route.ts` (DELETE)
+- `app/api/operator/audit-log/route.ts` (GET)
+
+#### 2. Email send crash in production ("b is not a function")
+All six `sendXxx` functions in `lib/email/send.tsx` were passing `react: <Component />` to Resend. Resend v6 does `await import('@react-email/render')` internally. In the Next.js production bundle that module resolves through `@react-email/components` but not as a direct top-level import, causing `b is not a function` at runtime. Fixed: import `render` from `@react-email/components` directly, pre-render each template to HTML, and pass `html:` to Resend instead.
+
+#### 3. MockDB server-side persistence missing (create→read E2E flows broken)
+`getStorage`/`setStorage` in `lib/api/mock-db.ts` were no-ops on the server (`typeof window === 'undefined'` → returned defaults / did nothing). Any E2E test that called one API to create a record and then a separate API to read it back would find nothing. Fixed: added a `serverMemory` Map (process-scoped) as the server-side store. MockDB now persists across API requests within the same Next.js server process.
+
+#### 4. Rate limiter blocked E2E quote submissions with 429
+The in-memory rate limiter (`MAX_ATTEMPTS=5, WINDOW_MS=15min`) is shared across all E2E test runs within the same server process. After 5 quote submissions the limiter blocks further requests, causing `bank-payment.spec.ts` test 2 to fail with "Too many attempts". Fixed: `checkRateLimit()` returns `{ limited: false }` immediately when `E2E_TESTING === '1'`.
+
+#### 5. Serial E2E state bleed (bank change cooling → no request-change-btn)
+`bank-payment.spec.ts` runs 4 tests serially. Test 1 approves a bank change → state becomes "cooling period" (7 days). Tests 3 and 4 expect `request-change-btn` (active state) but find the cooling UI instead. Fixed:
+- Added `resetE2EState()` export to `lib/api/mock-db.ts` that clears transient collections from `serverMemory`
+- Added `app/api/e2e/reset/route.ts` POST endpoint (404 unless `E2E_TESTING=1`)
+- Added `resetMockDB(page)` helper to `e2e/helpers/auth.ts`
+- Call `resetMockDB()` at the start of tests 2, 3, and 4
+
+#### 6. E2E flow tests matched stale quote wizard UI
+`e2e/flow.spec.ts` and `e2e/bank-payment.spec.ts` test 2 used `input[placeholder="e.g. London, Manchester"]` selectors. The quote wizard step 2 was redesigned to use chip buttons (city → airport chip chain) — no text input. Tests failed at step 2. Fixed: use `getByRole('button', { name: 'London' })` and `getByRole('button', { name: /LHR/i })`.
+
+#### 7. Comparison table price selector pointed at tbody (prices in thead)
+`flow.spec.ts` checked a specific tbody cell for currency. Package comparison renders offer prices in `<thead>` columns, not tbody rows. Fixed: `expect(comparisonTable).toContainText(/[£$€]/)`.
+
+### What was NOT broken (verified clean)
+- KaabaTrip text/logos: zero occurrences across all source, SVGs, emails, and components. Already removed.
+- Email branding: all 6 templates render as "PilgrimCompare", correct FROM address, legal disclaimers present.
+- Operator data isolation: each operator's leads API filters by `operatorId === user.id`; confirmed via seed data (op1 and op2 have separate package/offer sets).
+- Hotel star rendering: `PackageCard` already shows "Not provided" for null ratings (fixed in §27).
+- `/packages` (browse catalogue) vs `/search/packages` (filterable compare view): intentionally two separate pages, not a duplication bug.
+- Mobile viewport: quote wizard, package cards, comparison table, booking intent dialog all render within 390px without overflow or broken layout.
+
+### Gotchas
+- **E2E reset endpoint is protected by `E2E_TESTING=1`** — in production it returns 404. Never enables state mutation for real users.
+- **Rate limit bypass is also `E2E_TESTING=1`-gated** — production Upstash path is unaffected.
+- **`serverMemory` is process-scoped** — resets on every server restart (each `npm run build && next start` in Playwright's webServer starts fresh). Between serial tests within a run, state persists and must be explicitly reset via `/api/e2e/reset`.
+- **2 skipped Playwright tests** — `operator.spec.ts` has two tests marked `test.skip` deliberately (pre-existing); they are not failures.
