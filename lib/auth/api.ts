@@ -36,7 +36,16 @@ export async function apiSignUp(input: SignUpInput) {
         },
     },
   });
-  if (error) throw new Error(error.message);
+  if (error) {
+    const msg = error.message ?? '';
+    if (
+      msg.toLowerCase().includes('user already registered') ||
+      msg.toLowerCase().includes('email_address_already_registered')
+    ) {
+      throw new AppError({ code: 'AUTH_EMAIL_ALREADY_EXISTS', status: 409 });
+    }
+    throw new Error(msg);
+  }
 
   // SECURITY: write the authorization role to app_metadata, which only the service
   // role can set. This is the single trusted source read by getSessionUser(),

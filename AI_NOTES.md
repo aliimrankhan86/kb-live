@@ -1206,3 +1206,29 @@ Existing-data cleanup (whether to null-out these seed defaults) is a **separate 
 - **Inclusions three-state model (follow-up):** inclusions still default all-false. That direction is safe (it under-claims — never marks something included that the operator didn't confirm), so it was left as-is. A proper three-state model (included / not included / not specified) is a separate follow-up.
 - **Distance vocabulary reconciliation (separate task):** three vocabularies coexist — the type enum (`near|medium|far|unknown`), the wizard labels, and the DB seed strings (`'0-500m'` etc. in `prisma/seed.ts`, outside the enum). This fix deliberately did **not** touch the vocabulary; reconciling them is its own task.
 - **Edit-mode clearing limitation:** PATCH uses `packageSchema.partial()` and `JSON.stringify` drops `undefined`, so clearing a previously-set optional field (e.g. changing 5★ back to "Not sure") via edit does not persist a null. The type models these as `?:` (optional), not nullable, so explicit-null clearing is out of scope here. Create-flow (the task's focus) is unaffected.
+
+---
+
+## 29. Duplicate email signup error + header logo link + knowledge base — 2026-06-14
+
+**Branch:** `dev`
+**Tests:** 1,830/1,830 pass (27 files, 0 new tests) · `tsc --noEmit` clean · `npm run build` clean.
+
+### Duplicate email signup error (Task 1)
+- `lib/errors.ts` — added `AUTH_EMAIL_ALREADY_EXISTS` error code + user-facing message.
+- `lib/auth/api.ts` — `apiSignUp` now detects Supabase "User already registered" / "email_address_already_registered" error messages and throws `AppError({ code: 'AUTH_EMAIL_ALREADY_EXISTS', status: 409 })` instead of a plain `Error` (which was masked to the generic INTERNAL_ERROR).
+- `components/auth/SignUpForm.tsx` — added `isDuplicateEmail` state; on `AUTH_EMAIL_ALREADY_EXISTS` response code, renders "An account with this email already exists. [Sign in instead]." with a link to `/login?type=operator` or `/login?type=customer` depending on role tab. All other error paths unchanged.
+
+### Header logo link (Task 2)
+Already implemented in prior work — `Header.tsx` line 231 wraps both Logo + WordmarkLogo in `<Link href="/" aria-label="PilgrimCompare - Go to homepage">`. No change needed.
+
+### Quote email investigation (Task 3) — findings only, no code change
+**RESEND_API_KEY:** present in `.env.local` ✓
+**FROM domain:** `send.pilgrimcompare.co.uk` — verified on Resend per §§ in Done list above ✓
+**Email 2 (customer confirmation):** fires on every quote submission — no operator condition. If not arriving, check Resend dashboard logs for send errors. Most likely cause locally: dev `localhost` quotes bypass no env guard, but Resend may rate-limit or sandbox them.
+**Email 3 (operator alert):** fires **only** when `sourcePackageId` or `sourceOperatorId` is present on the quote and resolves to an operator with a non-null `contactEmail`. A quote submitted from `/quote` without targeting a specific package/operator → Email 3 is intentionally skipped.
+**Seed operator emails:** `hello@zamzamtravel.example.com` uses `.example.com` (reserved TLD) — Resend will reject sends to this address. `info@alhidayah.com` and `sales@makkahtours.com` are real-looking but likely unreachable domains.
+**Fix required:** For Email 3 to fire in production for real enquiries: ensure quote is submitted with a valid `sourcePackageId`/`sourceOperatorId`, and the resolved operator has a real `contactEmail`. For local testing: update seed operator emails to a Resend-verified test inbox.
+
+### Knowledge Base (Task 4)
+Created `PILGRIMCOMPARE_KNOWLEDGE_BASE.md` (root) with section 5 Technical State — test counts 1,830 unit / 19 E2E passing / 2 skipped / build clean / tsc clean.
