@@ -150,8 +150,8 @@ export default async function SearchPackagesPage({ searchParams }: SearchPackage
                     className="mb-4 rounded-lg border border-[var(--borderSubtle)] bg-[var(--surfaceDark)] p-5 opacity-60"
                     aria-hidden="true"
                   >
-                    <div className="h-5 w-40 rounded bg-[rgba(255,255,255,0.08)]" />
-                    <div className="mt-3 h-4 w-24 rounded bg-[rgba(255,255,255,0.05)]" />
+                    <div className="h-5 w-40 rounded bg-[var(--borderSubtle)]" />
+                    <div className="mt-3 h-4 w-24 rounded bg-[var(--color-surface-subtle)]" />
                   </div>
                 ))}
               </div>

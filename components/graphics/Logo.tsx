@@ -4,12 +4,14 @@ import Image from 'next/image'
 interface LogoProps {
   className?: string
   size?: number
+  isLight?: boolean
   'aria-label'?: string
 }
 
-export const Logo: React.FC<LogoProps> = ({ 
-  className = '', 
+export const Logo: React.FC<LogoProps> = ({
+  className = '',
   size = 32,
+  isLight = false,
   'aria-label': ariaLabel = 'PilgrimCompare Logo'
 }) => {
   return (

@@ -1,10 +1,10 @@
-/* Hero Component Styles */
+/* Hero Component Styles — token-only (no hardcoded colours). */
 .hero {
   position: relative;
-  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 72vh;
   overflow: hidden;
 }
 
@@ -12,185 +12,116 @@
   position: relative;
   z-index: 20;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 2rem 1.5rem;
+  padding: 4rem 1.5rem 3rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 2.5rem;
-  min-height: 100vh;
   box-sizing: border-box;
 }
 
 /* Value Proposition */
 .hero__valueProp {
   text-align: center;
-  max-width: 720px;
-  margin-bottom: 0.5rem;
+  max-width: 760px;
 }
 
 .hero__title {
-  font-size: 2.25rem;
+  font-size: 2.5rem;
   font-weight: 700;
   color: var(--text);
-  margin-bottom: 1rem;
-  line-height: 1.2;
+  margin: 0 0 1rem;
+  line-height: 1.15;
   letter-spacing: -0.02em;
 }
 
 .hero__subtitle {
-  font-size: 1.125rem;
+  font-size: 1.0625rem;
   color: var(--textMuted);
   line-height: 1.6;
-  max-width: 560px;
+  max-width: 620px;
   margin: 0 auto;
 }
 
-/* CTA Grid */
-.hero__ctas {
+/* Actions */
+.hero__actions {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 1.5rem;
-  width: 100%;
+  gap: 0.875rem;
+  margin-top: 1.75rem;
 }
 
-/* CTA Card */
-.hero__ctaSection {
-  position: relative;
-  width: 280px;
-  max-width: min(280px, 100%);
-  min-width: 0;
-  min-height: 260px;
-  text-align: center;
-  z-index: 20;
-  border: 2px solid var(--border);
-  border-radius: 1.25rem;
-  padding: 1.75rem 1.5rem;
-  background: var(--surfaceDark);
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  flex-shrink: 0;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.hero__ctaSection:hover {
-  border-color: var(--yellow);
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px color-mix(in srgb, var(--yellow) 15%, transparent);
-}
-
-.hero__ctaSectionDisabled {
-  cursor: not-allowed;
-  opacity: 0.7;
-  border-color: var(--border);
-  background: color-mix(in srgb, var(--surfaceDark) 50%, transparent);
-}
-
-.hero__ctaSectionDisabled:hover {
-  transform: none;
-  box-shadow: none;
-  border-color: var(--border);
-}
-
-/* Badge */
-.hero__badge {
-  display: inline-block;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 0.25rem 0.75rem;
-  border-radius: 999px;
-  background: var(--yellow);
-  color: var(--bg);
-  margin-bottom: 1rem;
-}
-
-.hero__ctaSectionDisabled .hero__badge {
-  background: var(--textMuted);
-  color: var(--bg);
-}
-
-/* CTA Content */
-.hero__ctaHeading {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 0.5rem;
-  line-height: 1.3;
-}
-
-.hero__ctaSubtitle {
-  font-size: 0.875rem;
-  color: var(--textMuted);
-  margin-bottom: 1.25rem;
-  line-height: 1.5;
-  flex-grow: 1;
-}
-
-.hero__ctaButton {
+.hero__ctaPrimary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-height: 48px;
+  padding: 0.75rem 1.75rem;
+  border-radius: 0.625rem;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  background: var(--primary);
+  color: var(--color-text-on-brand);
+  border: 1.5px solid var(--primary);
+  transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.hero__ctaPrimary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px color-mix(in srgb, var(--primary) 28%, transparent);
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+}
+
+.hero__ctaSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.625rem;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
   background: transparent;
-  color: var(--yellow);
-  font-size: 0.9375rem;
-  font-weight: 600;
-  padding: 0.625rem 1.5rem;
-  text-decoration: none;
-  border: 1.5px solid var(--yellow);
-  border-radius: 0.5rem;
-  transition: all 0.3s ease;
-  width: 100%;
-  line-height: 1.4;
-}
-
-.hero__ctaSection:hover .hero__ctaButton {
-  background: var(--yellow);
-  color: var(--bg);
-}
-
-.hero__ctaButtonDisabled {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--border);
-  color: var(--textMuted);
-  font-size: 0.9375rem;
-  font-weight: 600;
-  padding: 0.625rem 1.5rem;
+  color: var(--text);
   border: 1.5px solid var(--border);
-  border-radius: 0.5rem;
-  width: 100%;
-  line-height: 1.4;
-  cursor: not-allowed;
+  transition: border-color 0.25s ease, color 0.25s ease;
+}
+
+.hero__ctaSecondary:hover {
+  border-color: var(--yellow);
+  color: var(--yellow);
+}
+
+.hero__ctaPrimary:focus-visible,
+.hero__ctaSecondary:focus-visible {
+  outline: 2px solid var(--focusRing);
+  outline-offset: 4px;
 }
 
 /* Trust Bar — grid for balanced layout (2 cols mobile, 4 cols desktop) */
 .hero__trustBar {
+  list-style: none;
+  margin: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.75rem 1rem;
   padding: 1rem 1.25rem;
-  border-radius: 0.75rem;
+  border-radius: 0.875rem;
   background: var(--surfaceDark);
   border: 1px solid var(--border);
-  margin-top: 0.5rem;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadowSoft);
 }
 
 .hero__trustItem {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
   font-size: 0.875rem;
   color: var(--text);
   font-weight: 500;
@@ -202,36 +133,43 @@
   white-space: normal;
 }
 
-.hero__trustItem svg {
+.hero__trustIcon {
+  display: inline-flex;
   color: var(--yellow);
   flex-shrink: 0;
+  margin-right: 0.5rem;
 }
 
-/* Focus states */
-.hero__ctaSection:focus-visible {
-  outline: 2px solid var(--yellow);
-  outline-offset: 4px;
+.hero__trustLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--text);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.hero__trustLink:hover {
+  color: var(--yellow);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.hero__trustLink:focus-visible {
+  outline: 2px solid var(--focusRing);
+  outline-offset: 3px;
+  border-radius: 0.25rem;
 }
 
 /* Tablet styles */
 @media (max-width: 1024px) {
   .hero__container {
     gap: 2rem;
-    padding: 1.5rem;
+    padding: 3.5rem 1.5rem 2.5rem;
   }
 
   .hero__title {
-    font-size: 1.875rem;
-  }
-
-  .hero__subtitle {
-    font-size: 1rem;
-  }
-
-  .hero__ctaSection {
-    width: 260px;
-    min-height: 240px;
-    padding: 1.5rem;
+    font-size: 2.125rem;
   }
 
   .hero__trustBar {
@@ -242,33 +180,30 @@
 
 /* Mobile styles */
 @media (max-width: 768px) {
-  .hero__container {
-    padding: 1.5rem 1rem;
-    gap: 1.75rem;
+  .hero {
     min-height: auto;
-    padding-top: 5rem;
-    padding-bottom: 3rem;
+  }
+
+  .hero__container {
+    padding: 5rem 1rem 2.5rem;
+    gap: 1.75rem;
   }
 
   .hero__title {
-    font-size: 1.625rem;
+    font-size: 1.75rem;
   }
 
   .hero__subtitle {
     font-size: 0.9375rem;
   }
 
-  .hero__ctas {
+  .hero__actions {
     flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .hero__ctaSection {
+    align-items: stretch;
     width: 100%;
     max-width: 360px;
-    min-height: auto;
-    padding: 1.5rem;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .hero__trustBar {
@@ -285,38 +220,35 @@
 /* Small mobile styles */
 @media (max-width: 480px) {
   .hero__title {
-    font-size: 1.375rem;
+    font-size: 1.5rem;
   }
 
   .hero__subtitle {
     font-size: 0.875rem;
   }
-
-  .hero__ctaHeading {
-    font-size: 1.125rem;
-  }
-
-  .hero__ctaSubtitle {
-    font-size: 0.8125rem;
-  }
-
-  .hero__trustBar {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.625rem 0.875rem;
-  }
 }
 
-/* 320px: narrow viewport guardrails */
+/* Narrow viewport guardrails */
 @media (max-width: 360px) {
   .hero__container {
-    padding: 1.25rem 0.75rem;
+    padding: 4.5rem 0.75rem 2rem;
   }
 
   .hero__title {
-    font-size: 1.25rem;
+    font-size: 1.375rem;
+  }
+}
+
+/* Respect reduced motion — no transform/box-shadow movement */
+@media (prefers-reduced-motion: reduce) {
+  .hero__ctaPrimary,
+  .hero__ctaSecondary,
+  .hero__trustLink {
+    transition: none;
   }
 
-  .hero__ctaSection {
-    padding: 1.25rem 1rem;
+  .hero__ctaPrimary:hover {
+    transform: none;
+    box-shadow: none;
   }
 }

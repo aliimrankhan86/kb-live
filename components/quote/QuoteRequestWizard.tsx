@@ -101,7 +101,7 @@ export function QuoteRequestWizard({ cities }: { cities: string[] }) {
   };
 
   return (
-    <div className="rounded-xl border border-[rgba(255,255,255,0.1)] bg-[#111111] p-6 shadow-xl sm:p-10">
+    <div className="rounded-xl border border-[var(--borderSubtle)] bg-[var(--surfaceDark)] p-6 shadow-xl sm:p-10">
       <div className="mb-4">
         <Button
           type="button"
@@ -117,13 +117,13 @@ export function QuoteRequestWizard({ cities }: { cities: string[] }) {
 
       {/* Progress Bar */}
       <div className="mb-8">
-        <div className="flex justify-between text-sm font-medium text-[#FFFFFF]">
+        <div className="flex justify-between text-sm font-medium text-[var(--text)]">
           <span>Step {step} of 5</span>
           <span>{Math.round((step / 5) * 100)}%</span>
         </div>
-        <div className="mt-2 h-2 w-full rounded-full bg-[rgba(255,255,255,0.1)]">
+        <div className="mt-2 h-2 w-full rounded-full bg-[var(--borderSubtle)]">
           <div
-            className="h-full rounded-full bg-[#FFD31D] transition-all duration-300 ease-in-out"
+            className="h-full rounded-full bg-[var(--yellow)] transition-all duration-300 ease-in-out"
             style={{ width: `${(step / 5) * 100}%` }}
           />
         </div>
@@ -151,13 +151,13 @@ export function QuoteRequestWizard({ cities }: { cities: string[] }) {
         </div>
       ) : null}
 
-      <div className="mt-8 flex justify-between pt-6 border-t border-[rgba(255,255,255,0.1)]">
+      <div className="mt-8 flex justify-between pt-6 border-t border-[var(--borderSubtle)]">
         <Button
           type="button"
           onClick={prevStep}
           disabled={step === 1}
           variant="ghost"
-          className={step === 1 ? 'text-[rgba(255,255,255,0.4)]' : 'text-[var(--text)]'}
+          className={step === 1 ? 'text-[var(--textMuted)]' : 'text-[var(--text)]'}
         >
           Back
         </Button>

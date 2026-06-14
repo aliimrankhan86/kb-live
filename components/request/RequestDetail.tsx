@@ -329,8 +329,8 @@ export function RequestDetail({ id }: { id: string }) {
     }
   };
 
-  if (loading) return <div className="p-8 text-center text-[#FFFFFF]">Loading...</div>;
-  if (!request) return <div className="p-8 text-center text-[#FFFFFF]">Request not found.</div>;
+  if (loading) return <div className="p-8 text-center text-[var(--text)]">Loading...</div>;
+  if (!request) return <div className="p-8 text-center text-[var(--text)]">Request not found.</div>;
 
   const getOperator = (opId: string) => operators.find((o) => o.id === opId);
   const activeBookingOperatorName = activeOfferForBooking
@@ -353,7 +353,7 @@ export function RequestDetail({ id }: { id: string }) {
       </div>
 
       <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-[#FFFFFF]">Quote Request #{request.id.slice(0, 8)}</h1>
+        <h1 className="text-2xl font-bold text-[var(--text)]">Quote Request #{request.id.slice(0, 8)}</h1>
         <span className={`rounded-full px-3 py-1 text-sm font-medium capitalize ${
           request.status === 'open' ? 'bg-blue-500/10 text-blue-500' : 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
         }`}>
@@ -363,22 +363,22 @@ export function RequestDetail({ id }: { id: string }) {
 
 
       {/* Request Summary */}
-      <div className="mb-8 rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] p-6">
-        <div className="grid grid-cols-2 gap-4 text-sm text-[#FFFFFF] sm:grid-cols-4">
+      <div className="mb-8 rounded-lg border border-[var(--borderSubtle)] bg-[var(--color-surface-subtle)] p-6">
+        <div className="grid grid-cols-2 gap-4 text-sm text-[var(--text)] sm:grid-cols-4">
           <div>
-            <p className="text-[rgba(255,255,255,0.4)]">Type</p>
+            <p className="text-[var(--textMuted)]">Type</p>
             <p className="capitalize">{request.type}</p>
           </div>
           <div>
-            <p className="text-[rgba(255,255,255,0.4)]">Season</p>
+            <p className="text-[var(--textMuted)]">Season</p>
             <p className="capitalize">{request.season}</p>
           </div>
           <div>
-            <p className="text-[rgba(255,255,255,0.4)]">Departure</p>
+            <p className="text-[var(--textMuted)]">Departure</p>
             <p>{displayValue(request.departureCity)}</p>
           </div>
           <div>
-            <p className="text-[rgba(255,255,255,0.4)]">Budget</p>
+            <p className="text-[var(--textMuted)]">Budget</p>
             <p>
               {request.budgetRange
                 ? `${formatMoney(request.budgetRange.min, request.budgetRange.currency, regionSettings.locale)} - ${formatMoney(request.budgetRange.max, request.budgetRange.currency, regionSettings.locale)}`
@@ -391,7 +391,7 @@ export function RequestDetail({ id }: { id: string }) {
       {/* Offers List */}
       <div>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-[#FFFFFF]">Offers Received ({offers.length})</h2>
+          <h2 className="text-xl font-semibold text-[var(--text)]">Offers Received ({offers.length})</h2>
           {selectedOffers.length > 1 && (
             <Button
               type="button"
@@ -404,7 +404,7 @@ export function RequestDetail({ id }: { id: string }) {
         </div>
         
         {offers.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-[rgba(255,255,255,0.1)] p-8 text-center text-[rgba(255,255,255,0.4)]">
+          <div className="rounded-lg border border-dashed border-[var(--borderSubtle)] p-8 text-center text-[var(--textMuted)]">
             Waiting for operators to respond...
           </div>
         ) : (
@@ -420,8 +420,8 @@ export function RequestDetail({ id }: { id: string }) {
                 <div 
                   key={offer.id} 
                   data-testid="offer-card"
-                  className={`rounded-lg border bg-[#111111] p-6 shadow-sm transition-colors ${
-                    isSelected ? 'border-[#FFD31D] bg-[rgba(255,211,29,0.02)]' : 'border-[rgba(255,255,255,0.1)] hover:border-[#FFD31D]'
+                  className={`rounded-lg border bg-[var(--surfaceDark)] p-6 shadow-sm transition-colors ${
+                    isSelected ? 'border-[var(--primary)] bg-[var(--color-primary-soft)]' : 'border-[var(--borderSubtle)] hover:border-[var(--primary)]'
                   }`}
                 >
                   <div className="mb-4 flex items-center justify-between">
@@ -439,20 +439,20 @@ export function RequestDetail({ id }: { id: string }) {
                             alert((err as Error).message);
                           }
                         }}
-                        className="h-4 w-4 rounded border-[rgba(255,255,255,0.3)] bg-transparent text-[#FFD31D] focus:ring-[#FFD31D]"
+                        className="h-4 w-4 rounded border-[var(--borderStrong)] bg-transparent text-[var(--primary)] focus:ring-[var(--focusRing)]"
                         aria-label={`Compare offer from ${operatorName}`}
                       />
-                      <span className="font-medium text-[#FFFFFF]">{operatorName}</span>
+                      <span className="font-medium text-[var(--text)]">{operatorName}</span>
                     </div>
                     {op?.verificationStatus === 'verified' && (
-                      <span className="text-xs text-[#FFD31D]">Verified</span>
+                      <span className="text-xs text-[var(--yellow)]">Verified</span>
                     )}
                   </div>
-                  <div className="mb-4 text-2xl font-bold text-[#FFD31D]">
+                  <div className="mb-4 text-2xl font-bold text-[var(--yellow)]">
                     {formatMoney(offer.pricePerPerson, offer.currency, regionSettings.locale)}
-                    <span className="text-sm font-normal text-[rgba(255,255,255,0.64)]">/person</span>
+                    <span className="text-sm font-normal text-[var(--textMuted)]">/person</span>
                   </div>
-                  <div className="space-y-2 text-sm text-[rgba(255,255,255,0.64)]">
+                  <div className="space-y-2 text-sm text-[var(--textMuted)]">
                     <p>{offer.totalNights} Nights Total</p>
                     <p>{offer.hotelStars} Star Hotels</p>
                     <p>{distanceToHaram === 'Not provided' ? distanceToHaram : `${distanceToHaram} to Haram`}</p>
@@ -648,9 +648,9 @@ export function RequestDetail({ id }: { id: string }) {
       </Dialog>
 
       {/* Temporary Link to Operator Dashboard for Demo */}
-      <div className="mt-12 border-t border-[rgba(255,255,255,0.1)] pt-8 text-center">
-        <p className="text-sm text-[rgba(255,255,255,0.4)]">Demo Navigation</p>
-        <Link href="/operator/dashboard" className="mt-2 inline-block rounded text-[#FFD31D] underline hover:text-[#E5BD1A]">
+      <div className="mt-12 border-t border-[var(--borderSubtle)] pt-8 text-center">
+        <p className="text-sm text-[var(--textMuted)]">Demo Navigation</p>
+        <Link href="/operator/dashboard" className="mt-2 inline-block rounded text-[var(--yellow)] underline hover:text-[var(--color-primary-dark)]">
           Go to Operator Dashboard (Simulate Response)
         </Link>
       </div>

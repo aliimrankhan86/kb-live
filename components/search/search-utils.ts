@@ -13,9 +13,11 @@ export interface SearchFlightSegment {
 }
 
 export interface SearchHotel {
-  name: string;
+  // null = the operator has not supplied this. The card shows "Not provided"
+  // rather than inferring a name or a star rating.
+  name: string | null;
   location: string;
-  rating: number;
+  rating: number | null;
   distance: string;
   image: string;
 }
@@ -142,16 +144,18 @@ export function toSearchDisplay(pkg: CataloguePackage): SearchPackageDisplay {
     departure: { date: pkg.dateWindow?.start ?? 'TBC', duration: '-', route: departureRoute },
     return: { date: pkg.dateWindow?.end ?? 'TBC', duration: '-', route: departureRoute },
     makkahHotel: {
-      name: pkg.hotelMakkahName ?? pkg.title,
+      // Operator-supplied facts only — missing name/stars stay null (shown as
+      // "Not provided"), never inferred from the package title or a default.
+      name: pkg.hotelMakkahName ?? null,
       location: 'Makkah',
-      rating: pkg.hotelMakkahStars ?? 4,
+      rating: pkg.hotelMakkahStars ?? null,
       distance: dist(pkg.distanceBandMakkah),
       image: pkg.images?.[0] ?? PLACEHOLDER_IMAGE,
     },
     madinaHotel: {
-      name: pkg.hotelMadinahName ?? pkg.title,
+      name: pkg.hotelMadinahName ?? null,
       location: 'Madinah',
-      rating: pkg.hotelMadinahStars ?? 4,
+      rating: pkg.hotelMadinahStars ?? null,
       distance: dist(pkg.distanceBandMadinah),
       image: pkg.images?.[0] ?? PLACEHOLDER_IMAGE,
     },

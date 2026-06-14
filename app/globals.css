@@ -113,6 +113,29 @@ body::before {
   }
 }
 
+/* Scroll-reveal (added by components/marketing/Reveal.tsx on the client only).
+   opacity + transform only — never affects layout, so no CLS. */
+.reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  will-change: opacity, transform;
+}
+
+.reveal--visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal--visible {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
 /* Screen reader only class for accessibility */
 .sr-only {
   position: absolute;

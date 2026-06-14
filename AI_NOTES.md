@@ -275,6 +275,10 @@ Next.js App Router UI
 | `KT-` reference prefix | Existing DB records use this. Rename only post-launch after migration. `/terms` copy references `KT-XXXXX` — update when prefix changes. |
 | Docs consistency | Some docs contain stale historical status. Update when touched; do not regress implementation to match stale docs. |
 
+### Future features — flagged, NOT approved for build
+
+- **Hotel data enrichment** logged as a FUTURE feature, NOT approved for build — must be scoped against standards §9 before any work (three distinct states: operator-stated / verified-with-source / Not provided; never silent-fill; operator can correct; disclose to users). The "Not provided" baseline from this fix is its prerequisite. Knowledge base Section 8 + 15 updated.
+
 ---
 
 ## 9. Infrastructure Reference
@@ -1091,3 +1095,114 @@ Use Resend dashboard → Logs to confirm email delivery after submitting a test 
 - `npx tsc --noEmit` pass
 - `npm run build` 0 errors
 - Merged: `feature/light-theme` → `dev` → `main` (2026-06-13)
+
+---
+
+## 26. Homepage Contemporary Redesign — 2026-06-13
+
+**Branch:** `feature/homepage-redesign` (off `dev`). **Not yet PR'd.**
+**Tests:** 1,818/1,818 pass · `npx tsc --noEmit` clean · `npm run build` 0 errors.
+
+### What changed
+Rebuilt the homepage (`app/page.tsx`) from Hero-only (3 CTA cards + a routes nav) into a calm, multi-section contemporary layout with restrained scroll-reveal motion. Token-only throughout — dark stays the default, light fully works. No new npm dependencies.
+
+**New section flow:** Hero → ValueProps → HowItWorks → TrustBlock → DepartureCities → FAQ → HomeCTA (global Header/Footer unchanged).
+
+### Files touched
+- `app/page.tsx` — composes the new sections; metadata + OG/Twitter **unchanged**; FAQ array (`HOME_FAQS`) feeds BOTH the `FAQPage` JSON-LD and the visible `<FAQ>` (de-orphans the schema); `getDistinctDepartureCities()` reused (not duplicated) and now wrapped in try/catch → honest empty state on DB blip.
+- `components/marketing/Hero.tsx` + `hero.module.css` — H1 kept **verbatim** (SEO-load-bearing); model line from `MODEL_DESCRIPTION`; primary CTA "Compare packages" → `/search/packages` (canonical list), secondary "How it works" → `/how-it-works`; trust strip "Verified operators" now links to `/how-we-rank#verification-heading`. Removed the old 3 CTA cards (Umrah → primary CTA, Operator + Hajj → HomeCTA). Fixed the one hardcoded colour (`rgba(0,0,0,0.4)` trust-bar shadow → `var(--shadowSoft)`).
+- **New** `components/marketing/`: `ValueProps.tsx`, `HowItWorks.tsx`, `TrustBlock.tsx`, `DepartureCities.tsx`, `FAQ.tsx`, `HomeCTA.tsx`, `Reveal.tsx`, `home.module.css` — all token-only.
+- `components/marketing/Reveal.tsx` — client IntersectionObserver fade+translate; adds `.reveal` only on the client and only when motion is allowed (progressive enhancement: no-JS / reduced-motion → fully visible). Opacity+transform only → no CLS.
+- `app/globals.css` — `.reveal` / `.reveal--visible` rules + `prefers-reduced-motion` guard.
+- `lib/content-rules.ts` — added `VERIFICATION_STATEMENT` (verbatim §7), `MODEL_DESCRIPTION` (§1), `PAYMENT_STANDARD_LINE` (§4 verbatim), `HOME_FAQS`.
+- `app/how-we-rank/page.tsx` — now renders `{VERIFICATION_STATEMENT}` from the shared constant (single source of truth; per the redesign decision to reference verbatim from both homepage and how-we-rank).
+
+### Decisions
+- **H1 unchanged**, verbatim — already compliant + SEO-load-bearing.
+- **Verification statement: extracted to a shared constant**, referenced verbatim from homepage `TrustBlock` and `/how-we-rank`. No paraphrase/summary written anywhere. `terms` + `how-it-works` keep their own inline copies (out of homepage scope).
+- **Primary CTA → `/search/packages`** (canonical comparison surface; `/umrah` is a search-form landing page, kept discoverable via the guides row).
+- **Hajj 2027 "register your interest" retained** in the HomeCTA band → `/hajj`.
+- **FAQPage de-orphaned** by adding a visible FAQ rendering the same 2 Q&As (single `HOME_FAQS` source).
+- **No new design tokens added** — every colour resolved from existing `styles/tokens.css` tokens.
+
+### Verification performed
+- `tsc` clean · 1,818 tests pass (banned-phrase guard included) · build 0 errors.
+- Playwright @390px both themes: `scrollWidth == innerWidth` (390/390), zero overflow offenders.
+- `prefers-reduced-motion: reduce`: 0 elements left in `.reveal` hidden state (no motion).
+- Scroll test: all 6 below-fold sections reach `.reveal--visible` (none stuck hidden).
+- On-page compliance asserted present: H1 verbatim, model line, §7 statement verbatim, §4 payment line, "No operator pays for ranking" + `/how-we-rank` link, visible FAQ, Hajj 2027.
+- Visual check (screenshots) dark + light, desktop + mobile — both themes render correctly (light = prophetic-green CTA, amber icons, ivory bg).
+
+### Open risks / notes
+- `STATUS.md` / `HANDOFF.md` not yet updated (branch not merged) — sync on PR.
+- No Playwright spec committed for the homepage reveal/overflow (checked via throwaway scripts). Add to e2e suite when the Playwright suite next expands (testid hooks are stable section ids).
+- `terms` + `how-it-works` still carry their own inline §7 copy (pre-existing duplication; intentionally left out of homepage scope — fold into `VERIFICATION_STATEMENT` in a later cleanup).
+
+### Next step
+Founder review of the redesign in both themes, then open PR `feature/homepage-redesign` → `dev`. Update `STATUS.md`/`HANDOFF.md` on the same branch before the PR.
+
+---
+
+## 27. Data Integrity — "Not provided" for missing operator facts — 2026-06-13
+
+**Branch:** `fix/data-integrity-not-provided` (off `dev`).
+**Tests:** 1,825/1,825 pass (26 files, +7 new) · `tsc --noEmit` clean · `npm run build` 0 errors.
+
+### Why
+A read-only audit found user-facing surfaces that **inferred** operator-supplied fields when missing, violating the hard rule *missing = "Not provided", never inferred* (`AGENTS.md`; standards §9/§12). Fixed the live fabrications; documented the rest as scope boundaries.
+
+### What changed (one concern per commit)
+1. **Package cards** (`components/search/search-utils.ts`, `PackageCard.tsx`, `packages.module.css`, `PackageList.tsx`):
+   - `SearchHotel.name`/`rating` are now `string | null` / `number | null`. `toSearchDisplay` passes `hotelMakkah/MadinahName ?? null` and `hotelMakkah/MadinahStars ?? null` — **was** `?? pkg.title` (hotel name fell back to the package title) and `?? 4` (stars defaulted to 4).
+   - Card renders **"Not provided"** (italic, muted, new `.notProvided` class) for a null name or rating instead of fabricated stars / a borrowed title.
+   - Rating-sort treats missing as 0 **for ordering only** (sorts to the bottom; the card still shows "Not provided"). Compare-toggle aria-label switched from `hotel.name` → operator company name (null-safe).
+2. **Package JSON-LD** (`lib/seo/json-ld.ts`): `packageJsonLd` defaulted missing stars to `0` and emitted "0★" in the Product description. Now the hotels sentence is built only from stars that exist, and a `Makkah/Madinah hotel rating` PropertyValue is emitted **per city only when present**. Missing = property **absent** (not null, not 0, not empty) — verified by emitting the JSON-LD for a stars-less package: `additionalProperty` carries only Pilgrimage type + nights, no rating property; description has no `★`.
+3. **Quote prefill** (`lib/quote-prefill.ts`): `createQuotePrefillUrl` set `hotelStars` to `?? 4`, pre-seeding the enquiry with a fabricated preference. Now set **only** when a real rating exists, otherwise omitted.
+
+### Explicitly out of scope (deliberate)
+- `quote-prefill` inclusions `?? true` / `distancePreference` — seed the **customer's own enquiry-form preferences**, not displayed operator facts. Belongs with the operator-form task.
+- `PackageDetail.tsx` `?★` — already honest (shows unknown, not a fabricated number). Left as-is.
+- JSON-LD nights/price `??` defaults — **dead code** (`totalNights`/`nightsMakkah`/`nightsMadinah`/`pricePerPerson` are required `number` in `lib/types.ts`, so the fallbacks never fire). Left untouched to keep the diff tight.
+- Operator-form **entry defaults** (4-star / medium distance / small-group pre-selected in the wizard) — upstream data-quality risk (a skipped field can save a default as if confirmed). Separate task.
+
+### Future feature — flagged, NOT approved
+- **Hotel data enrichment** logged in §8 (Open Risks → Future features): must be scoped against standards §9 before any work (three distinct states: operator-stated / verified-with-source / Not provided; never silent-fill; operator can correct; disclose to users). The "Not provided" baseline from **this** fix is its prerequisite.
+
+---
+
+## 28. Operator Form — no silent defaults for skipped fields — 2026-06-13
+
+**Branch:** `fix/operator-form-no-silent-defaults` (off `dev`).
+**Tests:** 1,830/1,830 pass (27 files, +5 new) · `tsc --noEmit` clean · `npm run build` 0 errors.
+
+### Why
+The §27 fix made the *display* honest. This closes the upstream hole: the package wizard manufactured values for fields the operator skipped, so the DB stored a confident default (4-star / medium distance / small-group) as if the operator had confirmed it. The adapter was already honest (`?? null`) — the fabrication lived in `DEFAULT_DATA` and the Zod `.default()` calls. A skipped field must now persist as genuinely unset → render "Not provided" everywhere (matching §27 / PR #64).
+
+### Scope — three fields only
+**Hotel stars · distance band · group type.** Inclusions are OUT of scope (see deferred follow-up below).
+
+### What changed
+- **Zod schema extracted** to `lib/operator/package-schema.ts` (imported by `app/api/operator/packages/route.ts`; makes the defaults unit-testable). Distance `.default('medium')` → **`.default('unknown')`** — `'unknown'` is the existing "Not provided" sentinel (`comparison.ts:108-109`, `friendlyDistance` → null). Stars and `groupType` keep **no default** (`.optional()`).
+- **`PackageWizard.tsx` `DEFAULT_DATA`**: removed the `distanceBandMakkah/Madinah: 'medium'` and `groupType: 'small-group'` seeds (stars were never seeded).
+- **`WizardStep3Hotels.tsx`** — stars: removed the `?? 4` UI paint; select now starts on a disabled **"Select hotel class"** placeholder, with an explicit **"Not sure / not rated"** option → `undefined`. Removed the misleading required `*` on stars. Distance: removed the `'unknown' → 'medium'` display coercion; added a **"Not specified"** option (= `'unknown'`); parent default `?? 'unknown'`.
+- **`WizardStep6Policies.tsx`** — group type: removed the `?? 'small-group'` default; added a **"Not specified"** radio (value `undefined`) as the starting state.
+- **`WizardStep8Review.tsx`** — distance rows show "Not set" when `'unknown'` (instead of the literal "unknown"). Stars/group already showed "Not set" for unset.
+
+### Verified end to end (package created skipping all three)
+- Schema persists: stars `undefined`, distance `'unknown'`, groupType `undefined`.
+- Adapter writes: stars `null`, distance `'unknown'`, groupType `null` (`adapter.ts:385,386,400`).
+- Pilgrim sees (comparison grid): **"Not provided"** for hotel rating, distance, and group type.
+- Chosen values pass through unchanged (5★ / near / Private → rendered).
+- Theme/layout: only `<option>`/radio additions to existing token-styled selects — no new colours, no width/layout change, so both themes + 390px are unaffected (existing operator e2e still green). Pre-existing hardcoded `rgba(255,255,255,…)` wizard inputs left untouched per scope; new additions are token-only.
+
+### Existing data (report only — NO migration this task)
+Counts of records currently holding the old default-equivalent value (seed-authored; live DB not queried):
+- `lib/api/mock-db.ts` (17 pkgs): stars=4 → 8 Makkah / 9 Madinah; distance='medium' → 7 Makkah / 3 Madinah; groupType='small-group' → 6/17.
+- `prisma/seed.ts` (14 pkgs): stars=4 → 5 Makkah / 5 Madinah; distance uses an out-of-type vocabulary (`'0-500m'`/`'500m-1km'`/`'1km+'`), 0 `'medium'`; no `groupType` set.
+- `supabase/seed.sql`: 0 package records.
+Existing-data cleanup (whether to null-out these seed defaults) is a **separate later task** — not done here.
+
+### Deferred / flagged as separate tasks
+- **Inclusions three-state model (follow-up):** inclusions still default all-false. That direction is safe (it under-claims — never marks something included that the operator didn't confirm), so it was left as-is. A proper three-state model (included / not included / not specified) is a separate follow-up.
+- **Distance vocabulary reconciliation (separate task):** three vocabularies coexist — the type enum (`near|medium|far|unknown`), the wizard labels, and the DB seed strings (`'0-500m'` etc. in `prisma/seed.ts`, outside the enum). This fix deliberately did **not** touch the vocabulary; reconciling them is its own task.
+- **Edit-mode clearing limitation:** PATCH uses `packageSchema.partial()` and `JSON.stringify` drops `undefined`, so clearing a previously-set optional field (e.g. changing 5★ back to "Not sure") via edit does not persist a null. The type models these as `?:` (optional), not nullable, so explicit-null clearing is out of scope here. Create-flow (the task's focus) is unaffected.

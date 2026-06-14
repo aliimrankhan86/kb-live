@@ -91,11 +91,11 @@ export function WizardStep8Review({ data, onSaveDraft, onPublish, isSaving, erro
         <ReviewRow label="Makkah hotel" value={data.hotelMakkahName} />
         <ReviewRow label="Makkah stars" value={data.hotelMakkahStars ? `${data.hotelMakkahStars}★` : undefined} />
         <ReviewRow label="Makkah nights" value={data.nightsMakkah} />
-        <ReviewRow label="Makkah distance" value={data.distanceBandMakkah} />
+        <ReviewRow label="Makkah distance" value={data.distanceBandMakkah && data.distanceBandMakkah !== 'unknown' ? data.distanceBandMakkah : undefined} />
         <ReviewRow label="Madinah hotel" value={data.hotelMadinahName} />
         <ReviewRow label="Madinah stars" value={data.hotelMadinahStars ? `${data.hotelMadinahStars}★` : undefined} />
         <ReviewRow label="Madinah nights" value={data.nightsMadinah} />
-        <ReviewRow label="Madinah distance" value={data.distanceBandMadinah} />
+        <ReviewRow label="Madinah distance" value={data.distanceBandMadinah && data.distanceBandMadinah !== 'unknown' ? data.distanceBandMadinah : undefined} />
         <ReviewRow label="Total nights" value={data.totalNights} />
       </ReviewSection>
 

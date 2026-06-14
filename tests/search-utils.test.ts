@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { filterByParams } from '@/components/search/search-utils';
+import { filterByParams, toSearchDisplay } from '@/components/search/search-utils';
 import type { Package } from '@/lib/types';
 
 const basePackage: Package = {
@@ -62,5 +62,33 @@ describe('filterByParams', () => {
       'lhr-package',
       'lgw-package',
     ]);
+  });
+});
+
+describe('toSearchDisplay — data integrity (missing = Not provided)', () => {
+  it('returns null hotel name and rating when the operator has not supplied them', () => {
+    const display = toSearchDisplay(basePackage);
+
+    // No inferred star rating (was previously ?? 4) and no title-as-hotel-name.
+    expect(display.makkahHotel.rating).toBeNull();
+    expect(display.madinaHotel.rating).toBeNull();
+    expect(display.makkahHotel.name).toBeNull();
+    expect(display.madinaHotel.name).toBeNull();
+    expect(display.makkahHotel.name).not.toBe(basePackage.title);
+  });
+
+  it('passes through operator-supplied hotel name and rating unchanged', () => {
+    const display = toSearchDisplay({
+      ...basePackage,
+      hotelMakkahName: 'Hilton Makkah',
+      hotelMakkahStars: 5,
+      hotelMadinahName: 'Pullman Madinah',
+      hotelMadinahStars: 4,
+    });
+
+    expect(display.makkahHotel.name).toBe('Hilton Makkah');
+    expect(display.makkahHotel.rating).toBe(5);
+    expect(display.madinaHotel.name).toBe('Pullman Madinah');
+    expect(display.madinaHotel.rating).toBe(4);
   });
 });

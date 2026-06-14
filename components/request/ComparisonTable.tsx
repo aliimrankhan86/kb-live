@@ -63,7 +63,7 @@ const GROUPS: Group[] = [
   },
 ];
 
-const LOWEST_BG = 'bg-[#211d10]';
+const LOWEST_BG = 'bg-[var(--comparison-lowest-bg)]';
 
 export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
   const [operators, setOperators] = useState<Record<string, OperatorProfile>>({});
@@ -171,7 +171,7 @@ export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
           return (
             <tbody key={group.title}>
               <tr>
-                <th colSpan={colCount} scope="colgroup" className="border-b border-[var(--borderSubtle)] bg-[#161616] p-0">
+                <th colSpan={colCount} scope="colgroup" className="border-b border-[var(--borderSubtle)] bg-[var(--comparison-section-bg)] p-0">
                   <button
                     type="button"
                     onClick={() => toggle(group.title)}
@@ -206,7 +206,7 @@ export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
                       <th
                         scope="row"
                         className={`bg-[var(--surfaceDark)] border-b border-[var(--borderSubtle)] px-2.5 py-3 align-top text-xs font-semibold leading-snug [overflow-wrap:anywhere] sm:px-4 sm:text-[0.8125rem] ${
-                          allSame ? 'text-[rgba(255,255,255,0.35)]' : 'text-[var(--textMuted)]'
+                          allSame ? 'text-[var(--comparison-dim-text)]' : 'text-[var(--textMuted)]'
                         }`}
                       >
                         {feature.label}
@@ -217,16 +217,16 @@ export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
                         const isLowest = lowestPrice !== null && row.priceValue === lowestPrice;
                         const isWinner = winners.has(i);
                         const bg = isWinner
-                          ? 'bg-[#1c2a14]'
+                          ? 'bg-[var(--comparison-winner-bg)]'
                           : isLowest
                             ? LOWEST_BG
                             : even
-                              ? 'bg-[#181818]'
+                              ? 'bg-[var(--comparison-even-bg)]'
                               : 'bg-[var(--surfaceDark)]';
                         const text = allSame
-                          ? 'text-[rgba(255,255,255,0.4)]'
+                          ? 'text-[var(--comparison-dim-text)]'
                           : isWinner
-                            ? 'text-[#7dd97d] font-semibold'
+                            ? 'text-[var(--comparison-winner-text)] font-semibold'
                             : isMissing
                               ? 'text-[var(--textMuted)]'
                               : 'text-[var(--text)]';
@@ -236,7 +236,7 @@ export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
                             className={`border-b border-l border-[var(--borderSubtle)] px-2.5 py-3 align-top leading-relaxed [overflow-wrap:anywhere] sm:px-4 ${bg} ${text}`}
                           >
                             {isWinner && (
-                              <span data-testid="comparison-best" className="mb-0.5 flex items-center gap-1 text-[0.625rem] font-bold uppercase tracking-wide text-[#7dd97d]">
+                              <span data-testid="comparison-best" className="mb-0.5 flex items-center gap-1 text-[0.625rem] font-bold uppercase tracking-wide text-[var(--comparison-winner-text)]">
                                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" aria-hidden="true">
                                   <path d="M20 6L9 17l-5-5" />
                                 </svg>

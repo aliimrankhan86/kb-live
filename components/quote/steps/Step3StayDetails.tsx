@@ -17,13 +17,13 @@ export function Step3StayDetails() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-xl font-semibold text-[#FFFFFF]">Duration of Stay</h2>
-        <p className="mt-1 text-sm text-[rgba(255,255,255,0.64)]">
+        <h2 className="text-xl font-semibold text-[var(--text)]">Duration of Stay</h2>
+        <p className="mt-1 text-sm text-[var(--textMuted)]">
           How many nights do you plan to stay in each city?
         </p>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label className="mb-2 block text-sm font-medium text-[rgba(255,255,255,0.8)]">
+            <label className="mb-2 block text-sm font-medium text-[var(--color-text-secondary)]">
               Nights in Makkah
             </label>
             <input
@@ -37,11 +37,11 @@ export function Step3StayDetails() {
                   totalNights: val + (draft.nightsMadinah || 0),
                 });
               }}
-              className="block w-full rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] px-4 py-3 text-[#FFFFFF] placeholder-[rgba(255,255,255,0.4)] focus:border-[#FFD31D] focus:outline-none focus:ring-1 focus:ring-[#FFD31D]"
+              className="block w-full rounded-lg border border-[var(--borderSubtle)] bg-[var(--color-surface-subtle)] px-4 py-3 text-[var(--text)] placeholder-[var(--textMuted)] focus:border-[var(--focusRing)] focus:outline-none focus:ring-1 focus:ring-[var(--focusRing)]"
             />
           </div>
           <div>
-            <label className="mb-2 block text-sm font-medium text-[rgba(255,255,255,0.8)]">
+            <label className="mb-2 block text-sm font-medium text-[var(--color-text-secondary)]">
               Nights in Madinah
             </label>
             <input
@@ -55,18 +55,18 @@ export function Step3StayDetails() {
                   totalNights: (draft.nightsMakkah || 0) + val,
                 });
               }}
-              className="block w-full rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] px-4 py-3 text-[#FFFFFF] placeholder-[rgba(255,255,255,0.4)] focus:border-[#FFD31D] focus:outline-none focus:ring-1 focus:ring-[#FFD31D]"
+              className="block w-full rounded-lg border border-[var(--borderSubtle)] bg-[var(--color-surface-subtle)] px-4 py-3 text-[var(--text)] placeholder-[var(--textMuted)] focus:border-[var(--focusRing)] focus:outline-none focus:ring-1 focus:ring-[var(--focusRing)]"
             />
           </div>
         </div>
-        <p className="mt-2 text-sm text-[#FFD31D]">
+        <p className="mt-2 text-sm text-[var(--yellow)]">
           Total Trip Duration: {draft.totalNights || 0} Nights
         </p>
       </div>
 
       <div>
-        <h2 className="text-xl font-semibold text-[#FFFFFF]">Hotel Preference</h2>
-        <p className="mt-1 text-sm text-[rgba(255,255,255,0.64)]">
+        <h2 className="text-xl font-semibold text-[var(--text)]">Hotel Preference</h2>
+        <p className="mt-1 text-sm text-[var(--textMuted)]">
           What is your preferred hotel standard?
         </p>
         <div className="mt-4 flex gap-4">
@@ -77,8 +77,8 @@ export function Step3StayDetails() {
               className={clsx(
                 'flex-1 rounded-lg border py-3 text-center transition-all',
                 draft.hotelStars === star
-                  ? 'border-[#FFD31D] bg-[rgba(255,211,29,0.1)] text-[#FFD31D]'
-                  : 'border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] text-[#FFFFFF] hover:bg-[rgba(255,255,255,0.1)]'
+                  ? 'border-[var(--primary)] bg-[var(--color-primary-soft)] text-[var(--primary)]'
+                  : 'border-[var(--borderSubtle)] bg-[var(--color-surface-subtle)] text-[var(--text)] hover:bg-[var(--borderSubtle)]'
               )}
             >
               {star} Stars
@@ -88,8 +88,8 @@ export function Step3StayDetails() {
       </div>
 
       <div>
-        <h2 className="text-xl font-semibold text-[#FFFFFF]">Distance to Haram</h2>
-        <p className="mt-1 text-sm text-[rgba(255,255,255,0.64)]">
+        <h2 className="text-xl font-semibold text-[var(--text)]">Distance to Haram</h2>
+        <p className="mt-1 text-sm text-[var(--textMuted)]">
           How close do you want to be?
         </p>
         <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -105,8 +105,8 @@ export function Step3StayDetails() {
               className={clsx(
                 'rounded-lg border py-3 text-center text-sm transition-all',
                 draft.distancePreference === option.id
-                  ? 'border-[#FFD31D] bg-[rgba(255,211,29,0.1)] text-[#FFD31D]'
-                  : 'border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] text-[#FFFFFF] hover:bg-[rgba(255,255,255,0.1)]'
+                  ? 'border-[var(--primary)] bg-[var(--color-primary-soft)] text-[var(--primary)]'
+                  : 'border-[var(--borderSubtle)] bg-[var(--color-surface-subtle)] text-[var(--text)] hover:bg-[var(--borderSubtle)]'
               )}
             >
               {option.label}
