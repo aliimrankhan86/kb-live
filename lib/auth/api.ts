@@ -53,6 +53,10 @@ export async function apiSignUp(input: SignUpInput) {
       // customer, which is a confusing security-relevant state. Surface as 500.
       throw new AppError({ code: 'INTERNAL_ERROR', status: 500 });
     }
+
+    // Sync to Prisma users table so quote_requests FK constraint is satisfied.
+    const name = (data.user?.user_metadata?.name as string) || input.name || null;
+    await syncUserToPrisma(userId, input.email, input.role, name);
   }
 
   return data;
@@ -76,7 +80,47 @@ export async function apiSignIn(input: SignInInput) {
     }
     throw new AppError({ code: 'AUTH_INVALID_CREDENTIALS', status: 401 });
   }
+
+  // Sync to Prisma users table on every sign-in. This covers users who signed
+  // up before the FK sync was added — their Prisma row is created on first login.
+  const signedInUser = data.user;
+  if (signedInUser?.id) {
+    const role = (signedInUser.app_metadata?.role as string) || 'customer';
+    const name = (signedInUser.user_metadata?.name as string) || null;
+    await syncUserToPrisma(signedInUser.id, signedInUser.email!, role, name);
+  }
+
   return data;
+}
+
+/**
+ * Upsert a row in the Prisma `users` table to match the Supabase auth user.
+ * Required because quote_requests.customer_id has a FK to users.id.
+ * Only runs when FEATURE_USE_REAL_DB=true (skipped in E2E / test mode).
+ * Errors are logged but do not fail the caller — auth already succeeded.
+ */
+async function syncUserToPrisma(
+  userId: string,
+  email: string,
+  role: string,
+  name?: string | null,
+): Promise<void> {
+  if (process.env.FEATURE_USE_REAL_DB !== 'true') return;
+  try {
+    const { prisma } = await import('@/lib/api/db/prisma');
+    await prisma.user.upsert({
+      where: { id: userId },
+      create: {
+        id: userId,
+        email,
+        role: (role as 'customer' | 'operator' | 'admin'),
+        name: name ?? null,
+      },
+      update: { email, name: name ?? null },
+    });
+  } catch (err) {
+    console.error('[auth] Failed to sync user to Prisma users table:', err);
+  }
 }
 
 /**
