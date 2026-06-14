@@ -66,7 +66,7 @@ export function CookieConsent() {
       aria-label="Cookie consent"
       aria-modal="true"
       data-testid="cookie-consent-banner"
-      className="fixed bottom-0 left-0 right-0 z-50 border-t border-[var(--borderSubtle)] bg-[var(--surfaceDark)] p-4 shadow-2xl"
+      className="fixed bottom-0 left-0 right-0 z-40 border-t border-[var(--borderSubtle)] bg-[var(--surfaceDark)] p-4 shadow-2xl"
     >
       <div className="mx-auto max-w-6xl">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
