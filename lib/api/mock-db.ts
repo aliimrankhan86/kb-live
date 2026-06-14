@@ -32,14 +32,23 @@ const STORAGE_KEYS = {
 
 const PACKAGES_SEED_VERSION = 5;
 
+// Server-side in-memory store — persists within the process lifetime so that
+// E2E create→read flows work even though localStorage is unavailable on the server.
+const serverMemory = new Map<string, unknown>();
+
 const getStorage = <T>(key: string, defaultVal: T): T => {
-  if (typeof window === 'undefined') return defaultVal;
+  if (typeof window === 'undefined') {
+    return serverMemory.has(key) ? (serverMemory.get(key) as T) : defaultVal;
+  }
   const stored = localStorage.getItem(key);
   return stored ? JSON.parse(stored) : defaultVal;
 };
 
 const setStorage = <T>(key: string, val: T) => {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined') {
+    serverMemory.set(key, val);
+    return;
+  }
   localStorage.setItem(key, JSON.stringify(val));
 };
 
@@ -1157,3 +1166,17 @@ export const MockDB = {
     else MockDB.currentUser = SEED_USERS[1];
   }
 };
+
+/**
+ * E2E-only: wipe transient state (bank change requests, quote requests, offers,
+ * booking intents) so each test starts from a clean seeded baseline.
+ * Only exported for use by the /api/e2e/reset route (guarded by E2E_TESTING=1).
+ */
+export function resetE2EState(): void {
+  serverMemory.delete(STORAGE_KEYS.BANK_CHANGE_REQUESTS);
+  serverMemory.delete(STORAGE_KEYS.AUDIT_LOG);
+  serverMemory.delete(STORAGE_KEYS.REQUESTS);
+  serverMemory.delete(STORAGE_KEYS.OFFERS);
+  serverMemory.delete(STORAGE_KEYS.BOOKING_INTENTS);
+  serverMemory.delete(STORAGE_KEYS.BOOKING_OUTCOMES);
+}
