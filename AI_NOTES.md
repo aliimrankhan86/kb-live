@@ -1359,3 +1359,25 @@ UI-only; no logic touched. Verified in browser preview at 390px + desktop.
   account** to continue." — link text is the destination-aware phrase, no em dashes,
   short, obvious. "traveller" matches the signup tab label (the customer tab reads
   "Traveller"). No change to 409 detection (`lib/auth/api.ts`) or route logic.
+
+### Task 3 — light-theme cookie "Accept" button was muddy/low-contrast
+- **Root cause:** the Accept button hardcoded `bg-[var(--yellow)] text-black`. In
+  light theme `--yellow` resolves to **`#8A6800`** (dark olive — see
+  `styles/tokens.css:101`), so the primary cookie action rendered muddy brown with
+  black text: low contrast, not prominent.
+- **Fix (`components/compliance/CookieConsent.tsx`):** switch the Accept button to
+  the theme CTA token — `bg-[var(--primary)] text-[var(--color-text-on-brand)]`
+  (border to match). `--primary` = `#FFD31D` (dark) / `#0A6937` green (light);
+  `--color-text-on-brand` = `#000` (dark) / `#F9FAFB` (light). Result: **dark
+  unchanged** (yellow + black), **light = brand green + near-white (~6.5:1, AA)**,
+  consistent with the site "Compare packages" CTA. Removed the hardcoded
+  `rgba(255,211,29,…)` shadow ring (a light-mode token violation).
+
+### Task 4 — "Common questions" to "Ready to compare?" had a disproportionate gap
+- **Root cause:** `FAQ` and `HomeCTA` are two consecutive `.section`s, each with
+  `padding: 3.5rem` top+bottom (`components/marketing/home.module.css`). Stacked,
+  that doubled into a ~7rem (~156px card-to-card) void after a short 2-card FAQ.
+- **Fix:** added `.sectionTightTop { padding-top: 0 }` and applied it to the
+  closing `HomeCTA` section so it hugs the FAQ above it (one section's rhythm,
+  ~100px card-to-card) instead of doubling. Closing CTA reads as the natural next
+  step after the questions, in both themes.

@@ -136,6 +136,8 @@
 | Email confirm link signs user in (PKCE `code` callback) | ✅ Done 2026-06-14 (AI_NOTES §31) | — |
 | Cookie banner no longer covers mobile drawer nav items | ✅ Done 2026-06-14 (z-index stacking-context fix, AI_NOTES §32) | — |
 | Signup duplicate-email copy clearer + type-aware sign-in link | ✅ Done 2026-06-14 (UI copy, AI_NOTES §32) | — |
+| Light-theme cookie "Accept" button prominent + readable (brand green) | ✅ Done 2026-06-14 (token fix, AI_NOTES §32) | — |
+| "Common questions" → closing CTA spacing tightened (both themes) | ✅ Done 2026-06-14 (AI_NOTES §32) | — |
 | Inclusions three-state model (included / not / not specified) | ⏳ Not started | Follow-up to §28 |
 | Distance vocabulary reconciliation (enum vs wizard vs DB '0-500m') | ⏳ Not started | Separate task (flagged §28) |
 | Existing-data cleanup — null out seed default stars/distance/group | ⏳ Not started | Separate task (flagged §28) |

@@ -8,6 +8,12 @@
   box-sizing: border-box;
 }
 
+/* Closing CTA hugs the section above it (e.g. FAQ) instead of doubling
+   the 3.5rem section padding into a ~7rem void. */
+.sectionTightTop {
+  padding-top: 0;
+}
+
 .sectionHead {
   max-width: 640px;
   margin-bottom: 2rem;
