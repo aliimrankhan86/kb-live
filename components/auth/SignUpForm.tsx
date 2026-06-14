@@ -242,14 +242,14 @@ export function SignUpForm() {
         >
           {isDuplicateEmail ? (
             <>
-              An account with this email already exists.{' '}
+              Looks like you already have an account.{' '}
               <Link
                 href={role === 'operator' ? '/login?type=operator' : '/login?type=customer'}
                 className="underline font-medium"
               >
-                Sign in instead
-              </Link>
-              .
+                Sign in to your {role === 'operator' ? 'operator' : 'traveller'} account
+              </Link>{' '}
+              to continue.
             </>
           ) : (
             error

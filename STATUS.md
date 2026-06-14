@@ -3,7 +3,7 @@
 > **Single rolling tracker.** Any AI/dev: read this for current state. Update it after work is **done + tested + verified** (see `CLAUDE.md` rule).
 > Detailed handover lives in `AI_NOTES.md`. Cold-start brief: `HANDOFF.md`. Business: `BUSINESS.md`.
 
-**Last verified:** 2026-06-14 (signup duplicate-email 500 + PKCE confirm link — real fixes) · **Branch:** `dev` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
+**Last verified:** 2026-06-14 (cookie-banner / mobile-nav overlap + signup duplicate-email copy) · **Branch:** `dev` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
 
 ---
 
@@ -134,6 +134,8 @@
 | Operator form — no silent defaults for skipped stars/distance/group type | ✅ Done 2026-06-13 (PR → dev pending, see AI_NOTES §28) | — |
 | Duplicate email signup shows specific error with sign-in link | ✅ Done 2026-06-14 (real fix: empty-identities detection, AI_NOTES §31) | — |
 | Email confirm link signs user in (PKCE `code` callback) | ✅ Done 2026-06-14 (AI_NOTES §31) | — |
+| Cookie banner no longer covers mobile drawer nav items | ✅ Done 2026-06-14 (z-index stacking-context fix, AI_NOTES §32) | — |
+| Signup duplicate-email copy clearer + type-aware sign-in link | ✅ Done 2026-06-14 (UI copy, AI_NOTES §32) | — |
 | Inclusions three-state model (included / not / not specified) | ⏳ Not started | Follow-up to §28 |
 | Distance vocabulary reconciliation (enum vs wizard vs DB '0-500m') | ⏳ Not started | Separate task (flagged §28) |
 | Existing-data cleanup — null out seed default stars/distance/group | ⏳ Not started | Separate task (flagged §28) |

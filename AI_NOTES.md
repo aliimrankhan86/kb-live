@@ -1327,3 +1327,35 @@ targeted the wrong Supabase behaviour. Real root causes below.
   switch the Supabase "Confirm signup" email template URL to:
   `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup` — the route
   already supports that path via `verifyOtp`.
+
+## 32. Cookie banner / mobile-nav overlap + signup duplicate-email copy — 2026-06-14
+
+**Branch:** `fix/cookie-banner-nav-overlap-signin-copy` → dev → main
+**Tests:** 1,833/1,833 pass (28 files) · `tsc --noEmit` clean · `npm run build` clean.
+UI-only; no logic touched. Verified in browser preview at 390px + desktop.
+
+### Task 1 — cookie banner covered mobile drawer nav items
+- **Root cause: stacking-context trap.** `components/layout/Header.tsx` renders
+  `<header>` with `position: sticky; z-index: 50` (`header.module.css:3-5`), which
+  **creates a stacking context**. The mobile overlay (z-60) and drawer (z-70) live
+  *inside* that context, so their z-index only ranks them within the header — the
+  whole header still sits at root z-50. `CookieConsent` is a **sibling rendered
+  after `<Header>`** in `app/layout.tsx` and was also `z-50` at root → equal z-index,
+  later in DOM → painted **on top of** the drawer, covering the bottom nav items
+  ("Sign in" / "Create account").
+- **Fix (`components/compliance/CookieConsent.tsx`):** banner `z-50` → `z-40`. Now
+  the entire header context (drawer included) ranks above the banner; when the drawer
+  opens it covers the banner. One-class change, lowest risk.
+- **Desktop unchanged:** the sticky header (top) and banner (bottom) never overlap
+  spatially, so z-40 vs z-50 makes no visible difference — verified at desktop width.
+
+### Task 2 — duplicate-email "Sign in instead" copy was dismissive/ambiguous
+- **Context already available:** `SignUpForm` holds `role` state (`'customer'|'operator'`),
+  seeded from the `?type=` URL param. The duplicate-email link was **already**
+  type-specific (`/login?type=operator` vs `/login?type=customer`) from §30/§31 work —
+  only the wording needed fixing.
+- **Fix (`components/auth/SignUpForm.tsx`):** message rewritten to
+  "Looks like you already have an account. **Sign in to your {operator|traveller}
+  account** to continue." — link text is the destination-aware phrase, no em dashes,
+  short, obvious. "traveller" matches the signup tab label (the customer tab reads
+  "Traveller"). No change to 409 detection (`lib/auth/api.ts`) or route logic.
