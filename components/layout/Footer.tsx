@@ -120,9 +120,15 @@ function BrandBlock() {
   );
 }
 
-export function Footer({ cities = [] }: { cities?: string[] }) {
+export function Footer({ cities = [], rfqEnabled = false }: { cities?: string[]; rfqEnabled?: boolean }) {
   const currentYear = new Date().getFullYear();
   const isDesktop = useIsDesktop();
+
+  // PARKED: RFQ quote engine — drop the "Get a Quote" link when off.
+  // See PARKED_FEATURES.md entry 2. Flag evaluated server-side, passed as a prop.
+  const platformLinks = rfqEnabled
+    ? PLATFORM_LINKS
+    : PLATFORM_LINKS.filter((link) => link.href !== '/quote');
 
   return (
     <footer className="border-t border-[var(--borderSubtle)] bg-[var(--surfaceDark)]" role="contentinfo">
@@ -179,7 +185,7 @@ export function Footer({ cities = [] }: { cities?: string[] }) {
 
           <Section title="Platform" isLast forceOpen={isDesktop}>
             <ul className="space-y-2 text-xs">
-              {PLATFORM_LINKS.map(link => (
+              {platformLinks.map(link => (
                 <li key={link.href}>
                   <Link href={link.href} className={linkClass}>
                     {link.label}

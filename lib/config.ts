@@ -26,6 +26,50 @@ export const FEATURE_USE_REAL_DB =
 export const FEATURE_FEATURED_SLOTS =
   process.env.FEATURE_FEATURED_SLOTS === 'true';
 
+/**
+ * Whether the booking-intent / bank-details / payment-evidence flow is live in
+ * the pilgrim journey.
+ *
+ * Default FALSE — PARKED (see PARKED_FEATURES.md entry 1). When off, a pilgrim
+ * cannot reach the "Proceed direct" booking screen, the payment-evidence upload,
+ * the operator bank details, or the booking confirmation screen. The code is
+ * intact and reversible — never delete it.
+ *
+ * NEVER read this flag client-side. Evaluate on the server (via
+ * isBookingFlowEnabled) and pass the result down as a boolean prop.
+ *
+ * Re-enable only on explicit founder instruction.
+ */
+export const FEATURE_BOOKING_FLOW =
+  process.env.FEATURE_BOOKING_FLOW === 'true';
+
+/**
+ * Whether the multi-step RFQ (request-for-quote) engine is live in the pilgrim
+ * journey.
+ *
+ * Default FALSE — PARKED (see PARKED_FEATURES.md entry 2). When off, the
+ * `/quote` wizard route 404s, the package page hides its "Request quote" CTA,
+ * the quote-request API rejects writes, and the `/quote` entry links are hidden.
+ * The code is intact and reversible — never delete it.
+ *
+ * NEVER read this flag client-side. Evaluate on the server (via
+ * isRfqQuoteEnabled) and pass the result down as a boolean prop.
+ *
+ * Re-enable only on explicit founder instruction.
+ */
+export const FEATURE_RFQ_QUOTE =
+  process.env.FEATURE_RFQ_QUOTE === 'true';
+
+/** Server-side accessor for the booking-intent/payment flow flag. */
+export function isBookingFlowEnabled(): boolean {
+  return FEATURE_BOOKING_FLOW;
+}
+
+/** Server-side accessor for the multi-step RFQ quote engine flag. */
+export function isRfqQuoteEnabled(): boolean {
+  return FEATURE_RFQ_QUOTE;
+}
+
 /** Whether we're running in test mode (Vitest) */
 export const IS_TEST_ENV = process.env.NODE_ENV === 'test';
 

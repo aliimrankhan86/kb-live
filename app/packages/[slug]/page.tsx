@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { PackageDetail } from '@/components/packages/PackageDetail'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { Repository } from '@/lib/api/repository'
+import { isRfqQuoteEnabled } from '@/lib/config'
 import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, packageJsonLd, touristTripJsonLd } from '@/lib/seo/json-ld'
 import type { Package, OperatorProfile } from '@/lib/types'
 
@@ -140,7 +141,7 @@ export default async function PackageDetailPage({
         <div className="w-full max-w-5xl mx-auto px-4 pt-6">
           <Breadcrumb items={breadcrumbItems} />
         </div>
-        <PackageDetail pkg={pkg} operator={operator} />
+        <PackageDetail pkg={pkg} operator={operator} rfqEnabled={isRfqQuoteEnabled()} />
       </main>
     </>
   )

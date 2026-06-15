@@ -10,6 +10,43 @@ See §10 + §23 for queue context.
 
 This file is the current handover source of truth. If another document conflicts with a verified statement here, treat that other document as stale and update it before changing implementation.
 
+> **Precedence note (2026-06-15):** `PILGRIMCOMPARE_PROJECT_DIRECTION.md` (repo root) is now the single source of truth for product direction and **must be read first every session**, before this file. It wins all conflicts except the language/legal red lines. `PARKED_FEATURES.md` (repo root) is the canonical parked-feature register.
+
+---
+
+## §Task 1 — Park the broken flows (RFQ engine + booking/payment) — 2026-06-15
+
+**Branch:** off `dev` (Task 1 of the direction file §9). Two live pilgrim-journey flows switched OFF behind feature flags. **No code deleted.** Vitest 1,836/1,836, `tsc` clean, `npm run build` 0 errors. Acceptance verified on a phone-sized live preview (flags at default OFF).
+
+### Standing rule (now project-wide)
+**Parked code is never deleted and never re-enabled without the founder's explicit approval.** Parked = switched off behind a flag, intact, reversible, and documented in `PARKED_FEATURES.md` + here. (Direction file §4 + §10.3.)
+
+### The two flags added (`lib/config.ts`, both default OFF)
+| Env var | Helper | Parks |
+|---|---|---|
+| `FEATURE_BOOKING_FLOW` | `isBookingFlowEnabled()` | Booking-intent / bank-details / payment-evidence flow |
+| `FEATURE_RFQ_QUOTE` | `isRfqQuoteEnabled()` | Multi-step RFQ quote engine |
+
+Server-side only — evaluated on the server and passed down as boolean props (same rule as `FEATURE_FEATURED_SLOTS`; never read client-side).
+
+### Files touched
+- `lib/config.ts` — added both flags + `isBookingFlowEnabled()` / `isRfqQuoteEnabled()`.
+- **RFQ off:** `app/quote/page.tsx` (`notFound()`), `app/api/quote-requests/route.ts` (POST → 404), `components/packages/PackageDetail.tsx` + `app/packages/[slug]/page.tsx` (hide "Request quote" CTA via `rfqEnabled` prop), `app/layout.tsx` → `components/layout/Footer.tsx` (drop "Get a Quote" link), `components/marketing/CityCorridor.tsx`, `app/umrah/ramadan/page.tsx`, `app/umrah/cost/page.tsx` (hide `/quote` CTA). Header had no live `/quote` link (the `isQuote` branch is dead — no navLink uses it), so it was left untouched.
+- **Booking off:** `components/request/RequestDetail.tsx` + `app/requests/[id]/page.tsx` (hide "Proceed direct", booking dialog, payment-evidence upload, `PaymentInstructions`/bank details via `bookingEnabled` prop), `app/requests/[id]/confirmation/page.tsx` (`notFound()`), `app/api/booking-intents/route.ts` (POST → 404).
+- **Tests:** `tests/feature-flags.test.tsx` (new — flags default false; PackageDetail hides CTA when off, shows when on). `playwright.config.ts` — both flags forced `'true'` in `webServer.env` so the existing `flow.spec`/`bank-payment` E2E still exercise the parked code and prove it intact.
+- **Docs:** created `PILGRIMCOMPARE_PROJECT_DIRECTION.md`, `PARKED_FEATURES.md` (flag names + real file paths filled in), this section.
+
+### Acceptance (verified on live preview, flags OFF)
+`/quote` → 404 · `/requests/[id]/confirmation` → 404 · `POST /api/booking-intents` → 404 · `POST /api/quote-requests` → 404 · package page (375px) has no Request-quote CTA · zero `/quote` links on `/`, `/umrah/london`, `/umrah/cost`, `/umrah/ramadan`, package pages. The parked code still exists in the repo.
+
+### Surprises / notes
+- The booking/payment flow is only reachable *after* the RFQ flow (`/quote` → `/requests/[id]` → offers → "Proceed direct"), so parking RFQ already removes the path; the booking flag adds defence-in-depth + a clean server guard.
+- `Header.tsx` has a dead `/quote` CTA branch (`link.href === '/quote'`) but no navLink supplies that href — nothing to hide there.
+- `app/requests/page.tsx` (the customer's request list) still has `/quote` "New Request" links. It is behind customer auth (not the public pilgrim walk) and any click hits the `/quote` 404 guard. Left intact, flagged here as a minor follow-up if a cleaner empty-state is wanted.
+
+### Next task
+**Task 2 — Build the simplified enquiry journey** (direction file §9): package-page "Enquire" → short pre-filled form (name, contact, optional travel month, optional message) → reference code + confirmation with payment-posture copy. One package, one enquiry, one operator.
+
 ---
 
 ## §UX/CSP/theme polish — 2026-06-14 (branch `fix/packages-ux-csp-light-theme`)

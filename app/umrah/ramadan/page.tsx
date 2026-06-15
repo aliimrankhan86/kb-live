@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
 import { Repository } from '@/lib/api/repository'
+import { isRfqQuoteEnabled } from '@/lib/config'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 
 export const metadata: Metadata = {
@@ -151,12 +152,15 @@ export default async function RamadanUmrahPage() {
             >
               Browse Umrah packages
             </Link>
-            <Link
-              href="/quote"
-              className="inline-flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surfaceDark)] px-6 py-3 text-base font-medium text-[var(--text)] hover:border-[var(--yellow)]/40 transition-colors"
-            >
-              Request a custom Ramadan quote
-            </Link>
+            {/* PARKED: RFQ quote engine — CTA hidden when flag off (PARKED_FEATURES.md entry 2). */}
+            {isRfqQuoteEnabled() && (
+              <Link
+                href="/quote"
+                className="inline-flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surfaceDark)] px-6 py-3 text-base font-medium text-[var(--text)] hover:border-[var(--yellow)]/40 transition-colors"
+              >
+                Request a custom Ramadan quote
+              </Link>
+            )}
           </div>
 
           <p className="text-sm text-[var(--textMuted)] mb-10">
