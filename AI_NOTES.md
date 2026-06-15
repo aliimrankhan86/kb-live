@@ -1,16 +1,51 @@
 # PilgrimCompare AI Handover — Single Source of Truth
 
-**Last verified:** 2026-06-15 (cookie-banner E2E flake fix — Vitest 1,836/1,836, E2E 45/45 ×3 serial, 0 build errors)
-**Branch:** `feature/fix-cookie-banner-e2e-flake`
+**Last verified:** 2026-06-15 (Task 2 — pilgrim enquiry journey — Vitest 1,852/1,852, `tsc` clean, 0 build errors, enquiry E2E 3/3 ×3 browsers serial)
+**Branch:** `feature/clean-enquiry-journey`
 **Audience:** Claude, Codex, Kimi, and any AI/developer taking over the project.
 
 **Next immediate action:**
-Gate 3 — operator onboarding. Run the 3 DB migration SQL statements in §23 against Supabase before deploying. Then begin operator acquisition.
-See §10 + §23 for queue context.
+Task 3 — compliant pilgrim email opt-in (direction file §9). Add a separate, unticked marketing opt-in to the enquiry form with a stored consent record (timestamp, source, exact wording) + unsubscribe/suppression. Structural room already left in `lib/validation.ts` (`enquirySchema`), `lib/types.ts` (`Enquiry`), `components/enquiry/EnquiryForm.tsx`, and migration `010`.
 
 This file is the current handover source of truth. If another document conflicts with a verified statement here, treat that other document as stale and update it before changing implementation.
 
 > **Precedence note (2026-06-15):** `PILGRIMCOMPARE_PROJECT_DIRECTION.md` (repo root) is now the single source of truth for product direction and **must be read first every session**, before this file. It wins all conflicts except the language/legal red lines. `PARKED_FEATURES.md` (repo root) is the canonical parked-feature register.
+
+---
+
+## §Task 2 — Canonical pilgrim enquiry journey — 2026-06-15
+
+**Status: ✅ COMPLETE on branch `feature/clean-enquiry-journey`** (off `dev` `05c0788`). One package, one enquiry, one operator. **Anonymous** — no login required. Vitest **1,852/1,852** (+16), `tsc` clean, `npm run build` 0 errors, enquiry E2E 3/3 ×3 browsers (serial).
+
+### What was built
+- **Entry point:** package page (`components/packages/PackageDetail.tsx`) now has an always-live **Enquire** CTA (desktop rail `package-cta-enquire` + mobile sticky `package-mobile-cta-enquire`) → `/packages/[slug]/enquire`. Before this, the only CTA was the parked "Request quote" (hidden with flag off) — so there was *no* live way to enquire.
+- **Form** (`app/packages/[slug]/enquire/page.tsx` server → `components/enquiry/EnquiryForm.tsx` client): read-only package+operator summary (trip type, departure airport, duration, hotels, price — "Not provided" when absent), then fields **and only these**: Name (required), Email and/or Phone (≥1 required), Travel month (optional), Message (optional). Does **not** re-ask anything the package states.
+- **Submit:** `POST /api/enquiries` (anonymous, IP rate-limited scope `'enquiry'`). Resolves package+operator **server-side** (honest names, never client-supplied), persists an `Enquiry` with a unique reference code + timestamp, returns `{ referenceCode }`. Confirmation screen shows the reference code, a plain "what happens next" line, and the **three verbatim payment-posture lines**.
+
+### Data model / persistence (decision)
+- New **`Enquiry`** entity through the normal Repository stack (NOT the parked `QuoteRequest`, which needs a non-null `customerId` FK = auth-only; NOT the `interests` raw-SQL shortcut, which bypasses Repository and would not work under E2E/MockDB).
+- Prisma model `Enquiry` (`prisma/schema.prisma`) + raw migration **`supabase/migrations/010_enquiries_table.sql`** (`enquiries` table, RLS on, service-role only). **Migration already applied to Supabase** via `DIRECT_URL` (additive `CREATE TABLE IF NOT EXISTS`) — preview/prod persistence works now.
+- Wired through `lib/api/mock-db.ts` (get/saveEnquiry + `ENQUIRIES` key), `lib/api/db/adapter.ts` (`mapEnquiry`/`getEnquiries`/`saveEnquiry`), `lib/api/repository.ts` (`createEnquiry`, mockStore wrapper).
+
+### Reference code (reused, not duplicated)
+`Repository.createEnquiry` reuses the existing in-module `generateReferenceCode(existingCodes)` (`KT-XXXXXXXX`, unique, 10-attempt) — same generator BookingIntent uses. Single source; no new scattered logic. Codes are `KT-` (consistent with the existing prefix).
+
+### Emails — DO they send via Resend?
+**Yes, wired and sendable.** Uses the **existing** Resend setup only (`lib/email/send.tsx`): `sendEnquiryConfirmation` (pilgrim) + `sendOperatorEnquiryAlert` (operator). Fire-and-forget — both are try/catch and **never fail the enquiry**; the record persists and the confirmation screen shows regardless. Confirmation email sent only when the pilgrim gave an email; operator alert only when the operator has a `contactEmail`. No new email infra scaffolded (per task constraint). Prod has `RESEND_API_KEY`; in E2E/local without it, `resendClient()` throws and is swallowed — persistence + confirmation still succeed.
+
+### Posture copy (single source)
+`lib/content-rules.ts` now exports `CONTRACT_STANDARD_LINE`, `REFERENCE_CODE_STANDARD_LINE`, and `PAYMENT_POSTURE_LINES` (the three verbatim lines, in order). Confirmation renders them from this constant — do not paraphrase. (`lib/legal.ts` holds only the entity block, not these strings.)
+
+### Files changed
+`prisma/schema.prisma`, `supabase/migrations/010_enquiries_table.sql` (new), `lib/types.ts` (`Enquiry`), `lib/validation.ts` (`enquirySchema`), `lib/content-rules.ts` (posture lines), `lib/api/mock-db.ts`, `lib/api/db/adapter.ts`, `lib/api/repository.ts`, `app/api/enquiries/route.ts` (new), `components/enquiry/EnquiryForm.tsx` (new), `app/packages/[slug]/enquire/page.tsx` (new), `components/packages/PackageDetail.tsx` (Enquire CTAs). Tests: `tests/enquiry.test.ts`, `tests/enquiry-api.test.ts`, `e2e/enquiry.spec.ts` (all new).
+
+### Parked flows untouched
+`FEATURE_BOOKING_FLOW` / `FEATURE_RFQ_QUOTE` unchanged (default OFF). The parked RFQ "Request quote" CTA blocks in `PackageDetail.tsx` are untouched — the new Enquire CTA sits alongside them. PARKED_FEATURES.md unchanged (no flag/path changed).
+
+### Open risks / notes
+- Full E2E suite (serial): the new enquiry spec + everything passes except a **pre-existing webkit `operator.spec.ts` "loads packages page" flake** under full-suite load — passes in isolation (10/10), unrelated to this task (operator-login timing; my diff doesn't touch operator pages).
+- No analytics/lead-counting event emitted on enquiry — deliberately deferred to **Task 4** (lead logging + per-operator counting). `createEnquiry` is pure persistence.
+- Marketing opt-in is **Task 3** — structural room left, not built.
 
 ---
 

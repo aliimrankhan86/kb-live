@@ -301,6 +301,11 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
               {makkahDist && <RailFact label={makkahDist.primary} />}
               <RailFact label={hasProtection ? 'ATOL/ABTA listed' : 'No ATOL/ABTA listed'} tone={hasProtection ? 'good' : 'warn'} />
             </ul>
+            {/* Canonical enquiry entry point — always live (Task 2). */}
+            <Link href={`/packages/${pkg.slug}/enquire`} data-testid="package-cta-enquire" className={buttonVariants({ variant: 'primary', size: 'md', className: 'mt-5 w-full' })}>
+              Enquire
+            </Link>
+            <p className="mt-2 text-center text-xs text-[var(--textMuted)]">Free · the operator contacts you directly</p>
             {/* PARKED: RFQ quote engine — CTA hidden when flag off (PARKED_FEATURES.md entry 2). */}
             {rfqEnabled && (
               <>
@@ -321,6 +326,10 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
             <p className="text-xs text-[var(--textMuted)]">{pkg.priceType === 'from' ? 'From · per person' : 'Per person'}</p>
             <p className="text-lg font-bold text-[var(--text)]">{priceLabel}</p>
           </div>
+          {/* Canonical enquiry entry point — always live (Task 2). */}
+          <Link href={`/packages/${pkg.slug}/enquire`} data-testid="package-mobile-cta-enquire" className={buttonVariants({ variant: 'primary', size: 'md', className: 'px-5 whitespace-nowrap' })}>
+            Enquire
+          </Link>
           {/* PARKED: RFQ quote engine — CTA hidden when flag off (PARKED_FEATURES.md entry 2). */}
           {rfqEnabled && (
             <Link href={quoteUrl} data-testid="package-mobile-cta-request-quote" className={buttonVariants({ variant: 'primary', size: 'md', className: 'px-5 whitespace-nowrap' })}>

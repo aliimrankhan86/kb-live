@@ -19,6 +19,7 @@ import {
   ComplaintCategory,
   ComplaintSeverity,
   ComplaintStatus,
+  Enquiry,
   Offer,
   OperatorProfile,
   Package,
@@ -63,6 +64,8 @@ const mockStore = {
   saveAnalyticsEvent: (event: AnalyticsEvent) => Promise.resolve(MockDB.saveAnalyticsEvent(event)),
   saveComplaint: (c: Complaint) => Promise.resolve(MockDB.saveComplaint(c)),
   deletePackage: (id: string) => Promise.resolve(MockDB.deletePackage(id)),
+  getEnquiries: () => Promise.resolve(MockDB.getEnquiries()),
+  saveEnquiry: (enquiry: Enquiry) => Promise.resolve(MockDB.saveEnquiry(enquiry)),
   getBookingOutcomes: () => Promise.resolve(MockDB.getBookingOutcomes()),
   saveBookingOutcome: (bo: BookingOutcome) => Promise.resolve(MockDB.saveBookingOutcome(bo)),
   getDistinctDepartureCities: (): Promise<string[]> => {
@@ -523,6 +526,42 @@ export const Repository = {
     }
 
     return Array.from(rows.values());
+  },
+
+  // Enquiries (canonical pilgrim enquiry — Task 2). Anonymous: no RequestContext.
+  // Reuses the existing KT- reference-code generator (single source, no scatter).
+  createEnquiry: async (input: {
+    packageId: string;
+    operatorId?: string;
+    packageTitle?: string;
+    operatorName?: string;
+    name: string;
+    email?: string;
+    phone?: string;
+    travelMonth?: string;
+    message?: string;
+  }): Promise<Enquiry> => {
+    const existing = await store().getEnquiries();
+    const existingCodes = new Set(
+      existing.map((e) => e.referenceCode).filter((code): code is string => Boolean(code))
+    );
+
+    const enquiry: Enquiry = {
+      id: crypto.randomUUID(),
+      referenceCode: generateReferenceCode(existingCodes),
+      createdAt: new Date().toISOString(),
+      packageId: input.packageId,
+      operatorId: input.operatorId,
+      packageTitle: cleanOptionalText(input.packageTitle),
+      operatorName: cleanOptionalText(input.operatorName),
+      name: input.name.trim(),
+      email: cleanOptionalText(input.email),
+      phone: cleanOptionalText(input.phone),
+      travelMonth: cleanOptionalText(input.travelMonth),
+      message: cleanOptionalText(input.message),
+    };
+
+    return store().saveEnquiry(enquiry);
   },
 
   // Quote Requests

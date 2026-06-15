@@ -5,6 +5,7 @@ import {
   BookingIntent,
   BookingOutcome,
   Complaint,
+  Enquiry,
   Offer,
   OperatorProfile,
   Package,
@@ -28,6 +29,7 @@ const STORAGE_KEYS = {
   ANALYTICS_EVENTS: 'kb_analytics_events',
   COMPLAINTS: 'kb_complaints',
   INTERESTS: 'kb_interests',
+  ENQUIRIES: 'kb_enquiries',
 };
 
 const PACKAGES_SEED_VERSION = 5;
@@ -1142,6 +1144,20 @@ export const MockDB = {
     interests.push({ email, type, createdAt: new Date().toISOString() });
     setStorage(STORAGE_KEYS.INTERESTS, interests);
     return { email, type, createdAt: new Date().toISOString() };
+  },
+
+  getEnquiries: (): Enquiry[] => getStorage<Enquiry[]>(STORAGE_KEYS.ENQUIRIES, []),
+
+  saveEnquiry: (enquiry: Enquiry) => {
+    const enquiries = MockDB.getEnquiries();
+    const existingIndex = enquiries.findIndex((e) => e.id === enquiry.id);
+    if (existingIndex >= 0) {
+      enquiries[existingIndex] = enquiry;
+    } else {
+      enquiries.push(enquiry);
+    }
+    setStorage(STORAGE_KEYS.ENQUIRIES, enquiries);
+    return enquiry;
   },
 
   getBookingOutcomes: (): BookingOutcome[] =>
