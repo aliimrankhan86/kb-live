@@ -3,24 +3,29 @@
 > **Single rolling tracker.** Any AI/dev: read this for current state. Update it after work is **done + tested + verified** (see `CLAUDE.md` rule).
 > Detailed handover lives in `AI_NOTES.md`. Cold-start brief: `HANDOFF.md`. Business: `BUSINESS.md`.
 
-**Last verified:** 2026-06-14 (packages UX redesign + CSP nonce + light-theme bg + FAQ gap + mobile sort crop) · **Branch:** `fix/packages-ux-csp-light-theme` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
+**Last verified:** 2026-06-15 (Task 1 — park RFQ quote engine + booking/payment flow behind feature flags) · **Branch:** `feature/park-rfq-booking-flows` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
+
+> **Direction:** `PILGRIMCOMPARE_PROJECT_DIRECTION.md` (repo root) is now the source of truth — read first every session. Parked features tracked in `PARKED_FEATURES.md`.
 
 ---
 
-## Health (verified 2026-06-14)
+## Health (verified 2026-06-15)
 
 | Check | State |
 | --- | --- |
-| `npm run test` | ✅ 1,833/1,833 pass (28 files) |
+| `npm run test` | ✅ 1,836/1,836 pass (29 files) |
 | `npm run build` | ✅ 0 errors |
 | `npx tsc --noEmit` | ✅ pass |
-| E2E `e2e/operator.spec.ts` | ✅ 30/30 pass (chromium + firefox + webkit) |
+| E2E | ⚠️ pre-existing cookie-banner click-intercept flake in `catalogue`/`operator`/`bank-payment` (reproduces on `dev` baseline; varies by run). Parked-flow paths pass. |
 | Production deploy | ✅ main — Vercel live 2026-06-13 (light theme + search + pagination) |
 | Light theme | ✅ merged to dev + main 2026-06-13 |
 
 ---
 
 ## ✅ Done (shipped & verified)
+
+**Direction & parked flows**
+- **Task 1 — parked the broken flows (2026-06-15, branch `feature/park-rfq-booking-flows`, see AI_NOTES §Task 1):** added two server-side feature flags in `lib/config.ts`, both **default OFF**, removing them from the live pilgrim journey without deleting any code. `FEATURE_RFQ_QUOTE` (`isRfqQuoteEnabled`) — `/quote` wizard 404s, package "Request quote" CTA + footer/corridor/umrah `/quote` links hidden, quote-request POST 404s. `FEATURE_BOOKING_FLOW` (`isBookingFlowEnabled`) — "Proceed direct"/booking dialog/payment-evidence/operator bank details hidden, confirmation page + booking-intent POST 404. Created `PILGRIMCOMPARE_PROJECT_DIRECTION.md` + `PARKED_FEATURES.md`. Acceptance verified on a 375px live preview (flags OFF). Playwright forces both flags ON so parked code stays E2E-covered; `tests/feature-flags.test.tsx` covers flag-OFF.
 
 **Traveller flow**
 - **`/packages` browse redesign (2026-06-14, branch `fix/packages-ux-csp-light-theme`):** rewritten to reuse the polished `PackageCard` + sticky `CompareBar` + comparison dialog from `/search` (one consistent card language, low cognitive load). Segmented pilgrimage-type control, clean season/sort selects, Saved chip. Verified light + dark, mobile + desktop; compare 2→table flow works. Unit tests preserved; `e2e/catalogue.spec.ts` testids updated to the shared contracts.
