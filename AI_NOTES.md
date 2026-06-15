@@ -1,7 +1,7 @@
 # PilgrimCompare AI Handover — Single Source of Truth
 
-**Last verified:** 2026-06-12 (Prompt 5 + 6 — transactional email + cron suite — 1,818 tests, 0 build errors)
-**Branch:** `dev` (clean — Q1–Q6 all merged via PRs)
+**Last verified:** 2026-06-15 (cookie-banner E2E flake fix — Vitest 1,836/1,836, E2E 45/45 ×3 serial, 0 build errors)
+**Branch:** `feature/fix-cookie-banner-e2e-flake`
 **Audience:** Claude, Codex, Kimi, and any AI/developer taking over the project.
 
 **Next immediate action:**
@@ -45,10 +45,27 @@ Server-side only — evaluated on the server and passed down as boolean props (s
 - `app/requests/page.tsx` (the customer's request list) still has `/quote` "New Request" links. It is behind customer auth (not the public pilgrim walk) and any click hits the `/quote` 404 guard. Left intact, flagged here as a minor follow-up if a cleaner empty-state is wanted.
 
 ### Outstanding (separate task, NOT a blocker for Task 1)
-- **Cookie-banner E2E flake.** 5 Playwright specs (`catalogue`, `operator`, `bank-payment`) intermittently fail because the cookie-consent banner (`data-testid="cookie-consent-banner"`, fixed bottom, z-40) intercepts pointer events on bottom-of-viewport controls (e.g. the sticky compare button). **Pre-existing** — reproduces on the `dev` baseline with this branch's code absent; which spec/browser fails varies per run. In the compare/operator pages, out of Task 1's scope. Fix later: dismiss/clear the banner in test setup (or raise the compare bar above it). Tracked as its own task.
+- ✅ **Cookie-banner E2E flake — FIXED 2026-06-15** (branch `feature/fix-cookie-banner-e2e-flake`). See §Cookie-banner E2E flake fix below.
 
 ### Next task
 **Task 2 — Build the simplified enquiry journey** (direction file §9): package-page "Enquire" → short pre-filled form (name, contact, optional travel month, optional message) → reference code + confirmation with payment-posture copy. One package, one enquiry, one operator. Branch from the updated `dev` (`05c0788`).
+
+---
+
+## §Cookie-banner E2E flake fix — 2026-06-15 (branch `feature/fix-cookie-banner-e2e-flake`)
+
+**Problem.** `e2e/catalogue.spec.ts`, `e2e/operator.spec.ts`, `e2e/bank-payment.spec.ts` intermittently failed with `<...> from <div ... data-testid="cookie-consent-banner" ...> subtree intercepts pointer events` when clicking bottom-of-viewport controls (sticky compare button, wizard/bank CTAs). The `CookieConsent` banner (`components/compliance/CookieConsent.tsx`) is `position:fixed; bottom:0; z-40`; it mounts whenever `localStorage['kb_cookie_consent_v1']` is absent and overlaps those controls. Pre-existing; which spec/browser failed varied per run.
+
+**Fix (test-setup only — no product UX touched).** New helper `e2e/helpers/cookies.ts` → `dismissCookieBanner(page)` seeds the consent key via `page.addInitScript`. Init script re-runs before page scripts on **every** navigation, so the banner never mounts — and it survives the `localStorage.clear()` calls inside `bank-payment.spec.ts` (a one-shot `page.evaluate` would not). `STORAGE_KEY` + payload shape mirror the component; keep in sync if its consent contract changes.
+
+Wired before the first navigation in:
+- `catalogue.spec.ts` — first line of the test.
+- `operator.spec.ts` — all 3 `beforeEach` hooks.
+- `bank-payment.spec.ts` — the `beforeEach`.
+
+Banner component, feature flags, and RFQ/booking flows left untouched.
+
+**Verification.** Vitest 1,836/1,836; `tsc` clean; `npm run build` 0 errors (via Playwright `webServer`). E2E run **3× under CI conditions (`--workers=1`)**: 45/45 pass each (15 tests × chromium+firefox+webkit). Zero pointer-intercept errors. (Note: locally `fullyParallel:true` with default multi-workers causes a *separate, unrelated* shared-MockDB race between `operator`/`bank-payment` specs — CI runs `workers:1` so it does not occur there; out of scope here.)
 
 ---
 

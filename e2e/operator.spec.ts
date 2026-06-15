@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { setTestUser } from './helpers/auth';
+import { dismissCookieBanner } from './helpers/cookies';
 
 /**
  * E2E tests for the operator package management flow:
@@ -25,6 +26,7 @@ import { setTestUser } from './helpers/auth';
 test.describe('Operator packages page', () => {
   test.beforeEach(async ({ page }) => {
     await setTestUser(page, 'operator');
+    await dismissCookieBanner(page);
   });
 
   test('loads packages page', async ({ page }) => {
@@ -51,6 +53,7 @@ test.describe('Operator packages page', () => {
 test.describe('PackageWizard — step navigation', () => {
   test.beforeEach(async ({ page }) => {
     await setTestUser(page, 'operator');
+    await dismissCookieBanner(page);
     await page.goto('/operator/packages');
     await page.waitForLoadState('domcontentloaded');
     await page.getByRole('button', { name: /create package/i }).first().click();
@@ -117,6 +120,7 @@ test.describe('PackageWizard — step navigation', () => {
 test.describe('PackageWizard — full flow to review', () => {
   test.beforeEach(async ({ page }) => {
     await setTestUser(page, 'operator');
+    await dismissCookieBanner(page);
   });
 
   test('walks through all 8 steps to review screen', async ({ page }) => {
