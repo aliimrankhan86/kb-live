@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Repository } from '@/lib/api/repository';
+import { isBookingFlowEnabled } from '@/lib/config';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { ReferenceCodeDisplay } from '@/components/request/ReferenceCodeDisplay';
 
@@ -9,6 +10,10 @@ export default async function BookingConfirmationPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  // PARKED: booking-intent / payment flow. Off in the live pilgrim journey.
+  // See PARKED_FEATURES.md entry 1. Code intact; flag default OFF.
+  if (!isBookingFlowEnabled()) notFound();
+
   const { id } = await params;
 
   const bookingIntent = await Repository.getBookingIntentById(id);

@@ -8,6 +8,7 @@ import { Footer } from "@/components/layout/Footer";
 import { CookieConsent } from "@/components/compliance/CookieConsent";
 import { JsonLdScript, graphJsonLd, organizationJsonLd, websiteJsonLd } from "@/lib/seo/json-ld";
 import { Repository } from "@/lib/api/repository";
+import { isRfqQuoteEnabled } from "@/lib/config";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { headers } from "next/headers";
 
@@ -52,6 +53,10 @@ export default async function RootLayout({
   // otherwise the strict 'script-src' nonce policy blocks it (no 'unsafe-inline').
   const nonce = (await headers()).get("x-nonce") ?? undefined;
 
+  // PARKED: RFQ quote engine — hide /quote entry links in global nav when off.
+  // See PARKED_FEATURES.md entry 2. Evaluated server-side, passed as a prop.
+  const rfqEnabled = isRfqQuoteEnabled();
+
   return (
     <html lang="en-GB" className={`${exo2Font.variable} ${inter.variable} ${nunito.variable}`} suppressHydrationWarning>
       <head>
@@ -76,7 +81,7 @@ export default async function RootLayout({
           <main id="main-content" className="flex-1">
             {children}
           </main>
-          <Footer cities={departureCities} />
+          <Footer cities={departureCities} rfqEnabled={rfqEnabled} />
           <CookieConsent />
         </ThemeProvider>
       </body>

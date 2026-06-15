@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getSessionUser } from '@/lib/auth/session';
 import { Repository } from '@/lib/api/repository';
+import { isRfqQuoteEnabled } from '@/lib/config';
 import { mapErrorToResponse } from '@/lib/errors';
 import { checkRateLimit, getRateLimitIdentifier } from '@/lib/rate-limit';
 import type { QuoteRequest } from '@/lib/types';
@@ -68,6 +69,12 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  // PARKED: multi-step RFQ quote engine. Off in the live pilgrim journey.
+  // See PARKED_FEATURES.md entry 2. Code intact; flag default OFF.
+  if (!isRfqQuoteEnabled()) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+
   // Rate limiting — throttle by IP to prevent burst abuse. Scoped separately from auth + interest budgets.
   const rateLimit = await checkRateLimit(getRateLimitIdentifier(request, 'quote'));
   if (rateLimit.limited) {

@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
+import { notFound } from 'next/navigation';
 import { QuoteRequestWizard } from '@/components/quote/QuoteRequestWizard';
 import { Repository } from '@/lib/api/repository';
+import { isRfqQuoteEnabled } from '@/lib/config';
 
 export const metadata: Metadata = {
   title: 'Request a Quote | PilgrimCompare',
@@ -9,6 +11,10 @@ export const metadata: Metadata = {
 };
 
 export default async function QuotePage() {
+  // PARKED: multi-step RFQ quote engine. Off in the live pilgrim journey.
+  // See PARKED_FEATURES.md entry 2. Code intact; flag default OFF.
+  if (!isRfqQuoteEnabled()) notFound();
+
   const departureCities = await Repository.getDistinctDepartureCities();
 
   return (

@@ -1,5 +1,6 @@
 import { RequestDetail } from '@/components/request/RequestDetail';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
+import { isBookingFlowEnabled } from '@/lib/config';
 import { JsonLdScript, breadcrumbJsonLd } from '@/lib/seo/json-ld';
 
 export default async function RequestPage({ params }: { params: Promise<{ id: string }> }) {
@@ -25,7 +26,7 @@ export default async function RequestPage({ params }: { params: Promise<{ id: st
         <div className="w-full max-w-5xl mx-auto px-4 pt-6">
           <Breadcrumb items={breadcrumbItems} />
         </div>
-        <RequestDetail id={id} />
+        <RequestDetail id={id} bookingEnabled={isBookingFlowEnabled()} />
       </main>
     </>
   );

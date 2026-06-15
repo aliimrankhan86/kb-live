@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import type { BreadcrumbItem } from '@/components/ui/Breadcrumb'
+import { isRfqQuoteEnabled } from '@/lib/config'
 
 interface FAQ {
   question: string
@@ -58,12 +59,15 @@ export function CityCorridor({ city, h1, intro, queryParams, faqs, breadcrumbIte
           >
             Browse Umrah packages from {city}
           </Link>
-          <Link
-            href="/quote"
-            className="inline-flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surfaceDark)] px-6 py-3 text-base font-medium text-[var(--text)] hover:border-[var(--yellow)]/40 transition-colors"
-          >
-            Request a custom quote
-          </Link>
+          {/* PARKED: RFQ quote engine — CTA hidden when flag off (PARKED_FEATURES.md entry 2). */}
+          {isRfqQuoteEnabled() && (
+            <Link
+              href="/quote"
+              className="inline-flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surfaceDark)] px-6 py-3 text-base font-medium text-[var(--text)] hover:border-[var(--yellow)]/40 transition-colors"
+            >
+              Request a custom quote
+            </Link>
+          )}
         </div>
 
         <p className="text-sm text-[var(--textMuted)] mb-10">

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSessionUser } from '@/lib/auth/session';
 import { Repository } from '@/lib/api/repository';
+import { isBookingFlowEnabled } from '@/lib/config';
 import { mapErrorToResponse } from '@/lib/errors';
 import type { BookingIntent } from '@/lib/types';
 import { z } from 'zod';
@@ -53,6 +54,12 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    // PARKED: booking-intent / payment flow. Off in the live pilgrim journey.
+    // See PARKED_FEATURES.md entry 1. Code intact; flag default OFF.
+    if (!isBookingFlowEnabled()) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
+
     const user = await getSessionUser();
     const customerId =
       user?.role === 'customer' ? user.id : process.env.E2E_TESTING === '1' ? 'cust1' : null;
