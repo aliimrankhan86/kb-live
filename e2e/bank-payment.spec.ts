@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { setTestUser, resetMockDB } from './helpers/auth';
+import { dismissCookieBanner } from './helpers/cookies';
 
 test.describe.configure({ mode: 'serial' });
 
@@ -8,6 +9,7 @@ test.describe('Bank onboarding and payment flows', () => {
     // operatorAdmin: id=op1 (has seeded payment details) + role=admin (accesses /admin/bank-changes)
     // Admin role passes both /operator/* and /admin/* route guards per middleware ROLE_PROTECTED map
     await setTestUser(page, 'operatorAdmin');
+    await dismissCookieBanner(page);
   });
 
   test('operator creates change, admin approves, operator sees cooling', async ({ page }) => {

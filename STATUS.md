@@ -3,7 +3,7 @@
 > **Single rolling tracker.** Any AI/dev: read this for current state. Update it after work is **done + tested + verified** (see `CLAUDE.md` rule).
 > Detailed handover lives in `AI_NOTES.md`. Cold-start brief: `HANDOFF.md`. Business: `BUSINESS.md`.
 
-**Last verified:** 2026-06-15 (Task 1 — park RFQ quote engine + booking/payment flow behind feature flags) · **Branch:** `feature/park-rfq-booking-flows` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
+**Last verified:** 2026-06-15 (cookie-banner E2E flake fix) · **Branch:** `feature/fix-cookie-banner-e2e-flake` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
 
 > **Direction:** `PILGRIMCOMPARE_PROJECT_DIRECTION.md` (repo root) is now the source of truth — read first every session. Parked features tracked in `PARKED_FEATURES.md`.
 
@@ -16,7 +16,7 @@
 | `npm run test` | ✅ 1,836/1,836 pass (29 files) |
 | `npm run build` | ✅ 0 errors |
 | `npx tsc --noEmit` | ✅ pass |
-| E2E | ⚠️ pre-existing cookie-banner click-intercept flake in `catalogue`/`operator`/`bank-payment` (reproduces on `dev` baseline; varies by run). Parked-flow paths pass. |
+| E2E | ✅ cookie-banner click-intercept flake fixed 2026-06-15 (`feature/fix-cookie-banner-e2e-flake`, AI_NOTES §Cookie-banner E2E flake fix). `catalogue`/`operator`/`bank-payment` 45/45 × 3 serial runs (chromium+firefox+webkit). |
 | Production deploy | ✅ main — Vercel live 2026-06-13 (light theme + search + pagination) |
 | Light theme | ✅ merged to dev + main 2026-06-13 |
 
