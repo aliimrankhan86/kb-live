@@ -16,7 +16,7 @@ This file is the current handover source of truth. If another document conflicts
 
 ## §Task 1 — Park the broken flows (RFQ engine + booking/payment) — 2026-06-15
 
-**Branch:** off `dev` (Task 1 of the direction file §9). Two live pilgrim-journey flows switched OFF behind feature flags. **No code deleted.** Vitest 1,836/1,836, `tsc` clean, `npm run build` 0 errors. Acceptance verified on a phone-sized live preview (flags at default OFF).
+**Status: ✅ COMPLETE — PR [#83](https://github.com/aliimrankhan86/kb-live/pull/83) merged to `dev`** (merge commit `05c0788`, 2026-06-15; `ci` check green, Vercel preview built). `main` untouched (still `7431526`). Branched off `dev` (Task 1 of the direction file §9). Two live pilgrim-journey flows switched OFF behind feature flags. **No code deleted.** Vitest 1,836/1,836, `tsc` clean, `npm run build` 0 errors. Acceptance verified on a phone-sized live preview (flags at default OFF) and confirmed on the Vercel PR preview.
 
 ### Standing rule (now project-wide)
 **Parked code is never deleted and never re-enabled without the founder's explicit approval.** Parked = switched off behind a flag, intact, reversible, and documented in `PARKED_FEATURES.md` + here. (Direction file §4 + §10.3.)
@@ -44,8 +44,11 @@ Server-side only — evaluated on the server and passed down as boolean props (s
 - `Header.tsx` has a dead `/quote` CTA branch (`link.href === '/quote'`) but no navLink supplies that href — nothing to hide there.
 - `app/requests/page.tsx` (the customer's request list) still has `/quote` "New Request" links. It is behind customer auth (not the public pilgrim walk) and any click hits the `/quote` 404 guard. Left intact, flagged here as a minor follow-up if a cleaner empty-state is wanted.
 
+### Outstanding (separate task, NOT a blocker for Task 1)
+- **Cookie-banner E2E flake.** 5 Playwright specs (`catalogue`, `operator`, `bank-payment`) intermittently fail because the cookie-consent banner (`data-testid="cookie-consent-banner"`, fixed bottom, z-40) intercepts pointer events on bottom-of-viewport controls (e.g. the sticky compare button). **Pre-existing** — reproduces on the `dev` baseline with this branch's code absent; which spec/browser fails varies per run. In the compare/operator pages, out of Task 1's scope. Fix later: dismiss/clear the banner in test setup (or raise the compare bar above it). Tracked as its own task.
+
 ### Next task
-**Task 2 — Build the simplified enquiry journey** (direction file §9): package-page "Enquire" → short pre-filled form (name, contact, optional travel month, optional message) → reference code + confirmation with payment-posture copy. One package, one enquiry, one operator.
+**Task 2 — Build the simplified enquiry journey** (direction file §9): package-page "Enquire" → short pre-filled form (name, contact, optional travel month, optional message) → reference code + confirmation with payment-posture copy. One package, one enquiry, one operator. Branch from the updated `dev` (`05c0788`).
 
 ---
 
