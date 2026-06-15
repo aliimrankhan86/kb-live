@@ -62,7 +62,7 @@ describe('Repository.createEnquiry', () => {
     expect(enquiry.id).toBeTruthy();
     expect(enquiry.createdAt).toBeTruthy();
 
-    const stored = await Repository.getEnquiries?.() ?? MockDB.getEnquiries();
+    const stored = MockDB.getEnquiries();
     const found = stored.find((e) => e.id === enquiry.id);
     expect(found).toBeDefined();
     expect(found?.packageId).toBe('pkg-1');
