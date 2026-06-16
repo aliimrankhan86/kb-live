@@ -96,12 +96,12 @@ await send(
 
 // Email 4 — Booking intent confirmation
 await send(
-  'Booking intent created — reference KT-9X2P4A',
+  'Booking intent created — reference PC-7F3A9C21',
   `<p>Salaam Test,</p>
    <p>You have created a booking intent with <strong>Al Mabrur Travel</strong> for <strong>your chosen package</strong>.</p>
    <div style="background:#fdf8e7;border-left:4px solid #d4a017;padding:16px 20px;margin:20px 0">
      <p style="font-size:11px;color:#888;margin:0 0 6px;text-transform:uppercase;letter-spacing:0.5px">Reference</p>
-     <p style="font-size:24px;font-weight:700;letter-spacing:2px;margin:0">KT-9X2P4A</p>
+     <p style="font-size:24px;font-weight:700;letter-spacing:2px;margin:0">PC-7F3A9C21</p>
    </div>
    <p style="font-size:13px;color:#666;border-top:1px solid #eee;padding-top:16px">Important: your PilgrimCompare reference code is a tracking code, not a payment receipt. You pay the operator directly. PilgrimCompare does not receive or hold your payment.</p>`
 );
@@ -110,7 +110,7 @@ await send(
 await send(
   'Payment evidence received — Test Customer, your chosen package',
   `<p>Salaam Al Mabrur Travel,</p>
-   <p>Payment evidence has been uploaded by <strong>Test Customer</strong> for <strong>your package</strong> (reference <strong>KT-9X2P4A</strong>). Please log in to PilgrimCompare to review and confirm.</p>
+   <p>Payment evidence has been uploaded by <strong>Test Customer</strong> for <strong>your package</strong> (reference <strong>PC-7F3A9C21</strong>). Please log in to PilgrimCompare to review and confirm.</p>
    <p><a href="${BASE_URL}/operator/dashboard">Review payment evidence →</a></p>`
 );
 
