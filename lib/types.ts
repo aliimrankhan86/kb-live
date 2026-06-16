@@ -267,7 +267,7 @@ export interface MarketingConsent {
   consent: boolean;
   consentTimestamp: string; // ISO date (UTC)
   source: string; // e.g. 'enquiry_form'
-  enquiryReference: string; // the KT- enquiry reference code
+  enquiryReference: string; // the PC- enquiry reference code
   createdAt: string; // ISO date
 }
 

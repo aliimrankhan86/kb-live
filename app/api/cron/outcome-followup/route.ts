@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     for (const intent of pending) {
       const operatorName =
         intent.operator.tradingName ?? intent.operator.companyName;
-      const refCode = intent.referenceCode ?? `KT-${intent.id.slice(0, 8).toUpperCase()}`;
+      const refCode = intent.referenceCode ?? `PC-${intent.id.slice(0, 8).toUpperCase()}`;
 
       await sendOutcomeFollowup({
         customerEmail: intent.customer.email,

@@ -14,7 +14,7 @@ describe('Complaints repository', () => {
     // Seed a booking intent for complaint tests
     MockDB.saveBookingIntent({
       id: 'bi-1',
-      referenceCode: 'KT-TEST-001',
+      referenceCode: 'PC-TEST-001',
       offerId: 'offer-test-1',
       customerId: 'cust1',
       operatorId: 'op1',

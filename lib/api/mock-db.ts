@@ -195,7 +195,7 @@ const SEED_COMPLAINTS: Complaint[] = [
   {
     id: 'complaint-1',
     bookingIntentId: 'bi-demo-1',
-    referenceCode: 'KT-DEMO-001',
+    referenceCode: 'PC-DEMO-001',
     customerId: 'cust1',
     operatorId: 'op1',
     category: 'booking_problem',
@@ -924,7 +924,7 @@ export const MockDB = {
   getBookingIntents: (): BookingIntent[] =>
     getStorage<BookingIntent[]>(STORAGE_KEYS.BOOKING_INTENTS, []).map((booking) => ({
       ...booking,
-      referenceCode: booking.referenceCode ?? `KT-LEGACY-${booking.id.slice(0, 8).toUpperCase()}`,
+      referenceCode: booking.referenceCode ?? `PC-LEGACY-${booking.id.slice(0, 8).toUpperCase()}`,
       skipProofAcknowledged: booking.skipProofAcknowledged ?? false,
     })),
   saveBookingIntent: (booking: BookingIntent) => {
