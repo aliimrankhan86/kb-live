@@ -9,10 +9,27 @@
   1. ✅ Site loads (200). Footer renders *"PilgrimCompare is a trading name of Paramount Consultants Limited, registered in England and Wales (company no. 09679002). VAT no. GB 221 6154 46"* — **NO registered office**, as intended.
   2. ⚠️ Plausible **wiring** live: cookieless `script.js` (200) + pageview `POST plausible.io/api/event` → **202**. **CORRECTION:** 202 only proves the script posts correctly — Plausible returns 202 for *any* domain (registered or not) and silently drops events for domains not in an account. **It does NOT prove a site is recording.** Logged-out dashboard returned 404 (inconclusive alone — private dashboards 404 when logged out). **Founder cannot recall registering a Plausible account → analytics is most likely capturing nothing until the `pilgrimcompare.co.uk` site is created in a Plausible account.** Not a launch blocker / not a code bug — the wiring is correct and dormant; once the site is added, the already-live script populates immediately with no redeploy.
   3. ✅ Test enquiry completed to the PC- confirmation screen (**PC-DD26BB30**, on demo operator Al-Hidayah). Extra `/api/event` POST fired at confirmation with no navigation (the `'Enquiry Submitted'` goal) → 202 (same caveat as #2: fires + posts, capture depends on the site existing). Three payment-posture lines present.
+- **Analytics decision (RESOLVED 2026-06-16):** Plausible was never registered (no account, no Vercel integration, no env var — verified). Plausible Cloud is paid after trial; for a zero-cost POC we **swapped Plausible → Vercel Web Analytics** (free on Hobby, cookieless, same privacy story). See §Analytics swap below. **Founder action:** enable Web Analytics in the Vercel project → Analytics tab (free, no card) — script + events no-op until it's on.
 - **Deferred (logged decisions, non-blocking):**
-  - **⚠️ Plausible site registration (FOUNDER ACTION, OPEN)** — create `pilgrimcompare.co.uk` in a Plausible account, or analytics records nothing. Alternative: if Plausible is not wanted, remove the script + CSP entries + goal. Decide before relying on any analytics.
   - **Registered office line** — intentionally omitted pending Companies House AD01 filing. Revisit on validation; path ready in `lib/legal.ts` (`registeredOffice`).
   - **`KT-` sample string** in `scripts/test-emails.mjs:99,104,113` — cosmetic dev-utility literal only (not app/tests/e2e/generation). Cleanup whenever.
+
+---
+
+## §Analytics swap — Plausible → Vercel Web Analytics — 2026-06-16
+
+**Status: code complete on branch `feature/swap-plausible-vercel-analytics` (PR to `dev`). tsc clean, build 0 errors, Vitest 1860/1860.**
+
+**Why:** POC must cost nothing. Plausible Cloud is paid after a 30-day trial and was never actually registered (checked: no Plausible account recalled, no Vercel integration installed, no `PLAUSIBLE_*` env var, no self-hosted instance — the live 202s only proved the script posted; Plausible 202s any domain and drops unregistered ones). Vercel Web Analytics is free on the Hobby plan, cookieless, and same-origin — so the privacy/"no cookie consent" copy stays true.
+
+**What changed (supersedes §Task D — that Plausible wiring is now removed):**
+- `app/layout.tsx` — removed the `VERCEL_ENV`-gated Plausible `<script>`; added `<Analytics/>` from `@vercel/analytics/next`. No manual prod gate needed (auto-disabled outside production; preview/prod separated in the dashboard).
+- `middleware.ts` — removed `https://plausible.io` from **both** `script-src` and `connect-src`. Vercel's script + beacon are same-origin (`/_vercel/insights/*`), covered by `'self'` (a src'd same-origin script needs no nonce — nonces gate inline only). **CSP is now tighter than before.**
+- `components/enquiry/EnquiryForm.tsx` — `'Enquiry Submitted'` now fires via `track('Enquiry Submitted')` from `@vercel/analytics` (replaces `window.plausible?.(...)` + the `plausible` global type). Auto-no-ops outside production.
+- `app/privacy/page.tsx` + `components/compliance/CookieConsent.tsx` — tool name "Plausible" → "Vercel Web Analytics" (cookieless claim unchanged).
+- `package.json` — added `@vercel/analytics`.
+
+**Founder action (free, no card):** Vercel project → **Analytics** tab → **Enable Web Analytics**. Until enabled, `/_vercel/insights/script.js` 404s and events no-op — that's a dashboard toggle, not a code issue.
 
 ---
 
