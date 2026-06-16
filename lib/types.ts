@@ -230,6 +230,31 @@ export interface QuoteRequest {
   notes?: string;
 }
 
+/**
+ * Canonical pilgrim enquiry (Task 2): one package, one enquiry, one operator.
+ * Anonymous — no customer account required. The short form captures only what
+ * the package does not already state. Package/operator names are denormalised
+ * from the package at submit time so the lead is self-contained.
+ *
+ * Task 3 will add a marketing opt-in + consent record — leave structural room
+ * here (a `marketingOptIn` boolean + a separate consent record); do not inline
+ * it now.
+ */
+export interface Enquiry {
+  id: string;
+  referenceCode: string;
+  createdAt: string; // ISO date
+  packageId: string;
+  operatorId?: string;
+  packageTitle?: string;
+  operatorName?: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  travelMonth?: string;
+  message?: string;
+}
+
 export type BookingStatus = 'started' | 'contacted' | 'confirmed' | 'closed';
 
 export type BookingOutcomeType =
