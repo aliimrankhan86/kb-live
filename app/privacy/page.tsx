@@ -74,7 +74,7 @@ export default function PrivacyPolicyPage() {
               evidence metadata, and communication notes.
             </li>
             <li>
-              <strong>Analytics data:</strong> anonymised page view data via Plausible
+              <strong>Analytics data:</strong> anonymised page view data via Vercel Web
               Analytics, which uses no cookies and stores no personal identifiers. See
               Section 8.
             </li>
@@ -208,10 +208,10 @@ export default function PrivacyPolicyPage() {
         <section className="mb-8">
           <h2 className="mb-3 text-xl font-semibold">8. Cookies and analytics</h2>
           <p className="mb-3 text-sm leading-relaxed">
-            <strong>Analytics:</strong> We use Plausible Analytics, a privacy-first service
+            <strong>Analytics:</strong> We use Vercel Web Analytics, a privacy-first service
             that collects no personal data and uses no cookies. It measures page views and
             aggregate traffic patterns only, with no cross-site tracking or personal
-            identifiers. No cookie consent is required for Plausible.
+            identifiers. No cookie consent is required for Vercel Web Analytics.
           </p>
           <p className="mb-3 text-sm leading-relaxed">
             <strong>Strictly necessary cookies:</strong> We use one session cookie for

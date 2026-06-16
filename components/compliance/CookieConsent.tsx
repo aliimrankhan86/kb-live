@@ -74,7 +74,7 @@ export function CookieConsent() {
             <p className="text-sm text-[var(--text)]">
               <strong className="block text-base mb-1">We value your privacy</strong>
               PilgrimCompare uses one essential cookie for authentication and session security.
-              We do not use analytics cookies — our analytics tool (Plausible) is cookieless.
+              We do not use analytics cookies — our analytics tool (Vercel Web Analytics) is cookieless.
               {' '}
               <Link
                 href="/privacy"
