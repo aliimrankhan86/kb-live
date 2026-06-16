@@ -3,17 +3,17 @@
 > **Single rolling tracker.** Any AI/dev: read this for current state. Update it after work is **done + tested + verified** (see `CLAUDE.md` rule).
 > Detailed handover lives in `AI_NOTES.md`. Cold-start brief: `HANDOFF.md`. Business: `BUSINESS.md`.
 
-**Last verified:** 2026-06-15 (cookie-banner E2E flake fix) · **Branch:** `feature/fix-cookie-banner-e2e-flake` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
+**Last verified:** 2026-06-16 (Task 3 — pilgrim email opt-in + contact-hint) · **Branch:** `feature/pilgrim-email-optin` (PR → `dev`, open) · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
 
 > **Direction:** `PILGRIMCOMPARE_PROJECT_DIRECTION.md` (repo root) is now the source of truth — read first every session. Parked features tracked in `PARKED_FEATURES.md`.
 
 ---
 
-## Health (verified 2026-06-15)
+## Health (verified 2026-06-16)
 
 | Check | State |
 | --- | --- |
-| `npm run test` | ✅ 1,836/1,836 pass (29 files) |
+| `npm run test` | ✅ 1,860/1,860 pass (31 files) |
 | `npm run build` | ✅ 0 errors |
 | `npx tsc --noEmit` | ✅ pass |
 | E2E | ✅ cookie-banner click-intercept flake fixed 2026-06-15 (`feature/fix-cookie-banner-e2e-flake`, AI_NOTES §Cookie-banner E2E flake fix). `catalogue`/`operator`/`bank-payment` 45/45 × 3 serial runs (chromium+firefox+webkit). |
@@ -25,6 +25,8 @@
 ## ✅ Done (shipped & verified)
 
 **Direction & parked flows**
+- **Task 3 — pilgrim email opt-in + contact-hint UX fix (2026-06-16, branch `feature/pilgrim-email-optin`, see AI_NOTES §Task 3):** unticked-by-default marketing consent checkbox on the enquiry form (verbatim label; optional — never blocks the enquiry). New dedicated `marketing_consents` table (migration `011`, applied to Supabase, RLS service-role only, `enquiry_reference NOT NULL`, unique `(email, enquiry_reference)`). Consent persisted **only** when ticked AND email present; phone-only → no record; absence of row = no consent. Consent write wrapped — never fails the enquiry. No email sent (double-opt-in-ready store only). Also: contact-hint near Send when name-only ("Add an email or phone to send."). KT- prefix + payment-posture lines untouched.
+- **Task 2 — canonical pilgrim enquiry journey (2026-06-15, merged via PR #86, see AI_NOTES §Task 2):** anonymous package→Enquire→short form→KT- reference + confirmation with the three payment-posture lines. New `Enquiry` entity (migration `010`), `POST /api/enquiries` (IP rate-limited), confirmation + operator-alert emails fire-and-forget via existing Resend.
 - **Task 1 — parked the broken flows (2026-06-15, branch `feature/park-rfq-booking-flows`, see AI_NOTES §Task 1):** added two server-side feature flags in `lib/config.ts`, both **default OFF**, removing them from the live pilgrim journey without deleting any code. `FEATURE_RFQ_QUOTE` (`isRfqQuoteEnabled`) — `/quote` wizard 404s, package "Request quote" CTA + footer/corridor/umrah `/quote` links hidden, quote-request POST 404s. `FEATURE_BOOKING_FLOW` (`isBookingFlowEnabled`) — "Proceed direct"/booking dialog/payment-evidence/operator bank details hidden, confirmation page + booking-intent POST 404. Created `PILGRIMCOMPARE_PROJECT_DIRECTION.md` + `PARKED_FEATURES.md`. Acceptance verified on a 375px live preview (flags OFF). Playwright forces both flags ON so parked code stays E2E-covered; `tests/feature-flags.test.tsx` covers flag-OFF.
 
 **Traveller flow**

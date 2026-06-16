@@ -1,15 +1,48 @@
 # PilgrimCompare AI Handover — Single Source of Truth
 
-**Last verified:** 2026-06-15 (Task 2 — pilgrim enquiry journey — Vitest 1,852/1,852, `tsc` clean, 0 build errors, enquiry E2E 3/3 ×3 browsers serial)
-**Branch:** `feature/clean-enquiry-journey`
+**Last verified:** 2026-06-16 (Task 3 — pilgrim email opt-in + contact-hint — Vitest 1,860/1,860, `tsc` clean, 0 build errors; migration 011 applied to Supabase)
+**Branch:** `feature/pilgrim-email-optin` (off `dev` `314f303`; Task 2 merged via PR #86)
 **Audience:** Claude, Codex, Kimi, and any AI/developer taking over the project.
 
 **Next immediate action:**
-Task 3 — compliant pilgrim email opt-in (direction file §9). Add a separate, unticked marketing opt-in to the enquiry form with a stored consent record (timestamp, source, exact wording) + unsubscribe/suppression. Structural room already left in `lib/validation.ts` (`enquirySchema`), `lib/types.ts` (`Enquiry`), `components/enquiry/EnquiryForm.tsx`, and migration `010`.
+Task 4 — lead logging + per-operator enquiry counting (analytics event on enquiry). `Repository.createEnquiry` is currently pure persistence — no analytics/lead-count event is emitted yet. Also: wire the double-opt-in confirmation send + unsubscribe/suppression on top of the `marketing_consents` store built in Task 3 (record exists; no email is sent yet, by design).
 
 This file is the current handover source of truth. If another document conflicts with a verified statement here, treat that other document as stale and update it before changing implementation.
 
 > **Precedence note (2026-06-15):** `PILGRIMCOMPARE_PROJECT_DIRECTION.md` (repo root) is now the single source of truth for product direction and **must be read first every session**, before this file. It wins all conflicts except the language/legal red lines. `PARKED_FEATURES.md` (repo root) is the canonical parked-feature register.
+
+---
+
+## §Task 3 — Pilgrim email opt-in + contact-hint UX fix — 2026-06-16
+
+**Status: ✅ COMPLETE on branch `feature/pilgrim-email-optin`** (off `dev` `314f303`). Vitest **1,860/1,860** (+8), `tsc` clean, `npm run build` 0 errors. Migration `011` **applied to Supabase** (verified: 7 cols, RLS on, `enquiry_reference` NOT NULL, unique constraint present). No email sent from this task — store only.
+
+### What was built
+1. **Marketing opt-in on the enquiry form** (`components/enquiry/EnquiryForm.tsx`): a single, **unticked-by-default** consent checkbox (`data-testid="enquiry-marketing-consent"`) below the contact fields. Verbatim UK-English label: *"Email me Umrah tips and package updates from PilgrimCompare. You can unsubscribe anytime."* Consent is **optional** — the enquiry sends regardless; marketing consent never blocks it.
+2. **Contact-hint UX fix** (the flagged Task-2 item): when name is filled but neither email nor phone given, a visible hint `data-testid="enquiry-contact-hint"` ("Add an email or phone to send.") shows near the Send button. **Additive** — the existing disabled-button behaviour (`canSubmit`) is unchanged.
+
+### New table + RLS decision
+- **Dedicated `marketing_consents` table** (migration `supabase/migrations/011_marketing_consents_table.sql`) — consent is **NOT** bolted onto the `enquiries` record. RLS **enabled, service-role only, no public policies** — consistent with `enquiries`/`interests` (the existing 12-table RLS model). Prisma model `MarketingConsent` (`@@map("marketing_consents")`).
+- Columns: `id, email NOT NULL, consent BOOLEAN NOT NULL DEFAULT true, consent_timestamp TIMESTAMPTZ, source TEXT NOT NULL DEFAULT 'enquiry_form', enquiry_reference TEXT NOT NULL, created_at`. `UNIQUE (email, enquiry_reference)` for idempotency.
+- **`enquiry_reference` is NOT NULL** (founder correction): every write carries the KT- reference, so the unique constraint always dedupes (Postgres treats NULLs as distinct — avoided here). The write path (`route.ts`) always passes `enquiry.referenceCode`.
+- **Semantics (founder correction):** a row exists **only** when consent was given **with an email**. The **absence of a row IS the "no consent" state** — there is no `consent=false` row. `consent` is kept TRUE purely for audit explicitness.
+
+### Consent data shape
+`MarketingConsent` (`lib/types.ts`): `{ id, email, consent (always true), consentTimestamp (ISO/UTC), source ('enquiry_form'), enquiryReference (KT- code), createdAt }`.
+
+### Gating logic (in `app/api/enquiries/route.ts`)
+After `createEnquiry`, persist consent **only when** `marketingConsent === true` **AND** `enquiry.email` present. Phone-only opt-in → **no record**. The consent write is wrapped in try/catch and **logs but never propagates** to the enquiry response (the 201 + reference code always returns). Double-opt-in ready: stored only; **no email sent here**.
+
+### Files changed
+`supabase/migrations/011_marketing_consents_table.sql` (new), `prisma/schema.prisma` (`MarketingConsent` model), `lib/types.ts` (`MarketingConsent`), `lib/validation.ts` (`enquirySchema.marketingConsent: boolean, default false`), `lib/api/mock-db.ts` (`MARKETING_CONSENTS` key + get/save, idempotent), `lib/api/db/adapter.ts` (`mapMarketingConsent` + get/save upsert on the compound unique), `lib/api/repository.ts` (mockStore wiring + `createMarketingConsent`), `app/api/enquiries/route.ts` (gated consent persist). Tests: `tests/enquiry-api.test.ts` (+4: sends unticked w/ no record; record only ticked+email; none ticked+phone-only; consent failure never fails enquiry), `tests/enquiry.test.ts` (+4: schema default/true, repository persist + idempotency), `e2e/enquiry.spec.ts` (hint appears name-only then disappears; submit ±checkbox).
+
+### Hard rules held
+KT- reference prefix **untouched** (logged separately). The three payment-posture lines on the confirmation screen **unchanged**. Parked flags (`FEATURE_BOOKING_FLOW`/`FEATURE_RFQ_QUOTE`) untouched. Missing data still shows "Not provided".
+
+### Open risks / notes
+- Migration applied via `npx prisma db execute --file …` (uses `DIRECT_URL` from `prisma.config.ts`); `psql` not installed on this box. Additive + idempotent (`CREATE TABLE IF NOT EXISTS`).
+- E2E not run locally this session (CI runs no Playwright; full suite is run manually pre-merge per §9). The two enquiry E2E flows are written and the build that serves them is green. Run `npx playwright test e2e/enquiry.spec.ts` before merge if desired.
+- No unsubscribe/suppression UI or send yet — that's Task 4 (the store is the prerequisite, now in place).
 
 ---
 
