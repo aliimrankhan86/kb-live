@@ -2,8 +2,10 @@
 
 ## 🚀 GO-LIVE — `dev` promoted to `main` — 2026-06-16
 
-**Promoted `dev` → `main` via PR [#91](https://github.com/aliimrankhan86/kb-live/pull/91) (merge commit, no squash).**
-- **Final `main` HEAD:** `6aeace6` (merge commit) — includes the full `dev` tree at `230cbaf`.
+**Current `main` HEAD: `823f860`** (2nd promotion, PR [#95](https://github.com/aliimrankhan86/kb-live/pull/95)) — brings the analytics swap (#94) + go-live docs (#92, #93) live. Production deploy green. Live CSP verified clean: `script-src 'self' 'nonce-…'`, `connect-src 'self' https://*.supabase.co` — **no `plausible.io`**; zero Plausible in HTML; site healthy. Vercel Analytics script stays dormant until Web Analytics is enabled in the dashboard (founder toggle).
+
+**Initial go-live: promoted `dev` → `main` via PR [#91](https://github.com/aliimrankhan86/kb-live/pull/91) (merge commit, no squash).**
+- **First `main` HEAD:** `6aeace6` (merge commit) — included the full `dev` tree at `230cbaf`.
 - CI green on the merge result; Vercel **production deploy green**.
 - **Post-deploy smoke check (live `pilgrimcompare.co.uk`, 2026-06-16):**
   1. ✅ Site loads (200). Footer renders *"PilgrimCompare is a trading name of Paramount Consultants Limited, registered in England and Wales (company no. 09679002). VAT no. GB 221 6154 46"* — **NO registered office**, as intended.
