@@ -44,11 +44,15 @@ function generateNonce(): string {
 
 function createContentSecurityPolicy(nonce: string): string {
   const isDev = process.env.NODE_ENV === 'development';
-  const scriptSrc = `script-src 'self' 'nonce-${nonce}'${isDev ? " 'unsafe-eval'" : ''}`;
+  // Plausible Cloud: cookieless analytics. Script load needs script-src; the
+  // /api/event POST needs connect-src. Production-gated in the layout, but the
+  // CSP allowance is harmless in non-prod (no script renders to use it).
+  const scriptSrc = `script-src 'self' 'nonce-${nonce}' https://plausible.io${isDev ? " 'unsafe-eval'" : ''}`;
   const connectSrc = [
     "'self'",
     'https://*.supabase.co',
     'wss://*.supabase.co',
+    'https://plausible.io',
     ...(isDev ? ['ws://127.0.0.1:3000', 'ws://localhost:3000'] : []),
   ].join(' ');
 
