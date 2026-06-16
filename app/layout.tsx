@@ -67,6 +67,22 @@ export default async function RootLayout({
             __html: `(function(){try{var t=localStorage.getItem('theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');}catch(e){}})();`,
           }}
         />
+        {/*
+          Plausible Cloud — cookieless pageview analytics (plain script.js build,
+          so the privacy/cookie copy stays true). Production-ONLY: Plausible
+          attributes hits to data-domain regardless of host, so rendering on
+          localhost or *.vercel.app previews would pollute the real stats.
+          data-domain is the stable brand domain, hardcoded — NOT derived from
+          NEXT_PUBLIC_SITE_URL (a placeholder locally).
+        */}
+        {process.env.VERCEL_ENV === "production" && (
+          <script
+            nonce={nonce}
+            defer
+            data-domain="pilgrimcompare.co.uk"
+            src="https://plausible.io/js/script.js"
+          />
+        )}
       </head>
       <body className="antialiased min-h-screen flex flex-col">
         <JsonLdScript data={siteJsonLd} />

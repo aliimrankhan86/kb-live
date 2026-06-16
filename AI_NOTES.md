@@ -1,7 +1,7 @@
 # PilgrimCompare AI Handover — Single Source of Truth
 
-**Last verified:** 2026-06-16 (Task C — KT-→PC- reference prefix rename — Vitest 1,860/1,860, `tsc` clean, 0 build errors, enquiry E2E 6/6 ×3 browsers). Task 3 merged to `dev` via PR #87 (merge `313c222`).
-**Branch:** `feature/reference-prefix-rename` (off `dev` `313c222`)
+**Last verified:** 2026-06-16 (Task D — Plausible analytics wired + production-gated — `tsc` clean, `npm run build` 0 errors, enquiry Vitest 24/24, prod-gate verified by serving the build). Task C (KT-→PC-) + Task 3 merged to `dev`.
+**Branch:** `chore/verify-plausible-analytics` (off `dev` `49640e2`)
 **Audience:** Claude, Codex, Kimi, and any AI/developer taking over the project.
 
 **Next immediate action:**
@@ -10,6 +10,27 @@ Task 4 — lead logging + per-operator enquiry counting (analytics event on enqu
 This file is the current handover source of truth. If another document conflicts with a verified statement here, treat that other document as stale and update it before changing implementation.
 
 > **Precedence note (2026-06-15):** `PILGRIMCOMPARE_PROJECT_DIRECTION.md` (repo root) is now the single source of truth for product direction and **must be read first every session**, before this file. It wins all conflicts except the language/legal red lines. `PARKED_FEATURES.md` (repo root) is the canonical parked-feature register.
+
+---
+
+## §Task D — Plausible analytics wired + production-gated — 2026-06-16
+
+**Status: ✅ COMPLETE on branch `chore/verify-plausible-analytics`** (off `dev` `49640e2`). `tsc` clean, `npm run build` 0 errors, enquiry Vitest **24/24**. Production gate verified empirically (served the prod build).
+
+### What was found (pre-change)
+Plausible was **not wired at all** — no script, no events. It was only named in legal copy (`app/privacy/page.tsx`, `components/compliance/CookieConsent.tsx`), which promised "anonymised page views via Plausible (cookieless)". So the site legally claimed analytics while collecting nothing. The internal `Repository.trackEvent` / `analytics_events` DB system is **separate** (operator funnel) and was left untouched.
+
+### What changed
+1. **Pageview script** (`app/layout.tsx`): cookieless `https://plausible.io/js/script.js`, `defer`, carries the CSP `nonce` (same pattern as the theme script), `data-domain="pilgrimcompare.co.uk"` **hardcoded** (stable brand fact — deliberately NOT derived from `NEXT_PUBLIC_SITE_URL`, which is a placeholder locally). Cookieless build keeps the privacy/cookie copy true.
+2. **Production gate** (`app/layout.tsx`): script renders **only** when `process.env.VERCEL_ENV === 'production'`. Plausible attributes hits to `data-domain` regardless of host, so localhost + `*.vercel.app` previews would otherwise pollute the real stats. Verified: `VERCEL_ENV=production` → script + data-domain in HTML; no var → 0 occurrences.
+3. **CSP** (`middleware.ts`): added `https://plausible.io` to **both** `script-src` (load) and `connect-src` (the `/api/event` POST). Stays nonce-based, no `unsafe-inline`. Verified in the served `Content-Security-Policy` header.
+4. **One conversion goal** (`components/enquiry/EnquiryForm.tsx`): `window.plausible?.('Enquiry Submitted')` fires exactly once on the successful PC- confirmation (right after `setReferenceCode`). Optional-chained → no-ops when the script isn't loaded (non-prod). This is the **client-side anonymous count only** — NOT the Task 4 server-side lead log, and does not replace it. No other events added.
+
+### Files changed
+`app/layout.tsx` (gated script), `middleware.ts` (CSP), `components/enquiry/EnquiryForm.tsx` (goal + `window.plausible` global type). No DB changes, no migration. Payment-posture lines, "Not provided" semantics, parked flows, and the internal `trackEvent` system all untouched.
+
+### Open prereq (FOUNDER ACTION)
+**Create the `pilgrimcompare.co.uk` site in the Plausible Cloud dashboard.** Until that site exists, the production script loads but Plausible 404s the ingest and records nothing. One-time dashboard step, no code.
 
 ---
 
@@ -196,7 +217,7 @@ Test/build baseline unchanged: 1,833 unit tests pass, `tsc` clean, `npm run buil
 - CI workflow green; branch protection active on `main` + `dev`
 
 **Exception (not blocking, must close before scaling):**
-- **Plausible analytics: UNCONFIRMED** — wire `data-domain=pilgrimcompare.co.uk` in `app/layout.tsx` behind cookie consent
+- ~~**Plausible analytics: UNCONFIRMED**~~ → ✅ **WIRED + production-gated 2026-06-16** (§Task D). Cookieless `script.js`, `data-domain="pilgrimcompare.co.uk"`, renders only when `VERCEL_ENV === 'production'`, CSP allows `plausible.io`, single `'Enquiry Submitted'` goal on the PC- confirmation. **Founder prereq:** create the `pilgrimcompare.co.uk` site in the Plausible dashboard or ingest 404s.
 
 ### Gate 3 — Soft launch ⚡ ACTIVE
 Target: 5 operators onboarded, ~50 packages live. No code blockers for this gate — it is an operator acquisition and data-quality goal.
@@ -420,7 +441,7 @@ Next.js App Router UI
 | `/public/logo.svg` + `/public/text-logo.svg` contain PilgrimCompare | **OPEN — fix before operator onboarding (Q1 scope)** |
 | PaymentEvidence RLS — operator/admin read access | **UNCONFIRMED** — storage policies updated (migration 006) but evidence-review UI and signed-download route not built. Resolve before Gate 2 fully closed. |
 | `app_metadata` role backfill | Pre-2026-06-09 users default to `customer`. Backfill via service-role admin API before onboarding operators. |
-| Plausible analytics | Not wired — add `data-domain=pilgrimcompare.co.uk` in `app/layout.tsx` gated behind cookie consent. |
+| Plausible analytics | ✅ **Wired + production-gated 2026-06-16** (§Task D). Cookieless, `data-domain="pilgrimcompare.co.uk"`, `VERCEL_ENV==='production'` only, CSP allows `plausible.io`, one `'Enquiry Submitted'` goal. **Founder prereq:** create the site in the Plausible dashboard. |
 
 ### P1 — high value, not launch-blocking today
 
