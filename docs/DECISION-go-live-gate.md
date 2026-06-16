@@ -37,7 +37,7 @@
 - `scripts/test-emails.mjs:99,104,113` still contain hardcoded sample `KT-9X2P4A` in a manual email-preview dev utility — not app code, tests, e2e, or a generation source. Task C's "zero KT- in code/tests/e2e/sql" still holds.
 
 ### Founder prereqs (cannot be verified by tooling)
-- Plausible site `pilgrimcompare.co.uk` must exist in the dashboard, else launch runs blind from minute one.
+- **Plausible site `pilgrimcompare.co.uk` — OPEN as of go-live.** Founder cannot recall registering a Plausible account. Post-deploy smoke saw the script post events (202) but **202 does not prove a site is recording** — Plausible returns 202 for any domain and drops events not tied to an account. Until the site is created in a Plausible account, analytics records nothing. Wiring is live and dormant; adding the site populates data immediately, no redeploy. Alternative: remove the Plausible script/CSP/goal if analytics isn't wanted.
 - `FEATURE_FEATURED_SLOTS=false` set in Vercel.
 
-Neither blocks the merge mechanically; do both before promoting.
+Neither blocked the merge mechanically.
