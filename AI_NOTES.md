@@ -2,7 +2,14 @@
 
 ## 🚀 GO-LIVE — `dev` promoted to `main` — 2026-06-16
 
-**Current `main` HEAD: `823f860`** (2nd promotion, PR [#95](https://github.com/aliimrankhan86/kb-live/pull/95)) — brings the analytics swap (#94) + go-live docs (#92, #93) live. Production deploy green. Live CSP verified clean: `script-src 'self' 'nonce-…'`, `connect-src 'self' https://*.supabase.co` — **no `plausible.io`**; zero Plausible in HTML; site healthy. Vercel Analytics script stays dormant until Web Analytics is enabled in the dashboard (founder toggle).
+**Current `main` HEAD: `e156378`** (3rd promotion, PR [#99](https://github.com/aliimrankhan86/kb-live/pull/99), merge commit, no squash) — **docs + dev-utility only, zero app runtime change vs `823f860`.** Brings live: #96 (record 2nd promotion), #97 (`docs/ANALYTICS.md`), #98 (cleanup — verified Vercel-analytics copy in `app/privacy/page.tsx` + `components/compliance/CookieConsent.tsx`, swapped dev-utility `KT-9X2P4A` → `PC-7F3A9C21` in `scripts/test-emails.mjs`). Pre-flight on dev `06db208`: tsc clean, build 0 errors (66/66), Vitest **1,860/1,860**, zero `KT-` in code/tests/e2e/sql.
+- **Post-deploy smoke check (live `pilgrimcompare.co.uk`, 2026-06-16, 3rd promotion):**
+  1. ✅ Vercel production deploy green; site loads (200). Footer renders the Paramount Consultants entity line (company no. 09679002, VAT no. GB 221 6154 46) — **NO registered office**, as intended.
+  2. ✅ Analytics **live and recording** (Web Analytics now enabled in the dashboard): `/_vercel/insights/script.js` → **200** (`application/javascript`), `window.vai === true`. CSP clean: `script-src 'self' 'nonce-…'`, `connect-src 'self' https://*.supabase.co` — **no `plausible.io`**.
+  3. ✅ Test enquiry to demo operator **Al-Hidayah** → confirmation "Enquiry sent", reference **PC-D8DFD4DD**. The `'Enquiry Submitted'` Vercel event was captured **as the actual event object** (not just a 202): `va('event', { name: 'Enquiry Submitted' })`. Payment-posture lines present.
+- **Only deferred item:** the **registered office line** — intentionally omitted pending Companies House AD01 filing (logged decision; path ready in `lib/legal.ts` `registeredOffice: ''`). The earlier `KT-` dev-utility cleanup item is now **closed** (#98).
+
+**Prior — Current `main` HEAD before 3rd promotion: `823f860`** (2nd promotion, PR [#95](https://github.com/aliimrankhan86/kb-live/pull/95)) — brought the analytics swap (#94) + go-live docs (#92, #93) live. Production deploy green. Live CSP verified clean: `script-src 'self' 'nonce-…'`, `connect-src 'self' https://*.supabase.co` — **no `plausible.io`**; zero Plausible in HTML; site healthy.
 
 **Initial go-live: promoted `dev` → `main` via PR [#91](https://github.com/aliimrankhan86/kb-live/pull/91) (merge commit, no squash).**
 - **First `main` HEAD:** `6aeace6` (merge commit) — included the full `dev` tree at `230cbaf`.
