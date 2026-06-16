@@ -255,6 +255,22 @@ export interface Enquiry {
   message?: string;
 }
 
+/**
+ * Task 3: explicit marketing email consent captured at enquiry time.
+ * A record exists ONLY when consent was given with an email — the absence of a
+ * record is the "no consent" state. `consent` is always true (audit explicitness).
+ * Double-opt-in ready: the record is stored; no email is sent from this flow.
+ */
+export interface MarketingConsent {
+  id: string;
+  email: string;
+  consent: boolean;
+  consentTimestamp: string; // ISO date (UTC)
+  source: string; // e.g. 'enquiry_form'
+  enquiryReference: string; // the KT- enquiry reference code
+  createdAt: string; // ISO date
+}
+
 export type BookingStatus = 'started' | 'contacted' | 'confirmed' | 'closed';
 
 export type BookingOutcomeType =

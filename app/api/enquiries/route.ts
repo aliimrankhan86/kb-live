@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
     }
 
-    const { packageId, name, email, phone, travelMonth, message } = parsed.data;
+    const { packageId, name, email, phone, travelMonth, message, marketingConsent } = parsed.data;
 
     // Resolve the package + operator server-side so the lead carries honest,
     // package-sourced names (never client-supplied). Reject unknown/unpublished.
@@ -50,6 +50,22 @@ export async function POST(request: NextRequest) {
       travelMonth: travelMonth || undefined,
       message: message || undefined,
     });
+
+    // Task 3: capture marketing consent ONLY when opted in AND an email was
+    // given (consent requires an email to be actionable). Phone-only opt-in is
+    // ignored — no record. Wrapped so a consent-store failure can never fail the
+    // enquiry response. Double-opt-in ready: stored only, no email sent here.
+    if (marketingConsent && enquiry.email) {
+      try {
+        await Repository.createMarketingConsent({
+          email: enquiry.email,
+          enquiryReference: enquiry.referenceCode,
+          source: 'enquiry_form',
+        });
+      } catch (err) {
+        console.error('[enquiry] marketing consent persist failed:', err);
+      }
+    }
 
     // Fire-and-forget: emails must not fail the API response.
     void sendEnquiryEmails(enquiry, pkg, operator);
