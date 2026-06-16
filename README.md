@@ -7,7 +7,7 @@ A UK-focused Next.js platform connecting pilgrims with verified travel operators
 - **Package Discovery**: Browse, sort, and filter Umrah packages with real-time filters (budget, dates, hotel stars, distance to Haram, flight type)
 - **Umrah Search Form**: 4-step progressive form with real date picker, traveller stepper, hotel star selection, and budget slider
 - **Quote Journey**: Request quotes from operators with prefilled package details
-- **Booking Intent**: Track high-intent bookings with unique reference codes (`KT-...`)
+- **Booking Intent**: Track high-intent bookings with unique reference codes (`PC-...`)
 - **Payment Handoff**: Secure pay-operator-direct flow with evidence upload and bank detail display
 - **Operator Dashboard**: Registration, profile management, leads inbox, package CSV import/export, analytics
 - **Admin Tools**: Complaint triage, bank change review queue, audit logs

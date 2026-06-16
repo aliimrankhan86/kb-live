@@ -19,7 +19,7 @@ Two modes:
 - PilgrimCompare is a **marketplace / enquiry system** — NOT a tour operator, NOT a payment processor.
 - Operators are the source of truth for package content, availability, pricing, fulfilment, payment records.
 - PilgrimCompare does **not** collect, hold, transfer, escrow, or invoice customer funds.
-- **BookingIntent** (`KT-…` ref) = an intent/reference record, **not** a payment confirmation or final booking.
+- **BookingIntent** (`PC-…` ref) = an intent/reference record, **not** a payment confirmation or final booking.
 - Customer payment is **pay-operator-direct**.
 - Trust claims use **stored facts only** (verification status, ATOL/ABTA numbers, company metadata, regions, profile completeness). **Never invent trust claims.** Missing data → show "Not provided".
 - MVP scope: **UK-first, GBP-only**. Multi-currency = future. Launch corridors: London (LHR/LGW), Birmingham (BHX), Manchester (MAN).
@@ -48,7 +48,7 @@ Two modes:
 ---
 
 ## 5. ✅ Done (shipped & verified)
-**Traveller:** package discovery (sort + filter: budget, dates, hotel stars, Haram distance, flight type) · Umrah 4-step search form · airport-level routing (LHR/LGW/BHX/MAN, backend filters by airport code) · shortlist + compare up to 3 · quote journey → BookingIntent (`KT-…`) · payment handoff (pay-operator-direct + evidence upload + bank details).
+**Traveller:** package discovery (sort + filter: budget, dates, hotel stars, Haram distance, flight type) · Umrah 4-step search form · airport-level routing (LHR/LGW/BHX/MAN, backend filters by airport code) · shortlist + compare up to 3 · quote journey → BookingIntent (`PC-…`) · payment handoff (pay-operator-direct + evidence upload + bank details).
 
 **Operator:** registration + profile · package CRUD via 8-step wizard (single POST) · CSV import/export · multi-image upload (`imageUrl` → `images[]` across Zod/OG/JSON-LD/components) · dashboard on real data via `Repository.getOffers()` (role-filtered) + manual Refresh · BookingOutcome entity + OutcomeForm · TierExplanation (status transparency) · analytics wired to real events.
 

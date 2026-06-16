@@ -68,7 +68,7 @@ Goal: onboard supply easily while giving customers clarity and confidence.
 ## BookingIntent and payment evidence policy
 
 - BookingIntent is a pay-operator-direct intent record, not a PilgrimCompare payment or booking confirmation.
-- `BookingIntent.referenceCode` is generated as `KT-...`, unique, and immutable once issued.
+- `BookingIntent.referenceCode` is generated as `PC-...`, unique, and immutable once issued.
 - Payment evidence accepts image/PDF metadata plus optional text. MVP storage is metadata-only; file bytes are not stored.
 - If proof is skipped, `skipProofAcknowledged` is required and `proofSkippedAt` is recorded.
 - BookingIntent and evidence metadata are visible only to the customer, the involved operator, and admin.
