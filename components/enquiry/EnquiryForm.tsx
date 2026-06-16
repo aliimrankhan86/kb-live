@@ -5,6 +5,15 @@ import { useState } from 'react'
 import { buttonVariants } from '@/components/ui/Button'
 import { PAYMENT_POSTURE_LINES } from '@/lib/content-rules'
 
+// Plausible Cloud goal (cookieless, anonymous). Optional-chained: the script
+// only loads in production (see app/layout.tsx), so this no-ops everywhere else.
+// This is the client-side conversion COUNT — not the Task 4 server-side lead log.
+declare global {
+  interface Window {
+    plausible?: (event: string, options?: { props?: Record<string, string | number | boolean> }) => void
+  }
+}
+
 /**
  * Read-only summary of the package being enquired about. Pulled from the package
  * data on the server — the form must NOT re-ask any of this (trip type, airport,
@@ -72,6 +81,9 @@ export function EnquiryForm({ summary, packageSlug }: EnquiryFormProps) {
         return
       }
       setReferenceCode(data.referenceCode)
+      // Fire the single 'Enquiry Submitted' Plausible goal exactly once, on the
+      // confirmed PC- enquiry. No-ops if the script isn't loaded (non-prod).
+      window.plausible?.('Enquiry Submitted')
     } catch {
       setSubmit({ status: 'error', message: 'Network error. Please check your connection and try again.' })
     }

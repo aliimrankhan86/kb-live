@@ -1,7 +1,7 @@
 # PilgrimCompare AI Handover — Single Source of Truth
 
-**Last verified:** 2026-06-16 (Task E — `app_metadata.role` backfill — idempotent script ran clean against live: total 10, 0 absent, 0 updated, 10 skipped, breakdown unchanged 8 customer / 1 operator / 1 admin). Task C (KT-→PC-) + Task 3 merged to `dev`; Task D (Plausible) PR open to `dev`.
-**Branch:** `chore/app-metadata-role-backfill` (off `dev` `49640e2`)
+**Last verified:** 2026-06-16 (Task E — `app_metadata.role` backfill — idempotent script ran clean against live: total 10, 0 absent, 0 updated, 10 skipped, breakdown unchanged 8 customer / 1 operator / 1 admin). Task D (Plausible) wired + production-gated. **Both #89 (Task D) and #90 (Task E) merged to `dev`.** Task C (KT-→PC-) + Task 3 already on `dev`.
+**Branch:** `chore/app-metadata-role-backfill` — merged to `dev` (resolved AI_NOTES by keeping both §Task D + §Task E).
 **Audience:** Claude, Codex, Kimi, and any AI/developer taking over the project.
 
 **Next immediate action:**
@@ -44,6 +44,27 @@ Result: **0 updated, 10 skipped.** Every user already had a role; operator + adm
 
 ### Remaining blocker before `dev → main` promotion
 **Registered office line on the footer** — intentionally omitted pending the founder's **Companies House AD01** filing (move registered office off the residential address). See §below ("Open compliance gap — registered office address"). Code path ready: uncomment the line in `components/layout/Footer.tsx` once AD01 is filed. Practical risk while open: ~zero.
+
+---
+
+## §Task D — Plausible analytics wired + production-gated — 2026-06-16
+
+**Status: ✅ COMPLETE on branch `chore/verify-plausible-analytics`** (off `dev` `49640e2`). `tsc` clean, `npm run build` 0 errors, enquiry Vitest **24/24**. Production gate verified empirically (served the prod build).
+
+### What was found (pre-change)
+Plausible was **not wired at all** — no script, no events. It was only named in legal copy (`app/privacy/page.tsx`, `components/compliance/CookieConsent.tsx`), which promised "anonymised page views via Plausible (cookieless)". So the site legally claimed analytics while collecting nothing. The internal `Repository.trackEvent` / `analytics_events` DB system is **separate** (operator funnel) and was left untouched.
+
+### What changed
+1. **Pageview script** (`app/layout.tsx`): cookieless `https://plausible.io/js/script.js`, `defer`, carries the CSP `nonce` (same pattern as the theme script), `data-domain="pilgrimcompare.co.uk"` **hardcoded** (stable brand fact — deliberately NOT derived from `NEXT_PUBLIC_SITE_URL`, which is a placeholder locally). Cookieless build keeps the privacy/cookie copy true.
+2. **Production gate** (`app/layout.tsx`): script renders **only** when `process.env.VERCEL_ENV === 'production'`. Plausible attributes hits to `data-domain` regardless of host, so localhost + `*.vercel.app` previews would otherwise pollute the real stats. Verified: `VERCEL_ENV=production` → script + data-domain in HTML; no var → 0 occurrences.
+3. **CSP** (`middleware.ts`): added `https://plausible.io` to **both** `script-src` (load) and `connect-src` (the `/api/event` POST). Stays nonce-based, no `unsafe-inline`. Verified in the served `Content-Security-Policy` header.
+4. **One conversion goal** (`components/enquiry/EnquiryForm.tsx`): `window.plausible?.('Enquiry Submitted')` fires exactly once on the successful PC- confirmation (right after `setReferenceCode`). Optional-chained → no-ops when the script isn't loaded (non-prod). This is the **client-side anonymous count only** — NOT the Task 4 server-side lead log, and does not replace it. No other events added.
+
+### Files changed
+`app/layout.tsx` (gated script), `middleware.ts` (CSP), `components/enquiry/EnquiryForm.tsx` (goal + `window.plausible` global type). No DB changes, no migration. Payment-posture lines, "Not provided" semantics, parked flows, and the internal `trackEvent` system all untouched.
+
+### Open prereq (FOUNDER ACTION)
+**Create the `pilgrimcompare.co.uk` site in the Plausible Cloud dashboard.** Until that site exists, the production script loads but Plausible 404s the ingest and records nothing. One-time dashboard step, no code.
 
 ---
 
@@ -230,7 +251,7 @@ Test/build baseline unchanged: 1,833 unit tests pass, `tsc` clean, `npm run buil
 - CI workflow green; branch protection active on `main` + `dev`
 
 **Exception (not blocking, must close before scaling):**
-- **Plausible analytics: UNCONFIRMED** — wire `data-domain=pilgrimcompare.co.uk` in `app/layout.tsx` behind cookie consent
+- ~~**Plausible analytics: UNCONFIRMED**~~ → ✅ **WIRED + production-gated 2026-06-16** (§Task D). Cookieless `script.js`, `data-domain="pilgrimcompare.co.uk"`, renders only when `VERCEL_ENV === 'production'`, CSP allows `plausible.io`, single `'Enquiry Submitted'` goal on the PC- confirmation. **Founder prereq:** create the `pilgrimcompare.co.uk` site in the Plausible dashboard or ingest 404s.
 
 ### Gate 3 — Soft launch ⚡ ACTIVE
 Target: 5 operators onboarded, ~50 packages live. No code blockers for this gate — it is an operator acquisition and data-quality goal.
@@ -454,7 +475,7 @@ Next.js App Router UI
 | `/public/logo.svg` + `/public/text-logo.svg` contain PilgrimCompare | **OPEN — fix before operator onboarding (Q1 scope)** |
 | PaymentEvidence RLS — operator/admin read access | **UNCONFIRMED** — storage policies updated (migration 006) but evidence-review UI and signed-download route not built. Resolve before Gate 2 fully closed. |
 | ~~`app_metadata` role backfill~~ | ✅ **CLOSED 2026-06-16 (Task E).** Live backfill ran clean: 10 users, 0 absent, 0 updated, 10 skipped; operator/admin untouched (8 customer / 1 operator / 1 admin). Durable idempotent guard `scripts/backfill-roles.mjs` in repo; verifier `scripts/count-roles.mjs`. |
-| Plausible analytics | Not wired — add `data-domain=pilgrimcompare.co.uk` in `app/layout.tsx` gated behind cookie consent. |
+| Plausible analytics | ✅ **Wired + production-gated 2026-06-16** (§Task D). Cookieless, `data-domain="pilgrimcompare.co.uk"`, `VERCEL_ENV==='production'` only, CSP allows `plausible.io`, one `'Enquiry Submitted'` goal. **Founder prereq:** create the site in the Plausible dashboard. |
 
 ### P1 — high value, not launch-blocking today
 
