@@ -1,7 +1,7 @@
 # PilgrimCompare AI Handover — Single Source of Truth
 
-**Last verified:** 2026-06-16 (Task 3 — pilgrim email opt-in + contact-hint — Vitest 1,860/1,860, `tsc` clean, 0 build errors; migration 011 applied to Supabase)
-**Branch:** `feature/pilgrim-email-optin` (off `dev` `314f303`; Task 2 merged via PR #86)
+**Last verified:** 2026-06-16 (Task C — KT-→PC- reference prefix rename — Vitest 1,860/1,860, `tsc` clean, 0 build errors, enquiry E2E 6/6 ×3 browsers). Task 3 merged to `dev` via PR #87 (merge `313c222`).
+**Branch:** `feature/reference-prefix-rename` (off `dev` `313c222`)
 **Audience:** Claude, Codex, Kimi, and any AI/developer taking over the project.
 
 **Next immediate action:**
@@ -10,6 +10,32 @@ Task 4 — lead logging + per-operator enquiry counting (analytics event on enqu
 This file is the current handover source of truth. If another document conflicts with a verified statement here, treat that other document as stale and update it before changing implementation.
 
 > **Precedence note (2026-06-15):** `PILGRIMCOMPARE_PROJECT_DIRECTION.md` (repo root) is now the single source of truth for product direction and **must be read first every session**, before this file. It wins all conflicts except the language/legal red lines. `PARKED_FEATURES.md` (repo root) is the canonical parked-feature register.
+
+---
+
+## §Task C — Reference prefix rename `KT-` → `PC-` — 2026-06-16
+
+**Status: ✅ COMPLETE on branch `feature/reference-prefix-rename`** (off `dev` `313c222`). Vitest **1,860/1,860**, `tsc` clean, `npm run build` 0 errors, enquiry E2E **6/6 ×3 browsers** (PC- on the confirmation screen). PR to `dev` open — **not merged**.
+
+### What changed
+Renamed the KaabaTrip-era `KT-` reference prefix to `PC-` (PilgrimCompare) **everywhere it is generated or asserted**. Code format/length after the prefix is **unchanged** — still `<PREFIX>-<8 hex, uppercase>`; only the two letters changed.
+
+- **Single generation source:** `lib/api/repository.ts` — `const REFERENCE_CODE_PREFIX = 'KT' → 'PC'` (line 135). This one const drives both Enquiry and BookingIntent codes via `generateReferenceCode`, so the rename is one line + downstream assertions. No DB migration (prefix is generated at write time, not a stored constraint).
+- **Cron fallback:** `app/api/cron/outcome-followup/route.ts` — `KT-${id}` fallback → `PC-${id}`.
+- **Seed/mock data:** `lib/api/mock-db.ts` — `KT-DEMO-001` → `PC-DEMO-001`, `KT-LEGACY-` → `PC-LEGACY-`.
+- **Comments:** `repository.ts` + `lib/types.ts` (`enquiryReference` comment).
+- **Tests:** `tests/enquiry.test.ts` (fixtures `PC-ABCD1234`/`PC-DUP00001`, regex `/^PC-[A-Z0-9]{8}$/`, description), `tests/enquiry-api.test.ts` (`PC-ABCD1234` ×4), `tests/complaints.test.ts` (`PC-TEST-001`), `tests/payment-instructions.test.tsx` (`PC-TEST-001`/`PC-TEST-003`).
+- **E2E:** `e2e/enquiry.spec.ts` (`/PC-/` ×2), `e2e/bank-payment.spec.ts` + `e2e/flow.spec.ts` (`/^PC-/` — booking-intent codes share the generator, so these assertions had to move too).
+- **Docs:** README, BUSINESS, PROJECT_BRIEF, APP_READINESS_REPORT, docs/00_PRODUCT_CANON, docs/COMPLIANCE, docs/AI_RUNBOOK (F3 current-spec line), plus §6 + P2 here.
+
+### Grep results (pre-change, repo-wide, excl. node_modules/.next/lib/generated/.git)
+- `KT_`: **0 matches.**
+- `KT-`: **25 matches in code/tests/sql** (all changed) + the rest in `.md` docs. **0 `KT-` left in code/tests/e2e/sql after the change.**
+
+### Intentionally NOT changed
+- **Pre-rename DB records** keep their `KT-` codes — immutable by design (no migration; old refs stay valid historical references alongside new `PC-` ones).
+- **`docs/AI_RUNBOOK.md` lines 62 & 857** — historical changelog/summary entries; left as `KT-` to preserve the historical record (not current-state claims).
+- Three payment-posture lines, reference format/length, and "Not provided" semantics — all untouched.
 
 ---
 
@@ -334,7 +360,7 @@ Next.js App Router UI
 - Public: published packages + public operator profiles only
 
 ### Payment/evidence policy
-- BookingIntent reference codes are `KT-…`, unique, and immutable
+- BookingIntent reference codes are `PC-…`, unique, and immutable (renamed from `KT-` 2026-06-16, see §Task C)
 - Evidence metadata and file bytes visible only to the customer, involved operator, or admin
 - Product canon says MVP evidence storage is metadata-only; architecture supports byte storage — **policy conflict, resolve before shipping evidence-review UI**
 
@@ -413,7 +439,7 @@ Next.js App Router UI
 | Item | Status |
 |---|---|
 | Test coverage | Passes at 232/232 but coverage ~28%. Increase for auth session, DB adapter, package APIs, analytics, payment evidence. |
-| `KT-` reference prefix | Existing DB records use this. Rename only post-launch after migration. `/terms` copy references `KT-XXXXX` — update when prefix changes. |
+| ~~`KT-` reference prefix~~ → **`PC-`** | ✅ Renamed 2026-06-16 (§Task C, branch `feature/reference-prefix-rename`). Generated at write time (single const `REFERENCE_CODE_PREFIX`); no DB migration. **Pre-rename DB records keep their `KT-` codes** (immutable, by design) — both prefixes are valid historical references. `/terms` uses the dynamic code (never hard-coded the prefix). |
 | Docs consistency | Some docs contain stale historical status. Update when touched; do not regress implementation to match stale docs. |
 
 ### Future features — flagged, NOT approved for build

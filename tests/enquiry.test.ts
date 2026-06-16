@@ -47,7 +47,7 @@ describe('Repository.createEnquiry', () => {
     MockDB.getEnquiries().length = 0; // ensure isolation in shared in-memory store
   });
 
-  it('issues a KT- reference code and persists the enquiry', async () => {
+  it('issues a PC- reference code and persists the enquiry', async () => {
     const enquiry = await Repository.createEnquiry({
       packageId: 'pkg-1',
       operatorId: 'op-1',
@@ -58,7 +58,7 @@ describe('Repository.createEnquiry', () => {
       travelMonth: 'March 2026',
     });
 
-    expect(enquiry.referenceCode).toMatch(/^KT-[A-Z0-9]{8}$/);
+    expect(enquiry.referenceCode).toMatch(/^PC-[A-Z0-9]{8}$/);
     expect(enquiry.id).toBeTruthy();
     expect(enquiry.createdAt).toBeTruthy();
 
@@ -115,11 +115,11 @@ describe('Repository.createMarketingConsent (Task 3)', () => {
   it('persists a consent record (consent=true, source, reference, UTC timestamp)', async () => {
     const consent = await Repository.createMarketingConsent({
       email: 'aisha@example.com',
-      enquiryReference: 'KT-ABCD1234',
+      enquiryReference: 'PC-ABCD1234',
     });
     expect(consent.consent).toBe(true);
     expect(consent.source).toBe('enquiry_form');
-    expect(consent.enquiryReference).toBe('KT-ABCD1234');
+    expect(consent.enquiryReference).toBe('PC-ABCD1234');
     expect(consent.consentTimestamp).toBeTruthy();
 
     const stored = MockDB.getMarketingConsents();
@@ -127,10 +127,10 @@ describe('Repository.createMarketingConsent (Task 3)', () => {
   });
 
   it('is idempotent on (email, enquiryReference) — no duplicate row', async () => {
-    await Repository.createMarketingConsent({ email: 'a@example.com', enquiryReference: 'KT-DUP00001' });
-    await Repository.createMarketingConsent({ email: 'a@example.com', enquiryReference: 'KT-DUP00001' });
+    await Repository.createMarketingConsent({ email: 'a@example.com', enquiryReference: 'PC-DUP00001' });
+    await Repository.createMarketingConsent({ email: 'a@example.com', enquiryReference: 'PC-DUP00001' });
     const rows = MockDB.getMarketingConsents().filter(
-      (c) => c.email === 'a@example.com' && c.enquiryReference === 'KT-DUP00001'
+      (c) => c.email === 'a@example.com' && c.enquiryReference === 'PC-DUP00001'
     );
     expect(rows).toHaveLength(1);
   });

@@ -104,5 +104,5 @@ test('End-to-end Quote -> Offer -> Compare Flow', async ({ page }) => {
 
   await page.getByTestId('payment-proof-acknowledgement-checkbox').check();
   await page.getByTestId('booking-intent-submit').click();
-  await expect(page.getByTestId('booking-intent-reference-code').first()).toContainText(/^KT-/);
+  await expect(page.getByTestId('booking-intent-reference-code').first()).toContainText(/^PC-/);
 });

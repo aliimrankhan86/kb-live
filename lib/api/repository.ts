@@ -132,7 +132,7 @@ export interface RequestContext {
   role: UserRole;
 }
 
-const REFERENCE_CODE_PREFIX = 'KT';
+const REFERENCE_CODE_PREFIX = 'PC';
 const MAX_REFERENCE_CODE_ATTEMPTS = 10;
 const BANK_CHANGE_COOLING_PERIOD_MS = 24 * 60 * 60 * 1000;
 const PAY_OPERATOR_DIRECT_DISCLOSURE =
@@ -532,7 +532,7 @@ export const Repository = {
   },
 
   // Enquiries (canonical pilgrim enquiry — Task 2). Anonymous: no RequestContext.
-  // Reuses the existing KT- reference-code generator (single source, no scatter).
+  // Reuses the existing PC- reference-code generator (single source, no scatter).
   createEnquiry: async (input: {
     packageId: string;
     operatorId?: string;

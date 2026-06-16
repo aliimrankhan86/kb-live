@@ -142,7 +142,7 @@ test.describe('Bank onboarding and payment flows', () => {
     await page.getByTestId('booking-intent-submit').click();
 
     // Reference code issued
-    await expect(page.getByTestId('booking-intent-reference-code').first()).toContainText(/^KT-/);
+    await expect(page.getByTestId('booking-intent-reference-code').first()).toContainText(/^PC-/);
 
     // Payment instructions visible with required data-testids
     await expect(page.getByTestId('payment-instructions')).toBeVisible();

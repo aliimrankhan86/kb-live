@@ -34,7 +34,7 @@ const publishedPackage = {
 const operator = { id: 'op-1', companyName: 'Al Amanah Travel', tradingName: 'Al Amanah', contactEmail: 'leads@alamanah.example' };
 
 const createEnquiry = vi.fn((input: Record<string, unknown>) =>
-  Promise.resolve({ id: 'enq-1', referenceCode: 'KT-ABCD1234', createdAt: '2026-06-15T00:00:00.000Z', ...input })
+  Promise.resolve({ id: 'enq-1', referenceCode: 'PC-ABCD1234', createdAt: '2026-06-15T00:00:00.000Z', ...input })
 );
 const createMarketingConsent = vi.fn((input: Record<string, unknown>) =>
   Promise.resolve({ id: 'mc-1', consent: true, consentTimestamp: '2026-06-15T00:00:00.000Z', createdAt: '2026-06-15T00:00:00.000Z', ...input })
@@ -66,7 +66,7 @@ describe('/api/enquiries route', () => {
   it('returns 201 with a reference code for a valid enquiry', async () => {
     const { body, status } = await callRoute({ packageId: 'pkg-1', name: 'Aisha Khan', email: 'aisha@example.com', travelMonth: 'March 2026' });
     expect(status).toBe(201);
-    expect(body.referenceCode).toBe('KT-ABCD1234');
+    expect(body.referenceCode).toBe('PC-ABCD1234');
   });
 
   it('persists package + operator names resolved server-side (not from client)', async () => {
@@ -104,7 +104,7 @@ describe('/api/enquiries route', () => {
   it('sends the enquiry with consent unticked and stores NO consent record', async () => {
     const { status, body } = await callRoute({ packageId: 'pkg-1', name: 'Aisha', email: 'aisha@example.com' });
     expect(status).toBe(201);
-    expect(body.referenceCode).toBe('KT-ABCD1234');
+    expect(body.referenceCode).toBe('PC-ABCD1234');
     expect(createMarketingConsent).not.toHaveBeenCalled();
   });
 
@@ -113,7 +113,7 @@ describe('/api/enquiries route', () => {
     expect(status).toBe(201);
     expect(createMarketingConsent).toHaveBeenCalledTimes(1);
     expect(createMarketingConsent).toHaveBeenCalledWith(
-      expect.objectContaining({ email: 'aisha@example.com', enquiryReference: 'KT-ABCD1234', source: 'enquiry_form' })
+      expect.objectContaining({ email: 'aisha@example.com', enquiryReference: 'PC-ABCD1234', source: 'enquiry_form' })
     );
   });
 
@@ -127,6 +127,6 @@ describe('/api/enquiries route', () => {
     createMarketingConsent.mockRejectedValueOnce(new Error('db down'));
     const { status, body } = await callRoute({ packageId: 'pkg-1', name: 'Aisha', email: 'aisha@example.com', marketingConsent: true });
     expect(status).toBe(201);
-    expect(body.referenceCode).toBe('KT-ABCD1234');
+    expect(body.referenceCode).toBe('PC-ABCD1234');
   });
 });

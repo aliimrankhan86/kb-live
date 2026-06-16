@@ -37,7 +37,7 @@ test('Pilgrim enquiry journey: package → enquire → confirmation', async ({ p
 
   // Confirmation: reference code + payment-posture copy.
   await expect(page.locator('[data-testid="enquiry-confirmation"]')).toBeVisible();
-  await expect(page.locator('[data-testid="enquiry-reference-code"]')).toContainText(/KT-/);
+  await expect(page.locator('[data-testid="enquiry-reference-code"]')).toContainText(/PC-/);
   await expect(page.locator('[data-testid="enquiry-payment-posture"]')).toContainText(
     'You pay the operator directly. PilgrimCompare does not receive or hold your payment.'
   );
@@ -72,5 +72,5 @@ test('Pilgrim enquiry journey: submits with marketing opt-in ticked', async ({ p
 
   await page.locator('[data-testid="enquiry-submit"]').click();
   await expect(page.locator('[data-testid="enquiry-confirmation"]')).toBeVisible();
-  await expect(page.locator('[data-testid="enquiry-reference-code"]')).toContainText(/KT-/);
+  await expect(page.locator('[data-testid="enquiry-reference-code"]')).toContainText(/PC-/);
 });

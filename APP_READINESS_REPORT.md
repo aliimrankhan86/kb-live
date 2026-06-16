@@ -64,7 +64,7 @@ Everything below was tested and passes.
 - **Pilgrim quote journey**: home → quote form (all 5 steps) → submit → reference code page loads with correct request details
 - **Operator leads**: new quote requests appear in the operator's leads list; operator can respond with a price; offer appears on the pilgrim's page
 - **Two-offer comparison**: pilgrim can tick two offers and open the side-by-side comparison table; prices and operator names are visible
-- **Booking intent**: pilgrim clicks "Proceed direct", skips payment proof upload, submits → reference code starting with "KT-" is issued
+- **Booking intent**: pilgrim clicks "Proceed direct", skips payment proof upload, submits → reference code starting with "PC-" is issued
 - **Bank account display after booking**: the operator's bank details (account holder, sort code, account number) are shown to the pilgrim after creating a booking intent; the PilgrimCompare non-collection disclaimer is present
 - **Bank change — full approval flow**: change submitted → OTP verified → "Under review" state → admin sees it in the queue → admin approves → back to empty queue → operator sees "Approved — cooling period" with the activation date
 - **Bank change — rejection**: admin must fill in a reason before rejection goes through; empty reason keeps the dialog open; after rejection, operator sees "Previous change request rejected"

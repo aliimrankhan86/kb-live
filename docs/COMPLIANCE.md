@@ -202,7 +202,7 @@ This document maps PilgrimCompare's data handling, security, and consumer practi
 
 ## 7. Reference Code Policy (Booking Intent)
 
-- Every BookingIntent generates a unique immutable reference code (`KT-XXXXX`)
+- Every BookingIntent generates a unique immutable reference code (`PC-XXXXX`)
 - **Traveller obligation**: Must provide the reference code when paying the operator
 - **Consequence of omission**: If the reference is not provided, PilgrimCompare cannot verify the booking originated through our platform. Any dispute becomes a matter solely between the traveller and the operator. PilgrimCompare will not offer assistance, mediation, or complaint routing.
 - **Terms coverage**: Section 7 (Booking reference and payment) of `/terms` documents this clearly

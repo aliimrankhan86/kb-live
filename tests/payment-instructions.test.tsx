@@ -6,7 +6,7 @@ import type { BookingIntent, PaymentInstructions as PaymentInstructionsType } fr
 
 const baseIntent = (overrides: Partial<BookingIntent> = {}): BookingIntent => ({
   id: 'bi-test',
-  referenceCode: 'KT-TEST-001',
+  referenceCode: 'PC-TEST-001',
   offerId: 'offer-1',
   customerId: 'cust1',
   operatorId: 'op1',
@@ -71,7 +71,7 @@ describe('PaymentInstructions component', () => {
   it('shows full bank details for verified operator', async () => {
     mockFetch({ ok: true, body: { instructions: mockInstructions } });
 
-    const intent = baseIntent({ referenceCode: 'KT-TEST-003' });
+    const intent = baseIntent({ referenceCode: 'PC-TEST-003' });
     render(<PaymentInstructions bookingIntent={intent} />);
 
     await waitFor(() => {
@@ -81,7 +81,7 @@ describe('PaymentInstructions component', () => {
       expect(screen.getByTestId('bank-account-number')).toHaveTextContent('12345678');
       expect(screen.getByTestId('bank-bank-name')).toHaveTextContent('Example Business Bank');
       expect(screen.getByTestId('payment-disclaimer')).toHaveTextContent(/You pay the operator directly/);
-      expect(screen.getAllByText('KT-TEST-003')).toHaveLength(2);
+      expect(screen.getAllByText('PC-TEST-003')).toHaveLength(2);
     });
   });
 
