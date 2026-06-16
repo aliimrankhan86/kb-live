@@ -19,6 +19,8 @@ import {
   ComplaintCategory,
   ComplaintSeverity,
   ComplaintStatus,
+  Enquiry,
+  MarketingConsent,
   Offer,
   OperatorProfile,
   Package,
@@ -63,6 +65,10 @@ const mockStore = {
   saveAnalyticsEvent: (event: AnalyticsEvent) => Promise.resolve(MockDB.saveAnalyticsEvent(event)),
   saveComplaint: (c: Complaint) => Promise.resolve(MockDB.saveComplaint(c)),
   deletePackage: (id: string) => Promise.resolve(MockDB.deletePackage(id)),
+  getEnquiries: () => Promise.resolve(MockDB.getEnquiries()),
+  saveEnquiry: (enquiry: Enquiry) => Promise.resolve(MockDB.saveEnquiry(enquiry)),
+  getMarketingConsents: () => Promise.resolve(MockDB.getMarketingConsents()),
+  saveMarketingConsent: (consent: MarketingConsent) => Promise.resolve(MockDB.saveMarketingConsent(consent)),
   getBookingOutcomes: () => Promise.resolve(MockDB.getBookingOutcomes()),
   saveBookingOutcome: (bo: BookingOutcome) => Promise.resolve(MockDB.saveBookingOutcome(bo)),
   getDistinctDepartureCities: (): Promise<string[]> => {
@@ -126,7 +132,7 @@ export interface RequestContext {
   role: UserRole;
 }
 
-const REFERENCE_CODE_PREFIX = 'KT';
+const REFERENCE_CODE_PREFIX = 'PC';
 const MAX_REFERENCE_CODE_ATTEMPTS = 10;
 const BANK_CHANGE_COOLING_PERIOD_MS = 24 * 60 * 60 * 1000;
 const PAY_OPERATOR_DIRECT_DISCLOSURE =
@@ -523,6 +529,63 @@ export const Repository = {
     }
 
     return Array.from(rows.values());
+  },
+
+  // Enquiries (canonical pilgrim enquiry — Task 2). Anonymous: no RequestContext.
+  // Reuses the existing PC- reference-code generator (single source, no scatter).
+  createEnquiry: async (input: {
+    packageId: string;
+    operatorId?: string;
+    packageTitle?: string;
+    operatorName?: string;
+    name: string;
+    email?: string;
+    phone?: string;
+    travelMonth?: string;
+    message?: string;
+  }): Promise<Enquiry> => {
+    const existing = await store().getEnquiries();
+    const existingCodes = new Set(
+      existing.map((e) => e.referenceCode).filter((code): code is string => Boolean(code))
+    );
+
+    const enquiry: Enquiry = {
+      id: crypto.randomUUID(),
+      referenceCode: generateReferenceCode(existingCodes),
+      createdAt: new Date().toISOString(),
+      packageId: input.packageId,
+      operatorId: input.operatorId,
+      packageTitle: cleanOptionalText(input.packageTitle),
+      operatorName: cleanOptionalText(input.operatorName),
+      name: input.name.trim(),
+      email: cleanOptionalText(input.email),
+      phone: cleanOptionalText(input.phone),
+      travelMonth: cleanOptionalText(input.travelMonth),
+      message: cleanOptionalText(input.message),
+    };
+
+    return store().saveEnquiry(enquiry);
+  },
+
+  // Marketing consent (Task 3). Caller is responsible for the gating rule — a
+  // record is created ONLY when the pilgrim opted in AND an email is present
+  // (consent requires an email to be actionable). The enquiry reference is
+  // always carried so the DB unique (email, enquiry_reference) dedupes.
+  createMarketingConsent: async (input: {
+    email: string;
+    enquiryReference: string;
+    source?: string;
+  }): Promise<MarketingConsent> => {
+    const consent: MarketingConsent = {
+      id: crypto.randomUUID(),
+      email: input.email.trim(),
+      consent: true,
+      consentTimestamp: new Date().toISOString(),
+      source: input.source ?? 'enquiry_form',
+      enquiryReference: input.enquiryReference,
+      createdAt: new Date().toISOString(),
+    };
+    return store().saveMarketingConsent(consent);
   },
 
   // Quote Requests

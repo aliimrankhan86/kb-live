@@ -6,6 +6,8 @@ import type {
   BankChangeRequest,
   BookingIntent,
   Complaint,
+  Enquiry,
+  MarketingConsent,
   Offer,
   OperatorProfile,
   Package,
@@ -24,6 +26,8 @@ import type {
   BookingIntentModel as PrismaBookingIntent,
   AnalyticsEventModel as PrismaAnalyticsEvent,
   ComplaintModel as PrismaComplaint,
+  EnquiryModel as PrismaEnquiry,
+  MarketingConsentModel as PrismaMarketingConsent,
 } from '@/lib/generated/prisma/models';
 
 // ─── Helpers ─────────────────────────────────────────────────────────
@@ -142,6 +146,31 @@ const mapQuoteRequest = (qr: PrismaQuoteRequest): QuoteRequest => ({
   inclusions: qr.inclusions as QuoteRequest['inclusions'],
   notes: qr.notes ?? undefined,
   sourceOperatorId: qr.sourceOperatorId ?? undefined,
+});
+
+const mapEnquiry = (e: PrismaEnquiry): Enquiry => ({
+  id: e.id,
+  referenceCode: e.referenceCode,
+  createdAt: e.createdAt.toISOString(),
+  packageId: e.packageId,
+  operatorId: e.operatorId ?? undefined,
+  packageTitle: e.packageTitle ?? undefined,
+  operatorName: e.operatorName ?? undefined,
+  name: e.name,
+  email: e.email ?? undefined,
+  phone: e.phone ?? undefined,
+  travelMonth: e.travelMonth ?? undefined,
+  message: e.message ?? undefined,
+});
+
+const mapMarketingConsent = (c: PrismaMarketingConsent): MarketingConsent => ({
+  id: c.id,
+  email: c.email,
+  consent: c.consent,
+  consentTimestamp: c.consentTimestamp.toISOString(),
+  source: c.source,
+  enquiryReference: c.enquiryReference,
+  createdAt: c.createdAt.toISOString(),
 });
 
 const mapOffer = (o: PrismaOffer): Offer => ({
@@ -584,6 +613,54 @@ export const DBAdapter = {
       update: { ...data, updatedAt: dateOrNow(complaint.updatedAt) },
     });
     return mapComplaint(saved);
+  },
+
+  // Enquiries (canonical pilgrim enquiry — Task 2)
+  getEnquiries: async (): Promise<Enquiry[]> =>
+    (await prisma.enquiry.findMany()).map(mapEnquiry),
+
+  saveEnquiry: async (enquiry: Enquiry): Promise<Enquiry> => {
+    const data = {
+      id: enquiry.id,
+      referenceCode: enquiry.referenceCode,
+      packageId: enquiry.packageId,
+      operatorId: enquiry.operatorId ?? null,
+      packageTitle: enquiry.packageTitle ?? null,
+      operatorName: enquiry.operatorName ?? null,
+      name: enquiry.name,
+      email: enquiry.email ?? null,
+      phone: enquiry.phone ?? null,
+      travelMonth: enquiry.travelMonth ?? null,
+      message: enquiry.message ?? null,
+    };
+    const saved = await prisma.enquiry.upsert({
+      where: { id: enquiry.id },
+      create: { ...data, createdAt: dateOrNow(enquiry.createdAt) },
+      update: data,
+    });
+    return mapEnquiry(saved);
+  },
+
+  // Marketing consents (Task 3). Idempotent on (email, enquiryReference).
+  getMarketingConsents: async (): Promise<MarketingConsent[]> =>
+    (await prisma.marketingConsent.findMany()).map(mapMarketingConsent),
+
+  saveMarketingConsent: async (consent: MarketingConsent): Promise<MarketingConsent> => {
+    const data = {
+      email: consent.email,
+      consent: consent.consent,
+      consentTimestamp: dateOrNow(consent.consentTimestamp),
+      source: consent.source,
+      enquiryReference: consent.enquiryReference,
+    };
+    const saved = await prisma.marketingConsent.upsert({
+      where: {
+        email_enquiryReference: { email: consent.email, enquiryReference: consent.enquiryReference },
+      },
+      create: { id: consent.id, ...data, createdAt: dateOrNow(consent.createdAt) },
+      update: data,
+    });
+    return mapMarketingConsent(saved);
   },
 
   // Transaction support

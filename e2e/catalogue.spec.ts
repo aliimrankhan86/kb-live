@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
+import { dismissCookieBanner } from './helpers/cookies';
 
 test('Public catalogue flow: browse, detail, operator, compare', async ({ page }) => {
+  await dismissCookieBanner(page);
   await page.goto('/packages');
   await expect(page.locator('[data-testid="packages-page"]')).toBeVisible();
   const packageCards = page.locator('[data-testid^="package-card-"]');

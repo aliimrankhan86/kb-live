@@ -20,6 +20,13 @@ import {
 interface PackageDetailProps {
   pkg: Package
   operator?: OperatorProfile
+  /**
+   * Whether the parked multi-step RFQ quote engine is live. Evaluated on the
+   * server (isRfqQuoteEnabled) and passed down — never read the flag in this
+   * client component. Default false: the "Request quote" CTA is hidden.
+   * See PARKED_FEATURES.md entry 2.
+   */
+  rfqEnabled?: boolean
 }
 
 const formatPrice = (value: number, currency: string, settings = getRegionSettings()) =>
@@ -48,7 +55,7 @@ const SectionCard = ({ title, children, className = '' }: { title: string; child
   </section>
 )
 
-export function PackageDetail({ pkg, operator }: PackageDetailProps) {
+export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDetailProps) {
   const router = useRouter()
   const [regionSettings, setRegionSettings] = useState(() => getRegionSettings())
 
@@ -294,10 +301,20 @@ export function PackageDetail({ pkg, operator }: PackageDetailProps) {
               {makkahDist && <RailFact label={makkahDist.primary} />}
               <RailFact label={hasProtection ? 'ATOL/ABTA listed' : 'No ATOL/ABTA listed'} tone={hasProtection ? 'good' : 'warn'} />
             </ul>
-            <Link href={quoteUrl} data-testid="package-cta-request-quote" className={buttonVariants({ variant: 'primary', size: 'md', className: 'mt-5 w-full' })}>
-              Request quote
+            {/* Canonical enquiry entry point — always live (Task 2). */}
+            <Link href={`/packages/${pkg.slug}/enquire`} data-testid="package-cta-enquire" className={buttonVariants({ variant: 'primary', size: 'md', className: 'mt-5 w-full' })}>
+              Enquire
             </Link>
-            <p className="mt-2 text-center text-xs text-[var(--textMuted)]">Free · no payment taken here</p>
+            <p className="mt-2 text-center text-xs text-[var(--textMuted)]">Free · the operator contacts you directly</p>
+            {/* PARKED: RFQ quote engine — CTA hidden when flag off (PARKED_FEATURES.md entry 2). */}
+            {rfqEnabled && (
+              <>
+                <Link href={quoteUrl} data-testid="package-cta-request-quote" className={buttonVariants({ variant: 'primary', size: 'md', className: 'mt-5 w-full' })}>
+                  Request quote
+                </Link>
+                <p className="mt-2 text-center text-xs text-[var(--textMuted)]">Free · no payment taken here</p>
+              </>
+            )}
           </div>
         </aside>
       </div>
@@ -309,9 +326,16 @@ export function PackageDetail({ pkg, operator }: PackageDetailProps) {
             <p className="text-xs text-[var(--textMuted)]">{pkg.priceType === 'from' ? 'From · per person' : 'Per person'}</p>
             <p className="text-lg font-bold text-[var(--text)]">{priceLabel}</p>
           </div>
-          <Link href={quoteUrl} data-testid="package-mobile-cta-request-quote" className={buttonVariants({ variant: 'primary', size: 'md', className: 'px-5 whitespace-nowrap' })}>
-            Request quote
+          {/* Canonical enquiry entry point — always live (Task 2). */}
+          <Link href={`/packages/${pkg.slug}/enquire`} data-testid="package-mobile-cta-enquire" className={buttonVariants({ variant: 'primary', size: 'md', className: 'px-5 whitespace-nowrap' })}>
+            Enquire
           </Link>
+          {/* PARKED: RFQ quote engine — CTA hidden when flag off (PARKED_FEATURES.md entry 2). */}
+          {rfqEnabled && (
+            <Link href={quoteUrl} data-testid="package-mobile-cta-request-quote" className={buttonVariants({ variant: 'primary', size: 'md', className: 'px-5 whitespace-nowrap' })}>
+              Request quote
+            </Link>
+          )}
         </div>
       </div>
     </section>

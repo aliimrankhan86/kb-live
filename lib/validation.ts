@@ -75,9 +75,49 @@ export const interestSchema = z.object({
   type: z.enum(['hajj', 'umrah'] as const),
 });
 
+/**
+ * Canonical pilgrim enquiry (Task 2). Short form — only fields the package does
+ * NOT already state. Name is required; at least one of email/phone is required
+ * so the operator can reply. travelMonth + message are optional.
+ *
+ * Task 3 will add a separate, unticked marketing opt-in here — leave room, do
+ * not inline it now.
+ */
+export const enquirySchema = z
+  .object({
+    packageId: z.string().trim().min(1, 'A package is required.'),
+    operatorId: z.string().trim().optional(),
+    name: z
+      .string()
+      .trim()
+      .min(1, 'Please enter your name.')
+      .max(100, 'Name must be 100 characters or fewer.'),
+    email: z
+      .string()
+      .trim()
+      .max(254, 'Email must be 254 characters or fewer.')
+      .email('Enter a valid email address.')
+      .optional()
+      .or(z.literal('')),
+    phone: z.string().trim().max(40, 'Phone must be 40 characters or fewer.').optional().or(z.literal('')),
+    travelMonth: z.string().trim().max(40, 'Travel month must be 40 characters or fewer.').optional(),
+    message: z.string().trim().max(1000, 'Message must be 1000 characters or fewer.').optional(),
+    // Task 3: OPTIONAL marketing opt-in. Defaults false; never blocks the enquiry.
+    // A consent record is persisted only when this is true AND an email is given.
+    marketingConsent: z.boolean().optional().default(false),
+  })
+  .refine(
+    (d) => Boolean(d.email && d.email.length > 0) || Boolean(d.phone && d.phone.length > 0),
+    {
+      message: 'Add an email or phone number so the operator can reply.',
+      path: ['email'],
+    }
+  );
+
 export type SignUpInput = z.infer<typeof signUpSchema>;
 export type SignInInput = z.infer<typeof signInSchema>;
 export type InterestInput = z.infer<typeof interestSchema>;
+export type EnquiryInput = z.infer<typeof enquirySchema>;
 
 // ─── Reusable utility validators (non-Zod) ───────────────────────────────────
 

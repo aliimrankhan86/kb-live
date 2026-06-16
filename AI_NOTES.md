@@ -1,14 +1,220 @@
 # PilgrimCompare AI Handover — Single Source of Truth
 
-**Last verified:** 2026-06-12 (Prompt 5 + 6 — transactional email + cron suite — 1,818 tests, 0 build errors)
-**Branch:** `dev` (clean — Q1–Q6 all merged via PRs)
+**Last verified:** 2026-06-16 (Task E — `app_metadata.role` backfill — idempotent script ran clean against live: total 10, 0 absent, 0 updated, 10 skipped, breakdown unchanged 8 customer / 1 operator / 1 admin). Task D (Plausible) wired + production-gated. **Both #89 (Task D) and #90 (Task E) merged to `dev`.** Task C (KT-→PC-) + Task 3 already on `dev`.
+**Branch:** `chore/app-metadata-role-backfill` — merged to `dev` (resolved AI_NOTES by keeping both §Task D + §Task E).
 **Audience:** Claude, Codex, Kimi, and any AI/developer taking over the project.
 
 **Next immediate action:**
-Gate 3 — operator onboarding. Run the 3 DB migration SQL statements in §23 against Supabase before deploying. Then begin operator acquisition.
-See §10 + §23 for queue context.
+Task 4 — lead logging + per-operator enquiry counting (analytics event on enquiry). `Repository.createEnquiry` is currently pure persistence — no analytics/lead-count event is emitted yet. Also: wire the double-opt-in confirmation send + unsubscribe/suppression on top of the `marketing_consents` store built in Task 3 (record exists; no email is sent yet, by design).
 
 This file is the current handover source of truth. If another document conflicts with a verified statement here, treat that other document as stale and update it before changing implementation.
+
+> **Precedence note (2026-06-15):** `PILGRIMCOMPARE_PROJECT_DIRECTION.md` (repo root) is now the single source of truth for product direction and **must be read first every session**, before this file. It wins all conflicts except the language/legal red lines. `PARKED_FEATURES.md` (repo root) is the canonical parked-feature register.
+
+---
+
+## §Task E — `app_metadata.role` backfill — 2026-06-16
+
+**Status: ✅ COMPLETE on branch `chore/app-metadata-role-backfill`** (off `dev` `49640e2`). Closes the §5 / §8 P0 backfill item. No schema migration (JSON-field data change only). PR to `dev` open — **not merged**.
+
+### RBAC read path (confirmed tamper-proof)
+Authorization role is read from `app_metadata.role` (service-role-writable, not user-editable) in **both** trusted points, defaulting to least-privileged `customer` when absent:
+- `lib/auth/session.ts:40` — `getSessionUser()`: `const role = (user.app_metadata?.role as UserRole) || 'customer';`
+- `lib/supabase/middleware.ts:62`,69 — edge gate for `/operator/*` + `/admin/*`: `user?.app_metadata?.role` → `role || 'customer'`.
+
+`user_metadata` is never used for authz (explicit SECURITY comments at both sites). Old absent-role fallback was already `customer` — so a missing role could read public/customer surfaces but was already blocked from operator/admin by middleware.
+
+### What ran
+`scripts/backfill-roles.mjs` (idempotent, service-role admin API, `.env.local` path, same as `count-roles.mjs`) ran once against live. **Before === after** (nothing to fix):
+
+| Metric | Before | After |
+|---|---|---|
+| total users | 10 | 10 |
+| customer | 8 | 8 |
+| operator | 1 | 1 |
+| admin | 1 | 1 |
+| absent role | 0 | 0 |
+
+Result: **0 updated, 10 skipped.** Every user already had a role; operator + admin untouched. The pre-2026-06-09 risk was already satisfied on live data.
+
+### Durable artifacts (in repo)
+- `scripts/backfill-roles.mjs` — idempotent guard. Merges `app_metadata` (reads existing, adds `role` only, never drops/overwrites another key), sets `role='customer'` **only** where absent, never touches an existing role, safe to re-run. Prints total / updated / skipped + post-run breakdown.
+- `scripts/count-roles.mjs` — standalone read-only verifier.
+- Both write/read to whatever Supabase project the `SUPABASE_SERVICE_ROLE_KEY` belongs to — point at the correct env first. Service-role only, never client-exposed.
+
+### Remaining blocker before `dev → main` promotion
+**Registered office line on the footer** — intentionally omitted pending the founder's **Companies House AD01** filing (move registered office off the residential address). See §below ("Open compliance gap — registered office address"). Code path ready: uncomment the line in `components/layout/Footer.tsx` once AD01 is filed. Practical risk while open: ~zero.
+
+---
+
+## §Task D — Plausible analytics wired + production-gated — 2026-06-16
+
+**Status: ✅ COMPLETE on branch `chore/verify-plausible-analytics`** (off `dev` `49640e2`). `tsc` clean, `npm run build` 0 errors, enquiry Vitest **24/24**. Production gate verified empirically (served the prod build).
+
+### What was found (pre-change)
+Plausible was **not wired at all** — no script, no events. It was only named in legal copy (`app/privacy/page.tsx`, `components/compliance/CookieConsent.tsx`), which promised "anonymised page views via Plausible (cookieless)". So the site legally claimed analytics while collecting nothing. The internal `Repository.trackEvent` / `analytics_events` DB system is **separate** (operator funnel) and was left untouched.
+
+### What changed
+1. **Pageview script** (`app/layout.tsx`): cookieless `https://plausible.io/js/script.js`, `defer`, carries the CSP `nonce` (same pattern as the theme script), `data-domain="pilgrimcompare.co.uk"` **hardcoded** (stable brand fact — deliberately NOT derived from `NEXT_PUBLIC_SITE_URL`, which is a placeholder locally). Cookieless build keeps the privacy/cookie copy true.
+2. **Production gate** (`app/layout.tsx`): script renders **only** when `process.env.VERCEL_ENV === 'production'`. Plausible attributes hits to `data-domain` regardless of host, so localhost + `*.vercel.app` previews would otherwise pollute the real stats. Verified: `VERCEL_ENV=production` → script + data-domain in HTML; no var → 0 occurrences.
+3. **CSP** (`middleware.ts`): added `https://plausible.io` to **both** `script-src` (load) and `connect-src` (the `/api/event` POST). Stays nonce-based, no `unsafe-inline`. Verified in the served `Content-Security-Policy` header.
+4. **One conversion goal** (`components/enquiry/EnquiryForm.tsx`): `window.plausible?.('Enquiry Submitted')` fires exactly once on the successful PC- confirmation (right after `setReferenceCode`). Optional-chained → no-ops when the script isn't loaded (non-prod). This is the **client-side anonymous count only** — NOT the Task 4 server-side lead log, and does not replace it. No other events added.
+
+### Files changed
+`app/layout.tsx` (gated script), `middleware.ts` (CSP), `components/enquiry/EnquiryForm.tsx` (goal + `window.plausible` global type). No DB changes, no migration. Payment-posture lines, "Not provided" semantics, parked flows, and the internal `trackEvent` system all untouched.
+
+### Open prereq (FOUNDER ACTION)
+**Create the `pilgrimcompare.co.uk` site in the Plausible Cloud dashboard.** Until that site exists, the production script loads but Plausible 404s the ingest and records nothing. One-time dashboard step, no code.
+
+---
+
+## §Task C — Reference prefix rename `KT-` → `PC-` — 2026-06-16
+
+**Status: ✅ COMPLETE on branch `feature/reference-prefix-rename`** (off `dev` `313c222`). Vitest **1,860/1,860**, `tsc` clean, `npm run build` 0 errors, enquiry E2E **6/6 ×3 browsers** (PC- on the confirmation screen). PR to `dev` open — **not merged**.
+
+### What changed
+Renamed the KaabaTrip-era `KT-` reference prefix to `PC-` (PilgrimCompare) **everywhere it is generated or asserted**. Code format/length after the prefix is **unchanged** — still `<PREFIX>-<8 hex, uppercase>`; only the two letters changed.
+
+- **Single generation source:** `lib/api/repository.ts` — `const REFERENCE_CODE_PREFIX = 'KT' → 'PC'` (line 135). This one const drives both Enquiry and BookingIntent codes via `generateReferenceCode`, so the rename is one line + downstream assertions. No DB migration (prefix is generated at write time, not a stored constraint).
+- **Cron fallback:** `app/api/cron/outcome-followup/route.ts` — `KT-${id}` fallback → `PC-${id}`.
+- **Seed/mock data:** `lib/api/mock-db.ts` — `KT-DEMO-001` → `PC-DEMO-001`, `KT-LEGACY-` → `PC-LEGACY-`.
+- **Comments:** `repository.ts` + `lib/types.ts` (`enquiryReference` comment).
+- **Tests:** `tests/enquiry.test.ts` (fixtures `PC-ABCD1234`/`PC-DUP00001`, regex `/^PC-[A-Z0-9]{8}$/`, description), `tests/enquiry-api.test.ts` (`PC-ABCD1234` ×4), `tests/complaints.test.ts` (`PC-TEST-001`), `tests/payment-instructions.test.tsx` (`PC-TEST-001`/`PC-TEST-003`).
+- **E2E:** `e2e/enquiry.spec.ts` (`/PC-/` ×2), `e2e/bank-payment.spec.ts` + `e2e/flow.spec.ts` (`/^PC-/` — booking-intent codes share the generator, so these assertions had to move too).
+- **Docs:** README, BUSINESS, PROJECT_BRIEF, APP_READINESS_REPORT, docs/00_PRODUCT_CANON, docs/COMPLIANCE, docs/AI_RUNBOOK (F3 current-spec line), plus §6 + P2 here.
+
+### Grep results (pre-change, repo-wide, excl. node_modules/.next/lib/generated/.git)
+- `KT_`: **0 matches.**
+- `KT-`: **25 matches in code/tests/sql** (all changed) + the rest in `.md` docs. **0 `KT-` left in code/tests/e2e/sql after the change.**
+
+### Intentionally NOT changed
+- **Pre-rename DB records** keep their `KT-` codes — immutable by design (no migration; old refs stay valid historical references alongside new `PC-` ones).
+- **`docs/AI_RUNBOOK.md` lines 62 & 857** — historical changelog/summary entries; left as `KT-` to preserve the historical record (not current-state claims).
+- Three payment-posture lines, reference format/length, and "Not provided" semantics — all untouched.
+
+---
+
+## §Task 3 — Pilgrim email opt-in + contact-hint UX fix — 2026-06-16
+
+**Status: ✅ COMPLETE on branch `feature/pilgrim-email-optin`** (off `dev` `314f303`). Vitest **1,860/1,860** (+8), `tsc` clean, `npm run build` 0 errors. Migration `011` **applied to Supabase** (verified: 7 cols, RLS on, `enquiry_reference` NOT NULL, unique constraint present). No email sent from this task — store only.
+
+### What was built
+1. **Marketing opt-in on the enquiry form** (`components/enquiry/EnquiryForm.tsx`): a single, **unticked-by-default** consent checkbox (`data-testid="enquiry-marketing-consent"`) below the contact fields. Verbatim UK-English label: *"Email me Umrah tips and package updates from PilgrimCompare. You can unsubscribe anytime."* Consent is **optional** — the enquiry sends regardless; marketing consent never blocks it.
+2. **Contact-hint UX fix** (the flagged Task-2 item): when name is filled but neither email nor phone given, a visible hint `data-testid="enquiry-contact-hint"` ("Add an email or phone to send.") shows near the Send button. **Additive** — the existing disabled-button behaviour (`canSubmit`) is unchanged.
+
+### New table + RLS decision
+- **Dedicated `marketing_consents` table** (migration `supabase/migrations/011_marketing_consents_table.sql`) — consent is **NOT** bolted onto the `enquiries` record. RLS **enabled, service-role only, no public policies** — consistent with `enquiries`/`interests` (the existing 12-table RLS model). Prisma model `MarketingConsent` (`@@map("marketing_consents")`).
+- Columns: `id, email NOT NULL, consent BOOLEAN NOT NULL DEFAULT true, consent_timestamp TIMESTAMPTZ, source TEXT NOT NULL DEFAULT 'enquiry_form', enquiry_reference TEXT NOT NULL, created_at`. `UNIQUE (email, enquiry_reference)` for idempotency.
+- **`enquiry_reference` is NOT NULL** (founder correction): every write carries the KT- reference, so the unique constraint always dedupes (Postgres treats NULLs as distinct — avoided here). The write path (`route.ts`) always passes `enquiry.referenceCode`.
+- **Semantics (founder correction):** a row exists **only** when consent was given **with an email**. The **absence of a row IS the "no consent" state** — there is no `consent=false` row. `consent` is kept TRUE purely for audit explicitness.
+
+### Consent data shape
+`MarketingConsent` (`lib/types.ts`): `{ id, email, consent (always true), consentTimestamp (ISO/UTC), source ('enquiry_form'), enquiryReference (KT- code), createdAt }`.
+
+### Gating logic (in `app/api/enquiries/route.ts`)
+After `createEnquiry`, persist consent **only when** `marketingConsent === true` **AND** `enquiry.email` present. Phone-only opt-in → **no record**. The consent write is wrapped in try/catch and **logs but never propagates** to the enquiry response (the 201 + reference code always returns). Double-opt-in ready: stored only; **no email sent here**.
+
+### Files changed
+`supabase/migrations/011_marketing_consents_table.sql` (new), `prisma/schema.prisma` (`MarketingConsent` model), `lib/types.ts` (`MarketingConsent`), `lib/validation.ts` (`enquirySchema.marketingConsent: boolean, default false`), `lib/api/mock-db.ts` (`MARKETING_CONSENTS` key + get/save, idempotent), `lib/api/db/adapter.ts` (`mapMarketingConsent` + get/save upsert on the compound unique), `lib/api/repository.ts` (mockStore wiring + `createMarketingConsent`), `app/api/enquiries/route.ts` (gated consent persist). Tests: `tests/enquiry-api.test.ts` (+4: sends unticked w/ no record; record only ticked+email; none ticked+phone-only; consent failure never fails enquiry), `tests/enquiry.test.ts` (+4: schema default/true, repository persist + idempotency), `e2e/enquiry.spec.ts` (hint appears name-only then disappears; submit ±checkbox).
+
+### Hard rules held
+KT- reference prefix **untouched** (logged separately). The three payment-posture lines on the confirmation screen **unchanged**. Parked flags (`FEATURE_BOOKING_FLOW`/`FEATURE_RFQ_QUOTE`) untouched. Missing data still shows "Not provided".
+
+### Open risks / notes
+- Migration applied via `npx prisma db execute --file …` (uses `DIRECT_URL` from `prisma.config.ts`); `psql` not installed on this box. Additive + idempotent (`CREATE TABLE IF NOT EXISTS`).
+- E2E not run locally this session (CI runs no Playwright; full suite is run manually pre-merge per §9). The two enquiry E2E flows are written and the build that serves them is green. Run `npx playwright test e2e/enquiry.spec.ts` before merge if desired.
+- No unsubscribe/suppression UI or send yet — that's Task 4 (the store is the prerequisite, now in place).
+
+---
+
+## §Task 2 — Canonical pilgrim enquiry journey — 2026-06-15
+
+**Status: ✅ COMPLETE on branch `feature/clean-enquiry-journey`** (off `dev` `05c0788`). One package, one enquiry, one operator. **Anonymous** — no login required. Vitest **1,852/1,852** (+16), `tsc` clean, `npm run build` 0 errors, enquiry E2E 3/3 ×3 browsers (serial).
+
+### What was built
+- **Entry point:** package page (`components/packages/PackageDetail.tsx`) now has an always-live **Enquire** CTA (desktop rail `package-cta-enquire` + mobile sticky `package-mobile-cta-enquire`) → `/packages/[slug]/enquire`. Before this, the only CTA was the parked "Request quote" (hidden with flag off) — so there was *no* live way to enquire.
+- **Form** (`app/packages/[slug]/enquire/page.tsx` server → `components/enquiry/EnquiryForm.tsx` client): read-only package+operator summary (trip type, departure airport, duration, hotels, price — "Not provided" when absent), then fields **and only these**: Name (required), Email and/or Phone (≥1 required), Travel month (optional), Message (optional). Does **not** re-ask anything the package states.
+- **Submit:** `POST /api/enquiries` (anonymous, IP rate-limited scope `'enquiry'`). Resolves package+operator **server-side** (honest names, never client-supplied), persists an `Enquiry` with a unique reference code + timestamp, returns `{ referenceCode }`. Confirmation screen shows the reference code, a plain "what happens next" line, and the **three verbatim payment-posture lines**.
+
+### Data model / persistence (decision)
+- New **`Enquiry`** entity through the normal Repository stack (NOT the parked `QuoteRequest`, which needs a non-null `customerId` FK = auth-only; NOT the `interests` raw-SQL shortcut, which bypasses Repository and would not work under E2E/MockDB).
+- Prisma model `Enquiry` (`prisma/schema.prisma`) + raw migration **`supabase/migrations/010_enquiries_table.sql`** (`enquiries` table, RLS on, service-role only). **Migration already applied to Supabase** via `DIRECT_URL` (additive `CREATE TABLE IF NOT EXISTS`) — preview/prod persistence works now.
+- Wired through `lib/api/mock-db.ts` (get/saveEnquiry + `ENQUIRIES` key), `lib/api/db/adapter.ts` (`mapEnquiry`/`getEnquiries`/`saveEnquiry`), `lib/api/repository.ts` (`createEnquiry`, mockStore wrapper).
+
+### Reference code (reused, not duplicated)
+`Repository.createEnquiry` reuses the existing in-module `generateReferenceCode(existingCodes)` (`KT-XXXXXXXX`, unique, 10-attempt) — same generator BookingIntent uses. Single source; no new scattered logic. Codes are `KT-` (consistent with the existing prefix).
+
+### Emails — DO they send via Resend?
+**Yes, wired and sendable.** Uses the **existing** Resend setup only (`lib/email/send.tsx`): `sendEnquiryConfirmation` (pilgrim) + `sendOperatorEnquiryAlert` (operator). Fire-and-forget — both are try/catch and **never fail the enquiry**; the record persists and the confirmation screen shows regardless. Confirmation email sent only when the pilgrim gave an email; operator alert only when the operator has a `contactEmail`. No new email infra scaffolded (per task constraint). Prod has `RESEND_API_KEY`; in E2E/local without it, `resendClient()` throws and is swallowed — persistence + confirmation still succeed.
+
+### Posture copy (single source)
+`lib/content-rules.ts` now exports `CONTRACT_STANDARD_LINE`, `REFERENCE_CODE_STANDARD_LINE`, and `PAYMENT_POSTURE_LINES` (the three verbatim lines, in order). Confirmation renders them from this constant — do not paraphrase. (`lib/legal.ts` holds only the entity block, not these strings.)
+
+### Files changed
+`prisma/schema.prisma`, `supabase/migrations/010_enquiries_table.sql` (new), `lib/types.ts` (`Enquiry`), `lib/validation.ts` (`enquirySchema`), `lib/content-rules.ts` (posture lines), `lib/api/mock-db.ts`, `lib/api/db/adapter.ts`, `lib/api/repository.ts`, `app/api/enquiries/route.ts` (new), `components/enquiry/EnquiryForm.tsx` (new), `app/packages/[slug]/enquire/page.tsx` (new), `components/packages/PackageDetail.tsx` (Enquire CTAs). Tests: `tests/enquiry.test.ts`, `tests/enquiry-api.test.ts`, `e2e/enquiry.spec.ts` (all new).
+
+### Parked flows untouched
+`FEATURE_BOOKING_FLOW` / `FEATURE_RFQ_QUOTE` unchanged (default OFF). The parked RFQ "Request quote" CTA blocks in `PackageDetail.tsx` are untouched — the new Enquire CTA sits alongside them. PARKED_FEATURES.md unchanged (no flag/path changed).
+
+### Open risks / notes
+- Full E2E suite (serial): the new enquiry spec + everything passes except a **pre-existing webkit `operator.spec.ts` "loads packages page" flake** under full-suite load — passes in isolation (10/10), unrelated to this task (operator-login timing; my diff doesn't touch operator pages).
+- No analytics/lead-counting event emitted on enquiry — deliberately deferred to **Task 4** (lead logging + per-operator counting). `createEnquiry` is pure persistence.
+- Marketing opt-in is **Task 3** — structural room left, not built.
+
+---
+
+## §Task 1 — Park the broken flows (RFQ engine + booking/payment) — 2026-06-15
+
+**Status: ✅ COMPLETE — PR [#83](https://github.com/aliimrankhan86/kb-live/pull/83) merged to `dev`** (merge commit `05c0788`, 2026-06-15; `ci` check green, Vercel preview built). `main` untouched (still `7431526`). Branched off `dev` (Task 1 of the direction file §9). Two live pilgrim-journey flows switched OFF behind feature flags. **No code deleted.** Vitest 1,836/1,836, `tsc` clean, `npm run build` 0 errors. Acceptance verified on a phone-sized live preview (flags at default OFF) and confirmed on the Vercel PR preview.
+
+### Standing rule (now project-wide)
+**Parked code is never deleted and never re-enabled without the founder's explicit approval.** Parked = switched off behind a flag, intact, reversible, and documented in `PARKED_FEATURES.md` + here. (Direction file §4 + §10.3.)
+
+### The two flags added (`lib/config.ts`, both default OFF)
+| Env var | Helper | Parks |
+|---|---|---|
+| `FEATURE_BOOKING_FLOW` | `isBookingFlowEnabled()` | Booking-intent / bank-details / payment-evidence flow |
+| `FEATURE_RFQ_QUOTE` | `isRfqQuoteEnabled()` | Multi-step RFQ quote engine |
+
+Server-side only — evaluated on the server and passed down as boolean props (same rule as `FEATURE_FEATURED_SLOTS`; never read client-side).
+
+### Files touched
+- `lib/config.ts` — added both flags + `isBookingFlowEnabled()` / `isRfqQuoteEnabled()`.
+- **RFQ off:** `app/quote/page.tsx` (`notFound()`), `app/api/quote-requests/route.ts` (POST → 404), `components/packages/PackageDetail.tsx` + `app/packages/[slug]/page.tsx` (hide "Request quote" CTA via `rfqEnabled` prop), `app/layout.tsx` → `components/layout/Footer.tsx` (drop "Get a Quote" link), `components/marketing/CityCorridor.tsx`, `app/umrah/ramadan/page.tsx`, `app/umrah/cost/page.tsx` (hide `/quote` CTA). Header had no live `/quote` link (the `isQuote` branch is dead — no navLink uses it), so it was left untouched.
+- **Booking off:** `components/request/RequestDetail.tsx` + `app/requests/[id]/page.tsx` (hide "Proceed direct", booking dialog, payment-evidence upload, `PaymentInstructions`/bank details via `bookingEnabled` prop), `app/requests/[id]/confirmation/page.tsx` (`notFound()`), `app/api/booking-intents/route.ts` (POST → 404).
+- **Tests:** `tests/feature-flags.test.tsx` (new — flags default false; PackageDetail hides CTA when off, shows when on). `playwright.config.ts` — both flags forced `'true'` in `webServer.env` so the existing `flow.spec`/`bank-payment` E2E still exercise the parked code and prove it intact.
+- **Docs:** created `PILGRIMCOMPARE_PROJECT_DIRECTION.md`, `PARKED_FEATURES.md` (flag names + real file paths filled in), this section.
+
+### Acceptance (verified on live preview, flags OFF)
+`/quote` → 404 · `/requests/[id]/confirmation` → 404 · `POST /api/booking-intents` → 404 · `POST /api/quote-requests` → 404 · package page (375px) has no Request-quote CTA · zero `/quote` links on `/`, `/umrah/london`, `/umrah/cost`, `/umrah/ramadan`, package pages. The parked code still exists in the repo.
+
+### Surprises / notes
+- The booking/payment flow is only reachable *after* the RFQ flow (`/quote` → `/requests/[id]` → offers → "Proceed direct"), so parking RFQ already removes the path; the booking flag adds defence-in-depth + a clean server guard.
+- `Header.tsx` has a dead `/quote` CTA branch (`link.href === '/quote'`) but no navLink supplies that href — nothing to hide there.
+- `app/requests/page.tsx` (the customer's request list) still has `/quote` "New Request" links. It is behind customer auth (not the public pilgrim walk) and any click hits the `/quote` 404 guard. Left intact, flagged here as a minor follow-up if a cleaner empty-state is wanted.
+
+### Outstanding (separate task, NOT a blocker for Task 1)
+- ✅ **Cookie-banner E2E flake — FIXED 2026-06-15** (branch `feature/fix-cookie-banner-e2e-flake`). See §Cookie-banner E2E flake fix below.
+
+### Next task
+**Task 2 — Build the simplified enquiry journey** (direction file §9): package-page "Enquire" → short pre-filled form (name, contact, optional travel month, optional message) → reference code + confirmation with payment-posture copy. One package, one enquiry, one operator. Branch from the updated `dev` (`05c0788`).
+
+---
+
+## §Cookie-banner E2E flake fix — 2026-06-15 (branch `feature/fix-cookie-banner-e2e-flake`)
+
+**Problem.** `e2e/catalogue.spec.ts`, `e2e/operator.spec.ts`, `e2e/bank-payment.spec.ts` intermittently failed with `<...> from <div ... data-testid="cookie-consent-banner" ...> subtree intercepts pointer events` when clicking bottom-of-viewport controls (sticky compare button, wizard/bank CTAs). The `CookieConsent` banner (`components/compliance/CookieConsent.tsx`) is `position:fixed; bottom:0; z-40`; it mounts whenever `localStorage['kb_cookie_consent_v1']` is absent and overlaps those controls. Pre-existing; which spec/browser failed varied per run.
+
+**Fix (test-setup only — no product UX touched).** New helper `e2e/helpers/cookies.ts` → `dismissCookieBanner(page)` seeds the consent key via `page.addInitScript`. Init script re-runs before page scripts on **every** navigation, so the banner never mounts — and it survives the `localStorage.clear()` calls inside `bank-payment.spec.ts` (a one-shot `page.evaluate` would not). `STORAGE_KEY` + payload shape mirror the component; keep in sync if its consent contract changes.
+
+Wired before the first navigation in:
+- `catalogue.spec.ts` — first line of the test.
+- `operator.spec.ts` — all 3 `beforeEach` hooks.
+- `bank-payment.spec.ts` — the `beforeEach`.
+
+Banner component, feature flags, and RFQ/booking flows left untouched.
+
+**Verification.** Vitest 1,836/1,836; `tsc` clean; `npm run build` 0 errors (via Playwright `webServer`). E2E run **3× under CI conditions (`--workers=1`)**: 45/45 pass each (15 tests × chromium+firefox+webkit). Zero pointer-intercept errors. (Note: locally `fullyParallel:true` with default multi-workers causes a *separate, unrelated* shared-MockDB race between `operator`/`bank-payment` specs — CI runs `workers:1` so it does not occur there; out of scope here.)
 
 ---
 
@@ -45,7 +251,7 @@ Test/build baseline unchanged: 1,833 unit tests pass, `tsc` clean, `npm run buil
 - CI workflow green; branch protection active on `main` + `dev`
 
 **Exception (not blocking, must close before scaling):**
-- **Plausible analytics: UNCONFIRMED** — wire `data-domain=pilgrimcompare.co.uk` in `app/layout.tsx` behind cookie consent
+- ~~**Plausible analytics: UNCONFIRMED**~~ → ✅ **WIRED + production-gated 2026-06-16** (§Task D). Cookieless `script.js`, `data-domain="pilgrimcompare.co.uk"`, renders only when `VERCEL_ENV === 'production'`, CSP allows `plausible.io`, single `'Enquiry Submitted'` goal on the PC- confirmation. **Founder prereq:** create the `pilgrimcompare.co.uk` site in the Plausible dashboard or ingest 404s.
 
 ### Gate 3 — Soft launch ⚡ ACTIVE
 Target: 5 operators onboarded, ~50 packages live. No code blockers for this gate — it is an operator acquisition and data-quality goal.
@@ -174,7 +380,7 @@ Min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special character. Enforced i
 ### Role source
 Authorization role reads from `app_metadata.role` (service-role-only) — not user-editable `user_metadata`. Fixed 2026-06-09.
 
-⚠️ Backfill required: any Supabase auth user created before 2026-06-09 has role only in `user_metadata` and will default to `customer`. Set `app_metadata.role` via the service-role admin API before operator onboarding.
+✅ **Backfill done (Task E, 2026-06-16).** Idempotent service-role script `scripts/backfill-roles.mjs` ran clean against live: **total 10, 0 with absent role, 0 updated, 10 skipped.** All users already carried `app_metadata.role` (8 customer / 1 operator / 1 admin) — operator/admin untouched. The script is the durable guard (merges `app_metadata`, sets `role='customer'` only where absent, never overwrites an existing role, safe to re-run). `scripts/count-roles.mjs` is the standalone read-only verifier. Point either at the correct project's `SUPABASE_SERVICE_ROLE_KEY` before running.
 
 ---
 
@@ -209,7 +415,7 @@ Next.js App Router UI
 - Public: published packages + public operator profiles only
 
 ### Payment/evidence policy
-- BookingIntent reference codes are `KT-…`, unique, and immutable
+- BookingIntent reference codes are `PC-…`, unique, and immutable (renamed from `KT-` 2026-06-16, see §Task C)
 - Evidence metadata and file bytes visible only to the customer, involved operator, or admin
 - Product canon says MVP evidence storage is metadata-only; architecture supports byte storage — **policy conflict, resolve before shipping evidence-review UI**
 
@@ -268,8 +474,8 @@ Next.js App Router UI
 |---|---|
 | `/public/logo.svg` + `/public/text-logo.svg` contain PilgrimCompare | **OPEN — fix before operator onboarding (Q1 scope)** |
 | PaymentEvidence RLS — operator/admin read access | **UNCONFIRMED** — storage policies updated (migration 006) but evidence-review UI and signed-download route not built. Resolve before Gate 2 fully closed. |
-| `app_metadata` role backfill | Pre-2026-06-09 users default to `customer`. Backfill via service-role admin API before onboarding operators. |
-| Plausible analytics | Not wired — add `data-domain=pilgrimcompare.co.uk` in `app/layout.tsx` gated behind cookie consent. |
+| ~~`app_metadata` role backfill~~ | ✅ **CLOSED 2026-06-16 (Task E).** Live backfill ran clean: 10 users, 0 absent, 0 updated, 10 skipped; operator/admin untouched (8 customer / 1 operator / 1 admin). Durable idempotent guard `scripts/backfill-roles.mjs` in repo; verifier `scripts/count-roles.mjs`. |
+| Plausible analytics | ✅ **Wired + production-gated 2026-06-16** (§Task D). Cookieless, `data-domain="pilgrimcompare.co.uk"`, `VERCEL_ENV==='production'` only, CSP allows `plausible.io`, one `'Enquiry Submitted'` goal. **Founder prereq:** create the site in the Plausible dashboard. |
 
 ### P1 — high value, not launch-blocking today
 
@@ -288,7 +494,7 @@ Next.js App Router UI
 | Item | Status |
 |---|---|
 | Test coverage | Passes at 232/232 but coverage ~28%. Increase for auth session, DB adapter, package APIs, analytics, payment evidence. |
-| `KT-` reference prefix | Existing DB records use this. Rename only post-launch after migration. `/terms` copy references `KT-XXXXX` — update when prefix changes. |
+| ~~`KT-` reference prefix~~ → **`PC-`** | ✅ Renamed 2026-06-16 (§Task C, branch `feature/reference-prefix-rename`). Generated at write time (single const `REFERENCE_CODE_PREFIX`); no DB migration. **Pre-rename DB records keep their `KT-` codes** (immutable, by design) — both prefixes are valid historical references. `/terms` uses the dynamic code (never hard-coded the prefix). |
 | Docs consistency | Some docs contain stale historical status. Update when touched; do not regress implementation to match stale docs. |
 
 ### Future features — flagged, NOT approved for build

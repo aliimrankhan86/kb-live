@@ -26,7 +26,7 @@ These constraints are hard. Any output that violates them must be rejected.
 
 - F1 Quote rail: QuoteRequest → Offer → Compare (max 3) → BookingIntent.
 - F2 Catalogue: Browse Packages → Compare (max 3) → Quote or BookingIntent.
-- F3 BookingIntent: unique referenceCode (KT-..., immutable), payment handoff, evidence upload (image/PDF metadata + optional text), skip requires explicit acknowledgement.
+- F3 BookingIntent: unique referenceCode (PC-..., immutable), payment handoff, evidence upload (image/PDF metadata + optional text), skip requires explicit acknowledgement.
 - F4 Operator confirms payment status within 48h. Non-compliance affects routing/ranking.
 
 ### Trust and safety

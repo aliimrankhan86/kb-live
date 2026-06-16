@@ -469,3 +469,38 @@ model Complaint {
 
   @@map("complaints")
 }
+
+/// Canonical pilgrim enquiry (one package, one enquiry, one operator).
+/// Anonymous — no customer FK. Captures the short enquiry form + reference code.
+/// Marketing opt-in / consent record is intentionally NOT here yet (Task 3).
+model Enquiry {
+  id            String   @id @default(uuid())
+  referenceCode String   @unique @map("reference_code")
+  createdAt     DateTime @default(now()) @map("created_at")
+  packageId     String   @map("package_id")
+  operatorId    String?  @map("operator_id")
+  packageTitle  String?  @map("package_title")
+  operatorName  String?  @map("operator_name")
+  name          String
+  email         String?
+  phone         String?
+  travelMonth   String?  @map("travel_month")
+  message       String?
+
+  @@map("enquiries")
+}
+
+// Task 3: explicit marketing email consent captured at enquiry time.
+// A row exists ONLY when consent was given with an email — absence = no consent.
+model MarketingConsent {
+  id               String   @id @default(uuid())
+  email            String
+  consent          Boolean  @default(true)
+  consentTimestamp DateTime @default(now()) @map("consent_timestamp")
+  source           String   @default("enquiry_form")
+  enquiryReference String   @map("enquiry_reference")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  @@unique([email, enquiryReference], map: "marketing_consents_email_reference_unique")
+  @@map("marketing_consents")
+}

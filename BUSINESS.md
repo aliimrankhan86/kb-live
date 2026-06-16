@@ -22,7 +22,7 @@ Umrah/Hajj booking is opaque: scattered operators, inconsistent pricing, hard-to
 - PilgrimCompare is a **marketplace and enquiry system** — not a tour operator, not a payment processor.
 - Operators are the source of truth for package content, availability, pricing, fulfilment, payment records.
 - PilgrimCompare does **not** collect, hold, transfer, escrow, or invoice customer funds.
-- **BookingIntent** = an intent/reference record (`KT-…`), not a payment confirmation or final booking.
+- **BookingIntent** = an intent/reference record (`PC-…`), not a payment confirmation or final booking.
 - Customer payment is **pay-operator-direct**.
 - Trust claims use **stored facts only** (verification status, ATOL/ABTA numbers, company metadata, regions, profile completeness). Never invented. Missing data → shown as "Not provided".
 

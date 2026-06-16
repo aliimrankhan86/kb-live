@@ -86,6 +86,26 @@ export const PAYMENT_STANDARD_LINE =
   'You pay the operator directly. PilgrimCompare does not receive or hold your payment.'
 
 /**
+ * §4 standard copy lines 2 and 3. Verbatim — do not paraphrase.
+ * Shown with PAYMENT_STANDARD_LINE on the enquiry confirmation screen.
+ */
+export const CONTRACT_STANDARD_LINE =
+  'Your travel contract, cancellations and refunds are with the operator named on this page.'
+
+export const REFERENCE_CODE_STANDARD_LINE =
+  'Your PilgrimCompare reference code is a tracking code, not a payment receipt.'
+
+/**
+ * The three canonical payment-posture lines, in order. Single source for the
+ * enquiry confirmation screen. Verbatim — do not paraphrase or reorder.
+ */
+export const PAYMENT_POSTURE_LINES = [
+  PAYMENT_STANDARD_LINE,
+  CONTRACT_STANDARD_LINE,
+  REFERENCE_CODE_STANDARD_LINE,
+] as const
+
+/**
  * Homepage FAQ — defined once and fed to BOTH the FAQPage JSON-LD and the
  * visible on-page FAQ section, so the structured data is never orphaned.
  */

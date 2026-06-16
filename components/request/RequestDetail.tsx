@@ -95,7 +95,20 @@ export function BookableButton({
   );
 }
 
-export function RequestDetail({ id }: { id: string }) {
+export function RequestDetail({
+  id,
+  bookingEnabled = false,
+}: {
+  id: string;
+  /**
+   * Whether the parked booking-intent / payment flow is live. Evaluated on the
+   * server (isBookingFlowEnabled) and passed down — never read the flag in this
+   * client component. Default false: the "Proceed direct" booking screen,
+   * payment-evidence upload, and operator bank details are hidden.
+   * See PARKED_FEATURES.md entry 1.
+   */
+  bookingEnabled?: boolean;
+}) {
   const router = useRouter();
   const [regionSettings, setRegionSettings] = useState(() => getRegionSettings());
   const [request, setRequest] = useState<QuoteRequest | undefined>(undefined);
@@ -457,7 +470,8 @@ export function RequestDetail({ id }: { id: string }) {
                     <p>{offer.hotelStars} Star Hotels</p>
                     <p>{distanceToHaram === 'Not provided' ? distanceToHaram : `${distanceToHaram} to Haram`}</p>
                   </div>
-                  {existingIntent ? (
+                  {/* PARKED: booking-intent / payment flow — hidden when flag off (PARKED_FEATURES.md entry 1). */}
+                  {bookingEnabled && existingIntent ? (
                     <div className="mt-5 space-y-4">
                       <div className="rounded-md border border-[var(--borderSubtle)] bg-[rgba(255,255,255,0.04)] p-3 text-sm">
                         <p className="font-medium text-[var(--text)]">Booking intent recorded</p>
@@ -479,17 +493,20 @@ export function RequestDetail({ id }: { id: string }) {
                     <Button type="button" variant="secondary" size="sm" className="flex-1">
                       View Details
                     </Button>
-                    <BookableButton
-                      existingIntent={Boolean(existingIntent)}
-                      onProceed={() => {
-                        resetBookingForm();
-                        setActiveOfferForBooking(offer);
-                      }}
-                      isBookable={
-                        getOperator(offer.operatorId)?.eligibilityFlags?.canReceiveBookings === true &&
-                        getOperator(offer.operatorId)?.eligibilityFlags?.bankDetailsActive === true
-                      }
-                    />
+                    {/* PARKED: booking-intent / payment flow — hidden when flag off (PARKED_FEATURES.md entry 1). */}
+                    {bookingEnabled && (
+                      <BookableButton
+                        existingIntent={Boolean(existingIntent)}
+                        onProceed={() => {
+                          resetBookingForm();
+                          setActiveOfferForBooking(offer);
+                        }}
+                        isBookable={
+                          getOperator(offer.operatorId)?.eligibilityFlags?.canReceiveBookings === true &&
+                          getOperator(offer.operatorId)?.eligibilityFlags?.bankDetailsActive === true
+                        }
+                      />
+                    )}
                   </div>
                 </div>
               );
@@ -509,6 +526,8 @@ export function RequestDetail({ id }: { id: string }) {
         </OverlayContent>
       </Dialog>
 
+      {/* PARKED: booking-intent / payment flow — dialog hidden when flag off (PARKED_FEATURES.md entry 1). */}
+      {bookingEnabled && (
       <Dialog
         open={Boolean(activeOfferForBooking)}
         onOpenChange={(open) => {
@@ -646,6 +665,7 @@ export function RequestDetail({ id }: { id: string }) {
           </form>
         </OverlayContent>
       </Dialog>
+      )}
 
       {/* Temporary Link to Operator Dashboard for Demo */}
       <div className="mt-12 border-t border-[var(--borderSubtle)] pt-8 text-center">
