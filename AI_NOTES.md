@@ -1,7 +1,22 @@
 # PilgrimCompare AI Handover — Single Source of Truth
 
-**Last verified:** 2026-06-16 (Task E — `app_metadata.role` backfill — idempotent script ran clean against live: total 10, 0 absent, 0 updated, 10 skipped, breakdown unchanged 8 customer / 1 operator / 1 admin). Task D (Plausible) wired + production-gated. **Both #89 (Task D) and #90 (Task E) merged to `dev`.** Task C (KT-→PC-) + Task 3 already on `dev`.
-**Branch:** `chore/app-metadata-role-backfill` — merged to `dev` (resolved AI_NOTES by keeping both §Task D + §Task E).
+## 🚀 GO-LIVE — `dev` promoted to `main` — 2026-06-16
+
+**Promoted `dev` → `main` via PR [#91](https://github.com/aliimrankhan86/kb-live/pull/91) (merge commit, no squash).**
+- **Final `main` HEAD:** `6aeace6` (merge commit) — includes the full `dev` tree at `230cbaf`.
+- CI green on the merge result; Vercel **production deploy green**.
+- **Post-deploy smoke check (live `pilgrimcompare.co.uk`, 2026-06-16):**
+  1. ✅ Site loads (200). Footer renders *"PilgrimCompare is a trading name of Paramount Consultants Limited, registered in England and Wales (company no. 09679002). VAT no. GB 221 6154 46"* — **NO registered office**, as intended.
+  2. ✅ Plausible live: cookieless `script.js` (200) + pageview `POST plausible.io/api/event` → **202 Accepted** (site ingests; a non-existent site would 404). *Realtime dashboard eyeball is founder's — needs Plausible login.*
+  3. ✅ Test enquiry completed to the PC- confirmation screen (**PC-DD26BB30**, on demo operator Al-Hidayah). Extra `/api/event` POST fired at confirmation with no navigation (the `'Enquiry Submitted'` goal) → 202. Three payment-posture lines present.
+- **Deferred (logged decisions, non-blocking):**
+  - **Registered office line** — intentionally omitted pending Companies House AD01 filing. Revisit on validation; path ready in `lib/legal.ts` (`registeredOffice`).
+  - **`KT-` sample string** in `scripts/test-emails.mjs:99,104,113` — cosmetic dev-utility literal only (not app/tests/e2e/generation). Cleanup whenever.
+
+---
+
+**Last verified:** 2026-06-16 (Task E — `app_metadata.role` backfill — idempotent script ran clean against live: total 10, 0 absent, 0 updated, 10 skipped, breakdown unchanged 8 customer / 1 operator / 1 admin). Task D (Plausible) wired + production-gated. **Both #89 (Task D) and #90 (Task E) merged to `dev`, then all of `dev` promoted to `main` (#91, HEAD `6aeace6`).** Task C (KT-→PC-) + Task 3 already on `dev`.
+**Branch:** `dev` promoted to `main` 2026-06-16. (`chore/app-metadata-role-backfill` was the last merge into `dev`, resolved AI_NOTES by keeping both §Task D + §Task E.)
 **Audience:** Claude, Codex, Kimi, and any AI/developer taking over the project.
 
 **Next immediate action:**
