@@ -102,6 +102,9 @@ export const enquirySchema = z
     phone: z.string().trim().max(40, 'Phone must be 40 characters or fewer.').optional().or(z.literal('')),
     travelMonth: z.string().trim().max(40, 'Travel month must be 40 characters or fewer.').optional(),
     message: z.string().trim().max(1000, 'Message must be 1000 characters or fewer.').optional(),
+    // Task 3: OPTIONAL marketing opt-in. Defaults false; never blocks the enquiry.
+    // A consent record is persisted only when this is true AND an email is given.
+    marketingConsent: z.boolean().optional().default(false),
   })
   .refine(
     (d) => Boolean(d.email && d.email.length > 0) || Boolean(d.phone && d.phone.length > 0),

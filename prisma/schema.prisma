@@ -489,3 +489,18 @@ model Enquiry {
 
   @@map("enquiries")
 }
+
+// Task 3: explicit marketing email consent captured at enquiry time.
+// A row exists ONLY when consent was given with an email — absence = no consent.
+model MarketingConsent {
+  id               String   @id @default(uuid())
+  email            String
+  consent          Boolean  @default(true)
+  consentTimestamp DateTime @default(now()) @map("consent_timestamp")
+  source           String   @default("enquiry_form")
+  enquiryReference String   @map("enquiry_reference")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  @@unique([email, enquiryReference], map: "marketing_consents_email_reference_unique")
+  @@map("marketing_consents")
+}

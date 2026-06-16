@@ -35,12 +35,15 @@ export function EnquiryForm({ summary, packageSlug }: EnquiryFormProps) {
   const [phone, setPhone] = useState('')
   const [travelMonth, setTravelMonth] = useState('')
   const [message, setMessage] = useState('')
+  const [marketingOptIn, setMarketingOptIn] = useState(false)
   const [submit, setSubmit] = useState<SubmitState>({ status: 'idle' })
   const [referenceCode, setReferenceCode] = useState<string | null>(null)
 
   // Client-side mirror of the server rule: name + at least one contact.
   const hasContact = email.trim().length > 0 || phone.trim().length > 0
   const canSubmit = name.trim().length > 0 && hasContact && submit.status !== 'submitting'
+  // Task 3 UX fix: name filled but no contact yet → nudge near the Send button.
+  const showContactHint = name.trim().length > 0 && !hasContact
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -60,6 +63,7 @@ export function EnquiryForm({ summary, packageSlug }: EnquiryFormProps) {
           phone: phone.trim(),
           travelMonth: travelMonth.trim(),
           message: message.trim(),
+          marketingConsent: marketingOptIn,
         }),
       })
       const data = (await res.json().catch(() => ({}))) as { referenceCode?: string; error?: string }
@@ -216,7 +220,27 @@ export function EnquiryForm({ summary, packageSlug }: EnquiryFormProps) {
           />
         </Field>
 
-        {/* Task 3: a separate, unticked marketing opt-in goes here. */}
+        {/* Task 3: separate, OPTIONAL, unticked-by-default marketing opt-in.
+            Persisted only when ticked AND an email is given — never blocks the enquiry. */}
+        <label htmlFor="enquiry-marketing-consent" className="flex items-start gap-3 rounded-lg border border-[var(--border)] p-4">
+          <input
+            id="enquiry-marketing-consent"
+            data-testid="enquiry-marketing-consent"
+            type="checkbox"
+            checked={marketingOptIn}
+            onChange={(e) => setMarketingOptIn(e.target.checked)}
+            className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--yellow)]"
+          />
+          <span className="text-sm leading-relaxed text-[var(--textMuted)]">
+            Email me Umrah tips and package updates from PilgrimCompare. You can unsubscribe anytime.
+          </span>
+        </label>
+
+        {showContactHint && (
+          <p data-testid="enquiry-contact-hint" role="status" className="text-sm text-[var(--textMuted)]">
+            Add an email or phone to send.
+          </p>
+        )}
 
         {submit.status === 'error' && (
           <p data-testid="enquiry-error" role="alert" className="text-sm text-[var(--danger)]">

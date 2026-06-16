@@ -6,6 +6,7 @@ import {
   BookingOutcome,
   Complaint,
   Enquiry,
+  MarketingConsent,
   Offer,
   OperatorProfile,
   Package,
@@ -30,6 +31,7 @@ const STORAGE_KEYS = {
   COMPLAINTS: 'kb_complaints',
   INTERESTS: 'kb_interests',
   ENQUIRIES: 'kb_enquiries',
+  MARKETING_CONSENTS: 'kb_marketing_consents',
 };
 
 const PACKAGES_SEED_VERSION = 5;
@@ -1158,6 +1160,25 @@ export const MockDB = {
     }
     setStorage(STORAGE_KEYS.ENQUIRIES, enquiries);
     return enquiry;
+  },
+
+  // Task 3: marketing consent (a row exists only when consent given + email present).
+  getMarketingConsents: (): MarketingConsent[] =>
+    getStorage<MarketingConsent[]>(STORAGE_KEYS.MARKETING_CONSENTS, []),
+
+  saveMarketingConsent: (consent: MarketingConsent) => {
+    const consents = MockDB.getMarketingConsents();
+    // Idempotent on (email, enquiryReference) — mirror the DB unique constraint.
+    const existingIndex = consents.findIndex(
+      (c) => c.email === consent.email && c.enquiryReference === consent.enquiryReference
+    );
+    if (existingIndex >= 0) {
+      consents[existingIndex] = consent;
+    } else {
+      consents.push(consent);
+    }
+    setStorage(STORAGE_KEYS.MARKETING_CONSENTS, consents);
+    return consent;
   },
 
   getBookingOutcomes: (): BookingOutcome[] =>

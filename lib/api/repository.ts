@@ -20,6 +20,7 @@ import {
   ComplaintSeverity,
   ComplaintStatus,
   Enquiry,
+  MarketingConsent,
   Offer,
   OperatorProfile,
   Package,
@@ -66,6 +67,8 @@ const mockStore = {
   deletePackage: (id: string) => Promise.resolve(MockDB.deletePackage(id)),
   getEnquiries: () => Promise.resolve(MockDB.getEnquiries()),
   saveEnquiry: (enquiry: Enquiry) => Promise.resolve(MockDB.saveEnquiry(enquiry)),
+  getMarketingConsents: () => Promise.resolve(MockDB.getMarketingConsents()),
+  saveMarketingConsent: (consent: MarketingConsent) => Promise.resolve(MockDB.saveMarketingConsent(consent)),
   getBookingOutcomes: () => Promise.resolve(MockDB.getBookingOutcomes()),
   saveBookingOutcome: (bo: BookingOutcome) => Promise.resolve(MockDB.saveBookingOutcome(bo)),
   getDistinctDepartureCities: (): Promise<string[]> => {
@@ -562,6 +565,27 @@ export const Repository = {
     };
 
     return store().saveEnquiry(enquiry);
+  },
+
+  // Marketing consent (Task 3). Caller is responsible for the gating rule — a
+  // record is created ONLY when the pilgrim opted in AND an email is present
+  // (consent requires an email to be actionable). The enquiry reference is
+  // always carried so the DB unique (email, enquiry_reference) dedupes.
+  createMarketingConsent: async (input: {
+    email: string;
+    enquiryReference: string;
+    source?: string;
+  }): Promise<MarketingConsent> => {
+    const consent: MarketingConsent = {
+      id: crypto.randomUUID(),
+      email: input.email.trim(),
+      consent: true,
+      consentTimestamp: new Date().toISOString(),
+      source: input.source ?? 'enquiry_form',
+      enquiryReference: input.enquiryReference,
+      createdAt: new Date().toISOString(),
+    };
+    return store().saveMarketingConsent(consent);
   },
 
   // Quote Requests

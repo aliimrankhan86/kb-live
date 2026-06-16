@@ -90,3 +90,48 @@ describe('Repository.createEnquiry', () => {
     expect(enquiry.email).toBeUndefined();
   });
 });
+
+describe('enquirySchema — marketing opt-in (Task 3)', () => {
+  const base = { packageId: 'pkg-1', name: 'Aisha', email: 'aisha@example.com' };
+
+  it('defaults marketingConsent to false when omitted', () => {
+    const r = enquirySchema.safeParse(base);
+    expect(r.success).toBe(true);
+    if (r.success) expect(r.data.marketingConsent).toBe(false);
+  });
+
+  it('accepts marketingConsent true', () => {
+    const r = enquirySchema.safeParse({ ...base, marketingConsent: true });
+    expect(r.success).toBe(true);
+    if (r.success) expect(r.data.marketingConsent).toBe(true);
+  });
+});
+
+describe('Repository.createMarketingConsent (Task 3)', () => {
+  beforeEach(() => {
+    MockDB.getMarketingConsents().length = 0;
+  });
+
+  it('persists a consent record (consent=true, source, reference, UTC timestamp)', async () => {
+    const consent = await Repository.createMarketingConsent({
+      email: 'aisha@example.com',
+      enquiryReference: 'KT-ABCD1234',
+    });
+    expect(consent.consent).toBe(true);
+    expect(consent.source).toBe('enquiry_form');
+    expect(consent.enquiryReference).toBe('KT-ABCD1234');
+    expect(consent.consentTimestamp).toBeTruthy();
+
+    const stored = MockDB.getMarketingConsents();
+    expect(stored.find((c) => c.id === consent.id)?.email).toBe('aisha@example.com');
+  });
+
+  it('is idempotent on (email, enquiryReference) — no duplicate row', async () => {
+    await Repository.createMarketingConsent({ email: 'a@example.com', enquiryReference: 'KT-DUP00001' });
+    await Repository.createMarketingConsent({ email: 'a@example.com', enquiryReference: 'KT-DUP00001' });
+    const rows = MockDB.getMarketingConsents().filter(
+      (c) => c.email === 'a@example.com' && c.enquiryReference === 'KT-DUP00001'
+    );
+    expect(rows).toHaveLength(1);
+  });
+});
