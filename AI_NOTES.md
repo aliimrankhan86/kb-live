@@ -1,7 +1,7 @@
 # PilgrimCompare AI Handover — Single Source of Truth
 
-**Last verified:** 2026-06-16 (Task D — Plausible analytics wired + production-gated — `tsc` clean, `npm run build` 0 errors, enquiry Vitest 24/24, prod-gate verified by serving the build). Task C (KT-→PC-) + Task 3 merged to `dev`.
-**Branch:** `chore/verify-plausible-analytics` (off `dev` `49640e2`)
+**Last verified:** 2026-06-16 (Task E — `app_metadata.role` backfill — idempotent script ran clean against live: total 10, 0 absent, 0 updated, 10 skipped, breakdown unchanged 8 customer / 1 operator / 1 admin). Task D (Plausible) wired + production-gated. **Both #89 (Task D) and #90 (Task E) merged to `dev`.** Task C (KT-→PC-) + Task 3 already on `dev`.
+**Branch:** `chore/app-metadata-role-backfill` — merged to `dev` (resolved AI_NOTES by keeping both §Task D + §Task E).
 **Audience:** Claude, Codex, Kimi, and any AI/developer taking over the project.
 
 **Next immediate action:**
@@ -10,6 +10,40 @@ Task 4 — lead logging + per-operator enquiry counting (analytics event on enqu
 This file is the current handover source of truth. If another document conflicts with a verified statement here, treat that other document as stale and update it before changing implementation.
 
 > **Precedence note (2026-06-15):** `PILGRIMCOMPARE_PROJECT_DIRECTION.md` (repo root) is now the single source of truth for product direction and **must be read first every session**, before this file. It wins all conflicts except the language/legal red lines. `PARKED_FEATURES.md` (repo root) is the canonical parked-feature register.
+
+---
+
+## §Task E — `app_metadata.role` backfill — 2026-06-16
+
+**Status: ✅ COMPLETE on branch `chore/app-metadata-role-backfill`** (off `dev` `49640e2`). Closes the §5 / §8 P0 backfill item. No schema migration (JSON-field data change only). PR to `dev` open — **not merged**.
+
+### RBAC read path (confirmed tamper-proof)
+Authorization role is read from `app_metadata.role` (service-role-writable, not user-editable) in **both** trusted points, defaulting to least-privileged `customer` when absent:
+- `lib/auth/session.ts:40` — `getSessionUser()`: `const role = (user.app_metadata?.role as UserRole) || 'customer';`
+- `lib/supabase/middleware.ts:62`,69 — edge gate for `/operator/*` + `/admin/*`: `user?.app_metadata?.role` → `role || 'customer'`.
+
+`user_metadata` is never used for authz (explicit SECURITY comments at both sites). Old absent-role fallback was already `customer` — so a missing role could read public/customer surfaces but was already blocked from operator/admin by middleware.
+
+### What ran
+`scripts/backfill-roles.mjs` (idempotent, service-role admin API, `.env.local` path, same as `count-roles.mjs`) ran once against live. **Before === after** (nothing to fix):
+
+| Metric | Before | After |
+|---|---|---|
+| total users | 10 | 10 |
+| customer | 8 | 8 |
+| operator | 1 | 1 |
+| admin | 1 | 1 |
+| absent role | 0 | 0 |
+
+Result: **0 updated, 10 skipped.** Every user already had a role; operator + admin untouched. The pre-2026-06-09 risk was already satisfied on live data.
+
+### Durable artifacts (in repo)
+- `scripts/backfill-roles.mjs` — idempotent guard. Merges `app_metadata` (reads existing, adds `role` only, never drops/overwrites another key), sets `role='customer'` **only** where absent, never touches an existing role, safe to re-run. Prints total / updated / skipped + post-run breakdown.
+- `scripts/count-roles.mjs` — standalone read-only verifier.
+- Both write/read to whatever Supabase project the `SUPABASE_SERVICE_ROLE_KEY` belongs to — point at the correct env first. Service-role only, never client-exposed.
+
+### Remaining blocker before `dev → main` promotion
+**Registered office line on the footer** — intentionally omitted pending the founder's **Companies House AD01** filing (move registered office off the residential address). See §below ("Open compliance gap — registered office address"). Code path ready: uncomment the line in `components/layout/Footer.tsx` once AD01 is filed. Practical risk while open: ~zero.
 
 ---
 
@@ -346,7 +380,7 @@ Min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special character. Enforced i
 ### Role source
 Authorization role reads from `app_metadata.role` (service-role-only) — not user-editable `user_metadata`. Fixed 2026-06-09.
 
-⚠️ Backfill required: any Supabase auth user created before 2026-06-09 has role only in `user_metadata` and will default to `customer`. Set `app_metadata.role` via the service-role admin API before operator onboarding.
+✅ **Backfill done (Task E, 2026-06-16).** Idempotent service-role script `scripts/backfill-roles.mjs` ran clean against live: **total 10, 0 with absent role, 0 updated, 10 skipped.** All users already carried `app_metadata.role` (8 customer / 1 operator / 1 admin) — operator/admin untouched. The script is the durable guard (merges `app_metadata`, sets `role='customer'` only where absent, never overwrites an existing role, safe to re-run). `scripts/count-roles.mjs` is the standalone read-only verifier. Point either at the correct project's `SUPABASE_SERVICE_ROLE_KEY` before running.
 
 ---
 
@@ -440,7 +474,7 @@ Next.js App Router UI
 |---|---|
 | `/public/logo.svg` + `/public/text-logo.svg` contain PilgrimCompare | **OPEN — fix before operator onboarding (Q1 scope)** |
 | PaymentEvidence RLS — operator/admin read access | **UNCONFIRMED** — storage policies updated (migration 006) but evidence-review UI and signed-download route not built. Resolve before Gate 2 fully closed. |
-| `app_metadata` role backfill | Pre-2026-06-09 users default to `customer`. Backfill via service-role admin API before onboarding operators. |
+| ~~`app_metadata` role backfill~~ | ✅ **CLOSED 2026-06-16 (Task E).** Live backfill ran clean: 10 users, 0 absent, 0 updated, 10 skipped; operator/admin untouched (8 customer / 1 operator / 1 admin). Durable idempotent guard `scripts/backfill-roles.mjs` in repo; verifier `scripts/count-roles.mjs`. |
 | Plausible analytics | ✅ **Wired + production-gated 2026-06-16** (§Task D). Cookieless, `data-domain="pilgrimcompare.co.uk"`, `VERCEL_ENV==='production'` only, CSP allows `plausible.io`, one `'Enquiry Submitted'` goal. **Founder prereq:** create the site in the Plausible dashboard. |
 
 ### P1 — high value, not launch-blocking today
