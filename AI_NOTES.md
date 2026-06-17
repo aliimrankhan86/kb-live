@@ -64,6 +64,29 @@
 
 ---
 
+## §Standing decision — CSV import round-trip gap (DEFERRED — do NOT do piecemeal) — 2026-06-17
+
+The package CSV **export** emits the full field set, but the **importer reads only the basic columns** (`title, pricePerPerson, currency, totalNights, pilgrimageType` + `status, description, departureCity, departureDate`). So these operator-stated decision fields **export but do NOT round-trip back through import**:
+
+- `groupType`, `cancellationPolicy`, `paymentPlanAvailable`, hotel stars/names, distance bands, `inclusions`, and now **`ziyaratIncluded` / `ziyaratDetails`**.
+
+**Decision:** add importer support for **all** of these **together in one consistent change** — a single future scoped session, **not field-by-field**. Piecemeal additions would scatter the import mapping/validation and create an inconsistent pattern. Until then, ziyarat (like its siblings) is intentionally **export-only** — consistent with the existing pattern, not a bug. **Do not start this now.**
+
+---
+
+## §Standing rule — demo/seed data must NEVER reach production — 2026-06-17
+
+Demo operators and demo packages (e.g. **Al-Hidayah**, and any Zamzam / Makkah Tours-style seed listings) exist for **dev and E2E only**. They must **never** be visible to a real visitor on the live site.
+
+- **Before** any real operator browses production **OR** any real pilgrim traffic arrives: **remove all demo operators and demo packages from the live Supabase database.**
+- As real operators sign, their real **verified** listing replaces demo data **one-for-one**.
+- **Never** show fabricated operators, ATOL numbers, or prices on the live site — **DMCC Act 2024 + trust-proposition risk** (fabricated trust claims are exactly what the language/legal red lines forbid).
+- **Separately:** delete **test enquiries** (the `PC-XXXX` references created during testing) from production before launch, so Vercel analytics and per-operator enquiry counts start clean from zero.
+
+This is a **launch-gate cleanup task on the live DB**, not a code change. Track to completion before go-to-real-traffic.
+
+---
+
 **Last verified:** 2026-06-17 (§Ziyarat comparison field — migration 012 applied + verified live; Vitest 1,869, build 0, Playwright catalogue 2/2). Prior: 2026-06-16 (Task E — `app_metadata.role` backfill — idempotent script ran clean against live: total 10, 0 absent, 0 updated, 10 skipped, breakdown unchanged 8 customer / 1 operator / 1 admin). Task D (Plausible) wired + production-gated. **Both #89 (Task D) and #90 (Task E) merged to `dev`, then all of `dev` promoted to `main` (#91, HEAD `6aeace6`).** Task C (KT-→PC-) + Task 3 already on `dev`.
 **Branch:** `dev` promoted to `main` 2026-06-16. (`chore/app-metadata-role-backfill` was the last merge into `dev`, resolved AI_NOTES by keeping both §Task D + §Task E.)
 **Audience:** Claude, Codex, Kimi, and any AI/developer taking over the project.
