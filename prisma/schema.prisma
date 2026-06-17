@@ -411,6 +411,8 @@ model Package {
   cancellationPolicy         String?  @map("cancellation_policy")
   highlights                 String[]
   groupType                  String?  @map("group_type")
+  ziyaratIncluded            Boolean? @map("ziyarat_included")
+  ziyaratDetails             String?  @map("ziyarat_details")
   createdAt                  DateTime @default(now()) @map("created_at")
   updatedAt                  DateTime @updatedAt @map("updated_at")
   roomOccupancyOptions       Json     @map("room_occupancy_options")

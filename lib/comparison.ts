@@ -1,7 +1,7 @@
 import { Offer, OperatorProfile, Package } from './types';
 import { getRegionSettings } from './i18n/region';
 import { formatDistance, formatPriceForRegion, parseDistanceKm } from './i18n/format';
-import { flightTypeLabel, groupTypeShort } from './packages/display';
+import { flightTypeLabel, groupTypeShort, ziyaratShort } from './packages/display';
 
 export interface ComparisonRow {
   id: string;
@@ -27,6 +27,7 @@ export interface ComparisonRow {
   paymentPlan?: string;
   cancellation?: string;
   groupType?: string;
+  ziyarat?: string;
 }
 
 // Representative metres per distance band, so banded package data can be ranked
@@ -78,6 +79,7 @@ export function mapOfferToComparison(offer: Offer, operator?: OperatorProfile): 
     paymentPlan: 'Not provided',
     cancellation: 'Not provided',
     groupType: 'Not provided',
+    ziyarat: 'Not provided',
   };
 }
 
@@ -151,6 +153,7 @@ export function mapPackageToComparison(pkg: Package, operator?: OperatorProfile)
         : 'Not provided',
     cancellation: pkg.cancellationPolicy || 'Not provided',
     groupType: groupTypeShort(pkg.groupType) ?? 'Not provided',
+    ziyarat: ziyaratShort(pkg.ziyaratIncluded),
   };
 }
 

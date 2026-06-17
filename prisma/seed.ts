@@ -453,6 +453,8 @@ async function main() {
       depositAmount: 300,
       paymentPlanAvailable: true,
       cancellationPolicy: 'Full refund if cancelled 45+ days. 50% refund 15–44 days. Non-refundable within 14 days.',
+      ziyaratIncluded: true,
+      ziyaratDetails: 'Makkah and Madinah ziyarat tours',
       highlights: ['Family rooms available', 'School holiday dates', 'Child-friendly itinerary'],
       roomOccupancyOptions: {
         double: { pricePerPerson: 1350, availability: 'available' },
@@ -585,6 +587,7 @@ async function main() {
       depositAmount: 1000,
       paymentPlanAvailable: true,
       cancellationPolicy: 'Non-refundable once Hajj visa applied.',
+      ziyaratIncluded: false,
       highlights: ['Full Hajj pillar support', 'Experienced guides', 'ATOL protected'],
       roomOccupancyOptions: {
         double: { pricePerPerson: 4999, availability: 'available' },

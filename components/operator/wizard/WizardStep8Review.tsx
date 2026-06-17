@@ -136,6 +136,13 @@ export function WizardStep8Review({ data, onSaveDraft, onPublish, isSaving, erro
           />
         )}
         <ReviewRow label="Group type" value={data.groupType} />
+        <ReviewRow
+          label="Ziyarat"
+          value={data.ziyaratIncluded == null ? undefined : data.ziyaratIncluded ? 'Included' : 'Not included'}
+        />
+        {data.ziyaratIncluded === true && data.ziyaratDetails && (
+          <ReviewRow label="Ziyarat details" value={data.ziyaratDetails} />
+        )}
       </ReviewSection>
 
       {/* Step 6 & 7: Policies + Marketing */}
