@@ -62,6 +62,18 @@
 
 ---
 
+## §Admin promotion — real account → admin (production) — 2026-06-17
+
+**Status: ✅ DONE — production.** Promoted `aliimrankhan86@gmail.com` (auth.users id `35675c3d-9063-45c4-98d8-8c3971380bf5`) from `customer` → **`admin`** to remove the dependency on the synthetic `admin@test.local`.
+
+- **How:** service-role Supabase Admin API `PUT /auth/v1/admin/users/{id}` with `{app_metadata:{role:"admin"}}` (merge). **`app_metadata` only**, never `user_metadata` (per supabase skill — `user_metadata` is user-editable = self-escalation risk).
+- **Before:** `{role:customer, provider:email, providers:[email]}` → **After:** `{role:admin, provider:email, providers:[email]}`. Provider keys preserved; `user_metadata` untouched.
+- **Admins now:** `admin@test.local` + `aliimrankhan86@gmail.com`. `admin@test.local` deliberately **kept** (guard until local/prod separation).
+- **Note:** `public.users.role` mirror for this account left as `customer` (not used for authz — `lib/auth/session.ts` + middleware read `app_metadata` only). Sync optional.
+- **JWT freshness:** an existing session keeps the old role until token refresh — must **log in fresh** to get admin in the token.
+
+---
+
 ## §Hide self-serve operator onboarding wizard — 2026-06-17
 
 **Status: ✅ COMPLETE on branch `feature/hide-operator-self-serve`** (off `dev`). `tsc` clean · `npm run build` 0 errors (66/66) · Vitest **1,860/1,860** · Playwright `catalogue` 2/2 chromium (incl. the new gating test). No code deleted (parked, per the standing rule).
