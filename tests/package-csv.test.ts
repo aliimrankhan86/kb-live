@@ -46,6 +46,34 @@ describe('Package CSV import/export', () => {
       expect(csv).toContain('GBP');
     });
 
+    it('includes the ziyarat columns and round-trips operator-stated values', async () => {
+      MockDB.savePackage({
+        id: 'pkg-ziyarat-csv',
+        operatorId: 'op1',
+        title: 'Ziyarat Package',
+        slug: 'ziyarat-package-csv',
+        status: 'published',
+        pilgrimageType: 'umrah',
+        priceType: 'exact',
+        pricePerPerson: 1500,
+        currency: 'GBP',
+        totalNights: 10,
+        nightsMakkah: 5,
+        nightsMadinah: 5,
+        distanceBandMakkah: 'near',
+        distanceBandMadinah: 'near',
+        roomOccupancyOptions: { single: false, double: true, triple: false, quad: false },
+        inclusions: { visa: true, flights: true, transfers: true, meals: false },
+        ziyaratIncluded: true,
+        ziyaratDetails: 'Makkah and Madinah ziyarat tours',
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      });
+      const csv = await Repository.exportPackagesAsCsv(operatorCtx);
+      expect(csv).toContain('ziyaratIncluded,ziyaratDetails');
+      expect(csv).toContain('Makkah and Madinah ziyarat tours');
+    });
+
     it('returns empty string when no packages', async () => {
       localStorage.clear();
       MockDB.setCurrentUser('operator');

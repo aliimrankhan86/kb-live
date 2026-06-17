@@ -418,6 +418,10 @@ export interface Package {
   cancellationPolicy?: string;
   highlights?: string[];
   groupType?: 'private' | 'small-group' | 'large-group';
+  // Ziyarat — operator-stated only. undefined = not stated ("Not provided");
+  // true = Included; false = operator stated NOT included. Never inferred.
+  ziyaratIncluded?: boolean;
+  ziyaratDetails?: string;
   createdAt?: string;
   updatedAt?: string;
   
