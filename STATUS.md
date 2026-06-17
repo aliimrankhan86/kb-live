@@ -3,17 +3,17 @@
 > **Single rolling tracker.** Any AI/dev: read this for current state. Update it after work is **done + tested + verified** (see `CLAUDE.md` rule).
 > Detailed handover lives in `AI_NOTES.md`. Cold-start brief: `HANDOFF.md`. Business: `BUSINESS.md`.
 
-**Last verified:** 2026-06-16 (cleanup — analytics copy verify + KT-→PC- dev-utility sample) · **Branch:** `chore/cleanup-analytics-copy-pc-sample` (PR → `dev`, open) · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
+**Last verified:** 2026-06-17 (Ziyarat field #101 + self-serve onboarding hidden #102 — both merged to dev) · **Branch:** `dev` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
 
 > **Direction:** `PILGRIMCOMPARE_PROJECT_DIRECTION.md` (repo root) is now the source of truth — read first every session. Parked features tracked in `PARKED_FEATURES.md`.
 
 ---
 
-## Health (verified 2026-06-16)
+## Health (verified 2026-06-17)
 
 | Check | State |
 | --- | --- |
-| `npm run test` | ✅ 1,860/1,860 pass (31 files) |
+| `npm run test` | ✅ 1,869/1,869 pass (32 files) |
 | `npm run build` | ✅ 0 errors |
 | `npx tsc --noEmit` | ✅ pass |
 | E2E | ✅ cookie-banner click-intercept flake fixed 2026-06-15 (`feature/fix-cookie-banner-e2e-flake`, AI_NOTES §Cookie-banner E2E flake fix). `catalogue`/`operator`/`bank-payment` 45/45 × 3 serial runs (chromium+firefox+webkit). |
@@ -25,6 +25,8 @@
 ## ✅ Done (shipped & verified)
 
 **Direction & parked flows**
+- **Self-serve operator onboarding hidden (2026-06-17, branch `feature/hide-operator-self-serve` → PR #102, see AI_NOTES §Hide self-serve operator onboarding wizard):** concierge model is live — operators can't self-register. New `FEATURE_OPERATOR_SELF_SERVE` flag (default OFF) + `notFound()` guard on `/operator/onboarding` (also already role-gated by `middleware.ts`); the 3 `/partner` "Apply as an Operator" CTAs → concierge `mailto:operators@pilgrimcompare.co.uk` contact; `auth/confirm` sends operators to the dashboard; `PARKED_FEATURES.md` entry 3 filled in. No code deleted (parked). Playwright `catalogue` gating test green.
+- **Ziyarat comparison field (2026-06-17, branch `feature/package-ziyarat-field` → PR #101, see AI_NOTES §Ziyarat):** operator-stated **Ziyarat** added end-to-end — `ziyaratIncluded` (nullable bool) + `ziyaratDetails` (nullable string) on `Package`. Wizard Step 5 Yes/No/Not-specified radio (blank persists `null`, never `false`); package detail + comparison row in "What's included"; CSV export columns; migration `012` applied to live Supabase + columns verified. Missing = **"Not provided"** (never inferred). Mirrors `paymentPlanAvailable`/`cancellationPolicy`. Vitest 1,869/1,869, build 0, tsc clean, Playwright `catalogue` 2/2 (desktop + 390px).
 - **Cleanup — analytics copy verify + dev-utility KT-→PC- sample (2026-06-16, branch `chore/cleanup-analytics-copy-pc-sample`, PR → dev open):** verified all analytics mentions in `app/privacy/page.tsx` + `components/compliance/CookieConsent.tsx` already name **Vercel Web Analytics** (zero Plausible refs) with accurate cookieless / no-consent-required claims — no copy change needed. Swapped the hardcoded `KT-9X2P4A` sample in `scripts/test-emails.mjs` (dev email-preview utility, 3 occurrences) → `PC-7F3A9C21` so a future grep doesn't suggest the rename was incomplete; no app/test/E2E impact. `tests/legal.test.ts` confirmed unchanged (checks `companyName`/`companyNumber`/`contactEmail` only — `registeredOffice` deliberately not required). Vitest 1,860/1,860, build 0 errors, tsc pass.
 - **Task C — reference prefix `KT-` → `PC-` (2026-06-16, branch `feature/reference-prefix-rename`, PR → dev open, see AI_NOTES §Task C):** renamed the KaabaTrip-era prefix to PilgrimCompare's `PC-` at the single generation source (`REFERENCE_CODE_PREFIX` in `repository.ts`) + cron fallback + seed/mock + all test/E2E assertions (enquiry **and** booking-intent, which share the generator). Format/length after the prefix unchanged; no DB migration (pre-rename `KT-` records stay valid). Vitest 1,860/1,860, enquiry E2E 6/6 ×3 browsers show `PC-`.
 - **Task 3 — pilgrim email opt-in + contact-hint UX fix (2026-06-16, merged to `dev` via PR #87, see AI_NOTES §Task 3):** unticked-by-default marketing consent checkbox on the enquiry form (verbatim label; optional — never blocks the enquiry). New dedicated `marketing_consents` table (migration `011`, applied to Supabase, RLS service-role only, `enquiry_reference NOT NULL`, unique `(email, enquiry_reference)`). Consent persisted **only** when ticked AND email present; phone-only → no record; absence of row = no consent. Consent write wrapped — never fails the enquiry. No email sent (double-opt-in-ready store only). Also: contact-hint near Send when name-only ("Add an email or phone to send."). KT- prefix + payment-posture lines untouched.

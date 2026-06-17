@@ -67,10 +67,15 @@ In the Playwright E2E suite both flags are forced ON via `playwright.config.ts` 
 
 - **What it does:** let operators register themselves and enter their own packages.
 - **Why parked:** small Umrah operators run on WhatsApp and brochures and will not self-serve. The model is concierge onboarding: the operator sends a brochure, the founder builds the verified profile, the operator approves in one message.
-- **Status:** OFF (hidden from public navigation and public flow).
-- **Controlling flag / route guard:** to be confirmed by Claude Code in Task 5 (placeholder: `FEATURE_OPERATOR_SELF_SERVE=false`).
-- **Where it lives:** to be confirmed by Claude Code in Task 5.
-- **How to re-enable:** re-expose the route and re-add it to navigation.
+- **Status:** OFF — hidden from public navigation and the public flow (2026-06-17). Previously *described* as parked, but the `/partner` page still linked it three times; those CTAs are now removed and the route is flag-guarded.
+- **Controlling flag:** `FEATURE_OPERATOR_SELF_SERVE` (`lib/config.ts`, default **OFF**; server-side accessor `isOperatorSelfServeEnabled()`). Never read client-side.
+- **Where it lives / how it's hidden:**
+  - `app/operator/onboarding/page.tsx` — server guard `if (!isOperatorSelfServeEnabled()) notFound()` → the wizard route 404s when off. Belt-and-braces: `/operator/onboarding` is *also* role-gated by `middleware.ts` (`ROLE_PROTECTED['/operator/']`), so an unauthenticated visitor is redirected to `/` regardless of the flag.
+  - `app/partner/page.tsx` — the three "Apply as an Operator" CTAs (→ `/operator/onboarding`) replaced with a concierge contact (`mailto:operators@pilgrimcompare.co.uk`); the "How to get listed" step-1 copy now says *get in touch*, not "complete the registration form".
+  - `app/auth/confirm/route.ts` — a confirming operator is routed to `/operator/dashboard` (not the parked onboarding route) when the flag is off.
+  - **Kept untouched (parked, never deleted):** `components/operator/OperatorRegistrationForm.tsx`, its step components, `app/operator/onboarding/status/page.tsx`, `OnboardingVerifiedBanner`.
+  - `playwright.config.ts` forces `FEATURE_OPERATOR_SELF_SERVE=true` so the existing E2E still exercises the parked wizard (same convention as the RFQ/booking flags).
+- **How to re-enable:** set `FEATURE_OPERATOR_SELF_SERVE=true` and re-add the `/partner` CTAs — the route renders again automatically.
 
 ### 4. Success fee (£75 per completed booking) as the primary revenue model
 

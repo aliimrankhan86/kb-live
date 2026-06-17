@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { isBookingFlowEnabled, isRfqQuoteEnabled } from '@/lib/config';
+import { isBookingFlowEnabled, isRfqQuoteEnabled, isOperatorSelfServeEnabled } from '@/lib/config';
 import { PackageDetail } from '@/components/packages/PackageDetail';
 import type { Package } from '@/lib/types';
 
@@ -31,9 +31,11 @@ const basePackage: Package = {
 
 describe('parked-feature flags (lib/config)', () => {
   it('default OFF when the env vars are unset (the live pilgrim journey state)', () => {
-    // Vitest runs with FEATURE_BOOKING_FLOW / FEATURE_RFQ_QUOTE unset.
+    // Vitest runs with FEATURE_BOOKING_FLOW / FEATURE_RFQ_QUOTE /
+    // FEATURE_OPERATOR_SELF_SERVE unset.
     expect(isBookingFlowEnabled()).toBe(false);
     expect(isRfqQuoteEnabled()).toBe(false);
+    expect(isOperatorSelfServeEnabled()).toBe(false);
   });
 });
 

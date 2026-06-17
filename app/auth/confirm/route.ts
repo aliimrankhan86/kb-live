@@ -1,6 +1,7 @@
 import { type EmailOtpType } from '@supabase/supabase-js';
 import { type NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
+import { isOperatorSelfServeEnabled } from '@/lib/config';
 
 // Handles the confirmation callback from Supabase signup/recovery emails.
 //
@@ -69,7 +70,10 @@ export async function GET(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
   const role = user?.app_metadata?.role;
-  const destination = role === 'operator' && next === '/' ? '/operator/onboarding' : next;
+  // Self-serve onboarding is parked (concierge model). When off, send a
+  // confirming operator to their dashboard, not the parked onboarding route.
+  const operatorLanding = isOperatorSelfServeEnabled() ? '/operator/onboarding' : '/operator/dashboard';
+  const destination = role === 'operator' && next === '/' ? operatorLanding : next;
   const redirectUrl = new URL(destination, origin);
   redirectUrl.searchParams.set('verified', '1');
 

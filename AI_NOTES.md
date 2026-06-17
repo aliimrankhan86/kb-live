@@ -2,7 +2,14 @@
 
 ## 🚀 GO-LIVE — `dev` promoted to `main` — 2026-06-16
 
-**Current `main` HEAD: `823f860`** (2nd promotion, PR [#95](https://github.com/aliimrankhan86/kb-live/pull/95)) — brings the analytics swap (#94) + go-live docs (#92, #93) live. Production deploy green. Live CSP verified clean: `script-src 'self' 'nonce-…'`, `connect-src 'self' https://*.supabase.co` — **no `plausible.io`**; zero Plausible in HTML; site healthy. Vercel Analytics script stays dormant until Web Analytics is enabled in the dashboard (founder toggle).
+**Current `main` HEAD: `e156378`** (3rd promotion, PR [#99](https://github.com/aliimrankhan86/kb-live/pull/99), merge commit, no squash) — **docs + dev-utility only, zero app runtime change vs `823f860`.** Brings live: #96 (record 2nd promotion), #97 (`docs/ANALYTICS.md`), #98 (cleanup — verified Vercel-analytics copy in `app/privacy/page.tsx` + `components/compliance/CookieConsent.tsx`, swapped dev-utility `KT-9X2P4A` → `PC-7F3A9C21` in `scripts/test-emails.mjs`). Pre-flight on dev `06db208`: tsc clean, build 0 errors (66/66), Vitest **1,860/1,860**, zero `KT-` in code/tests/e2e/sql.
+- **Post-deploy smoke check (live `pilgrimcompare.co.uk`, 2026-06-16, 3rd promotion):**
+  1. ✅ Vercel production deploy green; site loads (200). Footer renders the Paramount Consultants entity line (company no. 09679002, VAT no. GB 221 6154 46) — **NO registered office**, as intended.
+  2. ✅ Analytics **live and recording** (Web Analytics now enabled in the dashboard): `/_vercel/insights/script.js` → **200** (`application/javascript`), `window.vai === true`. CSP clean: `script-src 'self' 'nonce-…'`, `connect-src 'self' https://*.supabase.co` — **no `plausible.io`**.
+  3. ✅ Test enquiry to demo operator **Al-Hidayah** → confirmation "Enquiry sent", reference **PC-D8DFD4DD**. The `'Enquiry Submitted'` Vercel event was captured **as the actual event object** (not just a 202): `va('event', { name: 'Enquiry Submitted' })`. Payment-posture lines present.
+- **Only deferred item:** the **registered office line** — intentionally omitted pending Companies House AD01 filing (logged decision; path ready in `lib/legal.ts` `registeredOffice: ''`). The earlier `KT-` dev-utility cleanup item is now **closed** (#98).
+
+**Prior — Current `main` HEAD before 3rd promotion: `823f860`** (2nd promotion, PR [#95](https://github.com/aliimrankhan86/kb-live/pull/95)) — brought the analytics swap (#94) + go-live docs (#92, #93) live. Production deploy green. Live CSP verified clean: `script-src 'self' 'nonce-…'`, `connect-src 'self' https://*.supabase.co` — **no `plausible.io`**; zero Plausible in HTML; site healthy.
 
 **Initial go-live: promoted `dev` → `main` via PR [#91](https://github.com/aliimrankhan86/kb-live/pull/91) (merge commit, no squash).**
 - **First `main` HEAD:** `6aeace6` (merge commit) — included the full `dev` tree at `230cbaf`.
@@ -35,7 +42,73 @@
 
 ---
 
-**Last verified:** 2026-06-16 (Task E — `app_metadata.role` backfill — idempotent script ran clean against live: total 10, 0 absent, 0 updated, 10 skipped, breakdown unchanged 8 customer / 1 operator / 1 admin). Task D (Plausible) wired + production-gated. **Both #89 (Task D) and #90 (Task E) merged to `dev`, then all of `dev` promoted to `main` (#91, HEAD `6aeace6`).** Task C (KT-→PC-) + Task 3 already on `dev`.
+## §Hide self-serve operator onboarding wizard — 2026-06-17
+
+**Status: ✅ COMPLETE on branch `feature/hide-operator-self-serve`** (off `dev`). `tsc` clean · `npm run build` 0 errors (66/66) · Vitest **1,860/1,860** · Playwright `catalogue` 2/2 chromium (incl. the new gating test). No code deleted (parked, per the standing rule).
+
+**Why:** concierge onboarding is the live model — operators must not self-register. The wizard was *described* as parked (PARKED_FEATURES entry 3) but `/partner` still linked it 3×.
+
+**What changed:**
+- **Flag:** new `FEATURE_OPERATOR_SELF_SERVE` (`lib/config.ts`, default OFF; accessor `isOperatorSelfServeEnabled()`), mirroring the RFQ/booking parked flags.
+- **Route guard:** `app/operator/onboarding/page.tsx` → `if (!isOperatorSelfServeEnabled()) notFound()` (same pattern as `/quote`). The route already sat behind `middleware.ts` `ROLE_PROTECTED['/operator/']` (unauthenticated → redirect `/`), so the flag is belt-and-braces **and** parks it from authenticated operators too.
+- **Public CTAs:** the 3 "Apply as an Operator" → `/operator/onboarding` links in `app/partner/page.tsx` replaced with a concierge `mailto:operators@pilgrimcompare.co.uk` contact ("Get in touch to list your packages"). Step-1 "How to get listed" copy changed from "complete the registration form" → "get in touch". The hero `partner-cta-apply` testid → `partner-cta-contact`.
+- **Confirm redirect:** `app/auth/confirm/route.ts` — a confirming operator now lands on `/operator/dashboard` (not the parked onboarding route) when the flag is off.
+- **E2E:** `playwright.config.ts` forces `FEATURE_OPERATOR_SELF_SERVE=true` so the parked wizard stays E2E-covered (same convention as RFQ/booking).
+
+**Kept untouched (parked, never deleted):** `components/operator/OperatorRegistrationForm.tsx` + its step components, `app/operator/onboarding/status/page.tsx`, `OnboardingVerifiedBanner`.
+
+**Tests:** `tests/feature-flags.test.tsx` (+`isOperatorSelfServeEnabled()` default-OFF assertion); `e2e/catalogue.spec.ts` (new test — `/partner` has zero `/operator/onboarding` links + concierge CTA visible; unauthenticated `/operator/onboarding` redirects to `/`, no registration form). `PARKED_FEATURES.md` entry 3 filled in (flag, guard, locations).
+
+**Acceptance verified:** a public visitor cannot reach the wizard from `/partner` (no link) or by direct URL (middleware redirect); flag default OFF 404s the route.
+
+---
+
+## §Ziyarat comparison field (operator-stated) — 2026-06-17
+
+**Status: ✅ COMPLETE on branch `feature/package-ziyarat-field`** (off `dev`). `tsc` clean · `npm run build` 0 errors (66/66) · Vitest **1,869/1,869** (+9, incl. new `tests/package-ziyarat.test.ts`) · Playwright `catalogue` 2/2 chromium (incl. new Ziyarat test, desktop + 390px). Migration applied to live Supabase + columns verified.
+
+**What:** added operator-stated **Ziyarat** to the package comparison (whether ziyarat tours are included is a pilgrim decision factor). Two nullable `Package` fields mirroring `paymentPlanAvailable` (nullable bool) + `cancellationPolicy` (nullable string):
+- `ziyaratIncluded?: boolean` — `null`/unset = **"Not provided"** (never inferred); `true` = Included; `false` = operator stated **Not included**.
+- `ziyaratDetails?: string` — optional free text (e.g. "Makkah and Madinah ziyarat tours").
+
+**Migration `012_package_ziyarat_fields.sql`:** `ALTER TABLE packages ADD COLUMN IF NOT EXISTS ziyarat_included boolean; … ziyarat_details text;` — additive, nullable, RLS inherited from the packages table. Applied via `npx prisma db execute --file supabase/migrations/012_package_ziyarat_fields.sql` (Prisma 7 reads `DIRECT_URL` from `prisma.config.ts`). **Verified live:** both columns present, nullable. `prisma generate` run.
+
+**Three-state entry (the load-bearing rule):** wizard Step 5 (Inclusions) uses a **Yes / No / Not specified radio** mirroring the groupType radio — NOT a checkbox (a checkbox can't express null; that's the `paymentPlanAvailable` anti-pattern). "Not specified" = `undefined` → persists `null`. `z.boolean().optional()` + adapter write `?? null`. **Blank is never coerced to false** (unit-tested).
+
+**Files:** `prisma/schema.prisma`, `supabase/migrations/012_package_ziyarat_fields.sql` (new), `lib/types.ts`, `lib/operator/package-schema.ts`, `lib/api/db/adapter.ts` (read `?? undefined` / write `?? null`), `lib/packages/display.ts` (`ziyaratShort` → Yes/No/Not provided), `lib/comparison.ts` (`ComparisonRow.ziyarat` + both mappers; offers → "Not provided"), `components/request/ComparisonTable.tsx` (one row in the **"What's included"** group), `components/packages/PackageDetail.tsx` (three-state row in the included card; details shown when Included), `components/operator/wizard/WizardStep5Inclusions.tsx` + `WizardStep8Review.tsx`, `lib/api/repository.ts` (CSV **export** columns). Seed: `lib/api/mock-db.ts` (pkg1 Included+details, pkg2 Not included, pkg3 absent) + `prisma/seed.ts` (two states). Tests: `tests/package-ziyarat.test.ts` (new — schema true/false/null persistence, null≠false, comparison mapping, helper), `tests/comparison-table.test.tsx` (+Ziyarat row), `tests/package-csv.test.ts` (+export columns), `e2e/catalogue.spec.ts` (+comparison Ziyarat row, desktop + 390px).
+
+**CSV decision (founder-approved):** **export-only**, mirroring its siblings — `groupType`/`cancellationPolicy`/`paymentPlanAvailable` are all export-only too. The minimal importer (5 required + 4 optional cols) round-trips **none** of these decision fields; extending it for ziyarat alone would introduce a new pattern (out of scope).
+
+**Not executed:** `prisma/seed.ts` updated in code but `npm run db:seed` was **not run** (avoids mutating live data). E2E/dev read the MockDB seed, which is updated.
+
+**🛠️ Gotchas:** (1) Prisma 7 `prisma db execute` rejects `--schema` — the datasource URL is read from `prisma.config.ts`. (2) The comparison view is **one responsive fit-to-width table** (§15), not a separate stacked/swipeable layout — a new row works at 390px automatically; `'Not provided'` cells auto-mute via the existing `isMissing` check.
+
+---
+
+## §Standing decision — CSV import round-trip gap (DEFERRED — do NOT do piecemeal) — 2026-06-17
+
+The package CSV **export** emits the full field set, but the **importer reads only the basic columns** (`title, pricePerPerson, currency, totalNights, pilgrimageType` + `status, description, departureCity, departureDate`). So these operator-stated decision fields **export but do NOT round-trip back through import**:
+
+- `groupType`, `cancellationPolicy`, `paymentPlanAvailable`, hotel stars/names, distance bands, `inclusions`, and now **`ziyaratIncluded` / `ziyaratDetails`**.
+
+**Decision:** add importer support for **all** of these **together in one consistent change** — a single future scoped session, **not field-by-field**. Piecemeal additions would scatter the import mapping/validation and create an inconsistent pattern. Until then, ziyarat (like its siblings) is intentionally **export-only** — consistent with the existing pattern, not a bug. **Do not start this now.**
+
+---
+
+## §Standing rule — demo/seed data must NEVER reach production — 2026-06-17
+
+Demo operators and demo packages (e.g. **Al-Hidayah**, and any Zamzam / Makkah Tours-style seed listings) exist for **dev and E2E only**. They must **never** be visible to a real visitor on the live site.
+
+- **Before** any real operator browses production **OR** any real pilgrim traffic arrives: **remove all demo operators and demo packages from the live Supabase database.**
+- As real operators sign, their real **verified** listing replaces demo data **one-for-one**.
+- **Never** show fabricated operators, ATOL numbers, or prices on the live site — **DMCC Act 2024 + trust-proposition risk** (fabricated trust claims are exactly what the language/legal red lines forbid).
+- **Separately:** delete **test enquiries** (the `PC-XXXX` references created during testing) from production before launch, so Vercel analytics and per-operator enquiry counts start clean from zero.
+
+This is a **launch-gate cleanup task on the live DB**, not a code change. Track to completion before go-to-real-traffic.
+
+---
+
+**Last verified:** 2026-06-17 (§Hide self-serve wizard #102 + §Ziyarat field #101 — both merged to dev; Vitest 1,869, build 0, Playwright catalogue 2/2). Prior: 2026-06-16 (Task E — `app_metadata.role` backfill — idempotent script ran clean against live: total 10, 0 absent, 0 updated, 10 skipped, breakdown unchanged 8 customer / 1 operator / 1 admin). Task D (Plausible) wired + production-gated. **Both #89 (Task D) and #90 (Task E) merged to `dev`, then all of `dev` promoted to `main` (#91, HEAD `6aeace6`).** Task C (KT-→PC-) + Task 3 already on `dev`.
 **Branch:** `dev` promoted to `main` 2026-06-16. (`chore/app-metadata-role-backfill` was the last merge into `dev`, resolved AI_NOTES by keeping both §Task D + §Task E.)
 **Audience:** Claude, Codex, Kimi, and any AI/developer taking over the project.
 

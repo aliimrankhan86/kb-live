@@ -44,7 +44,10 @@ const GROUPS: Group[] = [
   },
   {
     title: "What's included",
-    rows: [{ label: 'Included', key: 'inclusions', rank: 'inclusionsCount', dir: 'max', best: 'most included' }],
+    rows: [
+      { label: 'Included', key: 'inclusions', rank: 'inclusionsCount', dir: 'max', best: 'most included' },
+      { label: 'Ziyarat', key: 'ziyarat' },
+    ],
   },
   {
     title: 'Price & flexibility',

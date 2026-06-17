@@ -60,6 +60,23 @@ export const FEATURE_BOOKING_FLOW =
 export const FEATURE_RFQ_QUOTE =
   process.env.FEATURE_RFQ_QUOTE === 'true';
 
+/**
+ * Whether self-serve operator onboarding is live.
+ *
+ * Default FALSE — PARKED (see PARKED_FEATURES.md entry 3). The concierge model
+ * is the live model: operators are onboarded by the PilgrimCompare team, not via
+ * a public self-serve form. When off, the `/operator/onboarding` wizard 404s and
+ * the public `/partner` CTAs point to a concierge contact instead of the form.
+ * The code is intact and reversible — never delete it.
+ *
+ * NEVER read this flag client-side. Evaluate on the server (via
+ * isOperatorSelfServeEnabled) and pass the result down as a boolean prop.
+ *
+ * Re-enable only on explicit founder instruction.
+ */
+export const FEATURE_OPERATOR_SELF_SERVE =
+  process.env.FEATURE_OPERATOR_SELF_SERVE === 'true';
+
 /** Server-side accessor for the booking-intent/payment flow flag. */
 export function isBookingFlowEnabled(): boolean {
   return FEATURE_BOOKING_FLOW;
@@ -68,6 +85,11 @@ export function isBookingFlowEnabled(): boolean {
 /** Server-side accessor for the multi-step RFQ quote engine flag. */
 export function isRfqQuoteEnabled(): boolean {
   return FEATURE_RFQ_QUOTE;
+}
+
+/** Server-side accessor for the self-serve operator onboarding flag. */
+export function isOperatorSelfServeEnabled(): boolean {
+  return FEATURE_OPERATOR_SELF_SERVE;
 }
 
 /** Whether we're running in test mode (Vitest) */
