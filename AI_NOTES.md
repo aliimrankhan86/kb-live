@@ -42,6 +42,27 @@
 
 ---
 
+## §Hide self-serve operator onboarding wizard — 2026-06-17
+
+**Status: ✅ COMPLETE on branch `feature/hide-operator-self-serve`** (off `dev`). `tsc` clean · `npm run build` 0 errors (66/66) · Vitest **1,860/1,860** · Playwright `catalogue` 2/2 chromium (incl. the new gating test). No code deleted (parked, per the standing rule).
+
+**Why:** concierge onboarding is the live model — operators must not self-register. The wizard was *described* as parked (PARKED_FEATURES entry 3) but `/partner` still linked it 3×.
+
+**What changed:**
+- **Flag:** new `FEATURE_OPERATOR_SELF_SERVE` (`lib/config.ts`, default OFF; accessor `isOperatorSelfServeEnabled()`), mirroring the RFQ/booking parked flags.
+- **Route guard:** `app/operator/onboarding/page.tsx` → `if (!isOperatorSelfServeEnabled()) notFound()` (same pattern as `/quote`). The route already sat behind `middleware.ts` `ROLE_PROTECTED['/operator/']` (unauthenticated → redirect `/`), so the flag is belt-and-braces **and** parks it from authenticated operators too.
+- **Public CTAs:** the 3 "Apply as an Operator" → `/operator/onboarding` links in `app/partner/page.tsx` replaced with a concierge `mailto:operators@pilgrimcompare.co.uk` contact ("Get in touch to list your packages"). Step-1 "How to get listed" copy changed from "complete the registration form" → "get in touch". The hero `partner-cta-apply` testid → `partner-cta-contact`.
+- **Confirm redirect:** `app/auth/confirm/route.ts` — a confirming operator now lands on `/operator/dashboard` (not the parked onboarding route) when the flag is off.
+- **E2E:** `playwright.config.ts` forces `FEATURE_OPERATOR_SELF_SERVE=true` so the parked wizard stays E2E-covered (same convention as RFQ/booking).
+
+**Kept untouched (parked, never deleted):** `components/operator/OperatorRegistrationForm.tsx` + its step components, `app/operator/onboarding/status/page.tsx`, `OnboardingVerifiedBanner`.
+
+**Tests:** `tests/feature-flags.test.tsx` (+`isOperatorSelfServeEnabled()` default-OFF assertion); `e2e/catalogue.spec.ts` (new test — `/partner` has zero `/operator/onboarding` links + concierge CTA visible; unauthenticated `/operator/onboarding` redirects to `/`, no registration form). `PARKED_FEATURES.md` entry 3 filled in (flag, guard, locations).
+
+**Acceptance verified:** a public visitor cannot reach the wizard from `/partner` (no link) or by direct URL (middleware redirect); flag default OFF 404s the route.
+
+---
+
 ## §Ziyarat comparison field (operator-stated) — 2026-06-17
 
 **Status: ✅ COMPLETE on branch `feature/package-ziyarat-field`** (off `dev`). `tsc` clean · `npm run build` 0 errors (66/66) · Vitest **1,869/1,869** (+9, incl. new `tests/package-ziyarat.test.ts`) · Playwright `catalogue` 2/2 chromium (incl. new Ziyarat test, desktop + 390px). Migration applied to live Supabase + columns verified.
@@ -87,7 +108,7 @@ This is a **launch-gate cleanup task on the live DB**, not a code change. Track 
 
 ---
 
-**Last verified:** 2026-06-17 (§Ziyarat comparison field — migration 012 applied + verified live; Vitest 1,869, build 0, Playwright catalogue 2/2). Prior: 2026-06-16 (Task E — `app_metadata.role` backfill — idempotent script ran clean against live: total 10, 0 absent, 0 updated, 10 skipped, breakdown unchanged 8 customer / 1 operator / 1 admin). Task D (Plausible) wired + production-gated. **Both #89 (Task D) and #90 (Task E) merged to `dev`, then all of `dev` promoted to `main` (#91, HEAD `6aeace6`).** Task C (KT-→PC-) + Task 3 already on `dev`.
+**Last verified:** 2026-06-17 (§Hide self-serve wizard #102 + §Ziyarat field #101 — both merged to dev; Vitest 1,869, build 0, Playwright catalogue 2/2). Prior: 2026-06-16 (Task E — `app_metadata.role` backfill — idempotent script ran clean against live: total 10, 0 absent, 0 updated, 10 skipped, breakdown unchanged 8 customer / 1 operator / 1 admin). Task D (Plausible) wired + production-gated. **Both #89 (Task D) and #90 (Task E) merged to `dev`, then all of `dev` promoted to `main` (#91, HEAD `6aeace6`).** Task C (KT-→PC-) + Task 3 already on `dev`.
 **Branch:** `dev` promoted to `main` 2026-06-16. (`chore/app-metadata-role-backfill` was the last merge into `dev`, resolved AI_NOTES by keeping both §Task D + §Task E.)
 **Audience:** Claude, Codex, Kimi, and any AI/developer taking over the project.
 

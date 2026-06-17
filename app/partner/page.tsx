@@ -55,13 +55,13 @@ export default function PartnerLandingPage() {
                 No upfront fees. Transparent commission. ATOL/ABTA verified operators only.
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
-                <Link
-                  href="/operator/onboarding"
+                <a
+                  href="mailto:operators@pilgrimcompare.co.uk?subject=List%20my%20packages%20on%20PilgrimCompare"
                   className="inline-flex min-h-[48px] items-center justify-center rounded-lg bg-[var(--yellow)] px-8 py-3 text-base font-semibold text-[var(--bg)] transition-opacity hover:opacity-90"
-                  data-testid="partner-cta-apply"
+                  data-testid="partner-cta-contact"
                 >
-                  Apply as an Operator
-                </Link>
+                  Get in touch to list your packages
+                </a>
                 <Link
                   href="/operators/al-hidayah-travel"
                   className="inline-flex min-h-[48px] items-center justify-center rounded-lg border border-[var(--border)] px-6 py-3 text-base font-medium text-[var(--text)] transition-colors hover:border-[var(--yellow)] hover:text-[var(--yellow)]"
@@ -232,7 +232,7 @@ export default function PartnerLandingPage() {
             <h2 className="text-center text-2xl font-semibold text-[var(--text)]">How to Get Listed</h2>
             <div className="mt-10 grid gap-6 sm:grid-cols-3">
               {[
-                { step: '1', title: 'Apply', desc: 'Complete the registration form with your company details, ATOL/ABTA numbers, and package offerings.' },
+                { step: '1', title: 'Get in touch', desc: 'Send us your company details, ATOL/ABTA numbers, and package offerings — our team builds your verified profile for you.' },
                 { step: '2', title: 'Get Verified', desc: 'Our team reviews your application within 1–2 business days. We verify your financial protection status.' },
                 { step: '3', title: 'Start Receiving Enquiries', desc: 'Once approved, your packages appear in search results and travellers can send enquiries directly to you.' },
               ].map((item) => (
@@ -246,13 +246,13 @@ export default function PartnerLandingPage() {
               ))}
             </div>
             <div className="mt-10 text-center">
-              <Link
-                href="/operator/onboarding"
+              <a
+                href="mailto:operators@pilgrimcompare.co.uk?subject=List%20my%20packages%20on%20PilgrimCompare"
                 className="inline-flex min-h-[48px] items-center justify-center rounded-lg bg-[var(--yellow)] px-10 py-3 text-base font-semibold text-[var(--bg)] transition-opacity hover:opacity-90"
                 data-testid="partner-cta-how-it-works"
               >
-                Apply as an Operator
-              </Link>
+                Get in touch to list your packages
+              </a>
             </div>
           </div>
         </section>
@@ -276,13 +276,13 @@ export default function PartnerLandingPage() {
             <p className="mt-3 text-[var(--textMuted)]">
               Join operators already listing on PilgrimCompare and start receiving enquiries from UK travellers today.
             </p>
-            <Link
-              href="/operator/onboarding"
+            <a
+              href="mailto:operators@pilgrimcompare.co.uk?subject=List%20my%20packages%20on%20PilgrimCompare"
               className="mt-6 inline-flex min-h-[48px] items-center justify-center rounded-lg bg-[var(--yellow)] px-10 py-3 text-base font-semibold text-[var(--bg)] transition-opacity hover:opacity-90"
               data-testid="partner-cta-bottom"
             >
-              Apply as an Operator
-            </Link>
+              Get in touch to list your packages
+            </a>
             <p className="mt-4 text-sm text-[var(--textMuted)]">
               Already a partner?{' '}
               <Link

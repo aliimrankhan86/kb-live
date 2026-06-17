@@ -51,6 +51,22 @@ test('Public catalogue flow: browse, detail, operator, compare', async ({ page }
   }
 });
 
+test('Self-serve operator onboarding is hidden from the public flow', async ({ page }) => {
+  await dismissCookieBanner(page);
+
+  // /partner no longer links the self-serve wizard (concierge model is live).
+  await page.goto('/partner');
+  await expect(page.locator('[data-testid="partner-cta-contact"]')).toBeVisible();
+  await expect(page.locator('a[href="/operator/onboarding"]')).toHaveCount(0);
+
+  // The route itself is gated: an unauthenticated visitor is redirected to home
+  // by the middleware role gate, never landing on the registration form.
+  await page.goto('/operator/onboarding');
+  await page.waitForLoadState('domcontentloaded');
+  expect(new URL(page.url()).pathname).toBe('/');
+  await expect(page.getByText('Operator Registration')).toHaveCount(0);
+});
+
 test('Comparison shows the operator-stated Ziyarat row (desktop + 390px)', async ({ page }) => {
   await dismissCookieBanner(page);
   await page.goto('/packages');
