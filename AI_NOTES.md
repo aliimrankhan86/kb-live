@@ -42,6 +42,38 @@
 
 ---
 
+## §Production demo-data cleanup — 2026-06-17
+
+**Status: ✅ DONE — executed against live production Supabase** (project `nzvepuzzxjoxvpcrlozx`), reversible (full backup taken first), single FK-safe transaction committed. Implements the standing rule (demo/seed data must never reach production).
+
+**Deleted (one transaction, FK-safe order):** operator_profiles **3** (op1 Al-Hidayah, op2 Makkah Tours, op3 Zam Zam) · packages **14** · enquiries **4** (KT-1B98A1E1 + 3 PC- smoke tests) · payment_details **1** · quote_requests **2** · analytics_events **202** (all demo-operator-scoped) · public.users **4** (the 3 `@example.com` operator rows + `wigocor561@afterdo.com`) · auth.users **1** (`wigocor561@afterdo.com`, via Supabase Admin API → HTTP 200).
+
+**Preserved (deliberate):** all gmail/googlemail accounts (founder); `customer@example.com` (cust1 — out of scope); `admin@test.local` / `operator@test.local` / `customer@test.local` (the only local-login accounts — kept until a separate local Supabase exists); `marketing_consents` (was empty, untouched).
+
+**ADMIN-LOCKOUT GUARD:** `admin@test.local` is the ONLY admin → KEPT. Create/promote a real admin (a gmail account) before it is ever removed.
+
+**Backup / rollback (LOCAL only — contains prod PII, now in `.gitignore`):**
+- `backups/preclean-2026-06-17T15-49-23-491Z.json` — every deleted row, full columns.
+- `backups/restore-2026-06-17T15-49-23-491Z.sql` — transactional re-insert, parent→child via `json_populate_recordset`. Restores public-schema rows exactly; the `wigocor561` auth.users row must be recreated via `admin.createUser` (password not recoverable).
+
+**Verified clean public state (live `pilgrimcompare.co.uk`):** home 200 · `/partner` concierge CTA · `/packages` + `/search/packages?type=umrah` render the "No packages" empty state (0 cards, no broken UI) · `/operators/al-hidayah-travel` → "Operator not found" (fresh, `x-vercel-cache: MISS`). Production now: **0 operators / 0 packages / 0 enquiries** — ready for real operators one-for-one.
+
+**⚠️ Standing-rule caveat (open):** the 3 `*.test.local` accounts remain in production auth because local dev points `.env.local` at the prod Supabase project (no separate local DB). To fully satisfy the rule: stand up a separate local Supabase project + run `scripts/create-test-users.mjs` there, then remove the `*.test.local` accounts from prod (keeping/replacing the admin first).
+
+---
+
+## §Admin promotion — real account → admin (production) — 2026-06-17
+
+**Status: ✅ DONE — production.** Promoted `aliimrankhan86@gmail.com` (auth.users id `35675c3d-9063-45c4-98d8-8c3971380bf5`) from `customer` → **`admin`** to remove the dependency on the synthetic `admin@test.local`.
+
+- **How:** service-role Supabase Admin API `PUT /auth/v1/admin/users/{id}` with `{app_metadata:{role:"admin"}}` (merge). **`app_metadata` only**, never `user_metadata` (per supabase skill — `user_metadata` is user-editable = self-escalation risk).
+- **Before:** `{role:customer, provider:email, providers:[email]}` → **After:** `{role:admin, provider:email, providers:[email]}`. Provider keys preserved; `user_metadata` untouched.
+- **Admins now:** `admin@test.local` + `aliimrankhan86@gmail.com`. `admin@test.local` deliberately **kept** (guard until local/prod separation).
+- **Note:** `public.users.role` mirror for this account left as `customer` (not used for authz — `lib/auth/session.ts` + middleware read `app_metadata` only). Sync optional.
+- **JWT freshness:** an existing session keeps the old role until token refresh — must **log in fresh** to get admin in the token.
+
+---
+
 ## §Hide self-serve operator onboarding wizard — 2026-06-17
 
 **Status: ✅ COMPLETE on branch `feature/hide-operator-self-serve`** (off `dev`). `tsc` clean · `npm run build` 0 errors (66/66) · Vitest **1,860/1,860** · Playwright `catalogue` 2/2 chromium (incl. the new gating test). No code deleted (parked, per the standing rule).
