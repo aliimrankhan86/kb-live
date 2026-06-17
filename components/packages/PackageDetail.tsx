@@ -165,6 +165,26 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
                   </li>
                 )
               })}
+              {/* Ziyarat — operator-stated, three-state. null renders "Not provided". */}
+              <li className="flex gap-2.5" data-testid="package-ziyarat">
+                <span className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full ${pkg.ziyaratIncluded === true ? 'bg-[var(--color-success)]/15 text-[var(--color-success)]' : 'bg-[rgba(255,255,255,0.06)] text-[var(--textMuted)]'}`} aria-hidden="true">
+                  {pkg.ziyaratIncluded === true ? (
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 6L9 17l-5-5" /></svg>
+                  ) : pkg.ziyaratIncluded === false ? (
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                  ) : (
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                  )}
+                </span>
+                <span className="min-w-0">
+                  <span className="text-sm font-medium text-[var(--text)]">
+                    Ziyarat: <span className={pkg.ziyaratIncluded === true ? 'text-[var(--color-success)]' : 'text-[var(--textMuted)]'}>{pkg.ziyaratIncluded === true ? 'Included' : pkg.ziyaratIncluded === false ? 'Not included' : 'Not provided'}</span>
+                  </span>
+                  <span className="mt-0.5 block text-xs leading-snug text-[var(--textMuted)]">
+                    {pkg.ziyaratIncluded === true && pkg.ziyaratDetails ? pkg.ziyaratDetails : 'Guided visits to religious sites in Makkah and Madinah.'}
+                  </span>
+                </span>
+              </li>
             </ul>
             <p className="mt-4 rounded-lg border border-[var(--border)] bg-[rgba(255,255,255,0.02)] px-3 py-2.5 text-xs leading-relaxed text-[var(--textMuted)]">
               Anything marked <span className="text-[var(--text)]">Not included</span> you arrange or pay for separately. Always confirm exactly what is and isn&apos;t included, in writing, before paying.

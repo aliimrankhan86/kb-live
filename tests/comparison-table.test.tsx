@@ -75,6 +75,19 @@ describe('ComparisonTable decision aids', () => {
     expect(markers.length).toBe(3);
   });
 
+  it('renders a Ziyarat row with Yes / No / Not provided (never blank)', () => {
+    const yes: ComparisonRow = { ...rowA, id: 'z1', ziyarat: 'Yes' };
+    const no: ComparisonRow = { ...rowB, id: 'z2', ziyarat: 'No' };
+    const np: ComparisonRow = { ...rowB, id: 'z3', ziyarat: 'Not provided' };
+    act(() => root.render(<ComparisonTable rows={[yes, no, np]} />));
+    const ziyaratRow = Array.from(container.querySelectorAll('tr')).find(
+      (tr) => tr.querySelector('th')?.textContent?.trim() === 'Ziyarat'
+    );
+    expect(ziyaratRow).toBeTruthy();
+    const cells = Array.from(ziyaratRow!.querySelectorAll('td')).map((td) => td.textContent?.trim());
+    expect(cells).toEqual(['Yes', 'No', 'Not provided']);
+  });
+
   it('does not crown a winner when ranked values tie', () => {
     const tie: ComparisonRow = {
       ...rowB,

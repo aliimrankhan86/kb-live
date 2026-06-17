@@ -42,7 +42,29 @@
 
 ---
 
-**Last verified:** 2026-06-16 (Task E — `app_metadata.role` backfill — idempotent script ran clean against live: total 10, 0 absent, 0 updated, 10 skipped, breakdown unchanged 8 customer / 1 operator / 1 admin). Task D (Plausible) wired + production-gated. **Both #89 (Task D) and #90 (Task E) merged to `dev`, then all of `dev` promoted to `main` (#91, HEAD `6aeace6`).** Task C (KT-→PC-) + Task 3 already on `dev`.
+## §Ziyarat comparison field (operator-stated) — 2026-06-17
+
+**Status: ✅ COMPLETE on branch `feature/package-ziyarat-field`** (off `dev`). `tsc` clean · `npm run build` 0 errors (66/66) · Vitest **1,869/1,869** (+9, incl. new `tests/package-ziyarat.test.ts`) · Playwright `catalogue` 2/2 chromium (incl. new Ziyarat test, desktop + 390px). Migration applied to live Supabase + columns verified.
+
+**What:** added operator-stated **Ziyarat** to the package comparison (whether ziyarat tours are included is a pilgrim decision factor). Two nullable `Package` fields mirroring `paymentPlanAvailable` (nullable bool) + `cancellationPolicy` (nullable string):
+- `ziyaratIncluded?: boolean` — `null`/unset = **"Not provided"** (never inferred); `true` = Included; `false` = operator stated **Not included**.
+- `ziyaratDetails?: string` — optional free text (e.g. "Makkah and Madinah ziyarat tours").
+
+**Migration `012_package_ziyarat_fields.sql`:** `ALTER TABLE packages ADD COLUMN IF NOT EXISTS ziyarat_included boolean; … ziyarat_details text;` — additive, nullable, RLS inherited from the packages table. Applied via `npx prisma db execute --file supabase/migrations/012_package_ziyarat_fields.sql` (Prisma 7 reads `DIRECT_URL` from `prisma.config.ts`). **Verified live:** both columns present, nullable. `prisma generate` run.
+
+**Three-state entry (the load-bearing rule):** wizard Step 5 (Inclusions) uses a **Yes / No / Not specified radio** mirroring the groupType radio — NOT a checkbox (a checkbox can't express null; that's the `paymentPlanAvailable` anti-pattern). "Not specified" = `undefined` → persists `null`. `z.boolean().optional()` + adapter write `?? null`. **Blank is never coerced to false** (unit-tested).
+
+**Files:** `prisma/schema.prisma`, `supabase/migrations/012_package_ziyarat_fields.sql` (new), `lib/types.ts`, `lib/operator/package-schema.ts`, `lib/api/db/adapter.ts` (read `?? undefined` / write `?? null`), `lib/packages/display.ts` (`ziyaratShort` → Yes/No/Not provided), `lib/comparison.ts` (`ComparisonRow.ziyarat` + both mappers; offers → "Not provided"), `components/request/ComparisonTable.tsx` (one row in the **"What's included"** group), `components/packages/PackageDetail.tsx` (three-state row in the included card; details shown when Included), `components/operator/wizard/WizardStep5Inclusions.tsx` + `WizardStep8Review.tsx`, `lib/api/repository.ts` (CSV **export** columns). Seed: `lib/api/mock-db.ts` (pkg1 Included+details, pkg2 Not included, pkg3 absent) + `prisma/seed.ts` (two states). Tests: `tests/package-ziyarat.test.ts` (new — schema true/false/null persistence, null≠false, comparison mapping, helper), `tests/comparison-table.test.tsx` (+Ziyarat row), `tests/package-csv.test.ts` (+export columns), `e2e/catalogue.spec.ts` (+comparison Ziyarat row, desktop + 390px).
+
+**CSV decision (founder-approved):** **export-only**, mirroring its siblings — `groupType`/`cancellationPolicy`/`paymentPlanAvailable` are all export-only too. The minimal importer (5 required + 4 optional cols) round-trips **none** of these decision fields; extending it for ziyarat alone would introduce a new pattern (out of scope).
+
+**Not executed:** `prisma/seed.ts` updated in code but `npm run db:seed` was **not run** (avoids mutating live data). E2E/dev read the MockDB seed, which is updated.
+
+**🛠️ Gotchas:** (1) Prisma 7 `prisma db execute` rejects `--schema` — the datasource URL is read from `prisma.config.ts`. (2) The comparison view is **one responsive fit-to-width table** (§15), not a separate stacked/swipeable layout — a new row works at 390px automatically; `'Not provided'` cells auto-mute via the existing `isMissing` check.
+
+---
+
+**Last verified:** 2026-06-17 (§Ziyarat comparison field — migration 012 applied + verified live; Vitest 1,869, build 0, Playwright catalogue 2/2). Prior: 2026-06-16 (Task E — `app_metadata.role` backfill — idempotent script ran clean against live: total 10, 0 absent, 0 updated, 10 skipped, breakdown unchanged 8 customer / 1 operator / 1 admin). Task D (Plausible) wired + production-gated. **Both #89 (Task D) and #90 (Task E) merged to `dev`, then all of `dev` promoted to `main` (#91, HEAD `6aeace6`).** Task C (KT-→PC-) + Task 3 already on `dev`.
 **Branch:** `dev` promoted to `main` 2026-06-16. (`chore/app-metadata-role-backfill` was the last merge into `dev`, resolved AI_NOTES by keeping both §Task D + §Task E.)
 **Audience:** Claude, Codex, Kimi, and any AI/developer taking over the project.
 

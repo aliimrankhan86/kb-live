@@ -67,6 +67,10 @@ export const packageSchema = z.object({
   // Step 5
   inclusions: inclusionsSchema.default({ visa: false, flights: false, transfers: false, meals: false }),
   roomOccupancyOptions: roomOccupancySchema.default({ single: false, double: true, triple: true, quad: true }),
+  // Step 5 — Ziyarat: operator-stated, three-state. No default; a skipped value
+  // stays absent (→ "Not provided"). Must NOT coerce blank to false.
+  ziyaratIncluded: z.boolean().optional(),
+  ziyaratDetails: z.string().max(500).optional(),
   // Step 6 — no default: a skipped group type stays absent (→ "Not provided").
   cancellationPolicy: z.string().max(1000).optional(),
   groupType: z.enum(['private', 'small-group', 'large-group']).optional(),

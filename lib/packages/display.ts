@@ -91,6 +91,13 @@ export const groupTypeShort = (g?: Package['groupType']): string | null => {
   }
 };
 
+/**
+ * Comparison-grid label for the operator-stated ziyarat field: Yes / No /
+ * Not provided. `undefined`/`null` (not stated) → "Not provided", never inferred.
+ */
+export const ziyaratShort = (included?: boolean | null): string =>
+  included == null ? 'Not provided' : included ? 'Yes' : 'No';
+
 export const roomOptionsLabel = (o: Package['roomOccupancyOptions']): string => {
   const parts = [
     o.single && 'Single',
