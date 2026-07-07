@@ -24,13 +24,14 @@ Docker running, Supabase CLI ≥2.109. RLS + storage-bucket SQL was **already fu
 ### Gate 4 — three authorised prod operations (executed via `.env.production.local`)
 1. **Role mirror sync** — `public.users.role` for `aliimrankhan86@gmail.com`: `customer` → **`admin`** (idempotent; `app_metadata.role` was already `admin`). Authz still reads `app_metadata`; this only fixes the mirror.
 2. **Test-account cleanup** — `operator@test.local` + `customer@test.local` had **0 FK references** (checked every FK into `public.users`) and **no `public.users` mirror rows** → deleted from prod `auth.users` (both gone; admin API 200). `admin@test.local` **preserved**.
-3. **`scripts/remove-test-admin-guard.mjs`** — dry-run by default, `--execute` to act; deletes `admin@test.local` (auth + mirror). Refuses to remove the **last** admin (lockout guard, reads `app_metadata.role`). Targets `.env.production.local` if present. Dry-run validated against prod (sees `aliimrankhan86@gmail.com` as the other admin). **For the founder to run after verifying gmail admin login on live.**
+3. **`scripts/remove-test-admin-guard.mjs`** — dry-run by default, `--execute` to act; deletes `admin@test.local` (auth + mirror). Refuses to remove the **last** admin (lockout guard, reads `app_metadata.role`). Targets `.env.production.local` if present. **✅ EXECUTED this session (`--execute`)** — `admin@test.local` removed from prod `auth.users` (confirmed not present); `aliimrankhan86@gmail.com` survives as **sole admin**. The script remains in the repo for reference/reuse.
 
 ### Branch hygiene (Gate 1)
 main untouched. dev = main minus promotion-merge commits (healthy). **PR #104 merged docs-only into dev + branch deleted.** Deleted 26 merged local + 6 merged remote branches. Stragglers kept (unmerged): local `feature/mobile-ux-pass-sliders-footer`, `fix/duplicate-email-error`, `fix/merge-main-conflicts`, `fix/signup-and-auth-confirm`, `qa/app-readiness-audit`; remote `origin/ci/add-pr-workflow`.
 
-### Open risks / waiting on founder
-- **`admin@test.local` still on prod (deliberate).** Founder: (1) log in fresh on live as `aliimrankhan86@gmail.com`, confirm admin; (2) run `node scripts/remove-test-admin-guard.mjs --execute`; (3) review dev before promoting.
+### Completed this session / open items
+- **✅ `admin@test.local` removed from prod (DONE this session).** The guard script was run with `--execute`; `admin@test.local` is no longer in prod `auth.users`, and `aliimrankhan86@gmail.com` is the **sole admin**. No further action needed on this.
+- **Remaining:** review dev before promoting `dev → main` (human-gated; nothing this session touched `main` or deployed).
 - `config.toml` is gitignored per the C1 brief — a fresh clone reproduces the local stack via the steps above (each dev runs `supabase init` + provisioning).
 
 ### Next immediate action
@@ -106,7 +107,7 @@ main untouched. dev = main minus promotion-merge commits (healthy). **PR #104 me
 
 - **How:** service-role Supabase Admin API `PUT /auth/v1/admin/users/{id}` with `{app_metadata:{role:"admin"}}` (merge). **`app_metadata` only**, never `user_metadata` (per supabase skill — `user_metadata` is user-editable = self-escalation risk).
 - **Before:** `{role:customer, provider:email, providers:[email]}` → **After:** `{role:admin, provider:email, providers:[email]}`. Provider keys preserved; `user_metadata` untouched.
-- **Admins now:** `admin@test.local` + `aliimrankhan86@gmail.com`. `admin@test.local` deliberately **kept** (guard until local/prod separation).
+- **Admins now:** `admin@test.local` + `aliimrankhan86@gmail.com`. `admin@test.local` deliberately **kept** (guard until local/prod separation). **[Update 2026-07-07 — §C1]** local/prod separation done and `admin@test.local` has since been **removed from prod**; `aliimrankhan86@gmail.com` is now the **sole admin**.
 - **Note:** `public.users.role` mirror for this account left as `customer` (not used for authz — `lib/auth/session.ts` + middleware read `app_metadata` only). Sync optional.
 - **JWT freshness:** an existing session keeps the old role until token refresh — must **log in fresh** to get admin in the token.
 
