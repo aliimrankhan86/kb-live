@@ -11,6 +11,8 @@
 - **Current source-of-truth note:** Prompt 6 verified 2026-06-12. Full detail in `AI_NOTES.md` §23.
 - **Canonical handover:** `AI_NOTES.md` is the single source of truth for verified status, implementation posture, and pending areas.
 
+> ⚠️ **Local login correction (2026-07-07).** The `@example.com` dev-login personas and the `/dev/login` route referenced in the historical change-log entries below were **removed 2026-06-09 and no longer work**. Local sign-in now uses three real Supabase accounts — `admin@test.local` / `operator@test.local` / `customer@test.local`, all password `TestPass1!` — created by `node scripts/create-test-users.mjs`. **LOCAL ONLY** once C1 (local/prod Supabase separation) lands: run the script against the local stack, never prod. Roles live in `app_metadata`. Canonical: `AI_NOTES.md` §5. The dated rows below are kept verbatim as historical record — do not treat their `@example.com` credentials as current.
+
 ## What works (verified)
 
 - **Tests**: `npm run test` passes (24 files, 1,818/1,818 tests) — verified 2026-06-12.
