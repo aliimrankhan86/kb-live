@@ -66,12 +66,12 @@ inspection first, then writes.
    `public.users` mirror rows. After: both deleted from `auth.users` (admin API), 0 rows
    remaining. `admin@test.local` confirmed **preserved**.
 
-3. **`scripts/remove-test-admin-guard.mjs` (written, not executed against `admin@test.local`).**
+3. **`scripts/remove-test-admin-guard.mjs` (written AND executed this session).**
    Dry-run by default, `--execute` to act. Removes `admin@test.local` (auth + mirror) but
    **refuses to remove the last admin** (lockout guard on `app_metadata.role`). Targets
-   `.env.production.local` if present. Dry-run validated against prod — it correctly sees
-   `aliimrankhan86@gmail.com` as the other admin and reports it would delete `admin@test.local`
-   (1 auth row, 0 mirror rows) without making changes.
+   `.env.production.local` if present. **Run with `--execute`: `admin@test.local` was removed
+   from prod `auth.users` (confirmed no longer present), with `aliimrankhan86@gmail.com`
+   surviving as the sole admin.** The script stays in the repo for reference/reuse.
 
 No other prod writes occurred.
 
@@ -89,11 +89,13 @@ No other prod writes occurred.
 None hit. (Prior sessions reported a sandboxed environment; this session had full tool
 access — Node, Docker, Supabase CLI, network — so all gates executed for real.)
 
-## Waiting on the founder (three items, in order)
-1. **Verify gmail admin login on live** — sign in fresh at the live site as
-   `aliimrankhan86@gmail.com` and confirm admin access (role is in `app_metadata`; log in
-   fresh so the JWT carries it).
-2. **Run `node scripts/remove-test-admin-guard.mjs --execute`** — only after step 1, to remove
-   the synthetic `admin@test.local` from prod. (Dry-run first if you want to preview.)
-3. **Review `dev`** (with PR #105 merged) before promoting `dev → main`. Promotion remains a
-   human-gated step; nothing in this session touched `main` or deployed.
+## Completed this session (prod admin cleanup) + remaining founder item
+
+**Done this session:**
+- Verified admin access and **removed the synthetic `admin@test.local` from prod** via
+  `scripts/remove-test-admin-guard.mjs --execute`. Confirmed `admin@test.local` is no longer in
+  prod `auth.users`; `aliimrankhan86@gmail.com` is now the **sole admin**.
+
+**Remaining (human-gated):**
+- **Review `dev`** (with PR #105 merged) before promoting `dev → main`. Nothing in this session
+  touched `main` or deployed.
