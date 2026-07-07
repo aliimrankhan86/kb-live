@@ -24,7 +24,7 @@ When a local problem turns out to be **expected behavior, not a bug**, capture i
 
 ## Known gotchas (read before debugging "broken" local behavior)
 
-- **Dev login fails locally → check the server, not the code.** Dev personas (`customer@example.com` / `operator@example.com` / `operator2@example.com` / `admin@example.com`, all `PilgrimCompare!2026`) only work under `npm run dev` (`NODE_ENV=development`). A local prod build (`npm run build` + `npm start` → `next start`) runs `NODE_ENV=production`, so `isDevAuthEnabled()` is false and sign-in returns `401 AUTH_INVALID_CREDENTIALS` **by design**. Fix = restart with `npm run dev`. Full note: `PROJECT_BRIEF.md` §5, `AI_NOTES.md` §4.
+- **Local login uses real Supabase test accounts — not a code bypass.** The old `@example.com` dev-login personas and the `/dev/login` route were **removed 2026-06-09 and no longer work** (do not reintroduce them). Local sign-in now uses three real Supabase auth accounts — `admin@test.local`, `operator@test.local`, `customer@test.local`, all password `TestPass1!` — created by `node scripts/create-test-users.mjs`. The script provisions them in whatever Supabase project `.env.local` points at; **LOCAL ONLY** once C1 (local/prod Supabase separation) lands, so run it against the local stack, never prod. Roles are set in `app_metadata` (the authz source). If local login fails, the accounts are missing → run the script. Full note: `AI_NOTES.md` §5.
 
 ## Execution rules (mandatory every session)
 

@@ -63,7 +63,15 @@ test-results/
 prisma/.env
 docs.zip
 
+# Production data backups (DB cleanup rollback artifacts) — contain PII, keep local only
+backups/
+
 # Stale doc paths — untracked, kept locally only
 docs/01_STATUS.md
 docs/EXECUTION_QUEUE.md
 docs/_archive/
+
+# Local Supabase stack (C1 — LOCAL ONLY, not the prod project)
+supabase/config.toml
+supabase/.branches
+supabase/.temp

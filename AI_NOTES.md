@@ -1,5 +1,44 @@
 # PilgrimCompare AI Handover — Single Source of Truth
 
+## §C1 — Local/prod Supabase separation + branch hygiene + prod cleanup — 2026-07-07
+
+**Status: ✅ COMPLETE on branch `chore/c1-local-supabase`** (off `dev`). tsc clean · `npm run build` 0 errors · Vitest **1,869/1,869** · Playwright `--workers=1` **69 passed / 6 skipped / 0 failed** (parallel run shows the known multi-worker MockDB race on `bank-payment.spec.ts:15`; passes serially — same as CI). Autonomous session, gates 0–6.
+
+### What changed (this branch)
+- **Stale dev-login docs fixed** — the dead `@example.com` / `/dev/login` bypass (removed 2026-06-09) replaced with the real pattern in `CLAUDE.md` (gotcha) and `AI_NOTES.md` §5: three **real Supabase** accounts `admin@`/`operator@`/`customer@test.local`, password `TestPass1!`, roles in `app_metadata`, created by `node scripts/create-test-users.mjs`, **LOCAL ONLY** once C1 lands. `docs/NOW.md` got a correction banner (its `@example.com` rows are historical change-log, left verbatim).
+- **`.gitignore`** — added the local Supabase stack artefacts (`supabase/config.toml`, `supabase/.branches`, `supabase/.temp`). These describe the LOCAL Docker stack only, never the prod project.
+- **`scripts/remove-test-admin-guard.mjs`** (new) — Gate 4 Op 3, see below.
+
+### C1 local stack — how to reproduce (the reproducibility gap is closed)
+Docker running, Supabase CLI ≥2.109. RLS + storage-bucket SQL was **already fully captured** under `supabase/migrations/` — no prod `pg_dump` extraction was needed.
+1. `supabase init` (generates `supabase/config.toml` — gitignored).
+2. In `config.toml`: set `[db.migrations] enabled=false` and `[db.seed] enabled=false` — base tables come from Prisma, and `seed.sql` is demo data (standing rule forbids demo data). CLI auto-apply order is wrong (RLS migrations need tables first).
+3. `supabase start` → local API `http://127.0.0.1:54321`, DB `postgresql://postgres:postgres@127.0.0.1:54322/postgres`.
+4. Point `.env.local` at the local stack (URL, anon key, service_role key, `DATABASE_URL`, `DIRECT_URL` — all local CLI defaults). Keep `.env.production.local` as the prod snapshot.
+5. `npx prisma db push` (creates base tables from `prisma/schema.prisma`).
+6. Apply `supabase/migrations/*.sql` in numeric order via `npx prisma db execute --file <f>` (RLS, buckets, interests/enquiries/marketing tables — idempotent). Skip the gitignored macOS dup `012… 2.sql`.
+7. `node scripts/create-test-users.mjs` (creates the three `*.test.local` accounts in the LOCAL stack).
+
+**Verified local:** 15 public tables, RLS on across all key tables, 4 storage buckets (`evidence-files`, `operator-exports`, `package-images`, `payment-evidence`), **zero rows** in users/packages/operator_profiles. App boots; `admin@test.local`/`TestPass1!` logs in; `/api/auth/me` → role `admin`. Project ref local (`supabase-demo`/`127.0.0.1`) vs prod (`nzvepuzzxjoxvpcrlozx`). **Local dev cannot touch prod data.**
+
+### Gate 4 — three authorised prod operations (executed via `.env.production.local`)
+1. **Role mirror sync** — `public.users.role` for `aliimrankhan86@gmail.com`: `customer` → **`admin`** (idempotent; `app_metadata.role` was already `admin`). Authz still reads `app_metadata`; this only fixes the mirror.
+2. **Test-account cleanup** — `operator@test.local` + `customer@test.local` had **0 FK references** (checked every FK into `public.users`) and **no `public.users` mirror rows** → deleted from prod `auth.users` (both gone; admin API 200). `admin@test.local` **preserved**.
+3. **`scripts/remove-test-admin-guard.mjs`** — dry-run by default, `--execute` to act; deletes `admin@test.local` (auth + mirror). Refuses to remove the **last** admin (lockout guard, reads `app_metadata.role`). Targets `.env.production.local` if present. **✅ EXECUTED this session (`--execute`)** — `admin@test.local` removed from prod `auth.users` (confirmed not present); `aliimrankhan86@gmail.com` survives as **sole admin**. The script remains in the repo for reference/reuse.
+
+### Branch hygiene (Gate 1)
+main untouched. dev = main minus promotion-merge commits (healthy). **PR #104 merged docs-only into dev + branch deleted.** Deleted 26 merged local + 6 merged remote branches. Stragglers kept (unmerged): local `feature/mobile-ux-pass-sliders-footer`, `fix/duplicate-email-error`, `fix/merge-main-conflicts`, `fix/signup-and-auth-confirm`, `qa/app-readiness-audit`; remote `origin/ci/add-pr-workflow`.
+
+### Completed this session / open items
+- **✅ `admin@test.local` removed from prod (DONE this session).** The guard script was run with `--execute`; `admin@test.local` is no longer in prod `auth.users`, and `aliimrankhan86@gmail.com` is the **sole admin**. No further action needed on this.
+- **Remaining:** review dev before promoting `dev → main` (human-gated; nothing this session touched `main` or deployed).
+- `config.toml` is gitignored per the C1 brief — a fresh clone reproduces the local stack via the steps above (each dev runs `supabase init` + provisioning).
+
+### Next immediate action
+**C2 — register-interest capture** (pending founder-approved copy). Do not start until copy is approved.
+
+---
+
 ## 🚀 GO-LIVE — `dev` promoted to `main` — 2026-06-16
 
 **Current `main` HEAD: `e156378`** (3rd promotion, PR [#99](https://github.com/aliimrankhan86/kb-live/pull/99), merge commit, no squash) — **docs + dev-utility only, zero app runtime change vs `823f860`.** Brings live: #96 (record 2nd promotion), #97 (`docs/ANALYTICS.md`), #98 (cleanup — verified Vercel-analytics copy in `app/privacy/page.tsx` + `components/compliance/CookieConsent.tsx`, swapped dev-utility `KT-9X2P4A` → `PC-7F3A9C21` in `scripts/test-emails.mjs`). Pre-flight on dev `06db208`: tsc clean, build 0 errors (66/66), Vitest **1,860/1,860**, zero `KT-` in code/tests/e2e/sql.
@@ -39,6 +78,38 @@
 - `package.json` — added `@vercel/analytics`.
 
 **Founder action (free, no card):** Vercel project → **Analytics** tab → **Enable Web Analytics**. Until enabled, `/_vercel/insights/script.js` 404s and events no-op — that's a dashboard toggle, not a code issue.
+
+---
+
+## §Production demo-data cleanup — 2026-06-17
+
+**Status: ✅ DONE — executed against live production Supabase** (project `nzvepuzzxjoxvpcrlozx`), reversible (full backup taken first), single FK-safe transaction committed. Implements the standing rule (demo/seed data must never reach production).
+
+**Deleted (one transaction, FK-safe order):** operator_profiles **3** (op1 Al-Hidayah, op2 Makkah Tours, op3 Zam Zam) · packages **14** · enquiries **4** (KT-1B98A1E1 + 3 PC- smoke tests) · payment_details **1** · quote_requests **2** · analytics_events **202** (all demo-operator-scoped) · public.users **4** (the 3 `@example.com` operator rows + `wigocor561@afterdo.com`) · auth.users **1** (`wigocor561@afterdo.com`, via Supabase Admin API → HTTP 200).
+
+**Preserved (deliberate):** all gmail/googlemail accounts (founder); `customer@example.com` (cust1 — out of scope); `admin@test.local` / `operator@test.local` / `customer@test.local` (the only local-login accounts — kept until a separate local Supabase exists); `marketing_consents` (was empty, untouched).
+
+**ADMIN-LOCKOUT GUARD:** `admin@test.local` is the ONLY admin → KEPT. Create/promote a real admin (a gmail account) before it is ever removed.
+
+**Backup / rollback (LOCAL only — contains prod PII, now in `.gitignore`):**
+- `backups/preclean-2026-06-17T15-49-23-491Z.json` — every deleted row, full columns.
+- `backups/restore-2026-06-17T15-49-23-491Z.sql` — transactional re-insert, parent→child via `json_populate_recordset`. Restores public-schema rows exactly; the `wigocor561` auth.users row must be recreated via `admin.createUser` (password not recoverable).
+
+**Verified clean public state (live `pilgrimcompare.co.uk`):** home 200 · `/partner` concierge CTA · `/packages` + `/search/packages?type=umrah` render the "No packages" empty state (0 cards, no broken UI) · `/operators/al-hidayah-travel` → "Operator not found" (fresh, `x-vercel-cache: MISS`). Production now: **0 operators / 0 packages / 0 enquiries** — ready for real operators one-for-one.
+
+**⚠️ Standing-rule caveat (open):** the 3 `*.test.local` accounts remain in production auth because local dev points `.env.local` at the prod Supabase project (no separate local DB). To fully satisfy the rule: stand up a separate local Supabase project + run `scripts/create-test-users.mjs` there, then remove the `*.test.local` accounts from prod (keeping/replacing the admin first).
+
+---
+
+## §Admin promotion — real account → admin (production) — 2026-06-17
+
+**Status: ✅ DONE — production.** Promoted `aliimrankhan86@gmail.com` (auth.users id `35675c3d-9063-45c4-98d8-8c3971380bf5`) from `customer` → **`admin`** to remove the dependency on the synthetic `admin@test.local`.
+
+- **How:** service-role Supabase Admin API `PUT /auth/v1/admin/users/{id}` with `{app_metadata:{role:"admin"}}` (merge). **`app_metadata` only**, never `user_metadata` (per supabase skill — `user_metadata` is user-editable = self-escalation risk).
+- **Before:** `{role:customer, provider:email, providers:[email]}` → **After:** `{role:admin, provider:email, providers:[email]}`. Provider keys preserved; `user_metadata` untouched.
+- **Admins now:** `admin@test.local` + `aliimrankhan86@gmail.com`. `admin@test.local` deliberately **kept** (guard until local/prod separation). **[Update 2026-07-07 — §C1]** local/prod separation done and `admin@test.local` has since been **removed from prod**; `aliimrankhan86@gmail.com` is now the **sole admin**.
+- **Note:** `public.users.role` mirror for this account left as `customer` (not used for authz — `lib/auth/session.ts` + middleware read `app_metadata` only). Sync optional.
+- **JWT freshness:** an existing session keeps the old role until token refresh — must **log in fresh** to get admin in the token.
 
 ---
 
@@ -470,16 +541,17 @@ Operators pay. Travellers are always free. Funds never flow through the platform
 ### Password rules
 Min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special character. Enforced in `lib/validation.ts`, sign-up route, and `SignUpForm.tsx`.
 
-### Dev accounts (local `NODE_ENV=development` and `E2E_TESTING=1` only)
+### Local test accounts (real Supabase auth — not a code bypass)
 
-| Persona | Email | Password | Expected view |
+The old `@example.com` dev-login personas + the `/dev/login` route were **removed 2026-06-09 and no longer work**. Local sign-in now uses three real Supabase accounts, created by `node scripts/create-test-users.mjs`:
+
+| Persona | Email | Password | Role (`app_metadata`) |
 |---|---|---|---|
-| Customer | `customer@example.com` | `PilgrimCompare!2026` | Customer nav + public flows |
-| Operator verified | `operator@example.com` | `PilgrimCompare!2026` | Partner dashboard |
-| Operator new | `operator2@example.com` | `PilgrimCompare!2026` | Onboarding status flows |
-| Admin | `admin@example.com` | `PilgrimCompare!2026` | Admin audit flows |
+| Admin | `admin@test.local` | `TestPass1!` | admin |
+| Operator | `operator@test.local` | `TestPass1!` | operator |
+| Customer | `customer@test.local` | `TestPass1!` | customer |
 
-`PilgrimCompare!2026` is intentionally unchanged — it is a dev credential token, not user-facing copy.
+The script provisions these in whatever Supabase project `.env.local` points at. **LOCAL ONLY** once C1 (local/prod Supabase separation) lands — run it against the local stack, never prod. Roles live in `app_metadata` (the authz source), set at creation. `TestPass1!` is a dev credential token, not user-facing copy.
 
 ### Auth bypass paths
 - `__e2e_user` cookie: active only when `E2E_TESTING=1`. `next.config.ts` compiles `E2E_TESTING=''` in all deployments — path is dead in production/preview.
