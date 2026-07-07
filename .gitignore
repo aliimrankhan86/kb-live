@@ -63,6 +63,9 @@ test-results/
 prisma/.env
 docs.zip
 
+# Production data backups (DB cleanup rollback artifacts) — contain PII, keep local only
+backups/
+
 # Stale doc paths — untracked, kept locally only
 docs/01_STATUS.md
 docs/EXECUTION_QUEUE.md
