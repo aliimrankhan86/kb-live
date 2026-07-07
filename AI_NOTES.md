@@ -502,16 +502,17 @@ Operators pay. Travellers are always free. Funds never flow through the platform
 ### Password rules
 Min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special character. Enforced in `lib/validation.ts`, sign-up route, and `SignUpForm.tsx`.
 
-### Dev accounts (local `NODE_ENV=development` and `E2E_TESTING=1` only)
+### Local test accounts (real Supabase auth — not a code bypass)
 
-| Persona | Email | Password | Expected view |
+The old `@example.com` dev-login personas + the `/dev/login` route were **removed 2026-06-09 and no longer work**. Local sign-in now uses three real Supabase accounts, created by `node scripts/create-test-users.mjs`:
+
+| Persona | Email | Password | Role (`app_metadata`) |
 |---|---|---|---|
-| Customer | `customer@example.com` | `PilgrimCompare!2026` | Customer nav + public flows |
-| Operator verified | `operator@example.com` | `PilgrimCompare!2026` | Partner dashboard |
-| Operator new | `operator2@example.com` | `PilgrimCompare!2026` | Onboarding status flows |
-| Admin | `admin@example.com` | `PilgrimCompare!2026` | Admin audit flows |
+| Admin | `admin@test.local` | `TestPass1!` | admin |
+| Operator | `operator@test.local` | `TestPass1!` | operator |
+| Customer | `customer@test.local` | `TestPass1!` | customer |
 
-`PilgrimCompare!2026` is intentionally unchanged — it is a dev credential token, not user-facing copy.
+The script provisions these in whatever Supabase project `.env.local` points at. **LOCAL ONLY** once C1 (local/prod Supabase separation) lands — run it against the local stack, never prod. Roles live in `app_metadata` (the authz source), set at creation. `TestPass1!` is a dev credential token, not user-facing copy.
 
 ### Auth bypass paths
 - `__e2e_user` cookie: active only when `E2E_TESTING=1`. `next.config.ts` compiles `E2E_TESTING=''` in all deployments — path is dead in production/preview.
