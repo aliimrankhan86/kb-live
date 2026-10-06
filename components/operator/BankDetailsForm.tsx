@@ -94,7 +94,7 @@ export function BankDetailsForm({
 
       <Input
         label="Account holder name"
-        placeholder="e.g. Al-Hidayah Travel Ltd"
+        placeholder="e.g. Example Travel Ltd"
         value={accountHolderName}
         onChange={(e) => { setAccountHolderName(e.target.value); clearError('accountHolderName'); }}
         errorMessage={errors.accountHolderName}
