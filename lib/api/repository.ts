@@ -67,6 +67,7 @@ const mockStore = {
   deletePackage: (id: string) => Promise.resolve(MockDB.deletePackage(id)),
   getEnquiries: () => Promise.resolve(MockDB.getEnquiries()),
   saveEnquiry: (enquiry: Enquiry) => Promise.resolve(MockDB.saveEnquiry(enquiry)),
+  deleteUser: (id: string) => Promise.resolve(MockDB.deleteUser(id)),
   getMarketingConsents: () => Promise.resolve(MockDB.getMarketingConsents()),
   saveMarketingConsent: (consent: MarketingConsent) => Promise.resolve(MockDB.saveMarketingConsent(consent)),
   getBookingOutcomes: () => Promise.resolve(MockDB.getBookingOutcomes()),
@@ -496,6 +497,10 @@ function parseCsv(text: string): string[][] {
   rows.push(row);
   return rows;
 }
+
+/** Shown when an account cannot be erased automatically. Never claims success. */
+export const ACCOUNT_DELETE_MANUAL_MESSAGE =
+  'We could not delete this account automatically because it is linked to listings, bookings or complaints. Nothing has been deleted. Email dpo@pilgrimcompare.co.uk and we will handle your request.';
 
 /** Trust/verification state only an admin may change. */
 const OPERATOR_PROTECTED_FIELDS = [
@@ -1437,6 +1442,33 @@ export const Repository = {
 
   getOperatorBySlug: async (slug: string): Promise<OperatorProfile | undefined> => {
     return (await store().getOperators()).find((operator) => operator.slug === slug);
+  },
+
+  /**
+   * Erase the signed-in customer's own app record (UK GDPR Art. 17). Refuses,
+   * with an honest reason, when the account cannot be erased automatically:
+   * operator/admin accounts (tied to listings) and customers linked to quote,
+   * booking or complaint records (booking outcomes are billing evidence and
+   * are never deleted). The caller deletes the auth user afterwards.
+   */
+  assertCanDeleteOwnAccount: async (ctx: RequestContext): Promise<void> => {
+    if (ctx.role !== 'customer') {
+      throw new AppError({ code: 'CONFLICT', status: 409, message: ACCOUNT_DELETE_MANUAL_MESSAGE });
+    }
+    const [requests, intents, complaints] = await Promise.all([
+      store().getRequests(),
+      store().getBookingIntents(),
+      store().getComplaints(),
+    ]);
+    const linked = [...requests, ...intents, ...complaints].some((r) => r.customerId === ctx.userId);
+    if (linked) {
+      throw new AppError({ code: 'CONFLICT', status: 409, message: ACCOUNT_DELETE_MANUAL_MESSAGE });
+    }
+  },
+
+  deleteOwnCustomerRecord: async (ctx: RequestContext): Promise<void> => {
+    await Repository.assertCanDeleteOwnAccount(ctx);
+    await store().deleteUser(ctx.userId);
   },
 
   /**

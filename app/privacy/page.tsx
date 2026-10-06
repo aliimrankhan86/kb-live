@@ -140,7 +140,7 @@ export default function PrivacyPolicyPage() {
               </tr>
               <tr className="border-b border-[var(--borderSubtle)]">
                 <td className="px-3 py-2">User account (deleted)</td>
-                <td className="px-3 py-2">90-day grace period, then permanently deleted</td>
+                <td className="px-3 py-2">Deleted straight away when you delete your account</td>
               </tr>
               <tr className="border-b border-[var(--borderSubtle)]">
                 <td className="px-3 py-2">Enquiry and booking intent data</td>

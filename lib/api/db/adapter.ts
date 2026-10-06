@@ -281,6 +281,9 @@ const mapComplaint = (c: PrismaComplaint): Complaint => ({
 export const DBAdapter = {
   // Users
   getUsers: async () => prisma.user.findMany(),
+  deleteUser: async (id: string): Promise<void> => {
+    await prisma.user.deleteMany({ where: { id } });
+  },
 
   // Quote Requests
   getRequests: async (): Promise<QuoteRequest[]> =>

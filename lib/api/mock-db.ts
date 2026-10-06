@@ -1199,6 +1199,10 @@ export const MockDB = {
     return outcome;
   },
 
+  deleteUser: (id: string) => {
+    setStorage(STORAGE_KEYS.USERS, getStorage<User[]>(STORAGE_KEYS.USERS, SEED_USERS).filter((u) => u.id !== id));
+  },
+
   // For simulation
   currentUser: SEED_USERS[0], // Default to customer
   setCurrentUser: (role: 'customer' | 'operator') => {
