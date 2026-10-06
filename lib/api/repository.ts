@@ -1,4 +1,5 @@
 import { MockDB } from './mock-db';
+import { isPubliclyListed } from '@/lib/listing';
 import { sortByScore } from '@/lib/ranking';
 import { departureCityOf, resolveDepartureLocation } from '@/lib/airports';
 import {
@@ -76,7 +77,7 @@ const mockStore = {
   saveBookingOutcome: (bo: BookingOutcome) => Promise.resolve(MockDB.saveBookingOutcome(bo)),
   getDistinctDepartureCities: (): Promise<string[]> => {
     const citySet = new Set<string>();
-    const verified = new Set(MockDB.getOperators().filter((o) => o.verificationStatus === 'verified').map((o) => o.id));
+    const verified = new Set(MockDB.getOperators().filter(isPubliclyListed).map((o) => o.id));
     for (const pkg of MockDB.getPackages()) {
       if (pkg.status !== 'published' || !pkg.departureAirport || !verified.has(pkg.operatorId)) continue;
       const city = departureCityOf(pkg.departureAirport);
@@ -502,7 +503,7 @@ function parseCsv(text: string): string[][] {
 }
 
 async function verifiedOperatorIds(): Promise<Set<string>> {
-  return new Set((await store().getOperators()).filter((o) => o.verificationStatus === 'verified').map((o) => o.id));
+  return new Set((await store().getOperators()).filter(isPubliclyListed).map((o) => o.id));
 }
 
 /** Shown when an account cannot be erased automatically. Never claims success. */
@@ -1192,9 +1193,14 @@ export const Repository = {
       updatedAt: new Date().toISOString(),
     };
     // A changed ATOL/ABTA number has not been checked yet: drop the old check
-    // date so the page says "provided by the operator", not "checked".
+    // date so the page says "provided by the operator", not "checked". A new
+    // ATOL number also takes the operator off the public listing until an
+    // admin checks it (standards §7: we check each ATOL number before listing).
     if (ctx.role !== 'admin') {
-      if (operator.atolNumber !== existing.atolNumber) operator.atolVerifiedAt = undefined;
+      if ((operator.atolNumber ?? '').trim() !== (existing.atolNumber ?? '').trim()) {
+        operator.atolVerifiedAt = undefined;
+        if (existing.verificationStatus === 'verified') operator.verificationStatus = 'pending';
+      }
       if (operator.abtaMemberNumber !== existing.abtaMemberNumber) operator.abtaVerifiedAt = undefined;
     }
     await store().saveOperator(operator);
@@ -1266,7 +1272,7 @@ export const Repository = {
 
   /** Public operator profile: verified operators only. */
   getPublicOperatorBySlug: async (slug: string): Promise<OperatorProfile | undefined> =>
-    (await store().getOperators()).find((o) => o.slug === slug && o.verificationStatus === 'verified'),
+    (await store().getOperators()).find((o) => o.slug === slug && isPubliclyListed(o)),
 
   getPackageBySlug: async (slug: string): Promise<Package | undefined> => {
     const all = await store().getPackages();
@@ -1521,7 +1527,7 @@ export const Repository = {
    * operator profile page.
    */
   listPublicOperators: async (): Promise<OperatorProfile[]> => {
-    return (await store().getOperators()).filter((o) => o.verificationStatus === 'verified').map(({ eligibilityFlags, ...publicFields }) => ({
+    return (await store().getOperators()).filter(isPubliclyListed).map(({ eligibilityFlags, ...publicFields }) => ({
       ...publicFields,
       ...(eligibilityFlags
         ? {

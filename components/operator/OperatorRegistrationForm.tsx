@@ -416,8 +416,8 @@ export function OperatorRegistrationForm() {
           <div className="flex items-start gap-2">
             <span aria-hidden="true" className="text-[var(--danger)] font-bold">✗</span>
             <span>
-              <strong className="text-[var(--text)]">No protection</strong>: if you do not hold ATOL or ABTA, you must clearly state this.
-              PilgrimCompare will display a prominent warning on your listings so travellers can make an informed choice.
+              <strong className="text-[var(--text)]">No ATOL number</strong>: We only list operators with an ATOL number.
+              You can register now, but your packages are not listed until you add your ATOL number and we have checked it.
             </span>
           </div>
         </div>
