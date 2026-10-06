@@ -56,7 +56,8 @@ const DEFAULT_DATA: Partial<Package> = {
   priceType: 'from',
   currency: 'GBP',
   inclusions: { visa: null, flights: null, transfers: null, meals: null },
-  roomOccupancyOptions: { single: false, double: true, triple: true, quad: true },
+  // Nothing pre-ticked: unselected room types read "Not provided" (never assumed).
+  roomOccupancyOptions: { single: false, double: false, triple: false, quad: false },
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────

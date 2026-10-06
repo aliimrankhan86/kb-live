@@ -41,7 +41,7 @@ const INCLUSION_STATES: { value: boolean | null; key: string; label: string }[] 
 
 export function WizardStep5Inclusions({ data, onChange, error }: Props) {
   const inclusions = data.inclusions ?? { visa: null, flights: null, transfers: null, meals: null };
-  const occupancy = data.roomOccupancyOptions ?? { single: false, double: true, triple: true, quad: true };
+  const occupancy = data.roomOccupancyOptions ?? { single: false, double: false, triple: false, quad: false };
 
   const setInclusion = (key: keyof typeof inclusions, value: boolean | null) => {
     onChange({ inclusions: { ...inclusions, [key]: value } });

@@ -55,3 +55,15 @@ describe('inclusions are yes / no / not stated (founder decision 2026-10-06)', (
     expect(saved[0].inclusions).toEqual({ visa: true, flights: false, transfers: null, meals: null });
   });
 });
+
+describe('room types are never pre-selected (§3.4)', () => {
+  it('a skipped room step saves no room types, which reads Not provided', async () => {
+    const { roomOptionsLabel } = await import('@/lib/packages/display');
+    const parsed = packageSchema.safeParse({
+      title: 'Package title', pilgrimageType: 'umrah', pricePerPerson: 1000, priceType: 'from',
+      nightsMakkah: 4, nightsMadinah: 3, totalNights: 7,
+    });
+    expect(parsed.success && parsed.data.roomOccupancyOptions).toEqual({ single: false, double: false, triple: false, quad: false });
+    expect(roomOptionsLabel({ single: false, double: false, triple: false, quad: false })).toBe('Not provided');
+  });
+});

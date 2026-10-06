@@ -66,7 +66,8 @@ export const packageSchema = z.object({
   flightType: z.enum(['direct', 'one-stop', 'multi-stop']).optional(),
   // Step 5
   inclusions: inclusionsSchema.default({ visa: null, flights: null, transfers: null, meals: null }),
-  roomOccupancyOptions: roomOccupancySchema.default({ single: false, double: true, triple: true, quad: true }),
+  // No default room types: a skipped selection reads "Not provided", never invented.
+  roomOccupancyOptions: roomOccupancySchema.default({ single: false, double: false, triple: false, quad: false }),
   // Step 5 — Ziyarat: operator-stated, three-state. No default; a skipped value
   // stays absent (→ "Not provided"). Must NOT coerce blank to false.
   ziyaratIncluded: z.boolean().optional(),
