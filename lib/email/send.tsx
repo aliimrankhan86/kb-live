@@ -1,5 +1,7 @@
 import * as React from 'react';
 import { Resend } from 'resend';
+import { appendFileSync, mkdirSync } from 'node:fs';
+import { dirname } from 'node:path';
 import { render } from '@react-email/components';
 import type { Package, QuoteRequest } from '@/lib/types';
 import EnquiryConfirmation from '@/emails/EnquiryConfirmation';
@@ -12,10 +14,34 @@ import OutcomeFollowup from '@/emails/OutcomeFollowup';
 const FROM = 'PilgrimCompare <notifications@send.pilgrimcompare.co.uk>';
 const SUPPORT_REPLY = 'support@pilgrimcompare.co.uk';
 
-function resendClient(): Resend {
+type EmailMessage = { from: string; to: string | string[]; replyTo?: string; subject: string; html: string };
+type EmailSender = { emails: { send: (msg: EmailMessage) => Promise<{ error: unknown }> } };
+
+/**
+ * Local-only log transport: when RESEND_API_KEY is unset, EMAIL_LOG_PATH is
+ * set, and this is not a Vercel production deployment, messages are appended
+ * to that file instead of being sent. Production behaviour is unchanged: no
+ * key → throw (callers catch and log), so a misconfigured prod never "sends"
+ * into a file silently.
+ */
+function logTransport(path: string): EmailSender {
+  return {
+    emails: {
+      send: async (msg) => {
+        mkdirSync(dirname(path), { recursive: true });
+        appendFileSync(path, `${JSON.stringify({ at: new Date().toISOString(), ...msg })}\n`);
+        return { error: null };
+      },
+    },
+  };
+}
+
+export function resendClient(): EmailSender {
   const key = process.env.RESEND_API_KEY;
-  if (!key) throw new Error('RESEND_API_KEY is not set');
-  return new Resend(key);
+  if (key) return new Resend(key);
+  const logPath = process.env.EMAIL_LOG_PATH;
+  if (logPath && process.env.VERCEL_ENV !== 'production') return logTransport(logPath);
+  throw new Error('RESEND_API_KEY is not set');
 }
 
 export type SimilarPackage = Pick<Package, 'title' | 'slug' | 'pricePerPerson' | 'currency' | 'totalNights'>;
