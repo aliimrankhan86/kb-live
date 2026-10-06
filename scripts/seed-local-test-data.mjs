@@ -41,6 +41,8 @@ const OPERATORS = [
   { key: 'a', companyName: 'Local Test Operator A', slug: 'local-test-operator-a', verification: 'verified', atol: 'TEST-0001', airports: ['LHR', 'LGW', 'BHX'] },
   { key: 'b', companyName: 'Local Test Operator B', slug: 'local-test-operator-b', verification: 'verified', atol: 'TEST-0002', airports: ['MAN', 'BHX'] },
   { key: 'c', companyName: 'Local Test Operator C', slug: 'local-test-operator-c', verification: 'verified', atol: null, airports: ['LHR', 'STN'] },
+  // Unverified: its published package must never appear publicly.
+  { key: 'd', companyName: 'Local Test Operator D (pending)', slug: 'local-test-operator-d', verification: 'pending', atol: null, airports: ['BHX'] },
 ];
 
 const allIncl = { visa: true, flights: true, transfers: true, meals: false };
@@ -52,7 +54,7 @@ const PACKAGES = [
   { n: 2, op: 'a', title: '14 night family Umrah from Birmingham', departureAirport: 'BHX', price: 1550, priceType: 'from', dateWindow: { start: '2026-12-20', end: '2027-01-03' }, seasonLabel: 'School Holidays', totalNights: 14, nightsMakkah: 7, nightsMadinah: 7, hotelMakkahStars: 4, hotelMadinahStars: 3, hotelMakkahName: 'Test Hotel Makkah Two', hotelMadinahName: 'Test Hotel Madinah Two', distanceToHaramMakkahMetres: 800, distanceBandMakkah: 'medium', distanceBandMadinah: 'near', flightType: 'one-stop', groupType: 'large-group', cancellationPolicy: 'Test policy: full refund up to 60 days before departure.', paymentPlanAvailable: true, depositAmount: 250, inclusions: allIncl },
   { n: 3, op: 'b', title: '7 night budget Umrah from Manchester', departureAirport: 'MAN', price: 899, priceType: 'exact', dateWindow: { start: '2027-01-15', end: '2027-01-22' }, totalNights: 7, nightsMakkah: 4, nightsMadinah: 3, hotelMakkahStars: 3, hotelMadinahStars: 3, distanceBandMakkah: 'far', distanceBandMadinah: 'medium', flightType: 'one-stop', groupType: 'large-group', cancellationPolicy: 'Test policy: non-refundable once visa issued.', inclusions: { visa: true, flights: true, transfers: true, meals: false } },
   // Deliberately incomplete: no hotel names/stars, no distance, no group type, no cancellation.
-  { n: 4, op: 'b', title: '10 night Umrah from Birmingham (details pending)', departureAirport: 'BHX', price: 1200, priceType: 'from', dateWindow: { start: '2026-12-10', end: '2026-12-20' }, totalNights: 10, nightsMakkah: 5, nightsMadinah: 5, distanceBandMakkah: 'unknown', distanceBandMadinah: 'unknown', inclusions: { visa: true, flights: true, transfers: false, meals: false } },
+  { n: 4, op: 'b', title: '10 night Umrah from Birmingham (details pending)', departureAirport: 'BHX', price: 1200, priceType: 'from', dateWindow: { start: '2026-12-10', end: '2026-12-20' }, totalNights: 10, nightsMakkah: 5, nightsMadinah: 5, distanceBandMakkah: 'unknown', distanceBandMadinah: 'unknown', inclusions: { visa: true, flights: true, transfers: null, meals: null } },
   { n: 5, op: 'c', title: '5 star Ramadan Umrah from London', departureAirport: 'LHR', price: 2950, priceType: 'from', dateWindow: { start: '2027-02-20', end: '2027-03-05' }, seasonLabel: 'Ramadan', totalNights: 13, nightsMakkah: 8, nightsMadinah: 5, hotelMakkahStars: 5, hotelMadinahStars: 5, hotelMakkahName: 'Test Hotel Makkah Five', hotelMadinahName: 'Test Hotel Madinah Five', distanceToHaramMakkahMetres: 100, distanceToHaramMadinahMetres: 150, distanceBandMakkah: 'near', distanceBandMadinah: 'near', flightType: 'direct', airline: 'Test Airline', groupType: 'private', cancellationPolicy: 'Test policy: 50% refund up to 45 days before departure.', paymentPlanAvailable: false, depositAmount: 750, ziyaratIncluded: false, inclusions: { visa: true, flights: true, transfers: true, meals: true } },
   // Deliberately incomplete: free-text airport as an operator might type it, no cancellation.
   { n: 6, op: 'c', title: '12 night Umrah from London Stansted', departureAirport: 'London Stansted', price: 1340, priceType: 'from', dateWindow: { start: '2027-02-01', end: '2027-02-13' }, totalNights: 12, nightsMakkah: 7, nightsMadinah: 5, hotelMakkahStars: 4, hotelMakkahName: 'Test Hotel Makkah Six', distanceBandMakkah: 'medium', distanceBandMadinah: 'unknown', flightType: 'one-stop', groupType: 'small-group', inclusions: allIncl },
@@ -65,6 +67,8 @@ const PACKAGES = [
   { n: 11, op: 'c', title: '9 night Umrah from Heathrow, December', departureAirport: 'LHR', price: 1650, priceType: 'exact', dateWindow: { start: '2026-12-02', end: '2026-12-11' }, totalNights: 9, nightsMakkah: 5, nightsMadinah: 4, hotelMakkahStars: 5, hotelMakkahName: 'Test Hotel Makkah Eleven', distanceToHaramMakkahMetres: 200, distanceBandMakkah: 'near', distanceBandMadinah: 'unknown', flightType: 'direct', cancellationPolicy: 'Test policy: non-refundable.', inclusions: allIncl },
   { n: 12, op: 'a', title: 'Hajj 2027 package from London', pilgrimageType: 'hajj', departureAirport: 'LHR', price: 7950, priceType: 'from', dateWindow: { start: '2027-05-10', end: '2027-05-30' }, seasonLabel: 'Hajj', totalNights: 20, nightsMakkah: 14, nightsMadinah: 6, hotelMakkahStars: 4, hotelMadinahStars: 4, hotelMakkahName: 'Test Hotel Makkah Twelve', hotelMadinahName: 'Test Hotel Madinah Twelve', distanceBandMakkah: 'medium', distanceBandMadinah: 'near', flightType: 'direct', groupType: 'large-group', cancellationPolicy: 'Test policy: Hajj terms per operator.', inclusions: { visa: true, flights: true, transfers: true, meals: true } },
   { n: 13, op: 'b', title: '8 night Umrah from Birmingham, February', departureAirport: 'BHX', price: 1180, priceType: 'from', dateWindow: { start: '2027-02-10', end: '2027-02-18' }, totalNights: 8, nightsMakkah: 4, nightsMadinah: 4, hotelMakkahStars: 3, hotelMadinahStars: 3, hotelMakkahName: 'Test Hotel Makkah Thirteen', hotelMadinahName: 'Test Hotel Madinah Thirteen', distanceToHaramMakkahMetres: 1100, distanceBandMakkah: 'medium', distanceBandMadinah: 'medium', flightType: 'direct', groupType: 'private', cancellationPolicy: 'Test policy: 21 day window.', paymentPlanAvailable: true, depositAmount: 150, inclusions: allIncl },
+  // Published but from an UNVERIFIED operator: must never appear publicly.
+  { n: 15, op: 'd', title: 'Package from an unverified operator', departureAirport: 'BHX', price: 1111, priceType: 'from', dateWindow: { start: '2026-12-05', end: '2026-12-15' }, totalNights: 10, nightsMakkah: 5, nightsMadinah: 5, distanceBandMakkah: 'unknown', distanceBandMadinah: 'unknown', inclusions: allIncl },
   // Draft: must never appear publicly.
   { n: 14, op: 'a', title: 'Draft package (must not be public)', status: 'draft', departureAirport: 'LHR', price: 999, priceType: 'from', totalNights: 7, nightsMakkah: 4, nightsMadinah: 3, distanceBandMakkah: 'unknown', distanceBandMadinah: 'unknown', inclusions: allIncl },
 ];
@@ -82,10 +86,14 @@ async function main() {
 
     const auth = await client.query('select id from auth.users where email = $1', [OPERATOR_TEST_USER_EMAIL]);
     if (auth.rowCount === 0) throw new Error(`${OPERATOR_TEST_USER_EMAIL} missing: run node scripts/create-test-users.mjs first`);
-    const userIds = { a: auth.rows[0].id, b: 'local-test-user-operator-b', c: 'local-test-user-operator-c' };
+    const userIds = { a: auth.rows[0].id, b: 'local-test-user-operator-b', c: 'local-test-user-operator-c', d: 'local-test-user-operator-d' };
 
     if (process.argv.includes('--reset')) {
-      await client.query(`delete from packages where id like 'local-test-%'`);
+      // Rows created by browsing/enquiring against the test data first (FKs).
+      const testOperators = Object.values(userIds);
+      await client.query(`delete from analytics_events where operator_id = any($1) or package_id like 'local-test-%'`, [testOperators]);
+      await client.query(`delete from enquiries where package_id like 'local-test-%'`);
+      await client.query(`delete from packages where id like 'local-test-%' or operator_id = any($1)`, [testOperators]);
       await client.query(`delete from operator_profiles where slug like 'local-test-%'`);
       await client.query(`delete from users where id like 'local-test-%'`);
     }
