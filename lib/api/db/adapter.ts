@@ -675,6 +675,17 @@ export const DBAdapter = {
     return mapEnquiry(saved);
   },
 
+  anonymiseEnquiriesByEmail: async (email: string, erasedName: string): Promise<void> => {
+    await prisma.enquiry.updateMany({
+      where: { email: { equals: email.trim(), mode: 'insensitive' } },
+      data: { name: erasedName, email: null, phone: null, message: null },
+    });
+  },
+
+  deleteMarketingConsentsByEmail: async (email: string): Promise<void> => {
+    await prisma.marketingConsent.deleteMany({ where: { email: { equals: email.trim(), mode: 'insensitive' } } });
+  },
+
   // Marketing consents (Task 3). Idempotent on (email, enquiryReference).
   getMarketingConsents: async (): Promise<MarketingConsent[]> =>
     (await prisma.marketingConsent.findMany()).map(mapMarketingConsent),

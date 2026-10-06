@@ -68,6 +68,8 @@ const mockStore = {
   getEnquiries: () => Promise.resolve(MockDB.getEnquiries()),
   saveEnquiry: (enquiry: Enquiry) => Promise.resolve(MockDB.saveEnquiry(enquiry)),
   deleteUser: (id: string) => Promise.resolve(MockDB.deleteUser(id)),
+  anonymiseEnquiriesByEmail: (email: string, erasedName: string) => Promise.resolve(MockDB.anonymiseEnquiriesByEmail(email, erasedName)),
+  deleteMarketingConsentsByEmail: (email: string) => Promise.resolve(MockDB.deleteMarketingConsentsByEmail(email)),
   getMarketingConsents: () => Promise.resolve(MockDB.getMarketingConsents()),
   saveMarketingConsent: (consent: MarketingConsent) => Promise.resolve(MockDB.saveMarketingConsent(consent)),
   getBookingOutcomes: () => Promise.resolve(MockDB.getBookingOutcomes()),
@@ -506,6 +508,9 @@ async function verifiedOperatorIds(): Promise<Set<string>> {
 /** Shown when an account cannot be erased automatically. Never claims success. */
 export const ACCOUNT_DELETE_MANUAL_MESSAGE =
   'We could not delete this account automatically because it is linked to listings, bookings or complaints. Nothing has been deleted. Email dpo@pilgrimcompare.co.uk and we will handle your request.';
+
+/** Stands in for the name on an erased customer's enquiries (the column is required). */
+export const ERASED_NAME = 'Deleted account';
 
 /** Trust/verification state only an admin may change. */
 const OPERATOR_PROTECTED_FIELDS = [
@@ -1492,8 +1497,19 @@ export const Repository = {
     }
   },
 
-  deleteOwnCustomerRecord: async (ctx: RequestContext): Promise<void> => {
+  /**
+   * Erase everything PilgrimCompare holds for the signed-in customer except
+   * the sign-in itself (the caller removes that last, so a failure here
+   * leaves an account that can sign in and retry). Every step is idempotent.
+   * Enquiries are kept for the operator's and our records with the personal
+   * fields stripped; marketing consents for the account email are deleted.
+   */
+  eraseOwnCustomerData: async (ctx: RequestContext, email: string): Promise<void> => {
     await Repository.assertCanDeleteOwnAccount(ctx);
+    if (email) {
+      await store().anonymiseEnquiriesByEmail(email, ERASED_NAME);
+      await store().deleteMarketingConsentsByEmail(email);
+    }
     await store().deleteUser(ctx.userId);
   },
 

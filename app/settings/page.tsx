@@ -497,7 +497,7 @@ export default function SettingsPage() {
           Delete account
         </h2>
         <p style={{ margin: '0 0 1rem', fontSize: '0.8125rem', color: 'var(--textMuted)' }}>
-          Under UK GDPR Article 17, you can request erasure of your personal data. Deleting your account permanently removes your sign-in and profile. If your account is linked to bookings or complaints, we cannot delete it automatically: we will tell you, nothing will be deleted, and you can email dpo@pilgrimcompare.co.uk.
+          Under UK GDPR Article 17, you can ask us to erase your personal data. Deleting your account permanently deletes your sign-in, your profile and any marketing email consent you gave. On enquiries you sent with this email address, we delete your name, email address, phone number and message, and keep only the reference code, package and date. If your account is linked to bookings or complaints, we cannot delete it automatically: we will tell you, nothing will be deleted, and you can email dpo@pilgrimcompare.co.uk.
         </p>
         {deleteError && <p role="alert" style={{ marginBottom: '0.75rem', fontSize: '0.875rem', color: 'var(--danger)' }}>{deleteError}</p>}
         {!showDeleteConfirm ? (
@@ -513,7 +513,7 @@ export default function SettingsPage() {
           >
             <p id="delete-confirm-title" style={{ margin: '0 0 0.375rem', fontWeight: 600, color: 'var(--danger)' }}>This cannot be undone</p>
             <p id="delete-confirm-desc" style={{ margin: '0 0 1rem', fontSize: '0.875rem', color: 'var(--textMuted)' }}>
-              Your sign-in and profile will be permanently deleted and you will be signed out. Enquiries you sent are already with the operator, who holds them under its own privacy policy.
+              Your sign-in, profile and marketing consent will be permanently deleted, your details will be removed from your enquiries, and you will be signed out. Operators you already sent an enquiry to keep the details you gave them under their own privacy policy. To have those deleted, contact the operator directly.
             </p>
             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
               <Button variant="danger" onClick={handleDeleteConfirm} loading={deleting} disabled={deleting} data-testid="delete-account-confirm-btn">
