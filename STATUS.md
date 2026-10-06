@@ -9,6 +9,8 @@
 
 ---
 
+> **2026-10-06 overnight QA (branch `fix/overnight-qa`, in progress):** reported search/tab mismatch fixed (shared query layer); operator portal no longer uses browser MockDB; open redirects closed; JSON-LD/package-page/partner truth fixes. Vitest 1,971 · tsc ✅ · build ✅. Report: `docs/uat/OVERNIGHT_REPORT.md`; detail `AI_NOTES.md` §OQ1.
+
 ## Health (verified 2026-06-17)
 
 | Check | State |

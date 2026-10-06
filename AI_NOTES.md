@@ -1,5 +1,38 @@
 # PilgrimCompare AI Handover — Single Source of Truth
 
+## §OQ1 Overnight QA run (search mismatch + P0 data/security fixes), 2026-10-06
+
+**Status: IN PROGRESS on branch `fix/overnight-qa`** (off `dev` @ d03892d). Full report: `docs/uat/OVERNIGHT_REPORT.md`. Run memory (local, gitignored): `.overnight/STATE.md`. Vitest **1,971** (baseline 1,869), tsc clean, build 0 errors, real-DB Playwright (`.overnight/e2e`) 18/18.
+
+### Root causes and fixes
+- **Search lost packages (reported problem).** The search form had hidden defaults (LHR, £500 to £1,000). Corridor links sent `departureCity`, which was ignored. Airport matching used exact codes only. Budget max was silently dropped. Dates were ignored. "Clear all" could not clear the airport. Fixed with one shared query layer in `components/search/search-utils.ts` (`parseSearchCriteria` / `searchPackages` / `filterByParams` / `toPackageCardProps`) and one location mapping in `lib/airports.ts` (`resolveDepartureLocation`, `departureCityOf`). Must-haves (type, location, dates) apply strictly; preferences produce "Closest matches" with reasons; the empty state is honest; the page number is in the URL.
+- **Operator portal used the browser MockDB in production** (dashboard, analytics, profile save, CSV import/export, complaints inbox): seed data was shown and writes were lost. These now go through server routes: `GET /api/operator/dashboard`, `GET|POST /api/operator/packages/csv`, `PATCH /api/operator/profile`, plus the existing `/api/complaints`. The analytics page loads server-side. Guard test: `tests/client-data-guard.test.ts`.
+- **DBAdapter was missing** `getBookingOutcomes` / `saveBookingOutcome`, so leads and reconciliation threw under Prisma. Parity guard: `tests/db-adapter-parity.test.ts`.
+- **Open redirects** in `/auth/confirm?next=` and login `?redirect=`. Fixed with `lib/auth/redirect.ts` `safeRedirectPath`.
+- **`updateOperator` let operators change their own verification state.** Protected fields are now admin-only, and a changed ATOL/ABTA number drops its check date.
+- **Truth fixes:**
+  - JSON-LD no longer invents a nights split, a £0 price, InStock, a validity window or foundingDate.
+  - Package page ATOL/ABTA copy is per §5/§7, with no "?★".
+  - The enquiry form discloses data sharing (§12).
+  - Fabricated showcase content was removed, and /showcase 404s on Vercel production.
+  - /partner claims were rewritten (Direction §5, §7 statement).
+  - One nights and date format is used on every surface.
+- **CSV import** now runs server-side, uses an RFC 4180 parser and invents no values. A round-trip test covers every decision field.
+- **Local-only:** `scripts/seed-local-test-data.mjs` (guarded to localhost) and an email log transport via `EMAIL_LOG_PATH` (never on VERCEL_ENV=production).
+
+### Gotchas
+- Fresh `npm ci` needs `npx prisma generate` (CI does it as a separate step) before tsc, vitest or build.
+- Sign-in is rate limited to 5 per 15 minutes per IP. Locally that is an in-memory Map that resets on server restart, so local E2E must sign in once per role.
+- `/_vercel/insights/script.js` 404s off Vercel by design.
+- `npx playwright test` builds `.next` with `E2E_TESTING=1` baked in. Rebuild normally before running a non-E2E server.
+- Run Playwright with `--workers=1`: parallel workers race on the shared MockDB, the same as CI.
+
+### Open (see report)
+- **Content claims, D-030 remainder:** corridor pages, Ramadan, Hajj, cost page, TierExplanation, CityCorridor.
+- **Broken flows:** password reset (D-014), user delete no-op (D-019), CSP blocking Supabase images (D-020), /requests linking to the parked /quote (D-035).
+- **Missing copy:** §6 price attribution (D-036).
+- **NEEDS ALI:** registered office, the three-state inclusions schema, listing unverified operators, atol_verified_at columns.
+
 ## §C1 — Local/prod Supabase separation + branch hygiene + prod cleanup — 2026-07-07
 
 **Status: ✅ COMPLETE on branch `chore/c1-local-supabase`** (off `dev`). tsc clean · `npm run build` 0 errors · Vitest **1,869/1,869** · Playwright `--workers=1` **69 passed / 6 skipped / 0 failed** (parallel run shows the known multi-worker MockDB race on `bank-payment.spec.ts:15`; passes serially — same as CI). Autonomous session, gates 0–6.
