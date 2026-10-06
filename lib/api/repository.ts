@@ -1397,8 +1397,14 @@ export const Repository = {
     return (await store().getOperators()).find((operator) => operator.slug === slug);
   },
 
+  /**
+   * Public (unauthenticated) operator list. Strips internal eligibility flags
+   * (bank/booking/SLA state), which are admin-only. Business contact fields
+   * stay: they are already shown on the public operator profile page.
+   */
   listPublicOperators: async (): Promise<OperatorProfile[]> => {
-    return store().getOperators();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    return (await store().getOperators()).map(({ eligibilityFlags, ...publicFields }) => publicFields);
   },
 
   getBankChangeRequests: async (ctx: RequestContext): Promise<BankChangeRequest[]> => {
