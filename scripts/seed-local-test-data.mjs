@@ -39,8 +39,8 @@ const OPERATOR_TEST_USER_EMAIL = 'operator@test.local';
 
 const OPERATORS = [
   { key: 'a', companyName: 'Local Test Operator A', slug: 'local-test-operator-a', verification: 'verified', atol: 'TEST-0001', airports: ['LHR', 'LGW', 'BHX'] },
-  { key: 'b', companyName: 'Local Test Operator B', slug: 'local-test-operator-b', verification: 'verified', atol: 'TEST-0002', airports: ['MAN', 'BHX'] },
-  { key: 'c', companyName: 'Local Test Operator C', slug: 'local-test-operator-c', verification: 'verified', atol: null, airports: ['LHR', 'STN'] },
+  { key: 'b', companyName: 'Local Test Operator B', slug: 'local-test-operator-b', verification: 'verified', atol: 'TEST-0002', airports: ['MAN', 'BHX', 'STN'] },
+  { key: 'c', companyName: 'Local Test Operator C', slug: 'local-test-operator-c', verification: 'verified', atol: null, airports: ['LHR'] },
   // Unverified: its published package must never appear publicly.
   { key: 'd', companyName: 'Local Test Operator D (pending)', slug: 'local-test-operator-d', verification: 'pending', atol: null, airports: ['BHX'] },
 ];
@@ -57,7 +57,7 @@ const PACKAGES = [
   { n: 4, op: 'b', title: '10 night Umrah from Birmingham (details pending)', departureAirport: 'BHX', price: 1200, priceType: 'from', dateWindow: { start: '2026-12-10', end: '2026-12-20' }, totalNights: 10, nightsMakkah: 5, nightsMadinah: 5, distanceBandMakkah: 'unknown', distanceBandMadinah: 'unknown', inclusions: { visa: true, flights: true, transfers: null, meals: null } },
   { n: 5, op: 'c', title: '5 star Ramadan Umrah from London', departureAirport: 'LHR', price: 2950, priceType: 'from', dateWindow: { start: '2027-02-20', end: '2027-03-05' }, seasonLabel: 'Ramadan', totalNights: 13, nightsMakkah: 8, nightsMadinah: 5, hotelMakkahStars: 5, hotelMadinahStars: 5, hotelMakkahName: 'Test Hotel Makkah Five', hotelMadinahName: 'Test Hotel Madinah Five', distanceToHaramMakkahMetres: 100, distanceToHaramMadinahMetres: 150, distanceBandMakkah: 'near', distanceBandMadinah: 'near', flightType: 'direct', airline: 'Test Airline', groupType: 'private', cancellationPolicy: 'Test policy: 50% refund up to 45 days before departure.', paymentPlanAvailable: false, depositAmount: 750, ziyaratIncluded: false, inclusions: { visa: true, flights: true, transfers: true, meals: true } },
   // Deliberately incomplete: free-text airport as an operator might type it, no cancellation.
-  { n: 6, op: 'c', title: '12 night Umrah from London Stansted', departureAirport: 'London Stansted', price: 1340, priceType: 'from', dateWindow: { start: '2027-02-01', end: '2027-02-13' }, totalNights: 12, nightsMakkah: 7, nightsMadinah: 5, hotelMakkahStars: 4, hotelMakkahName: 'Test Hotel Makkah Six', distanceBandMakkah: 'medium', distanceBandMadinah: 'unknown', flightType: 'one-stop', groupType: 'small-group', inclusions: allIncl },
+  { n: 6, op: 'b', title: '12 night Umrah from London Stansted', departureAirport: 'London Stansted', price: 1340, priceType: 'from', dateWindow: { start: '2027-02-01', end: '2027-02-13' }, totalNights: 12, nightsMakkah: 7, nightsMadinah: 5, hotelMakkahStars: 4, hotelMakkahName: 'Test Hotel Makkah Six', distanceBandMakkah: 'medium', distanceBandMadinah: 'unknown', flightType: 'one-stop', groupType: 'small-group', inclusions: allIncl },
   { n: 7, op: 'a', title: 'Shortest 6 night Umrah from Gatwick', departureAirport: 'LGW', price: 1099, priceType: 'from', dateWindow: { start: '2026-11-05', end: '2026-11-11' }, totalNights: 6, nightsMakkah: 4, nightsMadinah: 2, hotelMakkahStars: 4, hotelMadinahStars: 4, hotelMakkahName: 'Test Hotel Makkah Seven', hotelMadinahName: 'Test Hotel Madinah Seven', distanceToHaramMakkahMetres: 500, distanceBandMakkah: 'medium', distanceBandMadinah: 'near', flightType: 'direct', groupType: 'small-group', cancellationPolicy: 'Test policy: refunds per operator terms.', paymentPlanAvailable: false, inclusions: allIncl },
   // Deliberately incomplete: no departure airport stated.
   { n: 8, op: 'b', title: '15 night Umrah, flights not included', price: 980, priceType: 'from', dateWindow: { start: '2027-03-20', end: '2027-04-04' }, seasonLabel: 'Easter', totalNights: 15, nightsMakkah: 8, nightsMadinah: 7, hotelMakkahStars: 3, hotelMadinahStars: 4, hotelMakkahName: 'Test Hotel Makkah Eight', hotelMadinahName: 'Test Hotel Madinah Eight', distanceBandMakkah: 'far', distanceBandMadinah: 'medium', groupType: 'large-group', cancellationPolicy: 'Test policy: deposit refundable within 14 days.', inclusions: { visa: true, flights: false, transfers: true, meals: false } },
@@ -74,6 +74,23 @@ const PACKAGES = [
 ];
 
 const pkgId = (n) => `local-test-pkg-${String(n).padStart(2, '0')}`;
+
+// 1x1 PNG, generated locally. Public URL is stored on package 01.
+const TEST_IMAGE_PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+
+async function uploadTestImage() {
+  const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is not set (local stack key from `supabase status`)');
+  const path = 'package-images/local-test/pkg01.png';
+  const res = await fetch(`${base}/storage/v1/object/${path}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${key}`, apikey: key, 'content-type': 'image/png', 'x-upsert': 'true' },
+    body: Buffer.from(TEST_IMAGE_PNG, 'base64'),
+  });
+  if (!res.ok) throw new Error(`Test image upload failed: ${res.status}`);
+  return `${base}/storage/v1/object/public/${path}`;
+}
 
 async function main() {
   config({ path: '.env.local', quiet: true });
@@ -142,6 +159,10 @@ async function main() {
         ]
       );
     }
+
+    // Package 01 carries one uploaded image so the image CSP path is tested
+    // end to end (Supabase Storage -> next/image -> browser).
+    await client.query('update packages set images = $1 where id = $2', [[await uploadTestImage()], pkgId(1)]);
 
     await client.query('COMMIT');
     console.log(`Seeded ${OPERATORS.length} operators and ${PACKAGES.length} packages ${LABEL}`);

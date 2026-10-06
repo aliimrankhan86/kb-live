@@ -78,3 +78,5 @@ supabase/.temp
 
 # Overnight QA run working files (local only)
 .overnight/
+e2e/local-db/supabase/.temp/
+e2e/local-db/supabase/.branches/
