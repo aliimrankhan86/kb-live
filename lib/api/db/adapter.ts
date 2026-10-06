@@ -5,6 +5,7 @@ import type {
   AuditLogEntry,
   BankChangeRequest,
   BookingIntent,
+  BookingOutcome,
   Complaint,
   Enquiry,
   MarketingConsent,
@@ -617,6 +618,31 @@ export const DBAdapter = {
       update: { ...data, updatedAt: dateOrNow(complaint.updatedAt) },
     });
     return mapComplaint(saved);
+  },
+
+  // Booking outcomes (were missing: /api/operator/leads + reconciliation threw
+  // "DBAdapter method ... not found" under Prisma). Never deleted: billing evidence.
+  getBookingOutcomes: async (): Promise<BookingOutcome[]> =>
+    (await prisma.bookingOutcome.findMany()).map((o) => ({
+      id: o.id,
+      bookingIntentId: o.bookingIntentId,
+      outcome: o.outcome as BookingOutcome['outcome'],
+      reportedAt: o.reportedAt.toISOString(),
+      notes: o.notes ?? undefined,
+    })),
+
+  saveBookingOutcome: async (outcome: BookingOutcome): Promise<BookingOutcome> => {
+    const data = {
+      outcome: outcome.outcome,
+      reportedAt: new Date(outcome.reportedAt),
+      notes: outcome.notes ?? null,
+    };
+    await prisma.bookingOutcome.upsert({
+      where: { bookingIntentId: outcome.bookingIntentId },
+      create: { id: outcome.id, bookingIntentId: outcome.bookingIntentId, ...data },
+      update: data,
+    });
+    return outcome;
   },
 
   // Enquiries (canonical pilgrim enquiry — Task 2)
