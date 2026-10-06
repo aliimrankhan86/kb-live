@@ -24,8 +24,73 @@ jobs:
       - name: Generate Prisma client
         run: npx prisma generate
 
+      - name: Lint
+        run: npm run lint
+
       - name: Type check
         run: npx tsc --noEmit
 
       - name: Run tests
         run: npm run test
+
+      - name: Build
+        run: npm run build
+
+  # Real-DB browser suite against a throwaway local Supabase stack inside the
+  # runner. No repository secrets: the keys are the Supabase CLI public local
+  # defaults, read from `supabase status` at run time. Never touches production.
+  local-db:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Set up Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start local Supabase
+        run: supabase start --workdir e2e/local-db -x studio,realtime,edge-runtime,logflare,vector,imgproxy,postgres-meta,supavisor
+
+      - name: Write local-only .env.local
+        run: |
+          supabase status --workdir e2e/local-db -o env 2>/dev/null | grep -E '^[A-Z_]+=' > /tmp/sb.env
+          set -a; . /tmp/sb.env; set +a
+          {
+            echo "DATABASE_URL=$DB_URL"
+            echo "DIRECT_URL=$DB_URL"
+            echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL"
+            echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON_KEY"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY"
+            echo "NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3100"
+            echo "FEATURE_USE_REAL_DB=true"
+            echo "FEATURE_FEATURED_SLOTS=false"
+          } > .env.local
+          grep -q '^NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:' .env.local
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Real-DB browser suite
+        run: npm run e2e:local-db
+
+      - name: Upload failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: local-db-results
+          path: test-results/local-db
+          retention-days: 7
