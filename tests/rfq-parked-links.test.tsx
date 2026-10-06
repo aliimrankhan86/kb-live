@@ -37,3 +37,11 @@ describe('parked RFQ flow is unreachable when the flag is off', () => {
     await waitFor(() => expect(screen.queryAllByTestId('nav-requests').length).toBeGreaterThan(0));
   });
 });
+
+describe('parked self-serve onboarding status page', () => {
+  it('404s when FEATURE_OPERATOR_SELF_SERVE is off', async () => {
+    delete process.env.FEATURE_OPERATOR_SELF_SERVE;
+    const { default: Page } = await import('@/app/operator/onboarding/status/page');
+    expect(() => Page()).toThrow('NEXT_NOT_FOUND');
+  });
+});
