@@ -143,7 +143,13 @@ export default function PrivacyPolicyPage() {
                 <td className="px-3 py-2">Deleted straight away when you delete your account</td>
               </tr>
               <tr className="border-b border-[var(--borderSubtle)]">
-                <td className="px-3 py-2">Enquiry and booking intent data</td>
+                <td className="px-3 py-2">Enquiries</td>
+                <td className="px-3 py-2">
+                  Your name, email address, phone number and message are removed 90 days after you send the enquiry. We keep the reference code, operator, package and date.
+                </td>
+              </tr>
+              <tr className="border-b border-[var(--borderSubtle)]">
+                <td className="px-3 py-2">Booking intent data</td>
                 <td className="px-3 py-2">90 days (auto-deleted unless a dispute is open)</td>
               </tr>
               <tr className="border-b border-[var(--borderSubtle)]">

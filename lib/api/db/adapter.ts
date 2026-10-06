@@ -683,6 +683,18 @@ export const DBAdapter = {
     });
   },
 
+  /** Retention: same fields as account erasure, for rows created before `cutoff`. Skips stripped rows, so reruns count 0. */
+  anonymiseEnquiriesCreatedBefore: async (cutoff: Date, erasedName: string, alreadyErased: readonly string[]): Promise<number> => {
+    const { count } = await prisma.enquiry.updateMany({
+      where: {
+        createdAt: { lt: cutoff },
+        OR: [{ email: { not: null } }, { phone: { not: null } }, { message: { not: null } }, { name: { notIn: [...alreadyErased] } }],
+      },
+      data: { name: erasedName, email: null, phone: null, message: null },
+    });
+    return count;
+  },
+
   deleteMarketingConsentsByEmail: async (email: string): Promise<void> => {
     await prisma.marketingConsent.deleteMany({ where: { email: { equals: email.trim(), mode: 'insensitive' } } });
   },

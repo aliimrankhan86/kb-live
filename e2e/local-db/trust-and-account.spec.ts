@@ -18,6 +18,7 @@ const sql = async <T,>(text: string, values: unknown[]): Promise<T[]> => {
   try { return (await client.query(text, values)).rows as T[] } finally { await client.end() }
 }
 const MAILPIT = 'http://127.0.0.1:54324'
+const CRON_SECRET = 'local-db-test-only' // matches the webServer env in playwright.config.ts
 
 async function login(page: Page, email: string, password = 'TestPass1!') {
   await page.goto('/login')
@@ -135,4 +136,32 @@ test('account deletion also deletes the Hajj availability alerts for the account
   const res = await page.request.delete('/api/user/delete')
   expect(await res.json()).toEqual({ deleted: true })
   expect(await sql('select 1 from interests where email = $1', [email])).toEqual([])
+})
+
+test('enquiry retention cron removes personal details after 90 days, keeps billing fields, and is safe to rerun', async ({ request }) => {
+  const ref = (age: string) => `PC-RET-${age}-${Date.now()}`
+  const oldRef = ref('OLD')
+  const newRef = ref('NEW')
+  for (const [reference, days] of [[oldRef, 91], [newRef, 89]] as const) {
+    await sql(
+      `insert into enquiries (id, reference_code, created_at, package_id, operator_id, package_title, operator_name, name, email, phone, travel_month, message)
+       values (gen_random_uuid(), $1, now() - make_interval(days => $2), 'local-test-pkg-01', 'op-b', 'Retention package', 'Operator B', 'Keep Out', 'retention@test.local', '07000000000', '2027-03', 'Two adults')`,
+      [reference, days],
+    )
+  }
+  expect((await request.get('/api/cron/enquiry-retention')).status()).toBe(401)
+  const run = async () => request.get('/api/cron/enquiry-retention', { headers: { authorization: `Bearer ${CRON_SECRET}` } })
+  const first = await run()
+  expect(first.status()).toBe(200)
+  expect((await first.json()).anonymised).toBeGreaterThanOrEqual(1)
+
+  const row = (reference: string) =>
+    sql('select name, email, phone, message, package_id, operator_id, package_title, operator_name, travel_month from enquiries where reference_code = $1', [reference])
+  expect(await row(oldRef)).toEqual([{
+    name: 'Removed after 90 days', email: null, phone: null, message: null,
+    package_id: 'local-test-pkg-01', operator_id: 'op-b', package_title: 'Retention package', operator_name: 'Operator B', travel_month: '2027-03',
+  }])
+  expect((await row(newRef))[0]).toMatchObject({ name: 'Keep Out', email: 'retention@test.local', phone: '07000000000', message: 'Two adults' })
+
+  expect(await (await run()).json()).toEqual({ ok: true, anonymised: 0 })
 })

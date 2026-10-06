@@ -70,6 +70,8 @@ const mockStore = {
   saveEnquiry: (enquiry: Enquiry) => Promise.resolve(MockDB.saveEnquiry(enquiry)),
   deleteUser: (id: string) => Promise.resolve(MockDB.deleteUser(id)),
   anonymiseEnquiriesByEmail: (email: string, erasedName: string) => Promise.resolve(MockDB.anonymiseEnquiriesByEmail(email, erasedName)),
+  anonymiseEnquiriesCreatedBefore: (cutoff: Date, erasedName: string, alreadyErased: readonly string[]) =>
+    Promise.resolve(MockDB.anonymiseEnquiriesCreatedBefore(cutoff, erasedName, alreadyErased)),
   deleteMarketingConsentsByEmail: (email: string) => Promise.resolve(MockDB.deleteMarketingConsentsByEmail(email)),
   getMarketingConsents: () => Promise.resolve(MockDB.getMarketingConsents()),
   saveMarketingConsent: (consent: MarketingConsent) => Promise.resolve(MockDB.saveMarketingConsent(consent)),
@@ -512,6 +514,12 @@ export const ACCOUNT_DELETE_MANUAL_MESSAGE =
 
 /** Stands in for the name on an erased customer's enquiries (the column is required). */
 export const ERASED_NAME = 'Deleted account';
+
+/** Stands in for the name on an enquiry whose personal details were removed by retention. */
+export const RETENTION_ERASED_NAME = 'Removed after 90 days';
+
+/** Enquiry personal details (name, email, phone, message) are kept this long (privacy page, section 5). */
+export const ENQUIRY_RETENTION_DAYS = 90;
 
 /** Trust/verification state only an admin may change. */
 const OPERATOR_PROTECTED_FIELDS = [
@@ -1517,6 +1525,17 @@ export const Repository = {
       await store().deleteMarketingConsentsByEmail(email);
     }
     await store().deleteUser(ctx.userId);
+  },
+
+  /**
+   * Retention (privacy page, section 5): remove the personal details from
+   * enquiries older than ENQUIRY_RETENTION_DAYS, exactly the fields account
+   * deletion removes. Reference code, operator, package, titles, travel month
+   * and date stay for lead billing. Idempotent: returns how many rows changed.
+   */
+  anonymiseExpiredEnquiries: async (now: Date = new Date()): Promise<number> => {
+    const cutoff = new Date(now.getTime() - ENQUIRY_RETENTION_DAYS * 24 * 60 * 60 * 1000);
+    return store().anonymiseEnquiriesCreatedBefore(cutoff, RETENTION_ERASED_NAME, [ERASED_NAME, RETENTION_ERASED_NAME]);
   },
 
   /**
