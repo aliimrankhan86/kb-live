@@ -119,6 +119,14 @@ test('account deletion removes the sign-in, consent and Hajj availability alerts
   await sql('insert into interests (email, type) values ($1, $2)', [`other-${email}`, 'hajj'])
 
   await login(page, email)
+  // Export (privacy page section 6) carries everything held under the email, read on the server connection.
+  const exp = await page.request.post('/api/user/export')
+  expect(exp.status()).toBe(200)
+  const dump = await exp.json()
+  expect(dump.enquiries.map((e: { referenceCode: string }) => e.referenceCode)).toEqual([referenceCode])
+  expect(dump.marketingConsents).toHaveLength(1)
+  expect(dump.interests).toEqual([expect.objectContaining({ email, type: 'hajj' })])
+
   const res = await page.request.delete('/api/user/delete')
   expect(res.status()).toBe(200)
   expect(await res.json()).toEqual({ deleted: true })

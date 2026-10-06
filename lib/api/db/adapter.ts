@@ -703,6 +703,10 @@ export const DBAdapter = {
     await prisma.$executeRaw`DELETE FROM interests WHERE lower(email) = lower(${email.trim()})`;
   },
 
+  getInterestsByEmail: async (email: string): Promise<{ email: string; type: string; createdAt: string }[]> =>
+    (await prisma.$queryRaw<{ email: string; type: string; created_at: Date }[]>`SELECT email, type, created_at FROM interests WHERE lower(email) = lower(${email.trim()})`)
+      .map((r) => ({ email: r.email, type: r.type, createdAt: r.created_at.toISOString() })),
+
   deleteMarketingConsentsByEmail: async (email: string): Promise<void> => {
     await prisma.marketingConsent.deleteMany({ where: { email: { equals: email.trim(), mode: 'insensitive' } } });
   },

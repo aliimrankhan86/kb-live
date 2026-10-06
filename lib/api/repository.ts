@@ -74,6 +74,8 @@ const mockStore = {
     Promise.resolve(MockDB.anonymiseEnquiriesCreatedBefore(cutoff, erasedName, alreadyErased)),
   deleteMarketingConsentsByEmail: (email: string) => Promise.resolve(MockDB.deleteMarketingConsentsByEmail(email)),
   deleteInterestsByEmail: (email: string) => Promise.resolve(MockDB.deleteInterestsByEmail(email)),
+  getInterestsByEmail: async (email: string) =>
+    MockDB.getInterests().filter((i) => i.email.toLowerCase() === email.trim().toLowerCase()),
   getMarketingConsents: () => Promise.resolve(MockDB.getMarketingConsents()),
   saveMarketingConsent: (consent: MarketingConsent) => Promise.resolve(MockDB.saveMarketingConsent(consent)),
   getBookingOutcomes: () => Promise.resolve(MockDB.getBookingOutcomes()),
@@ -1528,6 +1530,27 @@ export const Repository = {
       await store().deleteInterestsByEmail(email);
     }
     await store().deleteUser(ctx.userId);
+  },
+
+  /**
+   * Access and portability (privacy page, section 6): the enquiries,
+   * marketing choices and Hajj availability alerts held under the signed-in
+   * account's email. A failed read throws, so an export never shows an empty
+   * list for data that exists.
+   */
+  getOwnEmailData: async (email: string) => {
+    const target = email.trim().toLowerCase();
+    if (!target) return { enquiries: [], marketingConsents: [], interests: [] };
+    const [enquiries, consents, interests] = await Promise.all([
+      store().getEnquiries(),
+      store().getMarketingConsents(),
+      store().getInterestsByEmail(target),
+    ]);
+    return {
+      enquiries: enquiries.filter((e) => e.email?.toLowerCase() === target),
+      marketingConsents: consents.filter((c) => c.email.toLowerCase() === target),
+      interests,
+    };
   },
 
   /**
