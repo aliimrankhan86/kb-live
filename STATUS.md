@@ -9,6 +9,9 @@
 
 ---
 
+> **2026-10-06 review follow-up (PR #108, same branch, not merged):** real-DB suite committed (`e2e/local-db`, `npm run e2e:local-db`) and run in CI (`local-db` job); CI now also runs lint + build. Account deletion erases data first, sign-in last (retryable), anonymises enquiries, deletes marketing consents. Verified operators without an ATOL number are no longer listed. Read-only `supabase/migrations-pending/PRODUCTION_CHECKS.sql` + pending 014 for Ali. Vitest 2,056. Detail: `docs/uat/PR108_REVIEW.md` (Resolution), `AI_NOTES.md` §OQ1.
+> 🛠️ **Gotcha: `tsc` fails with "Duplicate identifier" in `.next/types/* 2.ts`.** The worktree lives under `~/Documents`, and macOS/iCloud can drop `"name 2.ts"` copies into `.next`. It is not a code bug: `rm -rf .next` and rerun. Also: the real-DB suite's own stack (`supabase start --workdir e2e/local-db`) raises `email_sent` to 100/h, because the CLI default of 2/h fails the reset test on a second run.
+
 > **2026-10-06 QA run (branch `fix/overnight-qa`, PR into dev, not merged; two green gates incl. clean verification):** reported search/tab mismatch fixed (shared query layer); operator portal no longer uses browser MockDB; open redirects closed; JSON-LD/package-page/partner truth fixes. Vitest 2,047 · Playwright 69/6/0 · real-DB 24/24 · tsc ✅ · build ✅. Founder decisions applied (verified-only, three-state inclusions, migration 013 pending, registered office unset). Report: `docs/uat/OVERNIGHT_REPORT.md`; detail `AI_NOTES.md` §OQ1.
 
 ## Health (verified 2026-06-17)

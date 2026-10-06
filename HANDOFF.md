@@ -11,6 +11,8 @@
 
 **Overnight QA (2026-10-06):** branch `fix/overnight-qa` (PR into dev, awaiting review) fixes the search/tab package mismatch and several P0 data/security issues. See `docs/uat/OVERNIGHT_REPORT.md`.
 
+**Listing rule (2026-10-06):** an operator is public only when admin-verified AND it has an ATOL number (`lib/listing.ts`); changing its ATOL number returns it to pending. Real-DB browser suite: `supabase start --workdir e2e/local-db` then `npm run e2e:local-db` (also CI job `local-db`).
+
 **Remaining setup items:** Operational only — curl-test 3 cron endpoints with CRON_SECRET, submit test enquiry to verify email delivery, onboard first operator. Email mailboxes live via Cloudflare Email Routing (→ Gmail). Upgrade to Google Workspace when onboarding real operators.
 
 **How to verify any change (mandatory before push):**

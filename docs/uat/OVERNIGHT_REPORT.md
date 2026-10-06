@@ -15,7 +15,7 @@ GREEN WITH OPEN ITEMS
 | Vitest | 1,869 (restart baseline 1,974) | **2,047 / 2,047** |
 | tsc / lint / build | pass / 0 errors / pass | pass / 0 errors (2 pre-existing warnings) / pass |
 | Repo Playwright (`--workers=1`, chromium + firefox + webkit) | 64 pass, 2 fail (parallel MockDB race) | **69 passed · 6 skipped · 0 failed** |
-| Real-DB Playwright (`.overnight/e2e`, local Supabase + seed) | n/a | **24 / 24** |
+| Real-DB Playwright (`e2e/local-db`, committed, CI job `local-db`) | n/a | **24 / 24** (after review follow-up: see below) |
 
 The real-DB suite covers:
 - **The reported tab/search mismatch:** closest matches, empty state, and URL, reload and back.
@@ -126,11 +126,20 @@ The full list is in `.overnight/STATE.md` ("New/changed user-facing copy"), plus
 ## Needs Ali
 
 1. **Registered office address** (§2, launch-blocking): set `REGISTERED_OFFICE` in `lib/legal.ts`.
-2. **Supabase dashboard:** add `https://pilgrimcompare.co.uk/auth/confirm` to the Auth redirect allow-list, or reset emails fall back to the site URL.
-3. **Migration 013:** move it into `supabase/migrations/` and apply it when ready, then ship the Prisma and adapter change described in the file.
+2. **Production checks:** run `supabase/migrations-pending/PRODUCTION_CHECKS.sql` in the Supabase SQL editor, one query at a time. If query 1 shows any FAIL, review and apply `014_revoke_api_role_writes_operator_profiles.sql`. Check the redirect allow-list against the list at the bottom of that file (`https://pilgrimcompare.co.uk/auth/confirm**`, no `*.vercel.app` wildcard).
+3. **Migration 013:** only after step 2. Move it into `supabase/migrations/`, apply it when ready, then ship the Prisma and adapter change described in the file.
 4. **Images:** `public/og.png` is 1×1 and `apple-touch-icon.png` is an SVG. A real 1200×630 brand image is needed; none was invented.
 5. **Enquiry retention:** the privacy page says "auto-deleted after 90 days", but no deletion job exists. Decide the policy, then either build the job or change the wording.
 6. **Docs:** four documents named in the original brief are not in the repo.
+
+## Follow-up after the independent review (2026-10-06)
+
+Resolution table: `docs/uat/PR108_REVIEW.md`. In short:
+- **Real-DB suite committed and in CI:** `e2e/local-db/` plus a `local-db` CI job (throwaway Supabase in the runner, public local keys only). CI also runs lint and build now.
+- **Account deletion:** erases data first and the sign-in last, so every step can be retried. Enquiries are anonymised and marketing consents deleted.
+- **Listing:** a verified operator with no ATOL number is not listed. An operator changing its ATOL number goes back to pending.
+- **Production checks:** read-only SQL for Ali, plus pending migration 014 if a grant gap shows.
+- **Open review P3s:** `websiteUrl` scheme; full operator object in the package page payload; reset page accepts any session; `requestOrigin` trusts proxy headers; email log transport on previews; admin ATOL verify does not persist before 013; dashboard shows quote notes to all operators; partner page "1 to 2 business days"; parked onboarding hardcoded reason.
 
 ## Logged only (P3)
 

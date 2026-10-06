@@ -27,6 +27,15 @@
 - `npx playwright test` builds `.next` with `E2E_TESTING=1` baked in. Rebuild normally before running a non-E2E server.
 - Run Playwright with `--workers=1`: parallel workers race on the shared MockDB, the same as CI.
 
+### Review follow-up (2026-10-06, after the independent PR #108 review)
+Resolution table: `docs/uat/PR108_REVIEW.md`. Vitest **2,056** (62 files). Real-DB suite 24/24.
+- **Real-DB suite is committed:** `e2e/local-db/` (search journey, operator access, trust and account). Run `supabase start --workdir e2e/local-db`, then `npm run e2e:local-db`. `setup.sh` runs `supabase db reset` every time because the SQL migrations cannot be re-applied. `playwright.config.ts` ignores `local-db/**`. CI job `local-db` does the same in the runner with CLI 2.109.1 and builds `.env.local` from `supabase status`.
+- **Account deletion order:** `Repository.eraseOwnCustomerData` (enquiries anonymised to `ERASED_NAME`, consents deleted, app record deleted), then the auth user. Every step is idempotent, so a 500 means "still signed in, retry".
+- **Listing rule:** `lib/listing.ts` `isPubliclyListed` = verified AND ATOL number. Never filter on `verificationStatus` alone. A non-admin changing `atolNumber` sets `verificationStatus` to `pending`.
+- **Pending (not applied):** `supabase/migrations-pending/PRODUCTION_CHECKS.sql` (read only) and `014_revoke_api_role_writes_operator_profiles.sql`.
+- 🛠️ **Gotcha:** this worktree is under `~/Documents`, and macOS/iCloud can drop `"name 2.ts"` copies into `.next/types`, which makes `tsc` fail with duplicate identifiers. It is not a code bug: `rm -rf .next` and rerun.
+- 🛠️ **Gotcha:** the local test stack config (`e2e/local-db/supabase/config.toml`) raises `auth.rate_limit.email_sent` to 100. The CLI default of 2 per hour fails the reset test on the second run within an hour.
+
 ### Iteration 2 (2026-10-06, founder decisions applied)
 - **Account deletion is real.** It returns an honest 409 for linked records and for operator or admin accounts.
 - **Guide pages are cleaned up.** City, Ramadan, Hajj and cost pages no longer carry PilgrimCompare prices, dates or urgency.
