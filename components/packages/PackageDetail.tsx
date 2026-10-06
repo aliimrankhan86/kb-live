@@ -15,7 +15,11 @@ import {
   flightTypeLabel,
   groupTypeLabel,
   roomOptionsLabel,
+  formatDate,
+  formatDateRange,
 } from '@/lib/packages/display'
+import { ATOL_STANDARD_LINE, CAA_ATOL_URL, CONTRACT_STANDARD_LINE } from '@/lib/content-rules'
+import { VERIFICATION_STATEMENT_HREF } from '@/components/ui/VerifiedBadge'
 
 interface PackageDetailProps {
   pkg: Package
@@ -112,7 +116,7 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
           {operator?.verificationStatus === 'verified' && (
             <span className="ml-2 inline-flex items-center gap-1 text-[var(--yellow)]">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.8 7.2 17l.9-5.4L4.2 7.7l5.4-.8z" /></svg>
-              Verified operator
+              <Link href={VERIFICATION_STATEMENT_HREF} className="underline-offset-2 hover:underline">Verified operator</Link>
             </span>
           )}
         </p>
@@ -222,7 +226,7 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
               {pkg.departureAirport && <Fact term="Departs from" value={pkg.departureAirport} />}
               <Fact term="Airport transfers" value={pkg.inclusions.transfers ? 'Included' : 'Not included'} />
               <Fact term="Trip length" value={`${pkg.totalNights} nights (${pkg.nightsMakkah} Makkah · ${pkg.nightsMadinah} Madinah)`} />
-              {pkg.dateWindow && <Fact term="Travel dates" value={`${pkg.dateWindow.start} – ${pkg.dateWindow.end}`} />}
+              <Fact term="Travel dates" value={pkg.dateWindow?.start ? formatDateRange(pkg.dateWindow.start, pkg.dateWindow.end) : 'Not provided'} />
             </dl>
           </SectionCard>
 
@@ -249,7 +253,7 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
             ) : (
               <p className="mt-2 flex items-start gap-2 text-sm leading-relaxed text-[var(--textMuted)]">
                 <span aria-hidden="true" className="text-[var(--danger)]">⚠</span>
-                <span>Not provided — ask the operator about cancellation and refunds <strong className="text-[var(--text)]">before paying any deposit.</strong></span>
+                <span>Not provided. Ask the operator about cancellation and refunds <strong className="text-[var(--text)]">before paying any deposit.</strong></span>
               </p>
             )}
           </SectionCard>
@@ -275,32 +279,31 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
             <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--textMuted)]">Your protection</h2>
             <div className="mt-3 space-y-2 text-sm leading-relaxed text-[var(--textMuted)]">
               {operator?.atolNumber ? (
-                <p>
-                  <span className="font-bold text-[var(--color-success)]">✓</span> ATOL {operator.atolNumber}{' '}
+                <p data-testid="package-atol">
+                  ATOL {operator.atolNumber}{' '}
                   {operator.atolVerifiedAt
-                    ? <span className="text-xs text-[var(--color-success)]" data-testid="atol-verified-badge">(Verified by PilgrimCompare)</span>
-                    : <span className="text-xs text-[var(--textMuted)]" data-testid="atol-self-reported">(Self-reported)</span>}
-                  {' '}— UK financial protection for flight-inclusive trips. You should receive an ATOL certificate with your confirmation.
+                    ? <span className="text-xs text-[var(--color-success)]" data-testid="atol-verified-badge">(checked against the CAA register on {formatDate(operator.atolVerifiedAt)})</span>
+                    : <span className="text-xs text-[var(--textMuted)]" data-testid="atol-self-reported">(provided by the operator)</span>}
+                  {'. '}
+                  <a href={CAA_ATOL_URL} className="underline underline-offset-2 hover:text-[var(--text)]" target="_blank" rel="noopener noreferrer">
+                    About ATOL on caa.co.uk
+                  </a>
                 </p>
               ) : null}
               {operator?.abtaMemberNumber ? (
-                <p>
-                  <span className="font-bold text-[var(--color-success)]">✓</span> ABTA {operator.abtaMemberNumber}{' '}
-                  {operator.abtaVerifiedAt
-                    ? <span className="text-xs text-[var(--color-success)]" data-testid="abta-verified-badge">(Verified by PilgrimCompare)</span>
-                    : <span className="text-xs text-[var(--textMuted)]" data-testid="abta-self-reported">(Self-reported)</span>}
-                  {' '}— dispute resolution and booking protection.
+                <p data-testid="package-abta">
+                  ABTA {operator.abtaMemberNumber}{' '}
+                  <span className="text-xs text-[var(--textMuted)]" data-testid="abta-self-reported">(provided by the operator)</span>
                 </p>
               ) : null}
               {!hasProtection ? (
                 <p className="flex items-start gap-2 text-[var(--danger)]" role="alert">
-                  <span className="font-bold">⚠</span>
-                  <span>No ATOL or ABTA protection listed. Ask the operator directly what financial protection they provide before paying anything.</span>
+                  <span className="font-bold" aria-hidden="true">⚠</span>
+                  <span>No ATOL or ABTA number provided. Ask the operator directly what financial protection they provide before paying anything.</span>
                 </p>
               ) : null}
-              <p className="border-t border-[var(--border)] pt-2 text-xs">
-                Your travel contract, cancellations and refunds are with the operator named on this page. PilgrimCompare is a comparison platform and does not verify ATOL/ABTA credentials — always confirm protection in writing before paying.
-              </p>
+              <p className="border-t border-[var(--border)] pt-2 text-xs">{ATOL_STANDARD_LINE}</p>
+              <p className="text-xs">{CONTRACT_STANDARD_LINE}</p>
             </div>
           </section>
 
@@ -315,11 +318,14 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
             <ul className="mt-4 space-y-2 text-sm text-[var(--textMuted)]">
               <RailFact label={`${pkg.totalNights} nights`} sub={`${pkg.nightsMakkah} Makkah · ${pkg.nightsMadinah} Madinah`} />
               {(pkg.hotelMakkahStars || pkg.hotelMadinahStars) && (
-                <RailFact label="Hotels" sub={`${pkg.hotelMakkahStars ?? '?'}★ Makkah · ${pkg.hotelMadinahStars ?? '?'}★ Madinah`} />
+                <RailFact
+                  label="Hotels"
+                  sub={`Makkah ${pkg.hotelMakkahStars ? `${pkg.hotelMakkahStars}★` : 'Not provided'} · Madinah ${pkg.hotelMadinahStars ? `${pkg.hotelMadinahStars}★` : 'Not provided'}`}
+                />
               )}
               {flight && <RailFact label={flight} />}
               {makkahDist && <RailFact label={makkahDist.primary} />}
-              <RailFact label={hasProtection ? 'ATOL/ABTA listed' : 'No ATOL/ABTA listed'} tone={hasProtection ? 'good' : 'warn'} />
+              <RailFact label={hasProtection ? 'ATOL/ABTA number provided' : 'No ATOL/ABTA number provided'} tone={hasProtection ? 'good' : 'warn'} />
             </ul>
             {/* Canonical enquiry entry point — always live (Task 2). */}
             <Link href={`/packages/${pkg.slug}/enquire`} data-testid="package-cta-enquire" className={buttonVariants({ variant: 'primary', size: 'md', className: 'mt-5 w-full' })}>

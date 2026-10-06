@@ -92,6 +92,13 @@ export const PAYMENT_STANDARD_LINE =
 export const CONTRACT_STANDARD_LINE =
   'Your travel contract, cancellations and refunds are with the operator named on this page.'
 
+/** §5 approved ATOL wording (replaces any blanket "ATOL protected" claim). Verbatim. */
+export const ATOL_STANDARD_LINE =
+  "We check each operator's ATOL number against the CAA register before listing. ATOL protection, where it applies, is provided by the operator. Always check your ATOL Certificate when you pay."
+
+/** CAA ATOL page already linked from the footer; used wherever an ATOL number is shown. */
+export const CAA_ATOL_URL = 'https://www.caa.co.uk/atol-protection'
+
 export const REFERENCE_CODE_STANDARD_LINE =
   'Your PilgrimCompare reference code is a tracking code, not a payment receipt.'
 
