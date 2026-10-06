@@ -1440,13 +1440,24 @@ export const Repository = {
   },
 
   /**
-   * Public (unauthenticated) operator list. Strips internal eligibility flags
-   * (bank/booking/SLA state), which are admin-only. Business contact fields
-   * stay: they are already shown on the public operator profile page.
+   * Public (unauthenticated) operator list. Internal state (payment SLA flag,
+   * onboarding progress) is admin-only and stripped. The two flags that decide
+   * whether the (parked) "Proceed direct" button shows stay, because the
+   * public UI reads them. Business contact fields are already public on the
+   * operator profile page.
    */
   listPublicOperators: async (): Promise<OperatorProfile[]> => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    return (await store().getOperators()).map(({ eligibilityFlags, ...publicFields }) => publicFields);
+    return (await store().getOperators()).map(({ eligibilityFlags, ...publicFields }) => ({
+      ...publicFields,
+      ...(eligibilityFlags
+        ? {
+            eligibilityFlags: {
+              canReceiveBookings: eligibilityFlags.canReceiveBookings,
+              bankDetailsActive: eligibilityFlags.bankDetailsActive,
+            } as OperatorProfile['eligibilityFlags'],
+          }
+        : {}),
+    }));
   },
 
   getBankChangeRequests: async (ctx: RequestContext): Promise<BankChangeRequest[]> => {
