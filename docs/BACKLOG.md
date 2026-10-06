@@ -12,3 +12,15 @@ Work the privacy page relies on that is not built yet. Each line names the deadl
 Found by the production checks for release 2026-10-06. Do after that release's POST-DEPLOY.
 
 - **Revoke API-role grants on `interests`.** In production, read-only check query 6 (6 October 2026) shows `anon` and `authenticated` hold INSERT, SELECT and DELETE on `public.interests`. Row level security is on with no policies, so the API roles reach no rows today, but one added policy would expose the table. The release doc says no code uses `interests` through the API roles: the Hajj "notify me" form inserts as `service_role`, and export and deletion use Prisma. Revoke ALL from `anon` and `authenticated`, keep `service_role` INSERT, then rerun query 6.
+
+## Post-release items
+
+Logged after release 2026-10-06 shipped (`main` `0c80db9`).
+
+- **Interests API role grants hardening.** See "Revoke API-role grants on `interests`" above. The release POST-DEPLOY is done, so this is unblocked.
+- **Rename the Supabase organisation** from "kaabatrip" to the PilgrimCompare name.
+- **En dashes in ranges.** The signup and login password hints write the A to Z and 0 to 9 ranges with an en dash, and `/umrah` writes "Children (0 to 11 years)" with an en dash. Replace each with "to".
+- **Page titles repeat the brand.** Some titles end in "| PilgrimCompare | PilgrimCompare".
+- **`/partner` trial wording.** It says "Free to list during the 90-day trial" while the founding cohort gets 12 months free. Copy decision for Ali.
+- **React #418 hydration error.** Seen once on the preview homepage, not reproduced. Watch for it in production logs.
+- **Vercel access.** The Vercel MCP and CLI need re-authenticating to the team scope to read deployments and runtime logs.

@@ -1,5 +1,32 @@
 # PilgrimCompare AI Handover — Single Source of Truth
 
+## §REL Release 2026-10-06 shipped to production, 2026-10-06
+
+**Status: DONE.** `main` is `0c80db9` (PR #112, dev into main, merged by Claude in Chrome). Production deployment `dpl_37VRWgywt4AhiwteZyHz9UfwURjs` is READY on `0c80db9`. Rollback target: `dpl_7njTU7yY4NuEBtHznKhJsrEx7VbM` (`1505dcd`). Runbook: `docs/release/RELEASE_2026-10-06.md`. SQL record: `supabase/migrations-pending/APPLIED.md`.
+
+### What shipped
+PRs #108 (overnight QA), #109 (erasure and 90-day enquiry retention), #110 (release doc) and #111 (SQL policy and backlog docs), all through `dev`.
+
+### Production SQL
+- Step A (before the deploy): 013 PRE-DEPLOY applied. Read-only queries 4 and 5 returned 0.
+- Step B (after the deploy, about 21:58): 014 POST-DEPLOY applied. Check query returned 0 rows. Query 1 rerun: 34 rows, 0 FAIL, all PASS (was 30 FAIL). Live pages `/`, `/search/packages`, `/packages`, `/partner`, `/privacy`, `/umrah`, `/hajj` and `/login` all 200 afterwards.
+- Both were run verbatim from the release doc by Claude in Chrome on Ali's instruction.
+
+### Smoke tests (read only, against pilgrimcompare.co.uk)
+- 1 `/` 200, 2 `/umrah` 200: pass.
+- 3 `/search/packages` 200 with 0 packages. This is data, not a regression. Production already showed 0 packages on `1505dcd` before the release (checked by Claude in Chrome about 20:25). No verified operator has published a package yet.
+- 4 and 9 not runnable until a verified operator publishes a package.
+- 5, 6, 7 privacy copy: pass (90-day sentence present, `dpo@` shown, no `privacy@`, no "auto-deleted").
+- 8 `GET /api/cron/enquiry-retention` with no secret: 401, pass.
+- 10 pending: the next morning, look for one `[cron/enquiry-retention] anonymised=` log line with status 200.
+
+### Risks and gotchas
+- 🛠️ **Gotcha:** the Vercel MCP and the Vercel CLI both returned 403 for the team scope after the deploy. Re-authenticate to the team before reading runtime logs (needed for smoke 10).
+- Post-release items are in `docs/BACKLOG.md` under "Post-release items".
+
+### Exact next step
+Check smoke 10 in the Vercel logs after the 03:00 UTC cron run. Then work through `docs/BACKLOG.md` post-release items.
+
 ## §ER Erasure gaps and 90-day enquiry retention (PR #109, branch `fix/erasure-retention`), 2026-10-06
 
 **Status: PR open into `dev`, not merged. Stacked on PR #108** (it branches from `fix/overnight-qa` 73d4ad3 because #108 was still open). Merge #108 first. Full report, with every new user-facing sentence for approval: `docs/uat/PR109_REPORT.md`. Vitest **2,072** (63 files), repo Playwright 69/6/0, real-DB suite **25/25**, lint 0 errors, tsc and build pass.
