@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 const pageJsonLd = graphJsonLd([
   webPageJsonLd({
     path: '/packages',
-    name: 'Browse Hajj & Umrah Packages — PilgrimCompare',
+    name: 'Browse Hajj & Umrah Packages | PilgrimCompare',
     description:
       'Browse and compare published Umrah and Hajj packages from verified UK operators.',
   }),

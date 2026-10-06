@@ -33,7 +33,7 @@ export function WizardStep1Basics({ data, onChange, error }: Props) {
           data-testid="wizard-title"
           required
           aria-required="true"
-          placeholder="e.g. Premium Umrah Package — Ramadan 2027"
+          placeholder="e.g. Premium Umrah Package, Ramadan 2027"
           value={data.title ?? ''}
           onChange={(e) => onChange({ title: e.target.value })}
           className="w-full rounded border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] px-3 py-2.5 text-sm text-[var(--text)] placeholder:text-[var(--textMuted)] focus:border-[var(--yellow)] focus:outline-none"

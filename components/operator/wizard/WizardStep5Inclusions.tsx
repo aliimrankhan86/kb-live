@@ -26,7 +26,7 @@ const ROOM_OPTIONS: { key: keyof NonNullable<Package['roomOccupancyOptions']>; l
 // is the starting state with no painted default — a skipped value persists as
 // unset (→ "Not provided"), never coerced to false. Mirrors the groupType radio.
 const ZIYARAT_OPTIONS: { value: boolean | undefined; key: string; label: string; description: string }[] = [
-  { value: undefined, key: 'unspecified', label: 'Not specified', description: 'Leave blank — shown to pilgrims as "Not provided".' },
+  { value: undefined, key: 'unspecified', label: 'Not specified', description: 'Leave blank. Shown to pilgrims as "Not provided".' },
   { value: true, key: 'included', label: 'Included', description: 'Ziyarat tours to holy sites are part of this package.' },
   { value: false, key: 'not-included', label: 'Not included', description: 'This package does not include ziyarat tours.' },
 ];

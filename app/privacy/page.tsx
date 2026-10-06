@@ -100,7 +100,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="mb-3 text-xl font-semibold">4. Data sharing — important disclosure</h2>
+          <h2 className="mb-3 text-xl font-semibold">4. Data sharing: important disclosure</h2>
           <p className="mb-4 rounded-lg border border-[var(--borderSubtle)] bg-[var(--surface)] p-4 text-sm font-medium leading-relaxed">
             When you send an enquiry, your contact details are shared with the operator you
             enquire with. From that point the operator is an independent data controller of
@@ -113,7 +113,7 @@ export default function PrivacyPolicyPage() {
           <ul className="list-disc pl-5 text-sm leading-relaxed space-y-1">
             <li>
               <strong>Service providers:</strong> Supabase (database, EU West / Ireland
-              region), Vercel (hosting), and Resend (transactional email delivery) — all under
+              region), Vercel (hosting), and Resend (transactional email delivery), all under
               GDPR-compliant data processing agreements.
             </li>
             <li>

@@ -37,7 +37,7 @@ export function DepartureCities({ cities, guideLinks }: DepartureCitiesProps) {
       ) : (
         <p className={styles.emptyState}>
           No packages are currently listed for a departure city. New operators
-          are being added — check back soon.
+          are being added, so check back soon.
         </p>
       )}
 

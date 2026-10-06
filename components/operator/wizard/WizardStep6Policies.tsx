@@ -12,7 +12,7 @@ interface Props {
 // state — no painted default. A skipped group type persists as unset and reads
 // as "Not provided" downstream. The `key` gives each radio a stable DOM value.
 const GROUP_OPTIONS: { value: Package['groupType']; key: string; label: string; description: string }[] = [
-  { value: undefined, key: 'unspecified', label: 'Not specified', description: 'Leave blank — shown to pilgrims as "Not provided".' },
+  { value: undefined, key: 'unspecified', label: 'Not specified', description: 'Leave blank. Shown to pilgrims as "Not provided".' },
   { value: 'private', key: 'private', label: 'Private', description: 'Dedicated group for your party only' },
   { value: 'small-group', key: 'small-group', label: 'Small group', description: 'Shared with up to ~15 pilgrims' },
   { value: 'large-group', key: 'large-group', label: 'Large group', description: 'Shared with 16+ pilgrims' },

@@ -16,7 +16,7 @@ export const INCLUSIONS: InclusionInfo[] = [
   { key: 'visa', label: 'Visa', help: 'Your Saudi entry visa for the trip.' },
   { key: 'flights', label: 'Flights', help: 'Return flights between the UK and Saudi Arabia.' },
   { key: 'transfers', label: 'Transfers', help: 'Airport pick-up/drop-off and travel between Makkah and Madinah.' },
-  { key: 'meals', label: 'Meals', help: 'Meals provided at the hotel — ask the operator which ones.' },
+  { key: 'meals', label: 'Meals', help: 'Meals provided at the hotel. Ask the operator which ones.' },
 ];
 
 const walkMinutes = (metres: number) => Math.max(1, Math.round(metres / 80));
@@ -67,7 +67,7 @@ export const flightTypeLabel = (t?: Package['flightType']): string | null => {
 export const groupTypeLabel = (g?: Package['groupType']): string | null => {
   switch (g) {
     case 'private':
-      return 'Private — your group only';
+      return 'Private (your group only)';
     case 'small-group':
       return 'Small group';
     case 'large-group':

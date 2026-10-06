@@ -61,7 +61,7 @@ export function OperatorProfileDetail({ operator, packages }: OperatorProfileDet
             >
               <span aria-hidden="true" className="text-[var(--danger)] font-bold">⚠</span>
               <span className="text-[var(--danger)]">
-                No ATOL/ABTA protection listed — verify directly before booking
+                No ATOL/ABTA protection listed. Verify directly before booking
               </span>
             </div>
           )}

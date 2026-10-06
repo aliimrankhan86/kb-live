@@ -158,7 +158,7 @@ export function PaymentDetailsClient() {
         <h2 className="text-xl font-semibold text-[var(--text)]">Payment details</h2>
         <p className="mt-1 text-sm text-[var(--textMuted)]">
           Bank details used to generate payment instructions for customers with a confirmed booking
-          intent. Shown in-app only — never by email.
+          intent. Shown in-app only, never by email.
         </p>
       </div>
 
@@ -299,7 +299,7 @@ export function PaymentDetailsClient() {
 
           <div role="status" aria-live="polite" className="rounded-md border border-[var(--info)]/60 bg-[color:rgba(56,189,248,0.08)] p-4 text-sm space-y-1">
             <div className="flex items-center gap-2">
-              <Badge variant="info">Approved — cooling period</Badge>
+              <Badge variant="info">Approved (cooling period)</Badge>
             </div>
             {pendingRequest.activationEligibleAt && (
               <p className="text-[var(--text)] mt-2">

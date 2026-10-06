@@ -53,8 +53,7 @@ export default function EnquiryConfirmation({
           <Text style={text}>Salaam {firstName},</Text>
           <Text style={text}>
             Your enquiry about <strong>{packageName}</strong> has been sent to{' '}
-            <strong>{operatorName}</strong>. They typically respond within 48 hours,
-            directly to this email address.
+            <strong>{operatorName}</strong>. They will reply directly to this email address.
           </Text>
 
           <Section style={refBox}>
@@ -73,7 +72,7 @@ export default function EnquiryConfirmation({
             <>
               <Hr style={hr} />
               <Heading as="h2" style={subheading}>
-                While you wait — similar packages to compare
+                While you wait: similar packages to compare
               </Heading>
               {similarPackages.map((pkg) => (
                 <Section key={pkg.slug} style={packageRow}>

@@ -74,7 +74,7 @@ function useDashboardData() {
 
     const acts: ActivityItem[] = [];
     allRequests.slice(0, 4).forEach((r) =>
-      acts.push({ title: `New lead: ${r.type.toUpperCase()} — ${r.season}`, date: r.createdAt, type: 'lead' })
+      acts.push({ title: `New lead: ${r.type.toUpperCase()}, ${r.season}`, date: r.createdAt, type: 'lead' })
     );
     offers.slice(0, 4).forEach((o) => acts.push({ title: 'Offer sent', date: o.createdAt, type: 'offer' }));
     bookings.slice(0, 4).forEach((b) =>
@@ -218,7 +218,7 @@ export function OperatorDashboard({ operatorId: _operatorId }: { operatorId: str
             {requests.map((req) => (
               <div key={req.id} className="flex items-center justify-between rounded-md border border-[var(--borderSubtle)] bg-[var(--surfaceDark)] px-4 py-3">
                 <div>
-                  <p className="text-sm font-medium text-[var(--text)]">{req.type.toUpperCase()} — {req.season}</p>
+                  <p className="text-sm font-medium text-[var(--text)]">{req.type.toUpperCase()}, {req.season}</p>
                   <p className="text-xs text-[var(--textMuted)]">{req.departureCity || 'Any departure'} • {req.totalNights} nights</p>
                 </div>
                 <Link href="/operator/leads" className="text-sm text-[var(--yellow)] hover:underline">

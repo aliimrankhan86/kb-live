@@ -91,7 +91,7 @@ export function OperatorLeadsClient({ operatorId }: OperatorLeadsClientProps) {
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="font-semibold text-[var(--text)]">
-                      {req.type.toUpperCase()} — {req.season}
+                      {req.type.toUpperCase()}, {req.season}
                     </h3>
                     {hasOffer ? (
                       <Badge variant="success">Responded</Badge>

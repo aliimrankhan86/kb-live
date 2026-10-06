@@ -192,7 +192,7 @@ export default function PartnerLandingPage() {
                 },
                 {
                   title: 'Accurate Package Pricing',
-                  desc: 'Prices must reflect real, bookable packages — not estimates. Misleading listings are removed.',
+                  desc: 'Prices must reflect real, bookable packages, not estimates. Misleading listings are removed.',
                 },
                 {
                   title: 'Responsive to Enquiries',
@@ -226,7 +226,7 @@ export default function PartnerLandingPage() {
             <h2 className="text-center text-2xl font-semibold text-[var(--text)]">How to Get Listed</h2>
             <div className="mt-10 grid gap-6 sm:grid-cols-3">
               {[
-                { step: '1', title: 'Get in touch', desc: 'Send us your company details, ATOL/ABTA numbers, and package offerings — our team builds your verified profile for you.' },
+                { step: '1', title: 'Get in touch', desc: 'Send us your company details, ATOL/ABTA numbers, and package offerings. Our team builds your verified profile for you.' },
                 { step: '2', title: 'Get Verified', desc: 'Our team reviews your details within 1 to 2 business days, using the checks listed above.' },
                 { step: '3', title: 'Start Receiving Enquiries', desc: 'Once approved, your packages appear in search results and travellers can send enquiries directly to you.' },
               ].map((item) => (

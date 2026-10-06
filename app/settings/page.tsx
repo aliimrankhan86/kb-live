@@ -475,7 +475,7 @@ export default function SettingsPage() {
       {/* Data export */}
       <SectionCard id="export-heading" title="Download your data">
         <p style={{ margin: '0 0 1rem', fontSize: '0.8125rem', color: 'var(--textMuted)' }}>
-          Under UK GDPR Article 20, you can receive a copy of the personal data PilgrimCompare holds — your requests, booking intents, and interests in a portable format.
+          Under UK GDPR Article 20, you can receive a copy of the personal data PilgrimCompare holds (your requests, booking intents, and interests) in a portable format.
         </p>
         {exportError && <p role="alert" style={{ marginBottom: '0.75rem', fontSize: '0.875rem', color: 'var(--danger)' }}>{exportError}</p>}
         <Button variant="secondary" onClick={handleExport} loading={exporting} disabled={exporting} data-testid="export-data-btn">

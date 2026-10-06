@@ -5,12 +5,12 @@ import { LEGAL_ENTITY_BLOCK, registeredOfficeClause } from '@/lib/legal';
 export const metadata: Metadata = {
   title: 'Terms of Use | PilgrimCompare',
   description:
-    'Terms of Use for PilgrimCompare — a UK comparison and enquiry service for Umrah travel packages from verified operators.',
+    'Terms of Use for PilgrimCompare, a UK comparison and enquiry service for Umrah travel packages from verified operators.',
   alternates: { canonical: '/terms' },
   robots: { index: true, follow: true },
   openGraph: {
     title: 'Terms of Use | PilgrimCompare',
-    description: 'Terms of Use for PilgrimCompare — a UK comparison and enquiry service for Umrah travel packages.',
+    description: 'Terms of Use for PilgrimCompare, a UK comparison and enquiry service for Umrah travel packages.',
     url: 'https://pilgrimcompare.co.uk/terms',
     siteName: 'PilgrimCompare',
     type: 'website',
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Terms of Use | PilgrimCompare',
-    description: 'Terms of Use for PilgrimCompare — a UK comparison and enquiry service for Umrah travel packages.',
+    description: 'Terms of Use for PilgrimCompare, a UK comparison and enquiry service for Umrah travel packages.',
   },
 };
 

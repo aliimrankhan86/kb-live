@@ -90,7 +90,7 @@ export default async function SearchPackagesPage({ searchParams }: SearchPackage
             </div>
             <h2 className={styles.emptyStateTitle}>We couldn&apos;t load packages right now</h2>
             <p className={styles.emptyStateText}>
-              This is usually a brief connection hiccup. Please refresh in a moment — your search
+              This is usually a brief connection hiccup. Please refresh in a moment. Your search
               is still saved in the address bar.
             </p>
             <a className={styles.emptyStateAction} href={`/search/packages?${buildUrlParams(params).toString()}`}>

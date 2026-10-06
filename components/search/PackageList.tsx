@@ -502,7 +502,7 @@ const PackageList: React.FC<PackageListProps> = ({
           <header className={styles.featuredSectionHeader}>
             <FeaturedBadge />
             <span className={styles.featuredSectionNote}>
-              Paid placement — not ranked by our neutral criteria.{' '}
+              Paid placement, not ranked by our neutral criteria.{' '}
               <a href="/how-we-rank" className={styles.sortDisclosureLink}>
                 How we rank
               </a>

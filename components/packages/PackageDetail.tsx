@@ -132,7 +132,7 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
         <section className="mb-6" data-testid="package-image-gallery" aria-label="Package images">
           <div className="overflow-hidden rounded-xl border border-[var(--border)]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={pkg.images[0]} alt={`${pkg.title} — cover`} className="aspect-[16/7] w-full object-cover" data-testid="package-image-primary" />
+            <img src={pkg.images[0]} alt={`${pkg.title}: cover`} className="aspect-[16/7] w-full object-cover" data-testid="package-image-primary" />
           </div>
         </section>
       )}
@@ -193,7 +193,7 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
 
           {/* Hotels */}
           <SectionCard title="Your hotels">
-            <p className="mt-1 text-xs text-[var(--textMuted)]">How close you stay to the holy sites — a key comfort factor, especially for elderly travellers.</p>
+            <p className="mt-1 text-xs text-[var(--textMuted)]">How close you stay to the holy sites: a key comfort factor, especially for elderly travellers.</p>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
               {([
                 { city: 'Makkah' as const, name: pkg.hotelMakkahName, stars: pkg.hotelMakkahStars, nights: pkg.nightsMakkah, dist: makkahDist },

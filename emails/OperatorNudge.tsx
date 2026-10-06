@@ -37,7 +37,7 @@ export default function OperatorNudge({
     <Html>
       <Head />
       <Preview>
-        Reminder — unanswered enquiry from {customerName}
+        Reminder: unanswered enquiry from {customerName}
       </Preview>
       <Body style={body}>
         <Container style={container}>

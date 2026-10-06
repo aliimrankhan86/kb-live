@@ -43,7 +43,7 @@ export default function OperatorEnquiryAlert({
     <Html>
       <Head />
       <Preview>
-        New enquiry from {customerName} — {packageName}
+        New enquiry from {customerName}: {packageName}
       </Preview>
       <Body style={body}>
         <Container style={container}>

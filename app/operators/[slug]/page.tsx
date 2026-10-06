@@ -43,7 +43,7 @@ export async function generateMetadata({
         },
         twitter: {
           card: 'summary_large_image',
-          title: `${operator.companyName} — ${statusLabel} UK Umrah Operator | PilgrimCompare`,
+          title: `${operator.companyName}: ${statusLabel} UK Umrah Operator | PilgrimCompare`,
           description: `Compare published packages, departure airports, and trust signals for ${operator.companyName}.`,
         },
       }

@@ -221,7 +221,7 @@ export function Footer({ cities = [], rfqEnabled = false }: { cities?: string[];
             <strong className="text-[var(--text)]">Important:</strong> PilgrimCompare is a comparison
             platform only. We do not organise, sell, or fulfil travel packages and do not collect, hold,
             or transfer customer funds. Your contract is directly with the travel operator. ATOL/ABTA
-            numbers are provided by operators — verify at{' '}
+            numbers are provided by operators. Verify at{' '}
             <a
               href="https://www.caa.co.uk/atol-protection"
               target="_blank"

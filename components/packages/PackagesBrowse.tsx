@@ -190,7 +190,7 @@ export function PackagesBrowse({ packages, error }: PackagesBrowseProps) {
       <header className={styles.header}>
         <h1 className={styles.title}>Browse packages</h1>
         <p className={styles.subtitle}>
-          Compare published Umrah and Hajj packages from verified UK operators — side by side, no
+          Compare published Umrah and Hajj packages from verified UK operators, side by side, at no
           cost to you.
         </p>
       </header>
@@ -317,7 +317,7 @@ export function PackagesBrowse({ packages, error }: PackagesBrowseProps) {
         <div data-testid="packages-empty" className={styles.empty} role="status">
           <p className={styles.emptyTitle}>No packages match these filters</p>
           <p className={styles.emptyText}>
-            Try a different pilgrimage type or season — or clear your filters to see everything.
+            Try a different pilgrimage type or season, or clear your filters to see everything.
           </p>
           <button type="button" className={styles.emptyAction} onClick={resetFilters}>
             Clear filters

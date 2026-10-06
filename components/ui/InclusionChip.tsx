@@ -18,7 +18,7 @@ export const InclusionChip: React.FC<InclusionChipProps> = ({ chip }) => (
     }`}
     data-testid={`inclusion-chip-${chip.label.toLowerCase()}`}
   >
-    <span aria-hidden="true">{chip.included ? '✓' : '—'}</span>
+    <span aria-hidden="true">{chip.included ? '✓' : '✕'}</span>
     {chip.label}
   </span>
 )

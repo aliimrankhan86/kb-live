@@ -121,7 +121,7 @@ export function PackageCsvImport({ operatorId: _operatorId, onImport }: { operat
                       className="w-full rounded border border-[var(--borderSubtle)] bg-[var(--bgSecondary)] px-2 py-1 text-xs text-[var(--text)] focus:border-[var(--yellow)] focus:outline-none"
                       aria-label={`Map column ${header}`}
                     >
-                      <option value="">— skip —</option>
+                      <option value="">(skip)</option>
                       {ALL_TARGET_COLUMNS.map((col) => (
                         <option key={col} value={col}>
                           {col}{REQUIRED_COLUMNS.includes(col as typeof REQUIRED_COLUMNS[number]) ? ' *' : ''}

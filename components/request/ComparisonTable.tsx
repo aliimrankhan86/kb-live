@@ -245,7 +245,7 @@ export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
                                   <path d="M20 6L9 17l-5-5" />
                                 </svg>
                                 Best
-                                <span className="sr-only"> — {feature.best}</span>
+                                <span className="sr-only">: {feature.best}</span>
                               </span>
                             )}
                             {value}

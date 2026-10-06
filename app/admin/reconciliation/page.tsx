@@ -17,7 +17,7 @@ const defaultRange = () => {
 };
 
 const formatDate = (iso?: string) =>
-  iso ? new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+  iso ? new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Not provided';
 
 export default function ReconciliationPage() {
   const initial = defaultRange();
@@ -172,10 +172,10 @@ export default function ReconciliationPage() {
                     <Badge variant="default">{r.status}</Badge>
                   </td>
                   <td className="px-3 py-2 text-[var(--text)]">{r.operatorName}</td>
-                  <td className="px-3 py-2 text-[var(--textMuted)]">{r.paymentReference ?? '—'}</td>
-                  <td className="px-3 py-2 text-[var(--textMuted)]">{r.payerName ?? '—'}</td>
-                  <td className="px-3 py-2 text-[var(--textMuted)]">{r.evidenceStatus ?? '—'}</td>
-                  <td className="px-3 py-2 text-[var(--textMuted)]">{r.outcome ?? '—'}</td>
+                  <td className="px-3 py-2 text-[var(--textMuted)]">{r.paymentReference ?? 'Not provided'}</td>
+                  <td className="px-3 py-2 text-[var(--textMuted)]">{r.payerName ?? 'Not provided'}</td>
+                  <td className="px-3 py-2 text-[var(--textMuted)]">{r.evidenceStatus ?? 'Not provided'}</td>
+                  <td className="px-3 py-2 text-[var(--textMuted)]">{r.outcome ?? 'Not provided'}</td>
                   <td className="px-3 py-2 text-[var(--textMuted)]">{formatDate(r.bookingCreatedAt)}</td>
                 </tr>
               ))}

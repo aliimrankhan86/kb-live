@@ -86,7 +86,7 @@ export function BankDetailsForm({
 
       <div className="rounded-md border border-[var(--borderSubtle)] bg-[rgba(255,255,255,0.03)] p-3 text-sm text-[var(--textMuted)] leading-relaxed space-y-1">
         <p>
-          Your payment details are only shown to customers with a confirmed booking intent — never
+          Your payment details are only shown to customers with a confirmed booking intent, never
           publicly, and never by email. Customers receive a link to view them securely in the app.
         </p>
         <p>The account name must match your registered business or trading name.</p>
@@ -131,7 +131,7 @@ export function BankDetailsForm({
           </p>
         ) : (
           <p id={`${scId}-help`} className="text-xs text-[var(--textMuted)]">
-            6 digits — formatted automatically (e.g. 20-00-00)
+            6 digits, formatted automatically (e.g. 20-00-00)
           </p>
         )}
       </div>
@@ -176,7 +176,7 @@ export function BankDetailsForm({
         onChange={(e) => { setBankName(e.target.value); clearError('bankName'); }}
         errorMessage={errors.bankName}
         hasError={Boolean(errors.bankName)}
-        helperText={!errors.bankName ? 'Display label — not used for payment processing' : undefined}
+        helperText={!errors.bankName ? 'Display label, not used for payment processing' : undefined}
         data-testid="bank-name-input"
         required
       />

@@ -21,7 +21,7 @@ export function Step5Review() {
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <div>
             <h3 className="mb-2 font-medium text-[var(--textMuted)]">Type & Season</h3>
-            <p className="capitalize">{draft.type} — {draft.season}</p>
+            <p className="capitalize">{draft.type}, {draft.season}</p>
           </div>
           
           <div>
@@ -36,7 +36,7 @@ export function Step5Review() {
             )}
             <p className="mt-0.5">
               {draft.season !== 'custom'
-                ? `${draft.season?.charAt(0).toUpperCase()}${draft.season?.slice(1)} — ${draft.dateWindow?.flexible ? 'Flexible dates' : 'Fixed dates'}`
+                ? `${draft.season?.charAt(0).toUpperCase()}${draft.season?.slice(1)}, ${draft.dateWindow?.flexible ? 'Flexible dates' : 'Fixed dates'}`
                 : draft.dateWindow?.start && draft.dateWindow?.end
                   ? `${draft.dateWindow.start} → ${draft.dateWindow.end}`
                   : 'Dates not set'}
@@ -99,7 +99,7 @@ export function Step5Review() {
           <strong className="text-[var(--text)]">Before you submit:</strong> your contact
           details and request will be shared with the operator you enquire with. They will use your
           details to respond to your enquiry. Your travel contract, cancellations and refunds are
-          with the operator directly — not PilgrimCompare.
+          with the operator directly, not PilgrimCompare.
         </p>
       </div>
     </div>

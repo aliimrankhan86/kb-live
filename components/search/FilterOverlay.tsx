@@ -155,7 +155,7 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({ isOpen, onClose })
               </span>
             )}
           </div>
-          <OverlayDescription>Narrow your results — changes apply when you tap Show packages.</OverlayDescription>
+          <OverlayDescription>Narrow your results. Changes apply when you tap Show packages.</OverlayDescription>
         </OverlayHeader>
 
         <OverlayBody className="space-y-7 px-5 py-6 sm:px-6">

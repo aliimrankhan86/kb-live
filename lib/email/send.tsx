@@ -107,7 +107,7 @@ export async function sendEnquiryConfirmation(params: {
       from: FROM,
       to: params.customerEmail,
       replyTo: SUPPORT_REPLY,
-      subject: `Your Umrah enquiry is on its way — reference ${params.refCode}`,
+      subject: `Your Umrah enquiry is on its way, reference ${params.refCode}`,
       html,
     });
     if (error) console.error('[email] sendEnquiryConfirmation error:', error);
@@ -146,7 +146,7 @@ export async function sendOperatorEnquiryAlert(params: {
       from: FROM,
       to: params.operatorEmail,
       replyTo: params.customerEmail,
-      subject: `New enquiry from PilgrimCompare — ${params.customerName}, ${params.packageName}`,
+      subject: `New enquiry from PilgrimCompare: ${params.customerName}, ${params.packageName}`,
       html,
     });
     if (error) console.error('[email] sendOperatorEnquiryAlert error:', error);
@@ -175,7 +175,7 @@ export async function sendBookingIntentConfirmation(params: {
       from: FROM,
       to: params.customerEmail,
       replyTo: SUPPORT_REPLY,
-      subject: `Booking intent created — reference ${params.refCode}`,
+      subject: `Booking intent created, reference ${params.refCode}`,
       html,
     });
     if (error) console.error('[email] sendBookingIntentConfirmation error:', error);
@@ -208,7 +208,7 @@ export async function sendOperatorNudge(params: {
       from: FROM,
       to: params.operatorEmail,
       replyTo: params.customerEmail,
-      subject: `Reminder — you have an unanswered PilgrimCompare enquiry`,
+      subject: `Reminder: you have an unanswered PilgrimCompare enquiry`,
       html,
     });
     if (error) console.error('[email] sendOperatorNudge error:', error);
@@ -268,7 +268,7 @@ export async function sendPaymentEvidenceNotification(params: {
       from: FROM,
       to: params.operatorEmail,
       replyTo: SUPPORT_REPLY,
-      subject: `Payment evidence received — ${params.customerName}, ${params.packageName ?? 'package'}`,
+      subject: `Payment evidence received: ${params.customerName}, ${params.packageName ?? 'package'}`,
       html,
     });
     if (error) console.error('[email] sendPaymentEvidenceNotification error:', error);

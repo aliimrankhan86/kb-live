@@ -46,7 +46,7 @@ export const CompareBar: React.FC<CompareBarProps> = ({
           </span>
           <span className={styles.hint}>
             {ready
-              ? 'Ready — tap Compare to see them side by side'
+              ? 'Ready: tap Compare to see them side by side'
               : `Pick ${remaining} more to compare`}
           </span>
         </div>
