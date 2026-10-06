@@ -82,7 +82,9 @@ export default async function PackageDetailPage({
       operator = await Repository.getOperatorById(pkg.operatorId)
     }
   } catch (err) {
-    error = err instanceof Error ? err.message : 'Unable to load this package right now.'
+    // Internal error detail stays in the server log, never on the page.
+    console.error(err)
+    error = 'Unable to load this package right now.'
   }
 
   if (error) {

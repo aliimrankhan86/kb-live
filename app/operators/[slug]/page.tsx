@@ -81,7 +81,9 @@ export default async function OperatorProfilePage({ params }: OperatorPageProps)
       )
     }
   } catch (err) {
-    error = err instanceof Error ? err.message : 'Unable to load this operator right now.'
+    // Internal error detail stays in the server log, never on the page.
+    console.error(err)
+    error = 'Unable to load this operator right now.'
   }
 
   if (error) {
