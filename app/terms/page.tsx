@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { LEGAL_ENTITY_BLOCK } from '@/lib/legal';
+import { LEGAL_ENTITY_BLOCK, registeredOfficeClause } from '@/lib/legal';
 
 export const metadata: Metadata = {
   title: 'Terms of Use | PilgrimCompare',
@@ -55,9 +55,8 @@ export default function TermsPage() {
             {LEGAL_ENTITY_BLOCK.tradingName} is a trading name of{' '}
             <strong>{LEGAL_ENTITY_BLOCK.companyName}</strong>, registered in{' '}
             {LEGAL_ENTITY_BLOCK.registeredCountry}, company number{' '}
-            {LEGAL_ENTITY_BLOCK.companyNumber}. VAT number: {LEGAL_ENTITY_BLOCK.vatNumber}.
+            {LEGAL_ENTITY_BLOCK.companyNumber}{registeredOfficeClause()}. VAT number: {LEGAL_ENTITY_BLOCK.vatNumber}.
           </p>
-          {/* TODO: add registered office line once virtual office is set up — see AI_NOTES.md §14 */}
           <p className="text-sm leading-relaxed">
             Contact:{' '}
             <a

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { LEGAL_ENTITY_BLOCK } from '@/lib/legal';
+import { LEGAL_ENTITY_BLOCK, registeredOfficeClause } from '@/lib/legal';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy | PilgrimCompare',
@@ -37,7 +37,7 @@ export default function PrivacyPolicyPage() {
             {LEGAL_ENTITY_BLOCK.tradingName} is a trading name of{' '}
             <strong>{LEGAL_ENTITY_BLOCK.companyName}</strong>, registered in{' '}
             {LEGAL_ENTITY_BLOCK.registeredCountry}, company number{' '}
-            {LEGAL_ENTITY_BLOCK.companyNumber}. For data protection purposes,{' '}
+            {LEGAL_ENTITY_BLOCK.companyNumber}{registeredOfficeClause()}. For data protection purposes,{' '}
             {LEGAL_ENTITY_BLOCK.companyName} is the data controller of your personal
             information.
           </p>

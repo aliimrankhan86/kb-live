@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Logo } from '@/components/graphics/Logo';
 import { WordmarkLogo } from '@/components/graphics/WordmarkLogo';
-import { LEGAL_ENTITY_BLOCK } from '@/lib/legal';
+import { LEGAL_ENTITY_BLOCK, registeredOfficeClause } from '@/lib/legal';
 
 const LEGAL_LINKS = [
   { href: '/how-it-works', label: 'How it works' },
@@ -258,7 +258,7 @@ export function Footer({ cities = [], rfqEnabled = false }: { cities?: string[];
           {LEGAL_ENTITY_BLOCK.tradingName} is a trading name of{' '}
           <span className="text-[var(--text)]">{LEGAL_ENTITY_BLOCK.companyName}</span>, registered
           in {LEGAL_ENTITY_BLOCK.registeredCountry} (company no.{' '}
-          <span className="text-[var(--text)]">{LEGAL_ENTITY_BLOCK.companyNumber}</span>). VAT
+          <span className="text-[var(--text)]">{LEGAL_ENTITY_BLOCK.companyNumber}</span>){registeredOfficeClause()}. VAT
           no.{' '}
           <span className="text-[var(--text)]">{LEGAL_ENTITY_BLOCK.vatNumber}</span>.
         </p>
