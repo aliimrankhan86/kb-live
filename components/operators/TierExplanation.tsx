@@ -1,3 +1,4 @@
+import { VERIFICATION_STATEMENT } from '@/lib/content-rules';
 import type { OperatorTier } from '@/lib/types';
 
 const TIER_COPY: Record<OperatorTier, { label: string; description: string; colour: string }> = {
@@ -8,14 +9,14 @@ const TIER_COPY: Record<OperatorTier, { label: string; description: string; colo
   },
   verified: {
     label: 'Verified',
-    description:
-      'We have checked this operator’s ATOL or ABTA registration and confirmed their identity.',
+    // Standards §7: say exactly what we check, nothing more.
+    description: VERIFICATION_STATEMENT,
     colour: 'text-[var(--color-success)] border-[var(--color-success)]/30 bg-[var(--color-success)]/10',
   },
   verified_plus: {
-    label: 'Verified+',
-    description:
-      'This operator has passed enhanced checks including trading history and customer feedback review.',
+    // No enhanced checks or feedback reviews exist, so this tier claims nothing extra.
+    label: 'Verified',
+    description: VERIFICATION_STATEMENT,
     colour: 'text-[var(--yellow)] border-[var(--yellow)]/30 bg-[rgba(255,211,29,0.06)]',
   },
 };

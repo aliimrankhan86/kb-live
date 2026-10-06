@@ -15,9 +15,9 @@ import type { Package } from '@/lib/types'
 import { Repository } from '@/lib/api/repository'
 
 const GUIDE_LINKS = [
-  { label: 'Ramadan Umrah 2027', href: '/umrah/ramadan' },
+  { label: 'Ramadan Umrah', href: '/umrah/ramadan' },
   { label: 'Umrah cost guide', href: '/umrah/cost' },
-  { label: 'Hajj packages 2027', href: '/hajj' },
+  { label: 'Hajj packages', href: '/hajj' },
 ]
 
 export const metadata: Metadata = {

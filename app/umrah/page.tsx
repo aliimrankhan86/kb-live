@@ -43,7 +43,7 @@ const umrahFaqs = [
   {
     question: 'How much does an Umrah package from the UK cost?',
     answer:
-      'Umrah packages from the UK start from around £800 per person for budget off-peak departures. Mid-range 4-star packages typically cost £1,200–£2,500. Premium 5-star packages near the Grand Mosque in Makkah range from £2,500 to over £5,000. Ramadan and school holiday departures are 20–40% higher. See our Umrah cost guide for a full breakdown.',
+      'Prices are set by each operator and depend on dates, hotels, what is included and room sharing. Compare the prices operators state side by side, and confirm the final price with the operator before paying. Our Umrah cost guide explains what affects the price.',
   },
 ]
 
@@ -102,7 +102,7 @@ export default async function UmrahPage() {
             </Link>
             {[
               ...departureCities.map((city) => ({ label: `From ${city}`, href: `/umrah/${city.toLowerCase()}` })),
-              { label: 'Ramadan Umrah 2027', href: '/umrah/ramadan' },
+              { label: 'Ramadan Umrah', href: '/umrah/ramadan' },
             ].map(({ label, href }) => (
               <Link key={href} href={href} className="inline-flex min-h-[44px] items-center rounded-lg border border-[var(--border)] bg-[var(--surfaceDark)] px-3 py-2 text-xs font-medium text-[var(--textMuted)] hover:text-[var(--text)] hover:border-[var(--yellow)]/40 transition-colors">
                 {label}

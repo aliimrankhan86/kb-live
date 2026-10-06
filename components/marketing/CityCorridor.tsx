@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import type { BreadcrumbItem } from '@/components/ui/Breadcrumb'
 import { isRfqQuoteEnabled } from '@/lib/config'
+import { PAYMENT_STANDARD_LINE } from '@/lib/content-rules'
 
 interface FAQ {
   question: string
@@ -34,19 +35,19 @@ export function CityCorridor({ city, h1, intro, queryParams, faqs, breadcrumbIte
           <ul className="space-y-3 text-[var(--textMuted)]">
             <li className="flex items-start gap-2">
               <span aria-hidden="true" className="text-[var(--yellow)] font-bold mt-0.5">✓</span>
-              <span>Verified UK operators with ATOL or ABTA protection</span>
+              <span>Operators are checked before listing. <Link href="/how-we-rank#verification-heading" className="underline underline-offset-2">See what we check</Link></span>
             </li>
             <li className="flex items-start gap-2">
               <span aria-hidden="true" className="text-[var(--yellow)] font-bold mt-0.5">✓</span>
-              <span>Compare packages side by side — up to 3 at a time</span>
+              <span>Compare packages side by side, up to 3 at a time</span>
             </li>
             <li className="flex items-start gap-2">
               <span aria-hidden="true" className="text-[var(--yellow)] font-bold mt-0.5">✓</span>
-              <span>Hotels near Haram in Makkah and Madinah, flights, transfers, and visa support</span>
+              <span>Hotels, distance to the Haram, flights, transfers and visa, as stated by each operator</span>
             </li>
             <li className="flex items-start gap-2">
               <span aria-hidden="true" className="text-[var(--yellow)] font-bold mt-0.5">✓</span>
-              <span>Request a quote or book directly with the operator — PilgrimCompare does not hold your money</span>
+              <span>{PAYMENT_STANDARD_LINE}</span>
             </li>
           </ul>
         </section>

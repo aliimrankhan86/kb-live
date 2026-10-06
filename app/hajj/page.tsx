@@ -1,20 +1,21 @@
+import { ATOL_STANDARD_LINE } from '@/lib/content-rules'
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { HajjInterestForm } from '@/components/hajj/HajjInterestForm';
 import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld';
 
 export const metadata: Metadata = {
-  title: 'Hajj Packages 2027 from the UK – Coming Soon',
+  title: 'Hajj Packages from the UK: Register Interest | PilgrimCompare',
   description:
-    'Compare Hajj packages for 2027 from verified UK operators. ATOL and ABTA status checked before listing. Register your interest and be first to know when packages go live.',
+    'Hajj packages are not listed on PilgrimCompare yet. Register your interest and we will email you if Hajj packages from verified UK operators are listed.',
   keywords: ['Hajj packages 2027', 'Hajj packages UK', 'Hajj 2027', 'ATOL Hajj packages', 'UK Hajj operators'],
   alternates: {
     canonical: '/hajj',
   },
   openGraph: {
-    title: 'Hajj Packages 2027 – Coming Soon | PilgrimCompare',
+    title: 'Hajj Packages from the UK: Register Interest | PilgrimCompare',
     description:
-      'Register interest for Hajj 2027 packages from verified UK operators. Compare prices, hotels, and inclusions when packages go live.',
+      'Hajj packages are not listed on PilgrimCompare yet. Register your interest and we will email you if they are.',
     url: 'https://pilgrimcompare.co.uk/hajj',
     siteName: 'PilgrimCompare',
     type: 'website',
@@ -24,37 +25,37 @@ export const metadata: Metadata = {
 
 const hajjFaqs = [
   {
-    question: 'When will Hajj 2027 packages be available on PilgrimCompare?',
+    question: 'When will Hajj packages be available on PilgrimCompare?',
     answer:
-      'We expect Hajj 2027 packages from verified UK operators to go live in late 2026. Register your interest to be notified first.',
+      'We do not have a date yet. Register your interest and we will email you if Hajj packages from verified UK operators are listed.',
   },
   {
     question: 'What should I look for in a Hajj package?',
     answer:
-      'Look for operators with ATOL or ABTA protection, hotel distance to the Grand Mosque in Makkah, included flights, visa assistance, and group or private travel options.',
+      'Check the operator\'s ATOL number, each hotel and its distance to the Haram, what is included (flights, visa, transfers), the nights in each city, and whether the group is private or shared.',
   },
   {
     question: 'How much does a Hajj package from the UK cost?',
     answer:
-      'Hajj packages from the UK typically range from £5,000 to £15,000 per person depending on accommodation grade, group size, and included services. Prices vary each year based on government quota allocations.',
+      'Prices are set by each operator and depend on accommodation, group size and what is included. Confirm the final price with the operator before paying.',
   },
   {
     question: 'Is PilgrimCompare ATOL protected?',
     answer:
-      'PilgrimCompare is a comparison and enquiry platform — we do not sell packages directly. All operators listed on PilgrimCompare are required to declare their ATOL and ABTA status. Always verify this directly with the operator before booking.',
+      `No. PilgrimCompare is a comparison and enquiry service and does not sell travel. ${ATOL_STANDARD_LINE}`,
   },
 ];
 
 const hajjPageJsonLd = graphJsonLd([
   webPageJsonLd({
     path: '/hajj',
-    name: 'Hajj Packages 2027 from the UK – Coming Soon | PilgrimCompare',
+    name: 'Hajj Packages from the UK: Register Interest | PilgrimCompare',
     description:
-      'Compare Hajj packages for 2027 from verified UK operators. ATOL and ABTA status checked before listing.',
+      'Hajj packages are not listed on PilgrimCompare yet. Register your interest and we will email you if they are.',
   }),
   breadcrumbJsonLd([
     { name: 'Home', path: '/' },
-    { name: 'Hajj Packages 2027', path: '/hajj' },
+    { name: 'Hajj Packages', path: '/hajj' },
   ]),
   faqPageJsonLd(hajjFaqs),
 ]);
@@ -78,11 +79,11 @@ export default function HajjPage() {
 
           {/* Headline */}
           <h1 className="text-3xl md:text-4xl font-bold text-[var(--text)] mb-4 leading-tight">
-            Hajj Packages for 2027
+            Hajj Packages from the UK
           </h1>
           <p className="text-[var(--textMuted)] text-lg mb-8 leading-relaxed">
-            We are working with verified UK operators to bring you the best Hajj packages for the
-            2027 season. Register your interest and be the first to know when packages are available.
+            Hajj packages are not listed on PilgrimCompare yet. Register your interest and we will
+            email you if Hajj packages from verified UK operators are listed.
           </p>
 
           {/* Value props */}
@@ -95,7 +96,7 @@ export default function HajjPage() {
                 </svg>
               </div>
               <h3 className="text-sm font-semibold text-[var(--text)] mb-1">Verified Operators</h3>
-              <p className="text-xs text-[var(--textMuted)]">All operators ATOL/ABTA checked</p>
+              <p className="text-xs text-[var(--textMuted)]">We check each operator&apos;s ATOL number before listing</p>
             </div>
             <div className="p-4 rounded-xl bg-[var(--surfaceDark)] border border-[var(--border)]">
               <div className="text-[var(--yellow)] mb-2">
@@ -114,8 +115,8 @@ export default function HajjPage() {
                   <polyline points="22,6 12,13 2,6" />
                 </svg>
               </div>
-              <h3 className="text-sm font-semibold text-[var(--text)] mb-1">Early Access</h3>
-              <p className="text-xs text-[var(--textMuted)]">Be notified first when live</p>
+              <h3 className="text-sm font-semibold text-[var(--text)] mb-1">Register Interest</h3>
+              <p className="text-xs text-[var(--textMuted)]">We email you if packages are listed</p>
             </div>
           </div>
 

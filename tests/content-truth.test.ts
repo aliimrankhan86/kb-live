@@ -41,3 +41,34 @@ describe('/partner makes only supported claims (standards §5, §7; Direction §
     expect(src()).toContain('{VERIFICATION_STATEMENT}');
   });
 });
+
+describe('SEO and guide pages state no PilgrimCompare prices, dates, urgency or supply (standards §5, §6, §8, §11)', () => {
+  const pages = [
+    'app/umrah/page.tsx', 'app/umrah/london/page.tsx', 'app/umrah/birmingham/page.tsx', 'app/umrah/manchester/page.tsx',
+    'app/umrah/ramadan/page.tsx', 'app/umrah/cost/page.tsx', 'app/hajj/page.tsx', 'components/marketing/CityCorridor.tsx',
+    'lib/seo/corridor-faqs.ts',
+  ];
+  const text = (f: string) => readFileSync(f, 'utf8');
+  it.each(pages)('%s has no hardcoded £ prices or % premiums', (f) => {
+    expect(text(f)).not.toMatch(/£\s?\d|\d\s?[–-]\s?\d+%|\d+%\s/);
+  });
+  it.each(pages)('%s has no urgency, cheapest/lowest or blanket protection claims', (f) => {
+    expect(text(f)).not.toMatch(/sell out|before packages|book(ing)? early|cheapest|lowest price|best value|ATOL or ABTA protect|must hold ATOL|protects your money|request a quote in minutes|flights included/i);
+  });
+  it('Ramadan page states no Ramadan dates of its own', () => {
+    expect(text('app/umrah/ramadan/page.tsx')).not.toMatch(/\d{1,2} (February|March|April|May|June)|2027/);
+  });
+  it('city pages do not claim supply or airline routes', () => {
+    for (const f of pages.slice(1, 4)) {
+      expect(text(f)).not.toMatch(/direct (and connecting )?flights to Jeddah|charter|large Muslim community|lists verified operators who accept bookings/i);
+    }
+  });
+});
+
+describe('tier explanation claims only the §7 checks', () => {
+  it('uses the verification statement and no enhanced-check or feedback claims', () => {
+    const src = readFileSync('components/operators/TierExplanation.tsx', 'utf8');
+    expect(src).toContain('VERIFICATION_STATEMENT');
+    expect(src).not.toMatch(/customer feedback|trading history|ATOL or ABTA registration/);
+  });
+});

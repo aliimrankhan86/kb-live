@@ -4,16 +4,18 @@ import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, webPageJson
 import { Repository } from '@/lib/api/repository'
 import { isRfqQuoteEnabled } from '@/lib/config'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
+import { ATOL_STANDARD_LINE, PAYMENT_STANDARD_LINE } from '@/lib/content-rules'
+
+const DESCRIPTION =
+  'Compare Ramadan Umrah packages from verified UK operators side by side: price, dates, hotels, distance to the Haram and inclusions, as stated by each operator.'
 
 export const metadata: Metadata = {
-  title: 'Ramadan Umrah Packages 2027 from the UK',
-  description:
-    'Compare Ramadan Umrah packages from verified UK operators for 2027. Perform Umrah during the holiest month — hotels near the Grand Mosque, flights included. ATOL status checked before listing.',
+  title: 'Ramadan Umrah Packages from the UK | PilgrimCompare',
+  description: DESCRIPTION,
   alternates: { canonical: '/umrah/ramadan' },
   openGraph: {
-    title: 'Ramadan Umrah Packages 2027 from the UK | PilgrimCompare',
-    description:
-      'Book your Ramadan Umrah 2027 with verified UK operators. Compare packages, hotel distance to Haram, and request a quote.',
+    title: 'Ramadan Umrah Packages from the UK | PilgrimCompare',
+    description: DESCRIPTION,
     url: 'https://pilgrimcompare.co.uk/umrah/ramadan',
     siteName: 'PilgrimCompare',
     type: 'website',
@@ -21,46 +23,46 @@ export const metadata: Metadata = {
   },
 }
 
+// No dates, prices, price premiums or availability claims: PilgrimCompare
+// cannot check them (standards §6, §11). Dates and prices come from operators.
 const faqs = [
   {
-    question: 'When is Ramadan 2027?',
+    question: 'When is Ramadan?',
     answer:
-      'Ramadan 2027 is expected to begin around 18 February 2027 and end around 18 March 2027, subject to moon sighting confirmation. UK operators typically start listing packages 6–9 months in advance. Register interest to be notified when packages go live.',
+      'Ramadan follows the Islamic lunar calendar, so it starts about 11 days earlier each year and its exact dates are confirmed by moon sighting. Check the travel dates each operator gives for its Ramadan packages.',
   },
   {
-    question: 'Why are Ramadan Umrah packages more expensive than off-peak?',
+    question: 'How much does a Ramadan Umrah package cost?',
     answer:
-      'Demand is significantly higher during Ramadan, especially in the final 10 nights. Hotels near the Grand Mosque charge premium rates and international flight capacity is limited. Expect to pay 30–50% more than equivalent off-peak packages. Booking early generally secures better availability and pricing.',
+      'Prices are set by each operator and depend on dates, hotels and what is included. Compare the prices operators state, and confirm the final price with the operator before paying.',
   },
   {
-    question: 'What are the last 10 nights of Ramadan for Umrah?',
+    question: 'What are the last 10 nights of Ramadan?',
     answer:
-      'The last 10 nights of Ramadan (Ashara Mubarakah) include Laylat al-Qadr, the Night of Power, considered the most spiritually significant night in the Islamic calendar. Many pilgrims aim to perform Umrah and remain in Makkah during this period. These packages sell out first and carry the highest prices.',
+      'The last 10 nights of Ramadan include Laylat al-Qadr, the Night of Power. Some packages are planned around these nights; check the dates and nights in Makkah each operator states.',
   },
   {
     question: 'Are Ramadan Umrah packages ATOL protected?',
-    answer:
-      "UK travel operators selling package holidays that include international flights and accommodation must hold ATOL (Air Travel Organiser's Licence) protection. Always verify the operator's ATOL number on the Civil Aviation Authority (CAA) website before booking. PilgrimCompare lists operators' protection status where provided.",
+    answer: ATOL_STANDARD_LINE,
   },
 ]
 
 const pageJsonLd = graphJsonLd([
   webPageJsonLd({
     path: '/umrah/ramadan',
-    name: 'Ramadan Umrah Packages 2027 from the UK | PilgrimCompare',
-    description:
-      'Compare Ramadan Umrah packages from verified UK operators for 2027. Hotels near the Grand Mosque, flights included. ATOL status checked before listing.',
+    name: 'Ramadan Umrah Packages from the UK | PilgrimCompare',
+    description: DESCRIPTION,
   }),
   breadcrumbJsonLd([
     { name: 'Home', path: '/' },
     { name: 'Umrah', path: '/umrah' },
-    { name: 'Ramadan Umrah 2027', path: '/umrah/ramadan' },
+    { name: 'Ramadan Umrah', path: '/umrah/ramadan' },
   ]),
   faqPageJsonLd(faqs),
 ])
 
 export default async function RamadanUmrahPage() {
-  const departureCities = await Repository.getDistinctDepartureCities()
+  const departureCities = await Repository.getDistinctDepartureCities().catch(() => [] as string[])
   return (
     <>
       <JsonLdScript data={pageJsonLd} />
@@ -75,45 +77,30 @@ export default async function RamadanUmrahPage() {
             ]}
           />
           <h1 className="text-3xl md:text-4xl font-bold text-[var(--text)] mb-6">
-            Ramadan Umrah Packages from the UK 2027
+            Ramadan Umrah Packages from the UK
           </h1>
 
           <p className="text-lg text-[var(--textMuted)] leading-relaxed mb-8">
-            Performing Umrah during Ramadan is one of the most spiritually rewarding pilgrimages a Muslim can make. Packages for Ramadan 2027 from verified UK operators include return flights, hotels near the Grand Mosque in Makkah, Madinah accommodation, and visa arrangements. Compare operators side by side and request a quote before packages sell out.
+            Compare Ramadan Umrah packages from verified UK operators side by side. Each package
+            shows what its operator states: price, travel dates, nights in Makkah and Madinah,
+            hotels, distance to the Haram and what is included. Anything an operator has not
+            given shows as &ldquo;Not provided&rdquo;.
           </p>
 
-          {/* Ramadan 2027 dates — direct-answer block for AEO */}
-          <section
-            className="rounded-xl border border-[var(--yellow)]/20 bg-[var(--yellow)]/5 p-6 mb-8"
-            aria-labelledby="ramadan-dates"
-          >
-            <h2 id="ramadan-dates" className="text-lg font-semibold text-[var(--text)] mb-3">
-              Ramadan 2027 dates
-            </h2>
-            <p className="text-[var(--textMuted)] text-sm leading-relaxed">
-              Ramadan 2027 is expected to run from approximately{' '}
-              <strong className="text-[var(--text)]">18 February</strong> to{' '}
-              <strong className="text-[var(--text)]">18 March 2027</strong>, subject to moon
-              sighting. UK operators typically start listing packages from mid-2026. Register your
-              interest to be notified as soon as packages go live.
-            </p>
-          </section>
-
-          {/* What's included */}
           <section
             className="rounded-xl border border-[var(--border)] bg-[var(--surfaceDark)] p-6 md:p-8 mb-8"
-            aria-labelledby="what-to-expect"
+            aria-labelledby="what-to-check"
           >
-            <h2 id="what-to-expect" className="text-xl font-semibold text-[var(--text)] mb-4">
-              What to expect from a Ramadan Umrah package
+            <h2 id="what-to-check" className="text-xl font-semibold text-[var(--text)] mb-4">
+              What to check in a Ramadan Umrah package
             </h2>
             <ul className="space-y-3 text-[var(--textMuted)]">
               {[
-                'Return flights from major UK airports — London, Birmingham, Manchester',
-                'Hotels near the Grand Mosque in Makkah — verified star ratings and distances to Haram',
-                'Madinah accommodation close to Masjid an-Nabawi',
-                'Saudi Umrah visa assistance and airport transfers',
-                'ATOL or ABTA protected operators — always verify status before booking',
+                'Travel dates and how many nights fall in the last 10 nights, if that matters to you',
+                'Nights in Makkah and Madinah, and each hotel with its distance to the Haram',
+                'Whether flights, visa and transfers are included',
+                'The deposit, payment terms and cancellation policy',
+                'The operator\'s ATOL number',
               ].map((item) => (
                 <li key={item} className="flex items-start gap-2">
                   <span aria-hidden="true" className="text-[var(--yellow)] font-bold mt-0.5">
@@ -123,31 +110,26 @@ export default async function RamadanUmrahPage() {
                 </li>
               ))}
             </ul>
+            <p className="mt-4 text-sm text-[var(--textMuted)]">{ATOL_STANDARD_LINE}</p>
           </section>
 
-          {/* Pricing note */}
           <section className="mb-8" aria-labelledby="ramadan-pricing">
             <h2 id="ramadan-pricing" className="text-lg font-semibold text-[var(--text)] mb-3">
               Ramadan Umrah package costs
             </h2>
             <p className="text-[var(--textMuted)] leading-relaxed mb-3 text-sm">
-              Ramadan packages carry a 30–50% premium over off-peak departures due to high demand
-              and limited hotel and flight capacity. Budget packages for Ramadan 2027 are expected
-              to start from around <strong className="text-[var(--text)]">£1,200 per person</strong>
-              ; mid-range 4-star options from <strong className="text-[var(--text)]">£2,000</strong>
-              ; and premium 5-star stays near the Grand Mosque from{' '}
-              <strong className="text-[var(--text)]">£3,500</strong>. Last-10-nights packages
-              carry the highest premiums.
+              Prices are set by each operator. Compare the prices operators state for the same
+              dates and hotels, and confirm the final price with the operator before paying.
             </p>
             <Link href="/umrah/cost" className="text-sm text-[var(--yellow)] hover:underline">
-              See full Umrah cost guide →
+              See the Umrah cost guide →
             </Link>
           </section>
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-4 mb-4">
             <Link
-              href="/search/packages?type=umrah"
+              href="/search/packages?type=umrah&season=ramadan"
               className="inline-flex items-center justify-center rounded-lg bg-[var(--yellow)] px-6 py-3 text-base font-semibold text-[var(--bg)] hover:opacity-90 transition-opacity"
             >
               Browse Umrah packages
@@ -164,9 +146,7 @@ export default async function RamadanUmrahPage() {
           </div>
 
           <p className="text-sm text-[var(--textMuted)] mb-10">
-            Ramadan 2027 package listings and availability depend on individual operators. Prices
-            and inclusions vary. Confirm ATOL or ABTA status directly with the operator before
-            booking.
+            {PAYMENT_STANDARD_LINE}
           </p>
 
           {/* FAQ section */}
