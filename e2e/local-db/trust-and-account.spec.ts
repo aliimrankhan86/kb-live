@@ -122,3 +122,17 @@ test('account deletion removes the sign-in and consent, and anonymises enquiries
   expect(await sql('select name, email, phone, message, package_id from enquiries where reference_code = $1', [referenceCode]))
     .toEqual([{ name: 'Deleted account', email: null, phone: null, message: null, package_id: 'local-test-pkg-01' }])
 })
+
+test('account deletion also deletes the Hajj availability alerts for the account email', async ({ page }) => {
+  const email = `alerts-${Date.now()}@test.local`
+  const { error } = await admin().auth.admin.createUser({ email, password: 'TestPass1!', email_confirm: true, app_metadata: { role: 'customer' } })
+  expect(error).toBeNull()
+  const alert = await page.request.post('/api/interest', { data: { email: email.toUpperCase(), type: 'hajj' } })
+  expect(alert.status()).toBe(201)
+  expect(await sql('select 1 from interests where email = $1', [email])).toHaveLength(1)
+
+  await login(page, email)
+  const res = await page.request.delete('/api/user/delete')
+  expect(await res.json()).toEqual({ deleted: true })
+  expect(await sql('select 1 from interests where email = $1', [email])).toEqual([])
+})
