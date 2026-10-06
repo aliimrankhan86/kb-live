@@ -1194,6 +1194,12 @@ export const MockDB = {
     return changed;
   },
 
+  /** Account erasure: Hajj "notify me" rows for this email, any letter case. Safe to rerun. */
+  deleteInterestsByEmail: (email: string) => {
+    const target = email.trim().toLowerCase();
+    setStorage(STORAGE_KEYS.INTERESTS, MockDB.getInterests().filter((i) => i.email.toLowerCase() !== target));
+  },
+
   deleteMarketingConsentsByEmail: (email: string) => {
     const target = email.trim().toLowerCase();
     setStorage(STORAGE_KEYS.MARKETING_CONSENTS, MockDB.getMarketingConsents().filter((c) => c.email.toLowerCase() !== target));

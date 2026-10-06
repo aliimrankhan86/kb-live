@@ -695,6 +695,14 @@ export const DBAdapter = {
     return count;
   },
 
+  /**
+   * Hajj "notify me" rows (`interests`, migration 007, not in the Prisma
+   * schema). Runs on the server connection, so it needs no API-role grant.
+   */
+  deleteInterestsByEmail: async (email: string): Promise<void> => {
+    await prisma.$executeRaw`DELETE FROM interests WHERE lower(email) = lower(${email.trim()})`;
+  },
+
   deleteMarketingConsentsByEmail: async (email: string): Promise<void> => {
     await prisma.marketingConsent.deleteMany({ where: { email: { equals: email.trim(), mode: 'insensitive' } } });
   },

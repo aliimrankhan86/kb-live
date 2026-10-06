@@ -16,11 +16,8 @@ const consent = (email: string, enquiryReference: string): MarketingConsent => (
 const session = { current: null as null | { id: string; role: string; email?: string } };
 const deleteUser = vi.fn(async () => ({ error: null as null | { message: string } }));
 const signOut = vi.fn(async () => ({}));
-// Hajj "notify me" rows live in the Supabase `interests` table (service role).
-const interestsEq = vi.fn(async (_column: string, _value: string) => ({ error: null as null | { message: string } }));
-const fromTable = vi.fn((_table: string) => ({ delete: () => ({ eq: interestsEq }) }));
 vi.mock('@/lib/auth/session', () => ({ getSessionUser: async () => session.current }));
-vi.mock('@/lib/supabase/service-role', () => ({ createServiceRoleClient: () => ({ auth: { admin: { deleteUser } }, from: fromTable }) }));
+vi.mock('@/lib/supabase/service-role', () => ({ createServiceRoleClient: () => ({ auth: { admin: { deleteUser } } }) }));
 vi.mock('@/lib/supabase/server', () => ({ createClient: async () => ({ auth: { signOut } }) }));
 
 const call = async () => {
@@ -34,9 +31,6 @@ beforeEach(() => {
   deleteUser.mockClear();
   deleteUser.mockResolvedValue({ error: null });
   signOut.mockClear();
-  interestsEq.mockClear();
-  interestsEq.mockResolvedValue({ error: null });
-  fromTable.mockClear();
 });
 
 describe('DELETE /api/user/delete really deletes, or says honestly that it did not', () => {
@@ -93,23 +87,30 @@ describe('DELETE /api/user/delete really deletes, or says honestly that it did n
     expect(MockDB.getMarketingConsents().map((c) => c.email)).toEqual(['someone@else.test']);
   });
 
-  it('deletes the account\'s Hajj availability alerts (interests), matched on the lower-case email, before the sign-in', async () => {
+  it('deletes the account\'s Hajj availability alerts (interests), any letter case, before the sign-in, and leaves other people\'s alone', async () => {
     session.current = { id: 'cust-clean', role: 'customer', email: ' Pilgrim@Example.test ' };
+    MockDB.saveInterest('pilgrim@example.test', 'hajj');
+    MockDB.saveInterest('someone@else.test', 'hajj');
+    const spy = vi.spyOn(MockDB, 'deleteInterestsByEmail');
     expect(await call()).toEqual({ status: 200, body: { deleted: true } });
-    expect(fromTable).toHaveBeenCalledWith('interests');
-    expect(interestsEq).toHaveBeenCalledWith('email', 'pilgrim@example.test');
-    expect(interestsEq.mock.invocationCallOrder[0]).toBeLessThan(deleteUser.mock.invocationCallOrder[0]);
+    expect(MockDB.getInterests().map((i) => i.email)).toEqual(['someone@else.test']);
+    expect(spy.mock.invocationCallOrder[0]).toBeLessThan(deleteUser.mock.invocationCallOrder[0]);
+    spy.mockRestore();
   });
 
   it('an availability-alert step failing never touches the sign-in, and a retry finishes the job', async () => {
     session.current = { id: 'cust-clean', role: 'customer', email: 'pilgrim@example.test' };
-    interestsEq.mockResolvedValueOnce({ error: { message: 'db blip' } });
+    MockDB.saveInterest('pilgrim@example.test', 'hajj');
+    const spy = vi.spyOn(MockDB, 'deleteInterestsByEmail').mockImplementationOnce(() => {
+      throw new Error('db blip');
+    });
     const res = await call();
     expect(res.status).toBe(500);
     expect(res.body.error).toMatch(/You can still sign in/);
     expect(deleteUser).not.toHaveBeenCalled();
+    spy.mockRestore();
     expect(await call()).toEqual({ status: 200, body: { deleted: true } });
-    expect(interestsEq).toHaveBeenCalledTimes(2);
+    expect(MockDB.getInterests()).toEqual([]);
   });
 
   it('a thrown error still returns JSON with the honest message and the data protection email', async () => {
@@ -120,10 +121,6 @@ describe('DELETE /api/user/delete really deletes, or says honestly that it did n
     expect(res.body.deleted).toBeUndefined();
     expect(res.body.error).toBe(ACCOUNT_DELETE_NOT_FINISHED);
     expect(res.body.error).toContain('dpo@pilgrimcompare.co.uk');
-
-    interestsEq.mockRejectedValueOnce(new Error('socket hang up'));
-    const again = await call();
-    expect(again).toEqual({ status: 500, body: { error: ACCOUNT_DELETE_NOT_FINISHED } });
   });
 
   it('a sign-out failure after the account is gone still reports the deletion', async () => {

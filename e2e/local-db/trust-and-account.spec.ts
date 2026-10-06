@@ -102,7 +102,7 @@ test('password reset works end to end through the emailed link', async ({ page }
   await admin().auth.admin.updateUserById(id, { password: 'TestPass1!' })
 })
 
-test('account deletion removes the sign-in and consent, and anonymises enquiries', async ({ page }) => {
+test('account deletion removes the sign-in, consent and Hajj availability alerts, and anonymises enquiries', async ({ page }) => {
   const email = `delete-me-${Date.now()}@test.local`
   const { data, error } = await admin().auth.admin.createUser({ email, password: 'TestPass1!', email_confirm: true, app_metadata: { role: 'customer' } })
   expect(error).toBeNull()
@@ -112,6 +112,11 @@ test('account deletion removes the sign-in and consent, and anonymises enquiries
   expect(enq.status()).toBe(201)
   const { referenceCode } = await enq.json()
   expect(await sql('select 1 from marketing_consents where email = $1', [email])).toHaveLength(1)
+  // Inserted directly: this stack's API roles hold no INSERT on new tables (CLI 2.109 defaults), so
+  // POST /api/interest cannot write here. Deletion runs on the server connection and needs no grant.
+  // One sign-in per test: sign-in is limited to 5 per 15 minutes per IP.
+  await sql('insert into interests (email, type) values ($1, $2)', [email, 'hajj'])
+  await sql('insert into interests (email, type) values ($1, $2)', [`other-${email}`, 'hajj'])
 
   await login(page, email)
   const res = await page.request.delete('/api/user/delete')
@@ -120,22 +125,10 @@ test('account deletion removes the sign-in and consent, and anonymises enquiries
   const { data: after } = await admin().auth.admin.getUserById(data.user!.id)
   expect(after.user).toBeNull()
   expect(await sql('select 1 from marketing_consents where email = $1', [email])).toEqual([])
+  expect(await sql('select 1 from interests where email = $1', [email])).toEqual([])
+  expect(await sql('select 1 from interests where email = $1', [`other-${email}`])).toHaveLength(1)
   expect(await sql('select name, email, phone, message, package_id from enquiries where reference_code = $1', [referenceCode]))
     .toEqual([{ name: 'Deleted account', email: null, phone: null, message: null, package_id: 'local-test-pkg-01' }])
-})
-
-test('account deletion also deletes the Hajj availability alerts for the account email', async ({ page }) => {
-  const email = `alerts-${Date.now()}@test.local`
-  const { error } = await admin().auth.admin.createUser({ email, password: 'TestPass1!', email_confirm: true, app_metadata: { role: 'customer' } })
-  expect(error).toBeNull()
-  const alert = await page.request.post('/api/interest', { data: { email: email.toUpperCase(), type: 'hajj' } })
-  expect(alert.status()).toBe(201)
-  expect(await sql('select 1 from interests where email = $1', [email])).toHaveLength(1)
-
-  await login(page, email)
-  const res = await page.request.delete('/api/user/delete')
-  expect(await res.json()).toEqual({ deleted: true })
-  expect(await sql('select 1 from interests where email = $1', [email])).toEqual([])
 })
 
 test('enquiry retention cron removes personal details after 90 days, keeps billing fields, and is safe to rerun', async ({ request }) => {

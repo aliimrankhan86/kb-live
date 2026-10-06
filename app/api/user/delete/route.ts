@@ -7,17 +7,6 @@ import { ACCOUNT_DELETE_NOT_FINISHED } from '@/lib/account-delete';
 import { AppError } from '@/lib/errors';
 
 /**
- * Hajj "notify me" rows for this email (stored lower-case by /api/interest,
- * read the same way by /api/user/export). Deleting nothing is fine on a retry.
- */
-async function deleteInterests(email: string | undefined): Promise<void> {
-  const target = (email ?? '').trim().toLowerCase();
-  if (!target) return;
-  const { error } = await createServiceRoleClient().from('interests').delete().eq('email', target);
-  if (error) throw new Error(error.message);
-}
-
-/**
  * Deletes the signed-in customer's account for real. Order matters: personal
  * data first (enquiries anonymised, marketing consents, availability alerts
  * and the app record deleted), the sign-in last. If any step fails the
@@ -32,7 +21,6 @@ export async function DELETE() {
 
   try {
     await Repository.eraseOwnCustomerData(ctx, user.email);
-    await deleteInterests(user.email);
   } catch (err) {
     // Refuse honestly (409) when this account cannot be erased automatically.
     if (err instanceof AppError && err.code === 'CONFLICT') {

@@ -73,6 +73,7 @@ const mockStore = {
   anonymiseEnquiriesCreatedBefore: (cutoff: Date, erasedName: string, alreadyErased: readonly string[]) =>
     Promise.resolve(MockDB.anonymiseEnquiriesCreatedBefore(cutoff, erasedName, alreadyErased)),
   deleteMarketingConsentsByEmail: (email: string) => Promise.resolve(MockDB.deleteMarketingConsentsByEmail(email)),
+  deleteInterestsByEmail: (email: string) => Promise.resolve(MockDB.deleteInterestsByEmail(email)),
   getMarketingConsents: () => Promise.resolve(MockDB.getMarketingConsents()),
   saveMarketingConsent: (consent: MarketingConsent) => Promise.resolve(MockDB.saveMarketingConsent(consent)),
   getBookingOutcomes: () => Promise.resolve(MockDB.getBookingOutcomes()),
@@ -1516,13 +1517,15 @@ export const Repository = {
    * the sign-in itself (the caller removes that last, so a failure here
    * leaves an account that can sign in and retry). Every step is idempotent.
    * Enquiries are kept for the operator's and our records with the personal
-   * fields stripped; marketing consents for the account email are deleted.
+   * fields stripped; marketing consents and Hajj availability alerts
+   * (`interests`) for the account email are deleted.
    */
   eraseOwnCustomerData: async (ctx: RequestContext, email: string): Promise<void> => {
     await Repository.assertCanDeleteOwnAccount(ctx);
     if (email) {
       await store().anonymiseEnquiriesByEmail(email, ERASED_NAME);
       await store().deleteMarketingConsentsByEmail(email);
+      await store().deleteInterestsByEmail(email);
     }
     await store().deleteUser(ctx.userId);
   },
