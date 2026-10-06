@@ -97,3 +97,18 @@ Each fix landed with a test that failed first. No production system was touched 
 | P3-1..6, 8..10 | Not in this pass. Still open, low risk, listed in `OVERNIGHT_REPORT.md`. | n/a | n/a |
 
 **Local seed change:** the Stansted free-text package moved from Operator C to Operator B, so London search still covers a free-text airport now that Operator C (verified, no ATOL) is hidden. Expected counts: browse 11, Umrah 10, London 4.
+
+**Gates after the follow-up (both on `d40aff5`, each from a clean `.next` and a freshly reset local database):**
+
+| Check | Gate 1 | Gate 2 |
+|---|---|---|
+| `npx tsc --noEmit` | pass | pass |
+| `npm run lint` | 0 errors | 0 errors |
+| Vitest | 2,056 / 2,056 | 2,056 / 2,056 |
+| `npm run build` | pass | pass |
+| Repo Playwright `--workers=1` | 69 passed, 6 skipped, 0 failed | 69 passed, 6 skipped, 0 failed |
+| Real-DB suite `npm run e2e:local-db` | 24 / 24 | 24 / 24 |
+
+**GitHub CI on `d40aff5`:** `ci` (lint, type check, unit, build) pass. `local-db` pass, 24 / 24, 4m37s. It took two attempts: the first failed resolving CLI "latest" (GitHub API rate limit, so the CLI is pinned to 2.109.1), and the second failed on Node 20 (supabase-js needs native WebSocket, so the job now uses Node 22).
+
+**Verdict after follow-up:** every P1 and P2 finding is resolved in code, or turned into a read-only check for Ali (P2-3, which only production can answer). Ready for Ali's review into `dev`. Not merged.
