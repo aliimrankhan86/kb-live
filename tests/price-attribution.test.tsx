@@ -51,3 +51,15 @@ describe('every package price names who stated it and when (standards §6)', () 
     expect(screen.getByTestId('package-price-attribution')).toHaveTextContent('as stated by Example Operator Ltd, last updated 1 Oct 2026');
   });
 });
+
+describe('comparison shows the travel dates in the shared format (D-046)', () => {
+  it('maps dates or Not provided', () => {
+    expect(mapPackageToComparison({ ...pkg, dateWindow: { start: '2026-12-18', end: '2026-12-28' } }, operator).travelDates).toBe('18 Dec 2026 to 28 Dec 2026');
+    expect(mapPackageToComparison(pkg, operator).travelDates).toBe('Not provided');
+  });
+
+  it('the card never shows a made-up operator label while loading', () => {
+    render(<PackageCard {...toPackageCardProps(pkg)} onAddToShortlist={() => {}} onToggleCompare={() => {}} />);
+    expect(screen.queryByText('Travel operator')).toBeNull();
+  });
+});

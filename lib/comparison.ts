@@ -1,7 +1,7 @@
 import { Offer, OperatorProfile, Package } from './types';
 import { getRegionSettings } from './i18n/region';
 import { formatDistance, formatPriceForRegion, parseDistanceKm } from './i18n/format';
-import { priceText } from './packages/display';
+import { formatDateRange, priceText } from './packages/display';
 import { flightTypeLabel, groupTypeShort, ziyaratShort } from './packages/display';
 
 export interface ComparisonRow {
@@ -24,6 +24,8 @@ export interface ComparisonRow {
   // Extra decision rows (grouped in the comparison view). Optional so existing
   // callers/tests stay valid; the view shows 'Not provided' when absent.
   flights?: string;
+  /** Operator-stated travel dates, same format as cards and the package page. */
+  travelDates?: string;
   deposit?: string;
   paymentPlan?: string;
   cancellation?: string;
@@ -146,6 +148,7 @@ export function mapPackageToComparison(pkg: Package, operator?: OperatorProfile)
     distanceValue: bandMeters.length ? Math.min(...bandMeters) : null,
     inclusionsCount: inclusionsList.length,
     flights: flightTypeLabel(pkg.flightType) ?? 'Not provided',
+    travelDates: pkg.dateWindow?.start ? formatDateRange(pkg.dateWindow.start, pkg.dateWindow.end) : 'Not provided',
     deposit:
       typeof pkg.depositAmount === 'number'
         ? formatPriceForRegion(pkg.depositAmount, pkg.currency, settings).formatted

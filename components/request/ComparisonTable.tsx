@@ -31,6 +31,7 @@ const GROUPS: Group[] = [
   {
     title: 'Stay & hotels',
     rows: [
+      { label: 'Travel dates', key: 'travelDates' },
       { label: 'Total nights', key: 'totalNights' },
       { label: 'Makkah / Madinah', key: 'splitNights' },
       { label: 'Hotel rating', key: 'hotelRating', rank: 'hotelStarsValue', dir: 'max', best: 'best-rated hotels' },
