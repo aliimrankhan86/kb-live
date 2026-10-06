@@ -4,7 +4,7 @@ import { useMemo, useCallback } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import PackageList from './PackageList';
 import type { Package as CataloguePackage } from '@/lib/types';
-import { filterByParams, toSearchDisplay } from './search-utils';
+import { searchPackages, toSearchDisplay } from './search-utils';
 import styles from './packages.module.css';
 
 interface SearchPackagesClientProps {
@@ -22,9 +22,14 @@ export function SearchPackagesClient({ allPackages, featuredSlotsEnabled }: Sear
   const router = useRouter();
   const pathname = usePathname();
 
-  const filteredPackages = useMemo(
-    () => filterByParams(allPackages, searchParams ?? new URLSearchParams()),
+  const result = useMemo(
+    () => searchPackages(allPackages, searchParams ?? new URLSearchParams()),
     [allPackages, searchParams]
+  );
+  const filteredPackages = result.matches;
+  const closeMatches = useMemo(
+    () => result.closeMatches.map((m) => ({ pkg: m.pkg, unmet: m.unmet.map((u) => u.reason) })),
+    [result]
   );
 
   const displayPackages = useMemo(
@@ -38,6 +43,7 @@ export function SearchPackagesClient({ allPackages, featuredSlotsEnabled }: Sear
     (sort: SortOption) => {
       const params = new URLSearchParams(searchParams?.toString() ?? '');
       params.set('sort', sort);
+      params.delete('page');
       router.replace(`${pathname}?${params.toString()}`);
     },
     [searchParams, router, pathname]
@@ -49,6 +55,7 @@ export function SearchPackagesClient({ allPackages, featuredSlotsEnabled }: Sear
       <PackageList
         packages={displayPackages}
         cataloguePackages={filteredPackages}
+        closeMatches={closeMatches}
         sortBy={sortBy}
         onSortChange={handleSortChange}
         featuredSlotsEnabled={featuredSlotsEnabled}

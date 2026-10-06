@@ -3,6 +3,7 @@ import { UmrahSearchForm } from '@/components/umrah/UmrahSearchForm'
 import Link from 'next/link'
 import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
 import { Repository } from '@/lib/api/repository'
+import { resolveDepartureLocation } from '@/lib/airports'
 
 export const metadata: Metadata = {
   title: 'Umrah Packages 2026 from the UK - Compare Operators',
@@ -61,13 +62,24 @@ const umrahJsonLd = graphJsonLd([
 ])
 
 export default async function UmrahPage() {
-  const departureCities = await Repository.getDistinctDepartureCities()
+  // A DB blip must not take the page down — sections fall back to honest empty states.
+  const departureCities = await Repository.getDistinctDepartureCities().catch(() => [] as string[])
+  const packages = await Repository.listPackages().catch(() => [])
+  // Only airports that live published packages actually depart from (standards §8).
+  const departureAirports = [
+    ...new Set(
+      packages.flatMap((p) => {
+        const loc = resolveDepartureLocation(p.departureAirport)
+        return loc?.kind === 'airport' ? loc.codes : []
+      })
+    ),
+  ]
 
   return (
     <>
       <JsonLdScript data={umrahJsonLd} />
       <main className="min-h-screen px-4 py-10">
-        <UmrahSearchForm />
+        <UmrahSearchForm departureAirports={departureAirports} />
         <section
           className="mx-auto mt-8 w-full max-w-3xl rounded-lg border border-[var(--border)] bg-[var(--panel)] p-5"
           aria-labelledby="umrah-seo-faq"

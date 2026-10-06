@@ -107,3 +107,19 @@ export const roomOptionsLabel = (o: Package['roomOccupancyOptions']): string => 
   ].filter(Boolean);
   return parts.length ? (parts as string[]).join(', ') : 'Not provided';
 };
+
+/**
+ * One date format for every surface (cards, package page, compare, chips):
+ * "18 Dec 2026". Parses the ISO date parts directly so the day never shifts
+ * with the server or browser time zone. Unparseable input is returned as-is.
+ */
+export function formatDate(iso: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+  if (!m) return iso;
+  const date = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
+  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+}
+
+export function formatDateRange(start: string, end?: string): string {
+  return end && end !== start ? `${formatDate(start)} to ${formatDate(end)}` : formatDate(start);
+}

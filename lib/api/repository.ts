@@ -1,6 +1,6 @@
 import { MockDB } from './mock-db';
 import { sortByScore } from '@/lib/ranking';
-import { UK_DEPARTURE_AIRPORTS } from '@/lib/airports';
+import { departureCityOf } from '@/lib/airports';
 import {
   ANALYTICS_EVENT_TYPES,
   AnalyticsEvent,
@@ -75,8 +75,8 @@ const mockStore = {
     const citySet = new Set<string>();
     for (const pkg of MockDB.getPackages()) {
       if (pkg.status !== 'published' || !pkg.departureAirport) continue;
-      const airport = UK_DEPARTURE_AIRPORTS.find((a) => a.code === pkg.departureAirport);
-      if (airport) citySet.add(airport.city);
+      const city = departureCityOf(pkg.departureAirport);
+      if (city) citySet.add(city);
     }
     return Promise.resolve([...citySet].sort());
   },

@@ -1,5 +1,5 @@
 import { prisma } from './prisma';
-import { UK_DEPARTURE_AIRPORTS } from '@/lib/airports';
+import { departureCityOf } from '@/lib/airports';
 import type {
   AnalyticsEvent,
   AuditLogEntry,
@@ -391,8 +391,8 @@ export const DBAdapter = {
     const citySet = new Set<string>();
     for (const row of rows) {
       if (!row.departureAirport) continue;
-      const airport = UK_DEPARTURE_AIRPORTS.find((a) => a.code === row.departureAirport);
-      if (airport) citySet.add(airport.city);
+      const city = departureCityOf(row.departureAirport);
+      if (city) citySet.add(city);
     }
     return [...citySet].sort();
   },

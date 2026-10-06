@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useMemo } from 'react'
 import { RangeSlider } from '@/components/ui/RangeSlider'
-import { UMRAH_SEARCH_AIRPORTS, getAirportLabel, type AirportCode } from '@/lib/airports'
+import { UK_DEPARTURE_AIRPORTS, getAirportLabel, type AirportCode } from '@/lib/airports'
 import styles from './umrah-search-form.module.css'
 
 interface ChildInfo {
@@ -11,10 +11,15 @@ interface ChildInfo {
 
 interface UmrahSearchFormProps {
   className?: string
+  /**
+   * Departure airports that live published packages actually use (standards
+   * §8: never a hardcoded list). Empty → only "Any airport" is offered.
+   */
+  departureAirports?: AirportCode[]
 }
 
-type TravelTimingMode = 'exact' | 'period'
-const DEFAULT_AIRPORT: AirportCode = 'LHR'
+// 'any' is the default so an untouched form never silently narrows results.
+type TravelTimingMode = 'any' | 'exact' | 'period'
 
 // Generate dates relative to today for sensible defaults
 const today = new Date()
@@ -37,14 +42,15 @@ const parseInputDate = (v: string) => {
   return new Date(y, m - 1, d)
 }
 
-export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = '' }) => {
-  const [departureAirport, setDepartureAirport] = useState<AirportCode | ''>(DEFAULT_AIRPORT)
-  const [returnAirport, setReturnAirport] = useState<AirportCode | ''>(DEFAULT_AIRPORT)
+export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = '', departureAirports = [] }) => {
+  const airportOptions = UK_DEPARTURE_AIRPORTS.filter((a) => departureAirports.includes(a.code))
+  const [departureAirport, setDepartureAirport] = useState<AirportCode | ''>('')
+  const [returnAirport, setReturnAirport] = useState<AirportCode | ''>('')
   const [departureDate, setDepartureDate] = useState(formatISODate(defaultDeparture))
   const [returnDate, setReturnDate] = useState(formatISODate(defaultReturn))
-  const [travelTimingMode, setTravelTimingMode] = useState<TravelTimingMode>('exact')
+  const [travelTimingMode, setTravelTimingMode] = useState<TravelTimingMode>('any')
   const [selectedQuickPick, setSelectedQuickPick] = useState<string>('')
-  const [budgetEnabled, setBudgetEnabled] = useState(true)
+  const [budgetEnabled, setBudgetEnabled] = useState(false)
   const [budgetRange, setBudgetRange] = useState([500, 1000])
   const [adults, setAdults] = useState(2)
   const [children, setChildren] = useState<ChildInfo[]>([])
@@ -74,7 +80,7 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
     {
       id: 'ramadan',
       label: 'Ramadan Umrah',
-      helper: `Approx. May - Jun ${nextYear}`,
+      helper: 'Dates follow the Islamic calendar. Confirm them with the operator.',
       season: 'ramadan',
       getDates: () => ({ start: `${nextYear}-05-01`, end: `${nextYear}-06-15` })
     },
@@ -82,7 +88,7 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
       id: 'summer',
       label: 'Summer school holidays',
       helper: `Approx. Jul - Sep ${nextYear}`,
-      season: 'flexible',
+      season: 'summer',
       getDates: () => ({ start: `${nextYear}-07-01`, end: `${nextYear}-09-15` })
     }
   ], [nextYear])
@@ -217,7 +223,7 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
   }, [departureDate, returnDate])
 
   const handleFormSubmit = (e: React.FormEvent) => {
-    if (!validateDates()) {
+    if (travelTimingMode === 'exact' && !validateDates()) {
       e.preventDefault()
     }
   }
@@ -239,10 +245,12 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
     0,
     Math.round((parseInputDate(returnDate).getTime() - parseInputDate(departureDate).getTime()) / (1000 * 60 * 60 * 24))
   )
-  const routeSummary = `${selectedAirportLabel ?? 'Any target airport'} to Jeddah or Madinah, returning to ${selectedReturnAirportLabel ?? 'any target airport'}`
-  const dateSummary = travelTimingMode === 'period' && selectedPeriod
-    ? `${selectedPeriod.label}: ${selectedPeriod.helper}`
-    : `${formatDisplayDate(departureDate)} to ${formatDisplayDate(returnDate)}`
+  const routeSummary = `${selectedAirportLabel ?? 'Any UK airport'} to Jeddah or Madinah, returning to ${selectedReturnAirportLabel ?? 'any UK airport'}`
+  const dateSummary = travelTimingMode === 'any'
+    ? 'Any dates'
+    : travelTimingMode === 'period' && selectedPeriod
+      ? `${selectedPeriod.label}: ${selectedPeriod.helper}`
+      : `${formatDisplayDate(departureDate)} to ${formatDisplayDate(returnDate)}`
   const staySummary = hotelStars.length > 0
     ? `${hotelStars.join(' or ')} star hotels`
     : 'Show all hotel levels'
@@ -260,10 +268,15 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
         onSubmit={handleFormSubmit}
       >
         <input type="hidden" name="type" value="umrah" />
-        <input type="hidden" name="season" value={seasonParam} />
+        {travelTimingMode === 'period' && <input type="hidden" name="season" value={seasonParam} />}
         <input type="hidden" name="adults" value={String(adults)} />
-        <input type="hidden" name="departureDate" value={departureDate} />
-        <input type="hidden" name="returnDate" value={returnDate} />
+        {/* Dates are a must-have filter, so they are only sent when chosen. */}
+        {travelTimingMode === 'exact' && (
+          <>
+            <input type="hidden" name="departureDate" value={departureDate} />
+            <input type="hidden" name="returnDate" value={returnDate} />
+          </>
+        )}
         {departureAirport && <input type="hidden" name="departureAirport" value={departureAirport} />}
         {returnAirport && <input type="hidden" name="returnAirport" value={returnAirport} />}
         {children.length > 0 && (
@@ -306,8 +319,8 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
                 aria-label="Departing airport"
                 data-testid="departure-airport-select"
               >
-                <option value="">Any target airport</option>
-                {UMRAH_SEARCH_AIRPORTS.map((airport) => (
+                <option value="">Any airport</option>
+                {airportOptions.map((airport) => (
                   <option key={airport.code} value={airport.code}>
                     {airport.name} ({airport.code})
                   </option>
@@ -324,8 +337,8 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
                 aria-label="Returning airport"
                 data-testid="return-airport-select"
               >
-                <option value="">Any target airport</option>
-                {UMRAH_SEARCH_AIRPORTS.map((airport) => (
+                <option value="">Any airport</option>
+                {airportOptions.map((airport) => (
                   <option key={airport.code} value={airport.code}>
                     {airport.name} ({airport.code})
                   </option>
@@ -334,7 +347,9 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
             </div>
           </div>
           <span className={styles.searchForm__airportHint} aria-live="polite">
-            London departures use Heathrow (LHR) and Gatwick (LGW). We also focus on Birmingham (BHX) and Manchester (MAN).
+            {airportOptions.length > 0
+              ? 'Only airports with packages currently listed are shown.'
+              : 'No departure airports are listed yet. Search all packages instead.'}
           </span>
         </div>
 
@@ -352,6 +367,20 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
           </p>
 
           <div className={styles.searchForm__choiceToggle} role="radiogroup" aria-label="Choose travel timing">
+            <button
+              type="button"
+              role="radio"
+              aria-checked={travelTimingMode === 'any'}
+              className={`${styles.searchForm__choiceButton} ${travelTimingMode === 'any' ? styles.searchForm__choiceButtonActive : ''}`}
+              onClick={() => {
+                setTravelTimingMode('any')
+                setSelectedQuickPick('')
+                setErrors({})
+              }}
+              data-testid="travel-mode-any"
+            >
+              Any dates
+            </button>
             <button
               type="button"
               role="radio"
@@ -380,7 +409,7 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
             </button>
           </div>
 
-          {travelTimingMode === 'exact' ? (
+          {travelTimingMode === 'any' ? null : travelTimingMode === 'exact' ? (
             <>
               <div className={styles.searchForm__dateInputs}>
                 <div className={styles.searchForm__dateField}>

@@ -112,6 +112,7 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({ isOpen, onClose })
     setOrDelete('season', season || null);
     setOrDelete('maxDistance', maxDistance !== DIST_MAX ? String(maxDistance) : null);
     setOrDelete('flightType', directOnly ? 'direct' : null);
+    params.delete('page');
 
     router.replace(`${pathname}?${params.toString()}`);
     onClose();

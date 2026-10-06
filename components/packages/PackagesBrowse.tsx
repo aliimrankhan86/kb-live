@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from 'react'
 import type { Package, OperatorProfile } from '@/lib/types'
 import { NEUTRAL_SORT_DISCLOSURE } from '@/lib/content-rules'
 import { mapPackageToComparison, handleComparisonSelection } from '@/lib/comparison'
-import { toSearchDisplay } from '@/components/search/search-utils'
+import { toPackageCardProps } from '@/components/search/search-utils'
 import PackageCard from '@/components/search/PackageCard'
 import CompareBar, { type CompareBarItem } from '@/components/search/CompareBar'
 import { ComparisonTable } from '@/components/request/ComparisonTable'
@@ -37,13 +37,6 @@ const TYPE_TABS: { value: PilgrimageFilter; label: string }[] = [
   { value: 'hajj', label: 'Hajj' },
 ]
 
-const buildInclusions = (pkg: Package) =>
-  [
-    { label: 'Visa', included: pkg.inclusions?.visa ?? false },
-    { label: 'Flights', included: pkg.inclusions?.flights ?? false },
-    { label: 'Transfers', included: pkg.inclusions?.transfers ?? false },
-    { label: 'Meals', included: pkg.inclusions?.meals ?? false },
-  ].filter((chip) => chip.included)
 
 export function PackagesBrowse({ packages, error }: PackagesBrowseProps) {
   const [pilgrimageType, setPilgrimageType] = useState<PilgrimageFilter>('all')
@@ -337,17 +330,13 @@ export function PackagesBrowse({ packages, error }: PackagesBrowseProps) {
           {filteredPackages.map((pkg) => (
             <li key={pkg.id}>
               <PackageCard
-                package={toSearchDisplay(pkg)}
+                {...toPackageCardProps(pkg)}
                 operator={operatorsById[pkg.operatorId]}
-                inclusions={buildInclusions(pkg)}
                 isShortlisted={shortlistedPackages.includes(pkg.id)}
                 isCompareSelected={selectedCompareIds.includes(pkg.id)}
                 compareFull={compareFull}
                 onAddToShortlist={onToggleShortlist}
                 onToggleCompare={onToggleCompare}
-                nightsMakkah={pkg.nightsMakkah}
-                nightsMadinah={pkg.nightsMadinah}
-                priceType={pkg.priceType === 'from' ? 'from' : 'exact'}
               />
             </li>
           ))}
