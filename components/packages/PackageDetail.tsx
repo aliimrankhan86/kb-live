@@ -19,6 +19,7 @@ import {
   formatStatedPrice,
   priceText,
   priceAttribution,
+  inclusionLabel,
 } from '@/lib/packages/display'
 import { ATOL_STANDARD_LINE, CAA_ATOL_URL, CONTRACT_STANDARD_LINE } from '@/lib/content-rules'
 import { VERIFICATION_STATEMENT_HREF } from '@/components/ui/VerifiedBadge'
@@ -147,15 +148,17 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
                 return (
                   <li key={key} className="flex gap-2.5">
                     <span className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full ${included ? 'bg-[var(--color-success)]/15 text-[var(--color-success)]' : 'bg-[rgba(255,255,255,0.06)] text-[var(--textMuted)]'}`} aria-hidden="true">
-                      {included ? (
+                      {included === true ? (
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 6L9 17l-5-5" /></svg>
-                      ) : (
+                      ) : included === false ? (
                         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                      ) : (
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="6" y1="12" x2="18" y2="12" /></svg>
                       )}
                     </span>
                     <span className="min-w-0">
                       <span className="text-sm font-medium text-[var(--text)]">
-                        {label}: <span className={included ? 'text-[var(--color-success)]' : 'text-[var(--textMuted)]'}>{included ? 'Included' : 'Not included'}</span>
+                        {label}: <span className={included === true ? 'text-[var(--color-success)]' : 'text-[var(--textMuted)]'}>{inclusionLabel(included)}</span>
                       </span>
                       <span className="mt-0.5 block text-xs leading-snug text-[var(--textMuted)]">{help}</span>
                     </span>
@@ -217,7 +220,7 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
               {flight && <Fact term="Flights" value={flight} />}
               {pkg.airline && <Fact term="Airline" value={pkg.airline} />}
               {pkg.departureAirport && <Fact term="Departs from" value={pkg.departureAirport} />}
-              <Fact term="Airport transfers" value={pkg.inclusions.transfers ? 'Included' : 'Not included'} />
+              <Fact term="Airport transfers" value={inclusionLabel(pkg.inclusions.transfers)} />
               <Fact term="Trip length" value={nightsText(pkg)} />
               <Fact term="Travel dates" value={pkg.dateWindow?.start ? formatDateRange(pkg.dateWindow.start, pkg.dateWindow.end) : 'Not provided'} />
             </dl>

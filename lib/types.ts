@@ -379,6 +379,13 @@ export interface Offer {
 }
 
 // Package listing (Catalogue) - upgrade path
+export interface PackageInclusions {
+  visa: boolean | null;
+  flights: boolean | null;
+  transfers: boolean | null;
+  meals: boolean | null;
+}
+
 export interface Package {
   id: string;
   operatorId: string;
@@ -432,12 +439,9 @@ export interface Package {
     quad: boolean;
   };
   
-  inclusions: {
-    visa: boolean;
-    flights: boolean;
-    transfers: boolean;
-    meals: boolean;
-  };
+  // Three-state per item (founder decision 2026-10-06): true = included,
+  // false = operator stated NOT included, null = not stated ("Not provided").
+  inclusions: PackageInclusions;
   
   notes?: string; // sanitized, no HTML
   images?: string[];

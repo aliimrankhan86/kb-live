@@ -133,7 +133,13 @@ export function mapPackageToComparison(pkg: Package, operator?: OperatorProfile)
     hotelRating,
     distance,
     occupancy: supportedOccupancy.join(', ') || 'Not provided',
-    inclusions: inclusionsList.length > 0 ? inclusionsList.join(', ') : 'Not provided',
+    // Three-state: "None" only when the operator said no to every item.
+    inclusions:
+      inclusionsList.length > 0
+        ? inclusionsList.join(', ')
+        : Object.values(pkg.inclusions).every((v) => v === false)
+          ? 'None'
+          : 'Not provided',
     notes: pkg.notes || 'Not provided',
     priceValue: pkg.currency && Number.isFinite(pkg.pricePerPerson) ? pkg.pricePerPerson : null,
     hotelStarsValue: avg(starValues),

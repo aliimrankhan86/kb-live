@@ -28,8 +28,9 @@ function ReviewSection({ title, children }: { title: string; children: React.Rea
   );
 }
 
-function yesNo(v: boolean | undefined) {
-  return v ? 'Yes' : 'No';
+// Three-state: unset reads "Not specified", never "No".
+function yesNo(v: boolean | null | undefined) {
+  return v === true ? 'Yes' : v === false ? 'No' : 'Not specified';
 }
 
 export function WizardStep8Review({ data, onSaveDraft, onPublish, isSaving, error }: Props) {
@@ -118,9 +119,8 @@ export function WizardStep8Review({ data, onSaveDraft, onPublish, isSaving, erro
             label="Included"
             value={
               Object.entries(inclusions)
-                .filter(([, v]) => v)
-                .map(([k]) => k)
-                .join(', ') || 'None'
+                .map(([k, v]) => `${k}: ${yesNo(v)}`)
+                .join(', ')
             }
           />
         )}

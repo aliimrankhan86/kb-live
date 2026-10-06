@@ -10,14 +10,14 @@ import { AIRPORT_CODES } from '@/lib/airports';
 //     NOT 'medium' — a skipped distance reads as "Not provided" downstream.
 //   - hotel stars and group type have NO default — skipped = absent (→ null in
 //     the adapter → "Not provided").
-//   - inclusions keep the all-false default (out of scope here; a three-state
-//     inclusions model is a separate follow-up — see AI_NOTES §28).
+//   - inclusions are three-state (founder decision 2026-10-06): true / false /
+//     null = not stated (→ "Not provided"); the default is all null.
 
 const inclusionsSchema = z.object({
-  visa: z.boolean(),
-  flights: z.boolean(),
-  transfers: z.boolean(),
-  meals: z.boolean(),
+  visa: z.boolean().nullable(),
+  flights: z.boolean().nullable(),
+  transfers: z.boolean().nullable(),
+  meals: z.boolean().nullable(),
 });
 
 const roomOccupancySchema = z.object({
@@ -65,7 +65,7 @@ export const packageSchema = z.object({
   departureAirport: airportCodeSchema.optional(),
   flightType: z.enum(['direct', 'one-stop', 'multi-stop']).optional(),
   // Step 5
-  inclusions: inclusionsSchema.default({ visa: false, flights: false, transfers: false, meals: false }),
+  inclusions: inclusionsSchema.default({ visa: null, flights: null, transfers: null, meals: null }),
   roomOccupancyOptions: roomOccupancySchema.default({ single: false, double: true, triple: true, quad: true }),
   // Step 5 — Ziyarat: operator-stated, three-state. No default; a skipped value
   // stays absent (→ "Not provided"). Must NOT coerce blank to false.

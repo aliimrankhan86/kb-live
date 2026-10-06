@@ -55,7 +55,7 @@ const DEFAULT_DATA: Partial<Package> = {
   pilgrimageType: 'umrah',
   priceType: 'from',
   currency: 'GBP',
-  inclusions: { visa: false, flights: false, transfers: false, meals: false },
+  inclusions: { visa: null, flights: null, transfers: null, meals: null },
   roomOccupancyOptions: { single: false, double: true, triple: true, quad: true },
 };
 

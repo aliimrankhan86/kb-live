@@ -253,7 +253,7 @@ export function PackageForm({ initialData, onSuccess, onCancel }: PackageFormPro
               <label key={opt} className="flex items-center space-x-2">
                 <input
                   type="checkbox"
-                  checked={formData.inclusions?.[opt as 'visa' | 'flights' | 'transfers' | 'meals']}
+                  checked={formData.inclusions?.[opt as 'visa' | 'flights' | 'transfers' | 'meals'] === true}
                   onChange={() => handleInclusionToggle(opt as 'visa' | 'flights' | 'transfers' | 'meals')}
                   className="rounded border-[rgba(255,255,255,0.3)] bg-transparent text-[#FFD31D] focus:ring-[#FFD31D]"
                 />

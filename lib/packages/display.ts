@@ -168,3 +168,7 @@ export function priceAttribution(operatorName?: string, updatedAt?: string): str
     updatedAt ? `, last updated ${formatDate(updatedAt)}` : ''
   }. Confirm the final price with the operator before paying.`;
 }
+
+/** Three-state inclusion label: true / false / not stated (founder decision 2026-10-06). */
+export const inclusionLabel = (value: boolean | null | undefined): 'Included' | 'Not included' | 'Not provided' =>
+  value === true ? 'Included' : value === false ? 'Not included' : 'Not provided';

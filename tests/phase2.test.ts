@@ -99,7 +99,7 @@ describe('Phase 2 Foundations', () => {
         distanceBandMakkah: 'unknown',
         distanceBandMadinah: 'unknown',
         roomOccupancyOptions: { single: false, double: false, triple: false, quad: false },
-        inclusions: { visa: false, flights: false, transfers: false, meals: false },
+        inclusions: { visa: null, flights: null, transfers: null, meals: null }, // not stated (three-state)
       };
 
       const row = mapPackageToComparison(pkg);

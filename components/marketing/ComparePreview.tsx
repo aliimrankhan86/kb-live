@@ -22,8 +22,9 @@ function distanceText(pkg: Package): string {
 }
 
 function includedText(pkg: Package): string {
-  const items = INCLUSIONS.filter((inc) => pkg.inclusions[inc.key]).map((inc) => inc.label)
-  return items.length > 0 ? items.join(', ') : 'Not provided'
+  const items = INCLUSIONS.filter((inc) => pkg.inclusions[inc.key] === true).map((inc) => inc.label)
+  if (items.length > 0) return items.join(', ')
+  return INCLUSIONS.every((inc) => pkg.inclusions[inc.key] === false) ? 'None' : 'Not provided'
 }
 
 /**
