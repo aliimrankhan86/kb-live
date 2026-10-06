@@ -103,6 +103,8 @@ All of these use UK English, with no em dashes, no guarantees and no "Not provid
 | Repo Playwright `--workers=1` | **69 passed, 6 skipped, 0 failed** | 69 / 6 / 0 |
 | `npm run e2e:local-db` | **25 / 25** | 24 (+1 new: retention cron. The deletion test also now covers the alerts) |
 
+**GitHub CI on PR #109:** `ci` pass (2m6s), `local-db` pass (4m22s), `Supabase Preview` skipped.
+
 **Fail-first evidence:** each new unit test was run before its fix and failed (missing module, `deleteInterestsByEmail` absent, `REVOKE SELECT, INSERT, UPDATE, DELETE` still in 014, the copy strings absent).
 
 **Two failures on the way, both fixed:**
