@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Nunito } from "next/font/google";
 import "./globals.css";
 import { baseMetadata } from "@/lib/seo";
 import { exo2Font } from "@/lib/fonts";
@@ -12,21 +11,6 @@ import { isRfqQuoteEnabled } from "@/lib/config";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { Analytics } from "@vercel/analytics/next";
 import { headers } from "next/headers";
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  display: "swap",
-  preload: true,
-});
-
-const nunito = Nunito({
-  variable: "--font-nunito",
-  subsets: ["latin"],
-  weight: ["700", "800"],
-  display: "swap",
-  preload: true,
-});
 
 export const metadata: Metadata = baseMetadata;
 
@@ -59,7 +43,7 @@ export default async function RootLayout({
   const rfqEnabled = isRfqQuoteEnabled();
 
   return (
-    <html lang="en-GB" className={`${exo2Font.variable} ${inter.variable} ${nunito.variable}`} suppressHydrationWarning>
+    <html lang="en-GB" className={exo2Font.variable} suppressHydrationWarning>
       <head>
         <script
           nonce={nonce}
@@ -78,7 +62,7 @@ export default async function RootLayout({
           Skip to main content
         </a>
         <ThemeProvider>
-          <Header />
+          <Header rfqEnabled={rfqEnabled} />
           <main id="main-content" className="flex-1">
             {children}
           </main>

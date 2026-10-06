@@ -16,7 +16,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   try {
     const { slug } = await params
-    const operator = await Repository.getOperatorBySlug(slug)
+    const operator = await Repository.getPublicOperatorBySlug(slug)
     if (operator) {
       const packages = (await Repository.listPackages()).filter(
         (pkg) => pkg.operatorId === operator.id && pkg.status === 'published'
@@ -43,7 +43,7 @@ export async function generateMetadata({
         },
         twitter: {
           card: 'summary_large_image',
-          title: `${operator.companyName} — ${statusLabel} UK Umrah Operator | PilgrimCompare`,
+          title: `${operator.companyName}: ${statusLabel} UK Umrah Operator | PilgrimCompare`,
           description: `Compare published packages, departure airports, and trust signals for ${operator.companyName}.`,
         },
       }
@@ -74,20 +74,22 @@ export default async function OperatorProfilePage({ params }: OperatorPageProps)
   let error: string | undefined
 
   try {
-    operator = await Repository.getOperatorBySlug(slug)
+    operator = await Repository.getPublicOperatorBySlug(slug)
     if (operator) {
       packages = (await Repository.listPackages()).filter(
         (pkg) => pkg.operatorId === operator?.id && pkg.status === 'published'
       )
     }
   } catch (err) {
-    error = err instanceof Error ? err.message : 'Unable to load this operator right now.'
+    // Internal error detail stays in the server log, never on the page.
+    console.error(err)
+    error = 'Unable to load this operator right now.'
   }
 
   if (error) {
     return (
       <>
-        <main className="min-h-screen bg-[var(--background)]">{renderNotFound(error)}</main>
+        <div className="min-h-screen bg-[var(--background)]">{renderNotFound(error)}</div>
       </>
     )
   }
@@ -95,9 +97,9 @@ export default async function OperatorProfilePage({ params }: OperatorPageProps)
   if (!operator) {
     return (
       <>
-        <main className="min-h-screen bg-[var(--background)]">
+        <div className="min-h-screen bg-[var(--background)]">
           {renderNotFound('This operator is not available.')}
-        </main>
+        </div>
       </>
     )
   }
@@ -126,13 +128,13 @@ export default async function OperatorProfilePage({ params }: OperatorPageProps)
 
   return (
     <>
-      <main className="min-h-screen bg-[var(--background)]">
+      <div className="min-h-screen bg-[var(--background)]">
         <JsonLdScript data={operatorProfileJsonLd} />
         <div className="w-full max-w-5xl mx-auto px-4 pt-6">
           <Breadcrumb items={breadcrumbItems} />
         </div>
         <OperatorProfileDetail operator={operator} packages={packages} />
-      </main>
+      </div>
     </>
   )
 }

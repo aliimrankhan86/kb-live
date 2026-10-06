@@ -5,7 +5,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import type { Package as CataloguePackage, OperatorProfile } from '@/lib/types';
-import type { SearchPackageDisplay } from './search-utils';
+import { FILTER_PARAM_KEYS, makkahDistance, parseSearchCriteria, toPackageCardProps, type SearchPackageDisplay } from './search-utils';
 import { mapPackageToComparison, handleComparisonSelection } from '@/lib/comparison';
 import { ComparisonTable } from '@/components/request/ComparisonTable';
 import {
@@ -21,6 +21,7 @@ import CompareBar, { type CompareBarItem } from './CompareBar';
 import { FilterOverlay } from './FilterOverlay';
 import { FeaturedBadge } from './FeaturedBadge';
 import { NEUTRAL_SORT_DISCLOSURE } from '@/lib/content-rules';
+import { formatDateRange } from '@/lib/packages/display';
 import { Pagination } from '@/components/ui/Pagination';
 import styles from './packages.module.css';
 
@@ -38,9 +39,17 @@ export type { SearchPackageDisplay } from './search-utils';
 type SortOption = 'relevance' | 'price-asc' | 'price-desc' | 'rating' | 'distance';
 
 
+/** A package that meets the must-haves but not every preference. */
+export interface CloseMatchItem {
+  pkg: CataloguePackage;
+  unmet: string[];
+}
+
 interface PackageListProps {
   packages: SearchPackageDisplay[];
   cataloguePackages?: CataloguePackage[];
+  /** Shown under the exact matches when they are few; each lists what differs. */
+  closeMatches?: CloseMatchItem[];
   onFilter?: () => void;
   sortBy?: SortOption;
   onSortChange?: (sort: SortOption) => void;
@@ -51,6 +60,7 @@ interface PackageListProps {
 const PackageList: React.FC<PackageListProps> = ({
   packages,
   cataloguePackages,
+  closeMatches = [],
   onFilter,
   sortBy: sortByProp,
   onSortChange,
@@ -71,7 +81,15 @@ const PackageList: React.FC<PackageListProps> = ({
   const sortBy = sortByProp ?? internalSort;
   const [isSortOpen, setIsSortOpen] = useState(false);
   const sortRef = useRef<HTMLDivElement>(null);
-  const [currentPage, setCurrentPage] = useState(1);
+  // Page lives in the URL so reload, shared links and Back restore the same view.
+  const pageParam = Number(searchParams?.get('page'));
+  const requestedPage = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
+  const setCurrentPage = (page: number) => {
+    const params = new URLSearchParams(searchParams?.toString() ?? '');
+    if (page > 1) params.set('page', String(page));
+    else params.delete('page');
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
 
   // Close sort dropdown on outside click
   useEffect(() => {
@@ -84,11 +102,6 @@ const PackageList: React.FC<PackageListProps> = ({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isSortOpen]);
-
-  // Reset to page 1 when sort or filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [sortBy, searchParams, shortlistOnly]);
 
   useEffect(() => {
     fetch('/api/operators')
@@ -151,12 +164,11 @@ const PackageList: React.FC<PackageListProps> = ({
     setIsFilterOpen(false);
   };
 
-  // Clear all filter params from the URL — results re-filter automatically.
+  // Clear every narrowing param (location and dates included) so "Clear all"
+  // can never leave the traveller stuck on an empty page. Type + sort stay.
   const handleClearFilters = () => {
     const params = new URLSearchParams(searchParams?.toString() ?? '');
-    ['budgetMin', 'budgetMax', 'hotelStars', 'season', 'maxDistance', 'flightType'].forEach((k) =>
-      params.delete(k)
-    );
+    [...FILTER_PARAM_KEYS, 'page'].forEach((k) => params.delete(k));
     router.replace(`${pathname}?${params.toString()}`);
     onFilter?.();
   };
@@ -201,47 +213,58 @@ const PackageList: React.FC<PackageListProps> = ({
           (p.makkahHotel.rating ?? 0) + (p.madinaHotel.rating ?? 0);
         return sorted.sort((a, b) => ratingScore(b) - ratingScore(a));
       }
-      case 'distance':
-        // Prefer near hotels (simple heuristic)
+      case 'distance': {
+        // Closest Makkah hotel first; not-provided distances sort last.
+        const byId = new Map((cataloguePackages ?? []).map((p) => [p.id, p]));
+        const d = (id: string) => {
+          const p = byId.get(id);
+          return p ? makkahDistance(p) : Infinity;
+        };
         return sorted.sort((a, b) => {
-          const aDist = a.makkahHotel.distance.toLowerCase().includes('near') ? 0 : 1;
-          const bDist = b.makkahHotel.distance.toLowerCase().includes('near') ? 0 : 1;
-          return aDist - bDist;
+          const x = d(a.id);
+          const y = d(b.id);
+          return x === y ? 0 : x < y ? -1 : 1;
         });
+      }
       default:
         return sorted;
     }
-  }, [normalPackages, sortBy]);
+  }, [normalPackages, sortBy, cataloguePackages]);
 
   const listPackages = shortlistOnly
     ? sortedPackages.filter((p) => shortlistedPackages.includes(p.id))
     : sortedPackages;
 
   const totalPages = Math.ceil(listPackages.length / PACKAGES_PER_PAGE);
+  const currentPage = Math.min(requestedPage, Math.max(1, totalPages));
   const pagedPackages = listPackages.slice(
     (currentPage - 1) * PACKAGES_PER_PAGE,
     currentPage * PACKAGES_PER_PAGE
   );
 
   const compareFull = selectedCompareIds.length >= COMPARE_MAX;
+  const comparablePackages = useMemo(
+    () => [...(cataloguePackages ?? []), ...closeMatches.map((m) => m.pkg)],
+    [cataloguePackages, closeMatches]
+  );
   const comparisonRows = useMemo(() => {
-    if (!cataloguePackages?.length) return [];
-    return cataloguePackages
+    if (!comparablePackages.length) return [];
+    return comparablePackages
       .filter((p) => selectedCompareIds.includes(p.id))
       .map((p) => mapPackageToComparison(p, operatorsById[p.operatorId]));
-  }, [cataloguePackages, operatorsById, selectedCompareIds]);
+  }, [comparablePackages, operatorsById, selectedCompareIds]);
 
   // Labels for the sticky compare bar — operator name keeps it human.
   const compareItems = useMemo<CompareBarItem[]>(() => {
     return selectedCompareIds.map((id) => {
-      const catPkg = cataloguePackages?.find((p) => p.id === id);
+      const catPkg = comparablePackages.find((p) => p.id === id);
       const operator = catPkg ? operatorsById[catPkg.operatorId] : undefined;
       return {
         id,
         label: operator?.companyName ?? catPkg?.title ?? 'Selected package',
       };
     });
-  }, [selectedCompareIds, cataloguePackages, operatorsById]);
+  }, [selectedCompareIds, comparablePackages, operatorsById]);
 
   const openComparison = () => {
     // Defer past the current event tick so Radix DismissableLayer doesn't treat
@@ -251,6 +274,11 @@ const PackageList: React.FC<PackageListProps> = ({
     }
   };
 
+  const searchCriteria = useMemo(
+    () => parseSearchCriteria(searchParams ?? new URLSearchParams()),
+    [searchParams]
+  );
+
   // Applied filters, as removable chips — makes filter state visible on the page
   // (previously it vanished into the URL with no on-screen cue).
   const activeFilters = useMemo(() => {
@@ -258,6 +286,17 @@ const PackageList: React.FC<PackageListProps> = ({
     const chips: { id: string; label: string; keys: string[] }[] = [];
     if (!sp) return chips;
     const gbp = (v: string) => `£${Number(v).toLocaleString('en-GB')}`;
+    const criteria = parseSearchCriteria(sp);
+    if (criteria.location) {
+      chips.push({ id: 'location', label: `From ${criteria.location.label}`, keys: ['departureAirport', 'departureCity'] });
+    }
+    if (criteria.dates) {
+      chips.push({
+        id: 'dates',
+        label: `Travelling ${formatDateRange(criteria.dates.start, criteria.dates.end)}`,
+        keys: ['departureDate', 'returnDate'],
+      });
+    }
     const bMin = sp.get('budgetMin');
     const bMax = sp.get('budgetMax');
     if (bMin || bMax) {
@@ -285,7 +324,7 @@ const PackageList: React.FC<PackageListProps> = ({
 
   const removeFilter = (keys: string[]) => {
     const params = new URLSearchParams(searchParams?.toString() ?? '');
-    keys.forEach((k) => params.delete(k));
+    [...keys, 'page'].forEach((k) => params.delete(k));
     router.replace(`${pathname}?${params.toString()}`);
   };
 
@@ -417,25 +456,42 @@ const PackageList: React.FC<PackageListProps> = ({
       ) : null}
 
 
-      {listPackages.length === 0 && (
-        <div className={styles.emptyState} role="status" aria-live="polite">
+      {searchCriteria.unrecognisedLocation && (
+        <p className={styles.searchNotice} role="status" data-testid="unrecognised-location">
+          We could not match &ldquo;{searchCriteria.unrecognisedLocation}&rdquo; to a UK departure airport, so
+          packages from every departure airport are shown.
+        </p>
+      )}
+
+      {listPackages.length === 0 && closeMatches.length > 0 && !shortlistOnly && (
+        <p className={styles.searchNotice} role="status" data-testid="no-exact-matches">
+          No packages meet every choice in your search. The closest matches are shown below, with what
+          differs listed on each one.
+        </p>
+      )}
+
+      {listPackages.length === 0 && (closeMatches.length === 0 || shortlistOnly) && (
+        <div className={styles.emptyState} role="status" aria-live="polite" data-testid="search-empty-state">
           <div className={styles.emptyStateIcon}>
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
               <circle cx="11" cy="11" r="8" />
               <path d="M21 21l-4.35-4.35" />
               <path d="M11 8v6M8 11h6" />
             </svg>
           </div>
-          <h2 className={styles.emptyStateTitle}>No packages match your filters</h2>
+          <h2 className={styles.emptyStateTitle}>No packages currently match</h2>
           <p className={styles.emptyStateText}>
-            Try adjusting your budget range, dates, or removing some filters to see more results.
+            Try changing your departure airport, dates or other choices. You can also email{' '}
+            <a href="mailto:support@pilgrimcompare.co.uk">support@pilgrimcompare.co.uk</a> and tell us what
+            you are looking for.
           </p>
           <button
             className={styles.emptyStateAction}
             onClick={handleClearFilters}
-            aria-label="Reset all filters"
+            aria-label="Clear all search choices"
+            data-testid="search-empty-reset"
           >
-            Reset filters
+            Clear all choices
           </button>
         </div>
       )}
@@ -446,7 +502,7 @@ const PackageList: React.FC<PackageListProps> = ({
           <header className={styles.featuredSectionHeader}>
             <FeaturedBadge />
             <span className={styles.featuredSectionNote}>
-              Paid placement — not ranked by our neutral criteria.{' '}
+              Paid placement, not ranked by our neutral criteria.{' '}
               <a href="/how-we-rank" className={styles.sortDisclosureLink}>
                 How we rank
               </a>
@@ -455,12 +511,7 @@ const PackageList: React.FC<PackageListProps> = ({
           {featuredPackages.map((pkg) => {
             const catPkg = cataloguePackages?.find((cp) => cp.id === pkg.id);
             const operator = catPkg ? operatorsById[catPkg.operatorId] : undefined;
-            const inclusions = catPkg ? [
-              { label: 'Visa', included: catPkg.inclusions?.visa ?? false },
-              { label: 'Flights', included: catPkg.inclusions?.flights ?? false },
-              { label: 'Transfers', included: catPkg.inclusions?.transfers ?? false },
-              { label: 'Meals', included: catPkg.inclusions?.meals ?? false },
-            ].filter((chip) => chip.included) : undefined;
+            const cardProps = catPkg ? toPackageCardProps(catPkg) : undefined;
             return (
               <PackageCard
                 key={pkg.id}
@@ -471,7 +522,12 @@ const PackageList: React.FC<PackageListProps> = ({
                 onToggleCompare={onToggleCompare}
                 compareFull={compareFull}
                 operator={operator}
-                inclusions={inclusions}
+                inclusions={cardProps?.inclusions}
+                totalNights={cardProps?.totalNights}
+                priceUpdatedAt={cardProps?.priceUpdatedAt}
+                nightsMakkah={cardProps?.nightsMakkah}
+                nightsMadinah={cardProps?.nightsMadinah}
+                priceType={cardProps?.priceType}
               />
             );
           })}
@@ -485,12 +541,7 @@ const PackageList: React.FC<PackageListProps> = ({
         {pagedPackages.map((pkg) => {
           const catPkg = cataloguePackages?.find((cp) => cp.id === pkg.id);
           const operator = catPkg ? operatorsById[catPkg.operatorId] : undefined;
-          const inclusions = catPkg ? [
-            { label: 'Visa', included: catPkg.inclusions?.visa ?? false },
-            { label: 'Flights', included: catPkg.inclusions?.flights ?? false },
-            { label: 'Transfers', included: catPkg.inclusions?.transfers ?? false },
-            { label: 'Meals', included: catPkg.inclusions?.meals ?? false },
-          ].filter((chip) => chip.included) : undefined;
+          const cardProps = catPkg ? toPackageCardProps(catPkg) : undefined;
 
           return (
             <PackageCard
@@ -502,10 +553,12 @@ const PackageList: React.FC<PackageListProps> = ({
               onToggleCompare={onToggleCompare}
               compareFull={compareFull}
               operator={operator}
-              inclusions={inclusions}
-              nightsMakkah={catPkg?.nightsMakkah}
-              nightsMadinah={catPkg?.nightsMadinah}
-              priceType={catPkg?.priceType === 'from' ? 'from' : 'exact'}
+              inclusions={cardProps?.inclusions}
+              totalNights={cardProps?.totalNights}
+              priceUpdatedAt={cardProps?.priceUpdatedAt}
+              nightsMakkah={cardProps?.nightsMakkah}
+              nightsMadinah={cardProps?.nightsMadinah}
+              priceType={cardProps?.priceType}
             />
           );
         })}
@@ -522,6 +575,39 @@ const PackageList: React.FC<PackageListProps> = ({
             }}
           />
         </div>
+      )}
+
+      {closeMatches.length > 0 && !shortlistOnly && (
+        <section
+          className={`${styles.closeMatchesSection} ${compareItems.length > 0 ? styles.packageListWithBar : ''}`}
+          aria-labelledby="close-matches-heading"
+          data-testid="close-matches"
+        >
+          <h2 id="close-matches-heading" className={styles.closeMatchesHeading}>
+            Closest matches
+          </h2>
+          <p className={styles.closeMatchesNote}>
+            These packages meet your departure airport and date choices, where you set them, but not every other choice.
+          </p>
+          <div className={styles.packageList}>
+            {closeMatches.map(({ pkg: catPkg, unmet }) => {
+              const cardProps = toPackageCardProps(catPkg);
+              return (
+                <PackageCard
+                  key={catPkg.id}
+                  {...cardProps}
+                  isShortlisted={shortlistedPackages.includes(catPkg.id)}
+                  isCompareSelected={selectedCompareIds.includes(catPkg.id)}
+                  onAddToShortlist={onToggleShortlist}
+                  onToggleCompare={onToggleCompare}
+                  compareFull={compareFull}
+                  operator={operatorsById[catPkg.operatorId]}
+                  unmetCriteria={unmet}
+                />
+              );
+            })}
+          </div>
+        </section>
       )}
 
       <CompareBar

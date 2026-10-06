@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { OperatorRegistrationForm } from '@/components/operator/OperatorRegistrationForm';
 import { OperatorProfileForm } from '@/components/operator/OperatorProfileForm';
@@ -88,15 +88,20 @@ describe('OperatorProfileForm', () => {
     expect(screen.getByText(/\d+%/)).toBeInTheDocument();
   });
 
-  it('saves updated profile', async () => {
-    // Seed the operator into MockDB so updateOperator can find it
-    MockDB.saveOperator(mockOperator);
+  it('saves updated profile through the server API (not browser MockDB)', async () => {
+    const fetchMock = vi.fn(async () => ({ ok: true, json: async () => ({}) }));
+    vi.stubGlobal('fetch', fetchMock);
     render(<OperatorProfileForm operator={mockOperator} />);
     fireEvent.change(screen.getByTestId('profile-company-name'), { target: { value: 'Updated Travel' } });
     fireEvent.click(screen.getByTestId('profile-save'));
     await waitFor(() => {
       expect(screen.getByRole('status')).toHaveTextContent(/Saved successfully/i);
     });
+    const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe('/api/operator/profile');
+    expect(init.method).toBe('PATCH');
+    expect(JSON.parse(String(init.body)).companyName).toBe('Updated Travel');
+    vi.unstubAllGlobals();
   });
 });
 

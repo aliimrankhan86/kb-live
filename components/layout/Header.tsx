@@ -57,7 +57,7 @@ const ICONS = {
   howItWorks: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
 };
 
-export function Header({ className = '' }: { className?: string }) {
+export function Header({ className = '', rfqEnabled = false }: { className?: string; rfqEnabled?: boolean }) {
   const router = useRouter();
   const pathname = usePathname();
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -211,9 +211,10 @@ export function Header({ className = '' }: { className?: string }) {
     { href: '/partner', label: 'For Operators', testId: 'nav-operators', icon: ICONS.partners },
   ];
 
-  const customerLinks = [
-    { href: '/requests', label: 'My Requests', testId: 'nav-requests', icon: ICONS.requests },
-  ];
+  // "My Requests" belongs to the parked RFQ flow (PARKED_FEATURES.md #2).
+  const customerLinks = rfqEnabled
+    ? [{ href: '/requests', label: 'My Requests', testId: 'nav-requests', icon: ICONS.requests }]
+    : [];
 
   const operatorAdminLinks = [
     {

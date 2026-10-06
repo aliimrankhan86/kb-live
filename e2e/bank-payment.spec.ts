@@ -74,7 +74,7 @@ test.describe('Bank onboarding and payment flows', () => {
     await page.goto('/operator/settings/payment-details');
     await page.waitForLoadState('domcontentloaded');
 
-    await expect(page.getByText('Approved — cooling period', { exact: true })).toBeVisible();
+    await expect(page.getByText('Approved (cooling period)', { exact: true })).toBeVisible();
     await expect(page.getByText(/take effect on/i)).toBeVisible();
     await expect(page.getByText('Active until change takes effect', { exact: true })).toBeVisible();
   });

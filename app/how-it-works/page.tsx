@@ -4,13 +4,13 @@ import { JsonLdScript, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/s
 export const metadata: Metadata = {
   title: 'How PilgrimCompare Works | Compare Umrah Packages from Verified UK Operators',
   description:
-    'Compare Umrah packages side by side, send an enquiry to your chosen operator, and pay them directly. PilgrimCompare is a comparison and enquiry service — not a travel agent.',
+    'Compare Umrah packages side by side, send an enquiry to your chosen operator, and pay them directly. PilgrimCompare is a comparison and enquiry service, not a travel agent.',
   alternates: { canonical: '/how-it-works' },
   robots: { index: true, follow: true },
   openGraph: {
     title: 'How PilgrimCompare Works | Compare Umrah Packages',
     description:
-      'Compare Umrah packages, send an enquiry to your chosen operator, and pay them directly. Not a travel agent — a comparison service.',
+      'Compare Umrah packages, send an enquiry to your chosen operator, and pay them directly. Not a travel agent: a comparison service.',
     url: 'https://pilgrimcompare.co.uk/how-it-works',
     siteName: 'PilgrimCompare',
     type: 'website',
@@ -20,14 +20,14 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'How PilgrimCompare Works | Compare Umrah Packages',
     description:
-      'Compare Umrah packages, send an enquiry, and pay the operator directly. Comparison and enquiry service — not a travel agent.',
+      'Compare Umrah packages, send an enquiry, and pay the operator directly. Comparison and enquiry service, not a travel agent.',
   },
 };
 
 const pageJsonLd = graphJsonLd([
   webPageJsonLd({
     path: '/how-it-works',
-    name: 'How PilgrimCompare Works — Compare Umrah Packages from Verified UK Operators',
+    name: 'How PilgrimCompare Works: Compare Umrah Packages from Verified UK Operators',
     description:
       'PilgrimCompare is a UK comparison and enquiry service for Umrah packages. Compare operators, send an enquiry, pay the operator directly.',
   }),
@@ -54,7 +54,7 @@ const STEPS = [
   {
     number: 1,
     title: 'Compare',
-    body: 'Browse packages from verified UK operators side by side. Filter by budget, hotel rating, departure city, and dates. Every package shows exactly what the operator has stated — nothing is filled in or guessed.',
+    body: 'Browse packages from verified UK operators side by side. Filter by budget, hotel rating, departure city, and dates. Every package shows exactly what the operator has stated. Nothing is filled in or guessed.',
     extra: null,
   },
   {
@@ -66,7 +66,7 @@ const STEPS = [
   {
     number: 3,
     title: 'Operator replies',
-    body: 'The operator contacts you directly — typically within 48 hours — to discuss your requirements, confirm pricing, and answer your questions. PilgrimCompare is not involved in this conversation.',
+    body: 'The operator contacts you directly to discuss your requirements, confirm pricing, and answer your questions. PilgrimCompare is not involved in this conversation.',
     extra: null,
   },
   {
@@ -78,7 +78,7 @@ const STEPS = [
   {
     number: 5,
     title: 'Reference code',
-    body: 'Your reference code tracks your journey. Keep it safe — it is the audit trail if you ever need to raise a concern through PilgrimCompare.',
+    body: 'Your reference code tracks your journey. Keep it safe: it is the audit trail if you ever need to raise a concern through PilgrimCompare.',
     extra: 'reference',
   },
 ] as const;
@@ -87,7 +87,7 @@ export default function HowItWorksPage() {
   return (
     <>
     <JsonLdScript data={pageJsonLd} />
-    <main className="min-h-screen bg-[var(--background)] text-[var(--text)]">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--text)]">
       <div className="mx-auto max-w-3xl px-4 py-12">
         <h1 className="mb-3 text-3xl font-bold">How PilgrimCompare Works</h1>
         <p className="mb-10 text-sm leading-relaxed text-[var(--textMuted)]">
@@ -98,7 +98,7 @@ export default function HowItWorksPage() {
           contract, and payment are always with the operator you choose.
         </p>
 
-        <ol className="mb-12 space-y-8" aria-label="How it works — five steps">
+        <ol className="mb-12 space-y-8" aria-label="How it works: five steps">
           {STEPS.map((step) => (
             <li key={step.number} className="flex gap-4">
               <span
@@ -111,7 +111,7 @@ export default function HowItWorksPage() {
                 <h2 className="mb-1 text-lg font-semibold">{step.title}</h2>
                 <p className="text-sm leading-relaxed text-[var(--textMuted)]">{step.body}</p>
                 {step.extra === 'payment' && (
-                  <ul className="mt-3 space-y-1 text-sm leading-relaxed">
+                  <ul className="mt-3 list-disc space-y-1 pl-5 text-sm leading-relaxed">
                     <li>
                       You pay the operator directly. PilgrimCompare does not receive or hold
                       your payment.
@@ -145,24 +145,24 @@ export default function HowItWorksPage() {
 
         <section className="rounded-lg border border-[var(--borderSubtle)] bg-[var(--surface)] p-5">
           <h2 className="mb-3 text-base font-semibold">
-            Payment and contract — what always applies
+            Payment and contract: what always applies
           </h2>
-          <ul className="space-y-3 text-sm leading-relaxed">
+          <ul className="list-disc space-y-3 pl-5 text-sm leading-relaxed">
             <li>
-              — You pay the operator directly. PilgrimCompare does not receive or hold your
+              You pay the operator directly. PilgrimCompare does not receive or hold your
               payment.
             </li>
             <li>
-              — Your travel contract, cancellations and refunds are with the operator named on
+              Your travel contract, cancellations and refunds are with the operator named on
               this page.
             </li>
             <li>
-              — Your PilgrimCompare reference code is a tracking code, not a payment receipt.
+              Your PilgrimCompare reference code is a tracking code, not a payment receipt.
             </li>
           </ul>
         </section>
       </div>
-    </main>
+    </div>
     </>
   );
 }

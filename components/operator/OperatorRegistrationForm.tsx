@@ -359,7 +359,7 @@ export function OperatorRegistrationForm() {
                 onChange={() => toggleAirport(airport.code)}
                 data-testid={`reg-airport-${airport.code}`}
               />
-              {airport.code} — {airport.name}
+              {airport.code} ({airport.name})
             </label>
           ))}
         </div>
@@ -402,22 +402,22 @@ export function OperatorRegistrationForm() {
           <div className="flex items-start gap-2">
             <span aria-hidden="true" className="text-[var(--success)] font-bold">✓</span>
             <span>
-              <strong className="text-[var(--text)]">ATOL protected</strong> — Customers receive a certificate and are protected if the company fails.
+              <strong className="text-[var(--text)]">ATOL protected</strong>: customers receive a certificate and are protected if the company fails.
               Required if selling flights plus accommodation/transport.
             </span>
           </div>
           <div className="flex items-start gap-2">
             <span aria-hidden="true" className="text-[var(--success)] font-bold">✓</span>
             <span>
-              <strong className="text-[var(--text)]">ABTA member</strong> — Customers can book with confidence and access dispute resolution.
+              <strong className="text-[var(--text)]">ABTA member</strong>: customers can book with confidence and access dispute resolution.
               Covers non-flight packages and Linked Travel Arrangements.
             </span>
           </div>
           <div className="flex items-start gap-2">
             <span aria-hidden="true" className="text-[var(--danger)] font-bold">✗</span>
             <span>
-              <strong className="text-[var(--text)]">No protection</strong> — If you do not hold ATOL or ABTA, you must clearly state this.
-              PilgrimCompare will display a prominent warning on your listings so travellers can make an informed choice.
+              <strong className="text-[var(--text)]">No ATOL number</strong>: We only list operators with an ATOL number.
+              You can register now, but your packages are not listed until you add your ATOL number and we have checked it.
             </span>
           </div>
         </div>

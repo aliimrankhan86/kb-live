@@ -54,7 +54,7 @@ export function OperatorLeadsClient({ operatorId }: OperatorLeadsClientProps) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-[var(--text)]">Leads & Enquiries</h1>
-          <p className="mt-1 text-sm text-[var(--textMuted)]">Incoming quote requests from travellers.</p>
+          <p className="mt-1 text-sm text-[var(--textMuted)]">Quote requests from the parked quote flow. New enquiries arrive by email.</p>
         </div>
         <div className="flex gap-2">
           {(['all', 'new', 'responded'] as const).map((f) => (
@@ -91,7 +91,7 @@ export function OperatorLeadsClient({ operatorId }: OperatorLeadsClientProps) {
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="font-semibold text-[var(--text)]">
-                      {req.type.toUpperCase()} — {req.season}
+                      {req.type.toUpperCase()}, {req.season}
                     </h3>
                     {hasOffer ? (
                       <Badge variant="success">Responded</Badge>

@@ -56,7 +56,7 @@ export function Step2LocationDates({ cities }: { cities: string[] }) {
                 className={`${chipBase} ${draft.departureAirport === airport.code ? chipActive : chipInactive}`}
               >
                 <span className="font-semibold">{airport.code}</span>
-                <span className="ml-1 text-xs opacity-80">— {airport.name}</span>
+                <span className="ml-1 text-xs opacity-80">({airport.name})</span>
               </button>
             ))}
           </div>

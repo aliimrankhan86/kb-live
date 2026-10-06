@@ -1,20 +1,13 @@
 import Link from 'next/link'
 import type { Package } from '@/lib/types'
-import { INCLUSIONS, friendlyDistance } from '@/lib/packages/display'
+import { NEUTRAL_SORT_DISCLOSURE } from '@/lib/content-rules'
+import { INCLUSIONS, friendlyDistance, nightsText, priceAttributionShort, priceText } from '@/lib/packages/display'
 import styles from './home.module.css'
 
 interface ComparePreviewProps {
   packages: Package[]
 }
 
-function formatPrice(pkg: Package): string {
-  const amount = new Intl.NumberFormat('en-GB', {
-    style: 'currency',
-    currency: pkg.currency || 'GBP',
-    maximumFractionDigits: 0,
-  }).format(pkg.pricePerPerson)
-  return pkg.priceType === 'from' ? `From ${amount}` : amount
-}
 
 function makkahHotel(pkg: Package): string {
   if (pkg.hotelMakkahName) return pkg.hotelMakkahName
@@ -30,8 +23,9 @@ function distanceText(pkg: Package): string {
 }
 
 function includedText(pkg: Package): string {
-  const items = INCLUSIONS.filter((inc) => pkg.inclusions[inc.key]).map((inc) => inc.label)
-  return items.length > 0 ? items.join(', ') : 'Not provided'
+  const items = INCLUSIONS.filter((inc) => pkg.inclusions[inc.key] === true).map((inc) => inc.label)
+  if (items.length > 0) return items.join(', ')
+  return INCLUSIONS.every((inc) => pkg.inclusions[inc.key] === false) ? 'None' : 'Not provided'
 }
 
 /**
@@ -44,7 +38,7 @@ export function ComparePreview({ packages }: ComparePreviewProps) {
   const pair = packages.slice(0, 2)
 
   const rows: { label: string; value: (pkg: Package) => string }[] = [
-    { label: 'Total nights', value: (p) => `${p.totalNights} nights (${p.nightsMakkah} Makkah / ${p.nightsMadinah} Madinah)` },
+    { label: 'Total nights', value: (p) => nightsText(p) },
     { label: 'Makkah hotel', value: makkahHotel },
     { label: 'Distance to Haram', value: distanceText },
     { label: "What's included", value: includedText },
@@ -80,7 +74,8 @@ export function ComparePreview({ packages }: ComparePreviewProps) {
               {pair.map((pkg) => (
                 <th key={pkg.id} scope="col">
                   <span className={styles.previewTitle}>{pkg.title}</span>
-                  <span className={styles.previewPrice}>{formatPrice(pkg)}</span>
+                  <span className={styles.previewPrice}>{priceText(pkg)}</span>
+                  <span className="block text-xs font-normal text-[var(--textMuted)]">{priceAttributionShort(undefined, pkg.updatedAt)}</span>
                 </th>
               ))}
             </tr>
@@ -101,6 +96,11 @@ export function ComparePreview({ packages }: ComparePreviewProps) {
           </tbody>
         </table>
       </div>
+
+      <p className="mt-2 text-xs text-[var(--textMuted)]" data-testid="preview-sort-disclosure">
+        The first two packages in our default order. {NEUTRAL_SORT_DISCLOSURE}{' '}
+        <Link href="/how-we-rank" className="underline underline-offset-2">How we rank</Link>
+      </p>
 
       <div className={styles.previewFoot}>
         <Link href="/search/packages" className={styles.inlineLink}>

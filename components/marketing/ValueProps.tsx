@@ -29,7 +29,7 @@ const VALUE_PROPS: ValueProp[] = [
   },
   {
     title: 'Enquire directly, pay the operator',
-    text: 'Send an enquiry to the operators you choose. Your booking, contract, and payment are always with the operator — never with PilgrimCompare.',
+    text: 'Send an enquiry to the operators you choose. Your booking, contract, and payment are always with the operator, never with PilgrimCompare.',
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
         <path d="M4 4h16v12H7l-3 3z" />

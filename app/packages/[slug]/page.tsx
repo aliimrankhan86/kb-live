@@ -13,7 +13,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   try {
     const { slug } = await params
-    const pkg = await Repository.getPackageBySlug(slug)
+    const pkg = await Repository.getPublicPackageBySlug(slug)
     if (pkg && pkg.status === 'published') {
       const operator = await Repository.getOperatorById(pkg.operatorId)
       const operatorName = operator?.companyName ?? 'PilgrimCompare operator'
@@ -77,18 +77,20 @@ export default async function PackageDetailPage({
   let operator: OperatorProfile | undefined
 
   try {
-    pkg = await Repository.getPackageBySlug(slug)
+    pkg = await Repository.getPublicPackageBySlug(slug)
     if (pkg) {
       operator = await Repository.getOperatorById(pkg.operatorId)
     }
   } catch (err) {
-    error = err instanceof Error ? err.message : 'Unable to load this package right now.'
+    // Internal error detail stays in the server log, never on the page.
+    console.error(err)
+    error = 'Unable to load this package right now.'
   }
 
   if (error) {
     return (
       <>
-        <main className="min-h-screen bg-[var(--background)]">{renderNotFound(error)}</main>
+        <div className="min-h-screen bg-[var(--background)]">{renderNotFound(error)}</div>
       </>
     )
   }
@@ -96,9 +98,9 @@ export default async function PackageDetailPage({
   if (!pkg || pkg.status !== 'published') {
     return (
       <>
-        <main className="min-h-screen bg-[var(--background)]">
+        <div className="min-h-screen bg-[var(--background)]">
           {renderNotFound('This package is no longer available.')}
-        </main>
+        </div>
       </>
     )
   }
@@ -117,9 +119,10 @@ export default async function PackageDetailPage({
     { label: 'Packages', href: '/search/packages' },
     { label: pkg.title },
   ];
+  // Standards §13: seller/provider is always the operator, never PilgrimCompare.
+  // Without a known operator the Product/Trip nodes are simply not emitted.
   const packageDetailJsonLd = graphJsonLd([
-    packageJsonLd(pkg, operator?.companyName ?? 'PilgrimCompare'),
-    touristTripJsonLd(pkg, operator?.companyName ?? 'PilgrimCompare'),
+    ...(operator ? [packageJsonLd(pkg, operator.companyName), touristTripJsonLd(pkg, operator.companyName)] : []),
     breadcrumbJsonLd(breadcrumbItems.map((item) => ({ name: item.label, path: item.href }))),
     faqPageJsonLd([
       {
@@ -129,20 +132,20 @@ export default async function PackageDetailPage({
       },
       {
         question: 'Who provides this pilgrimage package?',
-        answer: `${operator?.companyName ?? 'The listed operator'} provides this package. PilgrimCompare helps travellers compare details and request a quote.`,
+        answer: `${operator?.companyName ?? 'The listed operator'} provides this package. PilgrimCompare helps travellers compare details and send an enquiry to the operator.`,
       },
     ]),
   ]);
 
   return (
     <>
-      <main className="min-h-screen bg-[var(--background)]">
+      <div className="min-h-screen bg-[var(--background)]">
         <JsonLdScript data={packageDetailJsonLd} />
         <div className="w-full max-w-5xl mx-auto px-4 pt-6">
           <Breadcrumb items={breadcrumbItems} />
         </div>
         <PackageDetail pkg={pkg} operator={operator} rfqEnabled={isRfqQuoteEnabled()} />
-      </main>
+      </div>
     </>
   )
 }

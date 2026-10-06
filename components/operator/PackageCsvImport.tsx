@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Repository } from '@/lib/api/repository';
 import type { Package } from '@/lib/types';
 
 const REQUIRED_COLUMNS = ['title', 'pricePerPerson', 'currency', 'totalNights', 'pilgrimageType'] as const;
@@ -24,7 +23,7 @@ function applyMapping(csvText: string, mapping: Record<string, TargetColumn | ''
   return [newHeaders.join(','), ...lines.slice(1)].join('\n');
 }
 
-export function PackageCsvImport({ operatorId, onImport }: { operatorId: string; onImport?: () => void }) {
+export function PackageCsvImport({ operatorId: _operatorId, onImport }: { operatorId: string; onImport?: () => void }) {
   const [step, setStep] = useState<ImportStep>('idle');
   const [csvText, setCsvText] = useState('');
   const [csvHeaders, setCsvHeaders] = useState<string[]>([]);
@@ -67,8 +66,14 @@ export function PackageCsvImport({ operatorId, onImport }: { operatorId: string;
     setStep('importing');
     setResult(null);
     try {
-      const ctx = { userId: operatorId, role: 'operator' as const };
-      const importResult = await Repository.importPackagesFromCsv(ctx, text);
+      const res = await fetch('/api/operator/packages/csv', {
+        method: 'POST',
+        headers: { 'content-type': 'text/csv' },
+        body: text,
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error ?? `HTTP ${res.status}`);
+      const importResult = body as ImportResult;
       setResult(importResult);
       if (importResult.saved.length > 0 && onImport) onImport();
     } catch (err) {
@@ -116,7 +121,7 @@ export function PackageCsvImport({ operatorId, onImport }: { operatorId: string;
                       className="w-full rounded border border-[var(--borderSubtle)] bg-[var(--bgSecondary)] px-2 py-1 text-xs text-[var(--text)] focus:border-[var(--yellow)] focus:outline-none"
                       aria-label={`Map column ${header}`}
                     >
-                      <option value="">— skip —</option>
+                      <option value="">(skip)</option>
                       {ALL_TARGET_COLUMNS.map((col) => (
                         <option key={col} value={col}>
                           {col}{REQUIRED_COLUMNS.includes(col as typeof REQUIRED_COLUMNS[number]) ? ' *' : ''}

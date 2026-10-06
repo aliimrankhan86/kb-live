@@ -1,15 +1,15 @@
 import type { Metadata } from 'next';
-import { LEGAL_ENTITY_BLOCK } from '@/lib/legal';
+import { LEGAL_ENTITY_BLOCK, registeredOfficeClause } from '@/lib/legal';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy | PilgrimCompare',
   description:
-    'How PilgrimCompare collects, uses, and protects your personal data. UK GDPR compliant.',
+    'How PilgrimCompare collects, uses and protects your personal data under UK GDPR.',
   alternates: { canonical: '/privacy' },
   robots: { index: true, follow: true },
   openGraph: {
     title: 'Privacy Policy | PilgrimCompare',
-    description: 'How PilgrimCompare collects, uses, and protects your personal data. UK GDPR compliant.',
+    description: 'How PilgrimCompare collects, uses and protects your personal data under UK GDPR.',
     url: 'https://pilgrimcompare.co.uk/privacy',
     siteName: 'PilgrimCompare',
     type: 'website',
@@ -18,15 +18,15 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Privacy Policy | PilgrimCompare',
-    description: 'How PilgrimCompare collects, uses, and protects your personal data. UK GDPR compliant.',
+    description: 'How PilgrimCompare collects, uses and protects your personal data under UK GDPR.',
   },
 };
 
-const LAST_UPDATED = '12 June 2026';
+const LAST_UPDATED = '6 October 2026';
 
 export default function PrivacyPolicyPage() {
   return (
-    <main className="min-h-screen bg-[var(--background)] text-[var(--text)]">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--text)]">
       <div className="mx-auto max-w-3xl px-4 py-12">
         <h1 className="mb-2 text-3xl font-bold">Privacy Policy</h1>
         <p className="mb-8 text-sm text-[var(--textMuted)]">Last updated: {LAST_UPDATED}</p>
@@ -37,7 +37,7 @@ export default function PrivacyPolicyPage() {
             {LEGAL_ENTITY_BLOCK.tradingName} is a trading name of{' '}
             <strong>{LEGAL_ENTITY_BLOCK.companyName}</strong>, registered in{' '}
             {LEGAL_ENTITY_BLOCK.registeredCountry}, company number{' '}
-            {LEGAL_ENTITY_BLOCK.companyNumber}. For data protection purposes,{' '}
+            {LEGAL_ENTITY_BLOCK.companyNumber}{registeredOfficeClause()}. For data protection purposes,{' '}
             {LEGAL_ENTITY_BLOCK.companyName} is the data controller of your personal
             information.
           </p>
@@ -65,13 +65,22 @@ export default function PrivacyPolicyPage() {
               <strong>Account data:</strong> name, email address, password hash, user role.
             </li>
             <li>
-              <strong>Enquiry details:</strong> travel preferences (destination, dates, hotel
-              rating, room occupancy, budget, inclusions), departure city, and any notes you
-              provide when submitting an enquiry.
+              <strong>Enquiry details:</strong> your name, email address, phone number, travel month, your message and whether you agreed to marketing emails, when you send an enquiry to an operator.
+            </li>
+            <li>
+              <strong>Quote request details:</strong> travel preferences (season, dates, nights in
+              Makkah and Madinah, hotel rating, distance to the Haram, room occupancy, budget,
+              inclusions), departure city, and any notes you provide when you ask operators for
+              quotes.
+            </li>
+            <li>
+              <strong>Hajj availability alerts:</strong> your email address, when you ask us to
+              tell you about Hajj packages.
             </li>
             <li>
               <strong>Booking intent data:</strong> reference codes, selected package, payment
-              evidence metadata, and communication notes.
+              evidence (payer name, payment reference and any files you upload), and
+              communication notes.
             </li>
             <li>
               <strong>Analytics data:</strong> anonymised page view data via Vercel Web
@@ -100,7 +109,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="mb-3 text-xl font-semibold">4. Data sharing — important disclosure</h2>
+          <h2 className="mb-3 text-xl font-semibold">4. Data sharing: important disclosure</h2>
           <p className="mb-4 rounded-lg border border-[var(--borderSubtle)] bg-[var(--surface)] p-4 text-sm font-medium leading-relaxed">
             When you send an enquiry, your contact details are shared with the operator you
             enquire with. From that point the operator is an independent data controller of
@@ -113,8 +122,8 @@ export default function PrivacyPolicyPage() {
           <ul className="list-disc pl-5 text-sm leading-relaxed space-y-1">
             <li>
               <strong>Service providers:</strong> Supabase (database, EU West / Ireland
-              region), Vercel (hosting), and Resend (transactional email delivery) — all under
-              GDPR-compliant data processing agreements.
+              region), Vercel (hosting), and Resend (transactional email delivery), all under
+              data processing agreements.
             </li>
             <li>
               <strong>Regulators:</strong> where required by law.
@@ -140,19 +149,49 @@ export default function PrivacyPolicyPage() {
               </tr>
               <tr className="border-b border-[var(--borderSubtle)]">
                 <td className="px-3 py-2">User account (deleted)</td>
-                <td className="px-3 py-2">90-day grace period, then permanently deleted</td>
+                <td className="px-3 py-2">
+                  If your account has no quote requests, bookings or complaints, deleting it in Settings removes your account, marketing choices and Hajj availability alerts straight away, and removes your name and contact details from your enquiries. Other accounts, including operator accounts, are deleted by hand: email dpo@pilgrimcompare.co.uk.
+                </td>
               </tr>
               <tr className="border-b border-[var(--borderSubtle)]">
-                <td className="px-3 py-2">Enquiry and booking intent data</td>
-                <td className="px-3 py-2">90 days (auto-deleted unless a dispute is open)</td>
+                <td className="px-3 py-2">Enquiries</td>
+                <td className="px-3 py-2">
+                  Your name, email address, phone number and message are removed 90 days after you send the enquiry. We keep the reference code, operator, package, travel month and date.
+                </td>
+              </tr>
+              <tr className="border-b border-[var(--borderSubtle)]">
+                <td className="px-3 py-2">Marketing choices</td>
+                <td className="px-3 py-2">Kept until you delete your account or ask us to remove them.</td>
+              </tr>
+              <tr className="border-b border-[var(--borderSubtle)]">
+                <td className="px-3 py-2">Hajj availability alerts</td>
+                <td className="px-3 py-2">Kept until you delete your account or ask us to remove them.</td>
+              </tr>
+              <tr className="border-b border-[var(--borderSubtle)]">
+                <td className="px-3 py-2">Quote requests</td>
+                <td className="px-3 py-2">Kept until you ask us to delete them.</td>
+              </tr>
+              <tr className="border-b border-[var(--borderSubtle)]">
+                <td className="px-3 py-2">Booking intent data</td>
+                <td className="px-3 py-2">
+                  Kept until you ask us to delete it. Payment evidence files stop being shown 90 days after you upload them, unless a dispute is open.
+                </td>
               </tr>
               <tr className="border-b border-[var(--borderSubtle)]">
                 <td className="px-3 py-2">Audit log entries</td>
                 <td className="px-3 py-2">7 years (legal and financial requirement)</td>
               </tr>
-              <tr>
+              <tr className="border-b border-[var(--borderSubtle)]">
                 <td className="px-3 py-2">Complaint records</td>
                 <td className="px-3 py-2">7 years (consumer protection requirement)</td>
+              </tr>
+              <tr className="border-b border-[var(--borderSubtle)]">
+                <td className="px-3 py-2">Operator statistics</td>
+                <td className="px-3 py-2">Counts of package views, quote requests and bookings for each operator. They hold no names or contact details and have no set end date.</td>
+              </tr>
+              <tr>
+                <td className="px-3 py-2">Emails we send you</td>
+                <td className="px-3 py-2">Sent through Resend. We do not keep a copy. Resend keeps delivery records under its own retention policy.</td>
               </tr>
             </tbody>
           </table>
@@ -179,10 +218,10 @@ export default function PrivacyPolicyPage() {
           <p className="text-sm leading-relaxed">
             To exercise any right, email{' '}
             <a
-              href="mailto:privacy@pilgrimcompare.co.uk"
+              href="mailto:dpo@pilgrimcompare.co.uk"
               className="underline text-[var(--accent)]"
             >
-              privacy@pilgrimcompare.co.uk
+              dpo@pilgrimcompare.co.uk
             </a>. We will respond within one month.
           </p>
         </section>
@@ -244,10 +283,9 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <p className="mt-12 text-xs text-[var(--textMuted)]">
-          Governed by the laws of England and Wales. Compliant with UK GDPR and the Data
-          Protection Act 2018.
+          Governed by the laws of England and Wales. Written under UK GDPR and the Data Protection Act 2018.
         </p>
       </div>
-    </main>
+    </div>
   );
 }

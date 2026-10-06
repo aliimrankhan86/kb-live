@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'How We Rank Packages | PilgrimCompare',
     description:
-      'Transparent ranking criteria for Umrah and Hajj packages on PilgrimCompare. Default sort is neutral — no paid placement in organic results.',
+      'Transparent ranking criteria for Umrah and Hajj packages on PilgrimCompare. Default sort is neutral, with no paid placement in organic results.',
     url: 'https://pilgrimcompare.co.uk/how-we-rank',
     siteName: 'PilgrimCompare',
     type: 'website',
@@ -31,7 +31,7 @@ const LAST_UPDATED = '12 June 2026';
 const pageJsonLd = graphJsonLd([
   webPageJsonLd({
     path: '/how-we-rank',
-    name: 'How We Rank Packages — PilgrimCompare',
+    name: 'How We Rank Packages | PilgrimCompare',
     description:
       'Transparent explanation of the neutral ranking criteria used to sort packages on PilgrimCompare. Default sort is based on data completeness, price recency, and operator response rate only.',
     dateModified: '2026-06-12',
@@ -42,7 +42,7 @@ export default function HowWeRankPage() {
   return (
     <>
       <JsonLdScript data={pageJsonLd} />
-      <main className="min-h-screen bg-[var(--background)]">
+      <div className="min-h-screen bg-[var(--background)]">
         <article className="mx-auto max-w-2xl px-5 py-12 md:px-6 md:py-16">
 
           <header className="mb-10">
@@ -56,7 +56,7 @@ export default function HowWeRankPage() {
               The DMCC Act 2024 requires comparison services to disclose the
               criteria they use to order results and to label any paid placement
               clearly. This page explains exactly how PilgrimCompare ranks
-              packages — in plain English.
+              packages, in plain English.
             </p>
             <p className="mt-2 text-xs text-[var(--textMuted)]">
               Last updated: {LAST_UPDATED}
@@ -75,7 +75,7 @@ export default function HowWeRankPage() {
               Sorted by relevance and listing quality. No operator pays for ranking.
             </p>
             <p className="text-[var(--textMuted)]">
-              When you first see results — before choosing a different sort —
+              When you first see results (before choosing a different sort),
               packages are ordered by a neutral quality score. The score has
               three inputs, described below. No commercial relationship, no
               payment, and no editorial judgement affects where a package
@@ -99,7 +99,7 @@ export default function HowWeRankPage() {
                     1
                   </span>
                   <h3 className="font-semibold text-[var(--text)]">
-                    Data completeness — 45%
+                    Data completeness: 45%
                   </h3>
                 </div>
                 <p className="text-sm text-[var(--textMuted)]">
@@ -109,7 +109,7 @@ export default function HowWeRankPage() {
                   comparing packages side by side. We count how many of 16
                   optional fields are filled in and score the listing
                   proportionally. An operator improves their score simply by
-                  providing complete information — not by paying.
+                  providing complete information, not by paying.
                 </p>
               </div>
 
@@ -119,7 +119,7 @@ export default function HowWeRankPage() {
                     2
                   </span>
                   <h3 className="font-semibold text-[var(--text)]">
-                    Price confirmation recency — 35%
+                    Price confirmation recency: 35%
                   </h3>
                 </div>
                 <p className="text-sm text-[var(--textMuted)]">
@@ -138,7 +138,7 @@ export default function HowWeRankPage() {
                     3
                   </span>
                   <h3 className="font-semibold text-[var(--text)]">
-                    Operator response rate — 20%
+                    Operator response rate: 20%
                   </h3>
                 </div>
                 <p className="text-sm text-[var(--textMuted)]">
@@ -164,7 +164,7 @@ export default function HowWeRankPage() {
                   Packages you see have already been filtered to match your
                   chosen criteria (departure city, budget, hotel stars, distance
                   to Haram, and so on). Every result in the list has passed your
-                  active filters — so within those results, the other three
+                  active filters, so within those results, the other three
                   criteria determine the order.
                 </p>
               </div>
@@ -190,12 +190,12 @@ export default function HowWeRankPage() {
                 <span className="mt-0.5 shrink-0 text-[var(--yellow)]">✓</span>
                 Featured packages appear in a clearly labelled{' '}
                 <strong className="text-[var(--text)]">&ldquo;Featured&rdquo;</strong>{' '}
-                section above the neutral results — the label is at the slot
+                section above the neutral results. The label is at the slot
                 itself, not in a footnote.
               </li>
               <li className="flex gap-2">
                 <span className="mt-0.5 shrink-0 text-[var(--yellow)]">✓</span>
-                The section note reads: &ldquo;Paid placement — not ranked by our
+                The section note reads: &ldquo;Paid placement, not ranked by our
                 neutral criteria.&rdquo;
               </li>
               <li className="flex gap-2">
@@ -210,7 +210,7 @@ export default function HowWeRankPage() {
               <li className="flex gap-2">
                 <span className="mt-0.5 shrink-0 text-[var(--yellow)]">✓</span>
                 Featured status has no influence on a package&rsquo;s neutral
-                ranking score — if Featured is switched off, the package ranks
+                ranking score. If Featured is switched off, the package ranks
                 on its merits like any other.
               </li>
             </ul>
@@ -266,7 +266,7 @@ export default function HowWeRankPage() {
             </nav>
           </footer>
         </article>
-      </main>
+      </div>
     </>
   );
 }

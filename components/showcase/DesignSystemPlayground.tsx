@@ -164,7 +164,7 @@ export function DesignSystemPlayground() {
   ];
 
   return (
-    <main className="min-h-screen bg-[var(--bg)] px-4 py-6 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[var(--bg)] px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto grid w-full max-w-[1280px] gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
         <aside className="lg:sticky lg:top-6 lg:h-fit">
           <div className="rounded-xl border border-[var(--borderSubtle)] bg-[var(--surfaceDark)] p-4">
@@ -292,7 +292,7 @@ export function DesignSystemPlayground() {
 
               <DemoBlock title="Input examples">
                 <div className="grid gap-4 md:grid-cols-2">
-                  <Input label="Company name" placeholder="Al-Hidayah Travel" helperText="As shown on company registration." />
+                  <Input label="Company name" placeholder="Example Travel Ltd" helperText="As shown on company registration." />
                   <Input label="Email" type="email" placeholder="ops@example.com" errorMessage="Enter a valid business email address." />
                   <Input label="Contact phone" defaultValue="+44 20 7123 4567" disabled helperText="Disabled state" />
                   <div className="space-y-1.5">
@@ -451,13 +451,13 @@ export function DesignSystemPlayground() {
                   <CardHeader>
                     <div>
                       <Text size="sm" tone="muted">Operator</Text>
-                      <Heading as={3} size="base">Al-Hidayah Travel</Heading>
+                      <Heading as={3} size="base">Example Operator Ltd (sample)</Heading>
                     </div>
                     <Badge variant="success">Verified</Badge>
                   </CardHeader>
                   <CardBody>
-                    <Text size="sm" tone="muted">ATOL: 11234 • Serving UK pilgrims since 2012.</Text>
-                    <Text size="sm">8-night Umrah package from GBP 1,299</Text>
+                    <Text size="sm" tone="muted">ATOL: EXAMPLE • Sample text for the design system only.</Text>
+                    <Text size="sm">Sample: 8-night Umrah package from GBP 1,299</Text>
                   </CardBody>
                   <CardFooter>
                     <Badge variant="info">Flights included</Badge>
@@ -486,8 +486,8 @@ export function DesignSystemPlayground() {
                       </tr>
                       <tr>
                         <Td>Hotel Makkah</Td>
-                        <Td>Swissotel (180m)</Td>
-                        <Td>Hilton Suites (220m)</Td>
+                        <Td>Example Hotel A (180m)</Td>
+                        <Td>Example Hotel B (220m)</Td>
                         <Td>Not provided</Td>
                       </tr>
                       <tr>
@@ -537,6 +537,6 @@ export function DesignSystemPlayground() {
           </article>
         </section>
       </div>
-    </main>
+    </div>
   );
 }

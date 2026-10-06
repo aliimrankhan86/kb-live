@@ -42,7 +42,16 @@ function generateNonce(): string {
   return btoa(String.fromCharCode(...bytes));
 }
 
-function createContentSecurityPolicy(nonce: string): string {
+/** Origin of this project's Supabase (package images live in its public storage). */
+function supabaseOrigin(): string | null {
+  try {
+    return process.env.NEXT_PUBLIC_SUPABASE_URL ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin : null;
+  } catch {
+    return null;
+  }
+}
+
+export function createContentSecurityPolicy(nonce: string): string {
   const isDev = process.env.NODE_ENV === 'development';
   // Vercel Web Analytics serves its script and beacon same-origin
   // (/_vercel/insights/*), so 'self' covers both script-src and connect-src —
@@ -52,6 +61,8 @@ function createContentSecurityPolicy(nonce: string): string {
     "'self'",
     'https://*.supabase.co',
     'wss://*.supabase.co',
+    // The configured Supabase project (also covers a local stack on http://127.0.0.1).
+    ...[supabaseOrigin()].filter((o): o is string => Boolean(o) && !o!.endsWith('.supabase.co')),
     ...(isDev ? ['ws://127.0.0.1:3000', 'ws://localhost:3000'] : []),
   ].join(' ');
 
@@ -59,7 +70,8 @@ function createContentSecurityPolicy(nonce: string): string {
     "default-src 'self'",
     scriptSrc,
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob: https://images.unsplash.com",
+    // Operator package images are uploaded to Supabase storage (package-images bucket).
+    ["img-src 'self' data: blob: https://images.unsplash.com", supabaseOrigin()].filter(Boolean).join(' '),
     "font-src 'self'",
     `connect-src ${connectSrc}`,
     "object-src 'none'",

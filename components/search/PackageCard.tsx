@@ -5,10 +5,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import type { SearchPackageDisplay } from '@/components/search/search-utils'
 import type { OperatorProfile } from '@/lib/types'
-import { getRegionSettings } from '@/lib/i18n/region'
-import { formatPriceForRegion } from '@/lib/i18n/format'
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge'
 import { InclusionChip } from '@/components/ui/InclusionChip'
+import { formatStatedPrice, nightsText, priceAttributionShort } from '@/lib/packages/display'
 import styles from './packages.module.css'
 
 interface InclusionChip {
@@ -25,9 +24,14 @@ interface PackageCardProps {
   onToggleCompare: (id: string) => void
   operator?: OperatorProfile
   inclusions?: InclusionChip[]
+  totalNights?: number
   nightsMakkah?: number
   nightsMadinah?: number
   priceType?: 'from' | 'exact' | 'fixed'
+  /** When the operator last updated this package (price date, standards §6). */
+  priceUpdatedAt?: string
+  /** Closest-match only: the search preferences this package does not meet. */
+  unmetCriteria?: string[]
 }
 
 
@@ -44,18 +48,18 @@ const PackageCard: React.FC<PackageCardProps> = ({
   onToggleCompare,
   operator,
   inclusions,
+  totalNights,
   nightsMakkah,
   nightsMadinah,
   priceType = 'from',
+  unmetCriteria,
+  priceUpdatedAt,
 }) => {
-  const regionSettings = React.useMemo(() => getRegionSettings(), [])
   const [makkahImgSrc, setMakkahImgSrc] = useState(pkg.makkahHotel.image || HOTEL_FALLBACK)
   const [madinaImgSrc, setMadinaImgSrc] = useState(pkg.madinaHotel.image || HOTEL_FALLBACK)
 
-  const priceInfo = React.useMemo(
-    () => formatPriceForRegion(pkg.price, pkg.currency, regionSettings),
-    [pkg.currency, pkg.price, regionSettings]
-  )
+  // Stated price, never converted (standards §6).
+  const priceFormatted = formatStatedPrice(pkg.price, pkg.currency)
 
   const renderStars = (rating: number | null, label: string) => {
     // Operator has not supplied a star rating — state that honestly rather than
@@ -84,19 +88,16 @@ const PackageCard: React.FC<PackageCardProps> = ({
     )
   }
 
-  const totalNights = (nightsMakkah ?? 0) + (nightsMadinah ?? 0)
-  const nightsLabel = totalNights > 0
-    ? `${totalNights} night${totalNights === 1 ? '' : 's'}`
-    : null
-  const splitLabel = nightsMakkah && nightsMadinah
-    ? `${nightsMakkah} Makkah · ${nightsMadinah} Madinah`
-    : null
+  const nightsLabel = totalNights ? nightsText({ totalNights, nightsMakkah, nightsMadinah }) : null
 
   // Condense the noisy departure/return blocks into one quiet trip line.
+  // Missing facts read "not provided" rather than silently disappearing.
   const tripDates = !isPlaceholder(pkg.departure.date) && !isPlaceholder(pkg.return.date)
-    ? `${pkg.departure.date} – ${pkg.return.date}`
-    : null
-  const route = !isPlaceholder(pkg.departure.route) ? pkg.departure.route : null
+    ? `${pkg.departure.date} to ${pkg.return.date}`
+    : !isPlaceholder(pkg.departure.date)
+      ? pkg.departure.date
+      : 'Dates not provided'
+  const route = !isPlaceholder(pkg.departure.route) ? pkg.departure.route : 'Departure airport not provided'
 
   // Disable the compare control only when the basket is full AND this card
   // isn't already one of the selected packages.
@@ -120,15 +121,13 @@ const PackageCard: React.FC<PackageCardProps> = ({
         </span>
         <div className={styles.hotelMeta}>
           {renderStars(hotel.rating, hotel.location)}
-          {!isPlaceholder(hotel.distance) && (
-            <span className={styles.hotelDistance}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                <circle cx="12" cy="10" r="3" />
-              </svg>
-              {hotel.distance}
-            </span>
-          )}
+          <span className={hotel.distance === 'Distance not provided' ? styles.notProvided : styles.hotelDistance}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+            {hotel.distance}
+          </span>
         </div>
       </div>
     </div>
@@ -144,7 +143,8 @@ const PackageCard: React.FC<PackageCardProps> = ({
         <div className={styles.operatorBlock}>
           <div className={styles.operatorTopRow}>
             <span className={styles.operatorName} title={operator?.companyName}>
-              {operator?.companyName ?? 'Travel operator'}
+              {/* Real name only; blank (not a made-up label) while operators load. */}
+              {operator?.companyName ?? <span className="sr-only">Loading operator name</span>}
             </span>
             <button
               type="button"
@@ -156,7 +156,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
                 onAddToShortlist(pkg.id)
               }}
               aria-pressed={isShortlisted}
-              aria-label={isShortlisted ? 'Saved — tap to remove from your saved list' : 'Save this package for later'}
+              aria-label={isShortlisted ? 'Saved. Tap to remove from your saved list' : 'Save this package for later'}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill={isShortlisted ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
@@ -180,9 +180,12 @@ const PackageCard: React.FC<PackageCardProps> = ({
         <div className={styles.priceBlock}>
           <div className={styles.priceLead}>
             {priceType === 'from' && <span className={styles.priceFrom}>from</span>}
-            <span className={styles.priceAmount}>{priceInfo.formatted}</span>
+            <span className={styles.priceAmount}>{priceFormatted}</span>
           </div>
           <span className={styles.priceNote}>{pkg.priceNote || 'per person'}</span>
+          <span className={styles.priceAttribution} data-testid={`price-attribution-${pkg.id}`}>
+            {priceAttributionShort(operator?.companyName, priceUpdatedAt)}
+          </span>
         </div>
 
         {/* Trip summary line: nights + dates + route, only when real */}
@@ -193,7 +196,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                   <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                 </svg>
-                {nightsLabel}{splitLabel ? ` · ${splitLabel}` : ''}
+                {nightsLabel}
               </span>
             )}
             {route && (
@@ -224,6 +227,17 @@ const PackageCard: React.FC<PackageCardProps> = ({
           </div>
         )}
       </div>
+
+      {unmetCriteria && unmetCriteria.length > 0 && (
+        <div className={styles.unmetBlock} data-testid={`package-unmet-${pkg.id}`}>
+          <span className={styles.unmetLabel}>Differs from your search:</span>
+          <ul className={styles.unmetList}>
+            {unmetCriteria.map((reason) => (
+              <li key={reason}>{reason}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Actions: clear Compare toggle + primary View details */}
       <div className={styles.cardActions}>

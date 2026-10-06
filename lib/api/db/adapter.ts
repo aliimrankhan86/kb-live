@@ -1,10 +1,12 @@
 import { prisma } from './prisma';
-import { UK_DEPARTURE_AIRPORTS } from '@/lib/airports';
+import { isPubliclyListed } from '@/lib/listing';
+import { departureCityOf } from '@/lib/airports';
 import type {
   AnalyticsEvent,
   AuditLogEntry,
   BankChangeRequest,
   BookingIntent,
+  BookingOutcome,
   Complaint,
   Enquiry,
   MarketingConsent,
@@ -280,6 +282,9 @@ const mapComplaint = (c: PrismaComplaint): Complaint => ({
 export const DBAdapter = {
   // Users
   getUsers: async () => prisma.user.findMany(),
+  deleteUser: async (id: string): Promise<void> => {
+    await prisma.user.deleteMany({ where: { id } });
+  },
 
   // Quote Requests
   getRequests: async (): Promise<QuoteRequest[]> =>
@@ -385,14 +390,15 @@ export const DBAdapter = {
 
   getDistinctDepartureCities: async (): Promise<string[]> => {
     const rows = await prisma.package.findMany({
-      where: { status: 'published', departureAirport: { not: null } },
-      select: { departureAirport: true },
+      // Public: verified operators only (founder decision 2026-10-06).
+      where: { status: 'published', departureAirport: { not: null }, operator: { verificationStatus: 'verified', atolNumber: { not: null } } },
+      select: { departureAirport: true, operator: { select: { verificationStatus: true, atolNumber: true } } },
     });
     const citySet = new Set<string>();
     for (const row of rows) {
-      if (!row.departureAirport) continue;
-      const airport = UK_DEPARTURE_AIRPORTS.find((a) => a.code === row.departureAirport);
-      if (airport) citySet.add(airport.city);
+      if (!row.departureAirport || !isPubliclyListed({ verificationStatus: row.operator.verificationStatus as OperatorProfile['verificationStatus'], atolNumber: row.operator.atolNumber ?? undefined })) continue;
+      const city = departureCityOf(row.departureAirport);
+      if (city) citySet.add(city);
     }
     return [...citySet].sort();
   },
@@ -619,6 +625,31 @@ export const DBAdapter = {
     return mapComplaint(saved);
   },
 
+  // Booking outcomes (were missing: /api/operator/leads + reconciliation threw
+  // "DBAdapter method ... not found" under Prisma). Never deleted: billing evidence.
+  getBookingOutcomes: async (): Promise<BookingOutcome[]> =>
+    (await prisma.bookingOutcome.findMany()).map((o) => ({
+      id: o.id,
+      bookingIntentId: o.bookingIntentId,
+      outcome: o.outcome as BookingOutcome['outcome'],
+      reportedAt: o.reportedAt.toISOString(),
+      notes: o.notes ?? undefined,
+    })),
+
+  saveBookingOutcome: async (outcome: BookingOutcome): Promise<BookingOutcome> => {
+    const data = {
+      outcome: outcome.outcome,
+      reportedAt: new Date(outcome.reportedAt),
+      notes: outcome.notes ?? null,
+    };
+    await prisma.bookingOutcome.upsert({
+      where: { bookingIntentId: outcome.bookingIntentId },
+      create: { id: outcome.id, bookingIntentId: outcome.bookingIntentId, ...data },
+      update: data,
+    });
+    return outcome;
+  },
+
   // Enquiries (canonical pilgrim enquiry — Task 2)
   getEnquiries: async (): Promise<Enquiry[]> =>
     (await prisma.enquiry.findMany()).map(mapEnquiry),
@@ -643,6 +674,41 @@ export const DBAdapter = {
       update: data,
     });
     return mapEnquiry(saved);
+  },
+
+  anonymiseEnquiriesByEmail: async (email: string, erasedName: string): Promise<void> => {
+    await prisma.enquiry.updateMany({
+      where: { email: { equals: email.trim(), mode: 'insensitive' } },
+      data: { name: erasedName, email: null, phone: null, message: null },
+    });
+  },
+
+  /** Retention: same fields as account erasure, for rows created before `cutoff`. Skips stripped rows, so reruns count 0. */
+  anonymiseEnquiriesCreatedBefore: async (cutoff: Date, erasedName: string, alreadyErased: readonly string[]): Promise<number> => {
+    const { count } = await prisma.enquiry.updateMany({
+      where: {
+        createdAt: { lt: cutoff },
+        OR: [{ email: { not: null } }, { phone: { not: null } }, { message: { not: null } }, { name: { notIn: [...alreadyErased] } }],
+      },
+      data: { name: erasedName, email: null, phone: null, message: null },
+    });
+    return count;
+  },
+
+  /**
+   * Hajj "notify me" rows (`interests`, migration 007, not in the Prisma
+   * schema). Runs on the server connection, so it needs no API-role grant.
+   */
+  deleteInterestsByEmail: async (email: string): Promise<void> => {
+    await prisma.$executeRaw`DELETE FROM interests WHERE lower(email) = lower(${email.trim()})`;
+  },
+
+  getInterestsByEmail: async (email: string): Promise<{ email: string; type: string; createdAt: string }[]> =>
+    (await prisma.$queryRaw<{ email: string; type: string; created_at: Date }[]>`SELECT email, type, created_at FROM interests WHERE lower(email) = lower(${email.trim()})`)
+      .map((r) => ({ email: r.email, type: r.type, createdAt: r.created_at.toISOString() })),
+
+  deleteMarketingConsentsByEmail: async (email: string): Promise<void> => {
+    await prisma.marketingConsent.deleteMany({ where: { email: { equals: email.trim(), mode: 'insensitive' } } });
   },
 
   // Marketing consents (Task 3). Idempotent on (email, enquiryReference).

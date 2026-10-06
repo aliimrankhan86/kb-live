@@ -15,15 +15,15 @@ import type { Package } from '@/lib/types'
 import { Repository } from '@/lib/api/repository'
 
 const GUIDE_LINKS = [
-  { label: 'Ramadan Umrah 2027', href: '/umrah/ramadan' },
+  { label: 'Ramadan Umrah', href: '/umrah/ramadan' },
   { label: 'Umrah cost guide', href: '/umrah/cost' },
-  { label: 'Hajj packages 2027', href: '/hajj' },
+  { label: 'Hajj packages', href: '/hajj' },
 ]
 
 export const metadata: Metadata = {
   title: 'PilgrimCompare - Compare Hajj & Umrah Packages from UK Operators',
   description:
-    'Compare Hajj and Umrah packages from UK travel operators. Review prices, hotels near Haram, inclusions, ATOL/ABTA details, and operator profiles before requesting a quote.',
+    'Compare Umrah packages from verified UK operators side by side: prices, hotels, distance to the Haram, inclusions and ATOL numbers, then send an enquiry to the operator.',
   keywords: ['Umrah packages UK', 'Hajj packages UK', 'compare Umrah packages', 'ATOL Umrah operators'],
   alternates: {
     canonical: '/',
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
 const homeJsonLd = graphJsonLd([
   webPageJsonLd({
     path: '/',
-    name: 'PilgrimCompare — Compare Hajj and Umrah Packages from UK Operators',
+    name: 'PilgrimCompare: Compare Hajj and Umrah Packages from UK Operators',
     description:
       'Compare Hajj and Umrah packages from UK travel operators by price, hotel proximity, inclusions, and operator trust signals.',
   }),

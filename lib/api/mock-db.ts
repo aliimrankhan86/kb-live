@@ -887,6 +887,10 @@ const SEED_PACKAGES: Package[] = [
   },
 ];
 
+/** The personal fields an erased enquiry loses (account deletion and retention alike). */
+const stripEnquiryPersonalFields = (e: Enquiry, erasedName: string): Enquiry =>
+  ({ ...e, name: erasedName, email: undefined, phone: undefined, message: undefined });
+
 export const MockDB = {
   getRequests: (): QuoteRequest[] => getStorage(STORAGE_KEYS.REQUESTS, []),
   saveRequest: (req: QuoteRequest) => {
@@ -1165,6 +1169,42 @@ export const MockDB = {
     return enquiry;
   },
 
+  /** Account erasure: strip personal fields from this email's enquiries. Safe to rerun. */
+  anonymiseEnquiriesByEmail: (email: string, erasedName: string) => {
+    const target = email.trim().toLowerCase();
+    setStorage(STORAGE_KEYS.ENQUIRIES, MockDB.getEnquiries().map((e) =>
+      e.email?.toLowerCase() === target ? stripEnquiryPersonalFields(e, erasedName) : e
+    ));
+  },
+
+  /**
+   * Retention: strip the same personal fields from enquiries created before
+   * `cutoff`. Rows already stripped (by either path) are skipped, so a rerun
+   * changes and counts nothing. Returns how many rows changed.
+   */
+  anonymiseEnquiriesCreatedBefore: (cutoff: Date, erasedName: string, alreadyErased: readonly string[]): number => {
+    let changed = 0;
+    setStorage(STORAGE_KEYS.ENQUIRIES, MockDB.getEnquiries().map((e) => {
+      const old = new Date(e.createdAt).getTime() < cutoff.getTime();
+      const personal = e.email != null || e.phone != null || e.message != null || !alreadyErased.includes(e.name);
+      if (!old || !personal) return e;
+      changed++;
+      return stripEnquiryPersonalFields(e, erasedName);
+    }));
+    return changed;
+  },
+
+  /** Account erasure: Hajj "notify me" rows for this email, any letter case. Safe to rerun. */
+  deleteInterestsByEmail: (email: string) => {
+    const target = email.trim().toLowerCase();
+    setStorage(STORAGE_KEYS.INTERESTS, MockDB.getInterests().filter((i) => i.email.toLowerCase() !== target));
+  },
+
+  deleteMarketingConsentsByEmail: (email: string) => {
+    const target = email.trim().toLowerCase();
+    setStorage(STORAGE_KEYS.MARKETING_CONSENTS, MockDB.getMarketingConsents().filter((c) => c.email.toLowerCase() !== target));
+  },
+
   // Task 3: marketing consent (a row exists only when consent given + email present).
   getMarketingConsents: (): MarketingConsent[] =>
     getStorage<MarketingConsent[]>(STORAGE_KEYS.MARKETING_CONSENTS, []),
@@ -1197,6 +1237,10 @@ export const MockDB = {
     }
     setStorage(STORAGE_KEYS.BOOKING_OUTCOMES, outcomes);
     return outcome;
+  },
+
+  deleteUser: (id: string) => {
+    setStorage(STORAGE_KEYS.USERS, getStorage<User[]>(STORAGE_KEYS.USERS, SEED_USERS).filter((u) => u.id !== id));
   },
 
   // For simulation

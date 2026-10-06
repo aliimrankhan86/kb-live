@@ -1,20 +1,24 @@
 import type { MetadataRoute } from 'next'
 
+// Private and parked areas. A crawler that matches a named group ignores the
+// '*' group, so every group must repeat these.
+export const PRIVATE_PATHS = ['/quote', '/requests', '/operator', '/admin', '/settings', '/showcase', '/reset-password', '/api/']
+
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/quote', '/requests', '/operator', '/admin', '/settings', '/showcase'],
+        disallow: PRIVATE_PATHS,
       },
       // Explicit allow for AI crawlers — increases citation visibility in AI-generated answers.
       // Allowing these bots means our Umrah/Hajj content can be cited by ChatGPT, Perplexity,
       // Google AI Overviews, and Claude. Review policy if content strategy changes.
-      { userAgent: 'GPTBot', allow: '/' },
-      { userAgent: 'ClaudeBot', allow: '/' },
-      { userAgent: 'PerplexityBot', allow: '/' },
-      { userAgent: 'Google-Extended', allow: '/' },
+      { userAgent: 'GPTBot', allow: '/', disallow: PRIVATE_PATHS },
+      { userAgent: 'ClaudeBot', allow: '/', disallow: PRIVATE_PATHS },
+      { userAgent: 'PerplexityBot', allow: '/', disallow: PRIVATE_PATHS },
+      { userAgent: 'Google-Extended', allow: '/', disallow: PRIVATE_PATHS },
     ],
     sitemap: 'https://pilgrimcompare.co.uk/sitemap.xml',
   }
