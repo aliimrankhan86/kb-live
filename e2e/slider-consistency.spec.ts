@@ -6,7 +6,8 @@ test.describe('RangeSlider consistency across app', () => {
 
     // Budget is off by default (an untouched search never filters by price);
     // switch it on to reveal the slider.
-    await page.getByTestId('budget-toggle').uncheck();
+    await page.locator('label:has([data-testid="budget-toggle"])').click();
+    await expect(page.getByTestId('budget-toggle')).not.toBeChecked();
 
     // Scroll to find the budget slider (it's in the form, step 4)
     const budgetSlider = page.locator('[data-testid="budget-min-slider"]').first();
