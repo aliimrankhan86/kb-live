@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { Package } from '@/lib/types'
+import { NEUTRAL_SORT_DISCLOSURE } from '@/lib/content-rules'
 import { INCLUSIONS, friendlyDistance, nightsText, priceAttributionShort, priceText } from '@/lib/packages/display'
 import styles from './home.module.css'
 
@@ -95,6 +96,11 @@ export function ComparePreview({ packages }: ComparePreviewProps) {
           </tbody>
         </table>
       </div>
+
+      <p className="mt-2 text-xs text-[var(--textMuted)]" data-testid="preview-sort-disclosure">
+        The first two packages in our default order. {NEUTRAL_SORT_DISCLOSURE}{' '}
+        <Link href="/how-we-rank" className="underline underline-offset-2">How we rank</Link>
+      </p>
 
       <div className={styles.previewFoot}>
         <Link href="/search/packages" className={styles.inlineLink}>

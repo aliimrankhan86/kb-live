@@ -2,6 +2,7 @@ import Link from 'next/link'
 import type { OperatorProfile, Package } from '@/lib/types'
 import { TierExplanation } from '@/components/operators/TierExplanation'
 import { nightsText, priceAttributionShort, priceText } from '@/lib/packages/display'
+import { NEUTRAL_SORT_DISCLOSURE } from '@/lib/content-rules'
 
 interface OperatorProfileDetailProps {
   operator: OperatorProfile
@@ -175,6 +176,11 @@ export function OperatorProfileDetail({ operator, packages }: OperatorProfileDet
       {/* Packages */}
       <section data-testid="operator-packages" className="mt-8">
         <h2 className="text-lg font-semibold text-[var(--text)]">Published packages</h2>
+        {/* Standards §16: disclose the neutral sort wherever packages are listed. */}
+        <p className="mt-1 text-xs text-[var(--textMuted)]" data-testid="operator-sort-disclosure">
+          {NEUTRAL_SORT_DISCLOSURE}{' '}
+          <Link href="/how-we-rank" className="underline underline-offset-2">How we rank</Link>
+        </p>
 
         {packages.length === 0 ? (
           <div
