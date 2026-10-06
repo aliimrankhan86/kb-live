@@ -12,8 +12,12 @@
 -- operator_profiles_read_public. Policies are left in place; without a grant
 -- they cannot be used.
 --
+-- ALL also covers TRUNCATE, REFERENCES and TRIGGER, which Supabase grants by
+-- default and RLS does not police (TRUNCATE ignores row policies).
+-- Idempotent: revoking a privilege that is not held is a no-op.
+--
 -- Validated locally inside BEGIN ... ROLLBACK (2026-10-06). Not applied anywhere.
-REVOKE SELECT, INSERT, UPDATE, DELETE ON public.operator_profiles FROM anon, authenticated;
+REVOKE ALL ON public.operator_profiles FROM anon, authenticated;
 
 -- Rollback (restores Supabase's default API-role grants on this table):
---   GRANT SELECT, INSERT, UPDATE, DELETE ON public.operator_profiles TO anon, authenticated;
+--   GRANT ALL ON public.operator_profiles TO anon, authenticated;
