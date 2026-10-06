@@ -36,7 +36,8 @@ test.describe('Operator packages page', () => {
     const emptyState = page.getByTestId('operator-packages-empty');
     const list = page.getByTestId('operator-packages-list');
     // One of them must be present
-    await expect(list.or(emptyState)).toBeVisible({ timeout: 8000 });
+    // The empty state renders inside the list container, so both can match.
+    await expect(list.or(emptyState).first()).toBeVisible({ timeout: 8000 });
   });
 
   test('clicking Create package opens wizard', async ({ page }) => {
