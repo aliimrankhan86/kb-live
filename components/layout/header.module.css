@@ -492,7 +492,11 @@
   .header__container {
     padding: 1rem 2rem;
   }
+}
 
+/* Full desktop nav needs ~890px; below 1024px it overflowed tablets (768px)
+   sideways, so tablets keep the hamburger drawer. */
+@media (min-width: 1024px) {
   /* Show desktop nav, hide hamburger */
   .header__desktopNav {
     display: flex;
