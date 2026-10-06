@@ -221,3 +221,12 @@ describe('guard: no fixture or demo data in production code paths', () => {
     expect(offenders).toEqual([]);
   });
 });
+
+describe('one nights format', () => {
+  it('uses the stored total and never derives a split', async () => {
+    const { nightsText } = await import('@/lib/packages/display');
+    expect(nightsText({ totalNights: 10, nightsMakkah: 5, nightsMadinah: 5 })).toBe('10 nights · 5 Makkah · 5 Madinah');
+    expect(nightsText({ totalNights: 10, nightsMakkah: 0, nightsMadinah: 0 })).toBe('10 nights · Makkah and Madinah split not provided');
+    expect(toPackageCardProps({ ...base, totalNights: 12, nightsMakkah: 0, nightsMadinah: 0 }).totalNights).toBe(12);
+  });
+});

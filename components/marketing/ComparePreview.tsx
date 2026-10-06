@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type { Package } from '@/lib/types'
-import { INCLUSIONS, friendlyDistance } from '@/lib/packages/display'
+import { INCLUSIONS, friendlyDistance, nightsText } from '@/lib/packages/display'
 import styles from './home.module.css'
 
 interface ComparePreviewProps {
@@ -44,7 +44,7 @@ export function ComparePreview({ packages }: ComparePreviewProps) {
   const pair = packages.slice(0, 2)
 
   const rows: { label: string; value: (pkg: Package) => string }[] = [
-    { label: 'Total nights', value: (p) => `${p.totalNights} nights (${p.nightsMakkah} Makkah / ${p.nightsMadinah} Madinah)` },
+    { label: 'Total nights', value: (p) => nightsText(p) },
     { label: 'Makkah hotel', value: makkahHotel },
     { label: 'Distance to Haram', value: distanceText },
     { label: "What's included", value: includedText },

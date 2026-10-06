@@ -123,3 +123,17 @@ export function formatDate(iso: string): string {
 export function formatDateRange(start: string, end?: string): string {
   return end && end !== start ? `${formatDate(start)} to ${formatDate(end)}` : formatDate(start);
 }
+
+/**
+ * One nights format for every surface: "10 nights · 5 Makkah · 5 Madinah".
+ * The split is only shown when the operator stated both cities; it is never
+ * derived from the total.
+ */
+export function nightsText(p: { totalNights: number; nightsMakkah?: number; nightsMadinah?: number }): string {
+  const total = `${p.totalNights} night${p.totalNights === 1 ? '' : 's'}`;
+  const split =
+    p.nightsMakkah && p.nightsMadinah
+      ? `${p.nightsMakkah} Makkah · ${p.nightsMadinah} Madinah`
+      : 'Makkah and Madinah split not provided';
+  return `${total} · ${split}`;
+}

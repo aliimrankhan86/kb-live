@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { OperatorProfile, Package } from '@/lib/types'
 import { TierExplanation } from '@/components/operators/TierExplanation'
+import { nightsText } from '@/lib/packages/display'
 
 interface OperatorProfileDetailProps {
   operator: OperatorProfile
@@ -206,7 +207,7 @@ export function OperatorProfileDetail({ operator, packages }: OperatorProfileDet
                   </Link>
                 </h3>
                 <p className="mt-1 text-sm text-[var(--textMuted)]">
-                  {pkg.totalNights} nights · {pkg.nightsMakkah} Makkah · {pkg.nightsMadinah} Madinah
+                  {nightsText(pkg)}
                 </p>
                 <p className="mt-2 text-sm font-semibold text-[var(--yellow)]">
                   {pkg.priceType === 'from' ? 'From ' : ''}£{pkg.pricePerPerson.toLocaleString()} per person

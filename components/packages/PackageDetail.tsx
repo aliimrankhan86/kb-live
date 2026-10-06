@@ -17,6 +17,7 @@ import {
   roomOptionsLabel,
   formatDate,
   formatDateRange,
+  nightsText,
 } from '@/lib/packages/display'
 import { ATOL_STANDARD_LINE, CAA_ATOL_URL, CONTRACT_STANDARD_LINE } from '@/lib/content-rules'
 import { VERIFICATION_STATEMENT_HREF } from '@/components/ui/VerifiedBadge'
@@ -225,7 +226,7 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
               {pkg.airline && <Fact term="Airline" value={pkg.airline} />}
               {pkg.departureAirport && <Fact term="Departs from" value={pkg.departureAirport} />}
               <Fact term="Airport transfers" value={pkg.inclusions.transfers ? 'Included' : 'Not included'} />
-              <Fact term="Trip length" value={`${pkg.totalNights} nights (${pkg.nightsMakkah} Makkah · ${pkg.nightsMadinah} Madinah)`} />
+              <Fact term="Trip length" value={nightsText(pkg)} />
               <Fact term="Travel dates" value={pkg.dateWindow?.start ? formatDateRange(pkg.dateWindow.start, pkg.dateWindow.end) : 'Not provided'} />
             </dl>
           </SectionCard>
@@ -316,7 +317,7 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
             <p className="text-xs uppercase tracking-wide text-[var(--textMuted)]">{pkg.priceType === 'from' ? 'From' : 'Price'} · per person</p>
             <p data-testid="package-price" className="mt-1 text-3xl font-bold text-[var(--text)]">{priceLabel}</p>
             <ul className="mt-4 space-y-2 text-sm text-[var(--textMuted)]">
-              <RailFact label={`${pkg.totalNights} nights`} sub={`${pkg.nightsMakkah} Makkah · ${pkg.nightsMadinah} Madinah`} />
+              <RailFact label={`${pkg.totalNights} nights`} sub={nightsText(pkg).split(' · ').slice(1).join(' · ')} />
               {(pkg.hotelMakkahStars || pkg.hotelMadinahStars) && (
                 <RailFact
                   label="Hotels"

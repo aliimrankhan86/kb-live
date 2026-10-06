@@ -9,6 +9,7 @@ import { getRegionSettings } from '@/lib/i18n/region'
 import { formatPriceForRegion } from '@/lib/i18n/format'
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge'
 import { InclusionChip } from '@/components/ui/InclusionChip'
+import { nightsText } from '@/lib/packages/display'
 import styles from './packages.module.css'
 
 interface InclusionChip {
@@ -25,6 +26,7 @@ interface PackageCardProps {
   onToggleCompare: (id: string) => void
   operator?: OperatorProfile
   inclusions?: InclusionChip[]
+  totalNights?: number
   nightsMakkah?: number
   nightsMadinah?: number
   priceType?: 'from' | 'exact' | 'fixed'
@@ -46,6 +48,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
   onToggleCompare,
   operator,
   inclusions,
+  totalNights,
   nightsMakkah,
   nightsMadinah,
   priceType = 'from',
@@ -87,13 +90,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
     )
   }
 
-  const totalNights = (nightsMakkah ?? 0) + (nightsMadinah ?? 0)
-  const nightsLabel = totalNights > 0
-    ? `${totalNights} night${totalNights === 1 ? '' : 's'}`
-    : null
-  const splitLabel = nightsMakkah && nightsMadinah
-    ? `${nightsMakkah} Makkah · ${nightsMadinah} Madinah`
-    : null
+  const nightsLabel = totalNights ? nightsText({ totalNights, nightsMakkah, nightsMadinah }) : null
 
   // Condense the noisy departure/return blocks into one quiet trip line.
   // Missing facts read "not provided" rather than silently disappearing.
@@ -197,7 +194,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                   <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                 </svg>
-                {nightsLabel}{splitLabel ? ` · ${splitLabel}` : ''}
+                {nightsLabel}
               </span>
             )}
             {route && (
