@@ -49,7 +49,7 @@ export function RequestsListClient() {
 
   return (
     <>
-      <main style={{ minHeight: '100vh', background: 'var(--background)', padding: '2rem 1rem' }}>
+      <div style={{ minHeight: '100vh', background: 'var(--background)', padding: '2rem 1rem' }}>
         <div style={{ maxWidth: 800, margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', gap: '1rem', flexWrap: 'wrap' }}>
             <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text)', margin: 0 }}>My Requests</h1>
@@ -129,7 +129,7 @@ export function RequestsListClient() {
             </div>
           )}
         </div>
-      </main>
+      </div>
     </>
   );
 }

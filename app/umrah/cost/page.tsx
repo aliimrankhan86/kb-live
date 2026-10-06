@@ -91,7 +91,7 @@ export default async function UmrahCostPage() {
   return (
     <>
       <JsonLdScript data={pageJsonLd} />
-      <main className="min-h-screen bg-[var(--background)] px-4 py-12 md:py-20">
+      <div className="min-h-screen bg-[var(--background)] px-4 py-12 md:py-20">
         <article className="mx-auto max-w-3xl">
           <Breadcrumb
             className="mb-6"
@@ -214,7 +214,7 @@ export default async function UmrahCostPage() {
             </div>
           </nav>
         </article>
-      </main>
+      </div>
     </>
   )
 }

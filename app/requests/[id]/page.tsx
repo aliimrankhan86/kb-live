@@ -24,13 +24,13 @@ export default async function RequestPage({ params }: { params: Promise<{ id: st
 
   return (
     <>
-      <main className="min-h-screen bg-[var(--background)]">
+      <div className="min-h-screen bg-[var(--background)]">
         <JsonLdScript data={breadcrumbSchema} />
         <div className="w-full max-w-5xl mx-auto px-4 pt-6">
           <Breadcrumb items={breadcrumbItems} />
         </div>
         <RequestDetail id={id} bookingEnabled={isBookingFlowEnabled()} />
-      </main>
+      </div>
     </>
   );
 }

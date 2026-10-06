@@ -37,7 +37,7 @@ export default function PartnerLandingPage() {
   return (
     <>
       <JsonLdScript data={pageJsonLd} />
-      <main className="min-h-screen">
+      <div className="min-h-screen">
 
         {/* ── SPLIT HERO — both paths above the fold ── */}
         <section className="border-b border-[var(--border)] bg-[var(--surfaceDark)] px-4 py-14 md:py-20">
@@ -286,7 +286,7 @@ export default function PartnerLandingPage() {
           </div>
         </section>
 
-      </main>
+      </div>
     </>
   )
 }

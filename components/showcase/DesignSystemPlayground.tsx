@@ -164,7 +164,7 @@ export function DesignSystemPlayground() {
   ];
 
   return (
-    <main className="min-h-screen bg-[var(--bg)] px-4 py-6 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[var(--bg)] px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto grid w-full max-w-[1280px] gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
         <aside className="lg:sticky lg:top-6 lg:h-fit">
           <div className="rounded-xl border border-[var(--borderSubtle)] bg-[var(--surfaceDark)] p-4">
@@ -537,6 +537,6 @@ export function DesignSystemPlayground() {
           </article>
         </section>
       </div>
-    </main>
+    </div>
   );
 }

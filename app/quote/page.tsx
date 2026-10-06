@@ -19,7 +19,7 @@ export default async function QuotePage() {
 
   return (
     <>
-      <main className="min-h-screen bg-[var(--background)] py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-[var(--background)] py-12 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl">
           <div className="mb-8 text-center">
             <h1 className="text-3xl font-bold tracking-tight text-[var(--text)] sm:text-4xl">
@@ -40,7 +40,7 @@ export default async function QuotePage() {
             <QuoteRequestWizard cities={departureCities} />
           </Suspense>
         </div>
-      </main>
+      </div>
     </>
   );
 }

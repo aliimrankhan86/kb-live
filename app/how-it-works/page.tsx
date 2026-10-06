@@ -87,7 +87,7 @@ export default function HowItWorksPage() {
   return (
     <>
     <JsonLdScript data={pageJsonLd} />
-    <main className="min-h-screen bg-[var(--background)] text-[var(--text)]">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--text)]">
       <div className="mx-auto max-w-3xl px-4 py-12">
         <h1 className="mb-3 text-3xl font-bold">How PilgrimCompare Works</h1>
         <p className="mb-10 text-sm leading-relaxed text-[var(--textMuted)]">
@@ -162,7 +162,7 @@ export default function HowItWorksPage() {
           </ul>
         </section>
       </div>
-    </main>
+    </div>
     </>
   );
 }

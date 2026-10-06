@@ -20,7 +20,7 @@ interface CityCorridorProps {
 
 export function CityCorridor({ city, h1, intro, queryParams, faqs, breadcrumbItems }: CityCorridorProps) {
   return (
-    <main className="min-h-screen bg-[var(--background)] px-4 py-12 md:py-20">
+    <div className="min-h-screen bg-[var(--background)] px-4 py-12 md:py-20">
       <article className="mx-auto max-w-3xl">
         {breadcrumbItems && breadcrumbItems.length > 0 && (
           <Breadcrumb items={breadcrumbItems} className="mb-6" />
@@ -99,6 +99,6 @@ export function CityCorridor({ city, h1, intro, queryParams, faqs, breadcrumbIte
           </section>
         )}
       </article>
-    </main>
+    </div>
   )
 }

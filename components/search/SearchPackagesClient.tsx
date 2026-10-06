@@ -50,7 +50,7 @@ export function SearchPackagesClient({ allPackages, featuredSlotsEnabled }: Sear
   );
 
   return (
-    <main className={styles.searchPage}>
+    <div className={styles.searchPage}>
       <h1 className="sr-only">Search Results - Hajj and Umrah Packages</h1>
       <PackageList
         packages={displayPackages}
@@ -60,6 +60,6 @@ export function SearchPackagesClient({ allPackages, featuredSlotsEnabled }: Sear
         onSortChange={handleSortChange}
         featuredSlotsEnabled={featuredSlotsEnabled}
       />
-    </main>
+    </div>
   );
 }

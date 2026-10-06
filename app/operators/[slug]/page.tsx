@@ -89,7 +89,7 @@ export default async function OperatorProfilePage({ params }: OperatorPageProps)
   if (error) {
     return (
       <>
-        <main className="min-h-screen bg-[var(--background)]">{renderNotFound(error)}</main>
+        <div className="min-h-screen bg-[var(--background)]">{renderNotFound(error)}</div>
       </>
     )
   }
@@ -97,9 +97,9 @@ export default async function OperatorProfilePage({ params }: OperatorPageProps)
   if (!operator) {
     return (
       <>
-        <main className="min-h-screen bg-[var(--background)]">
+        <div className="min-h-screen bg-[var(--background)]">
           {renderNotFound('This operator is not available.')}
-        </main>
+        </div>
       </>
     )
   }
@@ -128,13 +128,13 @@ export default async function OperatorProfilePage({ params }: OperatorPageProps)
 
   return (
     <>
-      <main className="min-h-screen bg-[var(--background)]">
+      <div className="min-h-screen bg-[var(--background)]">
         <JsonLdScript data={operatorProfileJsonLd} />
         <div className="w-full max-w-5xl mx-auto px-4 pt-6">
           <Breadcrumb items={breadcrumbItems} />
         </div>
         <OperatorProfileDetail operator={operator} packages={packages} />
-      </main>
+      </div>
     </>
   )
 }

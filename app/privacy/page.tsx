@@ -26,7 +26,7 @@ const LAST_UPDATED = '12 June 2026';
 
 export default function PrivacyPolicyPage() {
   return (
-    <main className="min-h-screen bg-[var(--background)] text-[var(--text)]">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--text)]">
       <div className="mx-auto max-w-3xl px-4 py-12">
         <h1 className="mb-2 text-3xl font-bold">Privacy Policy</h1>
         <p className="mb-8 text-sm text-[var(--textMuted)]">Last updated: {LAST_UPDATED}</p>
@@ -247,6 +247,6 @@ export default function PrivacyPolicyPage() {
           Governed by the laws of England and Wales. Written under UK GDPR and the Data Protection Act 2018.
         </p>
       </div>
-    </main>
+    </div>
   );
 }

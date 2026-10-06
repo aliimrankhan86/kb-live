@@ -42,13 +42,13 @@ export default async function OperatorLayout({ children }: OperatorLayoutProps) 
           userRole={user.role}
           userName={user.name || user.email}
         />
-        <main className="min-w-0 flex-1 rounded-xl border border-[rgba(255,255,255,0.1)] bg-[#111111] p-4 md:p-6">
+        <div className="min-w-0 flex-1 rounded-xl border border-[rgba(255,255,255,0.1)] bg-[#111111] p-4 md:p-6">
           <header className="mb-6 border-b border-[rgba(255,255,255,0.1)] pb-4">
             <p className="text-xs uppercase tracking-wide text-[rgba(255,255,255,0.64)]">Operator Portal</p>
             <OperatorPageTitle />
           </header>
           {children}
-        </main>
+        </div>
       </div>
     </div>
   );

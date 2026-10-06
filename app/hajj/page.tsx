@@ -64,7 +64,7 @@ export default function HajjPage() {
   return (
     <>
       <JsonLdScript data={hajjPageJsonLd} />
-      <main className="min-h-screen flex items-center justify-center px-4 py-20">
+      <div className="min-h-screen flex items-center justify-center px-4 py-20">
         <div className="max-w-lg w-full text-center">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--yellow)]/10 border border-[var(--yellow)]/20 mb-6">
@@ -154,7 +154,7 @@ export default function HajjPage() {
             </Link>
           </div>
         </div>
-      </main>
+      </div>
     </>
   );
 }

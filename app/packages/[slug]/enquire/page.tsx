@@ -52,11 +52,11 @@ export default async function EnquirePage({ params }: { params: Promise<{ slug: 
     pkg = await Repository.getPublicPackageBySlug(slug)
     if (pkg) operator = await Repository.getOperatorById(pkg.operatorId)
   } catch {
-    return <main className="min-h-screen bg-[var(--background)]">{renderNotice('We could not load this package right now. Please try again.')}</main>
+    return <div className="min-h-screen bg-[var(--background)]">{renderNotice('We could not load this package right now. Please try again.')}</div>
   }
 
   if (!pkg || pkg.status !== 'published') {
-    return <main className="min-h-screen bg-[var(--background)]">{renderNotice('This package is no longer available.')}</main>
+    return <div className="min-h-screen bg-[var(--background)]">{renderNotice('This package is no longer available.')}</div>
   }
 
   const breadcrumbItems = [
@@ -67,11 +67,11 @@ export default async function EnquirePage({ params }: { params: Promise<{ slug: 
   ]
 
   return (
-    <main className="min-h-screen bg-[var(--background)]">
+    <div className="min-h-screen bg-[var(--background)]">
       <div className="w-full max-w-2xl mx-auto px-4 pt-6">
         <Breadcrumb items={breadcrumbItems} />
       </div>
       <EnquiryForm summary={buildSummary(pkg, operator)} packageSlug={pkg.slug} />
-    </main>
+    </div>
   )
 }

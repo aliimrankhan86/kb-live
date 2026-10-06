@@ -42,7 +42,7 @@ export default function HowWeRankPage() {
   return (
     <>
       <JsonLdScript data={pageJsonLd} />
-      <main className="min-h-screen bg-[var(--background)]">
+      <div className="min-h-screen bg-[var(--background)]">
         <article className="mx-auto max-w-2xl px-5 py-12 md:px-6 md:py-16">
 
           <header className="mb-10">
@@ -266,7 +266,7 @@ export default function HowWeRankPage() {
             </nav>
           </footer>
         </article>
-      </main>
+      </div>
     </>
   );
 }

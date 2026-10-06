@@ -78,7 +78,7 @@ export default async function UmrahPage() {
   return (
     <>
       <JsonLdScript data={umrahJsonLd} />
-      <main className="min-h-screen px-4 py-10">
+      <div className="min-h-screen px-4 py-10">
         <UmrahSearchForm departureAirports={departureAirports} />
         <section
           className="mx-auto mt-8 w-full max-w-3xl rounded-lg border border-[var(--border)] bg-[var(--panel)] p-5"
@@ -110,7 +110,7 @@ export default async function UmrahPage() {
             ))}
           </nav>
         </section>
-      </main>
+      </div>
     </>
   )
 }

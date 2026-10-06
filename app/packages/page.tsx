@@ -50,9 +50,9 @@ export default async function PackagesPage() {
   return (
     <>
       <JsonLdScript data={pageJsonLd} />
-      <main className="min-h-screen bg-[var(--background)]">
+      <div className="min-h-screen bg-[var(--background)]">
         <PackagesBrowse packages={packages} error={error} />
-      </main>
+      </div>
     </>
   )
 }

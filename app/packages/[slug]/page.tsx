@@ -90,7 +90,7 @@ export default async function PackageDetailPage({
   if (error) {
     return (
       <>
-        <main className="min-h-screen bg-[var(--background)]">{renderNotFound(error)}</main>
+        <div className="min-h-screen bg-[var(--background)]">{renderNotFound(error)}</div>
       </>
     )
   }
@@ -98,9 +98,9 @@ export default async function PackageDetailPage({
   if (!pkg || pkg.status !== 'published') {
     return (
       <>
-        <main className="min-h-screen bg-[var(--background)]">
+        <div className="min-h-screen bg-[var(--background)]">
           {renderNotFound('This package is no longer available.')}
-        </main>
+        </div>
       </>
     )
   }
@@ -139,13 +139,13 @@ export default async function PackageDetailPage({
 
   return (
     <>
-      <main className="min-h-screen bg-[var(--background)]">
+      <div className="min-h-screen bg-[var(--background)]">
         <JsonLdScript data={packageDetailJsonLd} />
         <div className="w-full max-w-5xl mx-auto px-4 pt-6">
           <Breadcrumb items={breadcrumbItems} />
         </div>
         <PackageDetail pkg={pkg} operator={operator} rfqEnabled={isRfqQuoteEnabled()} />
-      </main>
+      </div>
     </>
   )
 }
