@@ -137,3 +137,34 @@ export function nightsText(p: { totalNights: number; nightsMakkah?: number; nigh
       : 'Makkah and Madinah split not provided';
   return `${total} · ${split}`;
 }
+
+/**
+ * Standards §6: show the price exactly as the operator gave it. Never converts
+ * currency, rounds or recomputes. "£1,495" / "£1,495.50" / "US$1,200".
+ */
+export function formatStatedPrice(amount: number, currency: string): string {
+  return new Intl.NumberFormat('en-GB', {
+    style: 'currency',
+    currency: currency || 'GBP',
+    minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+}
+
+/** "From £1,495" or "£1,495": one price label for every surface. */
+export function priceText(p: { pricePerPerson: number; currency: string; priceType: string }): string {
+  const amount = formatStatedPrice(p.pricePerPerson, p.currency);
+  return p.priceType === 'from' ? `From ${amount}` : amount;
+}
+
+/** Short §6 attribution for cards: "As stated by Example Ltd, updated 6 Oct 2026". */
+export function priceAttributionShort(operatorName?: string, updatedAt?: string): string {
+  return `As stated by ${operatorName ?? 'the operator'}${updatedAt ? `, updated ${formatDate(updatedAt)}` : ''}`;
+}
+
+/** Full §6 attribution for the package page and enquiry. */
+export function priceAttribution(operatorName?: string, updatedAt?: string): string {
+  return `Price per person as stated by ${operatorName ?? 'the operator'}${
+    updatedAt ? `, last updated ${formatDate(updatedAt)}` : ''
+  }. Confirm the final price with the operator before paying.`;
+}

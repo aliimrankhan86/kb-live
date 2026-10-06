@@ -5,11 +5,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import type { SearchPackageDisplay } from '@/components/search/search-utils'
 import type { OperatorProfile } from '@/lib/types'
-import { getRegionSettings } from '@/lib/i18n/region'
-import { formatPriceForRegion } from '@/lib/i18n/format'
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge'
 import { InclusionChip } from '@/components/ui/InclusionChip'
-import { nightsText } from '@/lib/packages/display'
+import { formatStatedPrice, nightsText, priceAttributionShort } from '@/lib/packages/display'
 import styles from './packages.module.css'
 
 interface InclusionChip {
@@ -30,6 +28,8 @@ interface PackageCardProps {
   nightsMakkah?: number
   nightsMadinah?: number
   priceType?: 'from' | 'exact' | 'fixed'
+  /** When the operator last updated this package (price date, standards §6). */
+  priceUpdatedAt?: string
   /** Closest-match only: the search preferences this package does not meet. */
   unmetCriteria?: string[]
 }
@@ -53,15 +53,13 @@ const PackageCard: React.FC<PackageCardProps> = ({
   nightsMadinah,
   priceType = 'from',
   unmetCriteria,
+  priceUpdatedAt,
 }) => {
-  const regionSettings = React.useMemo(() => getRegionSettings(), [])
   const [makkahImgSrc, setMakkahImgSrc] = useState(pkg.makkahHotel.image || HOTEL_FALLBACK)
   const [madinaImgSrc, setMadinaImgSrc] = useState(pkg.madinaHotel.image || HOTEL_FALLBACK)
 
-  const priceInfo = React.useMemo(
-    () => formatPriceForRegion(pkg.price, pkg.currency, regionSettings),
-    [pkg.currency, pkg.price, regionSettings]
-  )
+  // Stated price, never converted (standards §6).
+  const priceFormatted = formatStatedPrice(pkg.price, pkg.currency)
 
   const renderStars = (rating: number | null, label: string) => {
     // Operator has not supplied a star rating — state that honestly rather than
@@ -181,9 +179,12 @@ const PackageCard: React.FC<PackageCardProps> = ({
         <div className={styles.priceBlock}>
           <div className={styles.priceLead}>
             {priceType === 'from' && <span className={styles.priceFrom}>from</span>}
-            <span className={styles.priceAmount}>{priceInfo.formatted}</span>
+            <span className={styles.priceAmount}>{priceFormatted}</span>
           </div>
           <span className={styles.priceNote}>{pkg.priceNote || 'per person'}</span>
+          <span className={styles.priceAttribution} data-testid={`price-attribution-${pkg.id}`}>
+            {priceAttributionShort(operator?.companyName, priceUpdatedAt)}
+          </span>
         </div>
 
         {/* Trip summary line: nights + dates + route, only when real */}

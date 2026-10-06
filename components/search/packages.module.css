@@ -362,6 +362,13 @@
   color: var(--textMuted);
 }
 
+/* §6 price attribution: who stated the price and when it was last updated. */
+.priceAttribution {
+  flex-basis: 100%;
+  font-size: 0.75rem;
+  color: var(--textMuted);
+}
+
 /* Trip meta pills */
 .tripMeta {
   display: flex;

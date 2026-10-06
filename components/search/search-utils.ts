@@ -320,6 +320,7 @@ export function toPackageCardProps(pkg: CataloguePackage) {
     package: toSearchDisplay(pkg),
     inclusions: buildInclusionChips(pkg),
     totalNights: pkg.totalNights,
+    priceUpdatedAt: pkg.updatedAt,
     nightsMakkah: pkg.nightsMakkah,
     nightsMadinah: pkg.nightsMadinah,
     priceType: (pkg.priceType === 'from' ? 'from' : 'exact') as 'from' | 'exact',

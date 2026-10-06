@@ -1,6 +1,7 @@
 import { Offer, OperatorProfile, Package } from './types';
 import { getRegionSettings } from './i18n/region';
 import { formatDistance, formatPriceForRegion, parseDistanceKm } from './i18n/format';
+import { priceText } from './packages/display';
 import { flightTypeLabel, groupTypeShort, ziyaratShort } from './packages/display';
 
 export interface ComparisonRow {
@@ -113,10 +114,8 @@ export function mapPackageToComparison(pkg: Package, operator?: OperatorProfile)
     return `Makkah ${makkah} / Madinah ${madinah}`;
   })();
 
-  const priceInfo = formatPriceForRegion(pkg.pricePerPerson, pkg.currency, settings);
-  const price = pkg.priceType === 'from'
-    ? `From ${priceInfo.formatted}`
-    : priceInfo.formatted;
+  // Stated price, never converted (standards §6); same label as cards and package page.
+  const price = priceText(pkg);
 
   const starValues = [pkg.hotelMakkahStars, pkg.hotelMadinahStars].filter(
     (s): s is 3 | 4 | 5 => typeof s === 'number'
@@ -130,7 +129,7 @@ export function mapPackageToComparison(pkg: Package, operator?: OperatorProfile)
     price: pkg.currency && Number.isFinite(pkg.pricePerPerson) ? price : 'Not provided',
     operatorName: operator?.companyName || 'Not provided',
     totalNights: pkg.totalNights,
-    splitNights: `${pkg.nightsMakkah} / ${pkg.nightsMadinah}`,
+    splitNights: pkg.nightsMakkah && pkg.nightsMadinah ? `${pkg.nightsMakkah} / ${pkg.nightsMadinah}` : 'Not provided',
     hotelRating,
     distance,
     occupancy: supportedOccupancy.join(', ') || 'Not provided',

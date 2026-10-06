@@ -3,6 +3,7 @@ import { EnquiryForm, type EnquirySummary } from '@/components/enquiry/EnquiryFo
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { Repository } from '@/lib/api/repository'
 import type { OperatorProfile, Package } from '@/lib/types'
+import { priceAttributionShort, priceText } from '@/lib/packages/display'
 
 export const metadata: Metadata = {
   title: 'Enquire | PilgrimCompare',
@@ -24,7 +25,7 @@ const renderNotice = (message: string) => (
 /** Build the read-only summary from package data. Honest: missing → "Not provided". */
 function buildSummary(pkg: Package, operator: OperatorProfile | undefined): EnquirySummary {
   const tripType = pkg.pilgrimageType === 'hajj' ? 'Hajj' : 'Umrah'
-  const price = `${pkg.priceType === 'from' ? 'From ' : ''}£${pkg.pricePerPerson.toLocaleString('en-GB')} per person`
+  const price = `${priceText(pkg)} per person (${priceAttributionShort(operator?.companyName, pkg.updatedAt)})`
   const stars = [
     pkg.hotelMakkahStars ? `${pkg.hotelMakkahStars}★ Makkah` : null,
     pkg.hotelMadinahStars ? `${pkg.hotelMadinahStars}★ Madinah` : null,

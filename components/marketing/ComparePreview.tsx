@@ -1,20 +1,12 @@
 import Link from 'next/link'
 import type { Package } from '@/lib/types'
-import { INCLUSIONS, friendlyDistance, nightsText } from '@/lib/packages/display'
+import { INCLUSIONS, friendlyDistance, nightsText, priceAttributionShort, priceText } from '@/lib/packages/display'
 import styles from './home.module.css'
 
 interface ComparePreviewProps {
   packages: Package[]
 }
 
-function formatPrice(pkg: Package): string {
-  const amount = new Intl.NumberFormat('en-GB', {
-    style: 'currency',
-    currency: pkg.currency || 'GBP',
-    maximumFractionDigits: 0,
-  }).format(pkg.pricePerPerson)
-  return pkg.priceType === 'from' ? `From ${amount}` : amount
-}
 
 function makkahHotel(pkg: Package): string {
   if (pkg.hotelMakkahName) return pkg.hotelMakkahName
@@ -80,7 +72,8 @@ export function ComparePreview({ packages }: ComparePreviewProps) {
               {pair.map((pkg) => (
                 <th key={pkg.id} scope="col">
                   <span className={styles.previewTitle}>{pkg.title}</span>
-                  <span className={styles.previewPrice}>{formatPrice(pkg)}</span>
+                  <span className={styles.previewPrice}>{priceText(pkg)}</span>
+                  <span className="block text-xs font-normal text-[var(--textMuted)]">{priceAttributionShort(undefined, pkg.updatedAt)}</span>
                 </th>
               ))}
             </tr>

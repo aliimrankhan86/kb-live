@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import type { OperatorProfile, Package } from '@/lib/types'
 import { TierExplanation } from '@/components/operators/TierExplanation'
-import { nightsText } from '@/lib/packages/display'
+import { nightsText, priceAttributionShort, priceText } from '@/lib/packages/display'
 
 interface OperatorProfileDetailProps {
   operator: OperatorProfile
@@ -210,7 +210,7 @@ export function OperatorProfileDetail({ operator, packages }: OperatorProfileDet
                   {nightsText(pkg)}
                 </p>
                 <p className="mt-2 text-sm font-semibold text-[var(--yellow)]">
-                  {pkg.priceType === 'from' ? 'From ' : ''}£{pkg.pricePerPerson.toLocaleString()} per person
+                  {priceText(pkg)} per person · {priceAttributionShort(operator.companyName, pkg.updatedAt)}
                 </p>
               </li>
             ))}

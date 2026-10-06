@@ -2,11 +2,9 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import type { Package, OperatorProfile } from '@/lib/types'
 import { createQuotePrefillUrl } from '@/lib/quote-prefill'
-import { CURRENCY_CHANGE_EVENT, getRegionSettings } from '@/lib/i18n/region'
-import { formatPriceForRegion } from '@/lib/i18n/format'
 import { buttonVariants } from '@/components/ui/Button'
 import { TierExplanation } from '@/components/operators/TierExplanation'
 import {
@@ -18,6 +16,9 @@ import {
   formatDate,
   formatDateRange,
   nightsText,
+  formatStatedPrice,
+  priceText,
+  priceAttribution,
 } from '@/lib/packages/display'
 import { ATOL_STANDARD_LINE, CAA_ATOL_URL, CONTRACT_STANDARD_LINE } from '@/lib/content-rules'
 import { VERIFICATION_STATEMENT_HREF } from '@/components/ui/VerifiedBadge'
@@ -33,9 +34,6 @@ interface PackageDetailProps {
    */
   rfqEnabled?: boolean
 }
-
-const formatPrice = (value: number, currency: string, settings = getRegionSettings()) =>
-  formatPriceForRegion(value, currency, settings).formatted
 
 const Stars = ({ rating }: { rating?: number }) => {
   if (!rating) return <span className="text-[var(--textMuted)]">Rating not provided</span>
@@ -62,20 +60,14 @@ const SectionCard = ({ title, children, className = '' }: { title: string; child
 
 export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDetailProps) {
   const router = useRouter()
-  const [regionSettings, setRegionSettings] = useState(() => getRegionSettings())
-
-  useEffect(() => {
-    const updateSettings = () => setRegionSettings(getRegionSettings())
-    window.addEventListener(CURRENCY_CHANGE_EVENT, updateSettings)
-    return () => window.removeEventListener(CURRENCY_CHANGE_EVENT, updateSettings)
-  }, [])
-
   const handleBack = () => {
     if (typeof window !== 'undefined' && window.history.length > 1) router.back()
     else router.push('/packages')
   }
 
-  const priceLabel = pkg.priceType === 'from' ? `From ${formatPrice(pkg.pricePerPerson, pkg.currency, regionSettings)}` : formatPrice(pkg.pricePerPerson, pkg.currency, regionSettings)
+  // Stated price, never converted; attributed and dated (standards §6).
+  const priceLabel = priceText(pkg)
+  const attribution = priceAttribution(operator?.companyName, pkg.updatedAt)
   const makkahDist = friendlyDistance('Makkah', pkg.distanceToHaramMakkahMetres, pkg.distanceBandMakkah)
   const madinahDist = friendlyDistance('Madinah', pkg.distanceToHaramMadinahMetres, pkg.distanceBandMadinah)
   const flight = flightTypeLabel(pkg.flightType)
@@ -234,9 +226,9 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
           {/* Price & payment */}
           <SectionCard title="Price & payment">
             <dl className="mt-3 grid gap-x-6 gap-y-3 sm:grid-cols-2">
-              <Fact term="Price per person" value={priceLabel} />
+              <Fact term="Price per person" value={priceLabel} hint={attribution} />
               {typeof pkg.depositAmount === 'number' && (
-                <Fact term="Deposit to book" value={formatPrice(pkg.depositAmount, pkg.currency, regionSettings)} />
+                <Fact term="Deposit to book" value={formatStatedPrice(pkg.depositAmount, pkg.currency)} />
               )}
               {typeof pkg.paymentPlanAvailable === 'boolean' && (
                 <Fact term="Pay in instalments" value={pkg.paymentPlanAvailable ? 'Available' : 'Not available'} />
@@ -316,6 +308,7 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
           <div className="sticky top-6 rounded-xl border border-[var(--border)] bg-[var(--panel)] p-5">
             <p className="text-xs uppercase tracking-wide text-[var(--textMuted)]">{pkg.priceType === 'from' ? 'From' : 'Price'} · per person</p>
             <p data-testid="package-price" className="mt-1 text-3xl font-bold text-[var(--text)]">{priceLabel}</p>
+            <p className="mt-1 text-xs text-[var(--textMuted)]" data-testid="package-price-attribution">{attribution}</p>
             <ul className="mt-4 space-y-2 text-sm text-[var(--textMuted)]">
               <RailFact label={`${pkg.totalNights} nights`} sub={nightsText(pkg).split(' · ').slice(1).join(' · ')} />
               {(pkg.hotelMakkahStars || pkg.hotelMadinahStars) && (
