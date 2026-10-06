@@ -75,3 +75,6 @@ docs/_archive/
 supabase/config.toml
 supabase/.branches
 supabase/.temp
+
+# Overnight QA run working files (local only)
+.overnight/
