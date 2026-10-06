@@ -1,110 +1,154 @@
-NOT READY: PARKED (usage). Iteration 1 is complete and green. The run stopped at 77% of the 5-hour plan window (the brief says no new work at 75% or more). The window resets Tue 06 Oct 2026 05:20 BST. To resume, say: "continue from .overnight/STATE.md".
+GREEN WITH OPEN ITEMS
 
-# PilgrimCompare overnight QA report
+# PilgrimCompare QA run: final report
 
-Branch `fix/overnight-qa` (from `dev` @ `d03892d`). Run in an isolated worktree against a **local** Supabase stack with labelled local test data. Production was never reachable: every database and Supabase URL pointed at 127.0.0.1, and there were no Resend, Upstash or other external keys.
+**Branch:** `fix/overnight-qa` (from `dev` @ `d03892d`).
+**Setup:** isolated worktree, its own local Supabase stack and labelled local test data. Production was never reachable.
+**Result:**
+- Two consecutive full gates are green, including a clean verification run.
+- No P0, P1 or P2 defects are open, except the items that need Ali (listed below).
 
-## Status at a glance
+## Gate results (final, after a clean `npm ci` and a fully rebuilt local database)
 
-| Item | State |
-|---|---|
-| Iterations completed | 1 (gate green); parked before iteration 2 |
-| Reported problem (tab and search show different packages) | **Fixed and verified** by unit tests and real-browser tests against the local DB |
-| Defects found / fixed / open | 52 logged · 28 fixed (some partially) · see the table |
-| Vitest | 1,974 / 1,974 (baseline 1,869; the brief quoted 1,833) |
-| Type check / lint / build | pass / 0 errors (2 pre-existing warnings) / 0 errors (final gate at bb0864d) |
-| Real-DB Playwright (`.overnight/e2e`) | 18 / 18 |
-| Repo Playwright (`--workers=1`, chromium + firefox + webkit) | 69 passed · 6 skipped · 0 failed (baseline 64 passed / 2 failed in parallel; parallel failures are a known MockDB race) |
+| Check | Baseline | Final |
+|---|---|---|
+| Vitest | 1,869 (restart baseline 1,974) | **2,047 / 2,047** |
+| tsc / lint / build | pass / 0 errors / pass | pass / 0 errors (2 pre-existing warnings) / pass |
+| Repo Playwright (`--workers=1`, chromium + firefox + webkit) | 64 pass, 2 fail (parallel MockDB race) | **69 passed · 6 skipped · 0 failed** |
+| Real-DB Playwright (`.overnight/e2e`, local Supabase + seed) | n/a | **24 / 24** |
 
-## The reported problem: root causes
+The real-DB suite covers:
+- **The reported tab/search mismatch:** closest matches, empty state, and URL, reload and back.
+- **Operator and admin:** operator dashboard, CSV import/export, profile save, access control, and the admin pages.
+- **Listing and display:** verified-only listing, an uploaded image under the CSP, price attribution, and three-state inclusions.
+- **Content:** guide pages with no PilgrimCompare prices or dates.
+- **Accounts:** password reset end to end through a real email link (local Mailpit), and real account deletion.
+- **Layout:** 1280, 768 and 375 px with no console errors and no sideways scrolling.
 
-The browse tab (`/packages`) and the search results read from the same database query. The search results lost packages because of the filter layer and the search form:
+## The reported problem (fixed and verified)
 
-1. **The search form had hidden defaults.** An untouched form searched Heathrow only, with a £500 to £1,000 budget, so most real packages disappeared.
-2. **Corridor links did nothing.** "Browse Umrah packages from London" sent `departureCity=London`, and the filter ignored that parameter. It showed every city.
-3. **Airport matching was code-only.** "London" did not match Gatwick or Stansted, and an airport typed as text (for example from a CSV) never matched.
-4. **The budget maximum was dropped without saying so.** When nothing fitted the budget, the filter quietly ignored it and showed over-budget packages as matches.
-5. **Travel dates were sent but ignored.** The Ramadan preset also said "Approx. May to Jun", which is wrong.
-6. **"Clear all" and "Reset filters" could not remove the airport filter,** so a traveller could get stuck on an empty page.
+The browse tab and search read the same packages; the search filters lost them. Six root causes:
+1. The form silently applied Heathrow and a £500 to £1,000 budget.
+2. Corridor links (`departureCity`) were ignored.
+3. Airports matched by code only, so London did not include Gatwick or Stansted.
+4. The budget maximum was dropped silently.
+5. Travel dates were ignored, and the Ramadan dates shown were wrong.
+6. "Clear all" could not remove the airport.
 
-**What happens now:**
-- **One shared query layer** (`components/search/search-utils.ts`) and one location mapping (`lib/airports.ts`).
-- **Must-haves apply strictly:** pilgrimage type, departure location and dates, each only when the traveller set it.
-- **Other choices are preferences.** When exact matches are few, the page shows "Closest matches" and lists what differs on each card. Missing data reads "Not provided".
-- **The empty state is honest** and offers a way out.
-- **Search state lives in the URL,** including the page number.
-- **One card mapping and one date and nights format** are shared by search, featured and browse.
+The fix is one shared query layer and one card mapping:
+- Must-haves (type, location, dates) apply strictly.
+- When exact matches are few, closest matches are shown with what differs.
+- The empty state is honest.
+- Search state lives in the URL.
 
-Proof that the tests failed before the fix and pass after it is in `.overnight/evidence/before-fix-probe.txt` and `after-fix-probe.txt`.
+Before/after proof: `.overnight/evidence/before-fix-probe.txt`.
 
-## Defects
+## Defects fixed
 
-| ID | Sev | Summary | Status |
-|---|---|---|---|
-| D-001..007 | P1 | Search silently lost packages (6 root causes above) | Fixed 5e6820e |
-| D-008 | P0 | Ramadan preset showed wrong months | Fixed 5e6820e |
-| D-011 | P0 | Open redirect via `/auth/confirm?next=//evil.com` | Fixed f9c3a28 |
-| D-015 | P0 | Open redirect via login `?redirect=` | Fixed f9c3a28 |
-| D-010 | P0 | Public `/api/operators` exposed internal eligibility flags | Fixed a99abb8 |
-| D-018 | P0 | Operator dashboard, analytics, profile save, CSV import/export and complaints inbox used the browser MockDB in production (seed data shown, writes lost) | Fixed 8215921, 38cab15, 2be7229, 39ecef0 (with guard test) |
-| D-029 | P0 | Structured data invented a nights split, a £0 price, "InStock" and a founding date | Fixed 00ec11b |
-| D-026 | P0 | Package page said PilgrimCompare "does not verify ATOL/ABTA", contradicting §7, and labelled ABTA as verified | Fixed 19de3e0 |
-| D-028 | P0 | Package rail showed "?★" for missing stars | Fixed 19de3e0 |
-| D-034 | P0 | Enquiry form did not say whose hands the details go into (§12) | Fixed 1938d90 |
-| D-017 | P1 | Prisma adapter missing booking-outcome methods: operator leads and admin reconciliation threw in production | Fixed 9b6513a |
-| D-009 | P1 | CSV import invented values, dropped ziyarat and broke on line breaks | Fixed 8215921 (round-trip test) |
-| (new) | P1 | Operators could change their own verification status and keep an old ATOL check date after editing the number | Fixed 2be7229 |
-| D-032 / D-033 | P2 | Tablet header and mobile enquire page overflowed sideways | Fixed c52b7fe / c55236c |
-| D-031 | P0 | Fabricated showcase content (fake testimonials, a real-sounding demo operator and ATOL number) | Fixed a8c7dd1 |
-| D-030 | P0 | /partner unsupported claims ("Thousands", "commission", "already listing") | Fixed 656ce6f |
-| D-030 (rest) | P0 | Corridor, Ramadan, Hajj and cost pages: hardcoded prices, implied supply, urgency, wrong Ramadan dates, blanket ATOL claims | Open |
-| D-019 | P1 | Account deletion reports success but deletes nothing | Open |
-| D-014 | P1 | Password reset is broken end to end (missing API route, missing /auth/callback, no set-new-password page) | Open (plan in STATE.md) |
-| D-020 | P1 | CSP blocks uploaded package images | Open |
-| D-035 | P1 | /requests and the header "My Requests" link go to a parked /quote (404) | Fixed 66680ff |
-| D-036 | P1 | Price attribution and date (§6) missing | Open |
-| Others | P2/P3 | See `.overnight/STATE.md` | Open / logged |
+**Iteration 1**
+- D-001..008 search: 5e6820e
+- D-011, D-015 open redirects: f9c3a28
+- D-010 operators API: a99abb8, c9ff44e
+- D-018 operator portal used the browser MockDB in production: 8215921, 38cab15, 2be7229, 39ecef0
+- D-017 database adapter: 9b6513a
+- D-029 invented structured data: 00ec11b
+- D-026, D-028 package-page protection copy and "?★": 19de3e0
+- D-034 enquiry data-sharing disclosure: 1938d90
+- D-009 CSV: 8215921
+- D-030, D-031 fake showcase content and /partner: a8c7dd1, 656ce6f
+- D-035 parked links: 66680ff
+- D-032, D-033 overflow: c52b7fe, c55236c
 
-## Tests added
+**Iteration 2 (Ali's order)**
+- D-019 account deletion: 4bc9eea
+- D-030 guide pages: 3654c6d
+- D-020 image CSP: 76bf57b
+- D-014 password reset: f0627c2, plus three issues found by the real-browser test (reset link host via the Origin header, `/auth/confirm` host, and the Supabase origin in `connect-src`)
+- D-036 operator name and price date beside prices: 6043fde
 
-search-journey (36), umrah-search-form (4), seed-guard (5), auth-redirect (18), login-redirect (4), public-operators (1), email-transport (4), package-detail-truth (4), enquiry-disclosure (1), json-ld-truth (3), package-csv-roundtrip (4), db-adapter-parity (1), operator-profile-api (4), client-data-guard (2), content-truth (12), rfq-parked-links (3). One existing test changed: the operator-surfaces profile save now asserts the PATCH to the server API, where it previously relied on the browser MockDB.
+**Ali's decisions**
+- Verified-only listing: e4072a3
+- Three-state inclusions: 1381205
+- ATOL/ABTA check-date migration, written and **not applied**: 2ceb5d0 (`supabase/migrations-pending/013_…`)
+- Registered office as a single unset config value: a7cd91a
 
-## Decisions taken without Ali (please review)
+**P2**
+- aeb8752 sort disclosure
+- 7ea3e1a no internal errors shown to users
+- 439b7b8 robots
+- 4d02df8 fonts
+- eb1416d no pre-selected room types
+- 1cb4fa9 compare dates row
+- 42f4918 card operator fallback
+- 3832dab parked-flow wording
+- 9e73f86 real-file banned-phrase scan
+- 281c4a6 em dashes and the 48-hour claim
+- 2c75983 city links
+- 531bc86 onboarding status
+- f204dbc GDPR self-claim
+- 0367791 nested `<main>`
 
-These are recorded in `.overnight/STATE.md` under DECISIONS:
-- The search form now defaults to any airport, any dates and no budget.
-- Distance filters on the Makkah hotel only.
-- When exact matches are few, closest matches are shown (up to 10).
-- Desktop navigation starts at 1024px wide.
-- A local email log transport is used when no Resend key is set.
+Full register: `.overnight/STATE.md`.
 
-## New or changed copy needing approval
+## Tests added (about 180)
 
-The list is in `.overnight/STATE.md` ("New/changed user-facing copy"). It will be copied here in full at the end of the run.
+- Search: search-journey, umrah-search-form, seed-guard
+- Auth and accounts: auth-redirect, login-redirect, password-reset, account-delete, email-transport
+- Operators and data: public-operators, package-csv-roundtrip, db-adapter-parity, operator-profile-api, client-data-guard, verified-only-listing
+- Truth and content: package-detail-truth, enquiry-disclosure, json-ld-truth, content-truth, banned-phrases-files, no-em-dash, registered-office
+- Display: price-attribution, inclusions-three-state, sort-disclosure, rfq-parked-links, image-csp
+- Hygiene: no-internal-errors, robots, landmarks
+
+Existing tests updated for new behaviour, with their assertions kept:
+- operator-surfaces now asserts the server API PATCH.
+- enquiry-api mocks the public lookup.
+- public-operators is verified-only.
+- phase2 now writes "missing" as `null`.
+- E2E slider, wizard and bank cooling text match the new UI.
+
+## Decisions taken (please review)
+
+- **Search:** must-haves are type, location and dates. Closest matches appear when there are fewer than 3 exact matches. Distance is measured to the Makkah hotel. The form defaults to Any airport / Any dates / no budget.
+- **Operator self-service:** operators cannot change their own verification. A changed ATOL or ABTA number clears its check date.
+- **Account deletion:** for customers linked to bookings or complaints, and for operator and admin accounts, the response is an honest 409 with the DPO email, and nothing is deleted.
+- **Prices:** shown exactly as stated, never converted, with "updated" taken from `updatedAt`.
+- **Local email:** a local-only log transport (`EMAIL_LOG_PATH`) is used. It never runs on Vercel production.
+- **Layout:** desktop nav from 1024px; only the root layout renders `<main>`.
+
+## Copy needing approval
+
+The full list is in `.overnight/STATE.md` ("New/changed user-facing copy"), plus the em-dash rewrites in commit 281c4a6. It covers:
+- **Search:** notices, chips, closest-match reasons, the empty state, and the "Any dates" / "Any airport" form options.
+- **Package page:** the price attribution line, protection/ATOL copy, and the nights format and "Not provided" variants.
+- **Journeys:** the enquiry data-sharing line, the account deletion messages and the reset-password page.
+- **Content pages:** city, Ramadan, Hajj and cost guides, and /partner.
 
 ## Needs Ali
 
-- **Registered office address** (§2, launch-blocking). It cannot be invented.
-- **Inclusions schema.** Inclusions are true/false only, so "not included" and "not stated" look the same.
-- **Unverified operators are listed publicly.**
-- **No per-number ATOL check date is stored in the database.**
-- **Four documents named in the brief are not in the repo.**
+1. **Registered office address** (§2, launch-blocking): set `REGISTERED_OFFICE` in `lib/legal.ts`.
+2. **Supabase dashboard:** add `https://pilgrimcompare.co.uk/auth/confirm` to the Auth redirect allow-list, or reset emails fall back to the site URL.
+3. **Migration 013:** move it into `supabase/migrations/` and apply it when ready, then ship the Prisma and adapter change described in the file.
+4. **Images:** `public/og.png` is 1×1 and `apple-touch-icon.png` is an SVG. A real 1200×630 brand image is needed; none was invented.
+5. **Enquiry retention:** the privacy page says "auto-deleted after 90 days", but no deletion job exists. Decide the policy, then either build the job or change the wording.
+6. **Docs:** four documents named in the original brief are not in the repo.
 
-## Exit criteria (brief §5): not yet met
+## Logged only (P3)
 
-- Two consecutive full gates with zero open P0/P1/P2: **no.** These P0/P1 items are still open:
-  - D-030 remainder (content claims)
-  - D-014 (password reset)
-  - D-019 (account delete)
-  - D-020 (CSP blocks images)
-  - D-036 (price attribution)
-- Reported problem fixed and verified: **yes.**
-- Claims table / alignment audit clean: **partly.** Cards, the package page, the compare preview and the operator profile now share one nights and date format. Content claims on SEO pages are still open.
-- Clean verification (fresh `npm ci` → DB reset → full gate): **not run yet.**
-- No pull request has been opened. The brief opens one into `dev` only when the exit criteria are met.
+- CSP `style-src 'unsafe-inline'` (`script-src` is nonce-only).
+- The E2E build bakes `E2E_TESTING` into `.next`.
+- Upstash `webpackIgnore` imports are unverified on Vercel.
+- Parked-flow APIs are not flag-gated.
+- `/api/outcomes` writes on a GET request.
+- The middleware static-file regex never matches.
+- Playwright has a parallel MockDB race.
+
+## CSV round trip
+
+Touched: import and export are now server-side and keep every decision field (round-trip test).
 
 ## Next step for Ali
 
-1. Say "continue from .overnight/STATE.md" after 05:20 BST. The ordered plan for iteration 2 is in STATE.md.
-2. Decide on the NEEDS ALI items above.
-3. Approve or adjust the new copy list in STATE.md.
+1. Review and merge the pull request into `dev`. It was not merged here.
+2. Do "Needs Ali" items 1 and 2 before going live.
+3. Run `docs/uat/SEARCH_JOURNEY_UAT.md`.
+4. Refresh `PILGRIMCOMPARE_HANDOFF.md`.

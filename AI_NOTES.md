@@ -2,7 +2,7 @@
 
 ## §OQ1 Overnight QA run (search mismatch + P0 data/security fixes), 2026-10-06
 
-**Status: IN PROGRESS on branch `fix/overnight-qa`** (off `dev` @ d03892d). Full report: `docs/uat/OVERNIGHT_REPORT.md`. Run memory (local, gitignored): `.overnight/STATE.md`. Vitest **1,971** (baseline 1,869), tsc clean, build 0 errors, real-DB Playwright (`.overnight/e2e`) 18/18.
+**Status: COMPLETE on branch `fix/overnight-qa` (PR into dev, not merged)** (off `dev` @ d03892d). Full report: `docs/uat/OVERNIGHT_REPORT.md`. Run memory (local, gitignored): `.overnight/STATE.md`. Vitest **1,971** (baseline 1,869), tsc clean, build 0 errors, real-DB Playwright (`.overnight/e2e`) 18/18.
 
 ### Root causes and fixes
 - **Search lost packages (reported problem).** The search form had hidden defaults (LHR, £500 to £1,000). Corridor links sent `departureCity`, which was ignored. Airport matching used exact codes only. Budget max was silently dropped. Dates were ignored. "Clear all" could not clear the airport. Fixed with one shared query layer in `components/search/search-utils.ts` (`parseSearchCriteria` / `searchPackages` / `filterByParams` / `toPackageCardProps`) and one location mapping in `lib/airports.ts` (`resolveDepartureLocation`, `departureCityOf`). Must-haves (type, location, dates) apply strictly; preferences produce "Closest matches" with reasons; the empty state is honest; the page number is in the URL.
@@ -26,6 +26,24 @@
 - `/_vercel/insights/script.js` 404s off Vercel by design.
 - `npx playwright test` builds `.next` with `E2E_TESTING=1` baked in. Rebuild normally before running a non-E2E server.
 - Run Playwright with `--workers=1`: parallel workers race on the shared MockDB, the same as CI.
+
+### Iteration 2 (2026-10-06, founder decisions applied)
+- **Account deletion is real.** It returns an honest 409 for linked records and for operator or admin accounts.
+- **Guide pages are cleaned up.** City, Ramadan, Hajj and cost pages no longer carry PilgrimCompare prices, dates or urgency.
+- **Images:** CSP and `next/image` allow the configured Supabase origin.
+- **Password reset works end to end.** It needs the production Supabase redirect allow-list to include `/auth/confirm`.
+- **Prices:** the operator name and price date appear beside every price, through one stated-price formatter that never converts currency.
+- **Founder decisions applied:**
+  - Verified-only public listing.
+  - Three-state inclusions.
+  - Migration 013 is written in `supabase/migrations-pending/` and has **not** been applied.
+  - `REGISTERED_OFFICE` is a single unset config value.
+- **P2 cleanup:** em dashes, sort disclosure, robots, fonts, landmarks, city links, error hygiene and real-file banned-phrase scanning.
+- **Gotchas:**
+  - `/auth/confirm` uses the Host header (`requestOrigin`), so reset and confirm links land on the host that holds the session cookie.
+  - The reset route uses the browser's Origin header.
+  - Local Supabase needs `additional_redirect_urls` for `http://127.0.0.1:3100/**` and `http://localhost:3100/**`.
+- **Final checks:** Vitest 2,047; Playwright 69/6/0; real-DB suite 24/24; clean verification green.
 
 ### Open (see report)
 - **Content claims, D-030 remainder:** corridor pages, Ramadan, Hajj, cost page, TierExplanation, CityCorridor.

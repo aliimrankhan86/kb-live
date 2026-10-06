@@ -9,7 +9,7 @@
 
 **State (2026-06-13):** Production on `main` (PR #54). Tests 1,830/1,830 ✅. Build clean ✅. Light theme + search redesign + pagination on `main`. Homepage redesign merged to `dev` (PR #63). Data-integrity "Not provided" display fix merged to `dev` (PR #64) — cards, JSON-LD, quote prefill. Operator-form no-silent-defaults fix on `fix/operator-form-no-silent-defaults` (PR → dev pending) — wizard no longer saves default stars/distance/group type for skipped fields; they persist unset → "Not provided" (see AI_NOTES §28). Q1–Q6 quality passes complete. Full transactional email suite live. 3 Vercel cron jobs active.
 
-**Overnight QA (2026-10-06):** branch `fix/overnight-qa` (PR not yet opened) fixes the search/tab package mismatch and several P0 data/security issues. See `docs/uat/OVERNIGHT_REPORT.md`.
+**Overnight QA (2026-10-06):** branch `fix/overnight-qa` (PR into dev, awaiting review) fixes the search/tab package mismatch and several P0 data/security issues. See `docs/uat/OVERNIGHT_REPORT.md`.
 
 **Remaining setup items:** Operational only — curl-test 3 cron endpoints with CRON_SECRET, submit test enquiry to verify email delivery, onboard first operator. Email mailboxes live via Cloudflare Email Routing (→ Gmail). Upgrade to Google Workspace when onboarding real operators.
 

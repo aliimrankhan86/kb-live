@@ -9,7 +9,7 @@
 
 ---
 
-> **2026-10-06 overnight QA (branch `fix/overnight-qa`, in progress):** reported search/tab mismatch fixed (shared query layer); operator portal no longer uses browser MockDB; open redirects closed; JSON-LD/package-page/partner truth fixes. Vitest 1,971 · tsc ✅ · build ✅. Report: `docs/uat/OVERNIGHT_REPORT.md`; detail `AI_NOTES.md` §OQ1.
+> **2026-10-06 QA run (branch `fix/overnight-qa`, PR into dev, not merged; two green gates incl. clean verification):** reported search/tab mismatch fixed (shared query layer); operator portal no longer uses browser MockDB; open redirects closed; JSON-LD/package-page/partner truth fixes. Vitest 2,047 · Playwright 69/6/0 · real-DB 24/24 · tsc ✅ · build ✅. Founder decisions applied (verified-only, three-state inclusions, migration 013 pending, registered office unset). Report: `docs/uat/OVERNIGHT_REPORT.md`; detail `AI_NOTES.md` §OQ1.
 
 ## Health (verified 2026-06-17)
 
