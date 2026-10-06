@@ -27,7 +27,11 @@ export async function POST(request: Request) {
   }
 
   try {
-    const origin = new URL(request.url).origin;
+    // The link must return to the same host the browser used, or the PKCE
+    // code-verifier cookie is missing and the reset fails. The browser's Origin
+    // header is that host; Supabase's redirect allow-list still rejects any
+    // origin that is not configured (it then falls back to the site URL).
+    const origin = request.headers.get('origin') ?? process.env.NEXT_PUBLIC_SITE_URL ?? new URL(request.url).origin;
     const supabase = await createClient();
     const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
       redirectTo: `${origin}/auth/confirm?next=/reset-password`,

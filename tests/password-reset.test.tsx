@@ -28,6 +28,17 @@ describe('POST /api/auth/reset-password (was missing: the login form posted to a
     });
   });
 
+  it('returns the link to the host the browser used (Origin header)', async () => {
+    const { POST } = await import('@/app/api/auth/reset-password/route');
+    await POST(new Request('http://localhost:3100/api/auth/reset-password', {
+      method: 'POST', body: JSON.stringify({ email: 'a@example.com' }),
+      headers: { 'x-forwarded-for': '10.0.0.5', origin: 'http://127.0.0.1:3100' },
+    }));
+    expect(resetPasswordForEmail).toHaveBeenLastCalledWith('a@example.com', {
+      redirectTo: 'http://127.0.0.1:3100/auth/confirm?next=/reset-password',
+    });
+  });
+
   it('answers the same way when Supabase errors, so it cannot reveal accounts', async () => {
     resetPasswordForEmail.mockResolvedValueOnce({ error: { message: 'User not found' } });
     const res = await post({ email: 'nobody@example.com' }, '10.0.0.3');
