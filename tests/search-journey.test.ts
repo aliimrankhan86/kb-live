@@ -230,3 +230,11 @@ describe('one nights format', () => {
     expect(toPackageCardProps({ ...base, totalNights: 12, nightsMakkah: 0, nightsMadinah: 0 }).totalNights).toBe(12);
   });
 });
+
+describe('departure city links never 404', () => {
+  it('uses the corridor page when it exists, otherwise the search results', async () => {
+    const { departureCityHref } = await import('@/lib/airports');
+    expect(departureCityHref('London')).toBe('/umrah/london');
+    expect(departureCityHref('Glasgow')).toBe('/search/packages?type=umrah&departureCity=Glasgow');
+  });
+});

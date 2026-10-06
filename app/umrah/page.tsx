@@ -3,7 +3,7 @@ import { UmrahSearchForm } from '@/components/umrah/UmrahSearchForm'
 import Link from 'next/link'
 import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
 import { Repository } from '@/lib/api/repository'
-import { resolveDepartureLocation } from '@/lib/airports'
+import { resolveDepartureLocation, departureCityHref } from '@/lib/airports'
 
 export const metadata: Metadata = {
   title: 'Umrah Packages 2026 from the UK - Compare Operators',
@@ -101,7 +101,7 @@ export default async function UmrahPage() {
               Umrah cost guide →
             </Link>
             {[
-              ...departureCities.map((city) => ({ label: `From ${city}`, href: `/umrah/${city.toLowerCase()}` })),
+              ...departureCities.map((city) => ({ label: `From ${city}`, href: departureCityHref(city) })),
               { label: 'Ramadan Umrah', href: '/umrah/ramadan' },
             ].map(({ label, href }) => (
               <Link key={href} href={href} className="inline-flex min-h-[44px] items-center rounded-lg border border-[var(--border)] bg-[var(--surfaceDark)] px-3 py-2 text-xs font-medium text-[var(--textMuted)] hover:text-[var(--text)] hover:border-[var(--yellow)]/40 transition-colors">

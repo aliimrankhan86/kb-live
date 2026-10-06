@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { departureCityHref } from '@/lib/airports'
 import styles from './home.module.css'
 
 interface GuideLink {
@@ -27,7 +28,7 @@ export function DepartureCities({ cities, guideLinks }: DepartureCitiesProps) {
           {cities.map((city) => (
             <Link
               key={city}
-              href={`/umrah/${city.toLowerCase()}`}
+              href={departureCityHref(city)}
               className={styles.cityLink}
             >
               Umrah from {city}

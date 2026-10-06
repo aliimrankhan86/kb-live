@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { departureCityHref } from '@/lib/airports'
 import Link from 'next/link'
 import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
 import { Repository } from '@/lib/api/repository'
@@ -25,9 +26,6 @@ export const metadata: Metadata = {
     locale: 'en_GB',
   },
 }
-
-/** Corridor pages that exist; other departure cities have no page yet. */
-const CORRIDOR_PAGES = new Set(['london', 'birmingham', 'manchester'])
 
 const factors = [
   {
@@ -201,9 +199,7 @@ export default async function UmrahCostPage() {
             </p>
             <div className="flex flex-wrap gap-2">
               {[
-                ...departureCities
-                  .filter((city) => CORRIDOR_PAGES.has(city.toLowerCase()))
-                  .map((city) => ({ label: `Umrah from ${city}`, href: `/umrah/${city.toLowerCase()}` })),
+                ...departureCities.map((city) => ({ label: `Umrah from ${city}`, href: departureCityHref(city) })),
                 { label: 'Ramadan Umrah', href: '/umrah/ramadan' },
                 { label: 'All Umrah packages', href: '/umrah' },
               ].map(({ label, href }) => (

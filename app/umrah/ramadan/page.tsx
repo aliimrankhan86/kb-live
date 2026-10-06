@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { departureCityHref } from '@/lib/airports'
 import Link from 'next/link'
 import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
 import { Repository } from '@/lib/api/repository'
@@ -181,7 +182,7 @@ export default async function RamadanUmrahPage() {
             </p>
             <div className="flex flex-wrap gap-2">
               {[
-                ...departureCities.map((city) => ({ label: `Umrah from ${city}`, href: `/umrah/${city.toLowerCase()}` })),
+                ...departureCities.map((city) => ({ label: `Umrah from ${city}`, href: departureCityHref(city) })),
                 { label: 'All Umrah packages', href: '/umrah' },
               ].map(({ label, href }) => (
                 <Link

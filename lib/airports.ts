@@ -100,3 +100,17 @@ export function departureCityOf(value: string | null | undefined): string | unde
   const location = resolveDepartureLocation(value);
   return location ? UK_DEPARTURE_AIRPORTS.find((a) => a.code === location.codes[0])?.city : undefined;
 }
+
+/** Cities that have their own corridor page under /umrah/{city}. */
+const CORRIDOR_PAGE_CITIES = new Set(['london', 'birmingham', 'manchester']);
+
+/**
+ * Link for "Umrah from {city}": the corridor page when one exists, otherwise
+ * the search results for that city (never a link to a page that 404s).
+ */
+export function departureCityHref(city: string): string {
+  const key = city.trim().toLowerCase();
+  return CORRIDOR_PAGE_CITIES.has(key)
+    ? `/umrah/${key}`
+    : `/search/packages?type=umrah&departureCity=${encodeURIComponent(city.trim())}`;
+}

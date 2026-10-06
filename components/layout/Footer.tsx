@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { departureCityHref } from '@/lib/airports'
 import Link from 'next/link';
 import { Logo } from '@/components/graphics/Logo';
 import { WordmarkLogo } from '@/components/graphics/WordmarkLogo';
@@ -202,7 +203,7 @@ export function Footer({ cities = [], rfqEnabled = false }: { cities?: string[];
                   {cities.map(city => (
                     <li key={city}>
                       <Link
-                        href={`/umrah/${city.toLowerCase()}`}
+                        href={departureCityHref(city)}
                         className={linkClass}
                       >
                         {city}
