@@ -497,6 +497,11 @@ function parseCsv(text: string): string[][] {
   return rows;
 }
 
+/** Trust/verification state only an admin may change. */
+const OPERATOR_PROTECTED_FIELDS = [
+  'verificationStatus', 'verifiedAt', 'tier', 'eligibilityFlags', 'atolVerifiedAt', 'abtaVerifiedAt', 'slug',
+] as const satisfies readonly (keyof OperatorProfile)[];
+
 // ─── CSV import helpers (only stated values survive; nothing is defaulted) ──
 const BANDS = ['near', 'medium', 'far', 'unknown'] as const;
 const oneOf = <T extends string>(value: string, allowed: readonly T[]): T | undefined =>
@@ -1160,12 +1165,23 @@ export const Repository = {
     const existing = await store().getOperatorById(id);
     if (!existing) throw new Error('Operator not found');
 
+    // Operators may edit their own profile but never their trust state.
+    const safe: Partial<OperatorProfile> = { ...updates };
+    if (ctx.role !== 'admin') {
+      for (const key of OPERATOR_PROTECTED_FIELDS) delete safe[key];
+    }
     const operator: OperatorProfile = {
       ...existing,
-      ...updates,
+      ...safe,
       id, // protect id
       updatedAt: new Date().toISOString(),
     };
+    // A changed ATOL/ABTA number has not been checked yet: drop the old check
+    // date so the page says "provided by the operator", not "checked".
+    if (ctx.role !== 'admin') {
+      if (operator.atolNumber !== existing.atolNumber) operator.atolVerifiedAt = undefined;
+      if (operator.abtaMemberNumber !== existing.abtaMemberNumber) operator.abtaVerifiedAt = undefined;
+    }
     await store().saveOperator(operator);
     return operator;
   },

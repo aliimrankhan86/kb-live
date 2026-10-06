@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { Repository } from '@/lib/api/repository';
 import { OperatorProfile } from '@/lib/types';
 
 const COUNTRIES = [
@@ -90,8 +89,10 @@ export function OperatorProfileForm({ operator }: Props) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const ctx = { userId: operator.id, role: 'operator' as const };
-      await Repository.updateOperator(ctx, operator.id, {
+      const res = await fetch('/api/operator/profile', {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
         companyName: form.companyName.trim(),
         tradingName: form.tradingName.trim() || undefined,
         companyRegistrationNumber: form.companyRegistrationNumber.trim() || undefined,
@@ -110,11 +111,13 @@ export function OperatorProfileForm({ operator }: Props) {
         yearsInBusiness: form.yearsInBusiness ? Number(form.yearsInBusiness) : undefined,
         servingRegions: form.servingRegions,
         pilgrimageTypesOffered: form.pilgrimageTypesOffered as ('umrah' | 'hajj')[],
+        }),
       });
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? `HTTP ${res.status}`);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
-    } catch {
-      alert('Failed to save. Please try again.');
+    } catch (err) {
+      alert(`Failed to save: ${err instanceof Error ? err.message : 'please try again'}.`);
     } finally {
       setSaving(false);
     }
