@@ -60,7 +60,7 @@ jobs:
       - name: Set up Supabase CLI
         uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 2.109.1 # pinned: matches the local rehearsal; "latest" hits the GitHub API rate limit
 
       - name: Start local Supabase
         run: supabase start --workdir e2e/local-db -x studio,realtime,edge-runtime,logflare,vector,imgproxy,postgres-meta,supavisor
