@@ -36,7 +36,8 @@ test.describe('Operator packages page', () => {
     const emptyState = page.getByTestId('operator-packages-empty');
     const list = page.getByTestId('operator-packages-list');
     // One of them must be present
-    await expect(list.or(emptyState)).toBeVisible({ timeout: 8000 });
+    // The empty state renders inside the list container, so both can match.
+    await expect(list.or(emptyState).first()).toBeVisible({ timeout: 8000 });
   });
 
   test('clicking Create package opens wizard', async ({ page }) => {
@@ -148,8 +149,11 @@ test.describe('PackageWizard — full flow to review', () => {
     await page.getByTestId('wizard-flights-toggle').waitFor({ state: 'visible' });
     await page.getByTestId('wizard-next-btn').click();
 
-    // Step 5 — Inclusions (defaults have rooms selected)
+    // Step 5 — Inclusions. No room type is pre-selected (never assumed), so the
+    // operator states one, as a real operator must.
     await page.getByTestId('wizard-inclusion-visa').waitFor({ state: 'visible' });
+    await page.locator('label:has([data-testid="wizard-room-double"])').click();
+    await expect(page.getByTestId('wizard-room-double')).toBeChecked();
     await page.getByTestId('wizard-next-btn').click();
 
     // Step 6 — Policies (optional for draft)

@@ -53,7 +53,7 @@ export async function GET(
 
   const message =
     result === 'booked'
-      ? 'Great news — your booking has been recorded. Thank you for using PilgrimCompare.'
+      ? 'Great news: your booking has been recorded. Thank you for using PilgrimCompare.'
       : 'Understood. Your response has been recorded. Thank you for letting us know.';
 
   return respondWithThanks(message);

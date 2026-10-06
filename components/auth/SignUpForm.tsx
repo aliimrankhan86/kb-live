@@ -220,7 +220,7 @@ export function SignUpForm() {
         <p className="mt-1 text-sm text-[var(--textMuted)]">
           {isPartner
             ? 'Register your travel company to list packages and receive enquiries from UK travellers.'
-            : 'Join PilgrimCompare to compare packages, save favourites, and request quotes.'}
+            : 'Join PilgrimCompare to compare packages, save favourites and send enquiries.'}
         </p>
       </div>
 

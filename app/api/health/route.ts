@@ -12,7 +12,9 @@ export async function GET() {
     await prisma.$queryRaw`SELECT 1`
     db = 'ok'
   } catch (err) {
-    dbError = err instanceof Error ? err.message : String(err)
+    // Log the detail server-side; never return internal DB errors publicly.
+    console.error('[health] DB ping failed:', err instanceof Error ? err.message : err)
+    dbError = 'unavailable'
   }
 
   const status = db === 'ok' ? 'healthy' : 'degraded'

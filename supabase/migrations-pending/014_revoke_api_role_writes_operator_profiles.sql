@@ -1,0 +1,19 @@
+-- 014_revoke_api_role_writes_operator_profiles.sql
+-- STATUS: WRITTEN, NOT APPLIED. Apply ONLY if PRODUCTION_CHECKS.sql query 1
+-- shows a FAIL, after review. Kept outside supabase/migrations/ so the
+-- "apply every file in order" procedure cannot run it by accident.
+--
+-- The app reads and writes operator_profiles only through Prisma on the
+-- server (postgres role), never through the Supabase REST API, so the API
+-- roles need no privileges on this table. Removing them closes the path where
+-- a signed-in operator sets its own verification_status / tier / booking
+-- flags / ATOL fields through policy operator_profiles_update_own,
+-- and stops anon reading unverified operator rows through
+-- operator_profiles_read_public. Policies are left in place; without a grant
+-- they cannot be used.
+--
+-- Validated locally inside BEGIN ... ROLLBACK (2026-10-06). Not applied anywhere.
+REVOKE SELECT, INSERT, UPDATE, DELETE ON public.operator_profiles FROM anon, authenticated;
+
+-- Rollback (restores Supabase's default API-role grants on this table):
+--   GRANT SELECT, INSERT, UPDATE, DELETE ON public.operator_profiles TO anon, authenticated;

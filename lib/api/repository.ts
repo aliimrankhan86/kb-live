@@ -1,6 +1,7 @@
 import { MockDB } from './mock-db';
+import { isPubliclyListed } from '@/lib/listing';
 import { sortByScore } from '@/lib/ranking';
-import { UK_DEPARTURE_AIRPORTS } from '@/lib/airports';
+import { departureCityOf, resolveDepartureLocation } from '@/lib/airports';
 import {
   ANALYTICS_EVENT_TYPES,
   AnalyticsEvent,
@@ -67,16 +68,20 @@ const mockStore = {
   deletePackage: (id: string) => Promise.resolve(MockDB.deletePackage(id)),
   getEnquiries: () => Promise.resolve(MockDB.getEnquiries()),
   saveEnquiry: (enquiry: Enquiry) => Promise.resolve(MockDB.saveEnquiry(enquiry)),
+  deleteUser: (id: string) => Promise.resolve(MockDB.deleteUser(id)),
+  anonymiseEnquiriesByEmail: (email: string, erasedName: string) => Promise.resolve(MockDB.anonymiseEnquiriesByEmail(email, erasedName)),
+  deleteMarketingConsentsByEmail: (email: string) => Promise.resolve(MockDB.deleteMarketingConsentsByEmail(email)),
   getMarketingConsents: () => Promise.resolve(MockDB.getMarketingConsents()),
   saveMarketingConsent: (consent: MarketingConsent) => Promise.resolve(MockDB.saveMarketingConsent(consent)),
   getBookingOutcomes: () => Promise.resolve(MockDB.getBookingOutcomes()),
   saveBookingOutcome: (bo: BookingOutcome) => Promise.resolve(MockDB.saveBookingOutcome(bo)),
   getDistinctDepartureCities: (): Promise<string[]> => {
     const citySet = new Set<string>();
+    const verified = new Set(MockDB.getOperators().filter(isPubliclyListed).map((o) => o.id));
     for (const pkg of MockDB.getPackages()) {
-      if (pkg.status !== 'published' || !pkg.departureAirport) continue;
-      const airport = UK_DEPARTURE_AIRPORTS.find((a) => a.code === pkg.departureAirport);
-      if (airport) citySet.add(airport.city);
+      if (pkg.status !== 'published' || !pkg.departureAirport || !verified.has(pkg.operatorId)) continue;
+      const city = departureCityOf(pkg.departureAirport);
+      if (city) citySet.add(city);
     }
     return Promise.resolve([...citySet].sort());
   },
@@ -467,6 +472,67 @@ const requireBookingIntentEvidenceAccess = (ctx: RequestContext, bookingIntent: 
   if (ctx.role === 'customer' && ctx.userId === bookingIntent.customerId) return;
   if (ctx.role === 'operator' && ctx.userId === bookingIntent.operatorId) return;
   throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
+};
+
+/**
+ * RFC 4180 CSV: quoted fields may contain commas, "" escapes and line breaks
+ * (cancellation policies and notes do), so parse the whole text, not lines.
+ */
+function parseCsv(text: string): string[][] {
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let cell = '';
+  let inQuotes = false;
+  const src = text.replace(/^\uFEFF/, '').trim();
+  for (let j = 0; j < src.length; j += 1) {
+    const ch = src[j];
+    if (inQuotes) {
+      if (ch === '"' && src[j + 1] === '"') { cell += '"'; j += 1; }
+      else if (ch === '"') inQuotes = false;
+      else cell += ch;
+    } else if (ch === '"') inQuotes = true;
+    else if (ch === ',') { row.push(cell); cell = ''; }
+    else if (ch === '\n' || ch === '\r') {
+      if (ch === '\r' && src[j + 1] === '\n') j += 1;
+      row.push(cell); rows.push(row); row = []; cell = '';
+    } else cell += ch;
+  }
+  row.push(cell);
+  rows.push(row);
+  return rows;
+}
+
+async function verifiedOperatorIds(): Promise<Set<string>> {
+  return new Set((await store().getOperators()).filter(isPubliclyListed).map((o) => o.id));
+}
+
+/** Shown when an account cannot be erased automatically. Never claims success. */
+export const ACCOUNT_DELETE_MANUAL_MESSAGE =
+  'We could not delete this account automatically because it is linked to listings, bookings or complaints. Nothing has been deleted. Email dpo@pilgrimcompare.co.uk and we will handle your request.';
+
+/** Stands in for the name on an erased customer's enquiries (the column is required). */
+export const ERASED_NAME = 'Deleted account';
+
+/** Trust/verification state only an admin may change. */
+const OPERATOR_PROTECTED_FIELDS = [
+  'verificationStatus', 'verifiedAt', 'tier', 'eligibilityFlags', 'atolVerifiedAt', 'abtaVerifiedAt', 'slug',
+] as const satisfies readonly (keyof OperatorProfile)[];
+
+// ─── CSV import helpers (only stated values survive; nothing is defaulted) ──
+const BANDS = ['near', 'medium', 'far', 'unknown'] as const;
+const oneOf = <T extends string>(value: string, allowed: readonly T[]): T | undefined =>
+  (allowed as readonly string[]).includes(value) ? (value as T) : undefined;
+/** 'true'/'false' (any case, or yes/no) → boolean; blank or anything else → not stated. */
+const csvBool = (value: string): boolean | undefined => {
+  const v = value.trim().toLowerCase();
+  if (v === 'true' || v === 'yes') return true;
+  if (v === 'false' || v === 'no') return false;
+  return undefined;
+};
+const normaliseAirport = (value: string): string | undefined => {
+  if (!value) return undefined;
+  const loc = resolveDepartureLocation(value);
+  return loc?.kind === 'airport' ? loc.codes[0] : value;
 };
 
 export const Repository = {
@@ -1115,12 +1181,28 @@ export const Repository = {
     const existing = await store().getOperatorById(id);
     if (!existing) throw new Error('Operator not found');
 
+    // Operators may edit their own profile but never their trust state.
+    const safe: Partial<OperatorProfile> = { ...updates };
+    if (ctx.role !== 'admin') {
+      for (const key of OPERATOR_PROTECTED_FIELDS) delete safe[key];
+    }
     const operator: OperatorProfile = {
       ...existing,
-      ...updates,
+      ...safe,
       id, // protect id
       updatedAt: new Date().toISOString(),
     };
+    // A changed ATOL/ABTA number has not been checked yet: drop the old check
+    // date so the page says "provided by the operator", not "checked". A new
+    // ATOL number also takes the operator off the public listing until an
+    // admin checks it (standards §7: we check each ATOL number before listing).
+    if (ctx.role !== 'admin') {
+      if ((operator.atolNumber ?? '').trim() !== (existing.atolNumber ?? '').trim()) {
+        operator.atolVerifiedAt = undefined;
+        if (existing.verificationStatus === 'verified') operator.verificationStatus = 'pending';
+      }
+      if (operator.abtaMemberNumber !== existing.abtaMemberNumber) operator.abtaVerifiedAt = undefined;
+    }
     await store().saveOperator(operator);
     return operator;
   },
@@ -1167,10 +1249,30 @@ export const Repository = {
     return store().savePackage(newPackage);
   },
 
+  /**
+   * Public package list. Founder decision (2026-10-06): only packages from
+   * VERIFIED operators are ever shown publicly (Direction §2: verified only).
+   */
   listPackages: async (): Promise<Package[]> => {
-    const all = await store().getPackages();
-    return sortByScore(all.filter((p) => p.status === 'published'));
+    const [all, verified] = await Promise.all([store().getPackages(), verifiedOperatorIds()]);
+    return sortByScore(all.filter((p) => p.status === 'published' && verified.has(p.operatorId)));
   },
+
+  /** A package page/enquiry target: published AND from a verified operator, else undefined. */
+  getPublicPackageBySlug: async (slug: string): Promise<Package | undefined> => {
+    const [all, verified] = await Promise.all([store().getPackages(), verifiedOperatorIds()]);
+    return all.find((p) => p.slug === slug && p.status === 'published' && verified.has(p.operatorId));
+  },
+
+  /** Same rule by id (enquiry API). */
+  getPublicPackageById: async (id: string): Promise<Package | undefined> => {
+    const [all, verified] = await Promise.all([store().getPackages(), verifiedOperatorIds()]);
+    return all.find((p) => p.id === id && p.status === 'published' && verified.has(p.operatorId));
+  },
+
+  /** Public operator profile: verified operators only. */
+  getPublicOperatorBySlug: async (slug: string): Promise<OperatorProfile | undefined> =>
+    (await store().getOperators()).find((o) => o.slug === slug && isPubliclyListed(o)),
 
   getPackageBySlug: async (slug: string): Promise<Package | undefined> => {
     const all = await store().getPackages();
@@ -1222,7 +1324,7 @@ export const Repository = {
       pkg.depositAmount ?? '', pkg.paymentPlanAvailable ?? '',
       pkg.cancellationPolicy ?? '', pkg.groupType ?? '',
       pkg.ziyaratIncluded ?? '', pkg.ziyaratDetails ?? '',
-      pkg.inclusions.visa, pkg.inclusions.flights, pkg.inclusions.transfers, pkg.inclusions.meals,
+      pkg.inclusions.visa ?? '', pkg.inclusions.flights ?? '', pkg.inclusions.transfers ?? '', pkg.inclusions.meals ?? '',
       pkg.roomOccupancyOptions.single, pkg.roomOccupancyOptions.double,
       pkg.roomOccupancyOptions.triple, pkg.roomOccupancyOptions.quad,
       pkg.notes ?? '',
@@ -1234,10 +1336,10 @@ export const Repository = {
   importPackagesFromCsv: async (ctx: RequestContext, csvText: string): Promise<{ saved: Package[]; errors: { row: number; reason: string }[] }> => {
     if (ctx.role !== 'operator') throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
 
-    const lines = csvText.trim().split(/\r?\n/);
-    if (lines.length < 2) throw new Error('CSV must contain a header row and at least one data row');
+    const rows = parseCsv(csvText);
+    if (rows.length < 2) throw new Error('CSV must contain a header row and at least one data row');
 
-    const headers = lines[0].split(',').map((h) => h.trim());
+    const headers = rows[0].map((h) => h.trim());
     const requiredColumns = ['title', 'pricePerPerson', 'currency', 'totalNights', 'pilgrimageType'];
     const missing = requiredColumns.filter((c) => !headers.includes(c));
     if (missing.length > 0) throw new Error(`Missing required columns: ${missing.join(', ')}`);
@@ -1250,30 +1352,9 @@ export const Repository = {
     const saved: Package[] = [];
     const errors: { row: number; reason: string }[] = [];
 
-    for (let i = 1; i < lines.length; i += 1) {
-      const line = lines[i].trim();
-      if (!line) continue;
-
-      const cells: string[] = [];
-      let current = '';
-      let inQuotes = false;
-      for (let j = 0; j < line.length; j += 1) {
-        const char = line[j];
-        if (char === '"') {
-          if (inQuotes && line[j + 1] === '"') {
-            current += '"';
-            j += 1;
-          } else {
-            inQuotes = !inQuotes;
-          }
-        } else if (char === ',' && !inQuotes) {
-          cells.push(current);
-          current = '';
-        } else {
-          current += char;
-        }
-      }
-      cells.push(current);
+    for (let i = 1; i < rows.length; i += 1) {
+      const cells = rows[i];
+      if (cells.every((c) => c.trim() === '')) continue;
 
       const title = getValue(cells, 'title');
       const pricePerPerson = Number(getValue(cells, 'pricePerPerson'));
@@ -1313,17 +1394,16 @@ export const Repository = {
         status: validStatus,
         pilgrimageType,
         seasonLabel: getValue(cells, 'seasonLabel') || undefined,
+        // Only what the CSV states: no invented end date, nights split, payment
+        // plan or enum values (data-integrity rule: missing = "Not provided").
         dateWindow: getValue(cells, 'dateWindowStart')
-          ? {
-              start: getValue(cells, 'dateWindowStart'),
-              end: getValue(cells, 'dateWindowEnd') || getValue(cells, 'dateWindowStart'),
-            }
+          ? { start: getValue(cells, 'dateWindowStart'), end: getValue(cells, 'dateWindowEnd') }
           : undefined,
-        priceType: (getValue(cells, 'priceType') as Package['priceType']) || 'exact',
+        priceType: oneOf(getValue(cells, 'priceType'), ['exact', 'from', 'fixed'] as const) ?? 'exact',
         pricePerPerson,
         currency,
         totalNights,
-        nightsMakkah: Number(getValue(cells, 'nightsMakkah')) || totalNights,
+        nightsMakkah: Number(getValue(cells, 'nightsMakkah')) || 0,
         nightsMadinah: Number(getValue(cells, 'nightsMadinah')) || 0,
         hotelMakkahStars: ((): 3 | 4 | 5 | undefined => {
           const n = Number(getValue(cells, 'hotelMakkahStars'));
@@ -1337,26 +1417,30 @@ export const Repository = {
         hotelMadinahName: getValue(cells, 'hotelMadinahName') || undefined,
         distanceToHaramMakkahMetres: Number(getValue(cells, 'distanceToHaramMakkahMetres')) || undefined,
         distanceToHaramMadinahMetres: Number(getValue(cells, 'distanceToHaramMadinahMetres')) || undefined,
-        distanceBandMakkah: (getValue(cells, 'distanceBandMakkah') as Package['distanceBandMakkah']) || 'unknown',
-        distanceBandMadinah: (getValue(cells, 'distanceBandMadinah') as Package['distanceBandMadinah']) || 'unknown',
+        distanceBandMakkah: oneOf(getValue(cells, 'distanceBandMakkah'), BANDS) ?? 'unknown',
+        distanceBandMadinah: oneOf(getValue(cells, 'distanceBandMadinah'), BANDS) ?? 'unknown',
         airline: getValue(cells, 'airline') || undefined,
-        departureAirport: getValue(cells, 'departureAirport') || undefined,
-        flightType: (getValue(cells, 'flightType') as Package['flightType']) || undefined,
+        // "Heathrow" / "LHR" → LHR; a city or unknown text is kept as written.
+        departureAirport: normaliseAirport(getValue(cells, 'departureAirport')),
+        flightType: oneOf(getValue(cells, 'flightType'), ['direct', 'one-stop', 'multi-stop'] as const),
         depositAmount: Number(getValue(cells, 'depositAmount')) || undefined,
-        paymentPlanAvailable: getValue(cells, 'paymentPlanAvailable') === 'true',
+        paymentPlanAvailable: csvBool(getValue(cells, 'paymentPlanAvailable')),
         cancellationPolicy: getValue(cells, 'cancellationPolicy') || undefined,
-        groupType: (getValue(cells, 'groupType') as Package['groupType']) || undefined,
+        groupType: oneOf(getValue(cells, 'groupType'), ['private', 'small-group', 'large-group'] as const),
+        ziyaratIncluded: csvBool(getValue(cells, 'ziyaratIncluded')),
+        ziyaratDetails: getValue(cells, 'ziyaratDetails') || undefined,
         roomOccupancyOptions: {
           single: getValue(cells, 'single') === 'true',
           double: getValue(cells, 'double') === 'true',
           triple: getValue(cells, 'triple') === 'true',
           quad: getValue(cells, 'quad') === 'true',
         },
+        // Three-state: blank → not stated (null), never "not included".
         inclusions: {
-          visa: getValue(cells, 'visa') === 'true',
-          flights: getValue(cells, 'flights') === 'true',
-          transfers: getValue(cells, 'transfers') === 'true',
-          meals: getValue(cells, 'meals') === 'true',
+          visa: csvBool(getValue(cells, 'visa')) ?? null,
+          flights: csvBool(getValue(cells, 'flights')) ?? null,
+          transfers: csvBool(getValue(cells, 'transfers')) ?? null,
+          meals: csvBool(getValue(cells, 'meals')) ?? null,
         },
         notes: getValue(cells, 'notes') || undefined,
         createdAt: new Date().toISOString(),
@@ -1397,8 +1481,63 @@ export const Repository = {
     return (await store().getOperators()).find((operator) => operator.slug === slug);
   },
 
+  /**
+   * Erase the signed-in customer's own app record (UK GDPR Art. 17). Refuses,
+   * with an honest reason, when the account cannot be erased automatically:
+   * operator/admin accounts (tied to listings) and customers linked to quote,
+   * booking or complaint records (booking outcomes are billing evidence and
+   * are never deleted). The caller deletes the auth user afterwards.
+   */
+  assertCanDeleteOwnAccount: async (ctx: RequestContext): Promise<void> => {
+    if (ctx.role !== 'customer') {
+      throw new AppError({ code: 'CONFLICT', status: 409, message: ACCOUNT_DELETE_MANUAL_MESSAGE });
+    }
+    const [requests, intents, complaints] = await Promise.all([
+      store().getRequests(),
+      store().getBookingIntents(),
+      store().getComplaints(),
+    ]);
+    const linked = [...requests, ...intents, ...complaints].some((r) => r.customerId === ctx.userId);
+    if (linked) {
+      throw new AppError({ code: 'CONFLICT', status: 409, message: ACCOUNT_DELETE_MANUAL_MESSAGE });
+    }
+  },
+
+  /**
+   * Erase everything PilgrimCompare holds for the signed-in customer except
+   * the sign-in itself (the caller removes that last, so a failure here
+   * leaves an account that can sign in and retry). Every step is idempotent.
+   * Enquiries are kept for the operator's and our records with the personal
+   * fields stripped; marketing consents for the account email are deleted.
+   */
+  eraseOwnCustomerData: async (ctx: RequestContext, email: string): Promise<void> => {
+    await Repository.assertCanDeleteOwnAccount(ctx);
+    if (email) {
+      await store().anonymiseEnquiriesByEmail(email, ERASED_NAME);
+      await store().deleteMarketingConsentsByEmail(email);
+    }
+    await store().deleteUser(ctx.userId);
+  },
+
+  /**
+   * Public (unauthenticated) operator list. Internal state (payment SLA flag,
+   * onboarding progress) is admin-only and stripped. The two flags that decide
+   * whether the (parked) "Proceed direct" button shows stay, because the
+   * public UI reads them. Business contact fields are already public on the
+   * operator profile page.
+   */
   listPublicOperators: async (): Promise<OperatorProfile[]> => {
-    return store().getOperators();
+    return (await store().getOperators()).filter(isPubliclyListed).map(({ eligibilityFlags, ...publicFields }) => ({
+      ...publicFields,
+      ...(eligibilityFlags
+        ? {
+            eligibilityFlags: {
+              canReceiveBookings: eligibilityFlags.canReceiveBookings,
+              bankDetailsActive: eligibilityFlags.bankDetailsActive,
+            } as OperatorProfile['eligibilityFlags'],
+          }
+        : {}),
+    }));
   },
 
   getBankChangeRequests: async (ctx: RequestContext): Promise<BankChangeRequest[]> => {

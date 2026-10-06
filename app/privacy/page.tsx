@@ -1,15 +1,15 @@
 import type { Metadata } from 'next';
-import { LEGAL_ENTITY_BLOCK } from '@/lib/legal';
+import { LEGAL_ENTITY_BLOCK, registeredOfficeClause } from '@/lib/legal';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy | PilgrimCompare',
   description:
-    'How PilgrimCompare collects, uses, and protects your personal data. UK GDPR compliant.',
+    'How PilgrimCompare collects, uses and protects your personal data under UK GDPR.',
   alternates: { canonical: '/privacy' },
   robots: { index: true, follow: true },
   openGraph: {
     title: 'Privacy Policy | PilgrimCompare',
-    description: 'How PilgrimCompare collects, uses, and protects your personal data. UK GDPR compliant.',
+    description: 'How PilgrimCompare collects, uses and protects your personal data under UK GDPR.',
     url: 'https://pilgrimcompare.co.uk/privacy',
     siteName: 'PilgrimCompare',
     type: 'website',
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Privacy Policy | PilgrimCompare',
-    description: 'How PilgrimCompare collects, uses, and protects your personal data. UK GDPR compliant.',
+    description: 'How PilgrimCompare collects, uses and protects your personal data under UK GDPR.',
   },
 };
 
@@ -26,7 +26,7 @@ const LAST_UPDATED = '12 June 2026';
 
 export default function PrivacyPolicyPage() {
   return (
-    <main className="min-h-screen bg-[var(--background)] text-[var(--text)]">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--text)]">
       <div className="mx-auto max-w-3xl px-4 py-12">
         <h1 className="mb-2 text-3xl font-bold">Privacy Policy</h1>
         <p className="mb-8 text-sm text-[var(--textMuted)]">Last updated: {LAST_UPDATED}</p>
@@ -37,7 +37,7 @@ export default function PrivacyPolicyPage() {
             {LEGAL_ENTITY_BLOCK.tradingName} is a trading name of{' '}
             <strong>{LEGAL_ENTITY_BLOCK.companyName}</strong>, registered in{' '}
             {LEGAL_ENTITY_BLOCK.registeredCountry}, company number{' '}
-            {LEGAL_ENTITY_BLOCK.companyNumber}. For data protection purposes,{' '}
+            {LEGAL_ENTITY_BLOCK.companyNumber}{registeredOfficeClause()}. For data protection purposes,{' '}
             {LEGAL_ENTITY_BLOCK.companyName} is the data controller of your personal
             information.
           </p>
@@ -100,7 +100,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="mb-3 text-xl font-semibold">4. Data sharing — important disclosure</h2>
+          <h2 className="mb-3 text-xl font-semibold">4. Data sharing: important disclosure</h2>
           <p className="mb-4 rounded-lg border border-[var(--borderSubtle)] bg-[var(--surface)] p-4 text-sm font-medium leading-relaxed">
             When you send an enquiry, your contact details are shared with the operator you
             enquire with. From that point the operator is an independent data controller of
@@ -113,8 +113,8 @@ export default function PrivacyPolicyPage() {
           <ul className="list-disc pl-5 text-sm leading-relaxed space-y-1">
             <li>
               <strong>Service providers:</strong> Supabase (database, EU West / Ireland
-              region), Vercel (hosting), and Resend (transactional email delivery) — all under
-              GDPR-compliant data processing agreements.
+              region), Vercel (hosting), and Resend (transactional email delivery), all under
+              data processing agreements.
             </li>
             <li>
               <strong>Regulators:</strong> where required by law.
@@ -140,7 +140,7 @@ export default function PrivacyPolicyPage() {
               </tr>
               <tr className="border-b border-[var(--borderSubtle)]">
                 <td className="px-3 py-2">User account (deleted)</td>
-                <td className="px-3 py-2">90-day grace period, then permanently deleted</td>
+                <td className="px-3 py-2">Deleted straight away when you delete your account</td>
               </tr>
               <tr className="border-b border-[var(--borderSubtle)]">
                 <td className="px-3 py-2">Enquiry and booking intent data</td>
@@ -244,10 +244,9 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <p className="mt-12 text-xs text-[var(--textMuted)]">
-          Governed by the laws of England and Wales. Compliant with UK GDPR and the Data
-          Protection Act 2018.
+          Governed by the laws of England and Wales. Written under UK GDPR and the Data Protection Act 2018.
         </p>
       </div>
-    </main>
+    </div>
   );
 }

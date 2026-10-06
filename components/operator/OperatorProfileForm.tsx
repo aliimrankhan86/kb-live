@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { Repository } from '@/lib/api/repository';
 import { OperatorProfile } from '@/lib/types';
 
 const COUNTRIES = [
@@ -48,7 +47,7 @@ function getCompletenessScore(op: OperatorProfile): number {
 
 function getCompletenessHints(op: OperatorProfile): string[] {
   const hints: string[] = [];
-  if (!op.atolNumber) hints.push('Add ATOL number to increase trust with travellers.');
+  if (!op.atolNumber) hints.push('Add your ATOL number. Without one, your packages are not listed publicly.');
   if (!op.abtaMemberNumber) hints.push('Add ABTA membership for extra credibility.');
   if (!op.websiteUrl) hints.push('Add a website URL for customer confidence.');
   if (!op.officeAddress?.line1) hints.push('Complete your office address.');
@@ -90,8 +89,10 @@ export function OperatorProfileForm({ operator }: Props) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const ctx = { userId: operator.id, role: 'operator' as const };
-      await Repository.updateOperator(ctx, operator.id, {
+      const res = await fetch('/api/operator/profile', {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
         companyName: form.companyName.trim(),
         tradingName: form.tradingName.trim() || undefined,
         companyRegistrationNumber: form.companyRegistrationNumber.trim() || undefined,
@@ -110,11 +111,13 @@ export function OperatorProfileForm({ operator }: Props) {
         yearsInBusiness: form.yearsInBusiness ? Number(form.yearsInBusiness) : undefined,
         servingRegions: form.servingRegions,
         pilgrimageTypesOffered: form.pilgrimageTypesOffered as ('umrah' | 'hajj')[],
+        }),
       });
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? `HTTP ${res.status}`);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
-    } catch {
-      alert('Failed to save. Please try again.');
+    } catch (err) {
+      alert(`Failed to save: ${err instanceof Error ? err.message : 'please try again'}.`);
     } finally {
       setSaving(false);
     }
@@ -165,7 +168,7 @@ export function OperatorProfileForm({ operator }: Props) {
           <Input label="Company name" value={form.companyName} onChange={(e) => setForm((p) => ({ ...p, companyName: e.target.value }))} data-testid="profile-company-name" />
           <Input label="Trading name" value={form.tradingName} onChange={(e) => setForm((p) => ({ ...p, tradingName: e.target.value }))} data-testid="profile-trading-name" />
           <Input label="Registration number" value={form.companyRegistrationNumber} onChange={(e) => setForm((p) => ({ ...p, companyRegistrationNumber: e.target.value }))} data-testid="profile-reg-number" />
-          <Input label="ATOL number" value={form.atolNumber} onChange={(e) => setForm((p) => ({ ...p, atolNumber: e.target.value }))} data-testid="profile-atol" />
+          <Input label="ATOL number" helperText="Changing your ATOL number takes your packages off the public listing until we check the new number." value={form.atolNumber} onChange={(e) => setForm((p) => ({ ...p, atolNumber: e.target.value }))} data-testid="profile-atol" />
           <Input label="ABTA member number" value={form.abtaMemberNumber} onChange={(e) => setForm((p) => ({ ...p, abtaMemberNumber: e.target.value }))} data-testid="profile-abta" />
           <Input label="Website URL" type="url" value={form.websiteUrl} onChange={(e) => setForm((p) => ({ ...p, websiteUrl: e.target.value }))} data-testid="profile-website" />
           <Input label="Years in business" type="number" value={form.yearsInBusiness} onChange={(e) => setForm((p) => ({ ...p, yearsInBusiness: e.target.value }))} data-testid="profile-years" />

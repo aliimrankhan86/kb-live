@@ -2,19 +2,19 @@ import type { Metadata } from 'next'
 import { CityCorridor } from '@/components/marketing/CityCorridor'
 import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
 import { Repository } from '@/lib/api/repository'
+import { corridorDescription, corridorFaqs, corridorIntro } from '@/lib/seo/corridor-faqs'
 
 export async function generateMetadata(): Promise<Metadata> {
   const cities = await Repository.getDistinctDepartureCities().catch(() => [] as string[])
   const hasSupply = cities.includes('London')
   return {
-    title: 'Umrah Packages from London 2026 – Compare UK Operators | PilgrimCompare',
-    description:
-      'Browse and compare Umrah packages departing from London Heathrow and Gatwick. Verified UK operators, hotels near Haram, and ATOL details displayed.',
+    title: 'Umrah Packages from London: Compare Verified UK Operators | PilgrimCompare',
+    description: corridorDescription('London'),
     alternates: { canonical: '/umrah/london' },
     robots: hasSupply ? { index: true, follow: true } : { index: false, follow: true },
     openGraph: {
-      title: 'Umrah Packages from London 2026 | PilgrimCompare',
-      description: 'Compare Umrah packages departing from London with verified UK operators.',
+      title: 'Umrah Packages from London: Compare Verified UK Operators | PilgrimCompare',
+      description: corridorDescription('London'),
       url: 'https://pilgrimcompare.co.uk/umrah/london',
       siteName: 'PilgrimCompare',
       type: 'website',
@@ -22,41 +22,19 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: 'summary_large_image',
-      title: 'Umrah Packages from London 2026 | PilgrimCompare',
-      description: 'Compare Umrah packages departing from London with verified UK operators.',
+      title: 'Umrah Packages from London: Compare Verified UK Operators | PilgrimCompare',
+      description: corridorDescription('London'),
     },
   }
 }
 
-const faqs = [
-  {
-    question: 'Which London airports offer direct flights to Jeddah for Umrah?',
-    answer:
-      'London Heathrow (LHR) and London Gatwick (LGW) offer the most frequent direct and connecting flights to Jeddah (JED) and Madinah (MED). London Stansted (STN) also has seasonal charter services from some operators.',
-  },
-  {
-    question: 'How much does an Umrah package from London cost?',
-    answer:
-      'Umrah packages from London typically start from around £800 per person for budget packages and can reach £3,000 or more for premium 5-star hotel stays near the Haram. Price depends on departure date, hotel rating, and inclusions.',
-  },
-  {
-    question: 'How do I compare Umrah packages from London on PilgrimCompare?',
-    answer:
-      'Use the search filters to set your departure city to London, select your travel dates and number of travellers, then compare up to 3 packages side by side. All operators are verified before listing.',
-  },
-  {
-    question: 'Are London-based Umrah operators ATOL protected?',
-    answer:
-      'ATOL protection applies to package holidays that include flights. Many UK Umrah operators hold ATOL licences. Always check the operator\'s ATOL number before booking and confirm with the CAA register.',
-  },
-]
+const faqs = corridorFaqs('London')
 
 const pageJsonLd = graphJsonLd([
   webPageJsonLd({
     path: '/umrah/london',
-    name: 'Umrah Packages from London 2026 – Compare UK Operators | PilgrimCompare',
-    description:
-      'Compare Umrah packages departing from London Heathrow and Gatwick with verified UK operators.',
+    name: 'Umrah Packages from London: Compare Verified UK Operators',
+    description: corridorDescription('London'),
   }),
   breadcrumbJsonLd([
     { name: 'Home', path: '/' },
@@ -67,7 +45,8 @@ const pageJsonLd = graphJsonLd([
 ])
 
 export default async function LondonUmrahPage() {
-  const departureCities = await Repository.getDistinctDepartureCities()
+  // A DB blip must not take the page down; the honest 'no packages' notice shows instead.
+  const departureCities = await Repository.getDistinctDepartureCities().catch(() => [] as string[])
   const hasPackages = departureCities.includes('London')
 
   return (
@@ -81,7 +60,7 @@ export default async function LondonUmrahPage() {
       <CityCorridor
         city="London"
         h1="Umrah Packages from London"
-        intro="Find Umrah packages departing from London Heathrow, Gatwick, and Stansted. Compare verified UK operators side by side, filter by hotel rating and distance to Haram, and request a quote in minutes."
+        intro={corridorIntro('London')}
         queryParams="?type=umrah&departureCity=London"
         faqs={faqs}
         breadcrumbItems={[

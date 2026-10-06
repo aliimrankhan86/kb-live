@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { Repository } from '@/lib/api/repository';
 import type { Complaint, ComplaintStatus } from '@/lib/types';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -23,14 +22,11 @@ const STATUS_OPTIONS: { label: string; value: ComplaintStatus }[] = [
 
 function ComplaintCard({
   complaint,
-  operatorId,
   onUpdate,
 }: {
   complaint: Complaint;
-  operatorId: string;
   onUpdate: () => void;
 }) {
-  const operatorCtx = { userId: operatorId, role: 'operator' as const };
   const [responding, setResponding] = useState(false);
   const [response, setResponse] = useState('');
   const [status, setStatus] = useState<ComplaintStatus>(complaint.status);
@@ -46,7 +42,7 @@ function ComplaintCard({
     }
     setSubmitting(true);
     try {
-      await Repository.updateComplaintOperatorResponse(operatorCtx, complaint.id, trimmed);
+      await patchComplaint(complaint.id, { op: 'response', response: trimmed });
       setResponding(false);
       setResponse('');
       onUpdate();
@@ -60,7 +56,7 @@ function ComplaintCard({
   const handleStatusChange = async (newStatus: ComplaintStatus) => {
     setStatus(newStatus);
     try {
-      await Repository.updateComplaintStatus(operatorCtx, complaint.id, newStatus);
+      await patchComplaint(complaint.id, { op: 'status', status: newStatus });
       onUpdate();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update status');
@@ -176,13 +172,26 @@ function ComplaintCard({
   );
 }
 
-export function ComplaintsInbox({ operatorId }: { operatorId: string }) {
+// The session decides whose complaints load; the prop is kept for existing callers.
+async function patchComplaint(id: string, body: Record<string, string>) {
+  const res = await fetch(`/api/complaints/${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? `HTTP ${res.status}`);
+}
+
+export function ComplaintsInbox({ operatorId: _operatorId }: { operatorId: string }) {
   const [complaints, setComplaints] = useState<Complaint[]>([]);
 
+  // Server API, not the browser Repository (which only reaches MockDB).
   const loadComplaints = useCallback(() => {
-    const ctx = { userId: operatorId, role: 'operator' as const };
-    Repository.getComplaints(ctx).then(setComplaints);
-  }, [operatorId]);
+    fetch('/api/complaints', { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : { complaints: [] }))
+      .then((d: { complaints?: Complaint[] }) => setComplaints(d.complaints ?? []))
+      .catch(() => { /* keep the last list; next poll retries */ });
+  }, []);
 
   useEffect(() => {
     loadComplaints();
@@ -205,7 +214,7 @@ export function ComplaintsInbox({ operatorId }: { operatorId: string }) {
   return (
     <div className="space-y-4" data-testid="complaints-inbox">
       {complaints.map((c) => (
-        <ComplaintCard key={c.id} complaint={c} operatorId={operatorId} onUpdate={loadComplaints} />
+        <ComplaintCard key={c.id} complaint={c} onUpdate={loadComplaints} />
       ))}
     </div>
   );

@@ -1,16 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { Repository } from '@/lib/api/repository';
 
-export function PackageCsvExport({ operatorId }: { operatorId: string }) {
+// The session decides whose packages are exported; the prop is kept for callers.
+export function PackageCsvExport({ operatorId: _operatorId }: { operatorId: string }) {
   const [exporting, setExporting] = useState(false);
 
   const handleExport = async () => {
     setExporting(true);
     try {
-      const ctx = { userId: operatorId, role: 'operator' as const };
-      const csv = await Repository.exportPackagesAsCsv(ctx);
+      const res = await fetch('/api/operator/packages/csv');
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? `HTTP ${res.status}`);
+      const csv = await res.text();
       if (!csv) {
         alert('No packages to export');
         setExporting(false);

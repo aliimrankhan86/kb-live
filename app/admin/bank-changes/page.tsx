@@ -77,7 +77,7 @@ export default function BankChangesQueuePage() {
                     <Text tone="muted" size="sm">
                       Change to:{' '}
                       <strong className="text-[var(--text)]">
-                        {request.proposedDetails.bankName} — {request.proposedDetails.accountHolderName}
+                        {request.proposedDetails.bankName}, {request.proposedDetails.accountHolderName}
                       </strong>
                     </Text>
                     <Link

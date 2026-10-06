@@ -362,6 +362,13 @@
   color: var(--textMuted);
 }
 
+/* §6 price attribution: who stated the price and when it was last updated. */
+.priceAttribution {
+  flex-basis: 100%;
+  font-size: 0.75rem;
+  color: var(--textMuted);
+}
+
 /* Trip meta pills */
 .tripMeta {
   display: flex;
@@ -846,4 +853,52 @@
   .compareToggleText {
     font-size: 0.875rem;
   }
+}
+
+/* ─── Closest matches (search preferences not all met) ───────────────── */
+/* Composed from existing tokens only (text/textMuted/border mix). */
+.unmetBlock {
+  margin: 0 1rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: var(--radiusMd);
+  border: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
+  font-size: 0.75rem;
+  color: var(--textMuted);
+}
+
+.unmetLabel {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.unmetList {
+  margin: 0.25rem 0 0;
+  padding-left: 1rem;
+  list-style: disc;
+}
+
+.closeMatchesSection {
+  margin-top: 1.5rem;
+}
+
+.closeMatchesHeading {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 0.25rem;
+}
+
+.closeMatchesNote {
+  font-size: 0.8125rem;
+  color: var(--textMuted);
+  margin: 0 0 1rem;
+}
+
+.searchNotice {
+  margin: 0 0 1rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: var(--radiusMd);
+  border: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
+  font-size: 0.8125rem;
+  color: var(--textMuted);
 }

@@ -26,7 +26,7 @@ export default async function BookingConfirmationPage({
   const referenceCode = bookingIntent.referenceCode ?? id.slice(0, 8).toUpperCase();
 
   return (
-    <main
+    <div
       id="main-content"
       className="min-h-screen bg-[var(--background)] px-4 py-12"
     >
@@ -120,6 +120,6 @@ export default async function BookingConfirmationPage({
           </Link>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

@@ -1,25 +1,11 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 import { BarChart, ChartContainer } from '@/components/ui/Chart';
-import { Repository } from '@/lib/api/repository';
 import type { AnalyticsEventCounts, AnalyticsTrendDay } from '@/lib/types';
-import { ANALYTICS_EVENT_TYPES } from '@/lib/types';
 
 const RANGE_OPTIONS = [7, 30, 90] as const;
-type AnalyticsRangeDays = (typeof RANGE_OPTIONS)[number];
-
-const emptyAnalyticsCounts = (): AnalyticsEventCounts =>
-  Object.fromEntries(ANALYTICS_EVENT_TYPES.map((t) => [t, 0])) as AnalyticsEventCounts;
-
-const getRangeStart = (days: number) => {
-  const now = new Date();
-  const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-  start.setUTCDate(start.getUTCDate() - days + 1);
-  return start;
-};
+export type AnalyticsRangeDays = (typeof RANGE_OPTIONS)[number];
 
 const getTrendValue = (day: AnalyticsTrendDay) =>
   day.package_view + day.quote_request + day.offer_sent + day.booking_started + day.booking_confirmed;
@@ -57,13 +43,13 @@ function Funnel({ summary }: { summary: AnalyticsEventCounts }) {
     { label: 'Views', value: summary.package_view },
     { label: 'Quotes', value: summary.quote_request },
     { label: 'Offers', value: summary.offer_sent },
-    { label: 'Bookings', value: summary.booking_confirmed },
+    { label: 'Intents you marked booked', value: summary.booking_confirmed },
   ];
 
   return (
     <section className="rounded-lg border border-[var(--borderSubtle)] bg-[var(--surfaceDark)] p-5" data-testid="analytics-funnel">
       <h2 className="text-base font-semibold text-[var(--text)]">Conversion Funnel</h2>
-      <p className="mt-0.5 text-sm text-[var(--textMuted)]">Views to confirmed bookings for the selected date range.</p>
+      <p className="mt-0.5 text-sm text-[var(--textMuted)]">From package views to booking intents for the selected date range. PilgrimCompare does not take or confirm bookings.</p>
       <div className="mt-5 grid gap-3 md:grid-cols-4">
         {stages.map((stage, index) => {
           const previous = stages[index - 1];
@@ -96,45 +82,31 @@ function EmptyChart() {
       </div>
       <p className="text-sm font-medium text-[var(--text)]">No activity yet</p>
       <p className="max-w-xs text-xs text-[var(--textMuted)]">
-        Events appear here once travellers view your packages and request quotes.
+        Events appear here once travellers view your packages.
       </p>
     </div>
   );
 }
 
 interface AnalyticsDashboardProps {
-  operatorId: string;
+  days: AnalyticsRangeDays;
+  summary: AnalyticsEventCounts;
+  trend: AnalyticsTrendDay[];
 }
 
-export function AnalyticsDashboard({ operatorId }: AnalyticsDashboardProps) {
-  const searchParams = useSearchParams();
-  const rawRange = searchParams.get('range');
-  const days: AnalyticsRangeDays =
-    rawRange === '7' ? 7 : rawRange === '90' ? 90 : 30;
-
-  const [summary, setSummary] = useState<AnalyticsEventCounts>(emptyAnalyticsCounts());
-  const [trend, setTrend] = useState<AnalyticsTrendDay[]>([]);
-  const [loaded, setLoaded] = useState(false);
-
-  const loadData = useCallback(async () => {
-    const fromDate = getRangeStart(days);
-    const [s, t] = await Promise.all([
-      Repository.getAnalyticsSummary(operatorId, fromDate, new Date()),
-      Repository.getAnalyticsTrend(operatorId, days),
-    ]);
-    setSummary(s);
-    setTrend(t);
-    setLoaded(true);
-  }, [operatorId, days]);
-
-  useEffect(() => { loadData(); }, [loadData]);
+/**
+ * Pure view. Data is loaded on the server (app/operator/analytics/page.tsx):
+ * in the browser the Repository only reaches the in-memory MockDB, so the old
+ * client-side load showed seed/empty numbers instead of the operator's events.
+ */
+export function AnalyticsDashboard({ days, summary, trend }: AnalyticsDashboardProps) {
 
   const trendPoints = trend.map((day, index) => ({
     label: getTrendLabel(day.date, index, trend.length),
     value: getTrendValue(day),
   }));
 
-  const hasData = loaded &&
+  const hasData =
     summary.package_view + summary.quote_request + summary.offer_sent +
     summary.booking_started + summary.booking_confirmed > 0;
 
@@ -164,13 +136,11 @@ export function AnalyticsDashboard({ operatorId }: AnalyticsDashboardProps) {
         <SummaryCard label="Package Views" value={summary.package_view} />
         <SummaryCard label="Quote Requests" value={summary.quote_request} />
         <SummaryCard label="Offers Sent" value={summary.offer_sent} />
-        <SummaryCard label="Bookings Started" value={summary.booking_started} />
-        <SummaryCard label="Bookings Confirmed" value={summary.booking_confirmed} />
+        <SummaryCard label="Booking Intents" value={summary.booking_started} />
+        <SummaryCard label="Intents You Marked Booked" value={summary.booking_confirmed} />
       </section>
 
-      {!loaded ? (
-        <div className="h-40 animate-pulse rounded-xl border border-[var(--borderSubtle)] bg-[var(--surfaceDark)]" />
-      ) : hasData ? (
+      {hasData ? (
         <>
           <Funnel summary={summary} />
           <ChartContainer title={`${days}-day activity trend`} subtitle="Key event volume by day" data-testid="analytics-trend">

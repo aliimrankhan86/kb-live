@@ -1,16 +1,16 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { LEGAL_ENTITY_BLOCK } from '@/lib/legal';
+import { LEGAL_ENTITY_BLOCK, registeredOfficeClause } from '@/lib/legal';
 
 export const metadata: Metadata = {
   title: 'Terms of Use | PilgrimCompare',
   description:
-    'Terms of Use for PilgrimCompare — a UK comparison and enquiry service for Umrah travel packages from verified operators.',
+    'Terms of Use for PilgrimCompare, a UK comparison and enquiry service for Umrah travel packages from verified operators.',
   alternates: { canonical: '/terms' },
   robots: { index: true, follow: true },
   openGraph: {
     title: 'Terms of Use | PilgrimCompare',
-    description: 'Terms of Use for PilgrimCompare — a UK comparison and enquiry service for Umrah travel packages.',
+    description: 'Terms of Use for PilgrimCompare, a UK comparison and enquiry service for Umrah travel packages.',
     url: 'https://pilgrimcompare.co.uk/terms',
     siteName: 'PilgrimCompare',
     type: 'website',
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Terms of Use | PilgrimCompare',
-    description: 'Terms of Use for PilgrimCompare — a UK comparison and enquiry service for Umrah travel packages.',
+    description: 'Terms of Use for PilgrimCompare, a UK comparison and enquiry service for Umrah travel packages.',
   },
 };
 
@@ -27,7 +27,7 @@ const LAST_UPDATED = '12 June 2026';
 
 export default function TermsPage() {
   return (
-    <main className="min-h-screen bg-[var(--background)] text-[var(--text)]">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--text)]">
       <div className="mx-auto max-w-3xl px-4 py-12">
         <h1 className="mb-2 text-3xl font-bold">Terms of Use</h1>
         <p className="mb-8 text-sm text-[var(--textMuted)]">Last updated: {LAST_UPDATED}</p>
@@ -55,9 +55,8 @@ export default function TermsPage() {
             {LEGAL_ENTITY_BLOCK.tradingName} is a trading name of{' '}
             <strong>{LEGAL_ENTITY_BLOCK.companyName}</strong>, registered in{' '}
             {LEGAL_ENTITY_BLOCK.registeredCountry}, company number{' '}
-            {LEGAL_ENTITY_BLOCK.companyNumber}. VAT number: {LEGAL_ENTITY_BLOCK.vatNumber}.
+            {LEGAL_ENTITY_BLOCK.companyNumber}{registeredOfficeClause()}. VAT number: {LEGAL_ENTITY_BLOCK.vatNumber}.
           </p>
-          {/* TODO: add registered office line once virtual office is set up — see AI_NOTES.md §14 */}
           <p className="text-sm leading-relaxed">
             Contact:{' '}
             <a
@@ -288,6 +287,6 @@ export default function TermsPage() {
           </Link>
         </p>
       </div>
-    </main>
+    </div>
   );
 }

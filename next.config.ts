@@ -4,6 +4,20 @@ import type { NextConfig } from "next";
 const dbAdapterPath = path.resolve(process.cwd(), 'lib/api/db/adapter.ts');
 const dbAdapterClientStubPath = './lib/api/db/client-adapter-stub.ts';
 
+function supabaseStoragePattern() {
+  try {
+    const url = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? '');
+    return [{
+      protocol: url.protocol.replace(':', '') as 'http' | 'https',
+      hostname: url.hostname,
+      port: url.port,
+      pathname: '/storage/v1/object/public/**',
+    }];
+  } catch {
+    return [];
+  }
+}
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
@@ -24,6 +38,8 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'images.unsplash.com',
       },
+      // Operator package images in this project's Supabase public storage.
+      ...supabaseStoragePattern(),
     ],
     // Prevent SVG script execution when operator logos become uploadable
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",

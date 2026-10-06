@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 const pageJsonLd = graphJsonLd([
   webPageJsonLd({
     path: '/packages',
-    name: 'Browse Hajj & Umrah Packages — PilgrimCompare',
+    name: 'Browse Hajj & Umrah Packages | PilgrimCompare',
     description:
       'Browse and compare published Umrah and Hajj packages from verified UK operators.',
   }),
@@ -42,15 +42,17 @@ export default async function PackagesPage() {
   try {
     packages = await Repository.listPackages()
   } catch (err) {
-    error = err instanceof Error ? err.message : 'Unable to load packages right now.'
+    // Internal error detail stays in the server log, never on the page.
+    console.error(err)
+    error = 'Unable to load packages right now.'
   }
 
   return (
     <>
       <JsonLdScript data={pageJsonLd} />
-      <main className="min-h-screen bg-[var(--background)]">
+      <div className="min-h-screen bg-[var(--background)]">
         <PackagesBrowse packages={packages} error={error} />
-      </main>
+      </div>
     </>
   )
 }

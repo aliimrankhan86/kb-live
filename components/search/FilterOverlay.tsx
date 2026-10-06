@@ -112,6 +112,7 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({ isOpen, onClose })
     setOrDelete('season', season || null);
     setOrDelete('maxDistance', maxDistance !== DIST_MAX ? String(maxDistance) : null);
     setOrDelete('flightType', directOnly ? 'direct' : null);
+    params.delete('page');
 
     router.replace(`${pathname}?${params.toString()}`);
     onClose();
@@ -154,7 +155,7 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({ isOpen, onClose })
               </span>
             )}
           </div>
-          <OverlayDescription>Narrow your results — changes apply when you tap Show packages.</OverlayDescription>
+          <OverlayDescription>Narrow your results. Changes apply when you tap Show packages.</OverlayDescription>
         </OverlayHeader>
 
         <OverlayBody className="space-y-7 px-5 py-6 sm:px-6">

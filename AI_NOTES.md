@@ -1,5 +1,65 @@
 # PilgrimCompare AI Handover — Single Source of Truth
 
+## §OQ1 Overnight QA run (search mismatch + P0 data/security fixes), 2026-10-06
+
+**Status: COMPLETE on branch `fix/overnight-qa` (PR into dev, not merged)** (off `dev` @ d03892d). Full report: `docs/uat/OVERNIGHT_REPORT.md`. Run memory (local, gitignored): `.overnight/STATE.md`. Vitest **1,971** (baseline 1,869), tsc clean, build 0 errors, real-DB Playwright (`.overnight/e2e`) 18/18.
+
+### Root causes and fixes
+- **Search lost packages (reported problem).** The search form had hidden defaults (LHR, £500 to £1,000). Corridor links sent `departureCity`, which was ignored. Airport matching used exact codes only. Budget max was silently dropped. Dates were ignored. "Clear all" could not clear the airport. Fixed with one shared query layer in `components/search/search-utils.ts` (`parseSearchCriteria` / `searchPackages` / `filterByParams` / `toPackageCardProps`) and one location mapping in `lib/airports.ts` (`resolveDepartureLocation`, `departureCityOf`). Must-haves (type, location, dates) apply strictly; preferences produce "Closest matches" with reasons; the empty state is honest; the page number is in the URL.
+- **Operator portal used the browser MockDB in production** (dashboard, analytics, profile save, CSV import/export, complaints inbox): seed data was shown and writes were lost. These now go through server routes: `GET /api/operator/dashboard`, `GET|POST /api/operator/packages/csv`, `PATCH /api/operator/profile`, plus the existing `/api/complaints`. The analytics page loads server-side. Guard test: `tests/client-data-guard.test.ts`.
+- **DBAdapter was missing** `getBookingOutcomes` / `saveBookingOutcome`, so leads and reconciliation threw under Prisma. Parity guard: `tests/db-adapter-parity.test.ts`.
+- **Open redirects** in `/auth/confirm?next=` and login `?redirect=`. Fixed with `lib/auth/redirect.ts` `safeRedirectPath`.
+- **`updateOperator` let operators change their own verification state.** Protected fields are now admin-only, and a changed ATOL/ABTA number drops its check date.
+- **Truth fixes:**
+  - JSON-LD no longer invents a nights split, a £0 price, InStock, a validity window or foundingDate.
+  - Package page ATOL/ABTA copy is per §5/§7, with no "?★".
+  - The enquiry form discloses data sharing (§12).
+  - Fabricated showcase content was removed, and /showcase 404s on Vercel production.
+  - /partner claims were rewritten (Direction §5, §7 statement).
+  - One nights and date format is used on every surface.
+- **CSV import** now runs server-side, uses an RFC 4180 parser and invents no values. A round-trip test covers every decision field.
+- **Local-only:** `scripts/seed-local-test-data.mjs` (guarded to localhost) and an email log transport via `EMAIL_LOG_PATH` (never on VERCEL_ENV=production).
+
+### Gotchas
+- Fresh `npm ci` needs `npx prisma generate` (CI does it as a separate step) before tsc, vitest or build.
+- Sign-in is rate limited to 5 per 15 minutes per IP. Locally that is an in-memory Map that resets on server restart, so local E2E must sign in once per role.
+- `/_vercel/insights/script.js` 404s off Vercel by design.
+- `npx playwright test` builds `.next` with `E2E_TESTING=1` baked in. Rebuild normally before running a non-E2E server.
+- Run Playwright with `--workers=1`: parallel workers race on the shared MockDB, the same as CI.
+
+### Review follow-up (2026-10-06, after the independent PR #108 review)
+Resolution table: `docs/uat/PR108_REVIEW.md`. Vitest **2,056** (62 files). Real-DB suite 24/24. Two green gates on d40aff5; CI `ci` + `local-db` pass.
+- **Real-DB suite is committed:** `e2e/local-db/` (search journey, operator access, trust and account). Run `supabase start --workdir e2e/local-db`, then `npm run e2e:local-db`. `setup.sh` runs `supabase db reset` every time because the SQL migrations cannot be re-applied. `playwright.config.ts` ignores `local-db/**`. CI job `local-db` does the same in the runner with CLI 2.109.1 and builds `.env.local` from `supabase status`.
+- **Account deletion order:** `Repository.eraseOwnCustomerData` (enquiries anonymised to `ERASED_NAME`, consents deleted, app record deleted), then the auth user. Every step is idempotent, so a 500 means "still signed in, retry".
+- **Listing rule:** `lib/listing.ts` `isPubliclyListed` = verified AND ATOL number. Never filter on `verificationStatus` alone. A non-admin changing `atolNumber` sets `verificationStatus` to `pending`.
+- **Pending (not applied):** `supabase/migrations-pending/PRODUCTION_CHECKS.sql` (read only) and `014_revoke_api_role_writes_operator_profiles.sql`.
+- 🛠️ **Gotcha:** this worktree is under `~/Documents`, and macOS/iCloud can drop `"name 2.ts"` copies into `.next/types`, which makes `tsc` fail with duplicate identifiers. It is not a code bug: `rm -rf .next` and rerun.
+- 🛠️ **Gotcha:** the local test stack config (`e2e/local-db/supabase/config.toml`) raises `auth.rate_limit.email_sent` to 100. The CLI default of 2 per hour fails the reset test on the second run within an hour.
+
+### Iteration 2 (2026-10-06, founder decisions applied)
+- **Account deletion is real.** It returns an honest 409 for linked records and for operator or admin accounts.
+- **Guide pages are cleaned up.** City, Ramadan, Hajj and cost pages no longer carry PilgrimCompare prices, dates or urgency.
+- **Images:** CSP and `next/image` allow the configured Supabase origin.
+- **Password reset works end to end.** It needs the production Supabase redirect allow-list to include `/auth/confirm`.
+- **Prices:** the operator name and price date appear beside every price, through one stated-price formatter that never converts currency.
+- **Founder decisions applied:**
+  - Verified-only public listing.
+  - Three-state inclusions.
+  - Migration 013 is written in `supabase/migrations-pending/` and has **not** been applied.
+  - `REGISTERED_OFFICE` is a single unset config value.
+- **P2 cleanup:** em dashes, sort disclosure, robots, fonts, landmarks, city links, error hygiene and real-file banned-phrase scanning.
+- **Gotchas:**
+  - `/auth/confirm` uses the Host header (`requestOrigin`), so reset and confirm links land on the host that holds the session cookie.
+  - The reset route uses the browser's Origin header.
+  - Local Supabase needs `additional_redirect_urls` for `http://127.0.0.1:3100/**` and `http://localhost:3100/**`.
+- **Final checks:** Vitest 2,047; Playwright 69/6/0; real-DB suite 24/24; clean verification green.
+
+### Open (see report)
+- **Content claims, D-030 remainder:** corridor pages, Ramadan, Hajj, cost page, TierExplanation, CityCorridor.
+- **Broken flows:** password reset (D-014), user delete no-op (D-019), CSP blocking Supabase images (D-020), /requests linking to the parked /quote (D-035).
+- **Missing copy:** §6 price attribution (D-036).
+- **NEEDS ALI:** registered office, the three-state inclusions schema, listing unverified operators, atol_verified_at columns.
+
 ## §C1 — Local/prod Supabase separation + branch hygiene + prod cleanup — 2026-07-07
 
 **Status: ✅ COMPLETE on branch `chore/c1-local-supabase`** (off `dev`). tsc clean · `npm run build` 0 errors · Vitest **1,869/1,869** · Playwright `--workers=1` **69 passed / 6 skipped / 0 failed** (parallel run shows the known multi-worker MockDB race on `bank-payment.spec.ts:15`; passes serially — same as CI). Autonomous session, gates 0–6.

@@ -55,8 +55,9 @@ const DEFAULT_DATA: Partial<Package> = {
   pilgrimageType: 'umrah',
   priceType: 'from',
   currency: 'GBP',
-  inclusions: { visa: false, flights: false, transfers: false, meals: false },
-  roomOccupancyOptions: { single: false, double: true, triple: true, quad: true },
+  inclusions: { visa: null, flights: null, transfers: null, meals: null },
+  // Nothing pre-ticked: unselected room types read "Not provided" (never assumed).
+  roomOccupancyOptions: { single: false, double: false, triple: false, quad: false },
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────

@@ -2,11 +2,9 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import type { Package, OperatorProfile } from '@/lib/types'
 import { createQuotePrefillUrl } from '@/lib/quote-prefill'
-import { CURRENCY_CHANGE_EVENT, getRegionSettings } from '@/lib/i18n/region'
-import { formatPriceForRegion } from '@/lib/i18n/format'
 import { buttonVariants } from '@/components/ui/Button'
 import { TierExplanation } from '@/components/operators/TierExplanation'
 import {
@@ -15,7 +13,16 @@ import {
   flightTypeLabel,
   groupTypeLabel,
   roomOptionsLabel,
+  formatDate,
+  formatDateRange,
+  nightsText,
+  formatStatedPrice,
+  priceText,
+  priceAttribution,
+  inclusionLabel,
 } from '@/lib/packages/display'
+import { ATOL_STANDARD_LINE, CAA_ATOL_URL, CONTRACT_STANDARD_LINE } from '@/lib/content-rules'
+import { VERIFICATION_STATEMENT_HREF } from '@/components/ui/VerifiedBadge'
 
 interface PackageDetailProps {
   pkg: Package
@@ -28,9 +35,6 @@ interface PackageDetailProps {
    */
   rfqEnabled?: boolean
 }
-
-const formatPrice = (value: number, currency: string, settings = getRegionSettings()) =>
-  formatPriceForRegion(value, currency, settings).formatted
 
 const Stars = ({ rating }: { rating?: number }) => {
   if (!rating) return <span className="text-[var(--textMuted)]">Rating not provided</span>
@@ -57,20 +61,14 @@ const SectionCard = ({ title, children, className = '' }: { title: string; child
 
 export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDetailProps) {
   const router = useRouter()
-  const [regionSettings, setRegionSettings] = useState(() => getRegionSettings())
-
-  useEffect(() => {
-    const updateSettings = () => setRegionSettings(getRegionSettings())
-    window.addEventListener(CURRENCY_CHANGE_EVENT, updateSettings)
-    return () => window.removeEventListener(CURRENCY_CHANGE_EVENT, updateSettings)
-  }, [])
-
   const handleBack = () => {
     if (typeof window !== 'undefined' && window.history.length > 1) router.back()
     else router.push('/packages')
   }
 
-  const priceLabel = pkg.priceType === 'from' ? `From ${formatPrice(pkg.pricePerPerson, pkg.currency, regionSettings)}` : formatPrice(pkg.pricePerPerson, pkg.currency, regionSettings)
+  // Stated price, never converted; attributed and dated (standards §6).
+  const priceLabel = priceText(pkg)
+  const attribution = priceAttribution(operator?.companyName, pkg.updatedAt)
   const makkahDist = friendlyDistance('Makkah', pkg.distanceToHaramMakkahMetres, pkg.distanceBandMakkah)
   const madinahDist = friendlyDistance('Madinah', pkg.distanceToHaramMadinahMetres, pkg.distanceBandMadinah)
   const flight = flightTypeLabel(pkg.flightType)
@@ -112,7 +110,7 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
           {operator?.verificationStatus === 'verified' && (
             <span className="ml-2 inline-flex items-center gap-1 text-[var(--yellow)]">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.8 7.2 17l.9-5.4L4.2 7.7l5.4-.8z" /></svg>
-              Verified operator
+              <Link href={VERIFICATION_STATEMENT_HREF} className="underline-offset-2 hover:underline">Verified operator</Link>
             </span>
           )}
         </p>
@@ -134,7 +132,7 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
         <section className="mb-6" data-testid="package-image-gallery" aria-label="Package images">
           <div className="overflow-hidden rounded-xl border border-[var(--border)]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={pkg.images[0]} alt={`${pkg.title} — cover`} className="aspect-[16/7] w-full object-cover" data-testid="package-image-primary" />
+            <img src={pkg.images[0]} alt={`${pkg.title}: cover`} className="aspect-[16/7] w-full object-cover" data-testid="package-image-primary" />
           </div>
         </section>
       )}
@@ -150,15 +148,17 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
                 return (
                   <li key={key} className="flex gap-2.5">
                     <span className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full ${included ? 'bg-[var(--color-success)]/15 text-[var(--color-success)]' : 'bg-[rgba(255,255,255,0.06)] text-[var(--textMuted)]'}`} aria-hidden="true">
-                      {included ? (
+                      {included === true ? (
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 6L9 17l-5-5" /></svg>
-                      ) : (
+                      ) : included === false ? (
                         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                      ) : (
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="6" y1="12" x2="18" y2="12" /></svg>
                       )}
                     </span>
                     <span className="min-w-0">
                       <span className="text-sm font-medium text-[var(--text)]">
-                        {label}: <span className={included ? 'text-[var(--color-success)]' : 'text-[var(--textMuted)]'}>{included ? 'Included' : 'Not included'}</span>
+                        {label}: <span className={included === true ? 'text-[var(--color-success)]' : 'text-[var(--textMuted)]'}>{inclusionLabel(included)}</span>
                       </span>
                       <span className="mt-0.5 block text-xs leading-snug text-[var(--textMuted)]">{help}</span>
                     </span>
@@ -193,7 +193,7 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
 
           {/* Hotels */}
           <SectionCard title="Your hotels">
-            <p className="mt-1 text-xs text-[var(--textMuted)]">How close you stay to the holy sites — a key comfort factor, especially for elderly travellers.</p>
+            <p className="mt-1 text-xs text-[var(--textMuted)]">How close you stay to the holy sites: a key comfort factor, especially for elderly travellers.</p>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
               {([
                 { city: 'Makkah' as const, name: pkg.hotelMakkahName, stars: pkg.hotelMakkahStars, nights: pkg.nightsMakkah, dist: makkahDist },
@@ -220,18 +220,18 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
               {flight && <Fact term="Flights" value={flight} />}
               {pkg.airline && <Fact term="Airline" value={pkg.airline} />}
               {pkg.departureAirport && <Fact term="Departs from" value={pkg.departureAirport} />}
-              <Fact term="Airport transfers" value={pkg.inclusions.transfers ? 'Included' : 'Not included'} />
-              <Fact term="Trip length" value={`${pkg.totalNights} nights (${pkg.nightsMakkah} Makkah · ${pkg.nightsMadinah} Madinah)`} />
-              {pkg.dateWindow && <Fact term="Travel dates" value={`${pkg.dateWindow.start} – ${pkg.dateWindow.end}`} />}
+              <Fact term="Airport transfers" value={inclusionLabel(pkg.inclusions.transfers)} />
+              <Fact term="Trip length" value={nightsText(pkg)} />
+              <Fact term="Travel dates" value={pkg.dateWindow?.start ? formatDateRange(pkg.dateWindow.start, pkg.dateWindow.end) : 'Not provided'} />
             </dl>
           </SectionCard>
 
           {/* Price & payment */}
           <SectionCard title="Price & payment">
             <dl className="mt-3 grid gap-x-6 gap-y-3 sm:grid-cols-2">
-              <Fact term="Price per person" value={priceLabel} />
+              <Fact term="Price per person" value={priceLabel} hint={attribution} />
               {typeof pkg.depositAmount === 'number' && (
-                <Fact term="Deposit to book" value={formatPrice(pkg.depositAmount, pkg.currency, regionSettings)} />
+                <Fact term="Deposit to book" value={formatStatedPrice(pkg.depositAmount, pkg.currency)} />
               )}
               {typeof pkg.paymentPlanAvailable === 'boolean' && (
                 <Fact term="Pay in instalments" value={pkg.paymentPlanAvailable ? 'Available' : 'Not available'} />
@@ -249,7 +249,7 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
             ) : (
               <p className="mt-2 flex items-start gap-2 text-sm leading-relaxed text-[var(--textMuted)]">
                 <span aria-hidden="true" className="text-[var(--danger)]">⚠</span>
-                <span>Not provided — ask the operator about cancellation and refunds <strong className="text-[var(--text)]">before paying any deposit.</strong></span>
+                <span>Not provided. Ask the operator about cancellation and refunds <strong className="text-[var(--text)]">before paying any deposit.</strong></span>
               </p>
             )}
           </SectionCard>
@@ -275,32 +275,31 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
             <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--textMuted)]">Your protection</h2>
             <div className="mt-3 space-y-2 text-sm leading-relaxed text-[var(--textMuted)]">
               {operator?.atolNumber ? (
-                <p>
-                  <span className="font-bold text-[var(--color-success)]">✓</span> ATOL {operator.atolNumber}{' '}
+                <p data-testid="package-atol">
+                  ATOL {operator.atolNumber}{' '}
                   {operator.atolVerifiedAt
-                    ? <span className="text-xs text-[var(--color-success)]" data-testid="atol-verified-badge">(Verified by PilgrimCompare)</span>
-                    : <span className="text-xs text-[var(--textMuted)]" data-testid="atol-self-reported">(Self-reported)</span>}
-                  {' '}— UK financial protection for flight-inclusive trips. You should receive an ATOL certificate with your confirmation.
+                    ? <span className="text-xs text-[var(--color-success)]" data-testid="atol-verified-badge">(checked against the CAA register on {formatDate(operator.atolVerifiedAt)})</span>
+                    : <span className="text-xs text-[var(--textMuted)]" data-testid="atol-self-reported">(provided by the operator)</span>}
+                  {'. '}
+                  <a href={CAA_ATOL_URL} className="underline underline-offset-2 hover:text-[var(--text)]" target="_blank" rel="noopener noreferrer">
+                    About ATOL on caa.co.uk
+                  </a>
                 </p>
               ) : null}
               {operator?.abtaMemberNumber ? (
-                <p>
-                  <span className="font-bold text-[var(--color-success)]">✓</span> ABTA {operator.abtaMemberNumber}{' '}
-                  {operator.abtaVerifiedAt
-                    ? <span className="text-xs text-[var(--color-success)]" data-testid="abta-verified-badge">(Verified by PilgrimCompare)</span>
-                    : <span className="text-xs text-[var(--textMuted)]" data-testid="abta-self-reported">(Self-reported)</span>}
-                  {' '}— dispute resolution and booking protection.
+                <p data-testid="package-abta">
+                  ABTA {operator.abtaMemberNumber}{' '}
+                  <span className="text-xs text-[var(--textMuted)]" data-testid="abta-self-reported">(provided by the operator)</span>
                 </p>
               ) : null}
               {!hasProtection ? (
                 <p className="flex items-start gap-2 text-[var(--danger)]" role="alert">
-                  <span className="font-bold">⚠</span>
-                  <span>No ATOL or ABTA protection listed. Ask the operator directly what financial protection they provide before paying anything.</span>
+                  <span className="font-bold" aria-hidden="true">⚠</span>
+                  <span>No ATOL or ABTA number provided. Ask the operator directly what financial protection they provide before paying anything.</span>
                 </p>
               ) : null}
-              <p className="border-t border-[var(--border)] pt-2 text-xs">
-                Your travel contract, cancellations and refunds are with the operator named on this page. PilgrimCompare is a comparison platform and does not verify ATOL/ABTA credentials — always confirm protection in writing before paying.
-              </p>
+              <p className="border-t border-[var(--border)] pt-2 text-xs">{ATOL_STANDARD_LINE}</p>
+              <p className="text-xs">{CONTRACT_STANDARD_LINE}</p>
             </div>
           </section>
 
@@ -312,14 +311,18 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
           <div className="sticky top-6 rounded-xl border border-[var(--border)] bg-[var(--panel)] p-5">
             <p className="text-xs uppercase tracking-wide text-[var(--textMuted)]">{pkg.priceType === 'from' ? 'From' : 'Price'} · per person</p>
             <p data-testid="package-price" className="mt-1 text-3xl font-bold text-[var(--text)]">{priceLabel}</p>
+            <p className="mt-1 text-xs text-[var(--textMuted)]" data-testid="package-price-attribution">{attribution}</p>
             <ul className="mt-4 space-y-2 text-sm text-[var(--textMuted)]">
-              <RailFact label={`${pkg.totalNights} nights`} sub={`${pkg.nightsMakkah} Makkah · ${pkg.nightsMadinah} Madinah`} />
+              <RailFact label={`${pkg.totalNights} nights`} sub={nightsText(pkg).split(' · ').slice(1).join(' · ')} />
               {(pkg.hotelMakkahStars || pkg.hotelMadinahStars) && (
-                <RailFact label="Hotels" sub={`${pkg.hotelMakkahStars ?? '?'}★ Makkah · ${pkg.hotelMadinahStars ?? '?'}★ Madinah`} />
+                <RailFact
+                  label="Hotels"
+                  sub={`Makkah ${pkg.hotelMakkahStars ? `${pkg.hotelMakkahStars}★` : 'Not provided'} · Madinah ${pkg.hotelMadinahStars ? `${pkg.hotelMadinahStars}★` : 'Not provided'}`}
+                />
               )}
               {flight && <RailFact label={flight} />}
               {makkahDist && <RailFact label={makkahDist.primary} />}
-              <RailFact label={hasProtection ? 'ATOL/ABTA listed' : 'No ATOL/ABTA listed'} tone={hasProtection ? 'good' : 'warn'} />
+              <RailFact label={hasProtection ? 'ATOL/ABTA number provided' : 'No ATOL/ABTA number provided'} tone={hasProtection ? 'good' : 'warn'} />
             </ul>
             {/* Canonical enquiry entry point — always live (Task 2). */}
             <Link href={`/packages/${pkg.slug}/enquire`} data-testid="package-cta-enquire" className={buttonVariants({ variant: 'primary', size: 'md', className: 'mt-5 w-full' })}>

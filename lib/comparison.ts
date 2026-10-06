@@ -1,6 +1,7 @@
 import { Offer, OperatorProfile, Package } from './types';
 import { getRegionSettings } from './i18n/region';
 import { formatDistance, formatPriceForRegion, parseDistanceKm } from './i18n/format';
+import { formatDateRange, priceText } from './packages/display';
 import { flightTypeLabel, groupTypeShort, ziyaratShort } from './packages/display';
 
 export interface ComparisonRow {
@@ -23,6 +24,8 @@ export interface ComparisonRow {
   // Extra decision rows (grouped in the comparison view). Optional so existing
   // callers/tests stay valid; the view shows 'Not provided' when absent.
   flights?: string;
+  /** Operator-stated travel dates, same format as cards and the package page. */
+  travelDates?: string;
   deposit?: string;
   paymentPlan?: string;
   cancellation?: string;
@@ -113,10 +116,8 @@ export function mapPackageToComparison(pkg: Package, operator?: OperatorProfile)
     return `Makkah ${makkah} / Madinah ${madinah}`;
   })();
 
-  const priceInfo = formatPriceForRegion(pkg.pricePerPerson, pkg.currency, settings);
-  const price = pkg.priceType === 'from'
-    ? `From ${priceInfo.formatted}`
-    : priceInfo.formatted;
+  // Stated price, never converted (standards §6); same label as cards and package page.
+  const price = priceText(pkg);
 
   const starValues = [pkg.hotelMakkahStars, pkg.hotelMadinahStars].filter(
     (s): s is 3 | 4 | 5 => typeof s === 'number'
@@ -130,17 +131,24 @@ export function mapPackageToComparison(pkg: Package, operator?: OperatorProfile)
     price: pkg.currency && Number.isFinite(pkg.pricePerPerson) ? price : 'Not provided',
     operatorName: operator?.companyName || 'Not provided',
     totalNights: pkg.totalNights,
-    splitNights: `${pkg.nightsMakkah} / ${pkg.nightsMadinah}`,
+    splitNights: pkg.nightsMakkah && pkg.nightsMadinah ? `${pkg.nightsMakkah} / ${pkg.nightsMadinah}` : 'Not provided',
     hotelRating,
     distance,
     occupancy: supportedOccupancy.join(', ') || 'Not provided',
-    inclusions: inclusionsList.length > 0 ? inclusionsList.join(', ') : 'Not provided',
+    // Three-state: "None" only when the operator said no to every item.
+    inclusions:
+      inclusionsList.length > 0
+        ? inclusionsList.join(', ')
+        : Object.values(pkg.inclusions).every((v) => v === false)
+          ? 'None'
+          : 'Not provided',
     notes: pkg.notes || 'Not provided',
     priceValue: pkg.currency && Number.isFinite(pkg.pricePerPerson) ? pkg.pricePerPerson : null,
     hotelStarsValue: avg(starValues),
     distanceValue: bandMeters.length ? Math.min(...bandMeters) : null,
     inclusionsCount: inclusionsList.length,
     flights: flightTypeLabel(pkg.flightType) ?? 'Not provided',
+    travelDates: pkg.dateWindow?.start ? formatDateRange(pkg.dateWindow.start, pkg.dateWindow.end) : 'Not provided',
     deposit:
       typeof pkg.depositAmount === 'number'
         ? formatPriceForRegion(pkg.depositAmount, pkg.currency, settings).formatted

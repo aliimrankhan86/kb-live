@@ -33,7 +33,7 @@ export default function BookingIntentConfirmation({
   return (
     <Html>
       <Head />
-      <Preview>Booking intent created — reference {refCode}</Preview>
+      <Preview>Booking intent created, reference {refCode}</Preview>
       <Body style={body}>
         <Container style={container}>
           <Heading style={logo}>PilgrimCompare</Heading>

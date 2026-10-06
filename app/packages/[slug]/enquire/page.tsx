@@ -3,6 +3,7 @@ import { EnquiryForm, type EnquirySummary } from '@/components/enquiry/EnquiryFo
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { Repository } from '@/lib/api/repository'
 import type { OperatorProfile, Package } from '@/lib/types'
+import { priceAttributionShort, priceText } from '@/lib/packages/display'
 
 export const metadata: Metadata = {
   title: 'Enquire | PilgrimCompare',
@@ -24,7 +25,7 @@ const renderNotice = (message: string) => (
 /** Build the read-only summary from package data. Honest: missing → "Not provided". */
 function buildSummary(pkg: Package, operator: OperatorProfile | undefined): EnquirySummary {
   const tripType = pkg.pilgrimageType === 'hajj' ? 'Hajj' : 'Umrah'
-  const price = `${pkg.priceType === 'from' ? 'From ' : ''}£${pkg.pricePerPerson.toLocaleString('en-GB')} per person`
+  const price = `${priceText(pkg)} per person (${priceAttributionShort(operator?.companyName, pkg.updatedAt)})`
   const stars = [
     pkg.hotelMakkahStars ? `${pkg.hotelMakkahStars}★ Makkah` : null,
     pkg.hotelMadinahStars ? `${pkg.hotelMadinahStars}★ Madinah` : null,
@@ -48,14 +49,14 @@ export default async function EnquirePage({ params }: { params: Promise<{ slug: 
   let pkg: Package | undefined
   let operator: OperatorProfile | undefined
   try {
-    pkg = await Repository.getPackageBySlug(slug)
+    pkg = await Repository.getPublicPackageBySlug(slug)
     if (pkg) operator = await Repository.getOperatorById(pkg.operatorId)
   } catch {
-    return <main className="min-h-screen bg-[var(--background)]">{renderNotice('We could not load this package right now. Please try again.')}</main>
+    return <div className="min-h-screen bg-[var(--background)]">{renderNotice('We could not load this package right now. Please try again.')}</div>
   }
 
   if (!pkg || pkg.status !== 'published') {
-    return <main className="min-h-screen bg-[var(--background)]">{renderNotice('This package is no longer available.')}</main>
+    return <div className="min-h-screen bg-[var(--background)]">{renderNotice('This package is no longer available.')}</div>
   }
 
   const breadcrumbItems = [
@@ -66,11 +67,11 @@ export default async function EnquirePage({ params }: { params: Promise<{ slug: 
   ]
 
   return (
-    <main className="min-h-screen bg-[var(--background)]">
+    <div className="min-h-screen bg-[var(--background)]">
       <div className="w-full max-w-2xl mx-auto px-4 pt-6">
         <Breadcrumb items={breadcrumbItems} />
       </div>
       <EnquiryForm summary={buildSummary(pkg, operator)} packageSlug={pkg.slug} />
-    </main>
+    </div>
   )
 }

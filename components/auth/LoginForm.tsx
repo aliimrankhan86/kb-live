@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { PasswordInput } from '@/components/auth/PasswordInput';
+import { safeRedirectPath } from '@/lib/auth/redirect';
 
 type LoginTab = 'customer' | 'partner';
 type ReturnedRole = 'customer' | 'operator' | 'admin';
@@ -28,7 +29,7 @@ function getRedirectForRole(role: ReturnedRole, redirect: string | null): string
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get('redirect');
+  const redirect = safeRedirectPath(searchParams.get('redirect'), '') || null;
   const forgotParam = searchParams.get('forgot');
   const defaultTab = resolveLoginType(searchParams.get('type'));
 
@@ -212,7 +213,7 @@ export function LoginForm() {
         <p className="mt-1 text-sm text-[var(--textMuted)]">
           {isPartner
             ? 'Access your operator dashboard and manage your packages.'
-            : 'Sign in to view your quotes, requests, and saved packages.'}
+            : 'Sign in to manage your account and saved packages.'}
         </p>
       </div>
 

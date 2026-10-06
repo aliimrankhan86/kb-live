@@ -26,17 +26,25 @@ const ROOM_OPTIONS: { key: keyof NonNullable<Package['roomOccupancyOptions']>; l
 // is the starting state with no painted default — a skipped value persists as
 // unset (→ "Not provided"), never coerced to false. Mirrors the groupType radio.
 const ZIYARAT_OPTIONS: { value: boolean | undefined; key: string; label: string; description: string }[] = [
-  { value: undefined, key: 'unspecified', label: 'Not specified', description: 'Leave blank — shown to pilgrims as "Not provided".' },
+  { value: undefined, key: 'unspecified', label: 'Not specified', description: 'Leave blank. Shown to pilgrims as "Not provided".' },
   { value: true, key: 'included', label: 'Included', description: 'Ziyarat tours to holy sites are part of this package.' },
   { value: false, key: 'not-included', label: 'Not included', description: 'This package does not include ziyarat tours.' },
 ];
 
-export function WizardStep5Inclusions({ data, onChange, error }: Props) {
-  const inclusions = data.inclusions ?? { visa: false, flights: false, transfers: false, meals: false };
-  const occupancy = data.roomOccupancyOptions ?? { single: false, double: true, triple: true, quad: true };
+// Each inclusion is three-state, like ziyarat: a skipped item stays "not stated"
+// (null → "Not provided"), never coerced to "Not included".
+const INCLUSION_STATES: { value: boolean | null; key: string; label: string }[] = [
+  { value: true, key: 'yes', label: 'Included' },
+  { value: false, key: 'no', label: 'Not included' },
+  { value: null, key: 'unspecified', label: 'Not specified' },
+];
 
-  const toggleInclusion = (key: keyof typeof inclusions) => {
-    onChange({ inclusions: { ...inclusions, [key]: !inclusions[key] } });
+export function WizardStep5Inclusions({ data, onChange, error }: Props) {
+  const inclusions = data.inclusions ?? { visa: null, flights: null, transfers: null, meals: null };
+  const occupancy = data.roomOccupancyOptions ?? { single: false, double: false, triple: false, quad: false };
+
+  const setInclusion = (key: keyof typeof inclusions, value: boolean | null) => {
+    onChange({ inclusions: { ...inclusions, [key]: value } });
   };
 
   const toggleOccupancy = (key: keyof typeof occupancy) => {
@@ -61,22 +69,40 @@ export function WizardStep5Inclusions({ data, onChange, error }: Props) {
         <h3 className="mb-3 text-sm font-semibold text-[var(--text)] uppercase tracking-wide">What&apos;s included</h3>
         <div className="space-y-2">
           {INCLUSION_ITEMS.map(({ key, label, description }) => (
-            <label
+            <fieldset
               key={key}
-              className="flex cursor-pointer items-center gap-3 rounded border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] px-4 py-3 hover:border-[rgba(255,255,255,0.15)] transition-colors"
+              data-testid={`wizard-inclusion-${key}`}
+              className="rounded border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] px-4 py-3"
             >
-              <input
-                type="checkbox"
-                data-testid={`wizard-inclusion-${key}`}
-                checked={inclusions[key]}
-                onChange={() => toggleInclusion(key)}
-                className="h-4 w-4 rounded accent-[var(--yellow)]"
-              />
-              <div>
-                <span className="text-sm font-medium text-[var(--text)]">{label}</span>
-                <p className="text-xs text-[var(--textMuted)]">{description}</p>
+              <legend className="sr-only">{label}</legend>
+              <span className="text-sm font-medium text-[var(--text)]">{label}</span>
+              <p className="text-xs text-[var(--textMuted)]">{description}</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {INCLUSION_STATES.map((state) => {
+                  const checked = (inclusions[key] ?? null) === state.value;
+                  return (
+                    <label
+                      key={state.key}
+                      className={`flex min-h-11 cursor-pointer items-center gap-2 rounded border px-3 text-sm transition-colors ${
+                        checked
+                          ? 'border-[var(--yellow)]/50 bg-[var(--yellow)]/10 text-[var(--yellow)]'
+                          : 'border-[rgba(255,255,255,0.08)] text-[var(--text)] hover:border-[rgba(255,255,255,0.15)]'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name={`inclusion-${key}`}
+                        data-testid={`wizard-inclusion-${key}-${state.key}`}
+                        checked={checked}
+                        onChange={() => setInclusion(key, state.value)}
+                        className="h-4 w-4 accent-[var(--yellow)]"
+                      />
+                      {state.label}
+                    </label>
+                  );
+                })}
               </div>
-            </label>
+            </fieldset>
           ))}
         </div>
       </div>

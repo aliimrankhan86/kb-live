@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { departureCityHref } from '@/lib/airports'
 import Link from 'next/link';
 import { Logo } from '@/components/graphics/Logo';
 import { WordmarkLogo } from '@/components/graphics/WordmarkLogo';
-import { LEGAL_ENTITY_BLOCK } from '@/lib/legal';
+import { LEGAL_ENTITY_BLOCK, registeredOfficeClause } from '@/lib/legal';
 
 const LEGAL_LINKS = [
   { href: '/how-it-works', label: 'How it works' },
@@ -202,7 +203,7 @@ export function Footer({ cities = [], rfqEnabled = false }: { cities?: string[];
                   {cities.map(city => (
                     <li key={city}>
                       <Link
-                        href={`/umrah/${city.toLowerCase()}`}
+                        href={departureCityHref(city)}
                         className={linkClass}
                       >
                         {city}
@@ -221,7 +222,7 @@ export function Footer({ cities = [], rfqEnabled = false }: { cities?: string[];
             <strong className="text-[var(--text)]">Important:</strong> PilgrimCompare is a comparison
             platform only. We do not organise, sell, or fulfil travel packages and do not collect, hold,
             or transfer customer funds. Your contract is directly with the travel operator. ATOL/ABTA
-            numbers are provided by operators — verify at{' '}
+            numbers are provided by operators. Verify at{' '}
             <a
               href="https://www.caa.co.uk/atol-protection"
               target="_blank"
@@ -258,7 +259,7 @@ export function Footer({ cities = [], rfqEnabled = false }: { cities?: string[];
           {LEGAL_ENTITY_BLOCK.tradingName} is a trading name of{' '}
           <span className="text-[var(--text)]">{LEGAL_ENTITY_BLOCK.companyName}</span>, registered
           in {LEGAL_ENTITY_BLOCK.registeredCountry} (company no.{' '}
-          <span className="text-[var(--text)]">{LEGAL_ENTITY_BLOCK.companyNumber}</span>). VAT
+          <span className="text-[var(--text)]">{LEGAL_ENTITY_BLOCK.companyNumber}</span>){registeredOfficeClause()}. VAT
           no.{' '}
           <span className="text-[var(--text)]">{LEGAL_ENTITY_BLOCK.vatNumber}</span>.
         </p>

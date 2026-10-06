@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next';
+import { isPubliclyListed } from '@/lib/listing';
 import { Repository } from '@/lib/api/repository';
 import type { Package, OperatorProfile } from '@/lib/types';
 
@@ -64,7 +65,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const operators = await Repository.getOperators({ userId: 'system', role: 'admin' });
     operatorPages = operators
-      .filter((o: OperatorProfile) => o.verificationStatus === 'verified' && o.slug)
+      .filter((o: OperatorProfile) => isPubliclyListed(o) && o.slug)
       .map((o: OperatorProfile) => ({
         url: `${baseUrl}/operators/${o.slug}`,
         lastModified: new Date(),

@@ -2,19 +2,19 @@ import type { Metadata } from 'next'
 import { CityCorridor } from '@/components/marketing/CityCorridor'
 import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
 import { Repository } from '@/lib/api/repository'
+import { corridorDescription, corridorFaqs, corridorIntro } from '@/lib/seo/corridor-faqs'
 
 export async function generateMetadata(): Promise<Metadata> {
   const cities = await Repository.getDistinctDepartureCities().catch(() => [] as string[])
   const hasSupply = cities.includes('Manchester')
   return {
-    title: 'Umrah Packages from Manchester 2026 – Compare UK Operators | PilgrimCompare',
-    description:
-      'Browse and compare Umrah packages departing from Manchester Airport (MAN). Verified UK operators, hotels near Haram, and ATOL details displayed.',
+    title: 'Umrah Packages from Manchester: Compare Verified UK Operators | PilgrimCompare',
+    description: corridorDescription('Manchester'),
     alternates: { canonical: '/umrah/manchester' },
     robots: hasSupply ? { index: true, follow: true } : { index: false, follow: true },
     openGraph: {
-      title: 'Umrah Packages from Manchester 2026 | PilgrimCompare',
-      description: 'Compare Umrah packages departing from Manchester MAN with verified UK operators.',
+      title: 'Umrah Packages from Manchester: Compare Verified UK Operators | PilgrimCompare',
+      description: corridorDescription('Manchester'),
       url: 'https://pilgrimcompare.co.uk/umrah/manchester',
       siteName: 'PilgrimCompare',
       type: 'website',
@@ -22,41 +22,19 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: 'summary_large_image',
-      title: 'Umrah Packages from Manchester 2026 | PilgrimCompare',
-      description: 'Compare Umrah packages departing from Manchester MAN with verified UK operators.',
+      title: 'Umrah Packages from Manchester: Compare Verified UK Operators | PilgrimCompare',
+      description: corridorDescription('Manchester'),
     },
   }
 }
 
-const faqs = [
-  {
-    question: 'Does Manchester Airport fly to Jeddah for Umrah?',
-    answer:
-      'Yes, Manchester Airport (MAN) has regular direct and connecting flights to Jeddah (JED) and Madinah (MED). It is one of the busiest UK departure points for Umrah travellers, particularly from the North of England.',
-  },
-  {
-    question: 'How much does an Umrah package from Manchester cost?',
-    answer:
-      'Umrah packages from Manchester typically start from around £850 per person for budget departures. Premium 5-star packages with hotels adjacent to the Grand Mosque can exceed £3,500. Ramadan and peak season departures are usually priced higher.',
-  },
-  {
-    question: 'Are there Umrah operators covering the North of England?',
-    answer:
-      'Yes, many UK Umrah operators offer packages departing from Manchester Airport, serving travellers across the North of England, including Manchester, Leeds, Sheffield, and Bradford. PilgrimCompare lists verified operators with MAN departure options.',
-  },
-  {
-    question: 'What should I check before booking an Umrah package from Manchester?',
-    answer:
-      'Check: (1) ATOL or ABTA number of the operator; (2) hotel distance to the Grand Mosque in Makkah; (3) whether flights depart from MAN or require a transfer; (4) what is included — visa, transfers, meals; (5) cancellation and refund policy.',
-  },
-]
+const faqs = corridorFaqs('Manchester')
 
 const pageJsonLd = graphJsonLd([
   webPageJsonLd({
     path: '/umrah/manchester',
-    name: 'Umrah Packages from Manchester 2026 – Compare UK Operators | PilgrimCompare',
-    description:
-      'Compare Umrah packages departing from Manchester Airport MAN with verified UK operators.',
+    name: 'Umrah Packages from Manchester: Compare Verified UK Operators',
+    description: corridorDescription('Manchester'),
   }),
   breadcrumbJsonLd([
     { name: 'Home', path: '/' },
@@ -67,7 +45,8 @@ const pageJsonLd = graphJsonLd([
 ])
 
 export default async function ManchesterUmrahPage() {
-  const departureCities = await Repository.getDistinctDepartureCities()
+  // A DB blip must not take the page down; the honest 'no packages' notice shows instead.
+  const departureCities = await Repository.getDistinctDepartureCities().catch(() => [] as string[])
   const hasPackages = departureCities.includes('Manchester')
 
   return (
@@ -81,7 +60,7 @@ export default async function ManchesterUmrahPage() {
       <CityCorridor
         city="Manchester"
         h1="Umrah Packages from Manchester"
-        intro="Find Umrah packages departing from Manchester Airport (MAN). Compare verified UK operators side by side, filter by hotel rating and distance to Haram, and request a quote in minutes."
+        intro={corridorIntro('Manchester')}
         queryParams="?type=umrah&departureCity=Manchester"
         faqs={faqs}
         breadcrumbItems={[

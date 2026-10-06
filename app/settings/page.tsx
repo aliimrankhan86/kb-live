@@ -215,7 +215,7 @@ export default function SettingsPage() {
     setResettingPassword(true);
     setPasswordError(null);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/callback?next=/settings`,
+      redirectTo: `${window.location.origin}/auth/confirm?next=/reset-password`,
     });
     if (error) {
       setPasswordError(error.message);
@@ -448,8 +448,8 @@ export default function SettingsPage() {
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {([
-            { key: 'offerUpdates' as const, label: 'Offer responses', desc: 'When an operator replies to your quote request' },
-            { key: 'bookingUpdates' as const, label: 'Booking updates', desc: 'Payment confirmations and status changes' },
+            // Offer and booking emails belong to parked flows (PARKED_FEATURES.md #1, #2),
+            // so their switches are hidden rather than offering emails that never send.
             { key: 'marketing' as const, label: 'Promotions & tips', desc: 'Guides, seasonal deals and Umrah insights' },
           ]).map(({ key, label, desc }) => (
             <label
@@ -475,7 +475,7 @@ export default function SettingsPage() {
       {/* Data export */}
       <SectionCard id="export-heading" title="Download your data">
         <p style={{ margin: '0 0 1rem', fontSize: '0.8125rem', color: 'var(--textMuted)' }}>
-          Under UK GDPR Article 20, you can receive a copy of the personal data PilgrimCompare holds — your requests, booking intents, and interests in a portable format.
+          Under UK GDPR Article 20, you can receive a copy of the personal data PilgrimCompare holds (your requests, booking intents, and interests) in a portable format.
         </p>
         {exportError && <p role="alert" style={{ marginBottom: '0.75rem', fontSize: '0.875rem', color: 'var(--danger)' }}>{exportError}</p>}
         <Button variant="secondary" onClick={handleExport} loading={exporting} disabled={exporting} data-testid="export-data-btn">
@@ -497,7 +497,7 @@ export default function SettingsPage() {
           Delete account
         </h2>
         <p style={{ margin: '0 0 1rem', fontSize: '0.8125rem', color: 'var(--textMuted)' }}>
-          Under UK GDPR Article 17, you can request erasure of your personal data. Deleting your account permanently removes your profile, requests, and booking history. This cannot be undone.
+          Under UK GDPR Article 17, you can ask us to erase your personal data. Deleting your account permanently deletes your sign-in, your profile and any marketing email consent you gave. On enquiries you sent with this email address, we delete your name, email address, phone number and message, and keep only the reference code, package and date. If your account is linked to bookings or complaints, we cannot delete it automatically: we will tell you, nothing will be deleted, and you can email dpo@pilgrimcompare.co.uk.
         </p>
         {deleteError && <p role="alert" style={{ marginBottom: '0.75rem', fontSize: '0.875rem', color: 'var(--danger)' }}>{deleteError}</p>}
         {!showDeleteConfirm ? (
@@ -513,7 +513,7 @@ export default function SettingsPage() {
           >
             <p id="delete-confirm-title" style={{ margin: '0 0 0.375rem', fontWeight: 600, color: 'var(--danger)' }}>This cannot be undone</p>
             <p id="delete-confirm-desc" style={{ margin: '0 0 1rem', fontSize: '0.875rem', color: 'var(--textMuted)' }}>
-              Your account, requests, booking intents, and personal data will be permanently deleted. You will be signed out immediately.
+              Your sign-in, profile and marketing consent will be permanently deleted, your details will be removed from your enquiries, and you will be signed out. Operators you already sent an enquiry to keep the details you gave them under their own privacy policy. To have those deleted, contact the operator directly.
             </p>
             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
               <Button variant="danger" onClick={handleDeleteConfirm} loading={deleting} disabled={deleting} data-testid="delete-account-confirm-btn">

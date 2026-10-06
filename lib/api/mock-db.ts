@@ -1165,6 +1165,21 @@ export const MockDB = {
     return enquiry;
   },
 
+  /** Account erasure: strip personal fields from this email's enquiries. Safe to rerun. */
+  anonymiseEnquiriesByEmail: (email: string, erasedName: string) => {
+    const target = email.trim().toLowerCase();
+    setStorage(STORAGE_KEYS.ENQUIRIES, MockDB.getEnquiries().map((e) =>
+      e.email?.toLowerCase() === target
+        ? { ...e, name: erasedName, email: undefined, phone: undefined, message: undefined }
+        : e
+    ));
+  },
+
+  deleteMarketingConsentsByEmail: (email: string) => {
+    const target = email.trim().toLowerCase();
+    setStorage(STORAGE_KEYS.MARKETING_CONSENTS, MockDB.getMarketingConsents().filter((c) => c.email.toLowerCase() !== target));
+  },
+
   // Task 3: marketing consent (a row exists only when consent given + email present).
   getMarketingConsents: (): MarketingConsent[] =>
     getStorage<MarketingConsent[]>(STORAGE_KEYS.MARKETING_CONSENTS, []),
@@ -1197,6 +1212,10 @@ export const MockDB = {
     }
     setStorage(STORAGE_KEYS.BOOKING_OUTCOMES, outcomes);
     return outcome;
+  },
+
+  deleteUser: (id: string) => {
+    setStorage(STORAGE_KEYS.USERS, getStorage<User[]>(STORAGE_KEYS.USERS, SEED_USERS).filter((u) => u.id !== id));
   },
 
   // For simulation

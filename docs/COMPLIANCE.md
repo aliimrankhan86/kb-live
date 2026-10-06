@@ -41,7 +41,7 @@ This document maps PilgrimCompare's data handling, security, and consumer practi
 | Data type                   | Retention                           | Rationale                                             |
 | --------------------------- | ----------------------------------- | ----------------------------------------------------- |
 | User account (active)       | Indefinite                          | Necessary for service                                 |
-| User account (deleted)      | 90 days grace                       | Then hard-delete personal data                        |
+| User account (deleted)      | Deleted straight away               | Sign-in, profile and marketing consents deleted; enquiries kept with name, email, phone and message removed |
 | Booking intent + evidence   | 90 days                             | MVP retention; auto-purged after `retentionExpiresAt` |
 | Flagged evidence (disputes) | Indefinite (until dispute resolved) | Admin `disputeFlag` preserves bytes                   |
 | Audit log entries           | 7 years                             | Financial/legal record-keeping                        |

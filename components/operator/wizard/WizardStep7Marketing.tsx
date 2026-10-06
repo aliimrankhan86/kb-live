@@ -213,7 +213,7 @@ export function WizardStep7Marketing({ data, onChange, error }: Props) {
           id="pkg-notes"
           data-testid="wizard-notes"
           rows={4}
-          placeholder="Any other details customers should know — itinerary, what to bring, accessibility info, etc."
+          placeholder="Any other details customers should know: itinerary, what to bring, accessibility info, etc."
           value={notes}
           onChange={(e) => onChange({ notes: e.target.value || undefined })}
           className="w-full rounded border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] px-3 py-2 text-sm text-[var(--text)] placeholder:text-[var(--textMuted)] focus:border-[var(--yellow)] focus:outline-none resize-none"

@@ -16,7 +16,7 @@ export const INCLUSIONS: InclusionInfo[] = [
   { key: 'visa', label: 'Visa', help: 'Your Saudi entry visa for the trip.' },
   { key: 'flights', label: 'Flights', help: 'Return flights between the UK and Saudi Arabia.' },
   { key: 'transfers', label: 'Transfers', help: 'Airport pick-up/drop-off and travel between Makkah and Madinah.' },
-  { key: 'meals', label: 'Meals', help: 'Meals provided at the hotel — ask the operator which ones.' },
+  { key: 'meals', label: 'Meals', help: 'Meals provided at the hotel. Ask the operator which ones.' },
 ];
 
 const walkMinutes = (metres: number) => Math.max(1, Math.round(metres / 80));
@@ -67,7 +67,7 @@ export const flightTypeLabel = (t?: Package['flightType']): string | null => {
 export const groupTypeLabel = (g?: Package['groupType']): string | null => {
   switch (g) {
     case 'private':
-      return 'Private — your group only';
+      return 'Private (your group only)';
     case 'small-group':
       return 'Small group';
     case 'large-group':
@@ -107,3 +107,68 @@ export const roomOptionsLabel = (o: Package['roomOccupancyOptions']): string => 
   ].filter(Boolean);
   return parts.length ? (parts as string[]).join(', ') : 'Not provided';
 };
+
+/**
+ * One date format for every surface (cards, package page, compare, chips):
+ * "18 Dec 2026". Parses the ISO date parts directly so the day never shifts
+ * with the server or browser time zone. Unparseable input is returned as-is.
+ */
+export function formatDate(iso: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+  if (!m) return iso;
+  const date = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
+  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+}
+
+export function formatDateRange(start: string, end?: string): string {
+  return end && end !== start ? `${formatDate(start)} to ${formatDate(end)}` : formatDate(start);
+}
+
+/**
+ * One nights format for every surface: "10 nights · 5 Makkah · 5 Madinah".
+ * The split is only shown when the operator stated both cities; it is never
+ * derived from the total.
+ */
+export function nightsText(p: { totalNights: number; nightsMakkah?: number; nightsMadinah?: number }): string {
+  const total = `${p.totalNights} night${p.totalNights === 1 ? '' : 's'}`;
+  const split =
+    p.nightsMakkah && p.nightsMadinah
+      ? `${p.nightsMakkah} Makkah · ${p.nightsMadinah} Madinah`
+      : 'Makkah and Madinah split not provided';
+  return `${total} · ${split}`;
+}
+
+/**
+ * Standards §6: show the price exactly as the operator gave it. Never converts
+ * currency, rounds or recomputes. "£1,495" / "£1,495.50" / "US$1,200".
+ */
+export function formatStatedPrice(amount: number, currency: string): string {
+  return new Intl.NumberFormat('en-GB', {
+    style: 'currency',
+    currency: currency || 'GBP',
+    minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+}
+
+/** "From £1,495" or "£1,495": one price label for every surface. */
+export function priceText(p: { pricePerPerson: number; currency: string; priceType: string }): string {
+  const amount = formatStatedPrice(p.pricePerPerson, p.currency);
+  return p.priceType === 'from' ? `From ${amount}` : amount;
+}
+
+/** Short §6 attribution for cards: "As stated by Example Ltd, updated 6 Oct 2026". */
+export function priceAttributionShort(operatorName?: string, updatedAt?: string): string {
+  return `As stated by ${operatorName ?? 'the operator'}${updatedAt ? `, updated ${formatDate(updatedAt)}` : ''}`;
+}
+
+/** Full §6 attribution for the package page and enquiry. */
+export function priceAttribution(operatorName?: string, updatedAt?: string): string {
+  return `Price per person as stated by ${operatorName ?? 'the operator'}${
+    updatedAt ? `, last updated ${formatDate(updatedAt)}` : ''
+  }. Confirm the final price with the operator before paying.`;
+}
+
+/** Three-state inclusion label: true / false / not stated (founder decision 2026-10-06). */
+export const inclusionLabel = (value: boolean | null | undefined): 'Included' | 'Not included' | 'Not provided' =>
+  value === true ? 'Included' : value === false ? 'Not included' : 'Not provided';
