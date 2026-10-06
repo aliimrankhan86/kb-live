@@ -4,12 +4,12 @@ import { LEGAL_ENTITY_BLOCK, registeredOfficeClause } from '@/lib/legal';
 export const metadata: Metadata = {
   title: 'Privacy Policy | PilgrimCompare',
   description:
-    'How PilgrimCompare collects, uses, and protects your personal data. UK GDPR compliant.',
+    'How PilgrimCompare collects, uses and protects your personal data under UK GDPR.',
   alternates: { canonical: '/privacy' },
   robots: { index: true, follow: true },
   openGraph: {
     title: 'Privacy Policy | PilgrimCompare',
-    description: 'How PilgrimCompare collects, uses, and protects your personal data. UK GDPR compliant.',
+    description: 'How PilgrimCompare collects, uses and protects your personal data under UK GDPR.',
     url: 'https://pilgrimcompare.co.uk/privacy',
     siteName: 'PilgrimCompare',
     type: 'website',
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Privacy Policy | PilgrimCompare',
-    description: 'How PilgrimCompare collects, uses, and protects your personal data. UK GDPR compliant.',
+    description: 'How PilgrimCompare collects, uses and protects your personal data under UK GDPR.',
   },
 };
 
@@ -114,7 +114,7 @@ export default function PrivacyPolicyPage() {
             <li>
               <strong>Service providers:</strong> Supabase (database, EU West / Ireland
               region), Vercel (hosting), and Resend (transactional email delivery), all under
-              GDPR-compliant data processing agreements.
+              data processing agreements.
             </li>
             <li>
               <strong>Regulators:</strong> where required by law.
@@ -244,8 +244,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <p className="mt-12 text-xs text-[var(--textMuted)]">
-          Governed by the laws of England and Wales. Compliant with UK GDPR and the Data
-          Protection Act 2018.
+          Governed by the laws of England and Wales. Written under UK GDPR and the Data Protection Act 2018.
         </p>
       </div>
     </main>
