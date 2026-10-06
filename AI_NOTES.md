@@ -18,9 +18,9 @@
 - The retention marker differs from `ERASED_NAME` so the two causes stay distinguishable. It is awaiting Ali's approval.
 
 ### Risks
-- `/api/interest` and `/api/user/export` still use the service role on `interests`. If production has the new default grants, the Hajj form fails there. Read-only check: see the report, risk 2.
+- `/api/interest` still inserts into `interests` through the service role. If production has the new default grants, the Hajj form fails there; the release document's PRE-DEPLOY block grants INSERT. Export now reads `interests` through Prisma and fails loudly instead of exporting `[]`.
 - `CRON_SECRET` must be set in Vercel or nothing is anonymised and the privacy claim becomes false. The first run anonymises the whole backlog older than 90 days, and that cannot be undone.
-- Privacy mismatches M1 to M7 (report) are live. M1 (booking evidence "auto-deleted") and M3 ("7 years") describe deletions that never run.
+- Privacy mismatches M1 to M7 fixed 2026-10-06 (Ali approved the copy): the page now says what the code does, export includes enquiries, marketing choices and alerts, one inbox (`dpo@`). Pinned by `tests/privacy-truth.test.ts`. The 7-year audit/complaint deletion and booking evidence deletion are in `docs/BACKLOG.md` (due before September 2032).
 - 🛠️ **Gotcha:** the real-DB specs share the sign-in limit of 5 per 15 minutes per IP, so add checks to an existing signed-in test rather than adding another `login()`.
 - 🛠️ **Gotcha:** the real-DB stack's API roles hold only TRUNCATE, REFERENCES, TRIGGER and MAINTAIN on tables created by the SQL migrations. Server code must use Prisma for those tables, or the spec must insert rows directly.
 

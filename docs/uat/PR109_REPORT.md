@@ -80,7 +80,7 @@ No production system, `.env` file, `kb-live` or production secret was touched. N
 
 All of these use UK English, with no em dashes, no guarantees and no "Not provided" paths changed. `tests/banned-phrases.test.ts` and `tests/content-truth.test.ts` pass.
 
-## Privacy mismatches found (reported, not changed)
+## Privacy mismatches found (all seven fixed 2026-10-06, see the end of this report)
 
 | # | Privacy page claim | What the code does |
 |---|---|---|
@@ -124,3 +124,17 @@ All of these use UK English, with no em dashes, no guarantees and no "Not provid
 
 ## Exact next step
 Merge #108 into `dev`, then review this PR (approve S1 to S5 and the marker decision). Before release, run PRODUCTION_CHECKS.sql queries 1 and 4 and the `interests` grant check in risk 2.
+
+## Privacy mismatches fixed (2026-10-06, copy approved by Ali)
+
+| # | Fix |
+|---|---|
+| M1 | Booking intent row now says "Kept until you ask us to delete it. Payment evidence files stop being shown 90 days after you upload them, unless a dispute is open." Building the real deletion is in `docs/BACKLOG.md`. |
+| M2 | Deleted-account row says what Settings removes, that enquiries are kept without name and contact details, and that other accounts (including operators) are deleted by hand via `dpo@`. |
+| M3 | 7 years kept. No record can reach 7 years before September 2032 (repo starts 17 September 2025). Deletion cron in `docs/BACKLOG.md`. |
+| M4 | New rows: marketing choices, Hajj availability alerts, quote requests, operator statistics, emails sent through Resend. |
+| M5 | Section 2 lists what the enquiry form collects; travel preferences moved to a new "Quote request details" item; Hajj alerts item added. |
+| M6 | Section 6 uses `dpo@pilgrimcompare.co.uk`. No `privacy@` left in the code. |
+| M7 | `/api/user/export` adds `enquiries` and `marketingConsents`, reads `interests` through Prisma (`getInterestsByEmail`), and returns 500 instead of `[]` when a read fails. Real-DB test asserts all three before deletion. |
+
+Gates after the fix: lint 0 errors, tsc pass, Vitest **2,081 / 2,081** (+9, `tests/privacy-truth.test.ts`, 7 failed before the fix), build pass, Playwright 69 / 6 / 0, real-DB 25 / 25.
