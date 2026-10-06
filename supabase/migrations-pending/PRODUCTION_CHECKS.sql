@@ -1,6 +1,8 @@
 -- PRODUCTION_CHECKS.sql: READ ONLY. Nothing here changes data, grants or policies.
--- Written for Ali to run in the Supabase SQL editor (production project).
--- Never run by an agent. Not a migration: kept outside supabase/migrations/.
+-- Run in the Supabase SQL editor (production project) by Ali, or by Claude in
+-- Chrome only on Ali's explicit instruction in that session, with each query
+-- copied verbatim from the release doc (docs/release/). No other agent runs it.
+-- Not a migration: kept outside supabase/migrations/.
 --
 -- The SQL editor shows only the LAST result, so highlight ONE query at a time
 -- and press Run.
