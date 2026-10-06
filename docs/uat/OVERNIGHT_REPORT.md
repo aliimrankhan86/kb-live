@@ -10,8 +10,8 @@ Branch `fix/overnight-qa` (from `dev` @ `d03892d`). Run in an isolated worktree 
 |---|---|
 | Iterations completed | 1 (iteration 1 gate in progress) |
 | Reported problem (tab and search show different packages) | **Fixed and verified** by unit tests and real-browser tests against the local DB |
-| Defects found / fixed / open | 51 logged · 24 fixed · see the table |
-| Vitest | 1,957 / 1,957 (baseline 1,869; the brief quoted 1,833) |
+| Defects found / fixed / open | 52 logged · 28 fixed (some partially) · see the table |
+| Vitest | 1,974 / 1,974 (baseline 1,869; the brief quoted 1,833) |
 | Type check / lint / build | pass / 0 errors (2 pre-existing warnings) / 0 errors |
 | Real-DB Playwright (`.overnight/e2e`) | 18 / 18 |
 | Repo Playwright (serial) | see the latest gate section |
@@ -55,17 +55,19 @@ Proof that the tests failed before the fix and pass after it is in `.overnight/e
 | D-009 | P1 | CSV import invented values, dropped ziyarat and broke on line breaks | Fixed 8215921 (round-trip test) |
 | (new) | P1 | Operators could change their own verification status and keep an old ATOL check date after editing the number | Fixed 2be7229 |
 | D-032 / D-033 | P2 | Tablet header and mobile enquire page overflowed sideways | Fixed c52b7fe / c55236c |
-| D-030 / D-031 | P0 | Unsupported or fabricated claims on /partner, corridor, Ramadan and Hajj pages; fake demo data on /showcase | Open (iteration 2) |
+| D-031 | P0 | Fabricated showcase content (fake testimonials, a real-sounding demo operator and ATOL number) | Fixed a8c7dd1 |
+| D-030 | P0 | /partner unsupported claims ("Thousands", "commission", "already listing") | Fixed 656ce6f |
+| D-030 (rest) | P0 | Corridor, Ramadan, Hajj and cost pages: hardcoded prices, implied supply, urgency, wrong Ramadan dates, blanket ATOL claims | Open |
 | D-019 | P1 | Account deletion reports success but deletes nothing | Open |
-| D-014 | P1 | Password reset posts to a route that does not exist | Open |
+| D-014 | P1 | Password reset is broken end to end (missing API route, missing /auth/callback, no set-new-password page) | Open (plan in STATE.md) |
 | D-020 | P1 | CSP blocks uploaded package images | Open |
-| D-035 | P1 | /requests and the header "My Requests" link go to a parked /quote (404) | Open |
+| D-035 | P1 | /requests and the header "My Requests" link go to a parked /quote (404) | Fixed 66680ff |
 | D-036 | P1 | Price attribution and date (§6) missing | Open |
 | Others | P2/P3 | See `.overnight/STATE.md` | Open / logged |
 
 ## Tests added
 
-search-journey (36), umrah-search-form (4), seed-guard (5), auth-redirect (18), login-redirect (4), public-operators (1), email-transport (4), package-detail-truth (4), enquiry-disclosure (1), json-ld-truth (3), package-csv-roundtrip (4), db-adapter-parity (1), operator-profile-api (4), client-data-guard (2). One existing test changed: the operator-surfaces profile save now asserts the PATCH to the server API, where it previously relied on the browser MockDB.
+search-journey (36), umrah-search-form (4), seed-guard (5), auth-redirect (18), login-redirect (4), public-operators (1), email-transport (4), package-detail-truth (4), enquiry-disclosure (1), json-ld-truth (3), package-csv-roundtrip (4), db-adapter-parity (1), operator-profile-api (4), client-data-guard (2), content-truth (12), rfq-parked-links (3). One existing test changed: the operator-surfaces profile save now asserts the PATCH to the server API, where it previously relied on the browser MockDB.
 
 ## Decisions taken without Ali (please review)
 
