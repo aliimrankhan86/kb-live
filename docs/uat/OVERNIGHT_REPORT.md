@@ -1,4 +1,4 @@
-NOT READY (overnight run in progress; this report is updated after every iteration)
+NOT READY: PARKED (usage). Iteration 1 is complete and green. The run stopped at 77% of the 5-hour plan window (the brief says no new work at 75% or more). The window resets Tue 06 Oct 2026 05:20 BST. To resume, say: "continue from .overnight/STATE.md".
 
 # PilgrimCompare overnight QA report
 
@@ -8,13 +8,13 @@ Branch `fix/overnight-qa` (from `dev` @ `d03892d`). Run in an isolated worktree 
 
 | Item | State |
 |---|---|
-| Iterations completed | 1 (iteration 1 gate in progress) |
+| Iterations completed | 1 (gate green); parked before iteration 2 |
 | Reported problem (tab and search show different packages) | **Fixed and verified** by unit tests and real-browser tests against the local DB |
 | Defects found / fixed / open | 52 logged · 28 fixed (some partially) · see the table |
 | Vitest | 1,974 / 1,974 (baseline 1,869; the brief quoted 1,833) |
-| Type check / lint / build | pass / 0 errors (2 pre-existing warnings) / 0 errors |
+| Type check / lint / build | pass / 0 errors (2 pre-existing warnings) / 0 errors (final gate at bb0864d) |
 | Real-DB Playwright (`.overnight/e2e`) | 18 / 18 |
-| Repo Playwright (serial) | see the latest gate section |
+| Repo Playwright (`--workers=1`, chromium + firefox + webkit) | 69 passed · 6 skipped · 0 failed (baseline 64 passed / 2 failed in parallel; parallel failures are a known MockDB race) |
 
 ## The reported problem: root causes
 
@@ -90,6 +90,21 @@ The list is in `.overnight/STATE.md` ("New/changed user-facing copy"). It will b
 - **No per-number ATOL check date is stored in the database.**
 - **Four documents named in the brief are not in the repo.**
 
-## Next step
+## Exit criteria (brief §5): not yet met
 
-The run continues with iteration 2. Read the top line of this file for the current verdict.
+- Two consecutive full gates with zero open P0/P1/P2: **no.** These P0/P1 items are still open:
+  - D-030 remainder (content claims)
+  - D-014 (password reset)
+  - D-019 (account delete)
+  - D-020 (CSP blocks images)
+  - D-036 (price attribution)
+- Reported problem fixed and verified: **yes.**
+- Claims table / alignment audit clean: **partly.** Cards, the package page, the compare preview and the operator profile now share one nights and date format. Content claims on SEO pages are still open.
+- Clean verification (fresh `npm ci` → DB reset → full gate): **not run yet.**
+- No pull request has been opened. The brief opens one into `dev` only when the exit criteria are met.
+
+## Next step for Ali
+
+1. Say "continue from .overnight/STATE.md" after 05:20 BST. The ordered plan for iteration 2 is in STATE.md.
+2. Decide on the NEEDS ALI items above.
+3. Approve or adjust the new copy list in STATE.md.
