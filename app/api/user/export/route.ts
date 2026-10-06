@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSessionUser } from '@/lib/auth/session';
 import { Repository } from '@/lib/api/repository';
-import { createServiceRoleClient } from '@/lib/supabase/service-role';
 import { mapErrorToResponse } from '@/lib/errors';
 
 export async function POST() {
@@ -14,22 +13,16 @@ export async function POST() {
     const userId = user.id;
     const ctx = { userId, role: user.role };
 
-    const [allRequests, allBookingIntents, allComplaints] = await Promise.all([
+    const [allRequests, allBookingIntents, allComplaints, emailData] = await Promise.all([
       Repository.getRequests(ctx),
       Repository.getBookingIntents(ctx),
       Repository.getComplaints(ctx),
+      Repository.getOwnEmailData(user.email ?? ''),
     ]);
 
     const requests = allRequests.filter((r) => r.customerId === userId);
     const bookingIntents = allBookingIntents.filter((b) => b.customerId === userId);
     const complaints = allComplaints.filter((c) => c.customerId === userId);
-
-    const supabase = createServiceRoleClient();
-    const { data: interestRows } = await supabase
-      .from('interests')
-      .select('email, type, created_at')
-      .eq('email', user.email?.toLowerCase() ?? '');
-    const interests = interestRows ?? [];
 
     const exportData = {
       exportedAt: new Date().toISOString(),
@@ -49,7 +42,9 @@ export async function POST() {
             }
           : undefined,
       })),
-      interests,
+      enquiries: emailData.enquiries,
+      marketingConsents: emailData.marketingConsents,
+      interests: emailData.interests,
       complaints,
     };
 

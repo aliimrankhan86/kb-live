@@ -41,11 +41,14 @@ This document maps PilgrimCompare's data handling, security, and consumer practi
 | Data type                   | Retention                           | Rationale                                             |
 | --------------------------- | ----------------------------------- | ----------------------------------------------------- |
 | User account (active)       | Indefinite                          | Necessary for service                                 |
-| User account (deleted)      | Deleted straight away               | Sign-in, profile and marketing consents deleted; enquiries kept with name, email, phone and message removed |
-| Booking intent + evidence   | 90 days                             | MVP retention; auto-purged after `retentionExpiresAt` |
+| User account (deleted)      | Deleted straight away (customers with no quote requests, bookings or complaints); others by hand via dpo@ | Sign-in, profile, marketing consents and Hajj availability alerts (`interests`) deleted; enquiries kept with name, email, phone and message removed |
+| Enquiry personal details    | 90 days                             | Daily cron `/api/cron/enquiry-retention` removes name, email, phone and message; reference, operator, package, travel month and date kept |
+| Marketing consents, Hajj alerts | Until account deletion or a request to dpo@ | No self-serve removal without an account (docs/BACKLOG.md) |
+| Quote requests              | Until a request to dpo@             | No deletion code                                      |
+| Booking intent + evidence   | Until a request to dpo@             | Evidence file path hidden after `retentionExpiresAt`; bytes and row kept. Deletion on docs/BACKLOG.md |
 | Flagged evidence (disputes) | Indefinite (until dispute resolved) | Admin `disputeFlag` preserves bytes                   |
-| Audit log entries           | 7 years                             | Financial/legal record-keeping                        |
-| Complaint records           | 7 years                             | Consumer protection / regulatory requirement          |
+| Audit log entries           | 7 years                             | Financial/legal record-keeping. No deletion code yet: docs/BACKLOG.md, due before September 2032 |
+| Complaint records           | 7 years                             | Consumer protection / regulatory requirement. Same backlog item |
 | CSV exports                 | 30 days                             | Operator convenience; not primary data                |
 | Session cookies             | Session + 7 days refresh            | Auth lifecycle                                        |
 

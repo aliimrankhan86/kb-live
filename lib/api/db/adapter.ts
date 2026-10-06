@@ -683,6 +683,30 @@ export const DBAdapter = {
     });
   },
 
+  /** Retention: same fields as account erasure, for rows created before `cutoff`. Skips stripped rows, so reruns count 0. */
+  anonymiseEnquiriesCreatedBefore: async (cutoff: Date, erasedName: string, alreadyErased: readonly string[]): Promise<number> => {
+    const { count } = await prisma.enquiry.updateMany({
+      where: {
+        createdAt: { lt: cutoff },
+        OR: [{ email: { not: null } }, { phone: { not: null } }, { message: { not: null } }, { name: { notIn: [...alreadyErased] } }],
+      },
+      data: { name: erasedName, email: null, phone: null, message: null },
+    });
+    return count;
+  },
+
+  /**
+   * Hajj "notify me" rows (`interests`, migration 007, not in the Prisma
+   * schema). Runs on the server connection, so it needs no API-role grant.
+   */
+  deleteInterestsByEmail: async (email: string): Promise<void> => {
+    await prisma.$executeRaw`DELETE FROM interests WHERE lower(email) = lower(${email.trim()})`;
+  },
+
+  getInterestsByEmail: async (email: string): Promise<{ email: string; type: string; createdAt: string }[]> =>
+    (await prisma.$queryRaw<{ email: string; type: string; created_at: Date }[]>`SELECT email, type, created_at FROM interests WHERE lower(email) = lower(${email.trim()})`)
+      .map((r) => ({ email: r.email, type: r.type, createdAt: r.created_at.toISOString() })),
+
   deleteMarketingConsentsByEmail: async (email: string): Promise<void> => {
     await prisma.marketingConsent.deleteMany({ where: { email: { equals: email.trim(), mode: 'insensitive' } } });
   },

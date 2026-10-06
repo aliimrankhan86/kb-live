@@ -1,5 +1,32 @@
 # PilgrimCompare AI Handover — Single Source of Truth
 
+## §ER Erasure gaps and 90-day enquiry retention (PR #109, branch `fix/erasure-retention`), 2026-10-06
+
+**Status: PR open into `dev`, not merged. Stacked on PR #108** (it branches from `fix/overnight-qa` 73d4ad3 because #108 was still open). Merge #108 first. Full report, with every new user-facing sentence for approval: `docs/uat/PR109_REPORT.md`. Vitest **2,072** (63 files), repo Playwright 69/6/0, real-DB suite **25/25**, lint 0 errors, tsc and build pass.
+
+### What changed
+- **Account deletion also deletes Hajj "notify me" rows** (`interests`, matched on lower(email)) inside `Repository.eraseOwnCustomerData`, before the sign-in. Files: `lib/api/repository.ts`, `lib/api/db/adapter.ts` (`deleteInterestsByEmail`, raw SQL, since `interests` is not in the Prisma schema), `lib/api/mock-db.ts`.
+- **The delete route always answers JSON.** A thrown error returns `ACCOUNT_DELETE_NOT_FINISHED` (with the DPO email). A sign-out failure after deletion still returns `deleted: true`. `lib/account-delete.ts` holds the messages and `deleteErrorMessage(res)`. `app/settings/page.tsx` shows `ACCOUNT_DELETE_UNCONFIRMED` for a non-JSON reply or no reply.
+- **Enquiry retention:** `Repository.anonymiseExpiredEnquiries(now)` strips name, email, phone and message from enquiries older than 90 days (`ENQUIRY_RETENTION_DAYS`). Marker `RETENTION_ERASED_NAME = 'Removed after 90 days'`. It keeps the reference, operator, package, titles, travel month and date. Idempotent: reruns count 0. Cron `GET /api/cron/enquiry-retention` (`verifyCronSecret`), `vercel.json` `0 3 * * *`. No DB function, so no migration 015.
+- **Privacy page section 5:** the "Enquiries" row states the 90-day removal. "Booking intent data" is a separate row with its old (inaccurate) wording, left unchanged on purpose. `docs/COMPLIANCE.md` is synced.
+- **Pending 014** is now `REVOKE ALL` (covers TRUNCATE). `PRODUCTION_CHECKS.sql` query 1 adds TRUNCATE and `bank_details_active`. New query 4 counts verified operators with no ATOL number. The file is still SELECT only.
+- `docs/uat/OVERNIGHT_REPORT.md:15` reads 2,056. `docs/uat/PR108_REREVIEW.md` is committed.
+
+### Decisions
+- Interests are deleted through Prisma (postgres role), not the service role. On the local stack (CLI 2.109 defaults) `service_role` has no SELECT, INSERT or DELETE on new public tables ("permission denied for table interests").
+- For a thrown error the route keeps "could not finish ... you can still sign in" rather than "nothing was deleted", because a throw can follow completed data steps.
+- The retention marker differs from `ERASED_NAME` so the two causes stay distinguishable. It is awaiting Ali's approval.
+
+### Risks
+- `/api/interest` still inserts into `interests` through the service role. If production has the new default grants, the Hajj form fails there; the release document's PRE-DEPLOY block grants INSERT. Export now reads `interests` through Prisma and fails loudly instead of exporting `[]`.
+- `CRON_SECRET` must be set in Vercel or nothing is anonymised and the privacy claim becomes false. The first run anonymises the whole backlog older than 90 days, and that cannot be undone.
+- Privacy mismatches M1 to M7 fixed 2026-10-06 (Ali approved the copy): the page now says what the code does, export includes enquiries, marketing choices and alerts, one inbox (`dpo@`). Pinned by `tests/privacy-truth.test.ts`. The 7-year audit/complaint deletion and booking evidence deletion are in `docs/BACKLOG.md` (due before September 2032).
+- 🛠️ **Gotcha:** the real-DB specs share the sign-in limit of 5 per 15 minutes per IP, so add checks to an existing signed-in test rather than adding another `login()`.
+- 🛠️ **Gotcha:** the real-DB stack's API roles hold only TRUNCATE, REFERENCES, TRIGGER and MAINTAIN on tables created by the SQL migrations. Server code must use Prisma for those tables, or the spec must insert rows directly.
+
+### Exact next step
+Merge #108 into `dev`. Then Ali approves sentences S1 to S5 and the marker in `docs/uat/PR109_REPORT.md` and merges #109. Before release, Ali runs PRODUCTION_CHECKS.sql queries 1 and 4 and the `interests` grant check.
+
 ## §OQ1 Overnight QA run (search mismatch + P0 data/security fixes), 2026-10-06
 
 **Status: COMPLETE on branch `fix/overnight-qa` (PR into dev, not merged)** (off `dev` @ d03892d). Full report: `docs/uat/OVERNIGHT_REPORT.md`. Run memory (local, gitignored): `.overnight/STATE.md`. Vitest **1,971** (baseline 1,869), tsc clean, build 0 errors, real-DB Playwright (`.overnight/e2e`) 18/18.

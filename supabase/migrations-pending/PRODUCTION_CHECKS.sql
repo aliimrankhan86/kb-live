@@ -29,14 +29,14 @@ FROM (
     FROM information_schema.columns
     WHERE table_schema = 'public' AND table_name = 'operator_profiles'
       AND column_name IN ('verification_status', 'verified_at', 'tier', 'can_receive_bookings',
-                          'payment_sla_flagged', 'onboarding_complete',
+                          'payment_sla_flagged', 'onboarding_complete', 'bank_details_active',
                           'atol_number', 'abta_member_number', 'atol_verified_at', 'abta_verified_at', 'slug')
   ) AS col
   UNION ALL
   SELECT format('%s can %s operator_profiles', r.role, p.priv),
          has_table_privilege(r.role, 'public.operator_profiles', p.priv)
   FROM (VALUES ('authenticated'), ('anon')) AS r(role)
-  CROSS JOIN (VALUES ('INSERT'), ('UPDATE'), ('DELETE'), ('SELECT')) AS p(priv)
+  CROSS JOIN (VALUES ('INSERT'), ('UPDATE'), ('DELETE'), ('SELECT'), ('TRUNCATE')) AS p(priv)
 ) AS c
 ORDER BY result, c.check_name;
 
@@ -61,6 +61,15 @@ SELECT schemaname, tablename, policyname, permissive, roles, cmd,
 FROM pg_policies
 WHERE schemaname IN ('public', 'storage')
 ORDER BY schemaname, tablename, policyname;
+
+-- ── Query 4: verified operators that the ATOL rule now hides ──────────────
+-- Returns one number only. Public pages list an operator only when it is
+-- verified AND has an ATOL number, so every operator counted here disappears
+-- from public pages on release. Expected: 0, or a number you have accepted.
+SELECT count(*) AS verified_without_atol
+FROM public.operator_profiles
+WHERE verification_status = 'verified'
+  AND (atol_number IS NULL OR btrim(atol_number) = '');
 
 -- ── Supabase dashboard: Authentication > URL Configuration ───────────────
 -- Not SQL. Check these by eye. The app only ever sends people back to

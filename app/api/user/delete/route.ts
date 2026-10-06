@@ -3,20 +3,19 @@ import { getSessionUser } from '@/lib/auth/session';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase/service-role';
 import { ACCOUNT_DELETE_MANUAL_MESSAGE, Repository } from '@/lib/api/repository';
+import { ACCOUNT_DELETE_NOT_FINISHED } from '@/lib/account-delete';
 import { AppError } from '@/lib/errors';
-
-const NOT_FINISHED =
-  'We could not finish deleting your account. You can still sign in, so please try again. If it keeps failing, email dpo@pilgrimcompare.co.uk.';
 
 /**
  * Deletes the signed-in customer's account for real. Order matters: personal
- * data first (enquiries anonymised, marketing consents and the app record
- * deleted), the sign-in last. If any step fails the customer can still sign
- * in and retry, and every step is safe to run again. Only reports
- * `deleted: true` when the sign-in is gone too.
+ * data first (enquiries anonymised, marketing consents, availability alerts
+ * and the app record deleted), the sign-in last. If any step fails the
+ * customer can still sign in and retry, and every step is safe to run again.
+ * Only reports `deleted: true` when the sign-in is gone too. Every failure,
+ * thrown or returned, answers in JSON.
  */
 export async function DELETE() {
-  const user = await getSessionUser();
+  const user = await getSessionUser().catch(() => null);
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const ctx = { userId: user.id, role: user.role };
 
@@ -28,16 +27,22 @@ export async function DELETE() {
       return NextResponse.json({ error: ACCOUNT_DELETE_MANUAL_MESSAGE }, { status: 409 });
     }
     console.error('[user/delete] data erasure failed for user', user.id, err);
-    return NextResponse.json({ error: NOT_FINISHED }, { status: 500 });
+    return NextResponse.json({ error: ACCOUNT_DELETE_NOT_FINISHED }, { status: 500 });
   }
 
-  const { error: authError } = await createServiceRoleClient().auth.admin.deleteUser(user.id);
-  if (authError) {
-    console.error('[user/delete] auth deletion failed for user', user.id, authError.message);
-    return NextResponse.json({ error: NOT_FINISHED }, { status: 500 });
+  try {
+    const { error: authError } = await createServiceRoleClient().auth.admin.deleteUser(user.id);
+    if (authError) throw new Error(authError.message);
+  } catch (err) {
+    console.error('[user/delete] auth deletion failed for user', user.id, err);
+    return NextResponse.json({ error: ACCOUNT_DELETE_NOT_FINISHED }, { status: 500 });
   }
 
-  const supabase = await createClient();
-  await supabase.auth.signOut();
+  // The account is gone; a failed sign-out only leaves a dead cookie behind.
+  try {
+    await (await createClient()).auth.signOut();
+  } catch (err) {
+    console.error('[user/delete] sign-out after deletion failed for user', user.id, err);
+  }
   return NextResponse.json({ deleted: true });
 }

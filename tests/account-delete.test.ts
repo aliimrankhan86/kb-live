@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MockDB } from '@/lib/api/mock-db';
 import { ACCOUNT_DELETE_MANUAL_MESSAGE, ERASED_NAME } from '@/lib/api/repository';
+import { ACCOUNT_DELETE_NOT_FINISHED, ACCOUNT_DELETE_UNCONFIRMED, deleteErrorMessage } from '@/lib/account-delete';
 import type { Enquiry, MarketingConsent } from '@/lib/types';
 
 const enquiry = (id: string, email: string): Enquiry => ({
@@ -86,6 +87,48 @@ describe('DELETE /api/user/delete really deletes, or says honestly that it did n
     expect(MockDB.getMarketingConsents().map((c) => c.email)).toEqual(['someone@else.test']);
   });
 
+  it('deletes the account\'s Hajj availability alerts (interests), any letter case, before the sign-in, and leaves other people\'s alone', async () => {
+    session.current = { id: 'cust-clean', role: 'customer', email: ' Pilgrim@Example.test ' };
+    MockDB.saveInterest('pilgrim@example.test', 'hajj');
+    MockDB.saveInterest('someone@else.test', 'hajj');
+    const spy = vi.spyOn(MockDB, 'deleteInterestsByEmail');
+    expect(await call()).toEqual({ status: 200, body: { deleted: true } });
+    expect(MockDB.getInterests().map((i) => i.email)).toEqual(['someone@else.test']);
+    expect(spy.mock.invocationCallOrder[0]).toBeLessThan(deleteUser.mock.invocationCallOrder[0]);
+    spy.mockRestore();
+  });
+
+  it('an availability-alert step failing never touches the sign-in, and a retry finishes the job', async () => {
+    session.current = { id: 'cust-clean', role: 'customer', email: 'pilgrim@example.test' };
+    MockDB.saveInterest('pilgrim@example.test', 'hajj');
+    const spy = vi.spyOn(MockDB, 'deleteInterestsByEmail').mockImplementationOnce(() => {
+      throw new Error('db blip');
+    });
+    const res = await call();
+    expect(res.status).toBe(500);
+    expect(res.body.error).toMatch(/You can still sign in/);
+    expect(deleteUser).not.toHaveBeenCalled();
+    spy.mockRestore();
+    expect(await call()).toEqual({ status: 200, body: { deleted: true } });
+    expect(MockDB.getInterests()).toEqual([]);
+  });
+
+  it('a thrown error still returns JSON with the honest message and the data protection email', async () => {
+    session.current = { id: 'cust-clean', role: 'customer', email: 'pilgrim@example.test' };
+    deleteUser.mockRejectedValueOnce(new Error('network down'));
+    const res = await call();
+    expect(res.status).toBe(500);
+    expect(res.body.deleted).toBeUndefined();
+    expect(res.body.error).toBe(ACCOUNT_DELETE_NOT_FINISHED);
+    expect(res.body.error).toContain('dpo@pilgrimcompare.co.uk');
+  });
+
+  it('a sign-out failure after the account is gone still reports the deletion', async () => {
+    session.current = { id: 'cust-clean', role: 'customer', email: 'pilgrim@example.test' };
+    signOut.mockRejectedValueOnce(new Error('cookie store gone'));
+    expect(await call()).toEqual({ status: 200, body: { deleted: true } });
+  });
+
   it('refuses (409, nothing deleted) for a customer linked to booking records', async () => {
     const intent = MockDB.getBookingIntents()[0] ?? null;
     const customerId = intent?.customerId ?? 'cust1';
@@ -116,9 +159,26 @@ describe('settings page says exactly what deletion does (truth rule)', () => {
   it('names the consent deletion, the enquiry anonymisation and what operators keep', async () => {
     const { readFileSync } = await import('node:fs');
     const page = readFileSync('app/settings/page.tsx', 'utf8');
-    expect(page).toContain('any marketing email consent you gave');
-    expect(page).toContain('we delete your name, email address, phone number and message, and keep only the reference code, package and date');
+    expect(page).toContain('any marketing email consent you gave and any Hajj availability alerts you signed up for with this email address');
+    expect(page).toContain('Your sign-in, profile, marketing consent and Hajj availability alerts will be permanently deleted');
+    expect(page).toContain('deleteErrorMessage(res)');
+    expect(page).toContain('we delete your name, email address, phone number and message, and keep only the reference code, operator, package, travel month and date');
     expect(page).toContain('Operators you already sent an enquiry to keep the details you gave them under their own privacy policy');
     expect(page).not.toContain('Enquiries you sent are already with the operator');
+  });
+});
+
+describe('the settings page never shows a parse error when deletion fails', () => {
+  it('shows the server\'s honest message when the reply is JSON', async () => {
+    const res = new Response(JSON.stringify({ error: ACCOUNT_DELETE_MANUAL_MESSAGE }), { status: 409 });
+    expect(await deleteErrorMessage(res)).toBe(ACCOUNT_DELETE_MANUAL_MESSAGE);
+  });
+
+  it('falls back to an honest message with the data protection email when the reply is not JSON', async () => {
+    const res = new Response('<html>504 Gateway Timeout</html>', { status: 504 });
+    const message = await deleteErrorMessage(res);
+    expect(message).toBe(ACCOUNT_DELETE_UNCONFIRMED);
+    expect(message).toContain('dpo@pilgrimcompare.co.uk');
+    expect(message).not.toMatch(/Unexpected token|JSON/);
   });
 });

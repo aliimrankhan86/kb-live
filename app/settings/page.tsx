@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { createClient } from '@/lib/supabase/client';
+import { ACCOUNT_DELETE_UNCONFIRMED, deleteErrorMessage } from '@/lib/account-delete';
 
 type NotifPrefs = {
   offerUpdates: boolean;
@@ -264,19 +265,16 @@ export default function SettingsPage() {
   const handleDeleteConfirm = async () => {
     setDeleting(true);
     setDeleteError(null);
-    try {
-      const res = await fetch('/api/user/delete', { method: 'DELETE' });
-      if (!res.ok) {
-        const data = await res.json() as { error?: string };
-        throw new Error(data.error ?? 'Deletion failed');
-      }
+    // A network failure leaves no reply to read: show the honest fallback, never raw error text.
+    const res = await fetch('/api/user/delete', { method: 'DELETE' }).catch(() => null);
+    if (res?.ok) {
       if (typeof window !== 'undefined') localStorage.clear();
       router.push('/?account_deleted=1');
-    } catch (err) {
-      setDeleteError(err instanceof Error ? err.message : 'Deletion failed. Please try again.');
-      setDeleting(false);
-      setShowDeleteConfirm(false);
+      return;
     }
+    setDeleteError(res ? await deleteErrorMessage(res) : ACCOUNT_DELETE_UNCONFIRMED);
+    setDeleting(false);
+    setShowDeleteConfirm(false);
   };
 
   const ROLE_LABEL: Record<string, string> = {
@@ -497,7 +495,7 @@ export default function SettingsPage() {
           Delete account
         </h2>
         <p style={{ margin: '0 0 1rem', fontSize: '0.8125rem', color: 'var(--textMuted)' }}>
-          Under UK GDPR Article 17, you can ask us to erase your personal data. Deleting your account permanently deletes your sign-in, your profile and any marketing email consent you gave. On enquiries you sent with this email address, we delete your name, email address, phone number and message, and keep only the reference code, package and date. If your account is linked to bookings or complaints, we cannot delete it automatically: we will tell you, nothing will be deleted, and you can email dpo@pilgrimcompare.co.uk.
+          Under UK GDPR Article 17, you can ask us to erase your personal data. Deleting your account permanently deletes your sign-in, your profile, any marketing email consent you gave and any Hajj availability alerts you signed up for with this email address. On enquiries you sent with this email address, we delete your name, email address, phone number and message, and keep only the reference code, operator, package, travel month and date. If your account is linked to bookings or complaints, we cannot delete it automatically: we will tell you, nothing will be deleted, and you can email dpo@pilgrimcompare.co.uk.
         </p>
         {deleteError && <p role="alert" style={{ marginBottom: '0.75rem', fontSize: '0.875rem', color: 'var(--danger)' }}>{deleteError}</p>}
         {!showDeleteConfirm ? (
@@ -513,7 +511,7 @@ export default function SettingsPage() {
           >
             <p id="delete-confirm-title" style={{ margin: '0 0 0.375rem', fontWeight: 600, color: 'var(--danger)' }}>This cannot be undone</p>
             <p id="delete-confirm-desc" style={{ margin: '0 0 1rem', fontSize: '0.875rem', color: 'var(--textMuted)' }}>
-              Your sign-in, profile and marketing consent will be permanently deleted, your details will be removed from your enquiries, and you will be signed out. Operators you already sent an enquiry to keep the details you gave them under their own privacy policy. To have those deleted, contact the operator directly.
+              Your sign-in, profile, marketing consent and Hajj availability alerts will be permanently deleted, your details will be removed from your enquiries, and you will be signed out. Operators you already sent an enquiry to keep the details you gave them under their own privacy policy. To have those deleted, contact the operator directly.
             </p>
             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
               <Button variant="danger" onClick={handleDeleteConfirm} loading={deleting} disabled={deleting} data-testid="delete-account-confirm-btn">

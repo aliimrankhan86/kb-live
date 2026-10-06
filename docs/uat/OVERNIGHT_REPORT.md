@@ -12,7 +12,7 @@ GREEN WITH OPEN ITEMS
 
 | Check | Baseline | Final |
 |---|---|---|
-| Vitest | 1,869 (restart baseline 1,974) | **2,047 / 2,047** |
+| Vitest | 1,869 (restart baseline 1,974) | **2,056 / 2,056** (2,047 before the PR108 review follow-up) |
 | tsc / lint / build | pass / 0 errors / pass | pass / 0 errors (2 pre-existing warnings) / pass |
 | Repo Playwright (`--workers=1`, chromium + firefox + webkit) | 64 pass, 2 fail (parallel MockDB race) | **69 passed · 6 skipped · 0 failed** |
 | Real-DB Playwright (`e2e/local-db`, committed, CI job `local-db`) | n/a | **24 / 24** (after review follow-up: see below) |

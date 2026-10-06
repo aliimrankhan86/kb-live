@@ -70,7 +70,12 @@ const mockStore = {
   saveEnquiry: (enquiry: Enquiry) => Promise.resolve(MockDB.saveEnquiry(enquiry)),
   deleteUser: (id: string) => Promise.resolve(MockDB.deleteUser(id)),
   anonymiseEnquiriesByEmail: (email: string, erasedName: string) => Promise.resolve(MockDB.anonymiseEnquiriesByEmail(email, erasedName)),
+  anonymiseEnquiriesCreatedBefore: (cutoff: Date, erasedName: string, alreadyErased: readonly string[]) =>
+    Promise.resolve(MockDB.anonymiseEnquiriesCreatedBefore(cutoff, erasedName, alreadyErased)),
   deleteMarketingConsentsByEmail: (email: string) => Promise.resolve(MockDB.deleteMarketingConsentsByEmail(email)),
+  deleteInterestsByEmail: (email: string) => Promise.resolve(MockDB.deleteInterestsByEmail(email)),
+  getInterestsByEmail: async (email: string) =>
+    MockDB.getInterests().filter((i) => i.email.toLowerCase() === email.trim().toLowerCase()),
   getMarketingConsents: () => Promise.resolve(MockDB.getMarketingConsents()),
   saveMarketingConsent: (consent: MarketingConsent) => Promise.resolve(MockDB.saveMarketingConsent(consent)),
   getBookingOutcomes: () => Promise.resolve(MockDB.getBookingOutcomes()),
@@ -512,6 +517,12 @@ export const ACCOUNT_DELETE_MANUAL_MESSAGE =
 
 /** Stands in for the name on an erased customer's enquiries (the column is required). */
 export const ERASED_NAME = 'Deleted account';
+
+/** Stands in for the name on an enquiry whose personal details were removed by retention. */
+export const RETENTION_ERASED_NAME = 'Removed after 90 days';
+
+/** Enquiry personal details (name, email, phone, message) are kept this long (privacy page, section 5). */
+export const ENQUIRY_RETENTION_DAYS = 90;
 
 /** Trust/verification state only an admin may change. */
 const OPERATOR_PROTECTED_FIELDS = [
@@ -1508,15 +1519,49 @@ export const Repository = {
    * the sign-in itself (the caller removes that last, so a failure here
    * leaves an account that can sign in and retry). Every step is idempotent.
    * Enquiries are kept for the operator's and our records with the personal
-   * fields stripped; marketing consents for the account email are deleted.
+   * fields stripped; marketing consents and Hajj availability alerts
+   * (`interests`) for the account email are deleted.
    */
   eraseOwnCustomerData: async (ctx: RequestContext, email: string): Promise<void> => {
     await Repository.assertCanDeleteOwnAccount(ctx);
     if (email) {
       await store().anonymiseEnquiriesByEmail(email, ERASED_NAME);
       await store().deleteMarketingConsentsByEmail(email);
+      await store().deleteInterestsByEmail(email);
     }
     await store().deleteUser(ctx.userId);
+  },
+
+  /**
+   * Access and portability (privacy page, section 6): the enquiries,
+   * marketing choices and Hajj availability alerts held under the signed-in
+   * account's email. A failed read throws, so an export never shows an empty
+   * list for data that exists.
+   */
+  getOwnEmailData: async (email: string) => {
+    const target = email.trim().toLowerCase();
+    if (!target) return { enquiries: [], marketingConsents: [], interests: [] };
+    const [enquiries, consents, interests] = await Promise.all([
+      store().getEnquiries(),
+      store().getMarketingConsents(),
+      store().getInterestsByEmail(target),
+    ]);
+    return {
+      enquiries: enquiries.filter((e) => e.email?.toLowerCase() === target),
+      marketingConsents: consents.filter((c) => c.email.toLowerCase() === target),
+      interests,
+    };
+  },
+
+  /**
+   * Retention (privacy page, section 5): remove the personal details from
+   * enquiries older than ENQUIRY_RETENTION_DAYS, exactly the fields account
+   * deletion removes. Reference code, operator, package, titles, travel month
+   * and date stay for lead billing. Idempotent: returns how many rows changed.
+   */
+  anonymiseExpiredEnquiries: async (now: Date = new Date()): Promise<number> => {
+    const cutoff = new Date(now.getTime() - ENQUIRY_RETENTION_DAYS * 24 * 60 * 60 * 1000);
+    return store().anonymiseEnquiriesCreatedBefore(cutoff, RETENTION_ERASED_NAME, [ERASED_NAME, RETENTION_ERASED_NAME]);
   },
 
   /**

@@ -18,6 +18,7 @@ const sql = async <T,>(text: string, values: unknown[]): Promise<T[]> => {
   try { return (await client.query(text, values)).rows as T[] } finally { await client.end() }
 }
 const MAILPIT = 'http://127.0.0.1:54324'
+const CRON_SECRET = 'local-db-test-only' // matches the webServer env in playwright.config.ts
 
 async function login(page: Page, email: string, password = 'TestPass1!') {
   await page.goto('/login')
@@ -101,7 +102,7 @@ test('password reset works end to end through the emailed link', async ({ page }
   await admin().auth.admin.updateUserById(id, { password: 'TestPass1!' })
 })
 
-test('account deletion removes the sign-in and consent, and anonymises enquiries', async ({ page }) => {
+test('account deletion removes the sign-in, consent and Hajj availability alerts, and anonymises enquiries', async ({ page }) => {
   const email = `delete-me-${Date.now()}@test.local`
   const { data, error } = await admin().auth.admin.createUser({ email, password: 'TestPass1!', email_confirm: true, app_metadata: { role: 'customer' } })
   expect(error).toBeNull()
@@ -111,14 +112,57 @@ test('account deletion removes the sign-in and consent, and anonymises enquiries
   expect(enq.status()).toBe(201)
   const { referenceCode } = await enq.json()
   expect(await sql('select 1 from marketing_consents where email = $1', [email])).toHaveLength(1)
+  // Inserted directly: this stack's API roles hold no INSERT on new tables (CLI 2.109 defaults), so
+  // POST /api/interest cannot write here. Deletion runs on the server connection and needs no grant.
+  // One sign-in per test: sign-in is limited to 5 per 15 minutes per IP.
+  await sql('insert into interests (email, type) values ($1, $2)', [email, 'hajj'])
+  await sql('insert into interests (email, type) values ($1, $2)', [`other-${email}`, 'hajj'])
 
   await login(page, email)
+  // Export (privacy page section 6) carries everything held under the email, read on the server connection.
+  const exp = await page.request.post('/api/user/export')
+  expect(exp.status()).toBe(200)
+  const dump = await exp.json()
+  expect(dump.enquiries.map((e: { referenceCode: string }) => e.referenceCode)).toEqual([referenceCode])
+  expect(dump.marketingConsents).toHaveLength(1)
+  expect(dump.interests).toEqual([expect.objectContaining({ email, type: 'hajj' })])
+
   const res = await page.request.delete('/api/user/delete')
   expect(res.status()).toBe(200)
   expect(await res.json()).toEqual({ deleted: true })
   const { data: after } = await admin().auth.admin.getUserById(data.user!.id)
   expect(after.user).toBeNull()
   expect(await sql('select 1 from marketing_consents where email = $1', [email])).toEqual([])
+  expect(await sql('select 1 from interests where email = $1', [email])).toEqual([])
+  expect(await sql('select 1 from interests where email = $1', [`other-${email}`])).toHaveLength(1)
   expect(await sql('select name, email, phone, message, package_id from enquiries where reference_code = $1', [referenceCode]))
     .toEqual([{ name: 'Deleted account', email: null, phone: null, message: null, package_id: 'local-test-pkg-01' }])
+})
+
+test('enquiry retention cron removes personal details after 90 days, keeps billing fields, and is safe to rerun', async ({ request }) => {
+  const ref = (age: string) => `PC-RET-${age}-${Date.now()}`
+  const oldRef = ref('OLD')
+  const newRef = ref('NEW')
+  for (const [reference, days] of [[oldRef, 91], [newRef, 89]] as const) {
+    await sql(
+      `insert into enquiries (id, reference_code, created_at, package_id, operator_id, package_title, operator_name, name, email, phone, travel_month, message)
+       values (gen_random_uuid(), $1, now() - make_interval(days => $2), 'local-test-pkg-01', 'op-b', 'Retention package', 'Operator B', 'Keep Out', 'retention@test.local', '07000000000', '2027-03', 'Two adults')`,
+      [reference, days],
+    )
+  }
+  expect((await request.get('/api/cron/enquiry-retention')).status()).toBe(401)
+  const run = async () => request.get('/api/cron/enquiry-retention', { headers: { authorization: `Bearer ${CRON_SECRET}` } })
+  const first = await run()
+  expect(first.status()).toBe(200)
+  expect((await first.json()).anonymised).toBeGreaterThanOrEqual(1)
+
+  const row = (reference: string) =>
+    sql('select name, email, phone, message, package_id, operator_id, package_title, operator_name, travel_month from enquiries where reference_code = $1', [reference])
+  expect(await row(oldRef)).toEqual([{
+    name: 'Removed after 90 days', email: null, phone: null, message: null,
+    package_id: 'local-test-pkg-01', operator_id: 'op-b', package_title: 'Retention package', operator_name: 'Operator B', travel_month: '2027-03',
+  }])
+  expect((await row(newRef))[0]).toMatchObject({ name: 'Keep Out', email: 'retention@test.local', phone: '07000000000', message: 'Two adults' })
+
+  expect(await (await run()).json()).toEqual({ ok: true, anonymised: 0 })
 })
