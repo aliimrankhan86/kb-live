@@ -1,6 +1,6 @@
 import { MockDB } from './mock-db';
 import { sortByScore } from '@/lib/ranking';
-import { departureCityOf } from '@/lib/airports';
+import { departureCityOf, resolveDepartureLocation } from '@/lib/airports';
 import {
   ANALYTICS_EVENT_TYPES,
   AnalyticsEvent,
@@ -467,6 +467,51 @@ const requireBookingIntentEvidenceAccess = (ctx: RequestContext, bookingIntent: 
   if (ctx.role === 'customer' && ctx.userId === bookingIntent.customerId) return;
   if (ctx.role === 'operator' && ctx.userId === bookingIntent.operatorId) return;
   throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
+};
+
+/**
+ * RFC 4180 CSV: quoted fields may contain commas, "" escapes and line breaks
+ * (cancellation policies and notes do), so parse the whole text, not lines.
+ */
+function parseCsv(text: string): string[][] {
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let cell = '';
+  let inQuotes = false;
+  const src = text.replace(/^\uFEFF/, '').trim();
+  for (let j = 0; j < src.length; j += 1) {
+    const ch = src[j];
+    if (inQuotes) {
+      if (ch === '"' && src[j + 1] === '"') { cell += '"'; j += 1; }
+      else if (ch === '"') inQuotes = false;
+      else cell += ch;
+    } else if (ch === '"') inQuotes = true;
+    else if (ch === ',') { row.push(cell); cell = ''; }
+    else if (ch === '\n' || ch === '\r') {
+      if (ch === '\r' && src[j + 1] === '\n') j += 1;
+      row.push(cell); rows.push(row); row = []; cell = '';
+    } else cell += ch;
+  }
+  row.push(cell);
+  rows.push(row);
+  return rows;
+}
+
+// ─── CSV import helpers (only stated values survive; nothing is defaulted) ──
+const BANDS = ['near', 'medium', 'far', 'unknown'] as const;
+const oneOf = <T extends string>(value: string, allowed: readonly T[]): T | undefined =>
+  (allowed as readonly string[]).includes(value) ? (value as T) : undefined;
+/** 'true'/'false' (any case, or yes/no) → boolean; blank or anything else → not stated. */
+const csvBool = (value: string): boolean | undefined => {
+  const v = value.trim().toLowerCase();
+  if (v === 'true' || v === 'yes') return true;
+  if (v === 'false' || v === 'no') return false;
+  return undefined;
+};
+const normaliseAirport = (value: string): string | undefined => {
+  if (!value) return undefined;
+  const loc = resolveDepartureLocation(value);
+  return loc?.kind === 'airport' ? loc.codes[0] : value;
 };
 
 export const Repository = {
@@ -1234,10 +1279,10 @@ export const Repository = {
   importPackagesFromCsv: async (ctx: RequestContext, csvText: string): Promise<{ saved: Package[]; errors: { row: number; reason: string }[] }> => {
     if (ctx.role !== 'operator') throw new AppError({ code: 'FORBIDDEN', status: 403, message: 'Unauthorized' });
 
-    const lines = csvText.trim().split(/\r?\n/);
-    if (lines.length < 2) throw new Error('CSV must contain a header row and at least one data row');
+    const rows = parseCsv(csvText);
+    if (rows.length < 2) throw new Error('CSV must contain a header row and at least one data row');
 
-    const headers = lines[0].split(',').map((h) => h.trim());
+    const headers = rows[0].map((h) => h.trim());
     const requiredColumns = ['title', 'pricePerPerson', 'currency', 'totalNights', 'pilgrimageType'];
     const missing = requiredColumns.filter((c) => !headers.includes(c));
     if (missing.length > 0) throw new Error(`Missing required columns: ${missing.join(', ')}`);
@@ -1250,30 +1295,9 @@ export const Repository = {
     const saved: Package[] = [];
     const errors: { row: number; reason: string }[] = [];
 
-    for (let i = 1; i < lines.length; i += 1) {
-      const line = lines[i].trim();
-      if (!line) continue;
-
-      const cells: string[] = [];
-      let current = '';
-      let inQuotes = false;
-      for (let j = 0; j < line.length; j += 1) {
-        const char = line[j];
-        if (char === '"') {
-          if (inQuotes && line[j + 1] === '"') {
-            current += '"';
-            j += 1;
-          } else {
-            inQuotes = !inQuotes;
-          }
-        } else if (char === ',' && !inQuotes) {
-          cells.push(current);
-          current = '';
-        } else {
-          current += char;
-        }
-      }
-      cells.push(current);
+    for (let i = 1; i < rows.length; i += 1) {
+      const cells = rows[i];
+      if (cells.every((c) => c.trim() === '')) continue;
 
       const title = getValue(cells, 'title');
       const pricePerPerson = Number(getValue(cells, 'pricePerPerson'));
@@ -1313,17 +1337,16 @@ export const Repository = {
         status: validStatus,
         pilgrimageType,
         seasonLabel: getValue(cells, 'seasonLabel') || undefined,
+        // Only what the CSV states: no invented end date, nights split, payment
+        // plan or enum values (data-integrity rule: missing = "Not provided").
         dateWindow: getValue(cells, 'dateWindowStart')
-          ? {
-              start: getValue(cells, 'dateWindowStart'),
-              end: getValue(cells, 'dateWindowEnd') || getValue(cells, 'dateWindowStart'),
-            }
+          ? { start: getValue(cells, 'dateWindowStart'), end: getValue(cells, 'dateWindowEnd') }
           : undefined,
-        priceType: (getValue(cells, 'priceType') as Package['priceType']) || 'exact',
+        priceType: oneOf(getValue(cells, 'priceType'), ['exact', 'from', 'fixed'] as const) ?? 'exact',
         pricePerPerson,
         currency,
         totalNights,
-        nightsMakkah: Number(getValue(cells, 'nightsMakkah')) || totalNights,
+        nightsMakkah: Number(getValue(cells, 'nightsMakkah')) || 0,
         nightsMadinah: Number(getValue(cells, 'nightsMadinah')) || 0,
         hotelMakkahStars: ((): 3 | 4 | 5 | undefined => {
           const n = Number(getValue(cells, 'hotelMakkahStars'));
@@ -1337,15 +1360,18 @@ export const Repository = {
         hotelMadinahName: getValue(cells, 'hotelMadinahName') || undefined,
         distanceToHaramMakkahMetres: Number(getValue(cells, 'distanceToHaramMakkahMetres')) || undefined,
         distanceToHaramMadinahMetres: Number(getValue(cells, 'distanceToHaramMadinahMetres')) || undefined,
-        distanceBandMakkah: (getValue(cells, 'distanceBandMakkah') as Package['distanceBandMakkah']) || 'unknown',
-        distanceBandMadinah: (getValue(cells, 'distanceBandMadinah') as Package['distanceBandMadinah']) || 'unknown',
+        distanceBandMakkah: oneOf(getValue(cells, 'distanceBandMakkah'), BANDS) ?? 'unknown',
+        distanceBandMadinah: oneOf(getValue(cells, 'distanceBandMadinah'), BANDS) ?? 'unknown',
         airline: getValue(cells, 'airline') || undefined,
-        departureAirport: getValue(cells, 'departureAirport') || undefined,
-        flightType: (getValue(cells, 'flightType') as Package['flightType']) || undefined,
+        // "Heathrow" / "LHR" → LHR; a city or unknown text is kept as written.
+        departureAirport: normaliseAirport(getValue(cells, 'departureAirport')),
+        flightType: oneOf(getValue(cells, 'flightType'), ['direct', 'one-stop', 'multi-stop'] as const),
         depositAmount: Number(getValue(cells, 'depositAmount')) || undefined,
-        paymentPlanAvailable: getValue(cells, 'paymentPlanAvailable') === 'true',
+        paymentPlanAvailable: csvBool(getValue(cells, 'paymentPlanAvailable')),
         cancellationPolicy: getValue(cells, 'cancellationPolicy') || undefined,
-        groupType: (getValue(cells, 'groupType') as Package['groupType']) || undefined,
+        groupType: oneOf(getValue(cells, 'groupType'), ['private', 'small-group', 'large-group'] as const),
+        ziyaratIncluded: csvBool(getValue(cells, 'ziyaratIncluded')),
+        ziyaratDetails: getValue(cells, 'ziyaratDetails') || undefined,
         roomOccupancyOptions: {
           single: getValue(cells, 'single') === 'true',
           double: getValue(cells, 'double') === 'true',
