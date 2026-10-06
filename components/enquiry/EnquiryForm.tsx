@@ -254,6 +254,14 @@ export function EnquiryForm({ summary, packageSlug }: EnquiryFormProps) {
           </p>
         )}
 
+        {/* Standards §12 + §10.3: tell people, before they send, who receives their details. */}
+        <p data-testid="enquiry-data-sharing" className="text-xs leading-relaxed text-[var(--textMuted)]">
+          When you send this enquiry, your details go to {summary.operatorName}. From then on{' '}
+          {summary.operatorName} is a separate, independent data controller of your details under its own
+          privacy policy. See our{' '}
+          <a href="/privacy" className="underline underline-offset-2 hover:text-[var(--text)]">Privacy Policy</a>.
+        </p>
+
         <button
           type="submit"
           data-testid="enquiry-submit"
