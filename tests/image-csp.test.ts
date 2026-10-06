@@ -12,6 +12,14 @@ describe('uploaded package images are allowed, nothing else is opened up', () =>
     expect(createContentSecurityPolicy('n')).not.toMatch(/script-src[^;]*unsafe-inline/);
   });
 
+  it('connect-src allows a non-supabase.co project origin (local stack) without widening anything else', async () => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'http://127.0.0.1:54321';
+    const { createContentSecurityPolicy } = await import('@/middleware');
+    const connect = createContentSecurityPolicy('n').split('; ').find((d) => d.startsWith('connect-src'))!;
+    expect(connect).toContain('http://127.0.0.1:54321');
+    expect(connect).not.toMatch(/\*(?!\.supabase\.co)/);
+  });
+
   it('next/image accepts this project\'s public storage path only', async () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL = 'http://127.0.0.1:54321';
     const { default: config } = await import('@/next.config');

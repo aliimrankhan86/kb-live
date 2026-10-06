@@ -61,6 +61,8 @@ export function createContentSecurityPolicy(nonce: string): string {
     "'self'",
     'https://*.supabase.co',
     'wss://*.supabase.co',
+    // The configured Supabase project (also covers a local stack on http://127.0.0.1).
+    ...[supabaseOrigin()].filter((o): o is string => Boolean(o) && !o!.endsWith('.supabase.co')),
     ...(isDev ? ['ws://127.0.0.1:3000', 'ws://localhost:3000'] : []),
   ].join(' ');
 
