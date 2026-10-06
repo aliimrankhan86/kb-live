@@ -78,7 +78,7 @@ export default async function RootLayout({
           Skip to main content
         </a>
         <ThemeProvider>
-          <Header />
+          <Header rfqEnabled={rfqEnabled} />
           <main id="main-content" className="flex-1">
             {children}
           </main>

@@ -1,9 +1,12 @@
 import { RequestDetail } from '@/components/request/RequestDetail';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
-import { isBookingFlowEnabled } from '@/lib/config';
+import { notFound } from 'next/navigation';
+import { isBookingFlowEnabled, isRfqQuoteEnabled } from '@/lib/config';
 import { JsonLdScript, breadcrumbJsonLd } from '@/lib/seo/json-ld';
 
 export default async function RequestPage({ params }: { params: Promise<{ id: string }> }) {
+  // PARKED with the RFQ quote engine (PARKED_FEATURES.md #2).
+  if (!isRfqQuoteEnabled()) notFound();
   const { id } = await params;
 
   const breadcrumbItems = [
