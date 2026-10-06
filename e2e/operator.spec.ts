@@ -152,7 +152,8 @@ test.describe('PackageWizard — full flow to review', () => {
     // Step 5 — Inclusions. No room type is pre-selected (never assumed), so the
     // operator states one, as a real operator must.
     await page.getByTestId('wizard-inclusion-visa').waitFor({ state: 'visible' });
-    await page.getByTestId('wizard-room-double').check();
+    await page.locator('label:has([data-testid="wizard-room-double"])').click();
+    await expect(page.getByTestId('wizard-room-double')).toBeChecked();
     await page.getByTestId('wizard-next-btn').click();
 
     // Step 6 — Policies (optional for draft)
