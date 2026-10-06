@@ -54,3 +54,17 @@ describe('/auth/confirm never redirects off-site', () => {
     expect(new URL(res.headers.get('location')!).pathname).toBe('/settings');
   });
 });
+
+describe('/auth/confirm lands on the host the browser used', () => {
+  it('uses the Host header, not a normalised request.url host', async () => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'http://127.0.0.1:54321';
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'anon';
+    const { GET } = await import('@/app/auth/confirm/route');
+    const req = new NextRequest('http://localhost:3100/auth/confirm?code=abc&next=/reset-password', {
+      headers: { host: '127.0.0.1:3100' },
+    });
+    const location = new URL((await GET(req)).headers.get('location')!);
+    expect(location.host).toBe('127.0.0.1:3100');
+    expect(location.pathname).toBe('/reset-password');
+  });
+});
