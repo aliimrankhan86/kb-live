@@ -143,7 +143,8 @@ const PackageCard: React.FC<PackageCardProps> = ({
         <div className={styles.operatorBlock}>
           <div className={styles.operatorTopRow}>
             <span className={styles.operatorName} title={operator?.companyName}>
-              {operator?.companyName ?? 'Travel operator'}
+              {/* Real name only; blank (not a made-up label) while operators load. */}
+              {operator?.companyName ?? <span className="sr-only">Loading operator name</span>}
             </span>
             <button
               type="button"
