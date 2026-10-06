@@ -2,8 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Repository } from '@/lib/api/repository';
-import { QuoteRequest, Package } from '@/lib/types';
+import type { BookingIntent, Offer, Package, QuoteRequest } from '@/lib/types';
 
 type DashboardStats = {
   publishedPackages: number;
@@ -39,7 +38,7 @@ function relativeTime(iso: string): string {
   return new Date(iso).toLocaleDateString();
 }
 
-function useDashboardData(operatorId: string) {
+function useDashboardData() {
   const [stats, setStats] = useState<DashboardStats>(EMPTY_STATS);
   const [requests, setRequests] = useState<QuoteRequest[]>([]);
   const [packages, setPackages] = useState<Package[]>([]);
@@ -48,13 +47,19 @@ function useDashboardData(operatorId: string) {
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const ctx = { userId: operatorId, role: 'operator' as const };
     setIsLoading(true);
-
-    const allPackages = await Repository.getPackagesByOperator(operatorId);
-    const allRequests = await Repository.getRequests(ctx);
-    const offers = await Repository.getOffers(ctx);
-    const bookings = await Repository.getBookingIntents(ctx);
+    const res = await fetch('/api/operator/dashboard', { cache: 'no-store' });
+    if (!res.ok) {
+      setIsLoading(false);
+      return;
+    }
+    const data = (await res.json()) as {
+      packages: Package[];
+      requests: QuoteRequest[];
+      offers: Offer[];
+      bookings: BookingIntent[];
+    };
+    const { packages: allPackages, requests: allRequests, offers, bookings } = data;
 
     setPackages(allPackages);
     setStats({
@@ -80,7 +85,7 @@ function useDashboardData(operatorId: string) {
 
     setLastUpdated(new Date().toISOString());
     setIsLoading(false);
-  }, [operatorId]);
+  }, []);
 
   useEffect(() => {
     load();
@@ -89,8 +94,9 @@ function useDashboardData(operatorId: string) {
   return { stats, requests, packages, activity, isLoading, lastUpdated, refresh: load };
 }
 
-export function OperatorDashboard({ operatorId }: { operatorId: string }) {
-  const { stats, requests, packages, activity, isLoading, lastUpdated, refresh } = useDashboardData(operatorId);
+// The session decides whose data loads; the prop is kept for existing callers.
+export function OperatorDashboard({ operatorId: _operatorId }: { operatorId: string }) {
+  const { stats, requests, packages, activity, isLoading, lastUpdated, refresh } = useDashboardData();
 
   return (
     <div className="space-y-8" data-testid="operator-dashboard">
