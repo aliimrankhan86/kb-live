@@ -33,6 +33,16 @@ function isDisposableEmail(email: string): boolean {
   return domain ? DISPOSABLE_DOMAINS.has(domain) : false;
 }
 
+/** One password rule for sign-up and password reset. */
+export const passwordSchema = z
+  .string()
+  .min(8, 'Password must be at least 8 characters')
+  .max(128, 'Password must be 128 characters or fewer')
+  .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+  .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+  .regex(/[0-9]/, 'Password must contain at least one number')
+  .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character');
+
 export const signUpSchema = z.object({
   email: z
     .string()
@@ -40,14 +50,7 @@ export const signUpSchema = z.object({
     .max(254, 'Email must be 254 characters or fewer')
     .email('Enter a valid email address')
     .refine((v) => !isDisposableEmail(v), 'Disposable email addresses are not allowed. Use a real email to receive your verification link.'),
-  password: z
-    .string()
-    .min(8, 'Password must be at least 8 characters')
-    .max(128, 'Password must be 128 characters or fewer')
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .regex(/[0-9]/, 'Password must contain at least one number')
-    .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character'),
+  password: passwordSchema,
   role: z.enum(['customer', 'operator'] as const),
   name: z
     .string()
