@@ -389,7 +389,8 @@ export const DBAdapter = {
 
   getDistinctDepartureCities: async (): Promise<string[]> => {
     const rows = await prisma.package.findMany({
-      where: { status: 'published', departureAirport: { not: null } },
+      // Public: verified operators only (founder decision 2026-10-06).
+      where: { status: 'published', departureAirport: { not: null }, operator: { verificationStatus: 'verified' } },
       select: { departureAirport: true },
     });
     const citySet = new Set<string>();

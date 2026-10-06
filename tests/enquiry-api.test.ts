@@ -42,7 +42,8 @@ const createMarketingConsent = vi.fn((input: Record<string, unknown>) =>
 
 vi.mock('@/lib/api/repository', () => ({
   Repository: {
-    getPackageById: vi.fn((id: string) => Promise.resolve(id === 'pkg-1' ? publishedPackage : undefined)),
+    // Public lookup: published package from a verified operator (else undefined).
+    getPublicPackageById: vi.fn((id: string) => Promise.resolve(id === 'pkg-1' ? publishedPackage : undefined)),
     getOperatorById: vi.fn(() => Promise.resolve(operator)),
     createEnquiry: (input: Record<string, unknown>) => createEnquiry(input),
     createMarketingConsent: (input: Record<string, unknown>) => createMarketingConsent(input),

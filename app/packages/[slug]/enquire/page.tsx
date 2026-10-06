@@ -49,7 +49,7 @@ export default async function EnquirePage({ params }: { params: Promise<{ slug: 
   let pkg: Package | undefined
   let operator: OperatorProfile | undefined
   try {
-    pkg = await Repository.getPackageBySlug(slug)
+    pkg = await Repository.getPublicPackageBySlug(slug)
     if (pkg) operator = await Repository.getOperatorById(pkg.operatorId)
   } catch {
     return <main className="min-h-screen bg-[var(--background)]">{renderNotice('We could not load this package right now. Please try again.')}</main>

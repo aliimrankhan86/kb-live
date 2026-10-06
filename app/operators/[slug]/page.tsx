@@ -16,7 +16,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   try {
     const { slug } = await params
-    const operator = await Repository.getOperatorBySlug(slug)
+    const operator = await Repository.getPublicOperatorBySlug(slug)
     if (operator) {
       const packages = (await Repository.listPackages()).filter(
         (pkg) => pkg.operatorId === operator.id && pkg.status === 'published'
@@ -74,7 +74,7 @@ export default async function OperatorProfilePage({ params }: OperatorPageProps)
   let error: string | undefined
 
   try {
-    operator = await Repository.getOperatorBySlug(slug)
+    operator = await Repository.getPublicOperatorBySlug(slug)
     if (operator) {
       packages = (await Repository.listPackages()).filter(
         (pkg) => pkg.operatorId === operator?.id && pkg.status === 'published'

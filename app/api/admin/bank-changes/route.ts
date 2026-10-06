@@ -12,7 +12,7 @@ export async function GET() {
     const ctx = { userId: user.id, role: 'admin' as const };
     const allRequests = await Repository.getBankChangeRequests(ctx);
     const pending = allRequests.filter((r) => r.status === 'pending_review');
-    const operators = await Repository.listPublicOperators();
+    const operators = await Repository.getOperators(ctx);
     const operatorById = Object.fromEntries(operators.map((o) => [o.id, o]));
     return NextResponse.json({ requests: pending, operatorById });
   } catch (err) {

@@ -13,7 +13,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   try {
     const { slug } = await params
-    const pkg = await Repository.getPackageBySlug(slug)
+    const pkg = await Repository.getPublicPackageBySlug(slug)
     if (pkg && pkg.status === 'published') {
       const operator = await Repository.getOperatorById(pkg.operatorId)
       const operatorName = operator?.companyName ?? 'PilgrimCompare operator'
@@ -77,7 +77,7 @@ export default async function PackageDetailPage({
   let operator: OperatorProfile | undefined
 
   try {
-    pkg = await Repository.getPackageBySlug(slug)
+    pkg = await Repository.getPublicPackageBySlug(slug)
     if (pkg) {
       operator = await Repository.getOperatorById(pkg.operatorId)
     }

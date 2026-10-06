@@ -74,8 +74,9 @@ const mockStore = {
   saveBookingOutcome: (bo: BookingOutcome) => Promise.resolve(MockDB.saveBookingOutcome(bo)),
   getDistinctDepartureCities: (): Promise<string[]> => {
     const citySet = new Set<string>();
+    const verified = new Set(MockDB.getOperators().filter((o) => o.verificationStatus === 'verified').map((o) => o.id));
     for (const pkg of MockDB.getPackages()) {
-      if (pkg.status !== 'published' || !pkg.departureAirport) continue;
+      if (pkg.status !== 'published' || !pkg.departureAirport || !verified.has(pkg.operatorId)) continue;
       const city = departureCityOf(pkg.departureAirport);
       if (city) citySet.add(city);
     }
@@ -496,6 +497,10 @@ function parseCsv(text: string): string[][] {
   row.push(cell);
   rows.push(row);
   return rows;
+}
+
+async function verifiedOperatorIds(): Promise<Set<string>> {
+  return new Set((await store().getOperators()).filter((o) => o.verificationStatus === 'verified').map((o) => o.id));
 }
 
 /** Shown when an account cannot be erased automatically. Never claims success. */
@@ -1233,10 +1238,30 @@ export const Repository = {
     return store().savePackage(newPackage);
   },
 
+  /**
+   * Public package list. Founder decision (2026-10-06): only packages from
+   * VERIFIED operators are ever shown publicly (Direction §2: verified only).
+   */
   listPackages: async (): Promise<Package[]> => {
-    const all = await store().getPackages();
-    return sortByScore(all.filter((p) => p.status === 'published'));
+    const [all, verified] = await Promise.all([store().getPackages(), verifiedOperatorIds()]);
+    return sortByScore(all.filter((p) => p.status === 'published' && verified.has(p.operatorId)));
   },
+
+  /** A package page/enquiry target: published AND from a verified operator, else undefined. */
+  getPublicPackageBySlug: async (slug: string): Promise<Package | undefined> => {
+    const [all, verified] = await Promise.all([store().getPackages(), verifiedOperatorIds()]);
+    return all.find((p) => p.slug === slug && p.status === 'published' && verified.has(p.operatorId));
+  },
+
+  /** Same rule by id (enquiry API). */
+  getPublicPackageById: async (id: string): Promise<Package | undefined> => {
+    const [all, verified] = await Promise.all([store().getPackages(), verifiedOperatorIds()]);
+    return all.find((p) => p.id === id && p.status === 'published' && verified.has(p.operatorId));
+  },
+
+  /** Public operator profile: verified operators only. */
+  getPublicOperatorBySlug: async (slug: string): Promise<OperatorProfile | undefined> =>
+    (await store().getOperators()).find((o) => o.slug === slug && o.verificationStatus === 'verified'),
 
   getPackageBySlug: async (slug: string): Promise<Package | undefined> => {
     const all = await store().getPackages();
@@ -1479,7 +1504,7 @@ export const Repository = {
    * operator profile page.
    */
   listPublicOperators: async (): Promise<OperatorProfile[]> => {
-    return (await store().getOperators()).map(({ eligibilityFlags, ...publicFields }) => ({
+    return (await store().getOperators()).filter((o) => o.verificationStatus === 'verified').map(({ eligibilityFlags, ...publicFields }) => ({
       ...publicFields,
       ...(eligibilityFlags
         ? {

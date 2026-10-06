@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
 
     // Resolve the package + operator server-side so the lead carries honest,
     // package-sourced names (never client-supplied). Reject unknown/unpublished.
-    const pkg = await Repository.getPackageById(packageId);
+    const pkg = await Repository.getPublicPackageById(packageId);
     if (!pkg || pkg.status !== 'published') {
       return NextResponse.json({ error: 'This package is no longer available.' }, { status: 404 });
     }
