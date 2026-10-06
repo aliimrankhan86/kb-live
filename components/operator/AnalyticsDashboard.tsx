@@ -43,13 +43,13 @@ function Funnel({ summary }: { summary: AnalyticsEventCounts }) {
     { label: 'Views', value: summary.package_view },
     { label: 'Quotes', value: summary.quote_request },
     { label: 'Offers', value: summary.offer_sent },
-    { label: 'Bookings', value: summary.booking_confirmed },
+    { label: 'Intents you marked booked', value: summary.booking_confirmed },
   ];
 
   return (
     <section className="rounded-lg border border-[var(--borderSubtle)] bg-[var(--surfaceDark)] p-5" data-testid="analytics-funnel">
       <h2 className="text-base font-semibold text-[var(--text)]">Conversion Funnel</h2>
-      <p className="mt-0.5 text-sm text-[var(--textMuted)]">Views to confirmed bookings for the selected date range.</p>
+      <p className="mt-0.5 text-sm text-[var(--textMuted)]">From package views to booking intents for the selected date range. PilgrimCompare does not take or confirm bookings.</p>
       <div className="mt-5 grid gap-3 md:grid-cols-4">
         {stages.map((stage, index) => {
           const previous = stages[index - 1];
@@ -82,7 +82,7 @@ function EmptyChart() {
       </div>
       <p className="text-sm font-medium text-[var(--text)]">No activity yet</p>
       <p className="max-w-xs text-xs text-[var(--textMuted)]">
-        Events appear here once travellers view your packages and request quotes.
+        Events appear here once travellers view your packages.
       </p>
     </div>
   );
@@ -136,8 +136,8 @@ export function AnalyticsDashboard({ days, summary, trend }: AnalyticsDashboardP
         <SummaryCard label="Package Views" value={summary.package_view} />
         <SummaryCard label="Quote Requests" value={summary.quote_request} />
         <SummaryCard label="Offers Sent" value={summary.offer_sent} />
-        <SummaryCard label="Bookings Started" value={summary.booking_started} />
-        <SummaryCard label="Bookings Confirmed" value={summary.booking_confirmed} />
+        <SummaryCard label="Booking Intents" value={summary.booking_started} />
+        <SummaryCard label="Intents You Marked Booked" value={summary.booking_confirmed} />
       </section>
 
       {hasData ? (

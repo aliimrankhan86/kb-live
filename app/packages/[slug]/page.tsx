@@ -132,7 +132,7 @@ export default async function PackageDetailPage({
       },
       {
         question: 'Who provides this pilgrimage package?',
-        answer: `${operator?.companyName ?? 'The listed operator'} provides this package. PilgrimCompare helps travellers compare details and request a quote.`,
+        answer: `${operator?.companyName ?? 'The listed operator'} provides this package. PilgrimCompare helps travellers compare details and send an enquiry to the operator.`,
       },
     ]),
   ]);

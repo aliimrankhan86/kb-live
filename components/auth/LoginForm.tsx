@@ -213,7 +213,7 @@ export function LoginForm() {
         <p className="mt-1 text-sm text-[var(--textMuted)]">
           {isPartner
             ? 'Access your operator dashboard and manage your packages.'
-            : 'Sign in to view your quotes, requests, and saved packages.'}
+            : 'Sign in to manage your account and saved packages.'}
         </p>
       </div>
 

@@ -72,3 +72,10 @@ describe('tier explanation claims only the §7 checks', () => {
     expect(src).not.toMatch(/customer feedback|trading history|ATOL or ABTA registration/);
   });
 });
+
+describe('no live copy offers quotes or bookings from parked flows (Direction §4, standards §14.2)', () => {
+  const files = ['app/page.tsx', 'lib/seo.ts', 'app/umrah/page.tsx', 'app/packages/[slug]/page.tsx', 'components/auth/LoginForm.tsx', 'components/auth/SignUpForm.tsx', 'app/settings/page.tsx', 'components/operator/AnalyticsDashboard.tsx'];
+  it.each(files)('%s', (f) => {
+    expect(readFileSync(f, 'utf8')).not.toMatch(/request(ing)? a quote|request quotes|your quotes|Bookings Confirmed|quote request'|Payment confirmations/i);
+  });
+});

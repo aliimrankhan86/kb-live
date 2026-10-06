@@ -23,7 +23,7 @@ const GUIDE_LINKS = [
 export const metadata: Metadata = {
   title: 'PilgrimCompare - Compare Hajj & Umrah Packages from UK Operators',
   description:
-    'Compare Hajj and Umrah packages from UK travel operators. Review prices, hotels near Haram, inclusions, ATOL/ABTA details, and operator profiles before requesting a quote.',
+    'Compare Umrah packages from verified UK operators side by side: prices, hotels, distance to the Haram, inclusions and ATOL numbers, then send an enquiry to the operator.',
   keywords: ['Umrah packages UK', 'Hajj packages UK', 'compare Umrah packages', 'ATOL Umrah operators'],
   alternates: {
     canonical: '/',

@@ -448,8 +448,8 @@ export default function SettingsPage() {
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {([
-            { key: 'offerUpdates' as const, label: 'Offer responses', desc: 'When an operator replies to your quote request' },
-            { key: 'bookingUpdates' as const, label: 'Booking updates', desc: 'Payment confirmations and status changes' },
+            // Offer and booking emails belong to parked flows (PARKED_FEATURES.md #1, #2),
+            // so their switches are hidden rather than offering emails that never send.
             { key: 'marketing' as const, label: 'Promotions & tips', desc: 'Guides, seasonal deals and Umrah insights' },
           ]).map(({ key, label, desc }) => (
             <label

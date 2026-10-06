@@ -8,7 +8,7 @@ import { resolveDepartureLocation } from '@/lib/airports'
 export const metadata: Metadata = {
   title: 'Umrah Packages 2026 from the UK - Compare Operators',
   description:
-    'Compare Umrah packages from UK travel operators by budget, hotel rating, distance to Haram, traveller count, and included services before requesting a quote.',
+    'Compare Umrah packages from UK travel operators by budget, hotel rating, distance to Haram, traveller count and included services, then send an enquiry to the operator.',
   keywords: ['Umrah packages 2026', 'Umrah packages from UK', 'compare Umrah packages', 'Ramadan Umrah packages'],
   alternates: {
     canonical: '/umrah',
