@@ -495,7 +495,7 @@ export default function SettingsPage() {
           Delete account
         </h2>
         <p style={{ margin: '0 0 1rem', fontSize: '0.8125rem', color: 'var(--textMuted)' }}>
-          Under UK GDPR Article 17, you can ask us to erase your personal data. Deleting your account permanently deletes your sign-in, your profile, any marketing email consent you gave and any Hajj availability alerts you signed up for with this email address. On enquiries you sent with this email address, we delete your name, email address, phone number and message, and keep only the reference code, package and date. If your account is linked to bookings or complaints, we cannot delete it automatically: we will tell you, nothing will be deleted, and you can email dpo@pilgrimcompare.co.uk.
+          Under UK GDPR Article 17, you can ask us to erase your personal data. Deleting your account permanently deletes your sign-in, your profile, any marketing email consent you gave and any Hajj availability alerts you signed up for with this email address. On enquiries you sent with this email address, we delete your name, email address, phone number and message, and keep only the reference code, operator, package, travel month and date. If your account is linked to bookings or complaints, we cannot delete it automatically: we will tell you, nothing will be deleted, and you can email dpo@pilgrimcompare.co.uk.
         </p>
         {deleteError && <p role="alert" style={{ marginBottom: '0.75rem', fontSize: '0.875rem', color: 'var(--danger)' }}>{deleteError}</p>}
         {!showDeleteConfirm ? (

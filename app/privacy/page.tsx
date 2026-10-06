@@ -145,7 +145,7 @@ export default function PrivacyPolicyPage() {
               <tr className="border-b border-[var(--borderSubtle)]">
                 <td className="px-3 py-2">Enquiries</td>
                 <td className="px-3 py-2">
-                  Your name, email address, phone number and message are removed 90 days after you send the enquiry. We keep the reference code, operator, package and date.
+                  Your name, email address, phone number and message are removed 90 days after you send the enquiry. We keep the reference code, operator, package, travel month and date.
                 </td>
               </tr>
               <tr className="border-b border-[var(--borderSubtle)]">

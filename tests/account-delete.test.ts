@@ -162,7 +162,7 @@ describe('settings page says exactly what deletion does (truth rule)', () => {
     expect(page).toContain('any marketing email consent you gave and any Hajj availability alerts you signed up for with this email address');
     expect(page).toContain('Your sign-in, profile, marketing consent and Hajj availability alerts will be permanently deleted');
     expect(page).toContain('deleteErrorMessage(res)');
-    expect(page).toContain('we delete your name, email address, phone number and message, and keep only the reference code, package and date');
+    expect(page).toContain('we delete your name, email address, phone number and message, and keep only the reference code, operator, package, travel month and date');
     expect(page).toContain('Operators you already sent an enquiry to keep the details you gave them under their own privacy policy');
     expect(page).not.toContain('Enquiries you sent are already with the operator');
   });

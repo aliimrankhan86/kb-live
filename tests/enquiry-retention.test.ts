@@ -82,7 +82,7 @@ describe('GET /api/cron/enquiry-retention follows the cron convention', () => {
 describe('privacy page states the enquiry retention the code applies', () => {
   const page = readFileSync('app/privacy/page.tsx', 'utf8');
   it('says personal details are removed after 90 days and what is kept', () => {
-    expect(page).toContain('Your name, email address, phone number and message are removed 90 days after you send the enquiry. We keep the reference code, operator, package and date.');
+    expect(page).toContain('Your name, email address, phone number and message are removed 90 days after you send the enquiry. We keep the reference code, operator, package, travel month and date.');
     expect(page).not.toContain('Enquiry and booking intent data');
   });
 });
