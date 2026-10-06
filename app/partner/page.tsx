@@ -1,10 +1,11 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { JsonLdScript, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
+import { VERIFICATION_STATEMENT } from '@/lib/content-rules'
 
 export const metadata: Metadata = {
   title: 'List Your Umrah & Hajj Packages on PilgrimCompare',
-  description: 'Join PilgrimCompare as a verified operator. Reach UK Muslims planning Umrah and Hajj. No upfront fees. ATOL and ABTA operators welcome.',
+  description: 'List your Umrah packages on PilgrimCompare so UK pilgrims can compare them and send you enquiries. Free to list during the 90-day trial.',
   alternates: {
     canonical: '/partner',
   },
@@ -48,11 +49,11 @@ export default function PartnerLandingPage() {
                 For Travel Operators
               </p>
               <h1 className="text-3xl font-bold leading-tight text-[var(--text)] md:text-4xl lg:text-5xl">
-                Reach Thousands of UK Muslims Planning Umrah &amp; Hajj
+                List Your Umrah Packages for UK Pilgrims to Compare
               </h1>
               <p className="mt-5 text-lg leading-relaxed text-[var(--textMuted)]">
-                List your verified packages on PilgrimCompare — the UK&apos;s Umrah &amp; Hajj comparison platform.
-                No upfront fees. Transparent commission. ATOL/ABTA verified operators only.
+                PilgrimCompare is a UK comparison and enquiry service for Umrah travel packages. Pilgrims compare packages side by side and send enquiries directly to you.
+                Free to list during the 90-day trial. We check each operator&apos;s ATOL number before listing.
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
                 <a
@@ -62,13 +63,6 @@ export default function PartnerLandingPage() {
                 >
                   Get in touch to list your packages
                 </a>
-                <Link
-                  href="/operators/al-hidayah-travel"
-                  className="inline-flex min-h-[48px] items-center justify-center rounded-lg border border-[var(--border)] px-6 py-3 text-base font-medium text-[var(--text)] transition-colors hover:border-[var(--yellow)] hover:text-[var(--yellow)]"
-                  data-testid="partner-cta-preview"
-                >
-                  See Example Profile
-                </Link>
               </div>
             </div>
 
@@ -77,7 +71,7 @@ export default function PartnerLandingPage() {
               <div className="rounded-xl border border-[var(--border)] bg-[var(--panel)] p-6 md:p-7">
                 {/* Label */}
                 <span className="inline-block rounded-full bg-[var(--yellow)]/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[var(--yellow)]">
-                  Already a partner?
+                  Already listed?
                 </span>
 
                 <h2 className="mt-4 text-xl font-semibold text-[var(--text)]">
@@ -145,7 +139,7 @@ export default function PartnerLandingPage() {
               </div>
               <h3 className="text-lg font-semibold text-[var(--text)]">UK-Focused Audience</h3>
               <p className="mt-2 text-sm text-[var(--textMuted)]">
-                Target British Muslims actively searching for ATOL-protected Umrah and Hajj packages.
+                Pilgrims compare packages side by side, then send an enquiry about the one they want.
               </p>
             </div>
             <div className="rounded-xl border border-[var(--border)] bg-[var(--panel)] p-6 text-center">
@@ -156,7 +150,7 @@ export default function PartnerLandingPage() {
               </div>
               <h3 className="text-lg font-semibold text-[var(--text)]">Verified Operator Badge</h3>
               <p className="mt-2 text-sm text-[var(--textMuted)]">
-                Stand out with a verified badge. ATOL and ABTA numbers displayed prominently to build traveller trust.
+                Verified operators show a Verified badge that links to what we check. Your ATOL number is shown on your profile and packages.
               </p>
             </div>
             <div className="rounded-xl border border-[var(--border)] bg-[var(--panel)] p-6 text-center">
@@ -166,9 +160,9 @@ export default function PartnerLandingPage() {
                   <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-[var(--text)]">No Upfront Fees</h3>
+              <h3 className="text-lg font-semibold text-[var(--text)]">Free During the Trial</h3>
               <p className="mt-2 text-sm text-[var(--textMuted)]">
-                Simple commission on confirmed enquiries. No listing fees, no hidden charges.
+                Listing is free during the 90-day trial. Pricing after the trial is explained before you agree to anything.
               </p>
             </div>
           </div>
@@ -189,12 +183,12 @@ export default function PartnerLandingPage() {
             <div className="mt-10 grid gap-4 sm:grid-cols-2">
               {[
                 {
-                  title: 'ATOL or ABTA Membership',
-                  desc: 'Your financial protection number is displayed on every package listing. Travellers expect this as standard.',
+                  title: 'ATOL Number',
+                  desc: 'We check your ATOL number against the CAA register before listing, and show it on your profile and packages.',
                 },
                 {
                   title: 'UK-Based Business Registration',
-                  desc: 'Companies House registered. We verify your business exists before approving your profile.',
+                  desc: 'We check your company status at Companies House and your UK trading address before listing.',
                 },
                 {
                   title: 'Accurate Package Pricing',
@@ -202,7 +196,7 @@ export default function PartnerLandingPage() {
                 },
                 {
                   title: 'Responsive to Enquiries',
-                  desc: 'Operators must respond to traveller enquiries within 48 hours or your listing ranking is affected.',
+                  desc: "Enquiries come to you with the traveller's contact details. You reply to them directly.",
                 },
               ].map((item) => (
                 <div key={item.title} className="flex gap-4 rounded-lg border border-[var(--border)] bg-[var(--panel)] p-5">
@@ -233,7 +227,7 @@ export default function PartnerLandingPage() {
             <div className="mt-10 grid gap-6 sm:grid-cols-3">
               {[
                 { step: '1', title: 'Get in touch', desc: 'Send us your company details, ATOL/ABTA numbers, and package offerings — our team builds your verified profile for you.' },
-                { step: '2', title: 'Get Verified', desc: 'Our team reviews your application within 1–2 business days. We verify your financial protection status.' },
+                { step: '2', title: 'Get Verified', desc: 'Our team reviews your details within 1 to 2 business days, using the checks listed above.' },
                 { step: '3', title: 'Start Receiving Enquiries', desc: 'Once approved, your packages appear in search results and travellers can send enquiries directly to you.' },
               ].map((item) => (
                 <div key={item.step} className="relative rounded-lg border border-[var(--border)] bg-[var(--panel)] p-5">
@@ -260,12 +254,8 @@ export default function PartnerLandingPage() {
         {/* Trust / compliance */}
         <section className="border-t border-[var(--border)] px-4 py-16">
           <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-2xl font-semibold text-[var(--text)]">Built for UK Compliance</h2>
-            <p className="mt-4 text-[var(--textMuted)]">
-              PilgrimCompare requires all operators to display ATOL/ABTA status prominently.
-              Travellers see verified protection badges — or a clear warning if protection is not listed.
-              This transparency drives higher-quality enquiries and builds long-term trust.
-            </p>
+            <h2 className="text-2xl font-semibold text-[var(--text)]">What We Check</h2>
+            <p className="mt-4 text-[var(--textMuted)]">{VERIFICATION_STATEMENT}</p>
           </div>
         </section>
 
@@ -274,7 +264,7 @@ export default function PartnerLandingPage() {
           <div className="mx-auto max-w-xl text-center">
             <h2 className="text-2xl font-semibold text-[var(--text)]">Ready to Grow Your Business?</h2>
             <p className="mt-3 text-[var(--textMuted)]">
-              Join operators already listing on PilgrimCompare and start receiving enquiries from UK travellers today.
+              Get in touch to list your packages and start receiving enquiries from UK travellers.
             </p>
             <a
               href="mailto:operators@pilgrimcompare.co.uk?subject=List%20my%20packages%20on%20PilgrimCompare"
@@ -284,7 +274,7 @@ export default function PartnerLandingPage() {
               Get in touch to list your packages
             </a>
             <p className="mt-4 text-sm text-[var(--textMuted)]">
-              Already a partner?{' '}
+              Already listed?{' '}
               <Link
                 href="/login?redirect=/operator/dashboard"
                 className="font-medium text-[var(--yellow)] underline-offset-2 hover:underline"
