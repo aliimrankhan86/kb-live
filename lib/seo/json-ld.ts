@@ -22,8 +22,11 @@ const compact = <T>(items: Array<T | undefined | false | null>): T[] => items.fi
 
 /** Package detail page — Product schema */
 export function packageJsonLd(pkg: Package, operatorName: string): Record<string, unknown> {
-  const nightsMakkah = pkg.nightsMakkah ?? Math.ceil((pkg.totalNights ?? 0) / 2);
-  const nightsMadinah = pkg.nightsMadinah ?? Math.floor((pkg.totalNights ?? 0) / 2);
+  // Stored nights only; the split is omitted when the operator did not give it
+  // (never derived from totalNights — data-integrity rule).
+  const split = pkg.nightsMakkah > 0 && pkg.nightsMadinah > 0
+    ? ` (${pkg.nightsMakkah} Makkah, ${pkg.nightsMadinah} Madinah)`
+    : '';
   // Operator-supplied star ratings only. When absent they are omitted from the
   // schema entirely — never emitted as 0 or a default (data-integrity rule).
   const hasMakkahStars = typeof pkg.hotelMakkahStars === 'number';
@@ -33,8 +36,6 @@ export function packageJsonLd(pkg: Package, operatorName: string): Record<string
     hasMadinahStars ? `${pkg.hotelMadinahStars}★ Madinah` : null,
   ].filter(Boolean);
   const hotelDescription = hotelStarsParts.length ? ` Hotels: ${hotelStarsParts.join(', ')}.` : '';
-  const startDate = pkg.dateWindow?.start;
-  const endDate = pkg.dateWindow?.end;
   const packageUrl = `${BASE_URL}/packages/${pkg.slug}`;
 
   return {
@@ -42,7 +43,7 @@ export function packageJsonLd(pkg: Package, operatorName: string): Record<string
     '@type': 'Product',
     '@id': `${packageUrl}#product`,
     name: pkg.title,
-    description: `${pkg.pilgrimageType} package – ${pkg.totalNights} nights (${nightsMakkah} Makkah, ${nightsMadinah} Madinah).${hotelDescription}`,
+    description: `${pkg.pilgrimageType} package, ${pkg.totalNights} nights${split}.${hotelDescription}`,
     sku: pkg.id,
     image: compact([...(pkg.images ?? [])]),
     brand: {
@@ -52,15 +53,14 @@ export function packageJsonLd(pkg: Package, operatorName: string): Record<string
     offers: {
       '@type': 'Offer',
       url: packageUrl,
-      priceCurrency: pkg.currency ?? 'GBP',
-      price: String(pkg.pricePerPerson ?? 0),
-      availability: 'https://schema.org/InStock',
+      priceCurrency: pkg.currency,
+      // Operator's stated price only. No availability claim (standards §3.5)
+      // and no validity window: travel dates are not an offer validity period.
+      ...(pkg.pricePerPerson > 0 ? { price: String(pkg.pricePerPerson) } : {}),
       seller: {
         '@type': 'TravelAgency',
         name: operatorName,
       },
-      ...(startDate ? { validFrom: startDate } : {}),
-      ...(endDate ? { validThrough: endDate } : {}),
     },
     category: 'Travel Package',
     url: packageUrl,
@@ -70,16 +70,8 @@ export function packageJsonLd(pkg: Package, operatorName: string): Record<string
         name: 'Pilgrimage type',
         value: pkg.pilgrimageType,
       },
-      {
-        '@type': 'PropertyValue',
-        name: 'Makkah nights',
-        value: String(nightsMakkah),
-      },
-      {
-        '@type': 'PropertyValue',
-        name: 'Madinah nights',
-        value: String(nightsMadinah),
-      },
+      pkg.nightsMakkah > 0 ? { '@type': 'PropertyValue', name: 'Makkah nights', value: String(pkg.nightsMakkah) } : null,
+      pkg.nightsMadinah > 0 ? { '@type': 'PropertyValue', name: 'Madinah nights', value: String(pkg.nightsMadinah) } : null,
       hasMakkahStars
         ? {
             '@type': 'PropertyValue',
@@ -168,9 +160,6 @@ export function operatorJsonLd(operator: OperatorProfile): Record<string, unknow
       ? {
           knowsAbout: operator.departureAirports.map((airport) => `Pilgrimage packages departing from ${airport}`),
         }
-      : {}),
-    ...(operator.yearsInBusiness != null
-      ? { foundingDate: String(new Date().getFullYear() - operator.yearsInBusiness) }
       : {}),
     ...(identifiers.length ? { identifier: identifiers } : {}),
   };
@@ -311,15 +300,16 @@ export function personJsonLd({ name, url, sameAs, jobTitle, description }: Perso
  */
 export function touristTripJsonLd(pkg: Package, operatorName: string): Record<string, unknown> {
   const packageUrl = `${BASE_URL}/packages/${pkg.slug}`;
-  const nightsMakkah = pkg.nightsMakkah ?? Math.ceil((pkg.totalNights ?? 0) / 2);
-  const nightsMadinah = pkg.nightsMadinah ?? Math.floor((pkg.totalNights ?? 0) / 2);
+  const nightsMakkah = pkg.nightsMakkah;
+  const nightsMadinah = pkg.nightsMadinah;
+  const split = nightsMakkah > 0 && nightsMadinah > 0 ? ` (${nightsMakkah} in Makkah, ${nightsMadinah} in Madinah)` : '';
 
   return {
     '@context': 'https://schema.org',
     '@type': 'TouristTrip',
     '@id': `${packageUrl}#touristtrip`,
     name: pkg.title,
-    description: `${pkg.pilgrimageType === 'hajj' ? 'Hajj' : 'Umrah'} package from the UK – ${pkg.totalNights ?? nightsMakkah + nightsMadinah} nights (${nightsMakkah} in Makkah, ${nightsMadinah} in Madinah).`,
+    description: `${pkg.pilgrimageType === 'hajj' ? 'Hajj' : 'Umrah'} package from the UK, ${pkg.totalNights} nights${split}.`,
     url: packageUrl,
     touristType: {
       '@type': 'Audience',
@@ -331,17 +321,16 @@ export function touristTripJsonLd(pkg: Package, operatorName: string): Record<st
     },
     offers: {
       '@type': 'Offer',
-      priceCurrency: pkg.currency ?? 'GBP',
-      price: String(pkg.pricePerPerson ?? 0),
-      availability: 'https://schema.org/InStock',
+      priceCurrency: pkg.currency,
+      ...(pkg.pricePerPerson > 0 ? { price: String(pkg.pricePerPerson) } : {}),
       url: packageUrl,
     },
     itinerary: compact([
       nightsMakkah > 0
-        ? { '@type': 'TouristDestination', name: 'Makkah', description: `${nightsMakkah} nights near the Grand Mosque` }
+        ? { '@type': 'TouristDestination', name: 'Makkah', description: `${nightsMakkah} nights in Makkah` }
         : null,
       nightsMadinah > 0
-        ? { '@type': 'TouristDestination', name: 'Madinah', description: `${nightsMadinah} nights near the Prophet's Mosque` }
+        ? { '@type': 'TouristDestination', name: 'Madinah', description: `${nightsMadinah} nights in Madinah` }
         : null,
     ]),
     ...(pkg.dateWindow?.start ? { startDate: pkg.dateWindow.start } : {}),

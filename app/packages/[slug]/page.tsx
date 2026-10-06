@@ -117,9 +117,10 @@ export default async function PackageDetailPage({
     { label: 'Packages', href: '/search/packages' },
     { label: pkg.title },
   ];
+  // Standards §13: seller/provider is always the operator, never PilgrimCompare.
+  // Without a known operator the Product/Trip nodes are simply not emitted.
   const packageDetailJsonLd = graphJsonLd([
-    packageJsonLd(pkg, operator?.companyName ?? 'PilgrimCompare'),
-    touristTripJsonLd(pkg, operator?.companyName ?? 'PilgrimCompare'),
+    ...(operator ? [packageJsonLd(pkg, operator.companyName), touristTripJsonLd(pkg, operator.companyName)] : []),
     breadcrumbJsonLd(breadcrumbItems.map((item) => ({ name: item.label, path: item.href }))),
     faqPageJsonLd([
       {
