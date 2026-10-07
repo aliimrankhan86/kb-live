@@ -5,7 +5,7 @@ import { VERIFICATION_STATEMENT } from '@/lib/content-rules'
 
 export const metadata: Metadata = {
   title: 'List Your Umrah & Hajj Packages on PilgrimCompare',
-  description: 'List your Umrah packages on PilgrimCompare so UK pilgrims can compare them and send you enquiries. Free to list during the 90-day trial.',
+  description: 'List your Umrah packages on PilgrimCompare so UK pilgrims can compare them and send you enquiries. Founding operators list free for 12 months.',
   alternates: {
     canonical: '/partner',
   },
@@ -53,7 +53,7 @@ export default function PartnerLandingPage() {
               </h1>
               <p className="mt-5 text-lg leading-relaxed text-[var(--textMuted)]">
                 PilgrimCompare is a UK comparison and enquiry service for Umrah travel packages. Pilgrims compare packages side by side and send enquiries directly to you.
-                Free to list during the 90-day trial. We check each operator&apos;s ATOL number before listing.
+                Founding operators list free for 12 months. We check each operator&apos;s ATOL number before listing.
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
                 <a
@@ -160,9 +160,9 @@ export default function PartnerLandingPage() {
                   <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-[var(--text)]">Free During the Trial</h3>
+              <h3 className="text-lg font-semibold text-[var(--text)]">Free for Founding Operators</h3>
               <p className="mt-2 text-sm text-[var(--textMuted)]">
-                Listing is free during the 90-day trial. Pricing after the trial is explained before you agree to anything.
+                Founding operators list free for 12 months. Any pricing after that is explained in writing before you agree to anything.
               </p>
             </div>
           </div>
