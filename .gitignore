@@ -43,6 +43,9 @@ yarn-error.log*
 .env*
 !.env.example
 
+# staging seed account passwords (scripts/seed-staging.mjs), never committed
+/staging-seed.config.local.json
+
 # vercel
 .vercel
 
