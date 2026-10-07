@@ -1,5 +1,44 @@
 # PilgrimCompare AI Handover — Single Source of Truth
 
+## §B0 Staging environment and fictional seed (PR #117, branch `feat/staging-env`), 2026-10-07
+
+**Status:** PR #117 into `dev`, CI green, NOT merged. Guide: `docs/STAGING.md`.
+
+### What changed and why
+Previews used to share every env var with Production, so a PR preview read and wrote the production database. B0 gives Preview its own fictional Supabase project and makes every non-production deployment safe for UAT.
+- `lib/env.ts` `isProduction()`: true only when `VERCEL_ENV === 'production'`.
+- `components/layout/StagingBanner.tsx`: banner outside production, first child of `<body>`, cannot be dismissed.
+- `next.config.ts` and `app/robots.ts`: `X-Robots-Tag: noindex, nofollow` and `Disallow: /` outside production. Production output is pinned by tests.
+- `lib/email/send.tsx` `resendClient()`: outside production, mail goes only to `STAGING_EMAIL_TO` with the subject `[STAGING] to <recipient>: <subject>`. Without `STAGING_EMAIL_TO` or `RESEND_API_KEY` it logs to the console.
+- `scripts/seed-staging.mjs` and `scripts/seed-staging-data.mjs` (`npm run seed:staging -- --ref <ref>`): idempotent fictional dataset. Refuses the production ref and any ref that `NEXT_PUBLIC_SUPABASE_URL` does not name. Verifies the pooler TLS certificate against `scripts/supabase-root-2021-ca.crt`.
+- Tests: 2,081 to 2,127 (+46). `tests/staging-env.test.tsx` 14 new, `tests/staging-seed.test.ts` 19 new, `tests/robots.test.ts` 1 to 10, `tests/email-transport.test.ts` 4 to 8. None skipped.
+
+### Staging Supabase
+`pilgrimcompare-staging`, ref `fkcudutzgltrsoykfvfn`, org kaabatrip, eu-west-1, Free plan, Postgres 17.11 (production 17.6). Database password only in the Keychain entry `pilgrimcompare-staging-db`. Built the same way as production (db push, migrations 001 to 012, release PRE-DEPLOY with 013, POST-DEPLOY with 014). PRODUCTION_CHECKS query 1: 34 PASS. Auth Site URL and redirect URLs: the dev alias only.
+
+### Vercel env split
+Before: 11 records, each targeting Production and Preview. After: the same 11 Production record ids. Preview was removed from 10 of them by PATCH `/v10/projects/<id>/env/<envId>` with only `{"target":["production"]}` (Ali authorised this explicitly). `RESEND_API_KEY` was not touched and is still shared. Nine new Preview-only records: staging Supabase URL, anon key and service role key, `DATABASE_URL` (pooler 6543, `?pgbouncer=true`), `DIRECT_URL` (5432), `FEATURE_USE_REAL_DB=true`, `NEXT_PUBLIC_SITE_URL` (dev alias), a new `CRON_SECRET` and `STAGING_EMAIL_TO`. Record ids before and after were compared and the Production ids are identical. No value was read.
+
+### Verification on the PR #117 preview
+- Banner, `X-Robots-Tag` and `robots.txt`: pass.
+- Listing: 29 packages (all of A to D except the draft). Operators E and F hidden: pass. Expired package 9 shows (known, batch 1).
+- Package detail and compare: pass. Enquiry form: pass, and the rows land in the staging database (`PC-F4E2DB05`, `PC-CD71B4EA`).
+- Enquiry email: FAIL. Nothing reached `STAGING_EMAIL_TO`. The first enquiry logged nothing. The second logged Resend `application_error` "Unable to fetch data". Cause: `void sendEnquiryEmails()` runs after the response with no `after()`, so Vercel cuts it off. Production runs the same code. Logged in `docs/BACKLOG.md`.
+- Sign-in: operator A, operator B and admin sign in against staging with the right roles (checked from a local script). The preview's sign-in form was not used, because Claude does not type passwords on a non-local host. Ali to check.
+- Production: no banner, no `X-Robots-Tag`, `/` and `/partner` 200, still `dpl_C6wvCksUXATpod7GaWpNwABsVQFM`.
+
+### Gotchas
+- 🛠️ **Gotcha: in Claude in Chrome a hidden tab never hydrates streamed Suspense boundaries.** React queues the reveal (`<!--$~-->`, `window.$RB`) on `requestAnimationFrame`, which a hidden tab never fires, so client effects (operator names, compare toggles) never run. Not an app bug. Keep one tab, take a screenshot after each navigation, then test.
+- 🛠️ **Gotcha: Vercel CLI 50.26.1 env commands.** `vercel env rm NAME preview` deletes the whole record (Production too). `vercel env update NAME preview` writes every target. Non-interactive `vercel env add NAME preview` always stops with `git_branch_required`. `vercel link --yes` in a terminal pulls `.env.local`. Workarounds in `docs/STAGING.md`.
+- Env vars are fixed at build time. The dev alias reads production until the next `dev` deployment (the merge of PR #117).
+
+### Exact next step
+Ali signs in on the preview as operator A and admin, then decides on merging PR #117. After the merge the dev alias rebuilds against staging. Then fix the fire-and-forget emails (`docs/BACKLOG.md`) and verify on the dev alias.
+
+## §REL2 Release 2026-10-07 (PR #115, PR #116), 2026-10-07
+
+PR #115 (`/partner` founding operators copy) merged into `dev` as `e21e955`. PR #116 merged `dev` into `main` as `a4e7075`. Production deployment `dpl_C6wvCksUXATpod7GaWpNwABsVQFM` READY, built 09:08 UTC from `a4e7075`. Previous production deployment `dpl_37VRWgywt4AhiwteZyHz9UfwURjs` (`0c80db9`).
+
 ## §REL Release 2026-10-06 shipped to production, 2026-10-06
 
 **Status: DONE.** `main` is `0c80db9` (PR #112, dev into main, merged by Claude in Chrome). Production deployment `dpl_37VRWgywt4AhiwteZyHz9UfwURjs` is READY on `0c80db9`. Rollback target: `dpl_7njTU7yY4NuEBtHznKhJsrEx7VbM` (`1505dcd`). Runbook: `docs/release/RELEASE_2026-10-06.md`. SQL record: `supabase/migrations-pending/APPLIED.md`.

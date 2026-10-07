@@ -23,4 +23,9 @@ Logged after release 2026-10-06 shipped (`main` `0c80db9`).
 - **Page titles repeat the brand.** Some titles end in "| PilgrimCompare | PilgrimCompare".
 - **`/partner` trial wording.** It says "Free to list during the 90-day trial" while the founding cohort gets 12 months free. Copy decision for Ali.
 - **React #418 hydration error.** Seen once on the preview homepage, not reproduced. Watch for it in production logs.
-- **Vercel access.** The Vercel MCP and CLI need re-authenticating to the team scope to read deployments and runtime logs.
+- **Vercel access.** The Vercel MCP and CLI need re-authenticating to the team scope to read deployments and runtime logs. The CLI was re-authenticated on 2026-10-07 and reads deployments, env names and runtime logs. The MCP was not rechecked.
+
+## Batch 1 (found in B0, 2026-10-07)
+
+- **Email sends are fire-and-forget without `after()`. Fix before the first operator publishes.** `app/api/enquiries/route.ts`, `app/api/quote-requests/route.ts` and `app/api/booking-intents/route.ts` call `void send...()` and return the response straight away. On Vercel the function can stop once the response is sent. On the B0 preview, enquiry `PC-F4E2DB05` sent no email and logged nothing, and `PC-CD71B4EA` logged Resend `application_error` "Unable to fetch data". Production runs the same code. Fix: wrap each call in `after()` from `next/server`, then submit an enquiry on the dev alias and check `STAGING_EMAIL_TO`.
+- **Expired packages still list.** There is no expiry rule. Staging package 9 (operator A, August 2026) shows on `/search/packages`. Decide the rule (for example, hide a package once its return date has passed) and add it to `lib/listing.ts`.

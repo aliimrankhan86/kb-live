@@ -91,4 +91,6 @@ This is a snapshot. After finishing + verifying work, update sections **4 (state
 
 > 🛠️ **Gotcha: `tsc` fails with "Duplicate identifier" in `.next/types/* 2.ts`.** The worktree lives under `~/Documents`, and macOS/iCloud can drop `"name 2.ts"` copies into `.next`. It is not a code bug: `rm -rf .next` and rerun. Also: the real-DB suite's own stack (`supabase start --workdir e2e/local-db`) raises `email_sent` to 100/h, because the CLI default of 2/h fails the reset test on a second run.
 
+> 🛠️ **Gotcha: in Claude in Chrome a hidden tab never hydrates streamed Suspense boundaries.** React queues the reveal (`<!--$~-->`, `window.$RB`) on `requestAnimationFrame`, which a hidden tab never fires, so client effects (operator names, compare toggles) never run. Not an app bug. Keep one tab, take a screenshot after each navigation, then test.
+
 **Recurring-gotcha rule (for current + future AI sessions):** when a local issue is diagnosed as *expected behavior* rather than a bug (e.g. the dev-login `npm run dev` vs `npm start` gotcha in §5), record it once as a 🛠️ **Gotcha** note in the relevant section here **and** mirror it in `AI_NOTES.md` + `STATUS.md`. Treat the three docs as one synced set — if you add or change a gotcha in one, update the other two in the same pass. Do not spin up a separate notes file.
