@@ -4,6 +4,7 @@ import { appendFileSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { render } from '@react-email/components';
 import type { Package, QuoteRequest } from '@/lib/types';
+import { isProduction } from '@/lib/env';
 import EnquiryConfirmation from '@/emails/EnquiryConfirmation';
 import OperatorEnquiryAlert from '@/emails/OperatorEnquiryAlert';
 import BookingIntentConfirmation from '@/emails/BookingIntentConfirmation';
@@ -17,13 +18,7 @@ const SUPPORT_REPLY = 'support@pilgrimcompare.co.uk';
 type EmailMessage = { from: string; to: string | string[]; replyTo?: string; subject: string; html: string };
 type EmailSender = { emails: { send: (msg: EmailMessage) => Promise<{ error: unknown }> } };
 
-/**
- * Local-only log transport: when RESEND_API_KEY is unset, EMAIL_LOG_PATH is
- * set, and this is not a Vercel production deployment, messages are appended
- * to that file instead of being sent. Production behaviour is unchanged: no
- * key → throw (callers catch and log), so a misconfigured prod never "sends"
- * into a file silently.
- */
+/** Local-only log transport: appends each message to EMAIL_LOG_PATH. */
 function logTransport(path: string): EmailSender {
   return {
     emails: {
@@ -36,12 +31,47 @@ function logTransport(path: string): EmailSender {
   };
 }
 
+const recipients = (to: string | string[]) => [to].flat().join(', ');
+
+/** Non-production fallback: the email is logged to the server console, never sent. */
+const consoleTransport: EmailSender = {
+  emails: {
+    send: async ({ from, to, replyTo, subject }) => {
+      console.info('[email] not sent (non-production, STAGING_EMAIL_TO or RESEND_API_KEY unset)', {
+        from, to: recipients(to), replyTo, subject,
+      });
+      return { error: null };
+    },
+  },
+};
+
+/** Non-production: every message goes only to STAGING_EMAIL_TO, its subject naming the original recipient. */
+function stagingTransport(resend: EmailSender, stagingTo: string): EmailSender {
+  return {
+    emails: {
+      send: (msg) => resend.emails.send({ ...msg, to: stagingTo, subject: `[STAGING] to ${recipients(msg.to)}: ${msg.subject}` }),
+    },
+  };
+}
+
+/**
+ * Production (VERCEL_ENV=production): Resend, and no key throws (callers
+ * catch and log), so a misconfigured production never "sends" into a file.
+ * Everywhere else no real recipient is ever emailed: Resend to
+ * STAGING_EMAIL_TO when both it and the key are set, else EMAIL_LOG_PATH
+ * (local real-DB suite), else the server console.
+ */
 export function resendClient(): EmailSender {
   const key = process.env.RESEND_API_KEY;
-  if (key) return new Resend(key);
+  if (isProduction()) {
+    if (key) return new Resend(key);
+    throw new Error('RESEND_API_KEY is not set');
+  }
+  const stagingTo = process.env.STAGING_EMAIL_TO;
+  if (key && stagingTo) return stagingTransport(new Resend(key), stagingTo);
   const logPath = process.env.EMAIL_LOG_PATH;
-  if (logPath && process.env.VERCEL_ENV !== 'production') return logTransport(logPath);
-  throw new Error('RESEND_API_KEY is not set');
+  if (logPath) return logTransport(logPath);
+  return consoleTransport;
 }
 
 export type SimilarPackage = Pick<Package, 'title' | 'slug' | 'pricePerPerson' | 'currency' | 'totalNights'>;

@@ -3,11 +3,16 @@
 > **Single rolling tracker.** Any AI/dev: read this for current state. Update it after work is **done + tested + verified** (see `CLAUDE.md` rule).
 > Detailed handover lives in `AI_NOTES.md`. Cold-start brief: `HANDOFF.md`. Business: `BUSINESS.md`.
 
-**Last verified:** 2026-06-17 (admin promotion `aliimrankhan86@gmail.com` → admin in prod; demo-data cleanup done — 0 operators/packages/enquiries; Ziyarat #101 + hide-wizard #102 on dev) · **Branch:** `dev` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
+**Last verified:** 2026-10-07 (B0 staging environment, PR #117 into `dev`, not merged. Production `main` `a4e7075`) · **Branch:** `feat/staging-env` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
 
 > **Direction:** `PILGRIMCOMPARE_PROJECT_DIRECTION.md` (repo root) is now the source of truth — read first every session. Parked features tracked in `PARKED_FEATURES.md`.
 
 ---
+
+> **2026-10-07 B0 staging environment (PR #117, `feat/staging-env` into `dev`, CI green, not merged):** every Vercel Preview now uses the fictional Supabase project `pilgrimcompare-staging` (`fkcudutzgltrsoykfvfn`), not production. Outside production: test-site banner, `noindex` header and `robots.txt` `Disallow: /`, email only to `STAGING_EMAIL_TO` with a `[STAGING] to <recipient>` subject. `npm run seed:staging` loads 6 fictional operators and 34 packages and refuses production. Preview env split done by PATCHing only the target of 10 shared records (Production records kept ids and values). Preview checks: banner, listing (29 shown, draft and operators E and F hidden), detail and compare pass. Enquiry email NOT delivered (see `docs/BACKLOG.md`, fire-and-forget sends). Sign-in through the preview form left for Ali. Vitest 2,127 (66 files) · Playwright 69/6/0 · real-DB 25/25. Guide `docs/STAGING.md`, detail `AI_NOTES.md` §B0.
+> 🛠️ **Gotcha: in Claude in Chrome a hidden tab never hydrates streamed Suspense boundaries.** React queues the reveal (`<!--$~-->`, `window.$RB`) on `requestAnimationFrame`, which a hidden tab never fires, so client effects (operator names, compare toggles) never run. Not an app bug. Keep one tab, take a screenshot after each navigation, then test.
+
+> **2026-10-07 release (production):** PR #115 (`/partner` founding operators copy, `dev` `e21e955`) and PR #116 (`dev` into `main`) merged. `main` is `a4e7075`. Production deployment `dpl_C6wvCksUXATpod7GaWpNwABsVQFM` READY (built 09:08 UTC). Previous production deployment `dpl_37VRWgywt4AhiwteZyHz9UfwURjs` (`0c80db9`). `/` and `/partner` 200.
 
 > **2026-10-06 release DONE (production):** `main` is `0c80db9` (PR #112). Production deployment `dpl_37VRWgywt4AhiwteZyHz9UfwURjs` READY. Rollback target `dpl_7njTU7yY4NuEBtHznKhJsrEx7VbM` (`1505dcd`). Ships PRs #108, #109, #110 and #111. Production SQL: 013 PRE-DEPLOY (Step A) and 014 POST-DEPLOY (Step B, check 0 rows, query 1 now 34 PASS and 0 FAIL, was 30 FAIL), both run by Claude in Chrome on Ali's instruction, recorded in `supabase/migrations-pending/APPLIED.md`. Smoke: 1, 2, 5, 6, 7, 8 pass. 3 returns 200 with 0 packages, which is data, not a regression (production showed 0 packages on `1505dcd` before the release). 4 and 9 not runnable until a verified operator publishes a package. 10 (cron log line after 03:00 UTC) pending. Post-release items in `docs/BACKLOG.md`. Detail `AI_NOTES.md` §REL.
 
@@ -18,15 +23,16 @@
 
 > **2026-10-06 QA run (branch `fix/overnight-qa`, PR into dev, not merged; two green gates incl. clean verification):** reported search/tab mismatch fixed (shared query layer); operator portal no longer uses browser MockDB; open redirects closed; JSON-LD/package-page/partner truth fixes. Vitest 2,047 · Playwright 69/6/0 · real-DB 24/24 · tsc ✅ · build ✅. Founder decisions applied (verified-only, three-state inclusions, migration 013 pending, registered office unset). Report: `docs/uat/OVERNIGHT_REPORT.md`; detail `AI_NOTES.md` §OQ1.
 
-## Health (verified 2026-06-17)
+## Health (verified 2026-10-07)
 
 | Check | State |
 | --- | --- |
-| `npm run test` | ✅ 1,869/1,869 pass (32 files) |
+| `npm run test` | ✅ 2,127/2,127 pass (66 files) |
 | `npm run build` | ✅ 0 errors |
 | `npx tsc --noEmit` | ✅ pass |
 | E2E | ✅ cookie-banner click-intercept flake fixed 2026-06-15 (`feature/fix-cookie-banner-e2e-flake`, AI_NOTES §Cookie-banner E2E flake fix). `catalogue`/`operator`/`bank-payment` 45/45 × 3 serial runs (chromium+firefox+webkit). |
-| Production deploy | ✅ main — Vercel live 2026-06-13 (light theme + search + pagination) |
+| Production deploy | ✅ `main` `a4e7075`, `dpl_C6wvCksUXATpod7GaWpNwABsVQFM`, 2026-10-07 |
+| Staging | ✅ Preview uses `pilgrimcompare-staging` (`fkcudutzgltrsoykfvfn`), `docs/STAGING.md` |
 | Light theme | ✅ merged to dev + main 2026-06-13 |
 
 ---

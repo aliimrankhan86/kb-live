@@ -1,5 +1,6 @@
 import path from "node:path";
 import type { NextConfig } from "next";
+import { isProduction } from "./lib/env";
 
 const dbAdapterPath = path.resolve(process.cwd(), 'lib/api/db/adapter.ts');
 const dbAdapterClientStubPath = './lib/api/db/client-adapter-stub.ts';
@@ -72,6 +73,8 @@ const nextConfig: NextConfig = {
             // Note: remove 'preload' once HSTS preload list application is submitted
             value: 'max-age=63072000; includeSubDomains',
           },
+          // Previews and local builds are the fictional test site: never indexed.
+          ...(isProduction() ? [] : [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }]),
         ],
       },
     ];

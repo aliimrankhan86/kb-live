@@ -4,6 +4,7 @@ import { baseMetadata } from "@/lib/seo";
 import { exo2Font } from "@/lib/fonts";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { StagingBanner } from "@/components/layout/StagingBanner";
 import { CookieConsent } from "@/components/compliance/CookieConsent";
 import { JsonLdScript, graphJsonLd, organizationJsonLd, websiteJsonLd } from "@/lib/seo/json-ld";
 import { Repository } from "@/lib/api/repository";
@@ -54,6 +55,7 @@ export default async function RootLayout({
         />
       </head>
       <body className="antialiased min-h-screen flex flex-col">
+        <StagingBanner />
         <JsonLdScript data={siteJsonLd} />
         <a
           href="#main-content"

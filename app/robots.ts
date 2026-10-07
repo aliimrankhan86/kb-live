@@ -1,10 +1,13 @@
 import type { MetadataRoute } from 'next'
+import { isProduction } from '@/lib/env'
 
 // Private and parked areas. A crawler that matches a named group ignores the
 // '*' group, so every group must repeat these.
 export const PRIVATE_PATHS = ['/quote', '/requests', '/operator', '/admin', '/settings', '/showcase', '/reset-password', '/api/']
 
 export default function robots(): MetadataRoute.Robots {
+  // Previews and local builds are the fictional test site: keep every crawler out.
+  if (!isProduction()) return { rules: [{ userAgent: '*', disallow: '/' }] }
   return {
     rules: [
       {
