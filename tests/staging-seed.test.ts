@@ -59,6 +59,7 @@ describe('staging seed guard', () => {
   it('loads no env file and keeps account passwords out of git', () => {
     const src = readFileSync('scripts/seed-staging.mjs', 'utf8');
     expect(src).not.toMatch(/from 'dotenv'|readFileSync\('\.env/);
+    expect(src).not.toMatch(/rejectUnauthorized/);
     expect(readFileSync('.gitignore', 'utf8')).toContain(`/${ACCOUNTS_FILE}`);
     expect(readFileSync('scripts/seed-staging-data.mjs', 'utf8')).not.toMatch(/password\s*:/i);
   });

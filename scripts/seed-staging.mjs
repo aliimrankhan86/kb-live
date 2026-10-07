@@ -334,7 +334,8 @@ async function main() {
   const accountIds = await upsertAccounts(supabase);
   const imageUrls = await uploadImages(baseUrl, key);
 
-  const client = new pg.Client({ connectionString: databaseUrl(ref, poolerHost), ssl: { rejectUnauthorized: false } });
+  // Supabase Root 2021 CA (public certificate published by Supabase) verifies the pooler's TLS certificate.
+  const client = new pg.Client({ connectionString: databaseUrl(ref, poolerHost), ssl: { ca: readFileSync(new URL('./supabase-root-2021-ca.crt', import.meta.url), 'utf8') } });
   await client.connect();
   try {
     await client.query('BEGIN');
