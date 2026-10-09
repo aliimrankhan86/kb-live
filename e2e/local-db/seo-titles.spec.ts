@@ -37,3 +37,25 @@ test('search has one h1, list pages keep the silhouette out from behind text, op
   await page.goto('/signup?type=operator')
   await expect(page).toHaveURL(/\/partner$/)
 })
+
+// Batch 3 item 1: an unknown slug or an unpublished package was a soft 404
+// (HTTP 200, robots "index, follow"). Departed and published pages are unchanged.
+test('an unknown or unpublished package URL is a real 404 with noindex', async ({ page, request }) => {
+  const robots = (html: string) => [...html.matchAll(/<meta name="robots" content="([^"]*)"/g)].map((m) => m[1])
+  for (const path of ['/packages/does-not-exist', '/packages/local-test-14']) { // 14 is the seeded draft
+    const res = await request.get(path)
+    expect(res.status(), path).toBe(404)
+    const tags = robots(await res.text())
+    expect(tags.length, path).toBeGreaterThan(0)
+    for (const tag of tags) expect(tag, path).toMatch(/noindex/)
+    await page.goto(path)
+    await expect(page.getByTestId('package-not-found')).toContainText('This package is no longer available.')
+    await expect(page.getByRole('alert').filter({ hasText: 'Package not found' })).toBeVisible()
+  }
+  const departed = await request.get('/packages/local-test-16')
+  expect(departed.status()).toBe(200)
+  expect(robots(await departed.text())).toContain('noindex, follow')
+  const live = await request.get('/packages/local-test-01')
+  expect(live.status()).toBe(200)
+  expect(robots(await live.text()).join()).not.toMatch(/noindex/)
+})
