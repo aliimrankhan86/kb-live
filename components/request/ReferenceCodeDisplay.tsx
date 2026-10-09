@@ -16,7 +16,7 @@ export function ReferenceCodeDisplay({ referenceCode, operatorName }: ReferenceC
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Clipboard API unavailable — silent fail; code is still visible on screen
+      // Clipboard API unavailable: silent fail; code is still visible on screen
     }
   };
 

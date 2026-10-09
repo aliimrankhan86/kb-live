@@ -15,7 +15,7 @@ export interface SessionUser {
  * Returns null if no session or invalid token.
  */
 export async function getSessionUser(): Promise<SessionUser | null> {
-  // E2E test bypass — only active when E2E_TESTING=1 (set by playwright webServer env).
+  // E2E test bypass: only active when E2E_TESTING=1 (set by playwright webServer env).
   if (process.env.E2E_TESTING === '1') {
     try {
       const cookieStore = await cookies();

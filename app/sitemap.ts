@@ -12,7 +12,7 @@ const CITY_CORRIDORS: { city: string; path: string }[] = [
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // Static pages — always index
+  // Static pages: always index
   const staticPages: MetadataRoute.Sitemap = [
     { url: `${baseUrl}/`, lastModified: new Date(), changeFrequency: 'weekly', priority: 1.0 },
     { url: `${baseUrl}/umrah`, lastModified: new Date(), changeFrequency: 'weekly', priority: 1.0 },
@@ -27,7 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/terms`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
   ];
 
-  // City corridor pages — only include when live packages exist for that departure city
+  // City corridor pages: only include when live packages exist for that departure city
   let corridorPages: MetadataRoute.Sitemap = [];
   try {
     const activeCities = await Repository.getDistinctDepartureCities();
@@ -40,7 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.9,
       }));
   } catch {
-    // DB unavailable — omit corridor pages rather than include zero-supply ones
+    // DB unavailable: omit corridor pages rather than include zero-supply ones
   }
 
   // Published packages
@@ -56,7 +56,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.8,
       }));
   } catch {
-    // DB unavailable — skip dynamic pages
+    // DB unavailable: skip dynamic pages
   }
 
   // Verified operators
@@ -72,7 +72,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.7,
       }));
   } catch {
-    // DB unavailable — skip dynamic pages
+    // DB unavailable: skip dynamic pages
   }
 
   return [...staticPages, ...corridorPages, ...packagePages, ...operatorPages];

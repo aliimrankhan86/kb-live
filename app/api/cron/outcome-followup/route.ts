@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
     const tenDaysAgo = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000);
 
-    // Booking intents 10–14 days old with no outcome and followup not yet sent.
+    // Booking intents 10 to 14 days old with no outcome and followup not yet sent.
     const pending = await prisma.bookingIntent.findMany({
       where: {
         createdAt: { gte: fourteenDaysAgo, lte: tenDaysAgo },

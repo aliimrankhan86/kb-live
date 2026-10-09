@@ -2,7 +2,7 @@
  * Rate limiter for auth API routes.
  *
  * Production: Upstash Redis sliding-window (requires UPSTASH_REDIS_REST_URL +
- * UPSTASH_REDIS_REST_TOKEN env vars — add to Vercel dashboard before launch).
+ * UPSTASH_REDIS_REST_TOKEN env vars: add to Vercel dashboard before launch).
  *
  * Dev / missing env: falls back to in-memory Map. In-memory resets on cold
  * start and is not safe for production serverless. See .clinerules §11.5.

@@ -62,7 +62,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
   const priceFormatted = formatStatedPrice(pkg.price, pkg.currency)
 
   const renderStars = (rating: number | null, label: string) => {
-    // Operator has not supplied a star rating — state that honestly rather than
+    // Operator has not supplied a star rating: state that honestly rather than
     // rendering a fabricated default. (Data-integrity rule: missing = Not provided.)
     if (rating == null) {
       return (
@@ -181,7 +181,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
       </div>
 
       <div className={styles.cardBody}>
-        {/* Price first — this is what people compare on */}
+        {/* Price first: this is what people compare on */}
         <div className={styles.priceBlock}>
           <div className={styles.priceLead}>
             {priceType === 'from' && <span className={styles.priceFrom}>from</span>}
@@ -216,7 +216,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
           </div>
         )}
 
-        {/* Hotels — compact rows with thumbnails */}
+        {/* Hotels: compact rows with thumbnails */}
         <div className={styles.hotels}>
           {hotelRow(pkg.makkahHotel, makkahImgSrc, () => setMakkahImgSrc(''))}
           {hotelRow(pkg.madinaHotel, madinaImgSrc, () => setMadinaImgSrc(''))}

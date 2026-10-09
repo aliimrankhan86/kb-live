@@ -220,7 +220,7 @@ export default function HowWeRankPage() {
             </p>
           </section>
 
-          {/* Verification statement — verbatim from §7 of standards doc */}
+          {/* Verification statement: verbatim from §7 of standards doc */}
           <section className="mb-10" aria-labelledby="verification-heading">
             <h2
               id="verification-heading"

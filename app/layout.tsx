@@ -32,14 +32,14 @@ export default async function RootLayout({
   try {
     departureCities = await Repository.getDistinctDepartureCities();
   } catch {
-    // DB unavailable — footer renders without city links
+    // DB unavailable: footer renders without city links
   }
 
   // Nonce set by middleware CSP. The inline theme script below must carry it,
   // otherwise the strict 'script-src' nonce policy blocks it (no 'unsafe-inline').
   const nonce = (await headers()).get("x-nonce") ?? undefined;
 
-  // PARKED: RFQ quote engine — hide /quote entry links in global nav when off.
+  // PARKED: RFQ quote engine: hide /quote entry links in global nav when off.
   // See PARKED_FEATURES.md entry 2. Evaluated server-side, passed as a prop.
   const rfqEnabled = isRfqQuoteEnabled();
 
@@ -72,7 +72,7 @@ export default async function RootLayout({
           <CookieConsent />
         </ThemeProvider>
         {/*
-          Vercel Web Analytics — cookieless, privacy-friendly (no consent banner
+          Vercel Web Analytics: cookieless, privacy-friendly (no consent banner
           needed). Script + beacon are same-origin (/_vercel/insights/*), so the
           strict CSP needs no external allowance: 'self' covers the src'd script
           (nonces are only required for inline scripts). Auto-disabled outside

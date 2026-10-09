@@ -30,7 +30,7 @@ function includedText(pkg: Package): string {
 
 /**
  * A small, real side-by-side so a visitor can see what comparing looks like.
- * LIVE DATA ONLY — renders nothing unless at least two real published packages
+ * LIVE DATA ONLY: renders nothing unless at least two real published packages
  * exist. Never fabricates packages, prices, operators, or counts.
  */
 export function ComparePreview({ packages }: ComparePreviewProps) {

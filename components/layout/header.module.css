@@ -1,4 +1,4 @@
-/* Header Component Styles — Mobile-first, touch-optimised */
+/* Header Component Styles: Mobile-first, touch-optimised */
 .header {
   position: sticky;
   top: 0;
@@ -41,7 +41,7 @@
   border-radius: 0.25rem;
 }
 
-/* Wordmark colour token — change this one variable for any theme */
+/* Wordmark colour token: change this one variable for any theme */
 .header__textLogo,
 .header__textLogoMobile {
   display: block;
@@ -63,12 +63,12 @@
   }
 }
 
-/* Desktop Navigation — hidden on mobile */
+/* Desktop Navigation: hidden on mobile */
 .header__desktopNav {
   display: none;
 }
 
-/* Hamburger button — visible on mobile */
+/* Hamburger button: visible on mobile */
 .header__hamburger {
   display: flex;
   align-items: center;
@@ -233,7 +233,7 @@
   border-left-color: var(--primary) !important;
 }
 
-/* "Get a Quote" — yellow CTA button in mobile nav */
+/* "Get a Quote": yellow CTA button in mobile nav */
 .header__mobileNavQuoteCta {
   display: flex;
   align-items: center;
@@ -301,7 +301,7 @@
   gap: 0.75rem;
 }
 
-/* Danger link — Log out */
+/* Danger link: Log out */
 .header__mobileNavLinkDanger {
   display: flex;
   align-items: center;

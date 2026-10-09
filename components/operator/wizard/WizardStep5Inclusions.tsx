@@ -23,7 +23,7 @@ const ROOM_OPTIONS: { key: keyof NonNullable<Package['roomOccupancyOptions']>; l
 ];
 
 // Ziyarat is operator-stated and three-state. 'Not specified' (value: undefined)
-// is the starting state with no painted default — a skipped value persists as
+// is the starting state with no painted default: a skipped value persists as
 // unset (→ "Not provided"), never coerced to false. Mirrors the groupType radio.
 const ZIYARAT_OPTIONS: { value: boolean | undefined; key: string; label: string; description: string }[] = [
   { value: undefined, key: 'unspecified', label: 'Not specified', description: 'Leave blank. Shown to pilgrims as "Not provided".' },
@@ -107,7 +107,7 @@ export function WizardStep5Inclusions({ data, onChange, error }: Props) {
         </div>
       </div>
 
-      {/* Ziyarat — operator-stated, three-state (Included / Not included / leave blank) */}
+      {/* Ziyarat: operator-stated, three-state (Included / Not included / leave blank) */}
       <div>
         <h3 className="mb-3 text-sm font-semibold text-[var(--text)] uppercase tracking-wide">Ziyarat tours</h3>
         <div className="space-y-2">

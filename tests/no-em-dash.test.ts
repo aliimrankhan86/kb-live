@@ -3,28 +3,30 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 // Standards §11: no em dashes in user-facing copy, and (batch 1) no en dashes
-// either: ranges read "1 to 2". Comment lines are ignored.
+// either: ranges read "1 to 2". Batch 3: comments too, and the demo seed data
+// that renders on a page when used (prisma/seed.ts, supabase/seed.sql).
 const walk = (dir: string): string[] =>
-  readdirSync(dir).flatMap((name) => {
-    const full = join(dir, name);
-    return statSync(full).isDirectory() ? walk(full) : /\.tsx?$/.test(name) ? [full] : [];
-  });
+  dir === join('lib', 'generated') // Prisma output, gitignored and regenerated
+    ? []
+    : readdirSync(dir).flatMap((name) => {
+        const full = join(dir, name);
+        return statSync(full).isDirectory() ? walk(full) : /\.(tsx?|css|sql|mjs|json)$/.test(name) ? [full] : [];
+      });
 
-const isComment = (line: string) => /^\s*(\/\/|\/?\*|\{\s*\/\*)/.test(line);
+const FILES = [
+  ...['app', 'components', 'emails', 'lib', 'hooks', 'styles'].flatMap(walk),
+  'middleware.ts', 'next.config.ts', 'prisma.config.ts', 'prisma/seed.ts', 'supabase/seed.sql',
+];
 
-describe('no em or en dashes in user-facing source', () => {
-  it('app, components, emails and lib', () => {
+describe('no em or en dashes in shipped source', () => {
+  it('copy, comments and demo seed data', () => {
     const hits: string[] = [];
-    let inBlock = false;
-    for (const f of [...walk('app'), ...walk('components'), ...walk('emails'), ...walk('lib')]) {
+    for (const f of FILES) {
       readFileSync(f, 'utf8').split('\n').forEach((line, i) => {
-        if (line.includes('/*') && !line.includes('*/')) inBlock = true;
-        const skip = inBlock || isComment(line);
-        if (line.includes('*/')) inBlock = false;
-        const code = line.replace(/\/\/.*$/, '').replace(/\{\/\*.*?\*\/\}/g, '').replace(/\/\*.*?\*\//g, '');
-        if (!skip && /[—–]/.test(code)) hits.push(`${f}:${i + 1}`);
+        if (/[—–]/.test(line)) hits.push(`${f}:${i + 1}: ${line.trim()}`);
       });
     }
+    expect(FILES.length).toBeGreaterThan(250);
     expect(hits).toEqual([]);
   });
 });

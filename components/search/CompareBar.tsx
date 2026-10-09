@@ -23,7 +23,7 @@ interface CompareBarProps {
 /**
  * Sticky bottom bar that anchors the "compare-first" flow. It only appears once
  * the traveller has selected at least one package, and tells them in plain words
- * exactly what to do next (pick 2–3, then compare).
+ * exactly what to do next (pick 2 to 3, then compare).
  */
 export const CompareBar: React.FC<CompareBarProps> = ({
   items,

@@ -10,7 +10,7 @@ export default defineConfig({
   datasource: {
     // DIRECT_URL (port 5432) used for all CLI operations (db push, migrate, db pull).
     // pgBouncer pooler (port 6543) blocks advisory locks and prepared statements in the
-    // schema engine — CLI must bypass it. Runtime PrismaClient reads DATABASE_URL from env.
+    // schema engine: CLI must bypass it. Runtime PrismaClient reads DATABASE_URL from env.
     url: process.env["DIRECT_URL"],
   } as { url?: string },
 });

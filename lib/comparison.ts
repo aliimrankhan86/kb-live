@@ -82,7 +82,7 @@ export function mapOfferToComparison(offer: Offer, operator?: OperatorProfile): 
     hotelStarsValue: offer.hotelStars ?? null,
     distanceValue: distanceKm != null ? distanceKm * 1000 : null,
     inclusionsCount: inclusionsList.length,
-    // Offers don't carry these fields — shown as 'Not provided' in the grid.
+    // Offers don't carry these fields: shown as 'Not provided' in the grid.
     flights: 'Not provided',
     deposit: 'Not provided',
     paymentPlan: 'Not provided',

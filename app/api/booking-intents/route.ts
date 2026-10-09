@@ -105,7 +105,7 @@ async function sendBookingEmails(
       ? (operator.tradingName ?? operator.companyName)
       : 'the operator';
 
-    // Email 4 — booking intent confirmation to customer.
+    // Email 4: booking intent confirmation to customer.
     await sendBookingIntentConfirmation({
       customerEmail,
       customerName: customerName || 'Pilgrim',
@@ -114,7 +114,7 @@ async function sendBookingEmails(
       refCode: intent.referenceCode ?? intent.id,
     });
 
-    // Email 5 — payment evidence notification to operator (only when evidence included).
+    // Email 5: payment evidence notification to operator (only when evidence included).
     if (hasEvidence && operator) {
       await sendPaymentEvidenceNotification({
         operatorEmail: operator.contactEmail,

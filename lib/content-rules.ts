@@ -13,7 +13,7 @@
  * Each entry is a lowercase substring. The test matches case-insensitively.
  */
 export const BANNED_METADATA_PHRASES: string[] = [
-  // §5 — banned phrases and required replacements
+  // §5: banned phrases and required replacements
   'book with pilgrimcompare',
   'book now',
   'guaranteed',
@@ -36,24 +36,24 @@ export const BANNED_METADATA_PHRASES: string[] = [
   '#1',
   'official',
   'approved by',
-  // §5 — "ATOL protected" as a blanket PilgrimCompare claim
+  // §5: "ATOL protected" as a blanket PilgrimCompare claim
   'atol protected',
-  // §11 — hype adjectives
+  // §11: hype adjectives
   'unforgettable',
   'seamless',
   'ultimate',
   'unbeatable',
   'amazing',
-  // §5 — "partner" to describe operators
+  // §5: "partner" to describe operators
   'pilgrimcompare partners',
-  // §14 — booking language implying PilgrimCompare concludes bookings
+  // §14: booking language implying PilgrimCompare concludes bookings
   'book your umrah',
   'book your hajj',
   'confirm your booking',
 ]
 
 /**
- * Neutral sort disclosure string — used on all package list/search pages
+ * Neutral sort disclosure string: used on all package list/search pages
  * as required by DMCC Act 2024 Schedule 20 and §16 of the standards doc.
  *
  * Place near the sort control. Link to a "How we rank" explainer when built.
@@ -62,7 +62,7 @@ export const NEUTRAL_SORT_DISCLOSURE =
   'Sorted by relevance and listing quality. No operator pays for ranking.'
 
 /**
- * Verification statement — the approved §7 wording, verbatim.
+ * Verification statement: the approved §7 wording, verbatim.
  *
  * Single source of truth so the statement reads identically everywhere the
  * "Verified" badge links or expands to it (§7 requires consistency). Reference
@@ -89,13 +89,13 @@ export const MODEL_DESCRIPTION =
 
 /**
  * §4 standard copy line carried on the homepage trust block.
- * Verbatim — do not paraphrase.
+ * Verbatim: do not paraphrase.
  */
 export const PAYMENT_STANDARD_LINE =
   'You pay the operator directly. PilgrimCompare does not receive or hold your payment.'
 
 /**
- * §4 standard copy lines 2 and 3. Verbatim — do not paraphrase.
+ * §4 standard copy lines 2 and 3. Verbatim: do not paraphrase.
  * Shown with PAYMENT_STANDARD_LINE on the enquiry confirmation screen.
  */
 export const CONTRACT_STANDARD_LINE =
@@ -113,7 +113,7 @@ export const REFERENCE_CODE_STANDARD_LINE =
 
 /**
  * The three canonical payment-posture lines, in order. Single source for the
- * enquiry confirmation screen. Verbatim — do not paraphrase or reorder.
+ * enquiry confirmation screen. Verbatim: do not paraphrase or reorder.
  */
 export const PAYMENT_POSTURE_LINES = [
   PAYMENT_STANDARD_LINE,
@@ -122,7 +122,7 @@ export const PAYMENT_POSTURE_LINES = [
 ] as const
 
 /**
- * Homepage FAQ — defined once and fed to BOTH the FAQPage JSON-LD and the
+ * Homepage FAQ: defined once and fed to BOTH the FAQPage JSON-LD and the
  * visible on-page FAQ section, so the structured data is never orphaned.
  */
 export const HOME_FAQS: { question: string; answer: string }[] = [

@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 /**
  * Creates a Supabase client for server-side usage (Server Components, Server Actions).
  * Reads session cookies for authenticated requests.
- * Uses the anon key — never the service role key in client-facing code.
+ * Uses the anon key: never the service role key in client-facing code.
  */
 export async function createClient() {
   const cookieStore = await cookies();

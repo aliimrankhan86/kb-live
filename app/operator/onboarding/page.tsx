@@ -10,7 +10,7 @@ export const metadata = {
 };
 
 export default function OperatorOnboardingPage() {
-  // PARKED: self-serve operator onboarding. The concierge model is live —
+  // PARKED: self-serve operator onboarding. The concierge model is live:
   // operators are onboarded by the PilgrimCompare team, not via this form.
   // See PARKED_FEATURES.md entry 3. Code intact; flag default OFF.
   if (!isOperatorSelfServeEnabled()) notFound();

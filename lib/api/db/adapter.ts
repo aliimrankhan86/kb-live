@@ -43,7 +43,7 @@ const dToNum = (d: Decimal | null | undefined): number | undefined =>
 const dateOrNow = (d?: string | Date | null): Date =>
   d ? (d instanceof Date ? d : new Date(d)) : new Date();
 
-// Prisma 7 strict JSON typing — cast JSON values through unknown
+// Prisma 7 strict JSON typing: cast JSON values through unknown
 const pj = (v: unknown) => v as unknown as never;
 
 // ─── Mappers: Prisma → App Types ─────────────────────────────────────
@@ -657,7 +657,7 @@ export const DBAdapter = {
     return outcome;
   },
 
-  // Enquiries (canonical pilgrim enquiry — Task 2)
+  // Enquiries (canonical pilgrim enquiry: Task 2)
   getEnquiries: async (): Promise<Enquiry[]> =>
     (await prisma.enquiry.findMany()).map(mapEnquiry),
 

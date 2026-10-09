@@ -48,7 +48,7 @@ const VALIDATORS: ((data: Partial<Package>) => string | null)[] = [
 // ─── Defaults ─────────────────────────────────────────────────────────────────
 
 // Only fields the operator cannot meaningfully "skip" are seeded. Hotel stars,
-// distance band, and group type are deliberately NOT seeded — a skipped value
+// distance band, and group type are deliberately NOT seeded: a skipped value
 // must persist as genuinely unset (→ "Not provided"), never a painted default.
 // (Inclusions keep all-false: the safe, non-over-claiming direction. See AI_NOTES §28.)
 const DEFAULT_DATA: Partial<Package> = {
@@ -264,7 +264,7 @@ export function PackageWizard({ initialData, onSuccess, onCancel }: Props) {
         )}
       </div>
 
-      {/* Navigation footer — hidden on final review step (Step 8 has its own buttons) */}
+      {/* Navigation footer: hidden on final review step (Step 8 has its own buttons) */}
       {step < 7 && (
         <div className="flex items-center justify-between gap-3 border-t border-[rgba(255,255,255,0.08)] pt-5">
           <button

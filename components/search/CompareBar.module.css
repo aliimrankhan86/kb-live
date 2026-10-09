@@ -1,4 +1,4 @@
-/* Sticky compare bar — anchors the compare-first flow on every viewport. */
+/* Sticky compare bar: anchors the compare-first flow on every viewport. */
 
 .wrap {
   position: fixed;
@@ -142,7 +142,7 @@
   align-items: center;
   gap: 0.5rem;
   flex-shrink: 0;
-  /* Mobile: full-width row at the bottom — fixed home for the primary action. */
+  /* Mobile: full-width row at the bottom: fixed home for the primary action. */
   order: 3;
   width: 100%;
 }
@@ -224,7 +224,7 @@
   background: color-mix(in srgb, var(--text) 12%, transparent);
 }
 
-/* Wider screens: one stable row that never wraps — info | chips lane | actions.
+/* Wider screens: one stable row that never wraps: info | chips lane | actions.
    The chips lane absorbs all the flex and scrolls if needed, so the Compare
    button stays pinned to the right regardless of how many are selected. */
 @media (min-width: 720px) {
@@ -243,7 +243,7 @@
     flex-wrap: nowrap;
     overflow-x: auto;
     justify-content: flex-start;
-    /* Keep the lane quiet — no visible scrollbar chrome for 2–3 chips. */
+    /* Keep the lane quiet: no visible scrollbar chrome for 2 to 3 chips. */
     scrollbar-width: none;
   }
   .chips::-webkit-scrollbar {

@@ -8,7 +8,7 @@ import { track } from '@vercel/analytics'
 
 /**
  * Read-only summary of the package being enquired about. Pulled from the package
- * data on the server — the form must NOT re-ask any of this (trip type, airport,
+ * data on the server: the form must NOT re-ask any of this (trip type, airport,
  * duration, hotel rating, budget). Shown so the pilgrim can confirm what they are
  * enquiring about. "Not provided" for anything the package does not state.
  */
@@ -75,7 +75,7 @@ export function EnquiryForm({ summary, packageSlug }: EnquiryFormProps) {
       setReferenceCode(data.referenceCode)
       // Fire the single 'Enquiry Submitted' Vercel Web Analytics custom event
       // exactly once, on the confirmed PC- enquiry. Auto-no-ops outside
-      // production. This is the client-side conversion COUNT — not the Task 4
+      // production. This is the client-side conversion COUNT: not the Task 4
       // server-side lead log.
       track('Enquiry Submitted')
     } catch {
@@ -227,7 +227,7 @@ export function EnquiryForm({ summary, packageSlug }: EnquiryFormProps) {
         </Field>
 
         {/* Task 3: separate, OPTIONAL, unticked-by-default marketing opt-in.
-            Persisted only when ticked AND an email is given — never blocks the enquiry. */}
+            Persisted only when ticked AND an email is given: never blocks the enquiry. */}
         <label htmlFor="enquiry-marketing-consent" className="flex items-start gap-3 rounded-lg border border-[var(--border)] p-4">
           <input
             id="enquiry-marketing-consent"

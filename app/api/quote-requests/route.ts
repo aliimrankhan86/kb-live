@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
-  // Rate limiting — throttle by IP to prevent burst abuse. Scoped separately from auth + interest budgets.
+  // Rate limiting: throttle by IP to prevent burst abuse. Scoped separately from auth + interest budgets.
   const rateLimit = await checkRateLimit(getRateLimitIdentifier(request, 'quote'));
   if (rateLimit.limited) {
     return NextResponse.json(
@@ -162,7 +162,7 @@ async function sendQuoteEmails(
     const allPublished = await Repository.listPackages();
     const similar = findSimilarPackages(allPublished, saved);
 
-    // Email 2 — customer confirmation.
+    // Email 2: customer confirmation.
     await sendEnquiryConfirmation({
       customerEmail,
       customerName: customerName || 'Pilgrim',
@@ -172,7 +172,7 @@ async function sendQuoteEmails(
       similarPackages: similar,
     });
 
-    // Email 3 — operator alert (only when enquiry targets a specific operator).
+    // Email 3: operator alert (only when enquiry targets a specific operator).
     if (operatorEmail) {
       const { occupancy, dateWindow, notes } = saved;
       const totalPeople =

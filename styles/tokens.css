@@ -25,7 +25,7 @@
   --spaceLg: 1.5rem;
   --shadowSoft: 0 10px 24px rgba(0, 0, 0, 0.3);
 
-  /* Semantic colour tokens — dark defaults (consumed by light-theme components and Step 6 replacements) */
+  /* Semantic colour tokens: dark defaults (consumed by light-theme components and Step 6 replacements) */
   --color-surface: #111111;
   --color-surface-subtle: #1A1A1A;
   --color-border-subtle: rgba(255, 255, 255, 0.14);
@@ -43,7 +43,7 @@
   --color-error: #EF4444;
   --color-info: #38BDF8;
 
-  /* Header / nav tokens — theme-aware */
+  /* Header / nav tokens: theme-aware */
   --color-header-surface: rgba(11, 11, 11, 0.95);
   --color-header-border: rgba(255, 255, 255, 0.08);
   --color-nav-hover: rgba(255, 255, 255, 0.05);

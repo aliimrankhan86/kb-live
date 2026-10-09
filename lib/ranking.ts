@@ -9,9 +9,9 @@ import type { Package } from '@/lib/types';
  * HOW THE SCORE WORKS (plain English):
  *
  *   1. DATA COMPLETENESS (45%)
- *      A listing with more filled-in details — hotel names, airline, exact
+ *      A listing with more filled-in details: hotel names, airline, exact
  *      distance to Haram, cancellation policy, deposit terms, group type,
- *      highlights, travel dates — is more useful to someone comparing side
+ *      highlights, travel dates: is more useful to someone comparing side
  *      by side. Score = fraction of 16 optional fields that are filled in
  *      (0 = nothing filled; 1 = everything filled).
  *
@@ -22,11 +22,11 @@ import type { Package } from '@/lib/types';
  *
  *   3. OPERATOR RESPONSE RATE (20%)
  *      How quickly the operator replies to enquiries. Currently neutral 0.5
- *      for all operators — no measured response-rate data exists yet.
+ *      for all operators: no measured response-rate data exists yet.
  *      When real per-operator data is available, pass it as `responseRate`.
  *
  *   RELEVANCE: packages reach this function only after the user's active
- *   filters have already been applied — every package here has already
+ *   filters have already been applied: every package here has already
  *   passed the user's criteria. Within that filtered set, completeness and
  *   recency proxy relevance: a complete, fresh listing gives the traveller
  *   what they need to make a decision.
@@ -79,7 +79,7 @@ function recencyScore(updatedAt: string | undefined): number {
 
 /**
  * Neutral listing quality score for one package. Higher = ranked first.
- * Range 0–1. Safe to call with no response-rate data (defaults to neutral 0.5).
+ * Range 0 to 1. Safe to call with no response-rate data (defaults to neutral 0.5).
  */
 export function scorePackage(pkg: Package, responseRate = 0.5): number {
   return (

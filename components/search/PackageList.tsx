@@ -205,14 +205,14 @@ const PackageList: React.FC<PackageListProps> = ({
     const sorted = [...normalPackages];
     switch (sortBy) {
       case 'relevance':
-        // Server already applied neutral quality sort — preserve that order.
+        // Server already applied neutral quality sort: preserve that order.
         return sorted;
       case 'price-asc':
         return sorted.sort((a, b) => a.price - b.price);
       case 'price-desc':
         return sorted.sort((a, b) => b.price - a.price);
       case 'rating': {
-        // Missing ratings are not inferred — they sort to the bottom (treated as
+        // Missing ratings are not inferred: they sort to the bottom (treated as
         // 0 for ordering only; the card still shows "Not provided").
         const ratingScore = (p: typeof sorted[number]) =>
           (p.makkahHotel.rating ?? 0) + (p.madinaHotel.rating ?? 0);
@@ -259,7 +259,7 @@ const PackageList: React.FC<PackageListProps> = ({
       .map((p) => mapPackageToComparison(p, operatorsById[p.operatorId]));
   }, [comparablePackages, operatorsById, selectedCompareIds]);
 
-  // Labels for the sticky compare bar — operator name keeps it human.
+  // Labels for the sticky compare bar: operator name keeps it human.
   const compareItems = useMemo<CompareBarItem[]>(() => {
     return selectedCompareIds.map((id) => {
       const catPkg = comparablePackages.find((p) => p.id === id);
@@ -285,7 +285,7 @@ const PackageList: React.FC<PackageListProps> = ({
     [searchParams]
   );
 
-  // Applied filters, as removable chips — makes filter state visible on the page
+  // Applied filters, as removable chips: makes filter state visible on the page
   // (previously it vanished into the URL with no on-screen cue).
   const activeFilters = useMemo(() => {
     const sp = searchParams;
@@ -532,7 +532,7 @@ const PackageList: React.FC<PackageListProps> = ({
         </div>
       )}
 
-      {/* Featured section — above neutral results, capped at 2, flag-gated */}
+      {/* Featured section: above neutral results, capped at 2, flag-gated */}
       {featuredPackages.length > 0 && (
         <section className={styles.featuredSection} aria-label="Featured packages" data-testid="featured-section">
           <header className={styles.featuredSectionHeader}>

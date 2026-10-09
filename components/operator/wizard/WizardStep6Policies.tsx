@@ -9,7 +9,7 @@ interface Props {
 }
 
 // 'Not specified' (value: undefined) is offered explicitly and is the starting
-// state — no painted default. A skipped group type persists as unset and reads
+// state: no painted default. A skipped group type persists as unset and reads
 // as "Not provided" downstream. The `key` gives each radio a stable DOM value.
 const GROUP_OPTIONS: { value: Package['groupType']; key: string; label: string; description: string }[] = [
   { value: undefined, key: 'unspecified', label: 'Not specified', description: 'Leave blank. Shown to pilgrims as "Not provided".' },
@@ -94,7 +94,7 @@ export function WizardStep6Policies({ data, onChange, error }: Props) {
 }
 
 export function validateStep6(_data: Partial<Package>): string | null {
-  // Cancellation policy required for publish — enforced at Step 8 (publish action)
+  // Cancellation policy required for publish: enforced at Step 8 (publish action)
   // Draft can proceed without it
   return null;
 }

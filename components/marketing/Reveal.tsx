@@ -11,7 +11,7 @@ interface RevealProps {
 
 /**
  * Restrained scroll-reveal: fade + small upward translate as the element
- * enters the viewport. Progressive enhancement only —
+ * enters the viewport. Progressive enhancement only:
  *
  *  - No JS / no IntersectionObserver  → content renders fully visible (the
  *    `.reveal` hidden state is added by this component, never in SSR markup).

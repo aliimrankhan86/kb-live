@@ -671,7 +671,7 @@
   font-weight: 500;
 }
 
-/* Budget toggle — inline in header, opt-out affordance */
+/* Budget toggle: inline in header, opt-out affordance */
 .searchForm__budgetToggle {
   display: inline-flex;
   align-items: center;

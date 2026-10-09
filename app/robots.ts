@@ -15,7 +15,7 @@ export default function robots(): MetadataRoute.Robots {
         allow: '/',
         disallow: PRIVATE_PATHS,
       },
-      // Explicit allow for AI crawlers — increases citation visibility in AI-generated answers.
+      // Explicit allow for AI crawlers: increases citation visibility in AI-generated answers.
       // Allowing these bots means our Umrah/Hajj content can be cited by ChatGPT, Perplexity,
       // Google AI Overviews, and Claude. Review policy if content strategy changes.
       { userAgent: 'GPTBot', allow: '/', disallow: PRIVATE_PATHS },

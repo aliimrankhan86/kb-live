@@ -8,7 +8,7 @@ import type { Enquiry, OperatorProfile, Package } from '@/lib/types';
 
 /**
  * Canonical pilgrim enquiry (Task 2): one package, one enquiry, one operator.
- * Anonymous — no auth required. Persists the enquiry with a unique reference
+ * Anonymous: no auth required. Persists the enquiry with a unique reference
  * code, then sends confirmation + operator-alert emails via the EXISTING Resend
  * setup inside after(), so the send finishes after the response and an email
  * failure is logged but never fails the enquiry.
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
 
     // Task 3: capture marketing consent ONLY when opted in AND an email was
     // given (consent requires an email to be actionable). Phone-only opt-in is
-    // ignored — no record. Wrapped so a consent-store failure can never fail the
+    // ignored: no record. Wrapped so a consent-store failure can never fail the
     // enquiry response. Double-opt-in ready: stored only, no email sent here.
     if (marketingConsent && enquiry.email) {
       try {
@@ -89,7 +89,7 @@ async function sendEnquiryEmails(
     const operatorName = enquiry.operatorName ?? 'the operator';
     const packageName = enquiry.packageTitle ?? pkg.title;
 
-    // Pilgrim confirmation — only when an email was provided.
+    // Pilgrim confirmation: only when an email was provided.
     if (enquiry.email) {
       await sendEnquiryConfirmation({
         customerEmail: enquiry.email,
@@ -101,7 +101,7 @@ async function sendEnquiryEmails(
       });
     }
 
-    // Operator lead alert — only when the operator has a contact email.
+    // Operator lead alert: only when the operator has a contact email.
     if (operator?.contactEmail) {
       await sendOperatorEnquiryAlert({
         operatorEmail: operator.contactEmail,

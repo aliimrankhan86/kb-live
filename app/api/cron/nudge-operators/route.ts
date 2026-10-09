@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
         refCode: `QR-${req.id.slice(0, 8).toUpperCase()}`,
       });
 
-      // Mark as nudged so the cron is idempotent — running again won't re-send.
+      // Mark as nudged so the cron is idempotent: running again won't re-send.
       await prisma.quoteRequest.update({
         where: { id: req.id },
         data: { nudgeSentAt: new Date() },

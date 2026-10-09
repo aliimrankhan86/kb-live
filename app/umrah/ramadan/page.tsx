@@ -135,7 +135,7 @@ export default async function RamadanUmrahPage() {
             >
               Browse Umrah packages
             </Link>
-            {/* PARKED: RFQ quote engine — CTA hidden when flag off (PARKED_FEATURES.md entry 2). */}
+            {/* PARKED: RFQ quote engine: CTA hidden when flag off (PARKED_FEATURES.md entry 2). */}
             {isRfqQuoteEnabled() && (
               <Link
                 href="/quote"

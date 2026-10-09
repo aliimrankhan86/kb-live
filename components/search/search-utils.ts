@@ -1,5 +1,5 @@
 /**
- * Pure search utilities — NO 'use client' directive.
+ * Pure search utilities: NO 'use client' directive.
  * Safe to import from both Server Components and Client Components.
  */
 
@@ -311,7 +311,7 @@ export function toSearchDisplay(pkg: CataloguePackage): SearchPackageDisplay {
     departure: { date: pkg.dateWindow?.start ? formatDate(pkg.dateWindow.start) : 'TBC', duration: '-', route: departureRoute },
     return: { date: pkg.dateWindow?.end ? formatDate(pkg.dateWindow.end) : 'TBC', duration: '-', route: departureRoute },
     makkahHotel: {
-      // Operator-supplied facts only — missing name/stars stay null (shown as
+      // Operator-supplied facts only: missing name/stars stay null (shown as
       // "Not provided"), never inferred from the package title or a default.
       name: pkg.hotelMakkahName ?? null,
       location: 'Makkah',

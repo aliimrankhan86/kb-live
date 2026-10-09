@@ -18,7 +18,7 @@ interface AuthUser {
   name?: string | null;
 }
 
-// Minimal inline SVG icons — 24×24 stroked
+// Minimal inline SVG icons: 24×24 stroked
 function Icon({ d, d2, size = 18 }: { d: string; d2?: string; size?: number }) {
   return (
     <svg
@@ -417,7 +417,7 @@ export function Header({ className = '', rfqEnabled = false }: { className?: str
           {/* Nav section */}
           <nav className={styles.header__mobileNav} aria-label="Mobile menu">
 
-            {/* Theme toggle — above all nav links */}
+            {/* Theme toggle: above all nav links */}
             <button
               onClick={toggleTheme}
               className={styles.header__mobileThemeRow}
