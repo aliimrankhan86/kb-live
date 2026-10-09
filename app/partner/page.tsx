@@ -39,11 +39,11 @@ export default function PartnerLandingPage() {
       <JsonLdScript data={pageJsonLd} />
       <div className="min-h-screen">
 
-        {/* ── SPLIT HERO — both paths above the fold ── */}
+        {/* SPLIT HERO: both paths above the fold */}
         <section className="border-b border-[var(--border)] bg-[var(--surfaceDark)] px-4 py-14 md:py-20">
           <div className="mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-5 md:gap-12">
 
-            {/* Left — new operators (primary path) */}
+            {/* Left: new operators (primary path) */}
             <div className="md:col-span-3">
               <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-[var(--yellow)]">
                 For Travel Operators
@@ -66,7 +66,7 @@ export default function PartnerLandingPage() {
               </div>
             </div>
 
-            {/* Right — existing operators (secondary path, same visual weight as hero) */}
+            {/* Right: existing operators (secondary path, same visual weight as hero) */}
             <div className="md:col-span-2">
               <div className="rounded-xl border border-[var(--border)] bg-[var(--panel)] p-6 md:p-7">
                 {/* Label */}
