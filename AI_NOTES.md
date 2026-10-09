@@ -57,14 +57,14 @@ PRs #108 (overnight QA), #109 (erasure and 90-day enquiry retention), #110 (rele
 - 4 and 9 not runnable until a verified operator publishes a package.
 - 5, 6, 7 privacy copy: pass (90-day sentence present, `dpo@` shown, no `privacy@`, no "auto-deleted").
 - 8 `GET /api/cron/enquiry-retention` with no secret: 401, pass.
-- 10 pending: the next morning, look for one `[cron/enquiry-retention] anonymised=` log line with status 200.
+- 10 pass: the enquiry-retention cron ran on 7 Oct 2026 at 03:45 UTC and returned 2XX.
 
 ### Risks and gotchas
-- 🛠️ **Gotcha:** the Vercel MCP and the Vercel CLI both returned 403 for the team scope after the deploy. Re-authenticate to the team before reading runtime logs (needed for smoke 10).
+- 🛠️ **Gotcha:** the Vercel MCP and the Vercel CLI both returned 403 for the team scope after the deploy. Re-authenticate to the team before reading runtime logs.
 - Post-release items are in `docs/BACKLOG.md` under "Post-release items".
 
 ### Exact next step
-Check smoke 10 in the Vercel logs after the 03:00 UTC cron run. Then work through `docs/BACKLOG.md` post-release items.
+Smoke 10 passed on 7 Oct 2026. Work through `docs/BACKLOG.md` post-release items.
 
 ## §ER Erasure gaps and 90-day enquiry retention (PR #109, branch `fix/erasure-retention`), 2026-10-06
 

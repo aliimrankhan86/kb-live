@@ -11,7 +11,7 @@
 
 **Overnight QA (2026-10-06):** branch `fix/overnight-qa` (PR into dev, awaiting review) fixes the search/tab package mismatch and several P0 data/security issues. See `docs/uat/OVERNIGHT_REPORT.md`.
 
-**Release 2026-10-06 (done):** production runs `main` `0c80db9` (deployment `dpl_37VRWgywt4AhiwteZyHz9UfwURjs`, rollback target `dpl_7njTU7yY4NuEBtHznKhJsrEx7VbM` on `1505dcd`). Migrations 013 and 014 applied in production (`supabase/migrations-pending/APPLIED.md`). Smoke tests pass except where no package data exists yet. Smoke 10, the first retention cron log line, is pending. Post-release items: `docs/BACKLOG.md`. Detail: `AI_NOTES.md` §REL.
+**Release 2026-10-06 (done):** production runs `main` `0c80db9` (deployment `dpl_37VRWgywt4AhiwteZyHz9UfwURjs`, rollback target `dpl_7njTU7yY4NuEBtHznKhJsrEx7VbM` on `1505dcd`). Migrations 013 and 014 applied in production (`supabase/migrations-pending/APPLIED.md`). Smoke tests pass except where no package data exists yet. Smoke 10 passed on 7 Oct 2026 (enquiry-retention cron ran at 03:45 UTC, 2XX). Post-release items: `docs/BACKLOG.md`. Detail: `AI_NOTES.md` §REL.
 
 **Release 2026-10-07 (done):** PR #115 (`/partner` founding operators copy) and PR #116 (`dev` into `main`). Production runs `main` `a4e7075` (`dpl_C6wvCksUXATpod7GaWpNwABsVQFM`).
 
