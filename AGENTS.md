@@ -25,7 +25,7 @@ This is non-negotiable. Every push must include:
 1. **`docs/NOW.md` updated** with what changed, current state, and next step.
 2. **`npm run test` passes** (all unit tests green).
 3. **`npm run build` passes** (zero type errors, zero build errors).
-4. If UI/routing changed: manual smoke on `/`, `/umrah`, `/search/packages` at 320px and 1280px.
+4. If UI/routing changed: manual smoke on `/`, `/umrah`, `/packages` at 320px and 1280px.
 5. If `data-testid` or routes changed: `npx playwright test` must pass.
 
 If you skip this, the push will be reverted.
@@ -34,7 +34,7 @@ If you skip this, the push will be reverted.
 
 - `app/page.tsx`
 - `app/umrah/page.tsx`
-- `app/search/packages/page.tsx`
+- `app/packages/page.tsx` (the one package list; `/search/packages` is a 308 to it)
 - `app/packages/[slug]/page.tsx`
 - `components/layout/Header.tsx`
 - `components/marketing/Hero.tsx`

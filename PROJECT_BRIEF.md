@@ -79,7 +79,7 @@ Two modes:
 
 ## 8. Engineering rules (apply to every change)
 - Small focused diffs, **one concern per commit**.
-- **Before every push:** `npm run test` green · `npm run build` 0 errors · `npx tsc --noEmit` pass. If UI/routes changed → Playwright smoke `/`, `/umrah`, `/search/packages` at **320px + 1280px**.
+- **Before every push:** `npm run test` green · `npm run build` 0 errors · `npx tsc --noEmit` pass. If UI/routes changed → Playwright smoke `/`, `/umrah`, `/packages` at **320px + 1280px**.
 - Add stable `data-testid` for anything Playwright tests.
 - A11y required: labels, keyboard, focus management, clear errors, ≥44px tap targets.
 - **Never invent operator trust claims** — stored facts only; missing = "Not provided".

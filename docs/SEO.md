@@ -15,13 +15,13 @@ PilgrimCompare targets high-intent pilgrimage travellers searching for packages.
 | Umrah packages           | "umrah packages 2026", "cheap umrah packages from UK"      | `/umrah`                      |
 | Hajj packages            | "hajj packages 2026 UK", "5 star hajj packages"            | `/hajj`                       |
 | Ramadan Umrah            | "ramadan umrah 2026", "umrah during ramadan"               | `/umrah/ramadan`              |
-| Makkah hotels near Haram | "hotels near haram makkah", "walking distance haram hotel" | `/search/packages` (filtered) |
+| Makkah hotels near Haram | "hotels near haram makkah", "walking distance haram hotel" | `/packages` (filtered) |
 
 ### Mid-funnel (comparison)
 
 | Keyword cluster        | Example queries                                 | Target page         |
 | ---------------------- | ----------------------------------------------- | ------------------- |
-| Compare Umrah packages | "compare umrah packages UK", "best umrah deals" | `/search/packages`  |
+| Compare Umrah packages | "compare umrah packages UK", "best umrah deals" | `/packages`  |
 | Umrah operator reviews | "[operator name] umrah reviews"                 | `/operators/[slug]` |
 | Umrah package details  | "[operator] ramadan umrah package 2026"         | `/packages/[slug]`  |
 
@@ -30,7 +30,7 @@ PilgrimCompare targets high-intent pilgrimage travellers searching for packages.
 | Keyword cluster   | Example queries                              | Target page                         |
 | ----------------- | -------------------------------------------- | ----------------------------------- |
 | Book Umrah        | "book umrah package", "request umrah quote"  | `/quote`                            |
-| Umrah from [city] | "umrah from london", "umrah from manchester" | `/search/packages?departure=[city]` |
+| Umrah from [city] | "umrah from london", "umrah from manchester" | `/packages?departureCity=[city]` |
 
 ---
 
@@ -54,7 +54,7 @@ Public pages must work for classic search crawlers, answer engines, and generati
 
 - Homepage: `Organization`, `WebSite`, `WebPage`, and relevant FAQ schema.
 - `/umrah`: `WebPage` and FAQ schema for UK Umrah package comparison.
-- `/search/packages`: `WebPage`, `ItemList`, and FAQ schema for result comparison.
+- `/packages`: `WebPage`, `ItemList`, and FAQ schema for result comparison (moved from `/search/packages`, now a 308 to `/packages`).
 - `/packages/[slug]`: `Product`, `Offer`, `BreadcrumbList`, and package FAQ schema.
 - `/operators/[slug]`: `TravelAgency`, `BreadcrumbList`, and operator FAQ schema.
 - Use `@id` values for durable graph identity where helpers provide them.
@@ -82,7 +82,6 @@ Every route must export Next.js `Metadata` with these fields. Use the `generateM
 | `/partner`          | `Partner with PilgrimCompare — List Your Packages`                       | `Join PilgrimCompare as a verified operator. Reach thousands of UK Muslims planning Umrah and Hajj. No upfront fees, transparent commission.`   | umrah operator, list umrah packages, partner     |
 | `/umrah/ramadan`    | `Ramadan Umrah 2026 – Special Packages \| PilgrimCompare`                | `Ramadan Umrah packages from UK operators. Hotels near Haram, flights included, group and family options.`                                 | ramadan umrah 2026, umrah ramadan packages       |
 | `/packages`         | `All Pilgrimage Packages – Browse & Compare \| PilgrimCompare`           | `Browse all Hajj and Umrah packages. Filter, shortlist, and compare side by side.`                                                         | pilgrimage packages, hajj umrah compare          |
-| `/search/packages`  | Dynamic: `{N} {type} Packages - Compare UK Operators \| PilgrimCompare`  | Dynamic: `Compare {N} packages by price, hotels, distance to Haram, inclusions, and operator trust signals.`                               | (use query params)                               |
 | `/umrah/london`     | `Umrah Packages from London 2026 – Compare & Book \| PilgrimCompare`     | `Browse and compare Umrah packages departing from London. Verified UK operators, hotels near Haram, flights included.`                     | umrah from london, umrah packages london         |
 | `/umrah/birmingham` | `Umrah Packages from Birmingham 2026 – Compare & Book \| PilgrimCompare` | `Browse and compare Umrah packages departing from Birmingham. Verified UK operators, hotels near Haram, flights included.`                 | umrah from birmingham, umrah packages birmingham |
 | `/umrah/manchester` | `Umrah Packages from Manchester 2026 – Compare & Book \| PilgrimCompare` | `Browse and compare Umrah packages departing from Manchester. Verified UK operators, hotels near Haram, flights included.`                 | umrah from manchester, umrah packages manchester |
@@ -202,7 +201,7 @@ Clean, meaningful URLs improve SEO and shareability.
 | `/packages`         | Browse all       | Static                                                   |
 | `/packages/{slug}`  | Package detail   | Slug from: `{operator-slug}-{type}-{season}-{id-suffix}` |
 | `/operators/{slug}` | Operator profile | Slug from `operatorProfile.slug`                         |
-| `/search/packages`  | Search results   | Query params: `?type=umrah&budget=1000-2000&stars=5`     |
+| `/packages`         | Package list     | Query params: `?type=umrah&budgetMax=2000&hotelStars=5` (`/search/packages` is a 308 here) |
 | `/quote`            | Request form     | No-index (robots.txt)                                    |
 
 ### Slug generation rules
@@ -221,7 +220,7 @@ The sitemap at `app/sitemap.ts` must include:
 1. **All static pages** — `/`, `/umrah`, `/hajj`, `/umrah/ramadan`, `/packages`.
 2. **All published package pages** — `/packages/[slug]` for every `status: 'published'` package.
 3. **All verified operator pages** — `/operators/[slug]` for every `verificationStatus: 'verified'` operator.
-4. **Search page** — `/search/packages` (but consider adding filtered variants like `/search/packages?type=umrah` if traffic warrants it).
+4. **Package list:** `/packages` only. `/search/packages` is a 308 to it and is not in the sitemap (UX-08, batch 2).
 
 ### Update frequency
 

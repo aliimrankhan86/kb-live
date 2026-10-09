@@ -45,7 +45,7 @@ pilgrimcompare/
 │   ├── page.tsx                  # Landing page
 │   ├── umrah/page.tsx            # Umrah search form
 │   ├── hajj/page.tsx             # Hajj interest capture (coming soon)
-│   ├── search/packages/          # Package search results
+│   ├── packages/page.tsx         # Package list: search, filters, compare (/search/packages is a 308 here)
 │   ├── packages/[slug]/          # Package detail
 │   ├── quote/page.tsx            # Quote wizard
 │   ├── requests/[id]/            # Request tracker
