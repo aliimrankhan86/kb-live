@@ -3,6 +3,7 @@
 
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { SHORTLIST_STORAGE_KEY } from '@/lib/shortlist';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import type { Package as CataloguePackage, OperatorProfile } from '@/lib/types';
 import { FILTER_PARAM_KEYS, makkahDistance, parseSearchCriteria, toPackageCardProps, type SearchPackageDisplay } from './search-utils';
@@ -31,7 +32,6 @@ const COMPARE_MAX = 3;
 const COMPARE_MIN = 2;
 const FEATURED_MAX = 2;
 
-const SHORTLIST_STORAGE_KEY = 'kb_shortlist_packages';
 const uniqueIds = (ids: string[]) => Array.from(new Set(ids));
 
 export type { SearchPackageDisplay } from './search-utils';

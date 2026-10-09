@@ -108,10 +108,12 @@ function PasswordStrength({ password }: { password: string }) {
   );
 }
 
-export function SignUpForm() {
+/** operatorSignupEnabled: server-evaluated FEATURE_OPERATOR_SELF_SERVE (parked, off). */
+export function SignUpForm({ operatorSignupEnabled = false }: { operatorSignupEnabled?: boolean } = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const defaultRole = (searchParams.get('type') as SignUpRole) || 'operator';
+  // Pilgrim signup by default (UX-12). Operators join through /partner unless self-serve is on.
+  const defaultRole: SignUpRole = operatorSignupEnabled && searchParams.get('type') === 'operator' ? 'operator' : 'customer';
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -181,37 +183,39 @@ export function SignUpForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4" data-testid="signup-form">
-      {/* Tabs */}
-      <div className="grid grid-cols-2 gap-2" role="tablist" aria-label="Account type">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={role === 'customer'}
-          onClick={() => setRole('customer')}
-          className={`min-h-[44px] rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
-            role === 'customer'
-              ? 'border-[var(--yellow)] bg-[rgba(255,211,29,0.12)] text-[var(--text)]'
-              : 'border-[var(--borderSubtle)] text-[var(--textMuted)] hover:border-[var(--borderStrong)]'
-          }`}
-          data-testid="signup-role-customer"
-        >
-          Traveller
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={role === 'operator'}
-          onClick={() => setRole('operator')}
-          className={`min-h-[44px] rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
-            role === 'operator'
-              ? 'border-[var(--yellow)] bg-[rgba(255,211,29,0.12)] text-[var(--text)]'
-              : 'border-[var(--borderSubtle)] text-[var(--textMuted)] hover:border-[var(--borderStrong)]'
-          }`}
-          data-testid="signup-role-operator"
-        >
-          Operator
-        </button>
-      </div>
+      {/* Tabs: only while operator self-serve signup is switched on */}
+      {operatorSignupEnabled && (
+        <div className="grid grid-cols-2 gap-2" role="tablist" aria-label="Account type">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={role === 'customer'}
+            onClick={() => setRole('customer')}
+            className={`min-h-[44px] rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
+              role === 'customer'
+                ? 'border-[var(--yellow)] bg-[rgba(255,211,29,0.12)] text-[var(--text)]'
+                : 'border-[var(--borderSubtle)] text-[var(--textMuted)] hover:border-[var(--borderStrong)]'
+            }`}
+            data-testid="signup-role-customer"
+          >
+            Traveller
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={role === 'operator'}
+            onClick={() => setRole('operator')}
+            className={`min-h-[44px] rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
+              role === 'operator'
+                ? 'border-[var(--yellow)] bg-[rgba(255,211,29,0.12)] text-[var(--text)]'
+                : 'border-[var(--borderSubtle)] text-[var(--textMuted)] hover:border-[var(--borderStrong)]'
+            }`}
+            data-testid="signup-role-operator"
+          >
+            Operator
+          </button>
+        </div>
+      )}
 
       <div>
         <h1 className="text-2xl font-semibold text-[var(--text)]">
@@ -222,6 +226,14 @@ export function SignUpForm() {
             ? 'Register your travel company to list packages and receive enquiries from UK travellers.'
             : 'Join PilgrimCompare to compare packages, save favourites and send enquiries.'}
         </p>
+        {!operatorSignupEnabled && (
+          <p className="mt-2 text-sm text-[var(--textMuted)]" data-testid="signup-operator-route">
+            Travel company?{' '}
+            <Link href="/partner" className="inline-flex min-h-[44px] items-center text-[var(--yellow)] underline-offset-2 hover:underline">
+              See how operators list packages
+            </Link>
+          </p>
+        )}
       </div>
 
       {passwordError && (

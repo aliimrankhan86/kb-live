@@ -35,7 +35,8 @@ const pageJsonLd = graphJsonLd([
   }),
 ])
 
-export default async function PackagesPage() {
+export default async function PackagesPage({ searchParams }: { searchParams: Promise<{ compare?: string }> }) {
+  const { compare } = await searchParams
   let packages: Package[] = []
   let operators: OperatorProfile[] = []
   let error: string | undefined
@@ -51,8 +52,13 @@ export default async function PackagesPage() {
   return (
     <>
       <JsonLdScript data={pageJsonLd} />
-      <div className="min-h-screen bg-[var(--background)]">
-        <PackagesBrowse packages={packages} operators={operators} error={error} />
+      <div className="min-h-screen bg-[var(--background)]" data-plain-background>
+        <PackagesBrowse
+          packages={packages}
+          operators={operators}
+          initialCompareIds={packages.some((p) => p.id === compare) ? [compare as string] : []}
+          error={error}
+        />
       </div>
     </>
   )

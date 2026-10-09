@@ -52,7 +52,6 @@ export function SearchPackagesClient({ allPackages, featuredSlotsEnabled, operat
 
   return (
     <div className={styles.searchPage}>
-      <h1 className="sr-only">Search Results - Hajj and Umrah Packages</h1>
       <PackageList
         packages={displayPackages}
         cataloguePackages={filteredPackages}

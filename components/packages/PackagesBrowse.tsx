@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState, useTransition } from 'react'
+import { SHORTLIST_STORAGE_KEY } from '@/lib/shortlist'
 import type { Package, OperatorProfile } from '@/lib/types'
 import { NEUTRAL_SORT_DISCLOSURE } from '@/lib/content-rules'
 import { mapPackageToComparison, handleComparisonSelection } from '@/lib/comparison'
@@ -21,7 +22,6 @@ import styles from './packagesBrowse.module.css'
 type PilgrimageFilter = 'all' | 'umrah' | 'hajj'
 type SortOption = 'relevance' | 'price-asc' | 'price-desc'
 
-const SHORTLIST_STORAGE_KEY = 'kb_shortlist_packages'
 const COMPARE_MIN = 2
 const COMPARE_MAX = 3
 const uniqueIds = (ids: string[]) => Array.from(new Set(ids))
@@ -30,6 +30,8 @@ interface PackagesBrowseProps {
   packages: Package[]
   /** Public operators, loaded on the server with the packages. */
   operators?: OperatorProfile[]
+  /** Preselected for comparison, from /packages?compare=<id> (package page "Compare"). */
+  initialCompareIds?: string[]
   error?: string
 }
 
@@ -40,12 +42,12 @@ const TYPE_TABS: { value: PilgrimageFilter; label: string }[] = [
 ]
 
 
-export function PackagesBrowse({ packages, operators = [], error }: PackagesBrowseProps) {
+export function PackagesBrowse({ packages, operators = [], initialCompareIds = [], error }: PackagesBrowseProps) {
   const [pilgrimageType, setPilgrimageType] = useState<PilgrimageFilter>('all')
   const [seasonLabel, setSeasonLabel] = useState<string>('all')
   const [sortBy, setSortBy] = useState<SortOption>('relevance')
   const [isPending, startTransition] = useTransition()
-  const [selectedCompareIds, setSelectedCompareIds] = useState<string[]>([])
+  const [selectedCompareIds, setSelectedCompareIds] = useState<string[]>(initialCompareIds)
   const [shortlistedPackages, setShortlistedPackages] = useState<string[]>([])
   const [shortlistOnly, setShortlistOnly] = useState(false)
   const [shortlistLoaded, setShortlistLoaded] = useState(false)

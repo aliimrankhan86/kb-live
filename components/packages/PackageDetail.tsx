@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { type ReactNode, useState } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
+import { SHORTLIST_STORAGE_KEY } from '@/lib/shortlist'
 import type { Package, OperatorProfile } from '@/lib/types'
 import { createQuotePrefillUrl } from '@/lib/quote-prefill'
 import { buttonVariants } from '@/components/ui/Button'
@@ -62,6 +63,27 @@ const SectionCard = ({ title, children, className = '' }: { title: string; child
 export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDetailProps) {
   // No photo, or it failed to load: the hero collapses instead of leaving an empty box.
   const [coverFailed, setCoverFailed] = useState(false)
+  // UX-21: Save uses the same saved list as the cards (localStorage, per browser).
+  const [saved, setSaved] = useState(false)
+  useEffect(() => {
+    try {
+      const ids = JSON.parse(window.localStorage.getItem(SHORTLIST_STORAGE_KEY) ?? '[]') as string[]
+      setSaved(Array.isArray(ids) && ids.includes(pkg.id))
+    } catch {
+      /* storage blocked: start unsaved */
+    }
+  }, [pkg.id])
+  const toggleSaved = () => {
+    const next = !saved
+    setSaved(next)
+    try {
+      const ids = JSON.parse(window.localStorage.getItem(SHORTLIST_STORAGE_KEY) ?? '[]') as string[]
+      const rest = (Array.isArray(ids) ? ids : []).filter((id) => id !== pkg.id)
+      window.localStorage.setItem(SHORTLIST_STORAGE_KEY, JSON.stringify(next ? [...rest, pkg.id] : rest))
+    } catch {
+      /* storage blocked: the button still reflects the tap */
+    }
+  }
   const cover = coverFailed ? undefined : pkg.images?.find(Boolean)
   const router = useRouter()
   const handleBack = () => {
@@ -109,7 +131,14 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
           {pkg.title}
         </h1>
         <p className="mt-1 text-sm text-[var(--textMuted)]">
-          Sold by <span className="font-medium text-[var(--text)]">{operator?.companyName ?? 'the travel operator'}</span>
+          Sold by{' '}
+          {operator?.slug ? (
+            <Link href={`/operators/${operator.slug}`} data-testid="package-operator-link" className="font-medium text-[var(--text)] underline underline-offset-2">
+              {operator.companyName}
+            </Link>
+          ) : (
+            <span className="font-medium text-[var(--text)]">{operator?.companyName ?? 'the travel operator'}</span>
+          )}
           {operator?.verificationStatus === 'verified' && (
             <span className="ml-2 inline-flex items-center gap-1 text-[var(--yellow)]">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.8 7.2 17l.9-5.4L4.2 7.7l5.4-.8z" /></svg>
@@ -117,6 +146,28 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
             </span>
           )}
         </p>
+
+        <div className="mt-4 flex flex-wrap gap-2" data-testid="package-actions">
+          <button
+            type="button"
+            onClick={toggleSaved}
+            aria-pressed={saved}
+            data-testid="package-save"
+            className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-[var(--borderSubtle)] px-4 text-sm font-semibold text-[var(--text)] hover:border-[var(--borderStrong)]"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill={saved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+            </svg>
+            {saved ? 'Saved' : 'Save'}
+          </button>
+          <Link
+            href={`/packages?compare=${encodeURIComponent(pkg.id)}`}
+            data-testid="package-compare"
+            className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-[var(--borderSubtle)] px-4 text-sm font-semibold text-[var(--text)] hover:border-[var(--borderStrong)]"
+          >
+            Compare with other packages
+          </Link>
+        </div>
 
         {/* Highlights / benefits — only when the operator listed them */}
         {pkg.highlights && pkg.highlights.length > 0 && (
@@ -306,7 +357,7 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
             </div>
           </section>
 
-          {operator?.tier && <TierExplanation tier={operator.tier} />}
+          {operator && <TierExplanation verified={operator.verificationStatus === 'verified'} />}
         </div>
 
         {/* Desktop decision rail */}

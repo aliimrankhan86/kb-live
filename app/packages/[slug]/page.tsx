@@ -149,7 +149,7 @@ export default async function PackageDetailPage({
 
   return (
     <>
-      <div className="min-h-screen bg-[var(--background)]">
+      <div className="min-h-screen bg-[var(--background)]" data-plain-background>
         <JsonLdScript data={packageDetailJsonLd} />
         <div className="w-full max-w-5xl mx-auto px-4 pt-6">
           <Breadcrumb items={breadcrumbItems} />

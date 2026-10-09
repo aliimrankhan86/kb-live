@@ -128,7 +128,7 @@ export default async function OperatorProfilePage({ params }: OperatorPageProps)
 
   return (
     <>
-      <div className="min-h-screen bg-[var(--background)]">
+      <div className="min-h-screen bg-[var(--background)]" data-plain-background>
         <JsonLdScript data={operatorProfileJsonLd} />
         <div className="w-full max-w-5xl mx-auto px-4 pt-6">
           <Breadcrumb items={breadcrumbItems} />

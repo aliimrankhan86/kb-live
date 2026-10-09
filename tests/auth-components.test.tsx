@@ -133,10 +133,15 @@ describe('LoginForm', () => {
     expect(screen.getByText('Sign up')).toHaveAttribute('href', '/signup?type=customer');
   });
 
-  it('has partner signup link in partner tab', () => {
+  it('sends operators to /partner from the partner tab (UX-12)', () => {
     render(<LoginForm />);
     fireEvent.click(screen.getByTestId('login-tab-partner'));
-    expect(screen.getByText('Register your company')).toHaveAttribute('href', '/signup?type=operator');
+    expect(screen.getByText('See how operators join')).toHaveAttribute('href', '/partner');
+  });
+
+  it('shows no password policy on sign in (UX-16)', () => {
+    const { container } = render(<LoginForm />);
+    expect(container.textContent).not.toMatch(/at least 8 characters|uppercase|special character/i);
   });
 });
 
@@ -145,8 +150,15 @@ describe('SignUpForm', () => {
     vi.resetAllMocks();
   });
 
-  it('renders signup form with role toggle', () => {
+  it('defaults to pilgrim signup and routes operators to /partner (UX-12)', () => {
     render(<SignUpForm />);
+    expect(screen.getByRole('heading', { name: 'Create Account' })).toBeInTheDocument();
+    expect(screen.queryByTestId('signup-role-operator')).toBeNull();
+    expect(screen.getByText('See how operators list packages')).toHaveAttribute('href', '/partner');
+  });
+
+  it('renders signup form with role toggle when operator self-serve is on', () => {
+    render(<SignUpForm operatorSignupEnabled />);
     expect(screen.getByTestId('signup-form')).toBeInTheDocument();
     expect(screen.getByTestId('signup-role-customer')).toBeInTheDocument();
     expect(screen.getByTestId('signup-role-operator')).toBeInTheDocument();
@@ -156,16 +168,16 @@ describe('SignUpForm', () => {
     expect(screen.getByTestId('signup-name')).toBeInTheDocument();
   });
 
-  it('toggles role between customer and operator', () => {
-    render(<SignUpForm />);
-    // Default from URLSearchParams is operator (Partner)
-    expect(screen.getByRole('heading', { name: 'Operator Registration' })).toBeInTheDocument();
-
-    fireEvent.click(screen.getByTestId('signup-role-customer'));
+  it('toggles role between customer and operator when self-serve is on', () => {
+    render(<SignUpForm operatorSignupEnabled />);
+    // Pilgrim signup is the default (UX-12)
     expect(screen.getByRole('heading', { name: 'Create Account' })).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('signup-role-operator'));
     expect(screen.getByRole('heading', { name: 'Operator Registration' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('signup-role-customer'));
+    expect(screen.getByRole('heading', { name: 'Create Account' })).toBeInTheDocument();
   });
 
   it('shows password mismatch error when passwords do not match', async () => {
@@ -223,12 +235,12 @@ describe('SignUpForm', () => {
   });
 
   it('links to login with correct type param based on role', () => {
-    render(<SignUpForm />);
-    // Default is partner
-    expect(screen.getByText('Sign in')).toHaveAttribute('href', '/login?type=operator');
-
-    fireEvent.click(screen.getByTestId('signup-role-customer'));
+    render(<SignUpForm operatorSignupEnabled />);
+    // Default is pilgrim
     expect(screen.getByText('Sign in')).toHaveAttribute('href', '/login?type=customer');
+
+    fireEvent.click(screen.getByTestId('signup-role-operator'));
+    expect(screen.getByText('Sign in')).toHaveAttribute('href', '/login?type=operator');
   });
 });
 

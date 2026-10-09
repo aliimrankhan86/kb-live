@@ -72,6 +72,15 @@ export const VERIFICATION_STATEMENT =
   "Before any operator is listed, we check: (1) their ATOL number against the CAA's public register, (2) their company status at Companies House, (3) that they have a real, verifiable UK trading address. Verification confirms these checks at the time of listing. It is not a guarantee of service quality, financial protection for your specific booking, or future conduct."
 
 /**
+ * Short form of the §7 statement for the "How we verify operators" notice on
+ * package and operator pages (UX-15). Same three checks, same "time of listing"
+ * limit, same three things it does not guarantee. Always shown with a link to
+ * the full statement.
+ */
+export const VERIFICATION_STATEMENT_SHORT =
+  "Before listing, we check this operator's ATOL number on the CAA's public register, its Companies House status and its UK trading address. These checks apply at the time of listing. They do not guarantee service quality, financial protection for your specific booking, or future conduct."
+
+/**
  * One-line model description (§1 / §12). States what the service is and is not.
  * Used as the homepage hero supporting line.
  */

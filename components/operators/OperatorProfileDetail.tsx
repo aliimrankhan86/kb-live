@@ -67,11 +67,9 @@ export function OperatorProfileDetail({ operator, packages }: OperatorProfileDet
           )}
         </div>
 
-        {operator.tier && (
-          <div className="mt-3">
-            <TierExplanation tier={operator.tier} />
-          </div>
-        )}
+        <div className="mt-3">
+          <TierExplanation verified={operator.verificationStatus === 'verified'} />
+        </div>
       </header>
 
       {/* About + quick-stats grid */}

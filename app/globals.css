@@ -43,6 +43,18 @@ body::before {
   background-color: #EDE8DC;
 }
 
+/* UX-17: list and detail pages wrap their content in [data-plain-background],
+   painted with the colour the overlay already gives the page, so the silhouette
+   never sits behind their cards and text. (body:has() would be neater, but
+   Lightning CSS drops it for Next's default browser targets.) */
+[data-plain-background] {
+  background: rgb(10 10 10);
+}
+
+[data-theme="light"] [data-plain-background] {
+  background: linear-gradient(160deg, #F7F5F0 0%, #EDE8DC 55%, #F4EFE6 100%) fixed;
+}
+
 [data-theme="light"] body::before {
   display: block;
   background: linear-gradient(160deg, rgba(248, 246, 241, 0.93) 0%, rgba(237, 232, 220, 0.93) 55%, rgba(244, 240, 231, 0.93) 100%);
