@@ -232,9 +232,9 @@ describe('one nights format', () => {
 });
 
 describe('departure city links never 404', () => {
-  it('uses the corridor page when it exists, otherwise the search results', async () => {
+  it('uses the corridor page when it exists, otherwise the package list', async () => {
     const { departureCityHref } = await import('@/lib/airports');
     expect(departureCityHref('London')).toBe('/umrah/london');
-    expect(departureCityHref('Glasgow')).toBe('/search/packages?type=umrah&departureCity=Glasgow');
+    expect(departureCityHref('Glasgow')).toBe('/packages?type=umrah&departureCity=Glasgow');
   });
 });

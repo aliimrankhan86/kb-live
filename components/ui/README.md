@@ -290,7 +290,7 @@ test('has no accessibility violations', async () => {
 import { test, expect } from '@playwright/test'
 
 test('filter overlay workflow', async ({ page }) => {
-  await page.goto('/search/packages')
+  await page.goto('/packages')
   await page.click('[aria-label="Filter packages"]')
   await expect(page.locator('[role="dialog"]')).toBeVisible()
   await page.keyboard.press('Escape')

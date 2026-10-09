@@ -67,7 +67,7 @@ export default async function EnquirePage({ params }: { params: Promise<{ slug: 
 
   const breadcrumbItems = [
     { label: 'Home', href: '/' },
-    { label: 'Packages', href: '/search/packages' },
+    { label: 'Packages', href: '/packages' },
     { label: pkg.title, href: `/packages/${pkg.slug}` },
     { label: 'Enquire' },
   ]

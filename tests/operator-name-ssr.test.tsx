@@ -2,7 +2,7 @@ import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { renderToString } from 'react-dom/server';
 import { MockDB } from '@/lib/api/mock-db';
-import { PackagesBrowse } from '@/components/packages/PackagesBrowse';
+import { SearchPackagesClient } from '@/components/search/SearchPackagesClient';
 import type { OperatorProfile } from '@/lib/types';
 
 // UX-02: operator names were fetched after hydration, so the line stayed blank
@@ -24,7 +24,7 @@ const operator: OperatorProfile = {
 
 describe('operator name on /packages cards', () => {
   it('is in the server HTML, linked to the operator page, without a client fetch', () => {
-    const html = renderToString(<PackagesBrowse packages={[pkg]} operators={[operator]} />);
+    const html = renderToString(<SearchPackagesClient allPackages={[pkg]} featuredSlotsEnabled={false} operators={[operator]} />);
     expect(html).toContain('Server Rendered Travel');
     expect(html).toMatch(/href="\/operators\/server-rendered-travel"[^>]*data-testid="operator-link-p1"|data-testid="operator-link-p1"[^>]*href="\/operators\/server-rendered-travel"/);
     expect(html).not.toContain('Loading operator name');

@@ -46,6 +46,12 @@ const nextConfig: NextConfig = {
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
+  // UX-08: one package list. The old search URL answers 308 to /packages;
+  // Next keeps the query string, so shared and indexed links still filter.
+  async redirects() {
+    return [{ source: '/search/packages', destination: '/packages', permanent: true }];
+  },
+
   // Security headers for all routes
   async headers() {
     return [

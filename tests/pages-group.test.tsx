@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { TierExplanation } from '@/components/operators/TierExplanation';
 import { PackageDetail } from '@/components/packages/PackageDetail';
-import { PackagesBrowse } from '@/components/packages/PackagesBrowse';
+import { SearchPackagesClient } from '@/components/search/SearchPackagesClient';
 import NotFound from '@/app/not-found';
 import { VERIFICATION_STATEMENT, VERIFICATION_STATEMENT_SHORT } from '@/lib/content-rules';
 import { SHORTLIST_STORAGE_KEY } from '@/lib/shortlist';
@@ -77,7 +77,7 @@ describe('UX-21: package page actions', () => {
 
   it('/packages?compare=<id> arrives with that package selected', () => {
     vi.stubGlobal('fetch', vi.fn(() => new Promise(() => {})));
-    render(<PackagesBrowse packages={[pkg]} operators={[operator]} initialCompareIds={['p-ux21']} />);
+    render(<SearchPackagesClient allPackages={[pkg]} featuredSlotsEnabled={false} operators={[operator]} initialCompareIds={['p-ux21']} />);
     expect(screen.getByRole('region', { name: 'Packages selected to compare' }).textContent).toContain('1 of 3 selected');
   });
 });

@@ -17,7 +17,7 @@ export function HomeCTA() {
           Line up Umrah packages from verified UK operators, side by side.
         </p>
         <Link
-          href="/search/packages"
+          href="/packages"
           className={`${styles.ctaButton} ${styles.ctaButtonFilled}`}
         >
           Compare packages

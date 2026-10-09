@@ -7,7 +7,7 @@ import type { SearchPackageDisplay } from '@/components/search/search-utils';
 vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
   useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
-  usePathname: () => '/search/packages',
+  usePathname: () => '/packages',
 }));
 
 // --- next/link mock ----------------------------------------------------------

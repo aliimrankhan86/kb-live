@@ -31,8 +31,10 @@ async function login(page: Page, email: string, password = 'TestPass1!') {
 test.describe.configure({ mode: 'serial' })
 
 test('unverified operator packages and profile are never public', async ({ page }) => {
-  await page.goto('/search/packages')
-  await expect(page.locator('body')).not.toContainText('unverified operator')
+  for (const p of [1, 2, 3]) {
+    await page.goto(`/packages?page=${p}`)
+    await expect(page.locator('body')).not.toContainText('unverified operator')
+  }
   await page.goto('/packages/local-test-15')
   await expect(page.locator('body')).toContainText('no longer available')
   // Operator C is verified but has no ATOL number, so it is not listed either.
@@ -52,13 +54,13 @@ test('uploaded package image renders under the CSP', async ({ page }) => {
   const img = page.locator('img[src*="package-images"], img[srcset*="package-images"]').first()
   await expect(img).toBeVisible()
   expect(await img.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 0)).toBe(true)
-  await page.goto('/search/packages?departureAirport=LHR')
+  await page.goto('/packages?departureAirport=LHR')
   await page.waitForLoadState('networkidle')
   expect(errors).toEqual([])
 })
 
 test('every price is attributed and dated; inclusions are three-state', async ({ page }) => {
-  await page.goto('/search/packages?type=umrah')
+  await page.goto('/packages?type=umrah')
   await expect(page.getByTestId('price-attribution-local-test-pkg-01')).toContainText(/As stated by Local Test Operator A, updated \d{1,2} \w{3} \d{4}/)
   await page.goto('/packages/local-test-04')
   await expect(page.getByTestId('package-price-attribution')).toContainText('Confirm the final price with the operator before paying')

@@ -61,7 +61,7 @@ export const Hero: React.FC<HeroProps> = ({ className = '' }) => {
           </h1>
           <p className={styles.hero__subtitle}>{MODEL_DESCRIPTION}</p>
           <div className={styles.hero__actions}>
-            <Link href="/search/packages" className={styles.hero__ctaPrimary}>
+            <Link href="/packages" className={styles.hero__ctaPrimary}>
               Compare packages
             </Link>
             <Link href="/how-it-works" className={styles.hero__ctaSecondary}>

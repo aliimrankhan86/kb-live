@@ -103,7 +103,7 @@ export function ComparePreview({ packages }: ComparePreviewProps) {
       </p>
 
       <div className={styles.previewFoot}>
-        <Link href="/search/packages" className={styles.inlineLink}>
+        <Link href="/packages" className={styles.inlineLink}>
           See the full comparison
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <path d="M5 12h14M13 6l6 6-6 6" />

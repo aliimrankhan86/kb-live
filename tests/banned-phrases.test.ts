@@ -42,10 +42,8 @@ const METADATA_STRINGS: Record<string, string> = {
   // app/packages/page.tsx
   'packages.title': 'Browse Hajj & Umrah Packages | PilgrimCompare',
   'packages.description': 'Browse and compare published Umrah and Hajj packages from verified UK operators. Filter by budget, hotel rating, departure city, and inclusions.',
-
-  // app/search/packages/page.tsx — template fragments
-  'search.og.title.fragment': 'Package Search Results | PilgrimCompare',
-  'search.og.description.fragment': 'packages from UK operators with transparent package details.',
+  'packages.og.description': 'Browse published Umrah and Hajj packages from verified UK operators. Filter and compare side by side.',
+  'packages.jsonld.description': 'Browse and compare published Umrah and Hajj packages from verified UK operators.',
 
   // app/umrah/london/page.tsx
   'london.title': 'Umrah Packages from London 2026 – Compare UK Operators | PilgrimCompare',

@@ -124,7 +124,7 @@ export function EnquiryForm({ summary, packageSlug }: EnquiryFormProps) {
         </div>
 
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link href="/search/packages" className={buttonVariants({ variant: 'primary', size: 'md' })}>
+          <Link href="/packages" className={buttonVariants({ variant: 'primary', size: 'md' })}>
             Compare more packages
           </Link>
           <Link href={`/packages/${packageSlug}`} className={buttonVariants({ variant: 'secondary', size: 'md' })}>

@@ -130,7 +130,7 @@ export default async function RamadanUmrahPage() {
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-4 mb-4">
             <Link
-              href="/search/packages?type=umrah&season=ramadan"
+              href="/packages?type=umrah&season=ramadan"
               className="inline-flex items-center justify-center rounded-lg bg-[var(--yellow)] px-6 py-3 text-base font-semibold text-[var(--bg)] hover:opacity-90 transition-opacity"
             >
               Browse Umrah packages

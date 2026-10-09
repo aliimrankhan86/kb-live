@@ -11,6 +11,8 @@ interface SearchPackagesClientProps {
   allPackages: CataloguePackage[];
   featuredSlotsEnabled: boolean;
   operators?: OperatorProfile[];
+  /** Preselected for comparison, from /packages?compare=<id> (package page "Compare"). */
+  initialCompareIds?: string[];
 }
 
 const VALID_SORTS = ['relevance', 'price-asc', 'price-desc', 'rating', 'distance'] as const;
@@ -18,7 +20,7 @@ type SortOption = typeof VALID_SORTS[number];
 const toSortOption = (v: string | null): SortOption =>
   VALID_SORTS.includes(v as SortOption) ? (v as SortOption) : 'relevance';
 
-export function SearchPackagesClient({ allPackages, featuredSlotsEnabled, operators }: SearchPackagesClientProps) {
+export function SearchPackagesClient({ allPackages, featuredSlotsEnabled, operators, initialCompareIds }: SearchPackagesClientProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -63,6 +65,7 @@ export function SearchPackagesClient({ allPackages, featuredSlotsEnabled, operat
         featuredSlotsEnabled={featuredSlotsEnabled}
         operators={operators}
         airportOptions={airportOptions}
+        initialCompareIds={initialCompareIds}
       />
     </div>
   );
