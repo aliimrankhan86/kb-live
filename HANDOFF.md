@@ -19,7 +19,7 @@
 
 **Batch 2 (2026-10-09, PR #119, merged into `dev` `e571228`):** one package list at `/packages` (`/search/packages` is a 308 to it), optional room prices (quad, triple, double), cron guard, partial PATCH fix, per-field CSV round trip. **Migration 015 (`supabase/migrations-pending/`) is on staging and pending on production: apply it before any release to `main`; the code fails package queries without it.** Report `docs/uat/BATCH2_REPORT.md`.
 
-**Batch 3 (2026-10-09, `fix/batch-3-soft-404-and-cleanup`, PR into `dev`, not merged):** real 404 with noindex for unknown or unpublished package URLs, additive staging seed that writes the stated room prices (not run on staging), dash and title hygiene. Cron expiry stays on the return date (decided). Report and staging proof `docs/uat/BATCH3_REPORT.md`.
+**Batch 3 (2026-10-09, `fix/batch-3-soft-404-and-cleanup`, PR #120 into `dev`, not merged):** real 404 with noindex for unknown or unpublished package URLs, additive staging seed that writes the stated room prices (not run on staging), dash and title hygiene. Cron expiry stays on the return date (decided). Report and staging proof `docs/uat/BATCH3_REPORT.md`.
 
 **Staging (B0, PR #117 merged into `dev`):** Vercel Preview deployments use the fictional Supabase project `pilgrimcompare-staging` (`fkcudutzgltrsoykfvfn`), with a test-site banner, `noindex` and email only to `STAGING_EMAIL_TO`. Reseed with `npm run seed:staging`. Read `docs/STAGING.md` before touching Preview env vars or staging data.
 

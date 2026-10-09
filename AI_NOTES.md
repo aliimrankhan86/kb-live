@@ -1,6 +1,6 @@
 # PilgrimCompare AI Handover — Single Source of Truth
 
-## §B3 Batch 3 soft 404, staging seed room prices, copy hygiene (PR into `dev`, branch `fix/batch-3-soft-404-and-cleanup`), 2026-10-09
+## §B3 Batch 3 soft 404, staging seed room prices, copy hygiene (PR #120 into `dev`, branch `fix/batch-3-soft-404-and-cleanup`), 2026-10-09
 
 Full report: `docs/uat/BATCH3_REPORT.md` (per item, decisions, risks, staging proof, every wording change).
 

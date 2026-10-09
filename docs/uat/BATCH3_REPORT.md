@@ -1,6 +1,6 @@
 # Batch 3 report: soft 404, staging seed room prices, copy hygiene (2026-10-09)
 
-Branch `fix/batch-3-soft-404-and-cleanup` from `dev` `e571228` (batch 2 merged). One PR into `dev`, not merged. `main` (`a4e7075`) untouched. No production database or Vercel change. No SQL written or applied anywhere. The staging seed was changed but **not run** against staging. No new dependencies.
+Branch `fix/batch-3-soft-404-and-cleanup` from `dev` `e571228` (batch 2 merged). One PR into `dev` (#120), not merged. `main` (`a4e7075`) untouched. No production database or Vercel change. No SQL written or applied anywhere. The staging seed was changed but **not run** against staging. No new dependencies.
 
 ## Test counts
 
