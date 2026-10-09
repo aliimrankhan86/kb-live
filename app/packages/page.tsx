@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { PackagesBrowse } from '@/components/packages/PackagesBrowse'
 import { JsonLdScript, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
 import { Repository } from '@/lib/api/repository'
-import type { Package } from '@/lib/types'
+import type { OperatorProfile, Package } from '@/lib/types'
 
 export const metadata: Metadata = {
   title: 'Browse Hajj & Umrah Packages',
@@ -37,10 +37,11 @@ const pageJsonLd = graphJsonLd([
 
 export default async function PackagesPage() {
   let packages: Package[] = []
+  let operators: OperatorProfile[] = []
   let error: string | undefined
 
   try {
-    packages = await Repository.listPackages()
+    ;[packages, operators] = await Promise.all([Repository.listPackages(), Repository.listPublicOperators()])
   } catch (err) {
     // Internal error detail stays in the server log, never on the page.
     console.error(err)
@@ -51,7 +52,7 @@ export default async function PackagesPage() {
     <>
       <JsonLdScript data={pageJsonLd} />
       <div className="min-h-screen bg-[var(--background)]">
-        <PackagesBrowse packages={packages} error={error} />
+        <PackagesBrowse packages={packages} operators={operators} error={error} />
       </div>
     </>
   )

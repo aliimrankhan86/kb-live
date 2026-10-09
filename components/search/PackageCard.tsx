@@ -143,8 +143,13 @@ const PackageCard: React.FC<PackageCardProps> = ({
         <div className={styles.operatorBlock}>
           <div className={styles.operatorTopRow}>
             <span className={styles.operatorName} title={operator?.companyName}>
-              {/* Real name only; blank (not a made-up label) while operators load. */}
-              {operator?.companyName ?? <span className="sr-only">Loading operator name</span>}
+              {operator?.slug ? (
+                <Link href={`/operators/${operator.slug}`} className={styles.operatorLink} data-testid={`operator-link-${pkg.id}`}>
+                  {operator.companyName}
+                </Link>
+              ) : (
+                operator?.companyName ?? 'Not provided'
+              )}
             </span>
             <button
               type="button"

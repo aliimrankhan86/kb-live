@@ -275,6 +275,24 @@
   min-width: 0;
 }
 
+.operatorLink {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--borderStrong);
+  text-underline-offset: 3px;
+}
+
+.operatorLink:hover {
+  text-decoration-color: currentColor;
+}
+
+.operatorLink:focus-visible {
+  outline: 2px solid var(--focusRing);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 .trustRow {
   display: flex;
   align-items: center;

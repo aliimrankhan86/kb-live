@@ -55,6 +55,8 @@ interface PackageListProps {
   onSortChange?: (sort: SortOption) => void;
   /** Evaluated server-side from FEATURE_FEATURED_SLOTS env var. Never pass client state here. */
   featuredSlotsEnabled?: boolean;
+  /** Public operators, loaded on the server with the packages. */
+  operators?: OperatorProfile[];
 }
 
 const PackageList: React.FC<PackageListProps> = ({
@@ -65,6 +67,7 @@ const PackageList: React.FC<PackageListProps> = ({
   sortBy: sortByProp,
   onSortChange,
   featuredSlotsEnabled = false,
+  operators = [],
 }) => {
   const [shortlistedPackages, setShortlistedPackages] = useState<string[]>([]);
   const [shortlistLoaded, setShortlistLoaded] = useState(false);
@@ -72,7 +75,6 @@ const PackageList: React.FC<PackageListProps> = ({
   const [selectedCompareIds, setSelectedCompareIds] = useState<string[]>([]);
   const [compareMessage, setCompareMessage] = useState('');
   const [showComparison, setShowComparison] = useState(false);
-  const [operatorsById, setOperatorsById] = useState<Record<string, OperatorProfile>>({});
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
@@ -103,20 +105,11 @@ const PackageList: React.FC<PackageListProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isSortOpen]);
 
-  useEffect(() => {
-    fetch('/api/operators')
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.operators) {
-          setOperatorsById(
-            (d.operators as OperatorProfile[]).reduce<Record<string, OperatorProfile>>(
-              (acc, op) => ({ ...acc, [op.id]: op }),
-              {}
-            )
-          );
-        }
-      });
-  }, []);
+  // Server-rendered names: no blank operator line, no layout shift (UX-02).
+  const operatorsById = useMemo(
+    () => Object.fromEntries(operators.map((op) => [op.id, op])) as Record<string, OperatorProfile>,
+    [operators]
+  );
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
