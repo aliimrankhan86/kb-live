@@ -8,6 +8,8 @@ export interface ComparisonRow {
   id: string;
   price: string;
   operatorName: string;
+  /** Package title, shown under the operator in each column (UX-05). */
+  title?: string;
   totalNights: number;
   splitNights: string;
   hotelRating: string;
@@ -137,6 +139,7 @@ export function mapPackageToComparison(pkg: Package, operator?: OperatorProfile)
     id: pkg.id,
     price: pkg.currency && Number.isFinite(pkg.pricePerPerson) ? price : 'Not provided',
     operatorName: operator?.companyName || 'Not provided',
+    title: pkg.title,
     totalNights: pkg.totalNights,
     splitNights: pkg.nightsMakkah && pkg.nightsMadinah ? `${pkg.nightsMakkah} / ${pkg.nightsMadinah}` : 'Not provided',
     hotelRating,

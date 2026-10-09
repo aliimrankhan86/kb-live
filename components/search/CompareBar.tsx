@@ -6,6 +6,8 @@ import styles from './CompareBar.module.css'
 export interface CompareBarItem {
   id: string
   label: string
+  /** Nights and package title, so two packages from one operator can be told apart. */
+  detail?: string
   price?: string
 }
 
@@ -54,7 +56,10 @@ export const CompareBar: React.FC<CompareBarProps> = ({
         <div className={styles.chips}>
           {items.map((item) => (
             <span key={item.id} className={styles.chip}>
-              <span className={styles.chipLabel} title={item.label}>{item.label}</span>
+              <span className={styles.chipText} title={item.detail ? `${item.label}: ${item.detail}` : item.label}>
+                <span className={styles.chipLabel}>{item.label}</span>
+                {item.detail && <span className={styles.chipDetail}>{item.detail}</span>}
+              </span>
               <button
                 type="button"
                 className={styles.chipRemove}

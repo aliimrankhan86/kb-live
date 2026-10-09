@@ -20,6 +20,8 @@ export const INCLUSIONS: InclusionInfo[] = [
 ];
 
 const walkMinutes = (metres: number) => Math.max(1, Math.round(metres / 80));
+/** "an 8-minute", "an 11-minute", "an 18-minute", else "a ...". */
+const aOrAn = (n: number) => (/^(8|11|18|8\d)$/.test(String(n)) ? 'an' : 'a');
 
 /** City-aware label for the holy site a hotel sits near. */
 export const haramLabel = (city: 'Makkah' | 'Madinah') =>
@@ -37,7 +39,7 @@ export function friendlyDistance(
 ): { primary: string; note?: string } | null {
   if (typeof metres === 'number' && metres > 0) {
     const dist = metres >= 1000 ? `${(metres / 1000).toFixed(1)} km` : `${metres} m`;
-    return { primary: `${dist} from ${haramLabel(city)}`, note: `about a ${walkMinutes(metres)}-minute walk` };
+    return { primary: `${dist} from ${haramLabel(city)}`, note: `about ${aOrAn(walkMinutes(metres))} ${walkMinutes(metres)}-minute walk` };
   }
   switch (band) {
     case 'near':

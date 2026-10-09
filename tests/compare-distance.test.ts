@@ -31,6 +31,11 @@ describe('compare distance matches the package page', () => {
     expect(row.distance).toBe('Makkah: Near the Haram (Grand Mosque), a short walk\nMadinah: Not provided');
   });
 
+  it('says "an 8-minute walk", not "a 8-minute walk"', () => {
+    expect(friendlyDistance('Madinah', 650, 'medium')?.note).toBe('about an 8-minute walk');
+    expect(friendlyDistance('Makkah', 250, 'near')?.note).toBe('about a 3-minute walk');
+  });
+
   it('ranks on stated metres before the band', () => {
     const close = mapPackageToComparison(pkg({ distanceToHaramMakkahMetres: 150, distanceBandMakkah: 'medium', distanceBandMadinah: 'unknown', distanceToHaramMadinahMetres: undefined }));
     expect(close.distanceValue).toBe(150);

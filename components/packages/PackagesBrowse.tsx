@@ -150,7 +150,7 @@ export function PackagesBrowse({ packages, operators = [], error }: PackagesBrow
       selectedCompareIds.map((id) => {
         const pkg = packages.find((p) => p.id === id)
         const operator = pkg ? operatorsById[pkg.operatorId] : undefined
-        return { id, label: operator?.companyName ?? pkg?.title ?? 'Selected package' }
+        return { id, label: operator?.companyName ?? 'Not provided', detail: pkg ? `${pkg.totalNights} nights · ${pkg.title}` : undefined }
       }),
     [selectedCompareIds, packages, operatorsById]
   )

@@ -9,9 +9,9 @@ vi.stubGlobal(
   vi.fn().mockResolvedValue({ json: () => Promise.resolve({ operators: [] }) })
 );
 
-// Row A is cheapest, closest, best-rated and most-included; Row B loses on all
-// four. Nights / split / occupancy are identical, so those rows must be muted
-// (no "Best" marker), and every decisive row must crown exactly Row A.
+// Row A is cheapest, closest, highest-rated and most-included; Row B trails on
+// all four. Nights / split / occupancy are identical, so those rows must be
+// muted (no mark), and every decisive row must mark exactly Row A.
 const rowA: ComparisonRow = {
   id: 'a',
   price: '£799',
@@ -61,13 +61,40 @@ describe('ComparisonTable decision aids', () => {
     container.remove();
   });
 
-  it('flags the cheapest column once', () => {
+  it('flags the cheapest column once, in neutral words', () => {
     act(() => root.render(<ComparisonTable rows={[rowA, rowB]} />));
-    const matches = container.textContent?.match(/Lowest price/g) ?? [];
-    expect(matches.length).toBe(1);
+    const flags = container.querySelectorAll('[data-testid="comparison-lowest"]');
+    expect(flags.length).toBe(1);
+    expect(flags[0].textContent).toBe('Lowest price in this comparison');
   });
 
-  it('marks "Best" on each decisive dimension (rating, distance, inclusions) — not on identical rows', () => {
+  it('does not flag a lowest price across different trip lengths, and shows each length (UX-06)', () => {
+    act(() => root.render(<ComparisonTable rows={[rowA, { ...rowB, totalNights: 14 }]} />));
+    expect(container.querySelector('[data-testid="comparison-lowest"]')).toBeNull();
+    const nights = Array.from(container.querySelectorAll('[data-testid="comparison-nights"]')).map((n) => n.textContent);
+    expect(nights).toEqual(['7 nights', '14 nights']);
+  });
+
+  it('shows the package title beside the operator in each column (UX-05)', () => {
+    act(() => root.render(<ComparisonTable rows={[{ ...rowA, title: '7 night Umrah from Gatwick' }, rowB]} />));
+    expect(container.querySelector('[data-testid="comparison-package-title"]')?.textContent).toBe('7 night Umrah from Gatwick');
+  });
+
+  it('uses factual marks, never "Best" (UX-06, standards §5)', () => {
+    act(() => root.render(<ComparisonTable rows={[rowA, rowB]} />));
+    const marks = Array.from(container.querySelectorAll('[data-testid="comparison-best"]')).map((m) => m.textContent);
+    expect(marks).toEqual([
+      'Highest star rating among these packages',
+      'Shortest distance among these packages',
+      'Most items included among these packages',
+    ]);
+    expect(container.textContent).not.toMatch(/\bbest\b/i);
+    expect(container.querySelector('[data-testid="comparison-marks-note"]')?.textContent).toBe(
+      'Marks compare only the packages shown here, using the details each operator gave us.'
+    );
+  });
+
+  it('marks each decisive dimension (rating, distance, inclusions), not identical rows', () => {
     act(() => root.render(<ComparisonTable rows={[rowA, rowB]} />));
     // 3 ranked rows differ (rating, distance, inclusions) → exactly 3 markers.
     // Nights/split/occupancy are identical, so no marker there.
@@ -98,8 +125,8 @@ describe('ComparisonTable decision aids', () => {
       inclusionsCount: 2,
     };
     act(() => root.render(<ComparisonTable rows={[rowA, tie]} />));
-    // All ranked dimensions now equal → no "Best" markers, no "Lowest price".
+    // All ranked dimensions now equal → no marks, no lowest price flag.
     expect(container.querySelectorAll('[data-testid="comparison-best"]').length).toBe(0);
-    expect(container.textContent).not.toContain('Lowest price');
+    expect(container.querySelector('[data-testid="comparison-lowest"]')).toBeNull();
   });
 });

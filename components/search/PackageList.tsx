@@ -254,7 +254,8 @@ const PackageList: React.FC<PackageListProps> = ({
       const operator = catPkg ? operatorsById[catPkg.operatorId] : undefined;
       return {
         id,
-        label: operator?.companyName ?? catPkg?.title ?? 'Selected package',
+        label: operator?.companyName ?? 'Not provided',
+        detail: catPkg ? `${catPkg.totalNights} nights · ${catPkg.title}` : undefined,
       };
     });
   }, [selectedCompareIds, comparablePackages, operatorsById]);
