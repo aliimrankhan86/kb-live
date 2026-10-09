@@ -79,11 +79,11 @@ export const interestSchema = z.object({
 });
 
 /**
- * Canonical pilgrim enquiry (Task 2). Short form — only fields the package does
+ * Canonical pilgrim enquiry (Task 2). Short form: only fields the package does
  * NOT already state. Name is required; at least one of email/phone is required
  * so the operator can reply. travelMonth + message are optional.
  *
- * Task 3 will add a separate, unticked marketing opt-in here — leave room, do
+ * Task 3 will add a separate, unticked marketing opt-in here: leave room, do
  * not inline it now.
  */
 export const enquirySchema = z

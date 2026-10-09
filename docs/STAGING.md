@@ -71,17 +71,17 @@ Production output is unchanged and pinned by tests (`tests/staging-env.test.tsx`
 | Customer with enquiries | `customer-enquiries@test.local` | customer |
 | Customer with none | `customer-new@test.local` | customer |
 
-Passwords: `staging-seed.config.local.json`. The seed creates that file with random passwords on its first run and reuses it after. If the file is lost, delete nothing: rerun the seed and it writes new passwords and updates the accounts to match. Never paste the passwords into chat, docs or tickets.
+Passwords: `staging-seed.config.local.json`. The seed creates that file with random passwords on its first run and reuses it after. If the file is lost, delete nothing: the seed writes new passwords into a new file but never changes an existing account, so set each account's password to the new value in the Supabase dashboard (Authentication, Users). Never paste the passwords into chat, docs or tickets.
 
 ## Reseed
 
-Idempotent. Run from the repo root on Ali's Mac (needs `supabase login` and the Keychain entry):
+Additive and idempotent. Run from the repo root on Ali's Mac (needs `supabase login` and the Keychain entry):
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=https://fkcudutzgltrsoykfvfn.supabase.co npm run seed:staging -- --ref fkcudutzgltrsoykfvfn
 ```
 
-It deletes only rows whose id starts with the seed marker `5eed5eed-`, plus analytics events, booking outcomes and complaints that point at those rows (the database would refuse the delete otherwise), then inserts the dataset again. Users and operators are upserted. Rows created during UAT (for example a new enquiry or a package an operator adds) are kept. The service role key comes from the Supabase CLI at runtime and the database password from the Keychain. The connection verifies the pooler certificate against `scripts/supabase-root-2021-ca.crt` (Supabase's public root CA).
+It inserts only the dataset rows that are missing and never deletes, overwrites or resets a row, so every change made during UAT is kept. Accounts are created when missing and never changed. The one write to an existing row: a seed package's empty `price_quad_per_person`, `price_triple_per_person` and `price_double_per_person` are filled with the room prices its operator notes state ("Room prices per person: Quad £1,295, ..."), only while the notes still read as seeded, and a value already set is kept. Needs migration 015 on the target (it is on staging since batch 2). Tested on the local database by `e2e/local-db/staging-seed.spec.ts`. The service role key comes from the Supabase CLI at runtime and the database password from the Keychain. The connection verifies the pooler certificate against `scripts/supabase-root-2021-ca.crt` (Supabase's public root CA).
 
 ## The dataset (`scripts/seed-staging-data.mjs`)
 

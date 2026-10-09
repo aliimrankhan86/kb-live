@@ -8,7 +8,7 @@ const schema = z.object({
 });
 
 export async function POST(request: Request) {
-  // Strict rate limit — resend is a potential email-bombing vector
+  // Strict rate limit: resend is a potential email-bombing vector
   const rateLimitId = getRateLimitIdentifier(request, 'auth');
   const rateLimit = await checkRateLimit(rateLimitId);
   if (rateLimit.limited) {
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ ok: true });
   } catch {
-    // Swallow and return ok — no enumeration risk.
+    // Swallow and return ok: no enumeration risk.
     return NextResponse.json({ ok: true });
   }
 }

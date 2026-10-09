@@ -2,7 +2,7 @@ import Link from 'next/link'
 import styles from './home.module.css'
 
 /**
- * Single closing reinforcement — a clear final next step at the end of the
+ * Single closing reinforcement: a clear final next step at the end of the
  * scroll. Deliberately NOT a second audience block (the AudienceRouter under
  * the hero owns audience routing).
  */

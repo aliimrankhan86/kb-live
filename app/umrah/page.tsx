@@ -62,7 +62,7 @@ const umrahJsonLd = graphJsonLd([
 ])
 
 export default async function UmrahPage() {
-  // A DB blip must not take the page down — sections fall back to honest empty states.
+  // A DB blip must not take the page down: sections fall back to honest empty states.
   const departureCities = await Repository.getDistinctDepartureCities().catch(() => [] as string[])
   const packages = await Repository.listPackages().catch(() => [])
   // Only airports that live published packages actually depart from (standards §8).
@@ -95,7 +95,7 @@ export default async function UmrahPage() {
               </article>
             ))}
           </div>
-          {/* Internal links — cost guide and city corridors */}
+          {/* Internal links: cost guide and city corridors */}
           <nav aria-label="Related guides" className="mt-6 pt-5 border-t border-[var(--border)] flex flex-wrap gap-2">
             <Link href="/umrah/cost" className="inline-flex min-h-[44px] items-center rounded-lg border border-[var(--yellow)]/30 bg-[var(--yellow)]/5 px-3 py-2 text-xs font-medium text-[var(--yellow)] hover:bg-[var(--yellow)]/10 transition-colors">
               Umrah cost guide →

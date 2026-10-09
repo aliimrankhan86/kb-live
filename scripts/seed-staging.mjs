@@ -9,11 +9,11 @@
  * comes from the Supabase CLI at runtime and the database password from the
  * macOS Keychain (service "pilgrimcompare-staging-db"), never from files.
  *
- * Idempotent: deletes only rows whose id starts with the seed marker (plus
- * the analytics events, outcomes and complaints that point at them, which
- * would otherwise block the delete), then inserts the dataset again. Users
- * and operators are upserted. Sign-in accounts carry app_metadata.seed_batch
- * and an existing account without it is never touched.
+ * Additive and idempotent: inserts only rows that are missing and never
+ * deletes, overwrites or resets a row. The one write to an existing row fills
+ * a seed package's empty room price columns, and only while its operator notes
+ * still state those prices. Sign-in accounts are created when missing and an
+ * existing one is never changed (one without app_metadata.seed_batch is refused).
  */
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
@@ -24,7 +24,7 @@ import pg from 'pg';
 import { createClient } from '@supabase/supabase-js';
 import {
   ACCOUNTS, COMPLAINTS, ENQUIRIES, IMAGES, LEADS, OPERATORS, PACKAGES,
-  SEED_BATCH, SEED_ID_PREFIX, roomPriceNote, seedId,
+  SEED_BATCH, roomPriceNote, seedId,
 } from './seed-staging-data.mjs';
 
 export const PRODUCTION_REF = 'nzvepuzzxjoxvpcrlozx';
@@ -115,7 +115,7 @@ function loadAccountPasswords() {
   return config.accounts;
 }
 
-async function upsertAccounts(supabase) {
+async function ensureAccounts(supabase) {
   const passwords = loadAccountPasswords();
   const { data, error } = await supabase.auth.admin.listUsers({ perPage: 1000 });
   if (error) throw error;
@@ -129,11 +129,13 @@ async function upsertAccounts(supabase) {
     };
     const existing = data.users.find((u) => u.email === a.email);
     if (existing && existing.app_metadata?.seed_batch !== SEED_BATCH) {
-      throw new Error(`${a.email} exists without the seed marker: refusing to change it`);
+      throw new Error(`${a.email} exists without the seed marker: refusing to use it`);
     }
-    const res = existing
-      ? await supabase.auth.admin.updateUserById(existing.id, attrs)
-      : await supabase.auth.admin.createUser({ email: a.email, ...attrs });
+    if (existing) {
+      ids[a.key] = existing.id;
+      continue;
+    }
+    const res = await supabase.auth.admin.createUser({ email: a.email, ...attrs });
     if (res.error) throw res.error;
     ids[a.key] = res.data.user.id;
   }
@@ -155,20 +157,8 @@ async function uploadImages(baseUrl, key) {
   return urls;
 }
 
-async function seedRows(client, accountIds, imageUrls) {
-  const marker = `${SEED_ID_PREFIX}%`;
-  const like = (col) => `${col}::text like $1`;
-  // Wipe: seed rows, plus rows that point at them (the delete would fail otherwise).
-  await client.query(`delete from booking_outcomes where ${like('id')} or ${like('booking_intent_id')}`, [marker]);
-  await client.query(`delete from complaints where ${like('id')} or ${like('booking_intent_id')}`, [marker]);
-  await client.query(`delete from booking_intents where ${like('id')} or ${like('offer_id')}`, [marker]);
-  await client.query(`delete from offers where ${like('id')} or ${like('request_id')}`, [marker]);
-  await client.query(`delete from quote_requests where ${like('id')}`, [marker]);
-  await client.query(`delete from analytics_events where ${like('id')} or ${like('package_id')}`, [marker]);
-  await client.query(`delete from marketing_consents where ${like('id')}`, [marker]);
-  await client.query(`delete from enquiries where ${like('id')}`, [marker]);
-  await client.query(`delete from packages where ${like('id')}`, [marker]);
-
+/** Inserts the dataset rows that are missing. Never deletes or resets a row (see the header). */
+export async function seedRows(client, accountIds, imageUrls) {
   const accountFor = (opKey) => ACCOUNTS.find((a) => a.operator === opKey);
   const opId = Object.fromEntries(OPERATORS.map((o, i) => [o.key, accountFor(o.key) ? accountIds[accountFor(o.key).key] : seedId('op', i + 1)]));
   const opName = Object.fromEntries(OPERATORS.map((o) => [o.key, o.companyName]));
@@ -184,9 +174,7 @@ async function seedRows(client, accountIds, imageUrls) {
       `insert into users (id, email, role, name, marketing_consent, marketing_consent_at, marketing_consent_source, updated_at)
        values ($1, $2, $3, $4, $5::boolean, case when $5::boolean is null then null else now() end,
          case when $5::boolean is null then null else 'signup' end, now())
-       on conflict (id) do update set email = excluded.email, role = excluded.role, name = excluded.name,
-         marketing_consent = excluded.marketing_consent, marketing_consent_at = excluded.marketing_consent_at,
-         marketing_consent_source = excluded.marketing_consent_source, updated_at = now()`,
+       on conflict do nothing`,
       [u.id, u.email, u.role, u.name, u.consent ?? null],
     );
   }
@@ -198,15 +186,7 @@ async function seedRows(client, accountIds, imageUrls) {
          verified_at, tier, atol_number, abta_member_number, contact_email, contact_phone, office_address, website_url,
          serving_regions, departure_airports, years_in_business, pilgrimage_types_offered, onboarding_complete, updated_at)
        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,true,now())
-       on conflict (id) do update set company_name = excluded.company_name, trading_name = excluded.trading_name,
-         slug = excluded.slug, company_registration_number = excluded.company_registration_number,
-         verification_status = excluded.verification_status, verified_at = excluded.verified_at, tier = excluded.tier,
-         atol_number = excluded.atol_number, abta_member_number = excluded.abta_member_number,
-         contact_email = excluded.contact_email, contact_phone = excluded.contact_phone,
-         office_address = excluded.office_address, website_url = excluded.website_url,
-         serving_regions = excluded.serving_regions, departure_airports = excluded.departure_airports,
-         years_in_business = excluded.years_in_business, pilgrimage_types_offered = excluded.pilgrimage_types_offered,
-         onboarding_complete = true, updated_at = now()`,
+       on conflict do nothing`,
       [
         opId[o.key], o.companyName, o.tradingName ?? null, o.slug, o.companyNumber ?? null, o.verification,
         o.verification === 'verified' ? daysAgo(30) : null, o.tier, o.atol ?? null, o.abta ?? null, contactEmail,
@@ -223,9 +203,19 @@ async function seedRows(client, accountIds, imageUrls) {
          hotel_makkah_name, hotel_madinah_name, distance_to_haram_makkah_metres, distance_to_haram_madinah_metres,
          distance_band_makkah, distance_band_madinah, airline, departure_airport, flight_type, deposit_amount,
          payment_plan_available, cancellation_policy, highlights, group_type, ziyarat_included, ziyarat_details,
-         room_occupancy_options, inclusions, notes, images, created_at, updated_at)
+         room_occupancy_options, inclusions, notes, images, created_at, updated_at,
+         price_quad_per_person, price_triple_per_person, price_double_per_person)
        values ($1,$2,$3,$4,$5,'umrah',$6,$7,$8,$9,'GBP',$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,
-         '{}',$27,$28,$29,$30,$31,$32,$33,$34,$34)`,
+         '{}',$27,$28,$29,$30,$31,$32,$33,$34,$34,$35,$36,$37)
+       on conflict (id) do update set
+         price_quad_per_person = coalesce(packages.price_quad_per_person, excluded.price_quad_per_person),
+         price_triple_per_person = coalesce(packages.price_triple_per_person, excluded.price_triple_per_person),
+         price_double_per_person = coalesce(packages.price_double_per_person, excluded.price_double_per_person)
+       -- Room prices only, only into empty columns, and only while the notes still state them.
+       where packages.notes is not distinct from excluded.notes
+         and ((packages.price_quad_per_person is null and excluded.price_quad_per_person is not null)
+           or (packages.price_triple_per_person is null and excluded.price_triple_per_person is not null)
+           or (packages.price_double_per_person is null and excluded.price_double_per_person is not null))`,
       [
         seedId('pkg', p.n), opId[p.op], p.title, slugify(p.n, p.title), p.status ?? 'published', p.seasonLabel ?? null,
         p.dates ? JSON.stringify({ start: p.dates[0], end: p.dates[1] }) : null, p.priceType ?? 'from', p.price,
@@ -235,6 +225,7 @@ async function seedRows(client, accountIds, imageUrls) {
         p.plan ?? null, p.cancellation ?? null, p.groupType ?? null, p.ziyarat ?? null, p.ziyaratDetails ?? null,
         JSON.stringify(p.rooms), JSON.stringify(p.inclusions), roomPriceNote(p.roomPrices),
         p.image ? [imageUrls[p.image]] : [], `${p.updated}T09:00:00Z`,
+        p.roomPrices?.[0] ?? null, p.roomPrices?.[1] ?? null, p.roomPrices?.[2] ?? null,
       ],
     );
   }
@@ -248,7 +239,7 @@ async function seedRows(client, accountIds, imageUrls) {
     await client.query(
       `insert into enquiries (id, reference_code, created_at, package_id, operator_id, package_title, operator_name,
          name, email, phone, travel_month, message)
-       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
+       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) on conflict do nothing`,
       [
         seedId('enq', e.n), ref, daysAgo(e.daysAgo), seedId('pkg', p.n), opId[p.op], p.title, opName[p.op], name,
         live ? e.email ?? null : null, live ? e.phone ?? null : null, live ? e.travelMonth ?? null : null,
@@ -258,7 +249,7 @@ async function seedRows(client, accountIds, imageUrls) {
     if (live && e.consent && e.email) {
       await client.query(
         `insert into marketing_consents (id, email, consent, consent_timestamp, source, enquiry_reference, created_at)
-         values ($1,$2,true,$3,'enquiry_form',$4,$3)`,
+         values ($1,$2,true,$3,'enquiry_form',$4,$3) on conflict do nothing`,
         [seedId('mc', e.n), e.email, daysAgo(e.daysAgo), ref],
       );
     }
@@ -273,7 +264,7 @@ async function seedRows(client, accountIds, imageUrls) {
       `insert into quote_requests (id, customer_id, status, created_at, type, season, date_window, departure_city,
          total_nights, nights_makkah, nights_madinah, hotel_stars, distance_preference, budget_range, occupancy,
          inclusions, notes, source_operator_id)
-       values ($1,$2,$3,$4,'umrah',$5,$6,$7,$8,$9,$10,$11,'near',$12,$13,$14,$15,$16)`,
+       values ($1,$2,$3,$4,'umrah',$5,$6,$7,$8,$9,$10,$11,'near',$12,$13,$14,$15,$16) on conflict do nothing`,
       [
         seedId('qr', l.n), customerId, l.status, daysAgo(l.daysAgo), seasonOf(p.seasonLabel),
         JSON.stringify({ start: p.dates[0], end: p.dates[1], flexible: false }), p.departureAirport ?? null,
@@ -288,7 +279,7 @@ async function seedRows(client, accountIds, imageUrls) {
     await client.query(
       `insert into offers (id, request_id, operator_id, created_at, price_per_person, currency, total_nights, nights_makkah,
          nights_madinah, hotel_stars, distance_to_haram, room_occupancy, inclusions, notes)
-       values ($1,$2,$3,$4,$5,'GBP',$6,$7,$8,$9,$10,$11,$12,'Test offer')`,
+       values ($1,$2,$3,$4,$5,'GBP',$6,$7,$8,$9,$10,$11,$12,'Test offer') on conflict do nothing`,
       [
         seedId('of', l.n), seedId('qr', l.n), opId[l.op], daysAgo(l.daysAgo - 1), l.offerPrice, p.nights[0], p.nights[1],
         p.nights[2], stars, p.metres?.[0] ? `${p.metres[0]}m` : 'Unknown',
@@ -297,12 +288,12 @@ async function seedRows(client, accountIds, imageUrls) {
     );
     await client.query(
       `insert into booking_intents (id, reference_code, offer_id, customer_id, operator_id, status, created_at, updated_at, notes)
-       values ($1,$2,$3,$4,$5,$6,$7,$7,'Test booking intent')`,
+       values ($1,$2,$3,$4,$5,$6,$7,$7,'Test booking intent') on conflict do nothing`,
       [seedId('bi', l.n), bookingRef(l.n), seedId('of', l.n), customerId, opId[l.op], l.booking, daysAgo(l.daysAgo - 2)],
     );
     if (l.outcome) {
       await client.query(
-        `insert into booking_outcomes (id, booking_intent_id, outcome, reported_at, notes) values ($1,$2,$3,now(),'Test outcome')`,
+        `insert into booking_outcomes (id, booking_intent_id, outcome, reported_at, notes) values ($1,$2,$3,now(),'Test outcome') on conflict do nothing`,
         [seedId('bo', l.n), seedId('bi', l.n), l.outcome],
       );
     }
@@ -314,7 +305,7 @@ async function seedRows(client, accountIds, imageUrls) {
     await client.query(
       `insert into complaints (id, booking_intent_id, reference_code, customer_id, operator_id, category, severity,
          description, status, operator_response, operator_responded_at, admin_notes, created_at, updated_at)
-       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,now())`,
+       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,now()) on conflict do nothing`,
       [
         seedId('cp', c.n), seedId('bi', l.n), bookingRef(l.n), customerId, opId[l.op], c.category, c.severity,
         c.description, c.status, c.operatorResponse ?? null, c.operatorResponse ? daysAgo(1) : null,
@@ -331,7 +322,7 @@ async function main() {
   const key = serviceRoleKey(ref);
   const supabase = createClient(baseUrl, key, { auth: { autoRefreshToken: false, persistSession: false } });
 
-  const accountIds = await upsertAccounts(supabase);
+  const accountIds = await ensureAccounts(supabase);
   const imageUrls = await uploadImages(baseUrl, key);
 
   // Supabase Root 2021 CA (public certificate published by Supabase) verifies the pooler's TLS certificate.

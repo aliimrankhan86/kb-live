@@ -3,7 +3,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@/lib/generated/prisma/client';
 
 // Prisma 7 uses the "prisma-client" generator which requires a driver adapter.
-// Pool uses DATABASE_URL (pgBouncer, port 6543) — optimal for serverless / concurrent queries.
+// Pool uses DATABASE_URL (pgBouncer, port 6543): optimal for serverless / concurrent queries.
 // prisma.config.ts uses DIRECT_URL (port 5432) for CLI schema engine operations only.
 
 function createPrismaClient() {

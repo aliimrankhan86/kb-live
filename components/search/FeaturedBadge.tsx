@@ -1,5 +1,5 @@
 /**
- * FeaturedBadge — rendered at the Featured slot itself, never in a footnote.
+ * FeaturedBadge: rendered at the Featured slot itself, never in a footnote.
  *
  * DMCC Act 2024 Schedule 20: paid placement must be visually distinct and
  * labelled at the slot. This component satisfies that requirement.

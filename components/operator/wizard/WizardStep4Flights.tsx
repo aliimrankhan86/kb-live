@@ -60,7 +60,7 @@ export function WizardStep4Flights({ data, onChange, error }: Props) {
         <span className="text-sm text-[var(--text)]">Flights included in price</span>
       </div>
 
-      {/* Flight details — shown only when flights included */}
+      {/* Flight details: shown only when flights included */}
       {flightsIncluded && (
         <div className="space-y-4 rounded border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.02)] p-4">
           <div className="grid gap-4 sm:grid-cols-2">
@@ -119,6 +119,6 @@ export function WizardStep4Flights({ data, onChange, error }: Props) {
 }
 
 export function validateStep4(_data: Partial<Package>): string | null {
-  // Flights details are optional — no hard validation
+  // Flights details are optional: no hard validation
   return null;
 }

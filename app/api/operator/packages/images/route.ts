@@ -11,7 +11,7 @@ const EXTENSION: Record<string, string> = {
   'image/webp': 'webp',
 };
 
-// ─── POST — upload a single package image, returns its public URL ─────────────
+// ─── POST: upload a single package image, returns its public URL ─────────────
 
 export async function POST(request: NextRequest) {
   try {

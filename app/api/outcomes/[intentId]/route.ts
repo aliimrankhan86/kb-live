@@ -32,7 +32,7 @@ export async function GET(
   }
 
   if (result === 'deciding') {
-    // No outcome to record — customer hasn't decided yet.
+    // No outcome to record: customer hasn't decided yet.
     return respondWithThanks('Thank you. We will check back with you later.');
   }
 
@@ -43,7 +43,7 @@ export async function GET(
     return respondWithThanks('Your response has already been recorded. Thank you.');
   }
 
-  // BookingOutcome records must NEVER be deleted — billing evidence.
+  // BookingOutcome records must NEVER be deleted: billing evidence.
   await prisma.bookingOutcome.create({
     data: {
       bookingIntentId: intentId,

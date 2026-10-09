@@ -10,7 +10,7 @@ export const FEATURE_USE_REAL_DB =
 /**
  * Whether Featured package slots are active in the list UI.
  *
- * Default FALSE — no operator is featured at launch.
+ * Default FALSE: no operator is featured at launch.
  *
  * When true: up to 2 Featured packages appear ABOVE the neutral-sorted list,
  * in a visually distinct section labelled "Featured" at the slot itself.
@@ -30,10 +30,10 @@ export const FEATURE_FEATURED_SLOTS =
  * Whether the booking-intent / bank-details / payment-evidence flow is live in
  * the pilgrim journey.
  *
- * Default FALSE — PARKED (see PARKED_FEATURES.md entry 1). When off, a pilgrim
+ * Default FALSE: PARKED (see PARKED_FEATURES.md entry 1). When off, a pilgrim
  * cannot reach the "Proceed direct" booking screen, the payment-evidence upload,
  * the operator bank details, or the booking confirmation screen. The code is
- * intact and reversible — never delete it.
+ * intact and reversible: never delete it.
  *
  * NEVER read this flag client-side. Evaluate on the server (via
  * isBookingFlowEnabled) and pass the result down as a boolean prop.
@@ -47,10 +47,10 @@ export const FEATURE_BOOKING_FLOW =
  * Whether the multi-step RFQ (request-for-quote) engine is live in the pilgrim
  * journey.
  *
- * Default FALSE — PARKED (see PARKED_FEATURES.md entry 2). When off, the
+ * Default FALSE: PARKED (see PARKED_FEATURES.md entry 2). When off, the
  * `/quote` wizard route 404s, the package page hides its "Request quote" CTA,
  * the quote-request API rejects writes, and the `/quote` entry links are hidden.
- * The code is intact and reversible — never delete it.
+ * The code is intact and reversible: never delete it.
  *
  * NEVER read this flag client-side. Evaluate on the server (via
  * isRfqQuoteEnabled) and pass the result down as a boolean prop.
@@ -63,11 +63,11 @@ export const FEATURE_RFQ_QUOTE =
 /**
  * Whether self-serve operator onboarding is live.
  *
- * Default FALSE — PARKED (see PARKED_FEATURES.md entry 3). The concierge model
+ * Default FALSE: PARKED (see PARKED_FEATURES.md entry 3). The concierge model
  * is the live model: operators are onboarded by the PilgrimCompare team, not via
  * a public self-serve form. When off, the `/operator/onboarding` wizard 404s and
  * the public `/partner` CTAs point to a concierge contact instead of the form.
- * The code is intact and reversible — never delete it.
+ * The code is intact and reversible: never delete it.
  *
  * NEVER read this flag client-side. Evaluate on the server (via
  * isOperatorSelfServeEnabled) and pass the result down as a boolean prop.
@@ -106,7 +106,7 @@ export const IS_PROD_ENV = process.env.NODE_ENV === 'production';
  * Get the active data source for repository operations.
  * - Tests: always MockDB (fast, deterministic, no DB needed)
  * - E2E: always MockDB (prod build + MockDB seed users)
- * - All other environments: requires FEATURE_USE_REAL_DB=true — throws otherwise
+ * - All other environments: requires FEATURE_USE_REAL_DB=true: throws otherwise
  */
 export function getDataSource(): 'prisma' | 'mockdb' {
   if (IS_TEST_ENV) return 'mockdb';

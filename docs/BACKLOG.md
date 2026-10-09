@@ -19,8 +19,8 @@ Logged after release 2026-10-06 shipped (`main` `0c80db9`).
 
 - **Interests API role grants hardening.** See "Revoke API-role grants on `interests`" above. The release POST-DEPLOY is done, so this is unblocked.
 - **Rename the Supabase organisation** from "kaabatrip" to the PilgrimCompare name.
-- **En dashes in ranges.** The signup and login password hints write the A to Z and 0 to 9 ranges with an en dash, and `/umrah` writes "Children (0 to 11 years)" with an en dash. Replace each with "to".
-- **Page titles repeat the brand.** Some titles end in "| PilgrimCompare | PilgrimCompare".
+- **DONE (batch 1 `d38e259`, batch 3 sweep):** en dashes in ranges. The password hints read A to Z and 0 to 9 and `/umrah` reads "Children (0 to 11 years)" on `dev`. Batch 3 also cleared the demo seeds and source comments (`tests/no-em-dash.test.ts`). Production keeps the old copy until `dev` is released.
+- **DONE (batch 1 `0bcc889`, batch 3 check):** page titles no longer repeat the brand on `dev`. Batch 3 widened the real-DB title test to public routes outside the sitemap; none repeat. Production keeps the doubled suffix until `dev` is released.
 - **`/partner` trial wording.** It says "Free to list during the 90-day trial" while the founding cohort gets 12 months free. Copy decision for Ali.
 - **React #418 hydration error.** Seen once on the preview homepage, not reproduced. Watch for it in production logs.
 - **Vercel access.** The Vercel MCP and CLI need re-authenticating to the team scope to read deployments and runtime logs. The CLI was re-authenticated on 2026-10-07 and reads deployments, env names and runtime logs. The MCP was not rechecked.
@@ -37,6 +37,16 @@ Logged after release 2026-10-06 shipped (`main` `0c80db9`).
 
 ## Batch 2 follow-ups (2026-10-09, need Ali)
 
-- **Migration 015 is pending.** `supabase/migrations-pending/015_package_room_prices.sql` (rollback `015_package_room_prices.rollback.sql`). Needs the staging rehearsal (apply on staging, check the PR preview), then production by Ali before any release of batch 2 to `main`. Until it is applied, every package query on that database fails.
-- **Cron expiry date: decision pending.** The `expire-packages` cron still expires a package on its **return** date (`date_window.end`), while the public lists hide it from its **departure** date. Decide: expire on the departure date or the return date. Only the guard changed in batch 2.
-- **Staging seed room prices.** After 015 is on staging, `scripts/seed-staging.mjs` can write each package's stated `roomPrices` into the new columns (today they are only in operator notes). Not done in batch 2, because the seed would fail on staging until 015 is applied.
+- **Migration 015: applied to staging, pending on production.** `supabase/migrations-pending/015_package_room_prices.sql` (rollback `015_package_room_prices.rollback.sql`) is on the staging project. Ali applies it to production before any release of batch 2 to `main`. Until then, every package query on production would fail with the new code.
+- **Cron expiry date: DECIDED (2026-10-09), return date.** The `expire-packages` cron keeps expiring a package on its return date (`date_window.end`). Reason: the public lists already hide a departed package at read time through `hasDeparted()` (`lib/listing.ts`), so the cron is data hygiene only. No code change.
+- **DONE in batch 3:** the staging seed writes each package's stated room prices into the new columns (see batch 3 below).
+
+## Batch 3 (2026-10-09, `fix/batch-3-soft-404-and-cleanup`)
+
+Report: `docs/uat/BATCH3_REPORT.md`.
+
+- **DONE: soft 404 on unknown package URLs (P1, SEO).** `/packages/<unknown slug>` and an unpublished package now answer HTTP 404 with robots noindex (`app/packages/[slug]/not-found.tsx`). A load error stays a rendered message and is noindex.
+- **DONE: staging seed room prices.** `npm run seed:staging` fills `price_quad_per_person`, `price_triple_per_person` and `price_double_per_person` from the prices each package's notes state, and is now additive: it never deletes, overwrites or resets a row. Not run against staging (Ali runs it).
+- **DONE: copy hygiene.** No em or en dashes left in shipped source, comments included, or the demo seeds. No page title repeats the brand.
+- **Still open: interests API role grants hardening.** SQL (`REVOKE` on `public.interests` from `anon` and `authenticated`, see "Revoke API-role grants on `interests`" above). Needs Ali's yes before it runs on staging, then production.
+- **Still open: migration 015 on production** before any release of `dev` to `main` (see batch 2 above).

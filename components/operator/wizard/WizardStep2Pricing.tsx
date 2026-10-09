@@ -61,7 +61,7 @@ export function WizardStep2Pricing({ data, onChange, error }: Props) {
         </div>
       </div>
 
-      {/* Currency — GBP only (MVP C8) */}
+      {/* Currency: GBP only (MVP C8) */}
       <div>
         <label className="mb-1.5 block text-sm font-medium text-[var(--textMuted)]">Currency</label>
         <div className="flex items-center gap-2 rounded border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.03)] px-3 py-2.5 text-sm text-[var(--textMuted)]">

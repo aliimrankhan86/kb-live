@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 import { PackageDetail } from '@/components/packages/PackageDetail'
 import { DepartedNotice } from '@/components/packages/DepartedNotice'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
@@ -7,6 +8,7 @@ import { isRfqQuoteEnabled } from '@/lib/config'
 import { hasDeparted } from '@/lib/listing'
 import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, packageJsonLd, touristTripJsonLd } from '@/lib/seo/json-ld'
 import type { Package, OperatorProfile } from '@/lib/types'
+import { PackageUnavailable } from './not-found'
 
 export async function generateMetadata({
   params,
@@ -59,17 +61,9 @@ export async function generateMetadata({
   return {
     title: 'Package not found',
     description: 'Package details are unavailable.',
+    robots: { index: false, follow: false },
   }
 }
-
-const renderNotFound = (message: string) => (
-  <section className="w-full max-w-3xl mx-auto px-4 py-16">
-    <div role="alert" data-testid="package-not-found" className="rounded border border-[var(--color-error)]/30 bg-[var(--color-error)]/10 px-5 py-4">
-      <h1 className="text-2xl font-semibold text-[var(--text)]">Package not found</h1>
-      <p className="mt-2 text-sm text-[var(--color-error)]">{message}</p>
-    </div>
-  </section>
-)
 
 export default async function PackageDetailPage({
   params,
@@ -93,9 +87,12 @@ export default async function PackageDetailPage({
   }
 
   if (error) {
+    // A load failure stays a rendered message, never indexable even when
+    // generateMetadata loaded the package: React hoists this tag into <head>.
     return (
       <>
-        <div className="min-h-screen bg-[var(--background)]">{renderNotFound(error)}</div>
+        <meta name="robots" content="noindex, nofollow" />
+        <PackageUnavailable message={error} />
       </>
     )
   }
@@ -105,15 +102,8 @@ export default async function PackageDetailPage({
     return <div className="min-h-screen bg-[var(--background)]"><DepartedNotice pkg={pkg} /></div>
   }
 
-  if (!pkg || pkg.status !== 'published') {
-    return (
-      <>
-        <div className="min-h-screen bg-[var(--background)]">
-          {renderNotFound('This package is no longer available.')}
-        </div>
-      </>
-    )
-  }
+  // Real HTTP 404 (not-found.tsx), never a soft 404 with a 200.
+  if (!pkg || pkg.status !== 'published') notFound()
 
   try {
     await Repository.trackEvent(pkg.operatorId, 'package_view', pkg.id, undefined, {

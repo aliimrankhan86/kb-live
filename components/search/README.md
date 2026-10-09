@@ -3,7 +3,7 @@
 `FilterOverlay.tsx` is the filter modal for the search packages page. It reads
 the current filters from the URL search params and, on apply, writes the
 selected values **directly back to the URL** via `next/navigation`. There is no
-internal `FilterState` object and no per-filter sub-components — the URL is the
+internal `FilterState` object and no per-filter sub-components: the URL is the
 single source of truth, so results stay shareable and survive refresh/back.
 
 ## How it works
@@ -29,5 +29,5 @@ CSS modules + CSS variables (`--bg`, `--text`, `--yellow`, `--font-exo2`).
 > Historical note: an earlier decorative version exposed a `FilterState` API and
 > a `filters/` subfolder of per-filter components, plus a parallel
 > `components/ui/FilterOverlay*` system. All of that was removed once the overlay
-> began writing URL params directly. Don't reintroduce a separate state object —
+> began writing URL params directly. Don't reintroduce a separate state object:
 > keep the URL authoritative.

@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════════
--- supabase/seed.sql — Manual seed for Supabase SQL Editor
+-- supabase/seed.sql: Manual seed for Supabase SQL Editor
 -- Run via Supabase Dashboard → SQL Editor → New Query
 -- Idempotent: uses ON CONFLICT (upsert pattern)
 -- ═══════════════════════════════════════════════════════════════════════
@@ -109,7 +109,7 @@ INSERT INTO packages (
   highlights, room_occupancy_options, inclusions, images
 )
 VALUES (
-  'pkg1', 'op1', '7 Nights Umrah Package — Value', 'umrah-2026-7-nights-value',
+  'pkg1', 'op1', '7 Nights Umrah Package: Value', 'umrah-2026-7-nights-value',
   'published', 'umrah', 'March 2026',
   'per_person', 1299, 'GBP', 7,
   4, 3, 3, 3,
@@ -138,7 +138,7 @@ INSERT INTO packages (
   highlights, room_occupancy_options, inclusions, images
 )
 VALUES (
-  'pkg2', 'op1', '10 Nights Umrah Package — Premium', 'umrah-2026-10-nights-premium',
+  'pkg2', 'op1', '10 Nights Umrah Package: Premium', 'umrah-2026-10-nights-premium',
   'published', 'umrah', 'Ramadan 2026',
   'per_person', 2499, 'GBP', 10,
   5, 5, 5, 5,

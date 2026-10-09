@@ -36,7 +36,7 @@ const STORAGE_KEYS = {
 
 const PACKAGES_SEED_VERSION = 5;
 
-// Server-side in-memory store — persists within the process lifetime so that
+// Server-side in-memory store: persists within the process lifetime so that
 // E2E create→read flows work even though localStorage is unavailable on the server.
 const serverMemory = new Map<string, unknown>();
 
@@ -423,7 +423,7 @@ const SEED_PACKAGES: Package[] = [
       'https://images.unsplash.com/photo-1580655653885-65763b2597d0?auto=format&fit=crop&w=1200&q=80',
     ],
   },
-  // op2 — LHR departures for local comparison testing
+  // op2: LHR departures for local comparison testing
   {
     id: 'pkg6',
     operatorId: 'op2',
@@ -501,7 +501,7 @@ const SEED_PACKAGES: Package[] = [
       'https://images.unsplash.com/photo-1580655653885-65763b2597d0?auto=format&fit=crop&w=1200&q=80',
     ],
   },
-  // op3 — Zam Zam Travel, LHR packages
+  // op3: Zam Zam Travel, LHR packages
   {
     id: 'pkg8',
     operatorId: 'op3',
@@ -1211,7 +1211,7 @@ export const MockDB = {
 
   saveMarketingConsent: (consent: MarketingConsent) => {
     const consents = MockDB.getMarketingConsents();
-    // Idempotent on (email, enquiryReference) — mirror the DB unique constraint.
+    // Idempotent on (email, enquiryReference): mirror the DB unique constraint.
     const existingIndex = consents.findIndex(
       (c) => c.email === consent.email && c.enquiryReference === consent.enquiryReference
     );

@@ -24,7 +24,7 @@ body {
   position: relative;
 }
 
-/* Dark overlay — balanced: minarets show as a faint atmospheric ghost */
+/* Dark overlay: balanced: minarets show as a faint atmospheric ghost */
 body::before {
   content: '';
   position: fixed;
@@ -37,7 +37,7 @@ body::before {
 /* Light theme: keep the same kaaba silhouette as dark mode, but barely-there.
    We reuse the base body's background-image (the SVG) and only swap the base
    colour, then let body::before lay a heavy warm-ivory wash over it so the
-   architecture reads as a faint atmospheric ghost — never enough contrast to
+   architecture reads as a faint atmospheric ghost: never enough contrast to
    interfere with text (all content sits at z-index:1, above the overlay). */
 [data-theme="light"] body {
   background-color: #EDE8DC;
@@ -129,7 +129,7 @@ body::before {
 }
 
 /* Scroll-reveal (added by components/marketing/Reveal.tsx on the client only).
-   opacity + transform only — never affects layout, so no CLS. */
+   opacity + transform only: never affects layout, so no CLS. */
 .reveal {
   opacity: 0;
   transform: translateY(12px);

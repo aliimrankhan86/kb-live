@@ -14,7 +14,7 @@ export interface AuthResult {
 export async function updateSession(request: NextRequest): Promise<AuthResult> {
   let supabaseResponse = NextResponse.next({ request });
 
-  // E2E test bypass — only active when E2E_TESTING=1 (set by playwright webServer env).
+  // E2E test bypass: only active when E2E_TESTING=1 (set by playwright webServer env).
   // next.config.ts forwards this into Edge Runtime at build time; production builds
   // compile it to '' so the condition is never true in real deployments.
   if (process.env.E2E_TESTING === '1') {
@@ -25,7 +25,7 @@ export async function updateSession(request: NextRequest): Promise<AuthResult> {
         if (u?.id && u?.email && u?.role) {
           return { user: u, response: supabaseResponse };
         }
-      } catch { /* invalid JSON — fall through to Supabase */ }
+      } catch { /* invalid JSON: fall through to Supabase */ }
     }
   }
 
@@ -53,7 +53,7 @@ export async function updateSession(request: NextRequest): Promise<AuthResult> {
     },
   });
 
-  // Refresh session if expired — required for Server Components to have valid auth state
+  // Refresh session if expired: required for Server Components to have valid auth state
   const { data: { user } } = await supabase.auth.getUser();
 
   // SECURITY: authorization role is read from app_metadata only. app_metadata is

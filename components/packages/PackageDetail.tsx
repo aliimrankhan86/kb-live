@@ -35,7 +35,7 @@ interface PackageDetailProps {
   operator?: OperatorProfile
   /**
    * Whether the parked multi-step RFQ quote engine is live. Evaluated on the
-   * server (isRfqQuoteEnabled) and passed down — never read the flag in this
+   * server (isRfqQuoteEnabled) and passed down: never read the flag in this
    * client component. Default false: the "Request quote" CTA is hidden.
    * See PARKED_FEATURES.md entry 2.
    */
@@ -107,7 +107,7 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
   const quoteUrl = createQuotePrefillUrl(pkg)
 
   // "Good to know" (Tier 2) only renders when the operator actually gave us
-  // something for it — sparse listings stay short, rich ones get richer.
+  // something for it: sparse listings stay short, rich ones get richer.
   const roomLabel = roomOptionsLabel(pkg.roomOccupancyOptions)
   const hasGoodToKnow = roomLabel !== 'Not provided' || Boolean(group) || Boolean(pkg.notes)
 
@@ -174,7 +174,7 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
           </Link>
         </div>
 
-        {/* Highlights / benefits — only when the operator listed them */}
+        {/* Highlights / benefits: only when the operator listed them */}
         {pkg.highlights && pkg.highlights.length > 0 && (
           <ul className="mt-4 flex flex-wrap gap-2" data-testid="package-highlights" aria-label="Package highlights">
             {pkg.highlights.map((h) => (
@@ -199,7 +199,7 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
       {/* Two-column on desktop: detail (left) + sticky decision rail (right) */}
       <div className="grid gap-6 lg:grid-cols-[1fr_320px] lg:items-start">
         <div className="grid gap-5">
-          {/* What's included / not included — the core decision block */}
+          {/* What's included / not included: the core decision block */}
           <SectionCard title="What's included">
             <ul data-testid="package-inclusions" className="mt-3 grid gap-3 sm:grid-cols-2">
               {INCLUSIONS.map(({ key, label, help }) => {
@@ -224,7 +224,7 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
                   </li>
                 )
               })}
-              {/* Ziyarat — operator-stated, three-state. null renders "Not provided". */}
+              {/* Ziyarat: operator-stated, three-state. null renders "Not provided". */}
               <li className="flex gap-2.5" data-testid="package-ziyarat">
                 <span className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full ${pkg.ziyaratIncluded === true ? 'bg-[var(--color-success)]/15 text-[var(--color-success)]' : 'bg-[rgba(255,255,255,0.06)] text-[var(--textMuted)]'}`} aria-hidden="true">
                   {pkg.ziyaratIncluded === true ? (
@@ -317,7 +317,7 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
             </p>
           </SectionCard>
 
-          {/* Cancellation — decision-critical, so flag its absence */}
+          {/* Cancellation: decision-critical, so flag its absence */}
           <SectionCard title="Cancellation & changes">
             {pkg.cancellationPolicy ? (
               <p className="mt-2 text-sm leading-relaxed text-[var(--text)]">{pkg.cancellationPolicy}</p>
@@ -329,7 +329,7 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
             )}
           </SectionCard>
 
-          {/* Good to know — Tier 2, only when there's something to show */}
+          {/* Good to know: Tier 2, only when there's something to show */}
           {hasGoodToKnow && (
             <SectionCard title="Good to know">
               <dl className="mt-3 grid gap-x-6 gap-y-3 sm:grid-cols-2">
@@ -399,12 +399,12 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
               {makkahDist && <RailFact label={makkahDist.primary} />}
               <RailFact label={hasProtection ? 'ATOL/ABTA number provided' : 'No ATOL/ABTA number provided'} tone={hasProtection ? 'good' : 'warn'} />
             </ul>
-            {/* Canonical enquiry entry point — always live (Task 2). */}
+            {/* Canonical enquiry entry point: always live (Task 2). */}
             <Link href={`/packages/${pkg.slug}/enquire`} data-testid="package-cta-enquire" className={buttonVariants({ variant: 'primary', size: 'md', className: 'mt-5 w-full' })}>
               Enquire
             </Link>
             <p className="mt-2 text-center text-xs text-[var(--textMuted)]">Free · the operator contacts you directly</p>
-            {/* PARKED: RFQ quote engine — CTA hidden when flag off (PARKED_FEATURES.md entry 2). */}
+            {/* PARKED: RFQ quote engine: CTA hidden when flag off (PARKED_FEATURES.md entry 2). */}
             {rfqEnabled && (
               <>
                 <Link href={quoteUrl} data-testid="package-cta-request-quote" className={buttonVariants({ variant: 'primary', size: 'md', className: 'mt-5 w-full' })}>
@@ -424,11 +424,11 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
             <p className="text-xs text-[var(--textMuted)]">{pkg.priceType === 'from' ? 'From · per person' : 'Per person'}</p>
             <p className="text-lg font-bold text-[var(--text)]">{priceLabel}</p>
           </div>
-          {/* Canonical enquiry entry point — always live (Task 2). */}
+          {/* Canonical enquiry entry point: always live (Task 2). */}
           <Link href={`/packages/${pkg.slug}/enquire`} data-testid="package-mobile-cta-enquire" className={buttonVariants({ variant: 'primary', size: 'md', className: 'px-5 whitespace-nowrap' })}>
             Enquire
           </Link>
-          {/* PARKED: RFQ quote engine — CTA hidden when flag off (PARKED_FEATURES.md entry 2). */}
+          {/* PARKED: RFQ quote engine: CTA hidden when flag off (PARKED_FEATURES.md entry 2). */}
           {rfqEnabled && (
             <Link href={quoteUrl} data-testid="package-mobile-cta-request-quote" className={buttonVariants({ variant: 'primary', size: 'md', className: 'px-5 whitespace-nowrap' })}>
               Request quote

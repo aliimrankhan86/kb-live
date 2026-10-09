@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/api/db/prisma'
 
-// Lightweight DB ping — used by Vercel cron every 3 days to prevent
+// Lightweight DB ping: used by Vercel cron every 3 days to prevent
 // Supabase free-tier auto-pause (pauses after ~7 days inactivity).
 // Migrate to Supabase Pro when first paying operator onboards.
 export async function GET() {

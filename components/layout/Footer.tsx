@@ -124,7 +124,7 @@ export function Footer({ cities = [], rfqEnabled = false }: { cities?: string[];
   const currentYear = new Date().getFullYear();
   const isDesktop = useIsDesktop();
 
-  // PARKED: RFQ quote engine — drop the "Get a Quote" link when off.
+  // PARKED: RFQ quote engine: drop the "Get a Quote" link when off.
   // See PARKED_FEATURES.md entry 2. Flag evaluated server-side, passed as a prop.
   const platformLinks = rfqEnabled
     ? PLATFORM_LINKS
@@ -134,17 +134,17 @@ export function Footer({ cities = [], rfqEnabled = false }: { cities?: string[];
     <footer className="border-t border-[var(--borderSubtle)] bg-[var(--surfaceDark)]" role="contentinfo">
       <div className="mx-auto max-w-6xl px-5 py-8 md:px-8 md:py-12">
 
-        {/* Mobile brand block — shown only on mobile, above the accordions */}
+        {/* Mobile brand block: shown only on mobile, above the accordions */}
         <div className="mb-6 flex flex-col gap-3 md:hidden">
           <BrandBlock />
         </div>
 
         {/* Main grid:
-            Mobile  — single-column stacked accordions
-            Desktop — 4-col: [brand 2fr] [contact 1fr] [legal 1fr] [platform 1fr] */}
+            Mobile: single-column stacked accordions
+            Desktop, 4-col: [brand 2fr] [contact 1fr] [legal 1fr] [platform 1fr] */}
         <div className="grid gap-1 md:grid-cols-[2fr_1fr_1fr_1fr] md:gap-10 md:items-start">
 
-          {/* Brand col — desktop only */}
+          {/* Brand col: desktop only */}
           <div className="hidden md:flex md:flex-col md:gap-4">
             <BrandBlock />
           </div>
@@ -253,7 +253,7 @@ export function Footer({ cities = [], rfqEnabled = false }: { cities?: string[];
           </p>
         </div>
 
-        {/* Legal entity disclosure — Companies Act 2006 §82 */}
+        {/* Legal entity disclosure: Companies Act 2006 §82 */}
         <p className="mt-3 text-center text-xs leading-relaxed text-[var(--textMuted)] md:text-left">
           {LEGAL_ENTITY_BLOCK.tradingName} is a trading name of{' '}
           <span className="text-[var(--text)]">{LEGAL_ENTITY_BLOCK.companyName}</span>, registered

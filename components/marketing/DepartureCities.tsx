@@ -8,7 +8,7 @@ interface GuideLink {
 }
 
 interface DepartureCitiesProps {
-  /** Cities derived from live published packages — never a hardcoded list. */
+  /** Cities derived from live published packages: never a hardcoded list. */
   cities: string[]
   guideLinks: GuideLink[]
 }

@@ -1,5 +1,5 @@
 /**
- * Presentation helpers for package data — turns stored fields into plain English
+ * Presentation helpers for package data: turns stored fields into plain English
  * a layman can act on, and writes neutral "what this means" copy. Nothing here
  * invents operator data; it only formats / explains values that exist.
  */

@@ -60,7 +60,7 @@ export function CityCorridor({ city, h1, intro, queryParams, faqs, breadcrumbIte
           >
             Browse Umrah packages from {city}
           </Link>
-          {/* PARKED: RFQ quote engine — CTA hidden when flag off (PARKED_FEATURES.md entry 2). */}
+          {/* PARKED: RFQ quote engine: CTA hidden when flag off (PARKED_FEATURES.md entry 2). */}
           {isRfqQuoteEnabled() && (
             <Link
               href="/quote"

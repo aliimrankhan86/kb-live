@@ -102,7 +102,7 @@ export function RequestDetail({
   id: string;
   /**
    * Whether the parked booking-intent / payment flow is live. Evaluated on the
-   * server (isBookingFlowEnabled) and passed down — never read the flag in this
+   * server (isBookingFlowEnabled) and passed down: never read the flag in this
    * client component. Default false: the "Proceed direct" booking screen,
    * payment-evidence upload, and operator bank details are hidden.
    * See PARKED_FEATURES.md entry 1.
@@ -470,7 +470,7 @@ export function RequestDetail({
                     <p>{offer.hotelStars} Star Hotels</p>
                     <p>{distanceToHaram === 'Not provided' ? distanceToHaram : `${distanceToHaram} to Haram`}</p>
                   </div>
-                  {/* PARKED: booking-intent / payment flow — hidden when flag off (PARKED_FEATURES.md entry 1). */}
+                  {/* PARKED: booking-intent / payment flow: hidden when flag off (PARKED_FEATURES.md entry 1). */}
                   {bookingEnabled && existingIntent ? (
                     <div className="mt-5 space-y-4">
                       <div className="rounded-md border border-[var(--borderSubtle)] bg-[rgba(255,255,255,0.04)] p-3 text-sm">
@@ -493,7 +493,7 @@ export function RequestDetail({
                     <Button type="button" variant="secondary" size="sm" className="flex-1">
                       View Details
                     </Button>
-                    {/* PARKED: booking-intent / payment flow — hidden when flag off (PARKED_FEATURES.md entry 1). */}
+                    {/* PARKED: booking-intent / payment flow: hidden when flag off (PARKED_FEATURES.md entry 1). */}
                     {bookingEnabled && (
                       <BookableButton
                         existingIntent={Boolean(existingIntent)}
@@ -526,7 +526,7 @@ export function RequestDetail({
         </OverlayContent>
       </Dialog>
 
-      {/* PARKED: booking-intent / payment flow — dialog hidden when flag off (PARKED_FEATURES.md entry 1). */}
+      {/* PARKED: booking-intent / payment flow: dialog hidden when flag off (PARKED_FEATURES.md entry 1). */}
       {bookingEnabled && (
       <Dialog
         open={Boolean(activeOfferForBooking)}

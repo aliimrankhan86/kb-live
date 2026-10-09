@@ -8,7 +8,7 @@ export const Dialog = DialogPrimitive.Root;
 export const DialogTrigger = DialogPrimitive.Trigger;
 export const DialogClose = DialogPrimitive.Close;
 
-/* ─── Shared close button — used by OverlayHeader ─────────────────────── */
+/* ─── Shared close button: used by OverlayHeader ─────────────────────── */
 const CloseButton = ({ testId }: { testId?: string }) => (
   <DialogPrimitive.Close
     className="absolute right-5 top-4 inline-flex h-11 w-11 items-center justify-center rounded-md border border-[var(--borderSubtle)] bg-transparent text-[var(--textMuted)] transition-colors hover:border-[var(--yellow)] hover:bg-[rgba(255,211,29,0.06)] hover:text-[var(--yellow)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focusRing)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surfaceDark)] disabled:pointer-events-none sm:right-6"
@@ -66,7 +66,7 @@ export const OverlayContent = React.forwardRef<
 ));
 OverlayContent.displayName = DialogPrimitive.Content.displayName;
 
-/* ─── OverlayHeader — flex row: title left, close button right ─────────── */
+/* ─── OverlayHeader: flex row: title left, close button right ─────────── */
 export const OverlayHeader = ({
   className,
   children,
@@ -86,7 +86,7 @@ export const OverlayHeader = ({
 );
 OverlayHeader.displayName = 'OverlayHeader';
 
-/* ─── OverlayBody — scrollable content area between header and footer ──── */
+/* ─── OverlayBody: scrollable content area between header and footer ──── */
 export const OverlayBody = ({
   className,
   ...props
@@ -98,7 +98,7 @@ export const OverlayBody = ({
 );
 OverlayBody.displayName = 'OverlayBody';
 
-/* ─── OverlayFooter — sticky at bottom with top border ────────────────── */
+/* ─── OverlayFooter: sticky at bottom with top border ────────────────── */
 export const OverlayFooter = ({
   className,
   ...props

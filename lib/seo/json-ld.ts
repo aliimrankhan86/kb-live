@@ -20,15 +20,15 @@ export interface FaqItem {
 
 const compact = <T>(items: Array<T | undefined | false | null>): T[] => items.filter(Boolean) as T[];
 
-/** Package detail page — Product schema */
+/** Package detail page: Product schema */
 export function packageJsonLd(pkg: Package, operatorName: string): Record<string, unknown> {
   // Stored nights only; the split is omitted when the operator did not give it
-  // (never derived from totalNights — data-integrity rule).
+  // (never derived from totalNights: data-integrity rule).
   const split = pkg.nightsMakkah > 0 && pkg.nightsMadinah > 0
     ? ` (${pkg.nightsMakkah} Makkah, ${pkg.nightsMadinah} Madinah)`
     : '';
   // Operator-supplied star ratings only. When absent they are omitted from the
-  // schema entirely — never emitted as 0 or a default (data-integrity rule).
+  // schema entirely: never emitted as 0 or a default (data-integrity rule).
   const hasMakkahStars = typeof pkg.hotelMakkahStars === 'number';
   const hasMadinahStars = typeof pkg.hotelMadinahStars === 'number';
   const hotelStarsParts = [
@@ -104,7 +104,7 @@ export function packageJsonLd(pkg: Package, operatorName: string): Record<string
   };
 }
 
-/** Operator profile page — TravelAgency schema */
+/** Operator profile page: TravelAgency schema */
 export function operatorJsonLd(operator: OperatorProfile): Record<string, unknown> {
   const operatorUrl = operator.slug ? `${BASE_URL}/operators/${operator.slug}` : BASE_URL;
   const identifiers = compact([
@@ -165,7 +165,7 @@ export function operatorJsonLd(operator: OperatorProfile): Record<string, unknow
   };
 }
 
-/** Search results page — ItemList schema */
+/** Search results page: ItemList schema */
 export function searchResultsJsonLd(
   results: Array<{ slug: string; title: string }>,
   listName = 'Umrah Packages'
@@ -254,7 +254,7 @@ export function webPageJsonLd({
   path: string;
   name: string;
   description: string;
-  /** ISO 8601 date string — surfaces freshness signal in AI and search results. */
+  /** ISO 8601 date string: surfaces freshness signal in AI and search results. */
   dateModified?: string;
 }): Record<string, unknown> {
   const url = `${BASE_URL}${path}`;
@@ -295,7 +295,7 @@ export function personJsonLd({ name, url, sameAs, jobTitle, description }: Perso
 
 /**
  * TouristTrip schema for pilgrimage package pages.
- * Use alongside `packageJsonLd` inside `graphJsonLd` — adds itinerary, destination,
+ * Use alongside `packageJsonLd` inside `graphJsonLd`: adds itinerary, destination,
  * and traveller-type signals that help AI engines classify and cite the package.
  */
 export function touristTripJsonLd(pkg: Package, operatorName: string): Record<string, unknown> {

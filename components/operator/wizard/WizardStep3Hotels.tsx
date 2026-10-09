@@ -67,7 +67,7 @@ function HotelSection({
           <select
             id={`${prefix}-stars`}
             data-testid={`${prefix}-stars`}
-            // Starts empty (placeholder) — no painted default. Unset persists as
+            // Starts empty (placeholder): no painted default. Unset persists as
             // "Not provided"; "Not sure / not rated" is the explicit unset choice.
             value={starsValue ?? ''}
             onChange={(e) => {

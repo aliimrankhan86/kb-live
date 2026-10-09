@@ -5,7 +5,7 @@ import { mapErrorToResponse } from '@/lib/errors';
 import type { Package } from '@/lib/types';
 import { packageSchema, updatePackageSchema } from '@/lib/operator/package-schema';
 
-// ─── POST — create package ────────────────────────────────────────────────────
+// ─── POST: create package ────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// ─── GET — list operator packages ─────────────────────────────────────────────
+// ─── GET: list operator packages ─────────────────────────────────────────────
 
 export async function GET(_request: NextRequest) {
   try {
@@ -58,7 +58,7 @@ export async function GET(_request: NextRequest) {
   }
 }
 
-// ─── DELETE — remove operator package ─────────────────────────────────────────
+// ─── DELETE: remove operator package ─────────────────────────────────────────
 
 export async function DELETE(_request: NextRequest) {
   try {
@@ -83,7 +83,7 @@ export async function DELETE(_request: NextRequest) {
   }
 }
 
-// ─── PATCH — update package ───────────────────────────────────────────────────
+// ─── PATCH: update package ───────────────────────────────────────────────────
 
 const updateSchema = updatePackageSchema;
 

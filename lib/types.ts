@@ -232,11 +232,11 @@ export interface QuoteRequest {
 
 /**
  * Canonical pilgrim enquiry (Task 2): one package, one enquiry, one operator.
- * Anonymous — no customer account required. The short form captures only what
+ * Anonymous: no customer account required. The short form captures only what
  * the package does not already state. Package/operator names are denormalised
  * from the package at submit time so the lead is self-contained.
  *
- * Task 3 will add a marketing opt-in + consent record — leave structural room
+ * Task 3 will add a marketing opt-in + consent record: leave structural room
  * here (a `marketingOptIn` boolean + a separate consent record); do not inline
  * it now.
  */
@@ -257,7 +257,7 @@ export interface Enquiry {
 
 /**
  * Task 3: explicit marketing email consent captured at enquiry time.
- * A record exists ONLY when consent was given with an email — the absence of a
+ * A record exists ONLY when consent was given with an email: the absence of a
  * record is the "no consent" state. `consent` is always true (audit explicitness).
  * Double-opt-in ready: the record is stored; no email is sent from this flow.
  */
@@ -432,7 +432,7 @@ export interface Package {
   cancellationPolicy?: string;
   highlights?: string[];
   groupType?: 'private' | 'small-group' | 'large-group';
-  // Ziyarat — operator-stated only. undefined = not stated ("Not provided");
+  // Ziyarat: operator-stated only. undefined = not stated ("Not provided");
   // true = Included; false = operator stated NOT included. Never inferred.
   ziyaratIncluded?: boolean;
   ziyaratDetails?: string;

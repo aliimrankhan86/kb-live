@@ -188,7 +188,7 @@ async function main() {
     create: {
       id: 'pkg1',
       operatorId: 'op1',
-      title: '7 Nights Umrah Package — Value',
+      title: '7 Nights Umrah Package: Value',
       slug: 'umrah-2026-7-nights-value',
       status: 'published',
       pilgrimageType: 'umrah',
@@ -225,7 +225,7 @@ async function main() {
     create: {
       id: 'pkg2',
       operatorId: 'op1',
-      title: '10 Nights Umrah Package — Premium',
+      title: '10 Nights Umrah Package: Premium',
       slug: 'umrah-2026-10-nights-premium',
       status: 'published',
       pilgrimageType: 'umrah',
@@ -260,13 +260,13 @@ async function main() {
     update: {},
   });
 
-  // op2 packages — LHR departures
+  // op2 packages: LHR departures
   await prisma.package.upsert({
     where: { id: 'pkg3' },
     create: {
       id: 'pkg3',
       operatorId: 'op2',
-      title: '7 Nights Umrah — Budget (LHR)',
+      title: '7 Nights Umrah: Budget (LHR)',
       slug: 'umrah-2026-7-nights-budget-lhr',
       status: 'published',
       pilgrimageType: 'umrah',
@@ -307,7 +307,7 @@ async function main() {
     create: {
       id: 'pkg4',
       operatorId: 'op2',
-      title: '14 Nights Umrah — Extended (LHR)',
+      title: '14 Nights Umrah: Extended (LHR)',
       slug: 'umrah-2026-14-nights-extended-lhr',
       status: 'published',
       pilgrimageType: 'umrah',
@@ -342,13 +342,13 @@ async function main() {
     update: {},
   });
 
-  // op3 packages — Zam Zam Travel, LHR
+  // op3 packages: Zam Zam Travel, LHR
   await prisma.package.upsert({
     where: { id: 'pkg5' },
     create: {
       id: 'pkg5',
       operatorId: 'op3',
-      title: '7 Nights Umrah — Premium (LHR)',
+      title: '7 Nights Umrah: Premium (LHR)',
       slug: 'umrah-2026-7-nights-premium-lhr',
       status: 'published',
       pilgrimageType: 'umrah',
@@ -388,7 +388,7 @@ async function main() {
     create: {
       id: 'pkg6',
       operatorId: 'op3',
-      title: '10 Nights Umrah — Luxury (LHR)',
+      title: '10 Nights Umrah: Luxury (LHR)',
       slug: 'umrah-2026-10-nights-luxury-lhr',
       status: 'published',
       pilgrimageType: 'umrah',
@@ -422,13 +422,13 @@ async function main() {
     update: {},
   });
 
-  // Additional packages for pagination demo (pkg7–pkg14)
+  // Additional packages for pagination demo (pkg7 to pkg14)
   await prisma.package.upsert({
     where: { id: 'pkg7' },
     create: {
       id: 'pkg7',
       operatorId: 'op1',
-      title: '14 Nights Umrah — Family (MAN)',
+      title: '14 Nights Umrah: Family (MAN)',
       slug: 'umrah-2026-14-nights-family-man',
       status: 'published',
       pilgrimageType: 'umrah',
@@ -452,7 +452,7 @@ async function main() {
       flightType: 'one-stop',
       depositAmount: 300,
       paymentPlanAvailable: true,
-      cancellationPolicy: 'Full refund if cancelled 45+ days. 50% refund 15–44 days. Non-refundable within 14 days.',
+      cancellationPolicy: 'Full refund if cancelled 45+ days. 50% refund 15 to 44 days. Non-refundable within 14 days.',
       ziyaratIncluded: true,
       ziyaratDetails: 'Makkah and Madinah ziyarat tours',
       highlights: ['Family rooms available', 'School holiday dates', 'Child-friendly itinerary'],
@@ -474,7 +474,7 @@ async function main() {
     create: {
       id: 'pkg8',
       operatorId: 'op2',
-      title: '5 Nights Umrah — Economy (BHX)',
+      title: '5 Nights Umrah: Economy (BHX)',
       slug: 'umrah-2026-5-nights-economy-bhx',
       status: 'published',
       pilgrimageType: 'umrah',
@@ -517,7 +517,7 @@ async function main() {
     create: {
       id: 'pkg9',
       operatorId: 'op3',
-      title: '12 Nights Ramadan Umrah — Premium (LHR)',
+      title: '12 Nights Ramadan Umrah: Premium (LHR)',
       slug: 'ramadan-umrah-2026-12-nights-premium-lhr',
       status: 'published',
       pilgrimageType: 'umrah',
@@ -541,7 +541,7 @@ async function main() {
       flightType: 'direct',
       depositAmount: 600,
       paymentPlanAvailable: true,
-      cancellationPolicy: 'Full refund 90+ days. 50% refund 45–89 days. Non-refundable within 45 days.',
+      cancellationPolicy: 'Full refund 90+ days. 50% refund 45 to 89 days. Non-refundable within 45 days.',
       highlights: ['Ramadan experience', 'Tarawih prayers at Haram', 'Iftar & Suhoor included'],
       roomOccupancyOptions: {
         single: { pricePerPerson: 2599, availability: 'limited' },
@@ -562,7 +562,7 @@ async function main() {
     create: {
       id: 'pkg10',
       operatorId: 'op1',
-      title: '21 Nights Hajj — Standard (LHR)',
+      title: '21 Nights Hajj: Standard (LHR)',
       slug: 'hajj-2026-21-nights-standard-lhr',
       status: 'published',
       pilgrimageType: 'hajj',
@@ -607,7 +607,7 @@ async function main() {
     create: {
       id: 'pkg11',
       operatorId: 'op2',
-      title: '8 Nights Umrah — Mid-Range (LGW)',
+      title: '8 Nights Umrah: Mid-Range (LGW)',
       slug: 'umrah-2026-8-nights-mid-range-lgw',
       status: 'published',
       pilgrimageType: 'umrah',
@@ -631,7 +631,7 @@ async function main() {
       flightType: 'one-stop',
       depositAmount: 200,
       paymentPlanAvailable: true,
-      cancellationPolicy: 'Full refund 30+ days. 50% refund 14–29 days. Non-refundable within 14 days.',
+      cancellationPolicy: 'Full refund 30+ days. 50% refund 14 to 29 days. Non-refundable within 14 days.',
       highlights: ['Gatwick departure', '4-star both cities', 'Payment plan available'],
       roomOccupancyOptions: {
         single: { pricePerPerson: 1150, availability: 'limited' },
@@ -651,7 +651,7 @@ async function main() {
     create: {
       id: 'pkg12',
       operatorId: 'op3',
-      title: '6 Nights Umrah — Budget (MAN)',
+      title: '6 Nights Umrah: Budget (MAN)',
       slug: 'umrah-2026-6-nights-budget-man',
       status: 'published',
       pilgrimageType: 'umrah',
@@ -694,7 +694,7 @@ async function main() {
     create: {
       id: 'pkg13',
       operatorId: 'op1',
-      title: '10 Nights Umrah — Silver (BHX)',
+      title: '10 Nights Umrah: Silver (BHX)',
       slug: 'umrah-2026-10-nights-silver-bhx',
       status: 'published',
       pilgrimageType: 'umrah',
@@ -718,7 +718,7 @@ async function main() {
       flightType: 'one-stop',
       depositAmount: 250,
       paymentPlanAvailable: true,
-      cancellationPolicy: 'Full refund 60+ days. 25% refund 30–59 days. Non-refundable within 30 days.',
+      cancellationPolicy: 'Full refund 60+ days. 25% refund 30 to 59 days. Non-refundable within 30 days.',
       highlights: ['Birmingham departure', 'Qatar Airways', '4-star both cities'],
       roomOccupancyOptions: {
         single: { pricePerPerson: 1399, availability: 'limited' },
@@ -738,7 +738,7 @@ async function main() {
     create: {
       id: 'pkg14',
       operatorId: 'op2',
-      title: '28 Nights Hajj — Premium (MAN)',
+      title: '28 Nights Hajj: Premium (MAN)',
       slug: 'hajj-2026-28-nights-premium-man',
       status: 'published',
       pilgrimageType: 'hajj',

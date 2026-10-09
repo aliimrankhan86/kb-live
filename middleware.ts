@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
 
 /**
- * Public routes — no auth required.
+ * Public routes: no auth required.
  */
 const PUBLIC_PREFIXES = [
   '/',
@@ -24,7 +24,7 @@ const PUBLIC_PREFIXES = [
 ];
 
 /**
- * Auth-related API routes — no guard (they handle auth themselves).
+ * Auth-related API routes: no guard (they handle auth themselves).
  */
 const AUTH_API_ROUTES = ['/api/auth/'];
 
@@ -54,7 +54,7 @@ function supabaseOrigin(): string | null {
 export function createContentSecurityPolicy(nonce: string): string {
   const isDev = process.env.NODE_ENV === 'development';
   // Vercel Web Analytics serves its script and beacon same-origin
-  // (/_vercel/insights/*), so 'self' covers both script-src and connect-src —
+  // (/_vercel/insights/*), so 'self' covers both script-src and connect-src:
   // no external analytics domain is allowed.
   const scriptSrc = `script-src 'self' 'nonce-${nonce}'${isDev ? " 'unsafe-eval'" : ''}`;
   const connectSrc = [

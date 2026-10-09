@@ -60,7 +60,7 @@ export async function apiSignUp(input: SignUpInput) {
   // an error for an already-registered email. To prevent email enumeration it
   // returns error=null plus an obfuscated user whose `identities` array is empty
   // (a real new signup always has at least one identity). We must detect this
-  // here — otherwise the code below tries to updateUserById() on the fake user
+  // here: otherwise the code below tries to updateUserById() on the fake user
   // and throws a 500 ("Something went wrong"). Treat empty identities as a
   // duplicate and surface the friendly AUTH_EMAIL_ALREADY_EXISTS message.
   // See: https://supabase.com/docs/reference/javascript/auth-signup
@@ -112,7 +112,7 @@ export async function apiSignIn(input: SignInInput) {
   }
 
   // Sync to Prisma users table on every sign-in. This covers users who signed
-  // up before the FK sync was added — their Prisma row is created on first login.
+  // up before the FK sync was added: their Prisma row is created on first login.
   const signedInUser = data.user;
   if (signedInUser?.id) {
     const role = (signedInUser.app_metadata?.role as string) || 'customer';
@@ -127,7 +127,7 @@ export async function apiSignIn(input: SignInInput) {
  * Upsert a row in the Prisma `users` table to match the Supabase auth user.
  * Required because quote_requests.customer_id has a FK to users.id.
  * Only runs when FEATURE_USE_REAL_DB=true (skipped in E2E / test mode).
- * Errors are logged but do not fail the caller — auth already succeeded.
+ * Errors are logged but do not fail the caller: auth already succeeded.
  */
 async function syncUserToPrisma(
   userId: string,
@@ -154,7 +154,7 @@ async function syncUserToPrisma(
 }
 
 /**
- * Sign out — clears session cookies.
+ * Sign out: clears session cookies.
  */
 export async function apiSignOut() {
   const supabase = await createClient();

@@ -43,7 +43,7 @@ export function PackageCsvImport({ operatorId: _operatorId, onImport }: { operat
     const missingRequired = REQUIRED_COLUMNS.filter((c) => !headers.includes(c));
 
     if (missingRequired.length === 0) {
-      // Happy path — all required columns present, import directly
+      // Happy path: all required columns present, import directly
       await runImport(text);
       return;
     }

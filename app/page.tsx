@@ -61,14 +61,14 @@ export default async function Home() {
   try {
     departureCities = await Repository.getDistinctDepartureCities()
   } catch {
-    // DB unavailable — the departure-cities section renders its honest empty state.
+    // DB unavailable: the departure-cities section renders its honest empty state.
   }
 
   let packages: Package[] = []
   try {
     packages = await Repository.listPackages()
   } catch {
-    // DB unavailable — the compare preview simply does not render.
+    // DB unavailable: the compare preview simply does not render.
   }
   // Live-data only: the preview appears solely when at least two real packages exist.
   const showPreview = packages.length >= 2

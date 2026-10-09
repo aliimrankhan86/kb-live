@@ -620,7 +620,7 @@ export const Repository = {
     return Array.from(rows.values());
   },
 
-  // Enquiries (canonical pilgrim enquiry — Task 2). Anonymous: no RequestContext.
+  // Enquiries (canonical pilgrim enquiry: Task 2). Anonymous: no RequestContext.
   // Reuses the existing PC- reference-code generator (single source, no scatter).
   createEnquiry: async (input: {
     packageId: string;
@@ -656,7 +656,7 @@ export const Repository = {
     return store().saveEnquiry(enquiry);
   },
 
-  // Marketing consent (Task 3). Caller is responsible for the gating rule — a
+  // Marketing consent (Task 3). Caller is responsible for the gating rule: a
   // record is created ONLY when the pilgrim opted in AND an email is present
   // (consent requires an email to be actionable). The enquiry reference is
   // always carried so the DB unique (email, enquiry_reference) dedupes.

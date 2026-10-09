@@ -24,8 +24,8 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
 
   // Forward only the E2E flag into Edge Runtime (middleware) at build time.
-  // Dev auth is localhost + E2E only — no remote/preview toggle exists, so
-  // No dev-auth toggle env var exists — dev auth is localhost + E2E_TESTING only.
+  // Dev auth is localhost + E2E only: no remote/preview toggle exists, so
+  // No dev-auth toggle env var exists: dev auth is localhost + E2E_TESTING only.
   env: {
     E2E_TESTING: process.env.E2E_TESTING || '',
   },

@@ -93,7 +93,7 @@ export function Step5Review() {
         />
       </div>
 
-      {/* Data-sharing disclosure — required before submit */}
+      {/* Data-sharing disclosure: required before submit */}
       <div className="rounded-lg border border-[var(--borderSubtle)] bg-[var(--color-surface-subtle)] px-4 py-3 text-sm text-[var(--textMuted)]">
         <p>
           <strong className="text-[var(--text)]">Before you submit:</strong> your contact

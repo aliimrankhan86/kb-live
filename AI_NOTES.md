@@ -1,5 +1,24 @@
 # PilgrimCompare AI Handover — Single Source of Truth
 
+## §B3 Batch 3 soft 404, staging seed room prices, copy hygiene (PR #120 into `dev`, branch `fix/batch-3-soft-404-and-cleanup`), 2026-10-09
+
+Full report: `docs/uat/BATCH3_REPORT.md` (per item, decisions, risks, staging proof, every wording change).
+
+### What changed and why
+- **Soft 404 (P1, SEO):** `app/packages/[slug]/page.tsx` calls `notFound()` for a missing slug or a package that is not published and not departed, so the response is HTTP 404. `app/packages/[slug]/not-found.tsx` renders the same alert markup (exported as `PackageUnavailable`, also used by the load error branch) with robots noindex. The `generateMetadata` fallback is `{ index: false, follow: false }`. The load error branch renders a `<meta name="robots" content="noindex, nofollow">` (React hoists it), because `generateMetadata` and the page load the package separately and can disagree. Departed notice, published pages, the enquire page and the enquiry API are unchanged.
+- **Staging seed:** `scripts/seed-staging.mjs` writes `roomPrices` into the three 015 columns. It used to delete and reinsert every seed row and update accounts, users and operators; it is now additive: `on conflict do nothing` everywhere, existing accounts never updated, and the only update is `on conflict (id) do update` of the room price columns with `coalesce` (empty columns only) `where packages.notes is not distinct from excluded.notes` (only while the notes still state those prices). `seedRows` is exported for the test. Not run against staging.
+- **Copy hygiene:** rendered copy was already clean on `dev` (batch 1 `d38e259` and `0bcc889`). Fixed the demo seeds (`prisma/seed.ts`, `supabase/seed.sql`) and 212 comment lines in 76 shipped files. `tests/no-em-dash.test.ts` now scans comments, `hooks`, `styles`, the root config files and both seeds (skips `lib/generated`). The real-DB title test also covers public routes outside the sitemap.
+- **Cron expiry (decided by Ali):** stays on the return date. No code change.
+
+### Gotchas
+> 🛠️ **Gotcha: a Playwright spec cannot statically import a repo `.mjs` script.** Playwright compiles the spec and what it imports to CommonJS, so `import { seedRows } from '../../scripts/seed-staging.mjs'` fails with "exports is not defined in ES module scope". Not a code bug: use `await import('../../scripts/seed-staging.mjs')` inside the test (`e2e/local-db/staging-seed.spec.ts`).
+
+### Tests
+Vitest 2,268 (81 files). Playwright 69 passed, 6 skipped. Real DB 39 of 39. New: `tests/package-not-found.test.tsx` (4), `e2e/local-db/staging-seed.spec.ts` (1), a 404 test in `e2e/local-db/seo-titles.spec.ts` (1). The batch 2 baseline of 2,265 counted an untracked debug file (`tests/zz-zodcheck.test.ts`, now removed); the tracked baseline was 2,264.
+
+### Exact next step
+Claude in Chrome runs the staging proof in `docs/uat/BATCH3_REPORT.md` on the PR preview (no SQL needed). Ali decides when to rerun `npm run seed:staging`, says yes or no to the interests grants SQL on staging, and applies 015 to production before any release to `main`.
+
 ## §B2 Batch 2 one package list, room prices, cron guard (PR into `dev`, branch `fix/batch-2-single-list-room-prices`), 2026-10-09
 
 Full report: `docs/uat/BATCH2_REPORT.md` (per item, decisions, staging proof, every wording change).
