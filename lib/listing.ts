@@ -1,4 +1,4 @@
-import type { OperatorProfile } from '@/lib/types';
+import type { OperatorProfile, Package } from '@/lib/types';
 
 /**
  * Public-listing rule: an admin has verified the operator AND it has an ATOL
@@ -8,3 +8,16 @@ import type { OperatorProfile } from '@/lib/types';
  */
 export const isPubliclyListed = (o: Pick<OperatorProfile, 'verificationStatus' | 'atolNumber'>): boolean =>
   o.verificationStatus === 'verified' && Boolean(o.atolNumber?.trim());
+
+/** Today's calendar date in London as yyyy-mm-dd (en-CA prints ISO order). */
+export const londonToday = (now = new Date()): string =>
+  now.toLocaleDateString('en-CA', { timeZone: 'Europe/London' });
+
+/**
+ * A departure has passed when its start date is before today in London, or the
+ * nightly expire-packages cron has marked it expired. It then leaves every
+ * public list (search, browse, compare, operator page, sitemap, airports) and
+ * its own page says so. A package with no start date is kept: nothing to compare.
+ */
+export const hasDeparted = (p: Pick<Package, 'status' | 'dateWindow'>, today = londonToday()): boolean =>
+  p.status === 'expired' || Boolean(p.dateWindow?.start && p.dateWindow.start < today);

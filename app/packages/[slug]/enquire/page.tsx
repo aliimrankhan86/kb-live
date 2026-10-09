@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { EnquiryForm, type EnquirySummary } from '@/components/enquiry/EnquiryForm'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
+import { DepartedNotice } from '@/components/packages/DepartedNotice'
+import { hasDeparted } from '@/lib/listing'
 import { Repository } from '@/lib/api/repository'
 import type { OperatorProfile, Package } from '@/lib/types'
 import { priceAttributionShort, priceText } from '@/lib/packages/display'
@@ -53,6 +55,10 @@ export default async function EnquirePage({ params }: { params: Promise<{ slug: 
     if (pkg) operator = await Repository.getOperatorById(pkg.operatorId)
   } catch {
     return <div className="min-h-screen bg-[var(--background)]">{renderNotice('We could not load this package right now. Please try again.')}</div>
+  }
+
+  if (pkg && hasDeparted(pkg)) {
+    return <div className="min-h-screen bg-[var(--background)]"><DepartedNotice pkg={pkg} /></div>
   }
 
   if (!pkg || pkg.status !== 'published') {

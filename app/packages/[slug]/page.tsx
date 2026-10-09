@@ -1,8 +1,10 @@
 import type { Metadata } from 'next'
 import { PackageDetail } from '@/components/packages/PackageDetail'
+import { DepartedNotice } from '@/components/packages/DepartedNotice'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { Repository } from '@/lib/api/repository'
 import { isRfqQuoteEnabled } from '@/lib/config'
+import { hasDeparted } from '@/lib/listing'
 import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, packageJsonLd, touristTripJsonLd } from '@/lib/seo/json-ld'
 import type { Package, OperatorProfile } from '@/lib/types'
 
@@ -14,6 +16,9 @@ export async function generateMetadata({
   try {
     const { slug } = await params
     const pkg = await Repository.getPublicPackageBySlug(slug)
+    if (pkg && hasDeparted(pkg)) {
+      return { title: 'This departure has passed', robots: { index: false, follow: true } }
+    }
     if (pkg && pkg.status === 'published') {
       const operator = await Repository.getOperatorById(pkg.operatorId)
       const operatorName = operator?.companyName ?? 'PilgrimCompare operator'
@@ -93,6 +98,11 @@ export default async function PackageDetailPage({
         <div className="min-h-screen bg-[var(--background)]">{renderNotFound(error)}</div>
       </>
     )
+  }
+
+  // Past departures keep their URL but show a notice, never the enquiry form.
+  if (pkg && hasDeparted(pkg)) {
+    return <div className="min-h-screen bg-[var(--background)]"><DepartedNotice pkg={pkg} /></div>
   }
 
   if (!pkg || pkg.status !== 'published') {

@@ -23,8 +23,39 @@ test('browse tab and an unfiltered search show the same published packages', asy
   const browse = await cardCount(page)
   await page.goto('/search/packages')
   expect(await resultCount(page)).toBe(browse)
-  // 15 seeded: 1 draft, 1 from an unverified operator, 2 from a verified operator with no ATOL number.
+  // 16 seeded: 1 draft, 1 from an unverified operator, 2 from a verified operator with no ATOL number, 1 departed.
   expect(browse).toBe(11)
+})
+
+test('a departed package leaves every public list and its page says the departure has passed', async ({ page, request }) => {
+  const departed = /August 2026 \[LOCAL TEST DATA\]/
+  for (const path of ['/packages', '/search/packages', '/operators/local-test-operator-b']) {
+    await page.goto(path)
+    await expect(page.getByText(departed)).toHaveCount(0)
+  }
+  const sitemap = await (await request.get('/sitemap.xml')).text()
+  expect(sitemap).toContain('/packages/local-test-01')
+  expect(sitemap).not.toContain('/packages/local-test-16')
+  expect((await request.post('/api/enquiries', { data: { packageId: 'local-test-pkg-16', name: 'Test', email: 'departed@test.local' } })).status()).toBe(404)
+
+  const notice = async () => {
+    await page.goto('/packages/local-test-16')
+    await expect(page.getByRole('heading', { level: 1, name: 'This departure has passed' })).toBeVisible()
+    await expect(page.getByRole('main').getByRole('link', { name: /enquir/i })).toHaveCount(0)
+    await page.goto('/packages/local-test-16/enquire')
+    await expect(page.getByRole('heading', { level: 1, name: 'This departure has passed' })).toBeVisible()
+    await expect(page.getByRole('main').locator('form')).toHaveCount(0)
+  }
+  await notice()
+  await page.goto('/packages/local-test-16')
+  await page.getByTestId('package-departed-back').click()
+  await page.waitForURL(/\/packages$/)
+
+  // The 02:00 cron marks it expired (its return date has passed); the page still says so.
+  const run = await request.get('/api/cron/expire-packages', { headers: { authorization: 'Bearer local-db-test-only' } })
+  expect(run.status()).toBe(200)
+  expect((await run.json()).expired).toBeGreaterThanOrEqual(1)
+  await notice()
 })
 
 test('submitting the untouched search form loses no Umrah packages', async ({ page }) => {

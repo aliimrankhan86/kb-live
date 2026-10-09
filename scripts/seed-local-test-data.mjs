@@ -69,11 +69,23 @@ const PACKAGES = [
   { n: 13, op: 'b', title: '8 night Umrah from Birmingham, February', departureAirport: 'BHX', price: 1180, priceType: 'from', dateWindow: { start: '2027-02-10', end: '2027-02-18' }, totalNights: 8, nightsMakkah: 4, nightsMadinah: 4, hotelMakkahStars: 3, hotelMadinahStars: 3, hotelMakkahName: 'Test Hotel Makkah Thirteen', hotelMadinahName: 'Test Hotel Madinah Thirteen', distanceToHaramMakkahMetres: 1100, distanceBandMakkah: 'medium', distanceBandMadinah: 'medium', flightType: 'direct', groupType: 'private', cancellationPolicy: 'Test policy: 21 day window.', paymentPlanAvailable: true, depositAmount: 150, inclusions: allIncl },
   // Published but from an UNVERIFIED operator: must never appear publicly.
   { n: 15, op: 'd', title: 'Package from an unverified operator', departureAirport: 'BHX', price: 1111, priceType: 'from', dateWindow: { start: '2026-12-05', end: '2026-12-15' }, totalNights: 10, nightsMakkah: 5, nightsMadinah: 5, distanceBandMakkah: 'unknown', distanceBandMadinah: 'unknown', inclusions: allIncl },
+  // Published, but the departure has passed: must leave every public list (batch 1 item 8).
+  { n: 16, op: 'b', title: '10 night summer Umrah from Heathrow, August 2026', departed: true, departureAirport: 'LHR', price: 1450, priceType: 'from', dateWindow: { start: '2026-08-20', end: '2026-08-30' }, seasonLabel: 'Summer holidays', totalNights: 10, nightsMakkah: 5, nightsMadinah: 5, hotelMakkahStars: 4, hotelMadinahStars: 4, distanceBandMakkah: 'near', distanceBandMadinah: 'medium', flightType: 'direct', inclusions: allIncl },
   // Draft: must never appear publicly.
   { n: 14, op: 'a', title: 'Draft package (must not be public)', status: 'draft', departureAirport: 'LHR', price: 999, priceType: 'from', totalNights: 7, nightsMakkah: 4, nightsMadinah: 3, distanceBandMakkah: 'unknown', distanceBandMadinah: 'unknown', inclusions: allIncl },
 ];
 
 const pkgId = (n) => `local-test-pkg-${String(n).padStart(2, '0')}`;
+
+// A start date before today hides a package (lib/listing.ts hasDeparted), so
+// the seeded departures roll forward by whole years once the earliest one
+// (5 Nov 2026) is reached. Months stay the same. Package 16 stays in the past.
+const today = new Date().toISOString().slice(0, 10);
+let yearsAhead = 0;
+while (`${2026 + yearsAhead}-11-05` <= today) yearsAhead += 1;
+const rollYear = (d) => `${Number(d.slice(0, 4)) + yearsAhead}${d.slice(4)}`;
+const seededWindow = (p) =>
+  p.departed ? p.dateWindow : { start: rollYear(p.dateWindow.start), end: rollYear(p.dateWindow.end) };
 
 // 1x1 PNG, generated locally. Public URL is stored on package 01.
 const TEST_IMAGE_PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
@@ -149,7 +161,7 @@ async function main() {
         [
           pkgId(p.n), userIds[p.op], `${p.title} ${LABEL}`, `local-test-${String(p.n).padStart(2, '0')}`,
           p.status ?? 'published', p.pilgrimageType ?? 'umrah', p.seasonLabel ?? null,
-          p.dateWindow ? JSON.stringify(p.dateWindow) : null, p.priceType, p.price,
+          p.dateWindow ? JSON.stringify(seededWindow(p)) : null, p.priceType, p.price,
           p.totalNights, p.nightsMakkah, p.nightsMadinah, p.hotelMakkahStars ?? null, p.hotelMadinahStars ?? null,
           p.hotelMakkahName ?? null, p.hotelMadinahName ?? null, p.distanceToHaramMakkahMetres ?? null,
           p.distanceToHaramMadinahMetres ?? null, p.distanceBandMakkah, p.distanceBandMadinah, p.airline ?? null,
