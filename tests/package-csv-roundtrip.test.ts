@@ -24,6 +24,19 @@ const full: Package = {
   priceQuadPerPerson: 1195, priceTriplePerPerson: 1350.5, priceDoublePerPerson: 1595,
 };
 
+// The other state of every field: true where full has false, not stated where
+// full states a value, a stated zero deposit, other enum values (item 4).
+const other: Package = {
+  id: 'rt-2', operatorId, title: 'Round trip, other states', slug: 'rt-2', status: 'published', pilgrimageType: 'hajj',
+  dateWindow: { start: '2027-05-10', end: '' },
+  priceType: 'exact', pricePerPerson: 7950.75, currency: 'GBP', totalNights: 20, nightsMakkah: 14, nightsMadinah: 6,
+  hotelMakkahStars: 3, distanceBandMakkah: 'far', distanceBandMadinah: 'unknown',
+  depositAmount: 0, paymentPlanAvailable: true, groupType: 'large-group', ziyaratIncluded: true,
+  roomOccupancyOptions: { single: true, double: false, triple: false, quad: true },
+  inclusions: { visa: null, flights: false, transfers: null, meals: false },
+  priceQuadPerPerson: null, priceDoublePerPerson: 8100,
+};
+
 const DECISION_FIELDS = [
   'title', 'pilgrimageType', 'seasonLabel', 'dateWindow', 'priceType', 'pricePerPerson', 'currency', 'totalNights',
   'nightsMakkah', 'nightsMadinah', 'hotelMakkahStars', 'hotelMadinahStars', 'hotelMakkahName', 'hotelMadinahName',
@@ -39,13 +52,21 @@ beforeEach(() => {
 });
 
 describe('CSV round trip keeps every decision field', () => {
-  it('export → import reproduces the package exactly (status/slug/id aside)', async () => {
-    await Repository.createPackage(ctx, full);
+  const roundTrip = async (pkg: Package) => {
+    await Repository.createPackage(ctx, pkg);
     const csv = await Repository.exportPackagesAsCsv(ctx);
     const { saved, errors } = await Repository.importPackagesFromCsv(ctx, csv);
     expect(errors).toEqual([]);
-    const back = saved[0];
-    for (const field of DECISION_FIELDS) expect(back[field], field).toEqual(full[field]);
+    return saved[0];
+  };
+
+  // One test per field and state. Not stated may come back as undefined or
+  // null: both read "Not provided".
+  describe.each([['stated values', full], ['the other states', other]] as const)('%s', (_, pkg) => {
+    it.each(DECISION_FIELDS)('%s', async (field) => {
+      const back = await roundTrip(pkg);
+      expect(back[field] ?? null).toEqual(pkg[field] ?? null);
+    });
   });
 });
 
@@ -59,7 +80,7 @@ describe('CSV room prices (item 9)', () => {
   });
 
   it('exports the three columns, blank when not stated', async () => {
-    await Repository.createPackage(ctx, { ...full, title: 'Export check', cancellationPolicy: 'Plain policy', priceTriplePerPerson: null });
+    await Repository.createPackage(ctx, { ...other, title: 'Export check', priceQuadPerPerson: 1195, priceTriplePerPerson: null, priceDoublePerPerson: 1595 });
     const [head, row] = (await Repository.exportPackagesAsCsv(ctx)).split('\n');
     const cols = head.split(',');
     const cells = row.split(',');

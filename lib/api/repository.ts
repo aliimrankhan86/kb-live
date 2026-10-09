@@ -541,6 +541,11 @@ const csvBool = (value: string): boolean | undefined => {
   if (v === 'false' || v === 'no') return false;
   return undefined;
 };
+/** A stated number of 0 or more (a £0 deposit is stated); blank or text → not stated. */
+const csvNonNegative = (value: string): number | undefined => {
+  const n = value ? Number(value) : NaN;
+  return Number.isFinite(n) && n >= 0 ? n : undefined;
+};
 /** Item 9 room price: blank → not stated (null); a positive number → stated; anything else → invalid. */
 const csvRoomPrice = (value: string): number | null | 'invalid' => {
   if (!value) return null;
@@ -1450,15 +1455,15 @@ export const Repository = {
         })(),
         hotelMakkahName: getValue(cells, 'hotelMakkahName') || undefined,
         hotelMadinahName: getValue(cells, 'hotelMadinahName') || undefined,
-        distanceToHaramMakkahMetres: Number(getValue(cells, 'distanceToHaramMakkahMetres')) || undefined,
-        distanceToHaramMadinahMetres: Number(getValue(cells, 'distanceToHaramMadinahMetres')) || undefined,
+        distanceToHaramMakkahMetres: csvNonNegative(getValue(cells, 'distanceToHaramMakkahMetres')),
+        distanceToHaramMadinahMetres: csvNonNegative(getValue(cells, 'distanceToHaramMadinahMetres')),
         distanceBandMakkah: oneOf(getValue(cells, 'distanceBandMakkah'), BANDS) ?? 'unknown',
         distanceBandMadinah: oneOf(getValue(cells, 'distanceBandMadinah'), BANDS) ?? 'unknown',
         airline: getValue(cells, 'airline') || undefined,
         // "Heathrow" / "LHR" → LHR; a city or unknown text is kept as written.
         departureAirport: normaliseAirport(getValue(cells, 'departureAirport')),
         flightType: oneOf(getValue(cells, 'flightType'), ['direct', 'one-stop', 'multi-stop'] as const),
-        depositAmount: Number(getValue(cells, 'depositAmount')) || undefined,
+        depositAmount: csvNonNegative(getValue(cells, 'depositAmount')),
         paymentPlanAvailable: csvBool(getValue(cells, 'paymentPlanAvailable')),
         cancellationPolicy: getValue(cells, 'cancellationPolicy') || undefined,
         groupType: oneOf(getValue(cells, 'groupType'), ['private', 'small-group', 'large-group'] as const),
