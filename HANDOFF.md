@@ -15,7 +15,7 @@
 
 **Release 2026-10-07 (done):** PR #115 (`/partner` founding operators copy) and PR #116 (`dev` into `main`). Production runs `main` `a4e7075` (`dpl_C6wvCksUXATpod7GaWpNwABsVQFM`).
 
-**Batch 1 (2026-10-09, `fix/batch-1-reliability-and-ux`, PR into `dev`, not merged):** emails now sent inside `after()`, departed packages hidden from every public list (`lib/listing.ts` `hasDeparted`), phone overflow fixed, compare and card UX fixes, airport and trip length filters. Report and staging email proof steps: `docs/uat/BATCH1_REPORT.md`.
+**Batch 1 (2026-10-09, `fix/batch-1-reliability-and-ux`, PR #118 into `dev`, not merged):** emails now sent inside `after()`, departed packages hidden from every public list (`lib/listing.ts` `hasDeparted`), phone overflow fixed, compare and card UX fixes, airport and trip length filters. Report and staging email proof steps: `docs/uat/BATCH1_REPORT.md`.
 
 **Staging (B0, PR #117 merged into `dev`):** Vercel Preview deployments use the fictional Supabase project `pilgrimcompare-staging` (`fkcudutzgltrsoykfvfn`), with a test-site banner, `noindex` and email only to `STAGING_EMAIL_TO`. Reseed with `npm run seed:staging`. Read `docs/STAGING.md` before touching Preview env vars or staging data.
 

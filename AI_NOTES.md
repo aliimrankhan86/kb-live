@@ -1,6 +1,6 @@
 # PilgrimCompare AI Handover — Single Source of Truth
 
-## §B1 Batch 1 reliability and UX (PR into `dev`, branch `fix/batch-1-reliability-and-ux`), 2026-10-09
+## §B1 Batch 1 reliability and UX (PR #118 into `dev`, branch `fix/batch-1-reliability-and-ux`), 2026-10-09
 
 Full report: `docs/uat/BATCH1_REPORT.md` (per item, decisions, UX-08 options, every wording change, staging email proof steps).
 
