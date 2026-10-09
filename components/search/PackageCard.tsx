@@ -35,7 +35,6 @@ interface PackageCardProps {
 }
 
 
-const HOTEL_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='80' viewBox='0 0 120 80'%3E%3Crect width='120' height='80' fill='%23222'/%3E%3Crect x='35' y='20' width='50' height='40' rx='2' fill='%23333'/%3E%3Crect x='45' y='35' width='10' height='25' rx='1' fill='%23444'/%3E%3Crect x='65' y='35' width='10' height='25' rx='1' fill='%23444'/%3E%3Crect x='35' y='20' width='50' height='8' rx='2' fill='%23444'/%3E%3C/svg%3E"
 
 const isPlaceholder = (v?: string) => !v || v === 'TBC' || v === '-' || v.trim() === ''
 
@@ -55,8 +54,9 @@ const PackageCard: React.FC<PackageCardProps> = ({
   unmetCriteria,
   priceUpdatedAt,
 }) => {
-  const [makkahImgSrc, setMakkahImgSrc] = useState(pkg.makkahHotel.image || HOTEL_FALLBACK)
-  const [madinaImgSrc, setMadinaImgSrc] = useState(pkg.madinaHotel.image || HOTEL_FALLBACK)
+  // '' = no photo (or it failed to load): show the themed tile, never a pale box.
+  const [makkahImgSrc, setMakkahImgSrc] = useState(pkg.makkahHotel.image)
+  const [madinaImgSrc, setMadinaImgSrc] = useState(pkg.madinaHotel.image)
 
   // Stated price, never converted (standards §6).
   const priceFormatted = formatStatedPrice(pkg.price, pkg.currency)
@@ -105,15 +105,15 @@ const PackageCard: React.FC<PackageCardProps> = ({
 
   const hotelRow = (hotel: SearchPackageDisplay['makkahHotel'], imgSrc: string, onErr: () => void) => (
     <div className={styles.hotelRow}>
-      <Image
-        src={imgSrc}
-        alt=""
-        width={64}
-        height={64}
-        className={styles.hotelThumb}
-        onError={onErr}
-        unoptimized={imgSrc === HOTEL_FALLBACK}
-      />
+      {imgSrc ? (
+        <Image src={imgSrc} alt="" width={64} height={64} className={styles.hotelThumb} onError={onErr} />
+      ) : (
+        <span className={`${styles.hotelThumb} ${styles.hotelThumbFallback}`} aria-hidden="true" data-testid="hotel-thumb-fallback">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-5h6v5M9 11h.01M15 11h.01" />
+          </svg>
+        </span>
+      )}
       <div className={styles.hotelInfo}>
         <span className={styles.hotelLocation}>{hotel.location}</span>
         <span className={hotel.name ? styles.hotelName : styles.notProvided}>
@@ -218,8 +218,8 @@ const PackageCard: React.FC<PackageCardProps> = ({
 
         {/* Hotels — compact rows with thumbnails */}
         <div className={styles.hotels}>
-          {hotelRow(pkg.makkahHotel, makkahImgSrc, () => setMakkahImgSrc(HOTEL_FALLBACK))}
-          {hotelRow(pkg.madinaHotel, madinaImgSrc, () => setMadinaImgSrc(HOTEL_FALLBACK))}
+          {hotelRow(pkg.makkahHotel, makkahImgSrc, () => setMakkahImgSrc(''))}
+          {hotelRow(pkg.madinaHotel, madinaImgSrc, () => setMadinaImgSrc(''))}
         </div>
 
         {/* What's included */}

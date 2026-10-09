@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { type ReactNode } from 'react'
+import { type ReactNode, useState } from 'react'
 import type { Package, OperatorProfile } from '@/lib/types'
 import { createQuotePrefillUrl } from '@/lib/quote-prefill'
 import { buttonVariants } from '@/components/ui/Button'
@@ -60,6 +60,9 @@ const SectionCard = ({ title, children, className = '' }: { title: string; child
 )
 
 export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDetailProps) {
+  // No photo, or it failed to load: the hero collapses instead of leaving an empty box.
+  const [coverFailed, setCoverFailed] = useState(false)
+  const cover = coverFailed ? undefined : pkg.images?.find(Boolean)
   const router = useRouter()
   const handleBack = () => {
     if (typeof window !== 'undefined' && window.history.length > 1) router.back()
@@ -128,11 +131,11 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
         )}
       </header>
 
-      {pkg.images && pkg.images.length > 0 && (
+      {cover && (
         <section className="mb-6" data-testid="package-image-gallery" aria-label="Package images">
           <div className="overflow-hidden rounded-xl border border-[var(--border)]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={pkg.images[0]} alt={`${pkg.title}: cover`} className="aspect-[16/7] w-full object-cover" data-testid="package-image-primary" />
+            <img src={cover} alt={`${pkg.title}: cover`} className="aspect-[16/7] w-full object-cover" data-testid="package-image-primary" onError={() => setCoverFailed(true)} />
           </div>
         </section>
       )}

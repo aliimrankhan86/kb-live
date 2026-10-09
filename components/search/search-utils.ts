@@ -36,9 +36,6 @@ export interface SearchPackageDisplay {
   isFeatured: boolean;
 }
 
-const PLACEHOLDER_IMAGE =
-  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjgwIiB2aWV3Qm94PSIwIDAgMTIwIDgwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iODAiIGZpbGw9InJnYmEoMjU1LCAyNTUsIDI1NSwgMC4xKSIvPjx0ZXh0IHg9IjYwIiB5PSI0MCIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9InJnYmEoMjU1LCAyNTUsIDI1NSwgMC41KSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+SG90ZWwgSW1hZ2U8L3RleHQ+PC9zdmc+';
-
 // ─── Shared search query layer ───────────────────────────────────────────────
 // ONE place that decides which packages a search returns. Used by the search
 // results page (server pre-render + client), the corridor CTAs and the browse
@@ -285,14 +282,14 @@ export function toSearchDisplay(pkg: CataloguePackage): SearchPackageDisplay {
       location: 'Makkah',
       rating: pkg.hotelMakkahStars ?? null,
       distance: dist('Makkah', pkg.distanceToHaramMakkahMetres, pkg.distanceBandMakkah),
-      image: pkg.images?.[0] ?? PLACEHOLDER_IMAGE,
+      image: pkg.images?.[0] ?? '',
     },
     madinaHotel: {
       name: pkg.hotelMadinahName ?? null,
       location: 'Madinah',
       rating: pkg.hotelMadinahStars ?? null,
       distance: dist('Madinah', pkg.distanceToHaramMadinahMetres, pkg.distanceBandMadinah),
-      image: pkg.images?.[0] ?? PLACEHOLDER_IMAGE,
+      image: pkg.images?.[0] ?? '',
     },
     price: pkg.pricePerPerson,
     currency: pkg.currency,
