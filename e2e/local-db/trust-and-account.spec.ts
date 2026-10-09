@@ -166,3 +166,34 @@ test('enquiry retention cron removes personal details after 90 days, keeps billi
 
   expect(await (await run()).json()).toEqual({ ok: true, anonymised: 0 })
 })
+
+test('expire-packages cron skips empty and malformed end dates and still expires the past one', async ({ request }) => {
+  const stamp = Date.now()
+  const rows = [
+    { id: `cron-empty-${stamp}`, end: '' },
+    { id: `cron-bad-${stamp}`, end: '2026-02-30' },
+    { id: `cron-past-${stamp}`, end: '2026-01-31' },
+  ]
+  for (const { id, end } of rows) {
+    await sql(
+      `insert into packages
+       select (jsonb_populate_record(p, jsonb_build_object('id', $1::text, 'slug', $1::text, 'status', 'published',
+         'date_window', jsonb_build_object('start', '2026-01-20', 'end', $2::text)))).*
+       from packages p where id = 'local-test-pkg-01'`,
+      [id, end],
+    )
+  }
+  try {
+    const run = await request.get('/api/cron/expire-packages', { headers: { authorization: `Bearer ${CRON_SECRET}` } })
+    expect(run.status()).toBe(200)
+    const body = await run.json()
+    expect(body.skipped).toEqual(expect.arrayContaining([rows[0].id, rows[1].id]))
+    expect(body.skipped).not.toContain(rows[2].id)
+    const status = await sql<{ id: string; status: string }>('select id, status from packages where id = any($1) order by id', [rows.map((r) => r.id)])
+    expect(Object.fromEntries(status.map((r) => [r.id, r.status]))).toEqual({
+      [rows[0].id]: 'published', [rows[1].id]: 'published', [rows[2].id]: 'expired',
+    })
+  } finally {
+    await sql('delete from packages where id = any($1)', [rows.map((r) => r.id)])
+  }
+})
