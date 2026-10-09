@@ -158,3 +158,16 @@ test('phone widths never scroll sideways, even with a very long title and hotel 
     }
   }
 })
+
+test('long hotel names wrap to two lines on /packages cards (UX-10)', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/packages')
+  const name = page.getByTestId('package-card-local-test-pkg-17').getByText(/Test Grand Residence Makkah Tower/)
+  const { height, line, clamp } = await name.evaluate((el) => {
+    const s = getComputedStyle(el)
+    return { height: el.getBoundingClientRect().height, line: parseFloat(s.lineHeight), clamp: s.webkitLineClamp }
+  })
+  expect(clamp).toBe('2')
+  expect(height).toBeGreaterThan(line * 1.5)
+  expect(height).toBeLessThanOrEqual(line * 2 + 1)
+})
