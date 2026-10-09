@@ -3,11 +3,14 @@
 > **Single rolling tracker.** Any AI/dev: read this for current state. Update it after work is **done + tested + verified** (see `CLAUDE.md` rule).
 > Detailed handover lives in `AI_NOTES.md`. Cold-start brief: `HANDOFF.md`. Business: `BUSINESS.md`.
 
-**Last verified:** 2026-10-09 (batch 2 one list and room prices, PR #119 into `dev`, not merged; batch 1 PR #118 merged into `dev`. Production `main` `a4e7075`) · **Branch:** `fix/batch-2-single-list-room-prices` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
+**Last verified:** 2026-10-09 (batch 3 soft 404 and cleanup, PR into `dev`, not merged; batches 1 and 2 merged into `dev` `e571228`. Production `main` `a4e7075`) · **Branch:** `fix/batch-3-soft-404-and-cleanup` · **App:** Next.js 15.5 / React 19 / Supabase / Prisma
 
 > **Direction:** `PILGRIMCOMPARE_PROJECT_DIRECTION.md` (repo root) is now the source of truth — read first every session. Parked features tracked in `PARKED_FEATURES.md`.
 
 ---
+
+> **2026-10-09 batch 3 (`fix/batch-3-soft-404-and-cleanup`, PR into `dev`, not merged):** unknown or unpublished package URLs now answer a real HTTP 404 with robots noindex (`app/packages/[slug]/not-found.tsx`); a load error stays a message and is noindex. `npm run seed:staging` writes the room prices each package's notes state and is now additive (never deletes, overwrites or resets a row; not run on staging). No em or en dashes left in shipped source comments or the demo seeds; no page title repeats the brand (already fixed in batch 1, test widened). Cron expiry decided: return date, no code change. Migration 015 is on staging, pending on production before release to `main`. Open: interests grants hardening (needs Ali's yes). Vitest 2,268 (81 files) · Playwright 69 passed, 6 skipped · real-DB 39 of 39. Report `docs/uat/BATCH3_REPORT.md`, detail `AI_NOTES.md` §B3.
+> 🛠️ **Gotcha: a Playwright spec cannot statically import a repo `.mjs` script.** Playwright compiles the spec and what it imports to CommonJS, so `import { seedRows } from '../../scripts/seed-staging.mjs'` fails with "exports is not defined in ES module scope". Not a code bug: use `await import('../../scripts/seed-staging.mjs')` inside the test (`e2e/local-db/staging-seed.spec.ts`).
 
 > **2026-10-09 batch 2 (`fix/batch-2-single-list-room-prices`, PR #119 into `dev`, not merged):** the `expire-packages` cron skips empty or malformed end dates instead of failing the run (rule unchanged). One package list at `/packages` (UX-08 option B): `/search/packages?...` answers 308 to `/packages?...`, sitemap and every link use `/packages`. Optional quad, triple and double price per person (item 9, closes UX-11): wizard, package page "Prices by room type", compare rows, CSV. **Migration `supabase/migrations-pending/015_package_room_prices.sql` is pending: apply on staging before the preview check and on production before release to `main`** (rollback file alongside). A partial package PATCH no longer resets status and defaults (Zod 4). CSV round trip tested per field; a stated £0 deposit now survives. Open for Ali: cron expiry date (departure or return). Vitest 2,265 · Playwright 69 passed, 6 skipped · real-DB 37 of 37. Report `docs/uat/BATCH2_REPORT.md`, detail `AI_NOTES.md` §B2.
 > 🛠️ **Gotcha: Zod 4 fills `.default()` values inside `.partial()`.** `updatePackageSchema.parse({ id, airline })` returns `status: 'draft'` and default bands, inclusions and room types, so a partial update overwrote them. Not a Zod bug (v4 behaviour): a partial-update route must keep only the keys the client sent (`app/api/operator/packages/route.ts` does).
@@ -29,11 +32,11 @@
 
 > **2026-10-06 QA run (branch `fix/overnight-qa`, PR into dev, not merged; two green gates incl. clean verification):** reported search/tab mismatch fixed (shared query layer); operator portal no longer uses browser MockDB; open redirects closed; JSON-LD/package-page/partner truth fixes. Vitest 2,047 · Playwright 69/6/0 · real-DB 24/24 · tsc ✅ · build ✅. Founder decisions applied (verified-only, three-state inclusions, migration 013 pending, registered office unset). Report: `docs/uat/OVERNIGHT_REPORT.md`; detail `AI_NOTES.md` §OQ1.
 
-## Health (verified 2026-10-09, batch 2)
+## Health (verified 2026-10-09, batch 3)
 
 | Check | State |
 | --- | --- |
-| `npm run test` | ✅ 2,265 (81 files) pass |
+| `npm run test` | ✅ 2,268 (81 files) pass |
 | `npm run build` | ✅ 0 errors |
 | `npx tsc --noEmit` | ✅ pass |
 | E2E | ✅ cookie-banner click-intercept flake fixed 2026-06-15 (`feature/fix-cookie-banner-e2e-flake`, AI_NOTES §Cookie-banner E2E flake fix). `catalogue`/`operator`/`bank-payment` 45/45 × 3 serial runs (chromium+firefox+webkit). |
