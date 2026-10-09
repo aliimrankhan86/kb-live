@@ -73,6 +73,8 @@ export async function generateMetadata({ searchParams }: SearchPackagesPageProps
 export default async function SearchPackagesPage({ searchParams }: SearchPackagesPageProps) {
   const params = await searchParams;
   const { packages: allPackages, failed } = await loadPackages();
+  // Names render on the server; a failure only loses the trust line, never the page.
+  const operators = await Repository.listPublicOperators().catch(() => []);
 
   // If the catalogue couldn't load (usually a database connectivity blip),
   // show a calm "try again" state rather than a 500.
@@ -130,12 +132,13 @@ export default async function SearchPackagesPage({ searchParams }: SearchPackage
   ]);
 
   return (
-    <>
+    <div className="min-h-screen" data-plain-background>
       <JsonLdScript data={searchJsonLd} />
+      {/* The only h1: the Suspense fallback and the client list used to add one each. */}
+      <h1 className="sr-only">Search Results - Hajj and Umrah Packages</h1>
       <Suspense
         fallback={
           <div className={styles.searchPage}>
-            <h1 className="sr-only">Search Results - Hajj and Umrah Packages</h1>
             <div className={styles.searchContainer}>
               <div className={styles.searchHeader}>
                 <div className={styles.searchResults}>
@@ -159,8 +162,8 @@ export default async function SearchPackagesPage({ searchParams }: SearchPackage
           </div>
         }
       >
-        <SearchPackagesClient allPackages={allPackages} featuredSlotsEnabled={FEATURE_FEATURED_SLOTS} />
+        <SearchPackagesClient allPackages={allPackages} featuredSlotsEnabled={FEATURE_FEATURED_SLOTS} operators={operators} />
       </Suspense>
-    </>
+    </div>
   );
 }

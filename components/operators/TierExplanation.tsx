@@ -1,40 +1,34 @@
-import { VERIFICATION_STATEMENT } from '@/lib/content-rules';
-import type { OperatorTier } from '@/lib/types';
-
-const TIER_COPY: Record<OperatorTier, { label: string; description: string; colour: string }> = {
-  listed: {
-    label: 'Listed',
-    description: 'This operator is registered on PilgrimCompare. Basic details have been collected.',
-    colour: 'text-[var(--textMuted)] border-[var(--borderSubtle)] bg-transparent',
-  },
-  verified: {
-    label: 'Verified',
-    // Standards §7: say exactly what we check, nothing more.
-    description: VERIFICATION_STATEMENT,
-    colour: 'text-[var(--color-success)] border-[var(--color-success)]/30 bg-[var(--color-success)]/10',
-  },
-  verified_plus: {
-    // No enhanced checks or feedback reviews exist, so this tier claims nothing extra.
-    label: 'Verified',
-    description: VERIFICATION_STATEMENT,
-    colour: 'text-[var(--yellow)] border-[var(--yellow)]/30 bg-[rgba(255,211,29,0.06)]',
-  },
-};
+import Link from 'next/link';
+import { VERIFICATION_STATEMENT_SHORT } from '@/lib/content-rules';
+import { VERIFICATION_STATEMENT_HREF } from '@/components/ui/VerifiedBadge';
 
 interface TierExplanationProps {
-  tier: OperatorTier;
+  /** verificationStatus === 'verified'. Public pages only show verified operators. */
+  verified: boolean;
 }
 
-export function TierExplanation({ tier }: TierExplanationProps) {
-  const config = TIER_COPY[tier] ?? TIER_COPY.listed;
-
+/**
+ * "How we verify operators" (UX-15). Follows the operator's verification
+ * status, so it never says "Listed: basic details collected" under a
+ * "Verified operator" badge. Claims only the §7 checks, linked in full.
+ */
+export function TierExplanation({ verified }: TierExplanationProps) {
   return (
     <div
-      className={`inline-flex items-start gap-2 rounded-md border px-3 py-2 text-sm ${config.colour}`}
+      className={`rounded-md border px-3 py-2 text-sm ${
+        verified
+          ? 'border-[var(--color-success)]/30 bg-[var(--color-success)]/10 text-[var(--text)]'
+          : 'border-[var(--borderSubtle)] text-[var(--textMuted)]'
+      }`}
       data-testid="tier-explanation"
     >
-      <span className="font-semibold shrink-0">{config.label}:</span>
-      <span>{config.description}</span>
+      <p className="font-semibold">{verified ? 'How we verify operators' : 'Verification not complete'}</p>
+      <p className="mt-1">
+        {verified ? VERIFICATION_STATEMENT_SHORT : 'We have not finished our checks on this operator.'}{' '}
+        <Link href={VERIFICATION_STATEMENT_HREF} className="underline underline-offset-2">
+          Full statement
+        </Link>
+      </p>
     </div>
   );
 }

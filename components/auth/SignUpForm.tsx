@@ -17,9 +17,9 @@ interface PasswordCheck {
 function getPasswordChecks(pwd: string): PasswordCheck[] {
   return [
     { label: 'At least 8 characters', met: pwd.length >= 8 },
-    { label: 'At least 1 uppercase letter (A–Z)', met: /[A-Z]/.test(pwd) },
-    { label: 'At least 1 lowercase letter (a–z)', met: /[a-z]/.test(pwd) },
-    { label: 'At least 1 number (0–9)', met: /[0-9]/.test(pwd) },
+    { label: 'At least 1 uppercase letter (A to Z)', met: /[A-Z]/.test(pwd) },
+    { label: 'At least 1 lowercase letter (a to z)', met: /[a-z]/.test(pwd) },
+    { label: 'At least 1 number (0 to 9)', met: /[0-9]/.test(pwd) },
     { label: 'At least 1 special character (!@#$%^&*)', met: /[^A-Za-z0-9]/.test(pwd) },
   ];
 }
@@ -34,7 +34,7 @@ function PasswordMatchIndicator({ password, confirm }: { password: string; confi
       aria-live="polite"
     >
       <span
-        className="inline-flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold"
+        className="inline-flex h-4 w-4 items-center justify-center rounded-full text-xs font-bold"
         style={{
           backgroundColor: match ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
         }}
@@ -84,7 +84,7 @@ function PasswordStrength({ password }: { password: string }) {
             }}
           >
             <span
-              className="inline-flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold"
+              className="inline-flex h-4 w-4 items-center justify-center rounded-full text-xs font-bold"
               style={{
                 backgroundColor: password.length === 0
                   ? 'var(--bgSecondary)'
@@ -108,10 +108,12 @@ function PasswordStrength({ password }: { password: string }) {
   );
 }
 
-export function SignUpForm() {
+/** operatorSignupEnabled: server-evaluated FEATURE_OPERATOR_SELF_SERVE (parked, off). */
+export function SignUpForm({ operatorSignupEnabled = false }: { operatorSignupEnabled?: boolean } = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const defaultRole = (searchParams.get('type') as SignUpRole) || 'operator';
+  // Pilgrim signup by default (UX-12). Operators join through /partner unless self-serve is on.
+  const defaultRole: SignUpRole = operatorSignupEnabled && searchParams.get('type') === 'operator' ? 'operator' : 'customer';
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -181,37 +183,39 @@ export function SignUpForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4" data-testid="signup-form">
-      {/* Tabs */}
-      <div className="grid grid-cols-2 gap-2" role="tablist" aria-label="Account type">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={role === 'customer'}
-          onClick={() => setRole('customer')}
-          className={`min-h-[44px] rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
-            role === 'customer'
-              ? 'border-[var(--yellow)] bg-[rgba(255,211,29,0.12)] text-[var(--text)]'
-              : 'border-[var(--borderSubtle)] text-[var(--textMuted)] hover:border-[var(--borderStrong)]'
-          }`}
-          data-testid="signup-role-customer"
-        >
-          Traveller
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={role === 'operator'}
-          onClick={() => setRole('operator')}
-          className={`min-h-[44px] rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
-            role === 'operator'
-              ? 'border-[var(--yellow)] bg-[rgba(255,211,29,0.12)] text-[var(--text)]'
-              : 'border-[var(--borderSubtle)] text-[var(--textMuted)] hover:border-[var(--borderStrong)]'
-          }`}
-          data-testid="signup-role-operator"
-        >
-          Operator
-        </button>
-      </div>
+      {/* Tabs: only while operator self-serve signup is switched on */}
+      {operatorSignupEnabled && (
+        <div className="grid grid-cols-2 gap-2" role="tablist" aria-label="Account type">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={role === 'customer'}
+            onClick={() => setRole('customer')}
+            className={`min-h-[44px] rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
+              role === 'customer'
+                ? 'border-[var(--yellow)] bg-[rgba(255,211,29,0.12)] text-[var(--text)]'
+                : 'border-[var(--borderSubtle)] text-[var(--textMuted)] hover:border-[var(--borderStrong)]'
+            }`}
+            data-testid="signup-role-customer"
+          >
+            Traveller
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={role === 'operator'}
+            onClick={() => setRole('operator')}
+            className={`min-h-[44px] rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
+              role === 'operator'
+                ? 'border-[var(--yellow)] bg-[rgba(255,211,29,0.12)] text-[var(--text)]'
+                : 'border-[var(--borderSubtle)] text-[var(--textMuted)] hover:border-[var(--borderStrong)]'
+            }`}
+            data-testid="signup-role-operator"
+          >
+            Operator
+          </button>
+        </div>
+      )}
 
       <div>
         <h1 className="text-2xl font-semibold text-[var(--text)]">
@@ -222,6 +226,14 @@ export function SignUpForm() {
             ? 'Register your travel company to list packages and receive enquiries from UK travellers.'
             : 'Join PilgrimCompare to compare packages, save favourites and send enquiries.'}
         </p>
+        {!operatorSignupEnabled && (
+          <p className="mt-2 text-sm text-[var(--textMuted)]" data-testid="signup-operator-route">
+            Travel company?{' '}
+            <Link href="/partner" className="inline-flex min-h-[44px] items-center text-[var(--yellow)] underline-offset-2 hover:underline">
+              See how operators list packages
+            </Link>
+          </p>
+        )}
       </div>
 
       {passwordError && (
@@ -326,11 +338,11 @@ export function SignUpForm() {
           />
           <span>
             I agree to the{' '}
-            <Link href="/terms" target="_blank" className="underline text-[var(--accent)]">
+            <Link href="/terms" target="_blank" className="py-1.5 underline text-[var(--accent)]">
               Terms & Conditions
             </Link>{' '}
             and{' '}
-            <Link href="/privacy" target="_blank" className="underline text-[var(--accent)]">
+            <Link href="/privacy" target="_blank" className="py-1.5 underline text-[var(--accent)]">
               Privacy Policy
             </Link>
             . I confirm I am at least 16 years old.
@@ -365,7 +377,7 @@ export function SignUpForm() {
         Already have an account?{' '}
         <Link
           href={isPartner ? '/login?type=operator' : '/login?type=customer'}
-          className="text-[var(--yellow)] hover:underline"
+          className="py-1.5 text-[var(--yellow)] hover:underline"
         >
           Sign in
         </Link>

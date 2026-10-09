@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { JsonLdScript, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld';
 
 export const metadata: Metadata = {
-  title: 'How PilgrimCompare Works | Compare Umrah Packages from Verified UK Operators',
+  title: 'How It Works: Compare Umrah Packages from Verified UK Operators',
   description:
     'Compare Umrah packages side by side, send an enquiry to your chosen operator, and pay them directly. PilgrimCompare is a comparison and enquiry service, not a travel agent.',
   alternates: { canonical: '/how-it-works' },

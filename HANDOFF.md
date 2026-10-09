@@ -11,19 +11,21 @@
 
 **Overnight QA (2026-10-06):** branch `fix/overnight-qa` (PR into dev, awaiting review) fixes the search/tab package mismatch and several P0 data/security issues. See `docs/uat/OVERNIGHT_REPORT.md`.
 
-**Release 2026-10-06 (done):** production runs `main` `0c80db9` (deployment `dpl_37VRWgywt4AhiwteZyHz9UfwURjs`, rollback target `dpl_7njTU7yY4NuEBtHznKhJsrEx7VbM` on `1505dcd`). Migrations 013 and 014 applied in production (`supabase/migrations-pending/APPLIED.md`). Smoke tests pass except where no package data exists yet. Smoke 10, the first retention cron log line, is pending. Post-release items: `docs/BACKLOG.md`. Detail: `AI_NOTES.md` §REL.
+**Release 2026-10-06 (done):** production runs `main` `0c80db9` (deployment `dpl_37VRWgywt4AhiwteZyHz9UfwURjs`, rollback target `dpl_7njTU7yY4NuEBtHznKhJsrEx7VbM` on `1505dcd`). Migrations 013 and 014 applied in production (`supabase/migrations-pending/APPLIED.md`). Smoke tests pass except where no package data exists yet. Smoke 10 passed on 7 Oct 2026 (enquiry-retention cron ran at 03:45 UTC, 2XX). Post-release items: `docs/BACKLOG.md`. Detail: `AI_NOTES.md` §REL.
 
 **Release 2026-10-07 (done):** PR #115 (`/partner` founding operators copy) and PR #116 (`dev` into `main`). Production runs `main` `a4e7075` (`dpl_C6wvCksUXATpod7GaWpNwABsVQFM`).
 
-**Staging (B0, PR #117 into `dev`, not merged):** Vercel Preview deployments use the fictional Supabase project `pilgrimcompare-staging` (`fkcudutzgltrsoykfvfn`), with a test-site banner, `noindex` and email only to `STAGING_EMAIL_TO`. Reseed with `npm run seed:staging`. Read `docs/STAGING.md` before touching Preview env vars or staging data.
+**Batch 1 (2026-10-09, `fix/batch-1-reliability-and-ux`, PR #118 into `dev`, not merged):** emails now sent inside `after()`, departed packages hidden from every public list (`lib/listing.ts` `hasDeparted`), phone overflow fixed, compare and card UX fixes, airport and trip length filters. Report and staging email proof steps: `docs/uat/BATCH1_REPORT.md`.
+
+**Staging (B0, PR #117 merged into `dev`):** Vercel Preview deployments use the fictional Supabase project `pilgrimcompare-staging` (`fkcudutzgltrsoykfvfn`), with a test-site banner, `noindex` and email only to `STAGING_EMAIL_TO`. Reseed with `npm run seed:staging`. Read `docs/STAGING.md` before touching Preview env vars or staging data.
 
 **Listing rule (2026-10-06):** an operator is public only when admin-verified AND it has an ATOL number (`lib/listing.ts`); changing its ATOL number returns it to pending. Real-DB browser suite: `supabase start --workdir e2e/local-db` then `npm run e2e:local-db` (also CI job `local-db`).
 
-**Remaining setup items:** Operational only — curl-test 3 cron endpoints with CRON_SECRET, submit test enquiry to verify email delivery (failed on the B0 preview: email sends are fire-and-forget, see `docs/BACKLOG.md`), onboard first operator. Email mailboxes live via Cloudflare Email Routing (→ Gmail). Upgrade to Google Workspace when onboarding real operators.
+**Remaining setup items:** Operational only: curl-test 3 cron endpoints with CRON_SECRET, submit a test enquiry on the batch 1 preview to prove email delivery (sends now use `after()`, steps in `docs/uat/BATCH1_REPORT.md`), onboard first operator. Email mailboxes live via Cloudflare Email Routing (→ Gmail). Upgrade to Google Workspace when onboarding real operators.
 
 **How to verify any change (mandatory before push):**
 ```bash
-npm run test     # 2,127/2,127 must pass
+npm run test     # 2,169/2,169 must pass
 npm run build    # 0 errors
 npx tsc --noEmit # pass
 # if UI/routes changed: Playwright smoke on / , /umrah , /search/packages at 320px + 1280px

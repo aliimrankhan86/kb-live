@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { LEGAL_ENTITY_BLOCK, registeredOfficeClause } from '@/lib/legal';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | PilgrimCompare',
+  title: 'Privacy Policy',
   description:
     'How PilgrimCompare collects, uses and protects your personal data under UK GDPR.',
   alternates: { canonical: '/privacy' },
@@ -27,7 +27,7 @@ const LAST_UPDATED = '6 October 2026';
 export default function PrivacyPolicyPage() {
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--text)]">
-      <div className="mx-auto max-w-3xl px-4 py-12">
+      <div className="mx-auto max-w-3xl px-4 py-12 [&_a]:py-1.5">
         <h1 className="mb-2 text-3xl font-bold">Privacy Policy</h1>
         <p className="mb-8 text-sm text-[var(--textMuted)]">Last updated: {LAST_UPDATED}</p>
 

@@ -3,13 +3,14 @@
 import { useMemo, useCallback } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import PackageList from './PackageList';
-import type { Package as CataloguePackage } from '@/lib/types';
-import { searchPackages, toSearchDisplay } from './search-utils';
+import type { Package as CataloguePackage, OperatorProfile } from '@/lib/types';
+import { liveAirportOptions, searchPackages, toSearchDisplay } from './search-utils';
 import styles from './packages.module.css';
 
 interface SearchPackagesClientProps {
   allPackages: CataloguePackage[];
   featuredSlotsEnabled: boolean;
+  operators?: OperatorProfile[];
 }
 
 const VALID_SORTS = ['relevance', 'price-asc', 'price-desc', 'rating', 'distance'] as const;
@@ -17,7 +18,7 @@ type SortOption = typeof VALID_SORTS[number];
 const toSortOption = (v: string | null): SortOption =>
   VALID_SORTS.includes(v as SortOption) ? (v as SortOption) : 'relevance';
 
-export function SearchPackagesClient({ allPackages, featuredSlotsEnabled }: SearchPackagesClientProps) {
+export function SearchPackagesClient({ allPackages, featuredSlotsEnabled, operators }: SearchPackagesClientProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -37,6 +38,8 @@ export function SearchPackagesClient({ allPackages, featuredSlotsEnabled }: Sear
     [filteredPackages]
   );
 
+  const airportOptions = useMemo(() => liveAirportOptions(allPackages), [allPackages]);
+
   const sortBy = toSortOption(searchParams?.get('sort') ?? null);
 
   const handleSortChange = useCallback(
@@ -51,7 +54,6 @@ export function SearchPackagesClient({ allPackages, featuredSlotsEnabled }: Sear
 
   return (
     <div className={styles.searchPage}>
-      <h1 className="sr-only">Search Results - Hajj and Umrah Packages</h1>
       <PackageList
         packages={displayPackages}
         cataloguePackages={filteredPackages}
@@ -59,6 +61,8 @@ export function SearchPackagesClient({ allPackages, featuredSlotsEnabled }: Sear
         sortBy={sortBy}
         onSortChange={handleSortChange}
         featuredSlotsEnabled={featuredSlotsEnabled}
+        operators={operators}
+        airportOptions={airportOptions}
       />
     </div>
   );

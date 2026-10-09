@@ -391,7 +391,8 @@ export interface Package {
   operatorId: string;
   title: string;
   slug: string;
-  status: 'draft' | 'published';
+  /** expired: set by the nightly expire-packages cron once the return date has passed. */
+  status: 'draft' | 'published' | 'expired';
   
   pilgrimageType: 'umrah' | 'hajj';
   seasonLabel?: string;

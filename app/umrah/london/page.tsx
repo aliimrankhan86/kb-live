@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const cities = await Repository.getDistinctDepartureCities().catch(() => [] as string[])
   const hasSupply = cities.includes('London')
   return {
-    title: 'Umrah Packages from London: Compare Verified UK Operators | PilgrimCompare',
+    title: 'Umrah Packages from London: Compare Verified UK Operators',
     description: corridorDescription('London'),
     alternates: { canonical: '/umrah/london' },
     robots: hasSupply ? { index: true, follow: true } : { index: false, follow: true },

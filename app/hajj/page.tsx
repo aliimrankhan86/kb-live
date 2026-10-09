@@ -5,7 +5,7 @@ import { HajjInterestForm } from '@/components/hajj/HajjInterestForm';
 import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld';
 
 export const metadata: Metadata = {
-  title: 'Hajj Packages from the UK: Register Interest | PilgrimCompare',
+  title: 'Hajj Packages from the UK: Register Interest',
   description:
     'Hajj packages are not listed on PilgrimCompare yet. Register your interest and we will email you if Hajj packages from verified UK operators are listed.',
   keywords: ['Hajj packages 2027', 'Hajj packages UK', 'Hajj 2027', 'ATOL Hajj packages', 'UK Hajj operators'],
@@ -127,7 +127,7 @@ export default function HajjPage() {
             </h2>
             {hajjFaqs.map((faq, i) => (
               <details key={i} className="rounded-lg border border-[var(--border)] bg-[var(--surfaceDark)] px-4 py-3">
-                <summary className="cursor-pointer text-sm font-medium text-[var(--text)]">
+                <summary className="cursor-pointer py-3 text-sm font-medium text-[var(--text)]">
                   {faq.question}
                 </summary>
                 <p className="mt-2 text-sm text-[var(--textMuted)] leading-relaxed">{faq.answer}</p>

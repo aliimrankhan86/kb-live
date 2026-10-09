@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState, useTransition } from 'react'
+import { SHORTLIST_STORAGE_KEY } from '@/lib/shortlist'
 import type { Package, OperatorProfile } from '@/lib/types'
 import { NEUTRAL_SORT_DISCLOSURE } from '@/lib/content-rules'
 import { mapPackageToComparison, handleComparisonSelection } from '@/lib/comparison'
@@ -21,13 +22,16 @@ import styles from './packagesBrowse.module.css'
 type PilgrimageFilter = 'all' | 'umrah' | 'hajj'
 type SortOption = 'relevance' | 'price-asc' | 'price-desc'
 
-const SHORTLIST_STORAGE_KEY = 'kb_shortlist_packages'
 const COMPARE_MIN = 2
 const COMPARE_MAX = 3
 const uniqueIds = (ids: string[]) => Array.from(new Set(ids))
 
 interface PackagesBrowseProps {
   packages: Package[]
+  /** Public operators, loaded on the server with the packages. */
+  operators?: OperatorProfile[]
+  /** Preselected for comparison, from /packages?compare=<id> (package page "Compare"). */
+  initialCompareIds?: string[]
   error?: string
 }
 
@@ -38,34 +42,23 @@ const TYPE_TABS: { value: PilgrimageFilter; label: string }[] = [
 ]
 
 
-export function PackagesBrowse({ packages, error }: PackagesBrowseProps) {
+export function PackagesBrowse({ packages, operators = [], initialCompareIds = [], error }: PackagesBrowseProps) {
   const [pilgrimageType, setPilgrimageType] = useState<PilgrimageFilter>('all')
   const [seasonLabel, setSeasonLabel] = useState<string>('all')
   const [sortBy, setSortBy] = useState<SortOption>('relevance')
   const [isPending, startTransition] = useTransition()
-  const [selectedCompareIds, setSelectedCompareIds] = useState<string[]>([])
+  const [selectedCompareIds, setSelectedCompareIds] = useState<string[]>(initialCompareIds)
   const [shortlistedPackages, setShortlistedPackages] = useState<string[]>([])
   const [shortlistOnly, setShortlistOnly] = useState(false)
   const [shortlistLoaded, setShortlistLoaded] = useState(false)
-  const [operatorsById, setOperatorsById] = useState<Record<string, OperatorProfile>>({})
   const [showComparison, setShowComparison] = useState(false)
   const [compareMessage, setCompareMessage] = useState<string>('')
 
-  useEffect(() => {
-    fetch('/api/operators')
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.operators) {
-          setOperatorsById(
-            (d.operators as OperatorProfile[]).reduce<Record<string, OperatorProfile>>(
-              (acc, op) => { acc[op.id] = op; return acc },
-              {}
-            )
-          )
-        }
-      })
-      .catch(() => { /* operator trust signals just won't render */ })
-  }, [])
+  // Server-rendered names: no blank operator line, no layout shift (UX-02).
+  const operatorsById = useMemo(
+    () => Object.fromEntries(operators.map((op) => [op.id, op])) as Record<string, OperatorProfile>,
+    [operators]
+  )
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -159,7 +152,7 @@ export function PackagesBrowse({ packages, error }: PackagesBrowseProps) {
       selectedCompareIds.map((id) => {
         const pkg = packages.find((p) => p.id === id)
         const operator = pkg ? operatorsById[pkg.operatorId] : undefined
-        return { id, label: operator?.companyName ?? pkg?.title ?? 'Selected package' }
+        return { id, label: operator?.companyName ?? 'Not provided', detail: pkg ? `${pkg.totalNights} nights · ${pkg.title}` : undefined }
       }),
     [selectedCompareIds, packages, operatorsById]
   )

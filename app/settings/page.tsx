@@ -194,7 +194,7 @@ export default function SettingsPage() {
     if (!supabase) return;
     const trimmed = nameInput.trim();
     if (!trimmed || trimmed.length > 100) {
-      setNameError('Name must be 1–100 characters.');
+      setNameError('Name must be 1 to 100 characters.');
       return;
     }
     setSavingName(true);

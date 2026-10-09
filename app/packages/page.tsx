@@ -2,10 +2,10 @@ import type { Metadata } from 'next'
 import { PackagesBrowse } from '@/components/packages/PackagesBrowse'
 import { JsonLdScript, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
 import { Repository } from '@/lib/api/repository'
-import type { Package } from '@/lib/types'
+import type { OperatorProfile, Package } from '@/lib/types'
 
 export const metadata: Metadata = {
-  title: 'Browse Hajj & Umrah Packages | PilgrimCompare',
+  title: 'Browse Hajj & Umrah Packages',
   description:
     'Browse and compare published Umrah and Hajj packages from verified UK operators. Filter by budget, hotel rating, departure city, and inclusions.',
   alternates: { canonical: '/packages' },
@@ -35,12 +35,14 @@ const pageJsonLd = graphJsonLd([
   }),
 ])
 
-export default async function PackagesPage() {
+export default async function PackagesPage({ searchParams }: { searchParams: Promise<{ compare?: string }> }) {
+  const { compare } = await searchParams
   let packages: Package[] = []
+  let operators: OperatorProfile[] = []
   let error: string | undefined
 
   try {
-    packages = await Repository.listPackages()
+    ;[packages, operators] = await Promise.all([Repository.listPackages(), Repository.listPublicOperators()])
   } catch (err) {
     // Internal error detail stays in the server log, never on the page.
     console.error(err)
@@ -50,8 +52,13 @@ export default async function PackagesPage() {
   return (
     <>
       <JsonLdScript data={pageJsonLd} />
-      <div className="min-h-screen bg-[var(--background)]">
-        <PackagesBrowse packages={packages} error={error} />
+      <div className="min-h-screen bg-[var(--background)]" data-plain-background>
+        <PackagesBrowse
+          packages={packages}
+          operators={operators}
+          initialCompareIds={packages.some((p) => p.id === compare) ? [compare as string] : []}
+          error={error}
+        />
       </div>
     </>
   )

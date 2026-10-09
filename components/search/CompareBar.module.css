@@ -93,11 +93,24 @@
   color: var(--text);
 }
 
-.chipLabel {
+.chipText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-width: 9rem;
+  line-height: 1.25;
+}
+
+.chipLabel,
+.chipDetail {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 9rem;
+}
+
+.chipDetail {
+  font-size: 0.75rem;
+  color: var(--textMuted);
 }
 
 .chipRemove {
@@ -243,7 +256,7 @@
   .compare {
     flex: 0 0 auto;
   }
-  .chipLabel {
+  .chipText {
     max-width: 11rem;
   }
 }

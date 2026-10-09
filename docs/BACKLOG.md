@@ -27,5 +27,12 @@ Logged after release 2026-10-06 shipped (`main` `0c80db9`).
 
 ## Batch 1 (found in B0, 2026-10-07)
 
+- **DONE in batch 1 (`fix/batch-1-reliability-and-ux`):** both items below. Email sends now run inside `after()`; departed packages leave every public list (`lib/listing.ts` `hasDeparted`). Proof steps for staging email delivery: `docs/uat/BATCH1_REPORT.md`.
 - **Email sends are fire-and-forget without `after()`. Fix before the first operator publishes.** `app/api/enquiries/route.ts`, `app/api/quote-requests/route.ts` and `app/api/booking-intents/route.ts` call `void send...()` and return the response straight away. On Vercel the function can stop once the response is sent. On the B0 preview, enquiry `PC-F4E2DB05` sent no email and logged nothing, and `PC-CD71B4EA` logged Resend `application_error` "Unable to fetch data". Production runs the same code. Fix: wrap each call in `after()` from `next/server`, then submit an enquiry on the dev alias and check `STAGING_EMAIL_TO`.
 - **Expired packages still list.** There is no expiry rule. Staging package 9 (operator A, August 2026) shows on `/search/packages`. Decide the rule (for example, hide a package once its return date has passed) and add it to `lib/listing.ts`.
+
+## Batch 1 follow-ups (2026-10-09, need Ali)
+
+- **Harden the 02:00 `expire-packages` cron.** `(date_window->>'end')::date` throws on an empty end date, which the wizard saves when only a start date is entered, so one such package makes every run return 500. Decide whether it should expire on the departure date (the public rule now) or the return date. It changes production data nightly, so it waits for a decision. The real-DB suite already calls the cron (`e2e/local-db/search-journey.spec.ts`).
+- **UX-08:** merge `/packages` and `/search/packages`. Options and the recommendation (one list at `/packages`, 308 from `/search/packages`) are in `docs/uat/BATCH1_REPORT.md`.
+- **UX-11 and item 9 (per room prices):** need Ali's decision.

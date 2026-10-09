@@ -46,7 +46,7 @@ export function WizardStep6Policies({ data, onChange, error }: Props) {
           id="pkg-cancel-policy"
           data-testid="wizard-cancellation-policy"
           rows={5}
-          placeholder="e.g. Full refund if cancelled 60+ days before departure. 50% refund 30–59 days. No refund within 30 days."
+          placeholder="e.g. Full refund if cancelled 60+ days before departure. 50% refund 30 to 59 days. No refund within 30 days."
           value={policy}
           onChange={(e) => onChange({ cancellationPolicy: e.target.value || undefined })}
           className="w-full rounded border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] px-3 py-2 text-sm text-[var(--text)] placeholder:text-[var(--textMuted)] focus:border-[var(--yellow)] focus:outline-none resize-none"

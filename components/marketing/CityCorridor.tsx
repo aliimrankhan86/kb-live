@@ -35,7 +35,7 @@ export function CityCorridor({ city, h1, intro, queryParams, faqs, breadcrumbIte
           <ul className="space-y-3 text-[var(--textMuted)]">
             <li className="flex items-start gap-2">
               <span aria-hidden="true" className="text-[var(--yellow)] font-bold mt-0.5">✓</span>
-              <span>Operators are checked before listing. <Link href="/how-we-rank#verification-heading" className="underline underline-offset-2">See what we check</Link></span>
+              <span>Operators are checked before listing. <Link href="/how-we-rank#verification-heading" className="py-1.5 underline underline-offset-2">See what we check</Link></span>
             </li>
             <li className="flex items-start gap-2">
               <span aria-hidden="true" className="text-[var(--yellow)] font-bold mt-0.5">✓</span>
@@ -87,7 +87,7 @@ export function CityCorridor({ city, h1, intro, queryParams, faqs, breadcrumbIte
                   key={i}
                   className="rounded-lg border border-[var(--border)] bg-[var(--surfaceDark)] px-4 py-3"
                 >
-                  <summary className="cursor-pointer text-sm font-medium text-[var(--text)]">
+                  <summary className="cursor-pointer py-3 text-sm font-medium text-[var(--text)]">
                     {faq.question}
                   </summary>
                   <p className="mt-2 text-sm text-[var(--textMuted)] leading-relaxed">

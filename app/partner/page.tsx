@@ -4,7 +4,7 @@ import { JsonLdScript, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
 import { VERIFICATION_STATEMENT } from '@/lib/content-rules'
 
 export const metadata: Metadata = {
-  title: 'List Your Umrah & Hajj Packages on PilgrimCompare',
+  title: 'List Your Umrah & Hajj Packages',
   description: 'List your Umrah packages on PilgrimCompare so UK pilgrims can compare them and send you enquiries. Founding operators list free for 12 months.',
   alternates: {
     canonical: '/partner',
@@ -39,11 +39,11 @@ export default function PartnerLandingPage() {
       <JsonLdScript data={pageJsonLd} />
       <div className="min-h-screen">
 
-        {/* ── SPLIT HERO — both paths above the fold ── */}
+        {/* SPLIT HERO: both paths above the fold */}
         <section className="border-b border-[var(--border)] bg-[var(--surfaceDark)] px-4 py-14 md:py-20">
           <div className="mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-5 md:gap-12">
 
-            {/* Left — new operators (primary path) */}
+            {/* Left: new operators (primary path) */}
             <div className="md:col-span-3">
               <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-[var(--yellow)]">
                 For Travel Operators
@@ -66,7 +66,7 @@ export default function PartnerLandingPage() {
               </div>
             </div>
 
-            {/* Right — existing operators (secondary path, same visual weight as hero) */}
+            {/* Right: existing operators (secondary path, same visual weight as hero) */}
             <div className="md:col-span-2">
               <div className="rounded-xl border border-[var(--border)] bg-[var(--panel)] p-6 md:p-7">
                 {/* Label */}
@@ -114,7 +114,7 @@ export default function PartnerLandingPage() {
                   Account issues?{' '}
                   <a
                     href="mailto:operators@pilgrimcompare.co.uk"
-                    className="underline underline-offset-2 hover:text-[var(--yellow)]"
+                    className="py-1.5 underline underline-offset-2 hover:text-[var(--yellow)]"
                   >
                     Contact operator support
                   </a>
@@ -277,7 +277,7 @@ export default function PartnerLandingPage() {
               Already listed?{' '}
               <Link
                 href="/login?redirect=/operator/dashboard"
-                className="font-medium text-[var(--yellow)] underline-offset-2 hover:underline"
+                className="py-1.5 font-medium text-[var(--yellow)] underline-offset-2 hover:underline"
                 data-testid="partner-signin-footer"
               >
                 Sign in to your dashboard

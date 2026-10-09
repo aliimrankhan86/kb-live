@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import { getSessionUser } from '@/lib/auth/session';
 import { Repository } from '@/lib/api/repository';
 import { isBookingFlowEnabled } from '@/lib/config';
@@ -80,14 +80,10 @@ export async function POST(request: NextRequest) {
       parsed.data as Partial<BookingIntent>
     );
 
-    // Fire-and-forget: emails must not fail the API response.
+    // after(): send once the response is out; failures are logged in sendBookingEmails.
     if (user) {
-      void sendBookingEmails(
-        user.email,
-        user.name ?? '',
-        bookingIntent,
-        Boolean(parsed.data.paymentEvidence?.files?.length),
-      );
+      const hasEvidence = Boolean(parsed.data.paymentEvidence?.files?.length);
+      after(() => sendBookingEmails(user.email, user.name ?? '', bookingIntent, hasEvidence));
     }
 
     return NextResponse.json({ bookingIntent, persisted: true }, { status: 201 });

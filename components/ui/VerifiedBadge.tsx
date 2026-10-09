@@ -12,7 +12,7 @@ export const VERIFICATION_STATEMENT_HREF = '/how-we-rank#verification-heading'
 export const VerifiedBadge: React.FC<VerifiedBadgeProps> = ({ className = '' }) => (
   <Link
     href={VERIFICATION_STATEMENT_HREF}
-    className={`inline-flex items-center gap-1 rounded-md border border-[var(--yellow)]/20 bg-[var(--yellow)]/10 px-2 py-0.5 text-xs font-medium text-[var(--yellow)] underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-[var(--focusRing)] ${className}`}
+    className={`inline-flex min-h-6 items-center gap-1 rounded-md border border-[var(--yellow)]/20 bg-[var(--yellow)]/10 px-2 py-0.5 text-xs font-medium text-[var(--yellow)] underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-[var(--focusRing)] ${className}`}
     title="Verified operator"
     aria-label="Verified operator: see what we check"
     data-testid="verified-badge"

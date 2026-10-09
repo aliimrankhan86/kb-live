@@ -14,7 +14,7 @@ const DESCRIPTION =
   'What affects the price of an Umrah package from the UK: hotels and distance to the Haram, travel dates, what is included and room sharing. Compare the prices operators state side by side.'
 
 export const metadata: Metadata = {
-  title: 'What Affects the Cost of an Umrah Package from the UK | PilgrimCompare',
+  title: 'What Affects the Cost of an Umrah Package from the UK',
   description: DESCRIPTION,
   alternates: { canonical: '/umrah/cost' },
   openGraph: {
@@ -179,7 +179,7 @@ export default async function UmrahCostPage() {
                   key={i}
                   className="rounded-lg border border-[var(--border)] bg-[var(--surfaceDark)] px-4 py-3"
                 >
-                  <summary className="cursor-pointer text-sm font-medium text-[var(--text)]">
+                  <summary className="cursor-pointer py-3 text-sm font-medium text-[var(--text)]">
                     {faq.question}
                   </summary>
                   <p className="mt-2 text-sm text-[var(--textMuted)] leading-relaxed">

@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { LEGAL_ENTITY_BLOCK, registeredOfficeClause } from '@/lib/legal';
 
 export const metadata: Metadata = {
-  title: 'Terms of Use | PilgrimCompare',
+  title: 'Terms of Use',
   description:
     'Terms of Use for PilgrimCompare, a UK comparison and enquiry service for Umrah travel packages from verified operators.',
   alternates: { canonical: '/terms' },
@@ -28,7 +28,7 @@ const LAST_UPDATED = '12 June 2026';
 export default function TermsPage() {
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--text)]">
-      <div className="mx-auto max-w-3xl px-4 py-12">
+      <div className="mx-auto max-w-3xl px-4 py-12 [&_a]:py-1.5">
         <h1 className="mb-2 text-3xl font-bold">Terms of Use</h1>
         <p className="mb-8 text-sm text-[var(--textMuted)]">Last updated: {LAST_UPDATED}</p>
 

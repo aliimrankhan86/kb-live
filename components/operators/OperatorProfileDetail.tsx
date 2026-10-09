@@ -67,11 +67,9 @@ export function OperatorProfileDetail({ operator, packages }: OperatorProfileDet
           )}
         </div>
 
-        {operator.tier && (
-          <div className="mt-3">
-            <TierExplanation tier={operator.tier} />
-          </div>
-        )}
+        <div className="mt-3">
+          <TierExplanation verified={operator.verificationStatus === 'verified'} />
+        </div>
       </header>
 
       {/* About + quick-stats grid */}
@@ -122,7 +120,7 @@ export function OperatorProfileDetail({ operator, packages }: OperatorProfileDet
               <span className="block text-xs uppercase tracking-wide text-[var(--textMuted)]">Email</span>
               <a
                 href={`mailto:${operator.contactEmail}`}
-                className="mt-0.5 text-[var(--yellow)] hover:underline break-all"
+                className="mt-0.5 inline-flex min-h-11 items-center text-[var(--yellow)] hover:underline break-all"
                 data-testid="operator-contact-email"
               >
                 {operator.contactEmail}
@@ -147,7 +145,7 @@ export function OperatorProfileDetail({ operator, packages }: OperatorProfileDet
                   href={operator.websiteUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-0.5 text-[var(--yellow)] hover:underline break-all"
+                  className="mt-0.5 inline-flex min-h-11 items-center text-[var(--yellow)] hover:underline break-all"
                   data-testid="operator-website"
                 >
                   {operator.websiteUrl.replace(/^https?:\/\//, '')}
@@ -179,7 +177,7 @@ export function OperatorProfileDetail({ operator, packages }: OperatorProfileDet
         {/* Standards §16: disclose the neutral sort wherever packages are listed. */}
         <p className="mt-1 text-xs text-[var(--textMuted)]" data-testid="operator-sort-disclosure">
           {NEUTRAL_SORT_DISCLOSURE}{' '}
-          <Link href="/how-we-rank" className="underline underline-offset-2">How we rank</Link>
+          <Link href="/how-we-rank" className="py-1.5 underline underline-offset-2">How we rank</Link>
         </p>
 
         {packages.length === 0 ? (

@@ -1,5 +1,26 @@
 # PilgrimCompare AI Handover — Single Source of Truth
 
+## §B1 Batch 1 reliability and UX (PR #118 into `dev`, branch `fix/batch-1-reliability-and-ux`), 2026-10-09
+
+Full report: `docs/uat/BATCH1_REPORT.md` (per item, decisions, UX-08 options, every wording change, staging email proof steps).
+
+### What changed and why
+- **Emails (item 10):** enquiry, quote and booking routes send inside `after()` from `next/server` instead of `void send()`, so Vercel keeps the function alive until the send ends. Failures are logged, never swallowed. Route tests mock `next/server` with an `after` that collects callbacks.
+- **Departed packages (item 8):** `lib/listing.ts` `hasDeparted()` (start date before today in London, or status `expired`). `Repository.listPackages`, `getPublicPackageById` and departure airports exclude them; the package and enquire pages show `DepartedNotice` (no form, `noindex`). The 02:00 cron works on production for valid dates, never runs on Preview, expires on the end date, and would fail on an empty end date (left for Ali).
+- **Layout and UX:** `/packages` grid `minmax(0, 1fr)` (was 718 px wide at 386 px), header brand shrinks below 375 px, compare distance in metres and walking time, neutral compare marks, server-rendered operator names with links, themed hotel image tile, pilgrim-only `/signup`, one search h1, 404 h1, package page Save and Compare, "How we verify operators" notice, 12 px minimum text, 44 px tap targets (24 px floor), two-line hotel names, airport and trip length filters (`departureAirport`, `minNights`, `maxNights`).
+- **Copy:** no en dashes in visible copy (test now fails on them); page titles no longer repeat the brand (real-DB test over every sitemap URL).
+
+### Gotchas
+- 🛠️ **Gotcha: a `body:has(...)` rule silently vanishes from the built CSS.** Next's CSS step (Lightning CSS) drops `:has()` rules for Next's default browser targets, because the repo has no `browserslist`. Tailwind keeps the rule; the compiled chunk does not. Not a code bug: put the style on an element the page renders (UX-17 uses a `[data-plain-background]` wrapper). Also: Turbopack dev can serve a stale shared component (seen with the footer) on routes compiled earlier; `npm run dev:clean` fixes it.
+- Seeded real-DB dates roll forward by whole years once 5 Nov 2026 passes (`scripts/seed-local-test-data.mjs`), because a past start date now hides a package. Package 16 is deliberately departed and package 17 has staging package 8's long title.
+- `/signup?type=operator` redirects to `/partner` while `FEATURE_OPERATOR_SELF_SERVE` is off.
+
+### Tests
+Vitest 2,169 (76 files). Playwright 69 passed, 6 skipped. Real DB 32/32.
+
+### Exact next step
+Claude in Chrome runs the staging email proof in `docs/uat/BATCH1_REPORT.md` on the PR preview. Ali decides UX-08, UX-11, item 9 and the cron hardening.
+
 ## §B0 Staging environment and fictional seed (PR #117, branch `feat/staging-env`), 2026-10-07
 
 **Status:** PR #117 into `dev`, CI green, NOT merged. Guide: `docs/STAGING.md`.
@@ -57,14 +78,14 @@ PRs #108 (overnight QA), #109 (erasure and 90-day enquiry retention), #110 (rele
 - 4 and 9 not runnable until a verified operator publishes a package.
 - 5, 6, 7 privacy copy: pass (90-day sentence present, `dpo@` shown, no `privacy@`, no "auto-deleted").
 - 8 `GET /api/cron/enquiry-retention` with no secret: 401, pass.
-- 10 pending: the next morning, look for one `[cron/enquiry-retention] anonymised=` log line with status 200.
+- 10 pass: the enquiry-retention cron ran on 7 Oct 2026 at 03:45 UTC and returned 2XX.
 
 ### Risks and gotchas
-- 🛠️ **Gotcha:** the Vercel MCP and the Vercel CLI both returned 403 for the team scope after the deploy. Re-authenticate to the team before reading runtime logs (needed for smoke 10).
+- 🛠️ **Gotcha:** the Vercel MCP and the Vercel CLI both returned 403 for the team scope after the deploy. Re-authenticate to the team before reading runtime logs.
 - Post-release items are in `docs/BACKLOG.md` under "Post-release items".
 
 ### Exact next step
-Check smoke 10 in the Vercel logs after the 03:00 UTC cron run. Then work through `docs/BACKLOG.md` post-release items.
+Smoke 10 passed on 7 Oct 2026. Work through `docs/BACKLOG.md` post-release items.
 
 ## §ER Erasure gaps and 90-day enquiry retention (PR #109, branch `fix/erasure-retention`), 2026-10-06
 

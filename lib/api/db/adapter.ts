@@ -1,5 +1,5 @@
 import { prisma } from './prisma';
-import { isPubliclyListed } from '@/lib/listing';
+import { hasDeparted, isPubliclyListed } from '@/lib/listing';
 import { departureCityOf } from '@/lib/airports';
 import type {
   AnalyticsEvent,
@@ -392,11 +392,12 @@ export const DBAdapter = {
     const rows = await prisma.package.findMany({
       // Public: verified operators only (founder decision 2026-10-06).
       where: { status: 'published', departureAirport: { not: null }, operator: { verificationStatus: 'verified', atolNumber: { not: null } } },
-      select: { departureAirport: true, operator: { select: { verificationStatus: true, atolNumber: true } } },
+      select: { departureAirport: true, dateWindow: true, operator: { select: { verificationStatus: true, atolNumber: true } } },
     });
     const citySet = new Set<string>();
     for (const row of rows) {
       if (!row.departureAirport || !isPubliclyListed({ verificationStatus: row.operator.verificationStatus as OperatorProfile['verificationStatus'], atolNumber: row.operator.atolNumber ?? undefined })) continue;
+      if (hasDeparted({ status: 'published', dateWindow: (row.dateWindow as unknown as Package['dateWindow']) ?? undefined })) continue;
       const city = departureCityOf(row.departureAirport);
       if (city) citySet.add(city);
     }

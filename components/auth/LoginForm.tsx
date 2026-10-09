@@ -258,7 +258,6 @@ export function LoginForm() {
           showPassword={showPassword}
           onToggleShowPassword={() => setShowPassword((current) => !current)}
           toggleTestId="login-password-toggle"
-          helperText="Password must be at least 8 characters, with 1 uppercase, 1 lowercase, 1 number, and 1 special character."
         />
         <div className="flex justify-end">
           <button
@@ -279,15 +278,15 @@ export function LoginForm() {
       <p className="text-center text-sm text-[var(--textMuted)]">
         {isPartner ? (
           <>
-            Don{'\''}t have an operator account?{' '}
-            <Link href="/signup?type=operator" className="text-[var(--yellow)] hover:underline">
-              Register your company
+            Want to list your packages?{' '}
+            <Link href="/partner" className="py-1.5 text-[var(--yellow)] hover:underline">
+              See how operators join
             </Link>
           </>
         ) : (
           <>
             Don{'\''}t have a traveller account?{' '}
-            <Link href="/signup?type=customer" className="text-[var(--yellow)] hover:underline">
+            <Link href="/signup?type=customer" className="py-1.5 text-[var(--yellow)] hover:underline">
               Sign up
             </Link>
           </>

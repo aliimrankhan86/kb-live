@@ -4,7 +4,7 @@ import { JsonLdScript, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld';
 import { VERIFICATION_STATEMENT } from '@/lib/content-rules';
 
 export const metadata: Metadata = {
-  title: 'How We Rank Packages | PilgrimCompare',
+  title: 'How We Rank Packages',
   description:
     'PilgrimCompare ranks packages by data completeness, price recency, and operator response rate. No operator pays for ranking position in our default results.',
   alternates: { canonical: '/how-we-rank' },
@@ -239,7 +239,7 @@ export default function HowWeRankPage() {
               Questions about our ranking or verification approach?{' '}
               <a
                 href="mailto:support@pilgrimcompare.co.uk"
-                className="text-[var(--accent)] underline underline-offset-2 hover:text-[var(--accentHover)]"
+                className="py-1.5 text-[var(--accent)] underline underline-offset-2 hover:text-[var(--accentHover)]"
               >
                 Contact us
               </a>
@@ -247,19 +247,19 @@ export default function HowWeRankPage() {
             <nav aria-label="Related pages" className="flex flex-wrap gap-4 text-sm">
               <Link
                 href="/how-it-works"
-                className="text-[var(--accent)] underline underline-offset-2 hover:text-[var(--accentHover)]"
+                className="inline-flex min-h-11 items-center text-[var(--accent)] underline underline-offset-2 hover:text-[var(--accentHover)]"
               >
                 How PilgrimCompare works
               </Link>
               <Link
                 href="/terms"
-                className="text-[var(--accent)] underline underline-offset-2 hover:text-[var(--accentHover)]"
+                className="inline-flex min-h-11 items-center text-[var(--accent)] underline underline-offset-2 hover:text-[var(--accentHover)]"
               >
                 Terms of Use
               </Link>
               <Link
                 href="/search/packages"
-                className="text-[var(--accent)] underline underline-offset-2 hover:text-[var(--accentHover)]"
+                className="inline-flex min-h-11 items-center text-[var(--accent)] underline underline-offset-2 hover:text-[var(--accentHover)]"
               >
                 Compare packages
               </Link>

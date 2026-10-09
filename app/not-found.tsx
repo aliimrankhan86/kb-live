@@ -8,37 +8,24 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
   return (
-    <div
-      style={{
-        minHeight: '60vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '2rem',
-        background: '#0B0B0B',
-        color: '#FFFFFF',
-        fontFamily: 'system-ui, sans-serif',
-      }}
-    >
-      <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Page not found</h2>
-      <p style={{ color: 'rgba(255,255,255,0.64)', marginBottom: '1.5rem' }}>
-        The page you’re looking for doesn’t exist.
-      </p>
-      <Link
-        href="/"
-        style={{
-          background: '#FFD31D',
-          color: '#0B0B0B',
-          padding: '0.5rem 1rem',
-          borderRadius: '0.5rem',
-          fontSize: '0.875rem',
-          fontWeight: 600,
-          textDecoration: 'none',
-        }}
-      >
-        Go home
-      </Link>
-    </div>
+    <section className="mx-auto flex min-h-[60vh] w-full max-w-xl flex-col items-center justify-center px-4 py-16 text-center">
+      <h1 className="text-2xl font-semibold text-[var(--text)]">Page not found</h1>
+      <p className="mt-2 text-[var(--textMuted)]">The page you are looking for does not exist or has moved.</p>
+      <div className="mt-6 flex flex-wrap justify-center gap-3">
+        <Link
+          href="/packages"
+          data-testid="not-found-packages"
+          className="inline-flex min-h-11 items-center rounded-lg bg-[var(--primary)] px-5 text-sm font-semibold text-[var(--bg)]"
+        >
+          Browse packages
+        </Link>
+        <Link
+          href="/"
+          className="inline-flex min-h-11 items-center rounded-lg border border-[var(--borderSubtle)] px-5 text-sm font-semibold text-[var(--text)]"
+        >
+          Go home
+        </Link>
+      </div>
+    </section>
   );
 }

@@ -63,7 +63,7 @@
   font-size: 0.875rem;
   font-weight: 600;
   padding: 0.5rem 1rem;
-  min-height: 40px;
+  min-height: 44px;
   border-radius: 0.5rem;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
@@ -123,7 +123,7 @@
 }
 
 .fieldLabel {
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -139,7 +139,7 @@
   font-weight: 500;
   font-family: inherit;
   padding: 0 2rem 0 0.75rem;
-  min-height: 40px;
+  min-height: 44px;
   border-radius: 0.5rem;
   cursor: pointer;
   transition: border-color 0.15s ease;
@@ -169,7 +169,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 0.875rem;
   background: var(--surfaceDark);
   border: 1px solid var(--borderSubtle);
@@ -207,6 +207,7 @@
   color: var(--textMuted);
   text-decoration: underline;
   text-underline-offset: 2px;
+  padding-block: 0.375rem; /* inline: larger tap area, same line (UX-23) */
 }
 
 .disclosureLink:hover {
@@ -216,11 +217,17 @@
 /* ─── Results grid ────────────────────────────────────────────────────── */
 .grid {
   display: grid;
-  grid-template-columns: 1fr;
+  /* minmax(0, ...): a long unbroken title or hotel name must not widen the
+     track past the screen (UX-22: 718px page in a 386px viewport). */
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
   list-style: none;
   padding: 0;
   margin: 0;
+}
+
+.grid > li {
+  min-width: 0;
 }
 
 .gridWithBar {

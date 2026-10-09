@@ -27,7 +27,7 @@ const CARDS: AudienceCard[] = [
   {
     badge: 'For operators',
     title: 'List your packages',
-    text: 'Reach pilgrims comparing UK operators. We build your profile to rank at its best.',
+    text: 'Reach pilgrims comparing UK operators. We set up your listing with you, and no operator pays for ranking.',
     action: 'List your packages',
     href: '/partner',
   },

@@ -3,9 +3,10 @@
 
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { SHORTLIST_STORAGE_KEY } from '@/lib/shortlist';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import type { Package as CataloguePackage, OperatorProfile } from '@/lib/types';
-import { FILTER_PARAM_KEYS, makkahDistance, parseSearchCriteria, toPackageCardProps, type SearchPackageDisplay } from './search-utils';
+import { DURATION_OPTIONS, FILTER_PARAM_KEYS, makkahDistance, parseSearchCriteria, toPackageCardProps, type SearchPackageDisplay } from './search-utils';
 import { mapPackageToComparison, handleComparisonSelection } from '@/lib/comparison';
 import { ComparisonTable } from '@/components/request/ComparisonTable';
 import {
@@ -31,7 +32,6 @@ const COMPARE_MAX = 3;
 const COMPARE_MIN = 2;
 const FEATURED_MAX = 2;
 
-const SHORTLIST_STORAGE_KEY = 'kb_shortlist_packages';
 const uniqueIds = (ids: string[]) => Array.from(new Set(ids));
 
 export type { SearchPackageDisplay } from './search-utils';
@@ -55,6 +55,10 @@ interface PackageListProps {
   onSortChange?: (sort: SortOption) => void;
   /** Evaluated server-side from FEATURE_FEATURED_SLOTS env var. Never pass client state here. */
   featuredSlotsEnabled?: boolean;
+  /** Public operators, loaded on the server with the packages. */
+  operators?: OperatorProfile[];
+  /** Live departure airports for the filter panel (from the whole catalogue). */
+  airportOptions?: { code: string; label: string }[];
 }
 
 const PackageList: React.FC<PackageListProps> = ({
@@ -65,6 +69,8 @@ const PackageList: React.FC<PackageListProps> = ({
   sortBy: sortByProp,
   onSortChange,
   featuredSlotsEnabled = false,
+  operators = [],
+  airportOptions = [],
 }) => {
   const [shortlistedPackages, setShortlistedPackages] = useState<string[]>([]);
   const [shortlistLoaded, setShortlistLoaded] = useState(false);
@@ -72,7 +78,6 @@ const PackageList: React.FC<PackageListProps> = ({
   const [selectedCompareIds, setSelectedCompareIds] = useState<string[]>([]);
   const [compareMessage, setCompareMessage] = useState('');
   const [showComparison, setShowComparison] = useState(false);
-  const [operatorsById, setOperatorsById] = useState<Record<string, OperatorProfile>>({});
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
@@ -103,20 +108,11 @@ const PackageList: React.FC<PackageListProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isSortOpen]);
 
-  useEffect(() => {
-    fetch('/api/operators')
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.operators) {
-          setOperatorsById(
-            (d.operators as OperatorProfile[]).reduce<Record<string, OperatorProfile>>(
-              (acc, op) => ({ ...acc, [op.id]: op }),
-              {}
-            )
-          );
-        }
-      });
-  }, []);
+  // Server-rendered names: no blank operator line, no layout shift (UX-02).
+  const operatorsById = useMemo(
+    () => Object.fromEntries(operators.map((op) => [op.id, op])) as Record<string, OperatorProfile>,
+    [operators]
+  );
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -261,7 +257,8 @@ const PackageList: React.FC<PackageListProps> = ({
       const operator = catPkg ? operatorsById[catPkg.operatorId] : undefined;
       return {
         id,
-        label: operator?.companyName ?? catPkg?.title ?? 'Selected package',
+        label: operator?.companyName ?? 'Not provided',
+        detail: catPkg ? `${catPkg.totalNights} nights · ${catPkg.title}` : undefined,
       };
     });
   }, [selectedCompareIds, comparablePackages, operatorsById]);
@@ -300,7 +297,7 @@ const PackageList: React.FC<PackageListProps> = ({
     const bMin = sp.get('budgetMin');
     const bMax = sp.get('budgetMax');
     if (bMin || bMax) {
-      const label = bMin && bMax ? `${gbp(bMin)}–${gbp(bMax)}` : bMax ? `Up to ${gbp(bMax)}` : `From ${gbp(bMin as string)}`;
+      const label = bMin && bMax ? `${gbp(bMin)} to ${gbp(bMax)}` : bMax ? `Up to ${gbp(bMax)}` : `From ${gbp(bMin as string)}`;
       chips.push({ id: 'budget', label, keys: ['budgetMin', 'budgetMax'] });
     }
     const stars = sp.get('hotelStars');
@@ -318,6 +315,12 @@ const PackageList: React.FC<PackageListProps> = ({
     }
     if (sp.get('flightType') === 'direct') {
       chips.push({ id: 'flight', label: 'Direct flights only', keys: ['flightType'] });
+    }
+    if (criteria.nights) {
+      const preset = DURATION_OPTIONS.find((d) => ('min' in d ? d.min : undefined) === criteria.nights!.min && ('max' in d ? d.max : undefined) === criteria.nights!.max);
+      const { min, max } = criteria.nights;
+      const label = preset?.label ?? (min && max ? `${min} to ${max} nights` : max ? `Up to ${max} nights` : `${min} nights or more`);
+      chips.push({ id: 'nights', label, keys: ['minNights', 'maxNights'] });
     }
     return chips;
   }, [searchParams]);
@@ -622,6 +625,7 @@ const PackageList: React.FC<PackageListProps> = ({
       <FilterOverlay
         isOpen={isFilterOpen}
         onClose={handleFilterClose}
+        airportOptions={airportOptions}
       />
       <Dialog open={showComparison} onOpenChange={setShowComparison}>
         <OverlayContent className="max-h-[min(92dvh,56rem)] w-[min(calc(100vw-1rem),68rem)] sm:w-[min(calc(100vw-2rem),68rem)]">

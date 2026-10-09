@@ -23,7 +23,7 @@ export default function OperatorOnboardingPage() {
       <div>
         <h1 className="text-2xl font-semibold text-[var(--text)]">Operator Registration</h1>
         <p className="mt-1 text-sm text-[var(--textMuted)]">
-          Complete the form below to apply as a verified operator. Our team will review your application within 1–2 business days.
+          Complete the form below to apply as a verified operator. Our team will review your application within 1 to 2 business days.
         </p>
       </div>
       <OperatorRegistrationForm />

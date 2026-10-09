@@ -556,7 +556,7 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
 
           {/* Children */}
           <div className={styles.searchForm__travellerRow}>
-            <span className={styles.searchForm__travellerLabel}>Children <span className={styles.searchForm__travellerHint}>(0–11 years)</span></span>
+            <span className={styles.searchForm__travellerLabel}>Children <span className={styles.searchForm__travellerHint}>(0 to 11 years)</span></span>
             <div className={styles.searchForm__stepper}>
               <button
                 type="button"
@@ -687,7 +687,7 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
             <div className={styles.searchForm__budgetSection}>
               <div className={styles.searchForm__budgetRow}>
                 <span className={styles.searchForm__selectedBudget}>
-                  GBP {minBudget.toLocaleString('en-GB')} – {maxBudget.toLocaleString('en-GB')}
+                  GBP {minBudget.toLocaleString('en-GB')} to {maxBudget.toLocaleString('en-GB')}
                 </span>
                 <span className={styles.searchForm__budgetUnit}>per person</span>
               </div>

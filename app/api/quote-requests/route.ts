@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import { z } from 'zod';
 import { getSessionUser } from '@/lib/auth/session';
 import { Repository } from '@/lib/api/repository';
@@ -118,8 +118,8 @@ export async function POST(request: NextRequest) {
 
     const saved = await Repository.createQuoteRequest({ userId: user.id, role: 'customer' }, quoteRequest);
 
-    // Fire-and-forget: emails must not fail the API response.
-    void sendQuoteEmails(user.email, user.name ?? '', saved);
+    // after(): send once the response is out; failures are logged in sendQuoteEmails.
+    after(() => sendQuoteEmails(user.email, user.name ?? '', saved));
 
     return NextResponse.json({ request: saved }, { status: 201 });
   } catch (err) {

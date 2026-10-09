@@ -16,7 +16,7 @@ interface Feature {
   key: keyof ComparisonRow;
   rank?: RankKey;
   dir?: 'min' | 'max';
-  best?: string; // sr-only context, e.g. "closest to the Haram"
+  mark?: string; // factual mark on the leading cell, e.g. "Shortest distance"
 }
 
 interface Group {
@@ -24,9 +24,10 @@ interface Group {
   rows: Feature[];
 }
 
-// Grouped so a longer comparison stays scannable. Price + operator live in the
-// column header. `rank`/`dir`/`best` mark the factual winner on dimensions with
-// an unambiguous "better"; everything else is informational.
+// Grouped so a longer comparison stays scannable. Operator, package, nights and
+// price live in the column header. `rank`/`dir`/`mark` label the highest, lowest
+// or most among the packages shown, in neutral factual words (standards §5, §16:
+// no "best"); everything else is informational.
 const GROUPS: Group[] = [
   {
     title: 'Stay & hotels',
@@ -34,8 +35,8 @@ const GROUPS: Group[] = [
       { label: 'Travel dates', key: 'travelDates' },
       { label: 'Total nights', key: 'totalNights' },
       { label: 'Makkah / Madinah', key: 'splitNights' },
-      { label: 'Hotel rating', key: 'hotelRating', rank: 'hotelStarsValue', dir: 'max', best: 'best-rated hotels' },
-      { label: 'Distance to Haram', key: 'distance', rank: 'distanceValue', dir: 'min', best: 'closest to the Haram' },
+      { label: 'Hotel rating', key: 'hotelRating', rank: 'hotelStarsValue', dir: 'max', mark: 'Highest star rating' },
+      { label: 'Distance to the mosque', key: 'distance', rank: 'distanceValue', dir: 'min', mark: 'Shortest distance' },
       { label: 'Room options', key: 'occupancy' },
     ],
   },
@@ -46,7 +47,7 @@ const GROUPS: Group[] = [
   {
     title: "What's included",
     rows: [
-      { label: 'Included', key: 'inclusions', rank: 'inclusionsCount', dir: 'max', best: 'most included' },
+      { label: 'Included', key: 'inclusions', rank: 'inclusionsCount', dir: 'max', mark: 'Most items included' },
       { label: 'Ziyarat', key: 'ziyarat' },
     ],
   },
@@ -91,11 +92,13 @@ export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
     return v == null ? 'Not provided' : String(v);
   };
 
-  // Cheapest column → header "Lowest price" flag + subtle tint.
+  // Cheapest column → header flag + subtle tint, but only when every package has
+  // the same number of nights: a 7 night price is not "lower" than a 14 night one.
   const priceVals = comparisonRows.map((r) => r.priceValue);
   const validPrices = priceVals.filter((p): p is number => typeof p === 'number');
+  const sameNights = new Set(comparisonRows.map((r) => r.totalNights)).size === 1;
   const lowestPrice =
-    validPrices.length >= 2 && Math.min(...validPrices) !== Math.max(...validPrices)
+    sameNights && validPrices.length >= 2 && Math.min(...validPrices) !== Math.max(...validPrices)
       ? Math.min(...validPrices)
       : null;
 
@@ -125,7 +128,10 @@ export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
   return (
     <div className="w-full overflow-x-auto" data-testid="comparison-table">
       <table className="w-full min-w-[320px] table-fixed border-separate border-spacing-0 text-left text-sm text-[var(--text)] sm:text-[0.9375rem]">
-        <caption className="sr-only">Package comparison. Best value on each row is marked.</caption>
+        <caption className="sr-only">
+          Package comparison. Marks show the highest star rating, shortest distance and most items included among
+          these packages, and the lowest price when all have the same number of nights.
+        </caption>
         <colgroup>
           <col className="w-[5.75rem] sm:w-36" />
           {comparisonRows.map((row) => (
@@ -152,8 +158,8 @@ export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
                   }`}
                 >
                   {isLowest && (
-                    <span className="mb-1.5 inline-block rounded bg-[var(--yellow)] px-1.5 py-0.5 text-[0.625rem] font-extrabold uppercase tracking-wide text-[var(--bg)]">
-                      Lowest price
+                    <span data-testid="comparison-lowest" className="mb-1.5 inline-block rounded bg-[var(--yellow)] px-1.5 py-0.5 text-xs font-bold leading-snug text-[var(--bg)]">
+                      Lowest price in this comparison
                     </span>
                   )}
                   <span
@@ -162,8 +168,20 @@ export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
                   >
                     {headerLabel}
                   </span>
+                  {row.title && (
+                    <span
+                      className="mb-1.5 block overflow-hidden text-xs font-normal leading-snug text-[var(--textMuted)] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] [display:-webkit-box]"
+                      title={row.title}
+                      data-testid="comparison-package-title"
+                    >
+                      {row.title}
+                    </span>
+                  )}
                   <span className="block text-base font-extrabold leading-tight tabular-nums text-[var(--yellow)] sm:text-xl">
                     {row.price}
+                  </span>
+                  <span className="block text-xs font-semibold text-[var(--text)]" data-testid="comparison-nights">
+                    {row.totalNights} nights
                   </span>
                 </th>
               );
@@ -237,15 +255,15 @@ export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
                         return (
                           <td
                             key={`${row.id}-${feature.key}`}
-                            className={`border-b border-l border-[var(--borderSubtle)] px-2.5 py-3 align-top leading-relaxed [overflow-wrap:anywhere] sm:px-4 ${bg} ${text}`}
+                            className={`whitespace-pre-line border-b border-l border-[var(--borderSubtle)] px-2.5 py-3 align-top leading-relaxed [overflow-wrap:anywhere] sm:px-4 ${bg} ${text}`}
                           >
                             {isWinner && (
-                              <span data-testid="comparison-best" className="mb-0.5 flex items-center gap-1 text-[0.625rem] font-bold uppercase tracking-wide text-[var(--comparison-winner-text)]">
+                              <span data-testid="comparison-best" className="mb-0.5 flex items-center gap-1 text-xs font-bold leading-snug text-[var(--comparison-winner-text)]">
                                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" aria-hidden="true">
                                   <path d="M20 6L9 17l-5-5" />
                                 </svg>
-                                Best
-                                <span className="sr-only">: {feature.best}</span>
+                                {feature.mark}
+                                <span className="sr-only"> among these packages</span>
                               </span>
                             )}
                             {value}
@@ -259,6 +277,9 @@ export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
           );
         })}
       </table>
+      <p className="mt-2 px-2.5 text-xs text-[var(--textMuted)] sm:px-4" data-testid="comparison-marks-note">
+        Marks compare only the packages shown here, using the details each operator gave us.
+      </p>
     </div>
   );
 }

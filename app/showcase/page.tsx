@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { DesignSystemPlayground } from '@/components/showcase/DesignSystemPlayground'
 
 export const metadata: Metadata = {
-  title: 'Design System | PilgrimCompare',
+  title: 'Design System',
   description: 'PilgrimCompare design system playground.',
   robots: { index: false, follow: false },
 }
