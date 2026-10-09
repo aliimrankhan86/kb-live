@@ -4,7 +4,7 @@ import { SignUpForm } from '@/components/auth/SignUpForm';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Create Account | PilgrimCompare',
+  title: 'Create Account',
   description: 'Sign up for a PilgrimCompare traveller or operator account.',
   robots: { index: false, follow: false },
 };

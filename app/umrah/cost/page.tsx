@@ -14,7 +14,7 @@ const DESCRIPTION =
   'What affects the price of an Umrah package from the UK: hotels and distance to the Haram, travel dates, what is included and room sharing. Compare the prices operators state side by side.'
 
 export const metadata: Metadata = {
-  title: 'What Affects the Cost of an Umrah Package from the UK | PilgrimCompare',
+  title: 'What Affects the Cost of an Umrah Package from the UK',
   description: DESCRIPTION,
   alternates: { canonical: '/umrah/cost' },
   openGraph: {

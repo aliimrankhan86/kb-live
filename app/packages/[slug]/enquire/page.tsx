@@ -8,7 +8,7 @@ import type { OperatorProfile, Package } from '@/lib/types'
 import { priceAttributionShort, priceText } from '@/lib/packages/display'
 
 export const metadata: Metadata = {
-  title: 'Enquire | PilgrimCompare',
+  title: 'Enquire',
   description: 'Send a short enquiry to the operator about this package.',
   robots: { index: false, follow: false },
 }

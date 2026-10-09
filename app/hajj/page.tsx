@@ -5,7 +5,7 @@ import { HajjInterestForm } from '@/components/hajj/HajjInterestForm';
 import { JsonLdScript, breadcrumbJsonLd, faqPageJsonLd, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld';
 
 export const metadata: Metadata = {
-  title: 'Hajj Packages from the UK: Register Interest | PilgrimCompare',
+  title: 'Hajj Packages from the UK: Register Interest',
   description:
     'Hajj packages are not listed on PilgrimCompare yet. Register your interest and we will email you if Hajj packages from verified UK operators are listed.',
   keywords: ['Hajj packages 2027', 'Hajj packages UK', 'Hajj 2027', 'ATOL Hajj packages', 'UK Hajj operators'],

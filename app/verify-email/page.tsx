@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { VerifyEmailContent } from '@/components/auth/VerifyEmailContent';
 
 export const metadata = {
-  title: 'Verify Your Email | PilgrimCompare',
+  title: 'Verify Your Email',
   description: 'Check your inbox to verify your PilgrimCompare account.',
 };
 

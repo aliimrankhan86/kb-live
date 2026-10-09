@@ -28,7 +28,7 @@ export async function generateMetadata({
 
       const ogDescription = `${packageType} package by ${operatorName}. ${pkg.totalNights} nights, ${price} per person. Compare inclusions and send an enquiry.`
       return {
-        title: `${pkg.title} by ${operatorName} | Compare on PilgrimCompare`,
+        title: `${pkg.title} by ${operatorName}`,
         description: `${pkg.title} by ${operatorName}. ${pkg.totalNights} nights, ${hotelStars ? `${hotelStars}-star hotels,` : ''} ${price} per person. Compare inclusions and send an enquiry.`,
         alternates: {
           canonical: `/packages/${pkg.slug}`,

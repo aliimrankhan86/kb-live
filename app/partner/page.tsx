@@ -4,7 +4,7 @@ import { JsonLdScript, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
 import { VERIFICATION_STATEMENT } from '@/lib/content-rules'
 
 export const metadata: Metadata = {
-  title: 'List Your Umrah & Hajj Packages on PilgrimCompare',
+  title: 'List Your Umrah & Hajj Packages',
   description: 'List your Umrah packages on PilgrimCompare so UK pilgrims can compare them and send you enquiries. Founding operators list free for 12 months.',
   alternates: {
     canonical: '/partner',

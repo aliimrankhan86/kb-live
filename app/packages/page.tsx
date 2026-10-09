@@ -5,7 +5,7 @@ import { Repository } from '@/lib/api/repository'
 import type { Package } from '@/lib/types'
 
 export const metadata: Metadata = {
-  title: 'Browse Hajj & Umrah Packages | PilgrimCompare',
+  title: 'Browse Hajj & Umrah Packages',
   description:
     'Browse and compare published Umrah and Hajj packages from verified UK operators. Filter by budget, hotel rating, departure city, and inclusions.',
   alternates: { canonical: '/packages' },

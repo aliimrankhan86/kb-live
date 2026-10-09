@@ -6,7 +6,7 @@ import { Repository } from '@/lib/api/repository';
 import { isRfqQuoteEnabled } from '@/lib/config';
 
 export const metadata: Metadata = {
-  title: 'Request a Quote | PilgrimCompare',
+  title: 'Request a Quote',
   robots: { index: false, follow: false },
 };
 

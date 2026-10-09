@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { LEGAL_ENTITY_BLOCK, registeredOfficeClause } from '@/lib/legal';
 
 export const metadata: Metadata = {
-  title: 'Terms of Use | PilgrimCompare',
+  title: 'Terms of Use',
   description:
     'Terms of Use for PilgrimCompare, a UK comparison and enquiry service for Umrah travel packages from verified operators.',
   alternates: { canonical: '/terms' },

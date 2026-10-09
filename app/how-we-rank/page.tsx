@@ -4,7 +4,7 @@ import { JsonLdScript, graphJsonLd, webPageJsonLd } from '@/lib/seo/json-ld';
 import { VERIFICATION_STATEMENT } from '@/lib/content-rules';
 
 export const metadata: Metadata = {
-  title: 'How We Rank Packages | PilgrimCompare',
+  title: 'How We Rank Packages',
   description:
     'PilgrimCompare ranks packages by data completeness, price recency, and operator response rate. No operator pays for ranking position in our default results.',
   alternates: { canonical: '/how-we-rank' },

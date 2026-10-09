@@ -11,7 +11,7 @@ const DESCRIPTION =
   'Compare Ramadan Umrah packages from verified UK operators side by side: price, dates, hotels, distance to the Haram and inclusions, as stated by each operator.'
 
 export const metadata: Metadata = {
-  title: 'Ramadan Umrah Packages from the UK | PilgrimCompare',
+  title: 'Ramadan Umrah Packages from the UK',
   description: DESCRIPTION,
   alternates: { canonical: '/umrah/ramadan' },
   openGraph: {

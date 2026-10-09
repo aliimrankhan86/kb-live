@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { LEGAL_ENTITY_BLOCK, registeredOfficeClause } from '@/lib/legal';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | PilgrimCompare',
+  title: 'Privacy Policy',
   description:
     'How PilgrimCompare collects, uses and protects your personal data under UK GDPR.',
   alternates: { canonical: '/privacy' },
