@@ -102,7 +102,7 @@ export function OperatorLeadsClient({ operatorId }: OperatorLeadsClientProps) {
                     )}
                   </div>
                   <p className="mt-1 text-sm text-[var(--textMuted)]">
-                    {req.departureCity || 'Any departure'} • {req.totalNights} nights • Budget: £{req.budgetRange?.min ?? 0}–£{req.budgetRange?.max ?? 'any'}
+                    {req.departureCity || 'Any departure'} • {req.totalNights} nights • Budget: £{req.budgetRange?.min ?? 0} to £{req.budgetRange?.max ?? 'any'}
                   </p>
                   <p className="text-xs text-[var(--textMuted)]">
                     {new Date(req.createdAt).toLocaleDateString()}

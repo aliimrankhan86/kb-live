@@ -17,9 +17,9 @@ interface PasswordCheck {
 function getPasswordChecks(pwd: string): PasswordCheck[] {
   return [
     { label: 'At least 8 characters', met: pwd.length >= 8 },
-    { label: 'At least 1 uppercase letter (A–Z)', met: /[A-Z]/.test(pwd) },
-    { label: 'At least 1 lowercase letter (a–z)', met: /[a-z]/.test(pwd) },
-    { label: 'At least 1 number (0–9)', met: /[0-9]/.test(pwd) },
+    { label: 'At least 1 uppercase letter (A to Z)', met: /[A-Z]/.test(pwd) },
+    { label: 'At least 1 lowercase letter (a to z)', met: /[a-z]/.test(pwd) },
+    { label: 'At least 1 number (0 to 9)', met: /[0-9]/.test(pwd) },
     { label: 'At least 1 special character (!@#$%^&*)', met: /[^A-Za-z0-9]/.test(pwd) },
   ];
 }

@@ -43,7 +43,7 @@ export function friendlyDistance(
     case 'near':
       return { primary: `Near ${haramLabel(city)}`, note: 'a short walk' };
     case 'medium':
-      return { primary: `A short distance from ${haramLabel(city)}`, note: 'roughly a 10–20 minute walk' };
+      return { primary: `A short distance from ${haramLabel(city)}`, note: 'roughly a 10 to 20 minute walk' };
     case 'far':
       return { primary: `Further from ${haramLabel(city)}`, note: 'likely a shuttle or taxi' };
     default:

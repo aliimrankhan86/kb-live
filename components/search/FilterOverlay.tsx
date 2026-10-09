@@ -164,7 +164,7 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({ isOpen, onClose })
             <div className="mb-1 flex items-baseline justify-between">
               <h3 className="text-base font-semibold text-[var(--text)]">Your budget</h3>
               <span className="text-sm font-semibold text-[var(--yellow)]" aria-live="polite">
-                {gbp(budget[0])} – {gbp(budget[1])}{budget[1] === BUDGET_MAX ? '+' : ''}
+                {gbp(budget[0])} to {gbp(budget[1])}{budget[1] === BUDGET_MAX ? '+' : ''}
               </span>
             </div>
             <p className="mb-3 text-xs text-[var(--textMuted)]">Price per person</p>

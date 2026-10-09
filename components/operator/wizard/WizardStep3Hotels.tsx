@@ -10,8 +10,8 @@ interface Props {
 
 const STAR_OPTIONS = [3, 4, 5] as const;
 const DISTANCE_OPTIONS = [
-  { value: 'near', label: 'Near Haram (0–500m)' },
-  { value: 'medium', label: 'Medium (500m–2km)' },
+  { value: 'near', label: 'Near Haram (0 to 500m)' },
+  { value: 'medium', label: 'Medium (500m to 2km)' },
   { value: 'far', label: 'Further (2km+)' },
 ] as const;
 

@@ -300,7 +300,7 @@ const PackageList: React.FC<PackageListProps> = ({
     const bMin = sp.get('budgetMin');
     const bMax = sp.get('budgetMax');
     if (bMin || bMax) {
-      const label = bMin && bMax ? `${gbp(bMin)}–${gbp(bMax)}` : bMax ? `Up to ${gbp(bMax)}` : `From ${gbp(bMin as string)}`;
+      const label = bMin && bMax ? `${gbp(bMin)} to ${gbp(bMax)}` : bMax ? `Up to ${gbp(bMax)}` : `From ${gbp(bMin as string)}`;
       chips.push({ id: 'budget', label, keys: ['budgetMin', 'budgetMax'] });
     }
     const stars = sp.get('hotelStars');
