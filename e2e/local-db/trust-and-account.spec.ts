@@ -31,8 +31,10 @@ async function login(page: Page, email: string, password = 'TestPass1!') {
 test.describe.configure({ mode: 'serial' })
 
 test('unverified operator packages and profile are never public', async ({ page }) => {
-  await page.goto('/search/packages')
-  await expect(page.locator('body')).not.toContainText('unverified operator')
+  for (const p of [1, 2, 3]) {
+    await page.goto(`/packages?page=${p}`)
+    await expect(page.locator('body')).not.toContainText('unverified operator')
+  }
   await page.goto('/packages/local-test-15')
   await expect(page.locator('body')).toContainText('no longer available')
   // Operator C is verified but has no ATOL number, so it is not listed either.
@@ -52,13 +54,13 @@ test('uploaded package image renders under the CSP', async ({ page }) => {
   const img = page.locator('img[src*="package-images"], img[srcset*="package-images"]').first()
   await expect(img).toBeVisible()
   expect(await img.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 0)).toBe(true)
-  await page.goto('/search/packages?departureAirport=LHR')
+  await page.goto('/packages?departureAirport=LHR')
   await page.waitForLoadState('networkidle')
   expect(errors).toEqual([])
 })
 
 test('every price is attributed and dated; inclusions are three-state', async ({ page }) => {
-  await page.goto('/search/packages?type=umrah')
+  await page.goto('/packages?type=umrah')
   await expect(page.getByTestId('price-attribution-local-test-pkg-01')).toContainText(/As stated by Local Test Operator A, updated \d{1,2} \w{3} \d{4}/)
   await page.goto('/packages/local-test-04')
   await expect(page.getByTestId('package-price-attribution')).toContainText('Confirm the final price with the operator before paying')
@@ -165,4 +167,35 @@ test('enquiry retention cron removes personal details after 90 days, keeps billi
   expect((await row(newRef))[0]).toMatchObject({ name: 'Keep Out', email: 'retention@test.local', phone: '07000000000', message: 'Two adults' })
 
   expect(await (await run()).json()).toEqual({ ok: true, anonymised: 0 })
+})
+
+test('expire-packages cron skips empty and malformed end dates and still expires the past one', async ({ request }) => {
+  const stamp = Date.now()
+  const rows = [
+    { id: `cron-empty-${stamp}`, end: '' },
+    { id: `cron-bad-${stamp}`, end: '2026-02-30' },
+    { id: `cron-past-${stamp}`, end: '2026-01-31' },
+  ]
+  for (const { id, end } of rows) {
+    await sql(
+      `insert into packages
+       select (jsonb_populate_record(p, jsonb_build_object('id', $1::text, 'slug', $1::text, 'status', 'published',
+         'date_window', jsonb_build_object('start', '2026-01-20', 'end', $2::text)))).*
+       from packages p where id = 'local-test-pkg-01'`,
+      [id, end],
+    )
+  }
+  try {
+    const run = await request.get('/api/cron/expire-packages', { headers: { authorization: `Bearer ${CRON_SECRET}` } })
+    expect(run.status()).toBe(200)
+    const body = await run.json()
+    expect(body.skipped).toEqual(expect.arrayContaining([rows[0].id, rows[1].id]))
+    expect(body.skipped).not.toContain(rows[2].id)
+    const status = await sql<{ id: string; status: string }>('select id, status from packages where id = any($1) order by id', [rows.map((r) => r.id)])
+    expect(Object.fromEntries(status.map((r) => [r.id, r.status]))).toEqual({
+      [rows[0].id]: 'published', [rows[1].id]: 'published', [rows[2].id]: 'expired',
+    })
+  } finally {
+    await sql('delete from packages where id = any($1)', [rows.map((r) => r.id)])
+  }
 })

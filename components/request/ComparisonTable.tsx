@@ -54,6 +54,10 @@ const GROUPS: Group[] = [
   {
     title: 'Price & flexibility',
     rows: [
+      // Item 9: informational only. No rank, so no mark ever compares a missing price.
+      { label: 'Quad room (4 sharing)', key: 'priceQuad' },
+      { label: 'Triple room (3 sharing)', key: 'priceTriple' },
+      { label: 'Double room (2 sharing)', key: 'priceDouble' },
       { label: 'Deposit to book', key: 'deposit' },
       { label: 'Pay in instalments', key: 'paymentPlan' },
       { label: 'Cancellation', key: 'cancellation' },

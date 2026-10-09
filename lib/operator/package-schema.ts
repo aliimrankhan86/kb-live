@@ -29,6 +29,11 @@ const roomOccupancySchema = z.object({
 
 const airportCodeSchema = z.enum(AIRPORT_CODES);
 
+// Optional price per person by room type (item 9). Same rule as the headline
+// price: a stated price is greater than 0. Blank is sent as null (not stated,
+// "Not provided"), so an edit can clear it; never stored as 0.
+const roomPriceSchema = z.number().positive('Room prices must be greater than 0, or left blank').nullable().optional();
+
 export const packageSchema = z.object({
   // Step 1 — required
   title: z.string().min(5, 'Title must be at least 5 characters').max(120, 'Title must be 120 characters or fewer'),
@@ -43,6 +48,9 @@ export const packageSchema = z.object({
   pricePerPerson: z.number().positive('Price must be greater than 0'),
   priceType: z.enum(['exact', 'from', 'fixed']),
   currency: z.literal('GBP').default('GBP'),
+  priceQuadPerPerson: roomPriceSchema,
+  priceTriplePerPerson: roomPriceSchema,
+  priceDoublePerPerson: roomPriceSchema,
   // Step 2 — optional
   depositAmount: z.number().nonnegative().optional(),
   paymentPlanAvailable: z.boolean().optional(),

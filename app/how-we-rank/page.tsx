@@ -258,7 +258,7 @@ export default function HowWeRankPage() {
                 Terms of Use
               </Link>
               <Link
-                href="/search/packages"
+                href="/packages"
                 className="inline-flex min-h-11 items-center text-[var(--accent)] underline underline-offset-2 hover:text-[var(--accentHover)]"
               >
                 Compare packages

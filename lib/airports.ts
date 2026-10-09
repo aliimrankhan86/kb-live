@@ -112,5 +112,5 @@ export function departureCityHref(city: string): string {
   const key = city.trim().toLowerCase();
   return CORRIDOR_PAGE_CITIES.has(key)
     ? `/umrah/${key}`
-    : `/search/packages?type=umrah&departureCity=${encodeURIComponent(city.trim())}`;
+    : `/packages?type=umrah&departureCity=${encodeURIComponent(city.trim())}`;
 }

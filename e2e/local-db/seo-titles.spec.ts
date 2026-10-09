@@ -16,7 +16,7 @@ test('every sitemap route names PilgrimCompare exactly once in its title', async
 
 test('search has one h1, list pages keep the silhouette out from behind text, operators signing up go to /partner', async ({ page, request }) => {
   // UX-19: the Suspense fallback and the client list each rendered an h1.
-  const html = await (await request.get('/search/packages?type=umrah')).text()
+  const html = await (await request.get('/packages?type=umrah')).text()
   expect(html.match(/<h1[\s>]/g)?.length).toBe(1)
   // UX-17: the Kaaba silhouette stays on the homepage, not behind cards and text:
   // list and detail pages sit on an opaque wrapper at least a screen tall.
@@ -30,7 +30,7 @@ test('search has one h1, list pages keep the silhouette out from behind text, op
     })
   }
   expect(await plain('/')).toBeNull()
-  for (const path of ['/packages', '/search/packages', '/packages/local-test-01', '/operators/local-test-operator-a']) {
+  for (const path of ['/packages', '/packages?type=umrah&departureCity=London', '/packages/local-test-01', '/operators/local-test-operator-a']) {
     expect(await plain(path), path).toEqual({ colour: 'rgb(10, 10, 10)', tall: true })
   }
   // UX-12: operator self-serve is parked, so /signup?type=operator goes to /partner.

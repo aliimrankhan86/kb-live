@@ -261,7 +261,7 @@ export const UmrahSearchForm: React.FC<UmrahSearchFormProps> = ({ className = ''
   return (
     <div className={`${styles.searchForm} ${className}`}>
       <form
-        action="/search/packages"
+        action="/packages"
         method="get"
         className={styles.searchForm__card}
         noValidate

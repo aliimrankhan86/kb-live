@@ -15,7 +15,9 @@
 
 **Release 2026-10-07 (done):** PR #115 (`/partner` founding operators copy) and PR #116 (`dev` into `main`). Production runs `main` `a4e7075` (`dpl_C6wvCksUXATpod7GaWpNwABsVQFM`).
 
-**Batch 1 (2026-10-09, `fix/batch-1-reliability-and-ux`, PR #118 into `dev`, not merged):** emails now sent inside `after()`, departed packages hidden from every public list (`lib/listing.ts` `hasDeparted`), phone overflow fixed, compare and card UX fixes, airport and trip length filters. Report and staging email proof steps: `docs/uat/BATCH1_REPORT.md`.
+**Batch 1 (2026-10-09, `fix/batch-1-reliability-and-ux`, PR #118, merged into `dev` `0e4ffa8`):** emails now sent inside `after()`, departed packages hidden from every public list (`lib/listing.ts` `hasDeparted`), phone overflow fixed, compare and card UX fixes, airport and trip length filters. Report and staging email proof steps: `docs/uat/BATCH1_REPORT.md`.
+
+**Batch 2 (2026-10-09, `fix/batch-2-single-list-room-prices`, PR #119 into `dev`, not merged):** one package list at `/packages` (`/search/packages` is a 308 to it), optional room prices (quad, triple, double), cron guard, partial PATCH fix, per-field CSV round trip. **Migration 015 (`supabase/migrations-pending/`) is pending: staging first, production before release to `main`; the code fails package queries without it.** Report `docs/uat/BATCH2_REPORT.md`.
 
 **Staging (B0, PR #117 merged into `dev`):** Vercel Preview deployments use the fictional Supabase project `pilgrimcompare-staging` (`fkcudutzgltrsoykfvfn`), with a test-site banner, `noindex` and email only to `STAGING_EMAIL_TO`. Reseed with `npm run seed:staging`. Read `docs/STAGING.md` before touching Preview env vars or staging data.
 
@@ -25,10 +27,10 @@
 
 **How to verify any change (mandatory before push):**
 ```bash
-npm run test     # 2,169/2,169 must pass
+npm run test     # 2,265 must pass
 npm run build    # 0 errors
 npx tsc --noEmit # pass
-# if UI/routes changed: Playwright smoke on / , /umrah , /search/packages at 320px + 1280px
+# if UI/routes changed: Playwright smoke on / , /umrah , /packages at 320px + 1280px
 ```
 
 **Where things live:**

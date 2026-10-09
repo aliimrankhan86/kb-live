@@ -391,6 +391,11 @@ model Package {
   dateWindow                 Json?    @map("date_window")
   priceType                  String   @map("price_type")
   pricePerPerson             Decimal  @map("price_per_person") @db.Decimal(10, 2)
+  // Optional operator-stated price per person by room type (item 9). NULL =
+  // not stated. Pending migration supabase/migrations-pending/015.
+  priceQuadPerPerson         Decimal? @map("price_quad_per_person") @db.Decimal(10, 2)
+  priceTriplePerPerson       Decimal? @map("price_triple_per_person") @db.Decimal(10, 2)
+  priceDoublePerPerson       Decimal? @map("price_double_per_person") @db.Decimal(10, 2)
   currency                   String
   totalNights                Int      @map("total_nights")
   nightsMakkah               Int      @map("nights_makkah")

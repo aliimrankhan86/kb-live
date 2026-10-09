@@ -126,7 +126,7 @@ export default async function PackageDetailPage({
 
   const breadcrumbItems = [
     { label: 'Home', href: '/' },
-    { label: 'Packages', href: '/search/packages' },
+    { label: 'Packages', href: '/packages' },
     { label: pkg.title },
   ];
   // Standards §13: seller/provider is always the operator, never PilgrimCompare.

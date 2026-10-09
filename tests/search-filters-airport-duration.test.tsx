@@ -12,7 +12,7 @@ let query = 'type=umrah&departureCity=London';
 let params = new URLSearchParams(query); // stable between renders, as in Next
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ replace, push: vi.fn() }),
-  usePathname: () => '/search/packages',
+  usePathname: () => '/packages',
   useSearchParams: () => params,
 }));
 

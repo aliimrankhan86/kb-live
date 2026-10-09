@@ -18,7 +18,7 @@ test.describe('RangeSlider consistency across app', () => {
   });
 
   test('Filter overlay sliders all use shared RangeSlider', async ({ page }) => {
-    await page.goto('/search/packages?type=umrah');
+    await page.goto('/packages?type=umrah');
 
     // Open filter overlay
     await page.click('[data-testid="filter-button"]');

@@ -1,7 +1,7 @@
 import { Offer, OperatorProfile, Package } from './types';
 import { getRegionSettings } from './i18n/region';
 import { formatDistance, formatPriceForRegion, parseDistanceKm } from './i18n/format';
-import { formatDateRange, friendlyDistance, priceText } from './packages/display';
+import { formatDateRange, friendlyDistance, isStatedRoomPrice, priceAttributionShort, priceText, roomPriceText } from './packages/display';
 import { flightTypeLabel, groupTypeShort, ziyaratShort } from './packages/display';
 
 export interface ComparisonRow {
@@ -33,6 +33,10 @@ export interface ComparisonRow {
   cancellation?: string;
   groupType?: string;
   ziyarat?: string;
+  /** Item 9: stated price per person by room type with its attribution, or "Not provided". Never ranked. */
+  priceQuad?: string;
+  priceTriple?: string;
+  priceDouble?: string;
 }
 
 // Representative metres per distance band, so banded package data can be ranked
@@ -125,6 +129,10 @@ export function mapPackageToComparison(pkg: Package, operator?: OperatorProfile)
 
   // Stated price, never converted (standards §6); same label as cards and package page.
   const price = priceText(pkg);
+  const roomPrice = (amount: number | null | undefined) =>
+    isStatedRoomPrice(amount)
+      ? `${roomPriceText(amount, pkg.currency)}\n${priceAttributionShort(operator?.companyName, pkg.updatedAt)}`
+      : 'Not provided';
 
   const starValues = [pkg.hotelMakkahStars, pkg.hotelMadinahStars].filter(
     (s): s is 3 | 4 | 5 => typeof s === 'number'
@@ -172,6 +180,9 @@ export function mapPackageToComparison(pkg: Package, operator?: OperatorProfile)
     cancellation: pkg.cancellationPolicy || 'Not provided',
     groupType: groupTypeShort(pkg.groupType) ?? 'Not provided',
     ziyarat: ziyaratShort(pkg.ziyaratIncluded),
+    priceQuad: roomPrice(pkg.priceQuadPerPerson),
+    priceTriple: roomPrice(pkg.priceTriplePerPerson),
+    priceDouble: roomPrice(pkg.priceDoublePerPerson),
   };
 }
 

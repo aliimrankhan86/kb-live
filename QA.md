@@ -87,10 +87,10 @@
 - [ ] Confirm deletion.
 - [ ] Verify package is removed.
 
-## 9. Search Packages – Option A (/search/packages)
+## 9. Package list (/packages; /search/packages answers 308 here)
 
-- [ ] Go to `/umrah`, fill preferences, click **Search For Amazing Packages** → redirects to `/search/packages` with query params.
-- [ ] On `/search/packages`: results show filtered packages (e.g. type=umrah, budgetMin/Max).
+- [ ] Go to `/umrah`, fill preferences, click **Search For Amazing Packages** → goes to `/packages` with query params.
+- [ ] On `/packages`: results show filtered packages (e.g. type=umrah, budgetMin/Max).
 - [ ] **Shortlist:** Click shortlist on 1+ packages → count updates in header; refresh → shortlist persists (localStorage `kb_shortlist_packages`). Toggle "Shortlist only" → only shortlisted packages shown.
 - [ ] **Compare:** Select 2 (or 3) packages via "Add to Compare" → **Compare (n)** button enables. Click **Compare (n)** → modal opens with comparison table (`[data-testid="comparison-table"]`). Close modal → works.
 - [ ] Console: no hydration error, no Image aspect-ratio or LCP warnings.
@@ -146,7 +146,7 @@
 
 ## 15. Claude Local Chrome SEO/AEO QA
 
-- [ ] Run with local Chrome access against `/`, `/umrah`, `/search/packages`, one published `/packages/[slug]`, one public `/operators/[slug]`, `/umrah/london`, `/umrah/birmingham`, `/umrah/manchester`, `/robots.txt`, and `/sitemap.xml`.
+- [ ] Run with local Chrome access against `/`, `/umrah`, `/packages`, one published `/packages/[slug]`, one public `/operators/[slug]`, `/umrah/london`, `/umrah/birmingham`, `/umrah/manchester`, `/robots.txt`, and `/sitemap.xml`.
 - [ ] Verify rendered title, meta description, canonical, Open Graph, and robots/indexability state.
 - [ ] Verify one sensible H1 per public page and a coherent H2/H3 hierarchy.
 - [ ] Verify key comparison and trust copy is visible in rendered HTML.

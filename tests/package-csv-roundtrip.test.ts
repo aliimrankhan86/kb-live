@@ -21,6 +21,20 @@ const full: Package = {
   roomOccupancyOptions: { single: false, double: true, triple: true, quad: false },
   inclusions: { visa: true, flights: true, transfers: false, meals: true },
   notes: 'Notes',
+  priceQuadPerPerson: 1195, priceTriplePerPerson: 1350.5, priceDoublePerPerson: 1595,
+};
+
+// The other state of every field: true where full has false, not stated where
+// full states a value, a stated zero deposit, other enum values (item 4).
+const other: Package = {
+  id: 'rt-2', operatorId, title: 'Round trip, other states', slug: 'rt-2', status: 'published', pilgrimageType: 'hajj',
+  dateWindow: { start: '2027-05-10', end: '' },
+  priceType: 'exact', pricePerPerson: 7950.75, currency: 'GBP', totalNights: 20, nightsMakkah: 14, nightsMadinah: 6,
+  hotelMakkahStars: 3, distanceBandMakkah: 'far', distanceBandMadinah: 'unknown',
+  depositAmount: 0, paymentPlanAvailable: true, groupType: 'large-group', ziyaratIncluded: true,
+  roomOccupancyOptions: { single: true, double: false, triple: false, quad: true },
+  inclusions: { visa: null, flights: false, transfers: null, meals: false },
+  priceQuadPerPerson: null, priceDoublePerPerson: 8100,
 };
 
 const DECISION_FIELDS = [
@@ -29,6 +43,7 @@ const DECISION_FIELDS = [
   'distanceToHaramMakkahMetres', 'distanceToHaramMadinahMetres', 'distanceBandMakkah', 'distanceBandMadinah',
   'airline', 'departureAirport', 'flightType', 'depositAmount', 'paymentPlanAvailable', 'cancellationPolicy',
   'groupType', 'ziyaratIncluded', 'ziyaratDetails', 'roomOccupancyOptions', 'inclusions', 'notes',
+  'priceQuadPerPerson', 'priceTriplePerPerson', 'priceDoublePerPerson',
 ] as const;
 
 beforeEach(() => {
@@ -37,13 +52,46 @@ beforeEach(() => {
 });
 
 describe('CSV round trip keeps every decision field', () => {
-  it('export → import reproduces the package exactly (status/slug/id aside)', async () => {
-    await Repository.createPackage(ctx, full);
+  const roundTrip = async (pkg: Package) => {
+    await Repository.createPackage(ctx, pkg);
     const csv = await Repository.exportPackagesAsCsv(ctx);
     const { saved, errors } = await Repository.importPackagesFromCsv(ctx, csv);
     expect(errors).toEqual([]);
-    const back = saved[0];
-    for (const field of DECISION_FIELDS) expect(back[field], field).toEqual(full[field]);
+    return saved[0];
+  };
+
+  // One test per field and state. Not stated may come back as undefined or
+  // null: both read "Not provided".
+  describe.each([['stated values', full], ['the other states', other]] as const)('%s', (_, pkg) => {
+    it.each(DECISION_FIELDS)('%s', async (field) => {
+      const back = await roundTrip(pkg);
+      expect(back[field] ?? null).toEqual(pkg[field] ?? null);
+    });
+  });
+});
+
+describe('CSV room prices (item 9)', () => {
+  const header = 'title,pricePerPerson,currency,totalNights,pilgrimageType';
+  it('imports an older CSV without the room price columns, as not stated', async () => {
+    const { saved, errors } = await Repository.importPackagesFromCsv(ctx, `${header}\nOld file,1200,GBP,10,umrah`);
+    expect(errors).toEqual([]);
+    expect(saved[0].pricePerPerson).toBe(1200);
+    expect([saved[0].priceQuadPerPerson, saved[0].priceTriplePerPerson, saved[0].priceDoublePerPerson]).toEqual([null, null, null]);
+  });
+
+  it('exports the three columns, blank when not stated', async () => {
+    await Repository.createPackage(ctx, { ...other, title: 'Export check', priceQuadPerPerson: 1195, priceTriplePerPerson: null, priceDoublePerPerson: 1595 });
+    const [head, row] = (await Repository.exportPackagesAsCsv(ctx)).split('\n');
+    const cols = head.split(',');
+    const cells = row.split(',');
+    const at = (c: string) => cells[cols.indexOf(c)];
+    expect([at('priceQuadPerPerson'), at('priceTriplePerPerson'), at('priceDoublePerPerson')]).toEqual(['1195', '', '1595']);
+  });
+
+  it.each(['0', '-10', 'abc'])('refuses the row when a room price is %s, never storing 0', async (bad) => {
+    const { saved, errors } = await Repository.importPackagesFromCsv(ctx, `${header},priceTriplePerPerson\nBad room price,1200,GBP,10,umrah,${bad}`);
+    expect(saved).toEqual([]);
+    expect(errors).toEqual([{ row: 2, reason: 'Triple room (3 sharing) price must be a positive number or blank' }]);
   });
 });
 

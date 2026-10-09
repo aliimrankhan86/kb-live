@@ -31,8 +31,12 @@ Logged after release 2026-10-06 shipped (`main` `0c80db9`).
 - **Email sends are fire-and-forget without `after()`. Fix before the first operator publishes.** `app/api/enquiries/route.ts`, `app/api/quote-requests/route.ts` and `app/api/booking-intents/route.ts` call `void send...()` and return the response straight away. On Vercel the function can stop once the response is sent. On the B0 preview, enquiry `PC-F4E2DB05` sent no email and logged nothing, and `PC-CD71B4EA` logged Resend `application_error` "Unable to fetch data". Production runs the same code. Fix: wrap each call in `after()` from `next/server`, then submit an enquiry on the dev alias and check `STAGING_EMAIL_TO`.
 - **Expired packages still list.** There is no expiry rule. Staging package 9 (operator A, August 2026) shows on `/search/packages`. Decide the rule (for example, hide a package once its return date has passed) and add it to `lib/listing.ts`.
 
-## Batch 1 follow-ups (2026-10-09, need Ali)
+## Batch 1 follow-ups (2026-10-09)
 
-- **Harden the 02:00 `expire-packages` cron.** `(date_window->>'end')::date` throws on an empty end date, which the wizard saves when only a start date is entered, so one such package makes every run return 500. Decide whether it should expire on the departure date (the public rule now) or the return date. It changes production data nightly, so it waits for a decision. The real-DB suite already calls the cron (`e2e/local-db/search-journey.spec.ts`).
-- **UX-08:** merge `/packages` and `/search/packages`. Options and the recommendation (one list at `/packages`, 308 from `/search/packages`) are in `docs/uat/BATCH1_REPORT.md`.
-- **UX-11 and item 9 (per room prices):** need Ali's decision.
+- **DONE in batch 2 (`fix/batch-2-single-list-room-prices`):** the `expire-packages` cron guard (empty or malformed end dates are skipped and logged), UX-08 option B (one list at `/packages`, 308 from `/search/packages`), and UX-11 with item 9 (optional room prices). Report: `docs/uat/BATCH2_REPORT.md`.
+
+## Batch 2 follow-ups (2026-10-09, need Ali)
+
+- **Migration 015 is pending.** `supabase/migrations-pending/015_package_room_prices.sql` (rollback `015_package_room_prices.rollback.sql`). Needs the staging rehearsal (apply on staging, check the PR preview), then production by Ali before any release of batch 2 to `main`. Until it is applied, every package query on that database fails.
+- **Cron expiry date: decision pending.** The `expire-packages` cron still expires a package on its **return** date (`date_window.end`), while the public lists hide it from its **departure** date. Decide: expire on the departure date or the return date. Only the guard changed in batch 2.
+- **Staging seed room prices.** After 015 is on staging, `scripts/seed-staging.mjs` can write each package's stated `roomPrices` into the new columns (today they are only in operator notes). Not done in batch 2, because the seed would fail on staging until 015 is applied.

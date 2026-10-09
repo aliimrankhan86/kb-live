@@ -10,5 +10,9 @@ cd "$(dirname "$0")/../.."
 supabase db reset --workdir e2e/local-db
 npx prisma db push
 for f in supabase/migrations/[0-9]*.sql; do npx prisma db execute --file "$f"; done
+# Pending migration 015 (item 9 room prices), not yet applied to staging or
+# production: run it here so every local run proves it applies cleanly on top
+# of the schema (IF NOT EXISTS: the Prisma schema already has the columns).
+npx prisma db execute --file supabase/migrations-pending/015_package_room_prices.sql
 node scripts/create-test-users.mjs
 node scripts/seed-local-test-data.mjs

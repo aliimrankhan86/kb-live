@@ -18,18 +18,45 @@ async function collectErrors(page: Page) {
   return errors
 }
 
-test('browse tab and an unfiltered search show the same published packages', async ({ page }) => {
+test('/packages lists every published package, and the old search URL lands on the same list', async ({ page }) => {
   await page.goto('/packages')
-  const browse = await cardCount(page)
+  const all = await resultCount(page)
+  expect(await cardCount(page)).toBe(5) // first page
   await page.goto('/search/packages')
-  expect(await resultCount(page)).toBe(browse)
+  await expect(page).toHaveURL(/\/packages$/)
+  expect(await resultCount(page)).toBe(all)
   // 17 seeded: 1 draft, 1 from an unverified operator, 2 from a verified operator with no ATOL number, 1 departed.
-  expect(browse).toBe(12)
+  expect(all).toBe(12)
+})
+
+test('/search/packages answers 308 to /packages with the query kept; nothing links to it (UX-08)', async ({ page, request }) => {
+  const kept = await request.get('/search/packages?departureAirport=LHR&type=umrah', { maxRedirects: 0 })
+  expect(kept.status()).toBe(308)
+  expect(kept.headers()['location']).toMatch(/^(http:\/\/127\.0\.0\.1:3100)?\/packages\?departureAirport=LHR&type=umrah$/)
+  const bare = await request.get('/search/packages', { maxRedirects: 0 })
+  expect(bare.status()).toBe(308)
+  expect(bare.headers()['location']).toMatch(/^(http:\/\/127\.0\.0\.1:3100)?\/packages$/)
+
+  await page.goto('/search/packages?departureAirport=LHR&type=umrah')
+  await expect(page).toHaveURL(/\/packages\?departureAirport=LHR&type=umrah$/)
+  await expect(page.getByRole('button', { name: /Remove filter: From/ })).toBeVisible()
+
+  const sitemap = await (await request.get('/sitemap.xml')).text()
+  expect(sitemap).toMatch(/\/packages<\/loc>/)
+  expect(sitemap).not.toContain('/search/packages')
+  const html = await (await request.get('/packages?type=umrah')).text()
+  expect(html).toMatch(/<link rel="canonical" href="[^"]*\/packages"/)
+  expect(html).not.toContain('/search/packages')
+
+  for (const path of ['/', '/umrah', '/umrah/london', '/umrah/cost', '/umrah/ramadan', '/hajj', '/how-we-rank', '/packages', '/packages/local-test-01', '/packages/local-test-01/enquire', '/operators/local-test-operator-b']) {
+    await page.goto(path)
+    expect(await page.locator('a[href*="/search/packages"], form[action*="/search/packages"]').count(), path).toBe(0)
+  }
 })
 
 test('a departed package leaves every public list and its page says the departure has passed', async ({ page, request }) => {
   const departed = /August 2026 \[LOCAL TEST DATA\]/
-  for (const path of ['/packages', '/search/packages', '/operators/local-test-operator-b']) {
+  for (const path of ['/packages', '/packages?departureAirport=LHR', '/operators/local-test-operator-b']) {
     await page.goto(path)
     await expect(page.getByText(departed)).toHaveCount(0)
   }
@@ -61,7 +88,7 @@ test('a departed package leaves every public list and its page says the departur
 test('submitting the untouched search form loses no Umrah packages', async ({ page }) => {
   await page.goto('/umrah')
   await page.getByTestId('find-packages-submit').click()
-  await page.waitForURL(/search\/packages/)
+  await page.waitForURL(/\/packages\?/)
   expect(await resultCount(page)).toBe(11)
   expect(page.url()).not.toMatch(/departureAirport|budgetMin|departureDate/)
 })
@@ -74,13 +101,13 @@ test('form airport list is generated from live packages', async ({ page }) => {
 })
 
 test('London city search includes Heathrow, Gatwick and free-text Stansted', async ({ page }) => {
-  await page.goto('/search/packages?type=umrah&departureCity=London')
+  await page.goto('/packages?type=umrah&departureCity=London')
   expect(await resultCount(page)).toBe(5)
   await expect(page.getByRole('button', { name: /Remove filter: From London/ })).toBeVisible()
 })
 
 test('budget too low shows closest matches with reasons, never a silent page', async ({ page }) => {
-  await page.goto('/search/packages?type=umrah&departureAirport=BHX&budgetMax=1000')
+  await page.goto('/packages?type=umrah&departureAirport=BHX&budgetMax=1000')
   await expect(page.getByTestId('no-exact-matches')).toBeVisible()
   await expect(page.getByTestId('close-matches')).toBeVisible()
   await expect(page.getByText(/is above your £1,000 budget/).first()).toBeVisible()
@@ -88,7 +115,7 @@ test('budget too low shows closest matches with reasons, never a silent page', a
 })
 
 test('nothing matches: honest empty state and Clear all removes location + dates', async ({ page }) => {
-  await page.goto('/search/packages?type=umrah&departureAirport=MAN&departureDate=2027-06-01&returnDate=2027-06-10')
+  await page.goto('/packages?type=umrah&departureAirport=MAN&departureDate=2027-06-01&returnDate=2027-06-10')
   await expect(page.getByTestId('search-empty-state')).toBeVisible()
   await expect(page.getByText('support@pilgrimcompare.co.uk').first()).toBeVisible()
   await page.getByTestId('search-empty-reset').click()
@@ -97,7 +124,7 @@ test('nothing matches: honest empty state and Clear all removes location + dates
 })
 
 test('reload, shared link and back button reproduce identical results', async ({ page }) => {
-  const url = '/search/packages?type=umrah&departureCity=London&sort=price-asc'
+  const url = '/packages?type=umrah&departureCity=London&sort=price-asc'
   await page.goto(url)
   const first = await page.locator('[data-testid^="package-card-"]').evaluateAll((els) => els.map((e) => e.getAttribute('data-testid')))
   await page.reload()
@@ -112,7 +139,7 @@ test('reload, shared link and back button reproduce identical results', async ({
 })
 
 test('pagination page survives reload', async ({ page }) => {
-  await page.goto('/search/packages?type=umrah')
+  await page.goto('/packages?type=umrah')
   await page.getByRole('button', { name: /page 2|^2$/i }).first().click()
   await expect(page).toHaveURL(/page=2/)
   const a = await page.locator('[data-testid^="package-card-"]').first().getAttribute('data-testid')
@@ -121,7 +148,7 @@ test('pagination page survives reload', async ({ page }) => {
 })
 
 test('cards never show undefined/null/NaN and gaps read Not provided', async ({ page }) => {
-  await page.goto('/search/packages?type=umrah&departureCity=Birmingham')
+  await page.goto('/packages?type=umrah&departureCity=Birmingham')
   const text = await page.locator('[data-testid^="package-card-"]').allInnerTexts()
   for (const t of text) expect(t).not.toMatch(/\bundefined\b|\bnull\b|NaN/)
   const incomplete = page.getByTestId('package-card-local-test-pkg-04')
@@ -133,7 +160,7 @@ for (const vp of [{ n: 'desktop', w: 1280, h: 900 }, { n: 'tablet', w: 768, h: 1
   test(`key pages: no console errors, no horizontal overflow @${vp.n}`, async ({ page }) => {
     await page.setViewportSize({ width: vp.w, height: vp.h })
     const errors = await collectErrors(page)
-    for (const [name, url] of [['home', '/'], ['umrah', '/umrah'], ['search', '/search/packages?type=umrah'], ['browse', '/packages'], ['package', '/packages/local-test-01'], ['enquire', '/packages/local-test-01/enquire'], ['corridor', '/umrah/london']]) {
+    for (const [name, url] of [['home', '/'], ['umrah', '/umrah'], ['search', '/packages?type=umrah'], ['browse', '/packages'], ['package', '/packages/local-test-01'], ['enquire', '/packages/local-test-01/enquire'], ['corridor', '/umrah/london']]) {
       await page.goto(url)
       await page.waitForLoadState('networkidle')
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
@@ -147,7 +174,7 @@ for (const vp of [{ n: 'desktop', w: 1280, h: 900 }, { n: 'tablet', w: 768, h: 1
 test('phone widths never scroll sideways, even with a very long title and hotel names (UX-22)', async ({ page }) => {
   for (const width of [320, 360, 390]) {
     await page.setViewportSize({ width, height: 800 })
-    for (const path of ['/packages', '/search/packages', '/packages/local-test-17', '/operators/local-test-operator-b']) {
+    for (const path of ['/packages', '/packages?departureAirport=LHR', '/packages/local-test-17', '/operators/local-test-operator-b']) {
       await page.goto(path)
       await page.waitForLoadState('networkidle')
       const { scroll, client } = await page.evaluate(() => ({
@@ -161,7 +188,7 @@ test('phone widths never scroll sideways, even with a very long title and hotel 
 
 test('long hotel names wrap to two lines on /packages cards (UX-10)', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
-  await page.goto('/packages')
+  await page.goto('/packages?departureAirport=LHR')
   const name = page.getByTestId('package-card-local-test-pkg-17').getByText(/Test Grand Residence Makkah Tower/)
   const { height, line, clamp } = await name.evaluate((el) => {
     const s = getComputedStyle(el)
@@ -172,8 +199,8 @@ test('long hotel names wrap to two lines on /packages cards (UX-10)', async ({ p
   expect(height).toBeLessThanOrEqual(line * 2 + 1)
 })
 
-test('filter panel narrows by departure airport and trip length, kept in the URL (UX-09)', async ({ page }) => {
-  await page.goto('/search/packages?type=umrah')
+test('filter panel on /packages narrows by departure airport and trip length, kept in the URL (UX-09)', async ({ page }) => {
+  await page.goto('/packages?type=umrah')
   await page.getByTestId('filter-button').click()
   const opts = await page.getByTestId('filter-departure-airport').locator('option').allTextContents()
   expect(opts.join('|')).toContain('(LHR)')

@@ -404,6 +404,12 @@ export interface Package {
   priceType: 'exact' | 'from' | 'fixed';
   pricePerPerson: number;
   currency: string;
+  // Optional price per person by room type (item 9), operator-stated, same
+  // currency as pricePerPerson, never converted. null or absent = not stated
+  // ("Not provided"), never zero. The headline price above is unchanged.
+  priceQuadPerPerson?: number | null;
+  priceTriplePerPerson?: number | null;
+  priceDoublePerPerson?: number | null;
   
   totalNights: number;
   nightsMakkah: number;

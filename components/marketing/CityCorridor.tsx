@@ -54,7 +54,7 @@ export function CityCorridor({ city, h1, intro, queryParams, faqs, breadcrumbIte
 
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <Link
-            href={`/search/packages${queryParams}`}
+            href={`/packages${queryParams}`}
             className="inline-flex items-center justify-center rounded-lg bg-[var(--yellow)] px-6 py-3 text-base font-semibold text-[var(--bg)] hover:opacity-90 transition-opacity"
             data-testid={`corridor-cta-${city.toLowerCase()}`}
           >

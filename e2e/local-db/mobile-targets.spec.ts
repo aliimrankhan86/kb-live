@@ -4,7 +4,7 @@ import { test, expect } from '@playwright/test'
 // least 24px high, and footer links, filter controls, card Save and contact
 // links reach 44px.
 const pages = [
-  '/', '/umrah', '/umrah/london', '/hajj', '/packages', '/search/packages?type=umrah&departureCity=London',
+  '/', '/umrah', '/umrah/london', '/hajj', '/packages', '/packages?type=umrah&departureCity=London',
   '/packages/local-test-01', '/operators/local-test-operator-a', '/partner', '/login', '/signup',
   '/how-we-rank', '/privacy', '/terms',
 ]

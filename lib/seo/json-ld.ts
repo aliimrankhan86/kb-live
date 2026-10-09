@@ -173,7 +173,7 @@ export function searchResultsJsonLd(
   return {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    '@id': `${BASE_URL}/search/packages#itemlist`,
+    '@id': `${BASE_URL}/packages#itemlist`,
     name: listName,
     description: 'Search results for Hajj and Umrah package comparison on PilgrimCompare.',
     numberOfItems: results.length,

@@ -45,7 +45,7 @@ When a local problem turns out to be **expected behavior, not a bug**, capture i
 ## Non-negotiable before every push (from AGENTS.md)
 
 - `npm run test` green · `npm run build` 0 errors · `npx tsc --noEmit` pass
-- UI/route change → Playwright smoke `/`, `/umrah`, `/search/packages` at 320px + 1280px
+- UI/route change → Playwright smoke `/`, `/umrah`, `/packages` at 320px + 1280px
 - Small focused diffs, one concern per commit; add `data-testid` for Playwright targets
 - Never invent operator trust claims — stored facts only; missing = "Not provided"
 

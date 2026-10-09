@@ -16,7 +16,6 @@ const LEGAL_LINKS = [
 
 const PLATFORM_LINKS = [
   { href: '/packages', label: 'Browse Packages' },
-  { href: '/search/packages', label: 'Compare Packages' },
   { href: '/quote', label: 'Get a Quote' },
   { href: '/partner', label: 'For Operators' },
 ];

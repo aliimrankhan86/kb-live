@@ -106,7 +106,7 @@ export default async function OperatorProfilePage({ params }: OperatorPageProps)
 
   const breadcrumbItems = [
     { label: 'Home', href: '/' },
-    { label: 'Search', href: '/search/packages' },
+    { label: 'Packages', href: '/packages' },
     { label: operator.companyName },
   ];
   const operatorProfileJsonLd = graphJsonLd([

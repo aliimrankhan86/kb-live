@@ -1,5 +1,29 @@
 # PilgrimCompare AI Handover — Single Source of Truth
 
+## §B2 Batch 2 one package list, room prices, cron guard (PR into `dev`, branch `fix/batch-2-single-list-room-prices`), 2026-10-09
+
+Full report: `docs/uat/BATCH2_REPORT.md` (per item, decisions, staging proof, every wording change).
+
+### What changed and why
+- **Cron guard:** `app/api/cron/expire-packages` reads `date_window->>'end'` as text and checks it with `storedEndDay` (`lib/listing.ts`). Empty, missing or malformed ends are skipped with a log line, never thrown (`''::date` used to fail the whole run). The rule is unchanged: expire on an end date before `CURRENT_DATE`.
+- **UX-08 option B:** `/packages` renders `SearchPackagesClient` (filters, chips, close matches, airport and trip length, sort, saved, compare, pagination) plus URL-backed type tabs and `?compare=<id>` preselect. `/search/packages` is a 308 in `next.config.ts` `redirects()` (Next keeps the query). The route, `PackagesBrowse` and its CSS are gone; sitemap, links, `/umrah` form, breadcrumbs, `departureCityHref` and JSON-LD use `/packages`.
+- **Item 9 / UX-11 room prices:** `priceQuadPerPerson`, `priceTriplePerPerson`, `priceDoublePerPerson` (`numeric(10,2)`, nullable; null = not stated, never 0). Wizard Pricing step (also edit), review step, API validation (> 0 or null), package page block "Prices by room type" (only when one is stated, each line "As stated by <operator>, updated <date>"), compare rows (no rank, never marked), CSV columns (old CSVs still import; bad values refuse the row). Helpers in `lib/packages/display.ts` (`ROOM_PRICES`, `roomPriceText`, `hasRoomPrices`). Headline price, sort and filters unchanged.
+- **PATCH fix (found on the way):** Zod 4 fills `.default()` values inside `updatePackageSchema` (a `.partial()`), so a partial PATCH reset status to draft and other defaulted fields. `app/api/operator/packages/route.ts` now applies only keys present in the request body.
+- **CSV (item 4):** the rich fields already round tripped; the test is now per field on two packages, and the import keeps a stated £0 deposit and 0 m distances (were `Number(x) || undefined`).
+
+### Migration 015 (PENDING, not applied to staging or production)
+`supabase/migrations-pending/015_package_room_prices.sql` and `.rollback.sql`. Deploy order: staging, then the PR preview check, then production before any release to `main`, then the code. Local: `e2e/local-db/setup.sh` runs 015 after `prisma db push` (no-op, proves it applies). Rehearsed locally: apply, re-apply, rollback, apply; `prisma migrate diff` shows no drift on `packages`.
+
+### Gotchas
+- 🛠️ **Gotcha: Zod 4 applies defaults inside `.partial()`.** `packageSchema.partial().parse({ id, airline })` returns `status: 'draft'`, `currency: 'GBP'`, default bands, inclusions and room types. Not a Zod bug (documented v4 behaviour). Any partial-update route must keep only the keys the client sent.
+- The `/packages` list is paged (5 per page): real-DB tests that need a specific card use a filter (for example `?departureAirport=LHR`) to bring it to page 1.
+
+### Tests
+Vitest 2,265 (81 files). Playwright 69 passed, 6 skipped. Real DB 37 of 37.
+
+### Exact next step
+Ali instructs Claude in Chrome to apply 015 to staging, then run the proof in `docs/uat/BATCH2_REPORT.md` on the PR preview. Production gets 015 before this reaches `main`. Pending decision: expire on departure or return date.
+
 ## §B1 Batch 1 reliability and UX (PR #118 into `dev`, branch `fix/batch-1-reliability-and-ux`), 2026-10-09
 
 Full report: `docs/uat/BATCH1_REPORT.md` (per item, decisions, UX-08 options, every wording change, staging email proof steps).
@@ -331,6 +355,8 @@ main untouched. dev = main minus promotion-merge commits (healthy). **PR #104 me
 ---
 
 ## §Standing decision — CSV import round-trip gap (DEFERRED — do NOT do piecemeal) — 2026-06-17
+
+> **RESOLVED (checked 2026-10-09, batch 2):** the importer reads every field listed below. `tests/package-csv-roundtrip.test.ts` now runs one round trip test per field on two packages; it found and fixed the last loss (a stated £0 deposit). Kept below as history.
 
 The package CSV **export** emits the full field set, but the **importer reads only the basic columns** (`title, pricePerPerson, currency, totalNights, pilgrimageType` + `status, description, departureCity, departureDate`). So these operator-stated decision fields **export but do NOT round-trip back through import**:
 

@@ -59,7 +59,15 @@ interface PackageListProps {
   operators?: OperatorProfile[];
   /** Live departure airports for the filter panel (from the whole catalogue). */
   airportOptions?: { code: string; label: string }[];
+  /** Preselected for comparison, from /packages?compare=<id> (package page "Compare"). */
+  initialCompareIds?: string[];
 }
+
+const TYPE_TABS = [
+  { value: '', label: 'All' },
+  { value: 'umrah', label: 'Umrah' },
+  { value: 'hajj', label: 'Hajj' },
+] as const;
 
 const PackageList: React.FC<PackageListProps> = ({
   packages,
@@ -71,11 +79,12 @@ const PackageList: React.FC<PackageListProps> = ({
   featuredSlotsEnabled = false,
   operators = [],
   airportOptions = [],
+  initialCompareIds = [],
 }) => {
   const [shortlistedPackages, setShortlistedPackages] = useState<string[]>([]);
   const [shortlistLoaded, setShortlistLoaded] = useState(false);
   const [shortlistOnly, setShortlistOnly] = useState(false);
-  const [selectedCompareIds, setSelectedCompareIds] = useState<string[]>([]);
+  const [selectedCompareIds, setSelectedCompareIds] = useState<string[]>(initialCompareIds);
   const [compareMessage, setCompareMessage] = useState('');
   const [showComparison, setShowComparison] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -325,6 +334,16 @@ const PackageList: React.FC<PackageListProps> = ({
     return chips;
   }, [searchParams]);
 
+  // Pilgrimage type lives in the URL like every other choice (?type=umrah).
+  const activeType = searchCriteria.type ?? '';
+  const setType = (value: string) => {
+    const params = new URLSearchParams(searchParams?.toString() ?? '');
+    if (value) params.set('type', value);
+    else params.delete('type');
+    params.delete('page');
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
   const removeFilter = (keys: string[]) => {
     const params = new URLSearchParams(searchParams?.toString() ?? '');
     [...keys, 'page'].forEach((k) => params.delete(k));
@@ -334,6 +353,20 @@ const PackageList: React.FC<PackageListProps> = ({
   return (
     <div className={styles.searchContainer}>
       <header className={styles.searchHeader}>
+        <div className={styles.segment} role="group" aria-label="Filter by pilgrimage type">
+          {TYPE_TABS.map((tab) => (
+            <button
+              key={tab.label}
+              type="button"
+              data-testid={`packages-type-${tab.value || 'all'}`}
+              className={`${styles.segmentBtn} ${activeType === tab.value ? styles.segmentBtnActive : ''}`}
+              aria-pressed={activeType === tab.value}
+              onClick={() => setType(tab.value)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
         <div className={styles.searchHeaderTop}>
           {/* Left: big count number + meta disclosure stacked */}
           <div className={styles.searchResults} aria-live="polite">

@@ -135,7 +135,7 @@ All UI must use these shared components. Never create one-off equivalents.
 - Form submits as GET request (works without JS). Query params in URL for shareability.
 - CTA: "Find packages" (not "Search" — too generic).
 
-### Search results (`/search/packages`)
+### Package list (`/packages`)
 
 - Results count: "Found N packages matching your criteria".
 - Sort options: Price (low-high), Price (high-low), Rating, Distance to Haram.
@@ -226,7 +226,7 @@ Users are spending £1,000-£5,000+ on pilgrimage. Trust is non-negotiable.
 - CTA: "Find Packages" (not generic "Search")
 - A concise answer block may sit below the form for SEO/AEO support. Keep it secondary to the search flow, use factual traveller questions, and do not add unsupported claims or promotional copy.
 
-### Search results (`/search/packages`)
+### Package list (`/packages`)
 
 - Results count + sort dropdown (price asc/desc, rating, distance)
 - Filter button opens bottom sheet on mobile

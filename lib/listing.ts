@@ -21,3 +21,15 @@ export const londonToday = (now = new Date()): string =>
  */
 export const hasDeparted = (p: Pick<Package, 'status' | 'dateWindow'>, today = londonToday()): boolean =>
   p.status === 'expired' || Boolean(p.dateWindow?.start && p.dateWindow.start < today);
+
+/**
+ * The yyyy-mm-dd day of a stored date_window end, or null when it is empty,
+ * missing or not a real calendar date (the wizard saves '' when only a start
+ * date is entered). A trailing time is ignored, as Postgres' ::date cast did.
+ */
+export const storedEndDay = (value: string | null | undefined): string | null => {
+  const m = value?.match(/^(\d{4}-\d{2}-\d{2})(?:$|T)/);
+  if (!m) return null;
+  const d = new Date(`${m[1]}T00:00:00Z`);
+  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === m[1] ? m[1] : null;
+};

@@ -152,7 +152,7 @@ export default async function UmrahCostPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
               <Link
-                href="/search/packages?type=umrah"
+                href="/packages?type=umrah"
                 className="inline-flex items-center justify-center rounded-lg bg-[var(--yellow)] px-5 py-2.5 text-sm font-semibold text-[var(--bg)] hover:opacity-90 transition-opacity"
               >
                 Compare Umrah packages
