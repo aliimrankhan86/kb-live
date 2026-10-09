@@ -3,11 +3,15 @@ import { test, expect } from '@playwright/test'
 // Batch 1 item 5: the root template appends "| PilgrimCompare", so a page title
 // must not carry the brand itself. Before the fix 24 of 29 sitemap routes ended
 // "| PilgrimCompare | PilgrimCompare" (or named the brand twice).
-test('every sitemap route names PilgrimCompare exactly once in its title', async ({ request }) => {
+// Batch 3 item 3: also the public routes the sitemap leaves out (sign-in pages,
+// the enquiry form, a departed package and the not found pages).
+const UNLISTED_PUBLIC = ['/login', '/signup', '/reset-password', '/verify-email', '/packages/local-test-01/enquire',
+  '/packages/local-test-16', '/packages/does-not-exist', '/operators/does-not-exist', '/no-such-page']
+test('every public route names PilgrimCompare exactly once in its title', async ({ request }) => {
   const xml = await (await request.get('/sitemap.xml')).text()
   const paths = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname)
   expect(paths.length).toBeGreaterThan(20)
-  for (const path of paths) {
+  for (const path of [...paths, ...UNLISTED_PUBLIC]) {
     const html = await (await request.get(path)).text()
     const title = html.match(/<title>([^<]*)<\/title>/)?.[1] ?? ''
     expect.soft(title.match(/PilgrimCompare/g)?.length ?? 0, `${path}: ${title}`).toBe(1)
