@@ -34,7 +34,7 @@ function PasswordMatchIndicator({ password, confirm }: { password: string; confi
       aria-live="polite"
     >
       <span
-        className="inline-flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold"
+        className="inline-flex h-4 w-4 items-center justify-center rounded-full text-xs font-bold"
         style={{
           backgroundColor: match ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
         }}
@@ -84,7 +84,7 @@ function PasswordStrength({ password }: { password: string }) {
             }}
           >
             <span
-              className="inline-flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold"
+              className="inline-flex h-4 w-4 items-center justify-center rounded-full text-xs font-bold"
               style={{
                 backgroundColor: password.length === 0
                   ? 'var(--bgSecondary)'
@@ -338,11 +338,11 @@ export function SignUpForm({ operatorSignupEnabled = false }: { operatorSignupEn
           />
           <span>
             I agree to the{' '}
-            <Link href="/terms" target="_blank" className="underline text-[var(--accent)]">
+            <Link href="/terms" target="_blank" className="py-1.5 underline text-[var(--accent)]">
               Terms & Conditions
             </Link>{' '}
             and{' '}
-            <Link href="/privacy" target="_blank" className="underline text-[var(--accent)]">
+            <Link href="/privacy" target="_blank" className="py-1.5 underline text-[var(--accent)]">
               Privacy Policy
             </Link>
             . I confirm I am at least 16 years old.
@@ -377,7 +377,7 @@ export function SignUpForm({ operatorSignupEnabled = false }: { operatorSignupEn
         Already have an account?{' '}
         <Link
           href={isPartner ? '/login?type=operator' : '/login?type=customer'}
-          className="text-[var(--yellow)] hover:underline"
+          className="py-1.5 text-[var(--yellow)] hover:underline"
         >
           Sign in
         </Link>

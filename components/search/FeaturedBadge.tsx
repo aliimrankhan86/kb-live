@@ -9,7 +9,7 @@ export function FeaturedBadge() {
   return (
     <span
       data-testid="featured-badge"
-      className="inline-flex items-center gap-1 rounded-full border border-[var(--yellow)] bg-[rgba(255,211,29,0.12)] px-2.5 py-0.5 text-[0.6875rem] font-700 uppercase tracking-wide text-[var(--yellow)]"
+      className="inline-flex items-center gap-1 rounded-full border border-[var(--yellow)] bg-[rgba(255,211,29,0.12)] px-2.5 py-0.5 text-xs font-700 uppercase tracking-wide text-[var(--yellow)]"
       aria-label="Featured listing"
     >
       <svg

@@ -22,7 +22,7 @@ const PLATFORM_LINKS = [
 ];
 
 const linkClass =
-  'inline-flex min-h-[24px] items-center text-[var(--textMuted)] hover:text-[var(--accent)] hover:underline focus-visible:outline-2 focus-visible:outline-[var(--yellow)] focus-visible:outline-offset-2';
+  'inline-flex min-h-11 md:min-h-[24px] items-center text-[var(--textMuted)] hover:text-[var(--accent)] hover:underline focus-visible:outline-2 focus-visible:outline-[var(--yellow)] focus-visible:outline-offset-2';
 
 function useIsDesktop() {
   const [isDesktop, setIsDesktop] = useState(false);
@@ -74,7 +74,7 @@ function Section({
 
   return (
     <div
-      className={`border-t border-[var(--borderSubtle)] py-3 md:border-0 md:py-0 ${
+      className={`border-t border-[var(--borderSubtle)] md:border-0 ${
         isLast ? 'border-b md:border-b-0' : ''
       }`}
     >
@@ -83,7 +83,7 @@ function Section({
         onClick={() => setOpen(o => !o)}
         aria-expanded={expanded}
         aria-controls={contentId}
-        className="flex w-full items-center justify-between text-left text-sm font-semibold text-[var(--text)] md:cursor-default md:pointer-events-none"
+        className="flex min-h-11 w-full items-center justify-between text-left text-sm font-semibold text-[var(--text)] md:min-h-0 md:cursor-default md:pointer-events-none"
       >
         <span>{title}</span>
         <Chevron open={expanded} />
@@ -155,7 +155,7 @@ export function Footer({ cities = [], rfqEnabled = false }: { cities?: string[];
               United Kingdom<br />
               <a
                 href="mailto:support@pilgrimcompare.co.uk"
-                className="mt-1 inline-block min-h-[24px] underline text-[var(--accent)] hover:text-[var(--accentHover)] focus-visible:outline-2 focus-visible:outline-[var(--yellow)] focus-visible:outline-offset-2"
+                className="mt-1 inline-flex min-h-11 items-center md:min-h-[24px] underline text-[var(--accent)] hover:text-[var(--accentHover)] focus-visible:outline-2 focus-visible:outline-[var(--yellow)] focus-visible:outline-offset-2"
               >
                 support@pilgrimcompare.co.uk
               </a>
@@ -196,7 +196,7 @@ export function Footer({ cities = [], rfqEnabled = false }: { cities?: string[];
             </ul>
             {cities.length > 0 && (
               <div className="mt-4">
-                <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--textMuted)]">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--textMuted)]">
                   Departing from
                 </p>
                 <ul className="space-y-2 text-xs">
@@ -227,7 +227,7 @@ export function Footer({ cities = [], rfqEnabled = false }: { cities?: string[];
               href="https://www.caa.co.uk/atol-protection"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline text-[var(--accent)] hover:text-[var(--accentHover)] focus-visible:outline-2 focus-visible:outline-[var(--yellow)] focus-visible:outline-offset-2"
+              className="py-1.5 underline text-[var(--accent)] hover:text-[var(--accentHover)] focus-visible:outline-2 focus-visible:outline-[var(--yellow)] focus-visible:outline-offset-2"
             >
               caa.co.uk
             </a>
@@ -236,7 +236,7 @@ export function Footer({ cities = [], rfqEnabled = false }: { cities?: string[];
               href="https://www.abta.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline text-[var(--accent)] hover:text-[var(--accentHover)] focus-visible:outline-2 focus-visible:outline-[var(--yellow)] focus-visible:outline-offset-2"
+              className="py-1.5 underline text-[var(--accent)] hover:text-[var(--accentHover)] focus-visible:outline-2 focus-visible:outline-[var(--yellow)] focus-visible:outline-offset-2"
             >
               abta.com
             </a>{' '}
@@ -255,7 +255,7 @@ export function Footer({ cities = [], rfqEnabled = false }: { cities?: string[];
         </div>
 
         {/* Legal entity disclosure — Companies Act 2006 §82 */}
-        <p className="mt-3 text-center text-[11px] leading-relaxed text-[var(--textMuted)] md:text-left">
+        <p className="mt-3 text-center text-xs leading-relaxed text-[var(--textMuted)] md:text-left">
           {LEGAL_ENTITY_BLOCK.tradingName} is a trading name of{' '}
           <span className="text-[var(--text)]">{LEGAL_ENTITY_BLOCK.companyName}</span>, registered
           in {LEGAL_ENTITY_BLOCK.registeredCountry} (company no.{' '}

@@ -99,7 +99,7 @@ export function ComparePreview({ packages }: ComparePreviewProps) {
 
       <p className="mt-2 text-xs text-[var(--textMuted)]" data-testid="preview-sort-disclosure">
         The first two packages in our default order. {NEUTRAL_SORT_DISCLOSURE}{' '}
-        <Link href="/how-we-rank" className="underline underline-offset-2">How we rank</Link>
+        <Link href="/how-we-rank" className="py-1.5 underline underline-offset-2">How we rank</Link>
       </p>
 
       <div className={styles.previewFoot}>

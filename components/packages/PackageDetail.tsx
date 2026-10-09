@@ -133,7 +133,7 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
         <p className="mt-1 text-sm text-[var(--textMuted)]">
           Sold by{' '}
           {operator?.slug ? (
-            <Link href={`/operators/${operator.slug}`} data-testid="package-operator-link" className="font-medium text-[var(--text)] underline underline-offset-2">
+            <Link href={`/operators/${operator.slug}`} data-testid="package-operator-link" className="py-1.5 font-medium text-[var(--text)] underline underline-offset-2">
               {operator.companyName}
             </Link>
           ) : (
@@ -142,7 +142,7 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
           {operator?.verificationStatus === 'verified' && (
             <span className="ml-2 inline-flex items-center gap-1 text-[var(--yellow)]">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.8 7.2 17l.9-5.4L4.2 7.7l5.4-.8z" /></svg>
-              <Link href={VERIFICATION_STATEMENT_HREF} className="underline-offset-2 hover:underline">Verified operator</Link>
+              <Link href={VERIFICATION_STATEMENT_HREF} className="py-1.5 underline-offset-2 hover:underline">Verified operator</Link>
             </span>
           )}
         </p>

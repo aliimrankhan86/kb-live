@@ -78,7 +78,7 @@ export function CookieConsent() {
               {' '}
               <Link
                 href="/privacy"
-                className="underline text-[var(--yellow)] hover:brightness-95"
+                className="py-1.5 underline text-[var(--yellow)] hover:brightness-95"
                 onClick={() => setVisible(false)}
               >
                 Privacy Policy
@@ -86,7 +86,7 @@ export function CookieConsent() {
               {' and '}
               <Link
                 href="/terms"
-                className="underline text-[var(--yellow)] hover:brightness-95"
+                className="py-1.5 underline text-[var(--yellow)] hover:brightness-95"
                 onClick={() => setVisible(false)}
               >
                 Terms & Conditions

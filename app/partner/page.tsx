@@ -114,7 +114,7 @@ export default function PartnerLandingPage() {
                   Account issues?{' '}
                   <a
                     href="mailto:operators@pilgrimcompare.co.uk"
-                    className="underline underline-offset-2 hover:text-[var(--yellow)]"
+                    className="py-1.5 underline underline-offset-2 hover:text-[var(--yellow)]"
                   >
                     Contact operator support
                   </a>
@@ -277,7 +277,7 @@ export default function PartnerLandingPage() {
               Already listed?{' '}
               <Link
                 href="/login?redirect=/operator/dashboard"
-                className="font-medium text-[var(--yellow)] underline-offset-2 hover:underline"
+                className="py-1.5 font-medium text-[var(--yellow)] underline-offset-2 hover:underline"
                 data-testid="partner-signin-footer"
               >
                 Sign in to your dashboard

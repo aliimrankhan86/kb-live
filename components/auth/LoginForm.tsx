@@ -279,14 +279,14 @@ export function LoginForm() {
         {isPartner ? (
           <>
             Want to list your packages?{' '}
-            <Link href="/partner" className="text-[var(--yellow)] hover:underline">
+            <Link href="/partner" className="py-1.5 text-[var(--yellow)] hover:underline">
               See how operators join
             </Link>
           </>
         ) : (
           <>
             Don{'\''}t have a traveller account?{' '}
-            <Link href="/signup?type=customer" className="text-[var(--yellow)] hover:underline">
+            <Link href="/signup?type=customer" className="py-1.5 text-[var(--yellow)] hover:underline">
               Sign up
             </Link>
           </>

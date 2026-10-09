@@ -239,7 +239,7 @@ export default function HowWeRankPage() {
               Questions about our ranking or verification approach?{' '}
               <a
                 href="mailto:support@pilgrimcompare.co.uk"
-                className="text-[var(--accent)] underline underline-offset-2 hover:text-[var(--accentHover)]"
+                className="py-1.5 text-[var(--accent)] underline underline-offset-2 hover:text-[var(--accentHover)]"
               >
                 Contact us
               </a>
@@ -247,19 +247,19 @@ export default function HowWeRankPage() {
             <nav aria-label="Related pages" className="flex flex-wrap gap-4 text-sm">
               <Link
                 href="/how-it-works"
-                className="text-[var(--accent)] underline underline-offset-2 hover:text-[var(--accentHover)]"
+                className="inline-flex min-h-11 items-center text-[var(--accent)] underline underline-offset-2 hover:text-[var(--accentHover)]"
               >
                 How PilgrimCompare works
               </Link>
               <Link
                 href="/terms"
-                className="text-[var(--accent)] underline underline-offset-2 hover:text-[var(--accentHover)]"
+                className="inline-flex min-h-11 items-center text-[var(--accent)] underline underline-offset-2 hover:text-[var(--accentHover)]"
               >
                 Terms of Use
               </Link>
               <Link
                 href="/search/packages"
-                className="text-[var(--accent)] underline underline-offset-2 hover:text-[var(--accentHover)]"
+                className="inline-flex min-h-11 items-center text-[var(--accent)] underline underline-offset-2 hover:text-[var(--accentHover)]"
               >
                 Compare packages
               </Link>

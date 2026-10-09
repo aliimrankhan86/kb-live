@@ -179,7 +179,7 @@ export default async function UmrahCostPage() {
                   key={i}
                   className="rounded-lg border border-[var(--border)] bg-[var(--surfaceDark)] px-4 py-3"
                 >
-                  <summary className="cursor-pointer text-sm font-medium text-[var(--text)]">
+                  <summary className="cursor-pointer py-3 text-sm font-medium text-[var(--text)]">
                     {faq.question}
                   </summary>
                   <p className="mt-2 text-sm text-[var(--textMuted)] leading-relaxed">
