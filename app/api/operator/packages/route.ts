@@ -101,7 +101,14 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: msg }, { status: 400 });
     }
 
-    const { id, ...updates } = parsed.data;
+    // Zod 4 fills .default() values even in a partial schema, so a PATCH that
+    // sent a few fields also reset status to draft, distance bands, inclusions,
+    // room types and currency. Apply only the fields the request sent.
+    const sent = new Set(Object.keys(body ?? {}));
+    const { id, ...parsedUpdates } = parsed.data;
+    const updates = Object.fromEntries(
+      Object.entries(parsedUpdates).filter(([key]) => sent.has(key))
+    ) as typeof parsedUpdates;
 
     // Extra publish guard
     if (updates.status === 'published' && (!updates.cancellationPolicy || updates.cancellationPolicy.length < 10)) {
