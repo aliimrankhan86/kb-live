@@ -1,6 +1,7 @@
 'use client';
 
 import type { Package } from '@/lib/types';
+import { ROOM_PRICES } from '@/lib/packages/display';
 
 interface Props {
   data: Partial<Package>;
@@ -104,6 +105,37 @@ export function WizardStep2Pricing({ data, onChange, error }: Props) {
           </label>
         </div>
       </div>
+
+      {/* Item 9: optional price per person by room type. Blank = not stated, never £0. */}
+      <fieldset>
+        <legend className="mb-1 text-sm font-medium text-[var(--textMuted)]">Price per person by room type (£), optional</legend>
+        <p className="mb-2 text-xs text-[var(--textMuted)]">
+          Leave a room type blank if you do not price it separately. Pilgrims see blank as &ldquo;Not provided&rdquo;, never £0.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-3">
+          {ROOM_PRICES.map(({ key, id, label }) => (
+            <div key={key}>
+              <label htmlFor={`pkg-price-${id}`} className="mb-1.5 block text-sm font-medium text-[var(--textMuted)]">
+                {label}
+              </label>
+              <input
+                id={`pkg-price-${id}`}
+                type="number"
+                data-testid={`wizard-price-${id}`}
+                min="1"
+                step="1"
+                placeholder="Optional"
+                value={data[key] ?? ''}
+                onChange={(e) => {
+                  const v = parseFloat(e.target.value);
+                  onChange({ [key]: Number.isNaN(v) ? null : v });
+                }}
+                className="w-full rounded border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] px-3 py-2.5 text-sm text-[var(--text)] placeholder:text-[var(--textMuted)] focus:border-[var(--yellow)] focus:outline-none"
+              />
+            </div>
+          ))}
+        </div>
+      </fieldset>
     </div>
   );
 }
@@ -111,5 +143,9 @@ export function WizardStep2Pricing({ data, onChange, error }: Props) {
 export function validateStep2(data: Partial<Package>): string | null {
   if (!data.pricePerPerson || data.pricePerPerson <= 0) return 'Price per person must be greater than 0.';
   if (!data.priceType) return 'Please select a price type.';
+  for (const { key, label } of ROOM_PRICES) {
+    const v = data[key];
+    if (v != null && !(v > 0)) return `${label}: the price must be greater than 0, or left blank.`;
+  }
   return null;
 }

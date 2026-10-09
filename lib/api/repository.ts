@@ -2,6 +2,7 @@ import { MockDB } from './mock-db';
 import { hasDeparted, isPubliclyListed, londonToday } from '@/lib/listing';
 import { sortByScore } from '@/lib/ranking';
 import { departureCityOf, resolveDepartureLocation } from '@/lib/airports';
+import { ROOM_PRICES } from '@/lib/packages/display';
 import {
   ANALYTICS_EVENT_TYPES,
   AnalyticsEvent,
@@ -539,6 +540,12 @@ const csvBool = (value: string): boolean | undefined => {
   if (v === 'true' || v === 'yes') return true;
   if (v === 'false' || v === 'no') return false;
   return undefined;
+};
+/** Item 9 room price: blank → not stated (null); a positive number → stated; anything else → invalid. */
+const csvRoomPrice = (value: string): number | null | 'invalid' => {
+  if (!value) return null;
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? n : 'invalid';
 };
 const normaliseAirport = (value: string): string | undefined => {
   if (!value) return undefined;
@@ -1309,6 +1316,7 @@ export const Repository = {
     const headers = [
       'title', 'slug', 'status', 'pilgrimageType', 'seasonLabel', 'dateWindowStart', 'dateWindowEnd',
       'priceType', 'pricePerPerson', 'currency', 'totalNights', 'nightsMakkah', 'nightsMadinah',
+      'priceQuadPerPerson', 'priceTriplePerPerson', 'priceDoublePerPerson',
       'hotelMakkahStars', 'hotelMadinahStars', 'hotelMakkahName', 'hotelMadinahName',
       'distanceToHaramMakkahMetres', 'distanceToHaramMadinahMetres',
       'distanceBandMakkah', 'distanceBandMadinah', 'airline', 'departureAirport', 'flightType',
@@ -1333,6 +1341,7 @@ export const Repository = {
       pkg.dateWindow?.start ?? '', pkg.dateWindow?.end ?? '',
       pkg.priceType, pkg.pricePerPerson, pkg.currency, pkg.totalNights,
       pkg.nightsMakkah, pkg.nightsMadinah,
+      pkg.priceQuadPerPerson ?? '', pkg.priceTriplePerPerson ?? '', pkg.priceDoublePerPerson ?? '',
       pkg.hotelMakkahStars ?? '', pkg.hotelMadinahStars ?? '',
       pkg.hotelMakkahName ?? '', pkg.hotelMadinahName ?? '',
       pkg.distanceToHaramMakkahMetres ?? '', pkg.distanceToHaramMadinahMetres ?? '',
@@ -1400,6 +1409,14 @@ export const Repository = {
         continue;
       }
 
+      // Optional room prices: columns may be absent (older CSVs) or blank.
+      const roomPrices = ROOM_PRICES.map(({ key, label }) => ({ key, label, value: csvRoomPrice(getValue(cells, key)) }));
+      const badRoomPrice = roomPrices.find((r) => r.value === 'invalid');
+      if (badRoomPrice) {
+        errors.push({ row: i + 1, reason: `${badRoomPrice.label} price must be a positive number or blank` });
+        continue;
+      }
+
       const status = getValue(cells, 'status') as 'draft' | 'published';
       const validStatus = status === 'published' ? 'published' : 'draft';
 
@@ -1418,6 +1435,7 @@ export const Repository = {
           : undefined,
         priceType: oneOf(getValue(cells, 'priceType'), ['exact', 'from', 'fixed'] as const) ?? 'exact',
         pricePerPerson,
+        ...Object.fromEntries(roomPrices.map((r) => [r.key, r.value])),
         currency,
         totalNights,
         nightsMakkah: Number(getValue(cells, 'nightsMakkah')) || 0,

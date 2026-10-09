@@ -1,6 +1,7 @@
 'use client';
 
 import type { Package } from '@/lib/types';
+import { ROOM_PRICES } from '@/lib/packages/display';
 
 interface Props {
   data: Partial<Package>;
@@ -83,6 +84,9 @@ export function WizardStep8Review({ data, onSaveDraft, onPublish, isSaving, erro
       <ReviewSection title="Pricing">
         <ReviewRow label="Price/person" value={data.pricePerPerson != null ? `£${data.pricePerPerson.toLocaleString()}` : undefined} />
         <ReviewRow label="Price type" value={data.priceType} />
+        {ROOM_PRICES.map(({ key, label }) => (
+          <ReviewRow key={key} label={label} value={data[key] != null ? `£${data[key].toLocaleString()}` : undefined} />
+        ))}
         <ReviewRow label="Deposit" value={data.depositAmount != null ? `£${data.depositAmount}` : 'None'} />
         <ReviewRow label="Payment plan" value={yesNo(data.paymentPlanAvailable)} />
       </ReviewSection>

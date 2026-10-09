@@ -20,7 +20,12 @@ import {
   formatStatedPrice,
   priceText,
   priceAttribution,
+  priceAttributionShort,
   inclusionLabel,
+  ROOM_PRICES,
+  hasRoomPrices,
+  isStatedRoomPrice,
+  roomPriceText,
 } from '@/lib/packages/display'
 import { ATOL_STANDARD_LINE, CAA_ATOL_URL, CONTRACT_STANDARD_LINE } from '@/lib/content-rules'
 import { VERIFICATION_STATEMENT_HREF } from '@/components/ui/VerifiedBadge'
@@ -291,6 +296,22 @@ export function PackageDetail({ pkg, operator, rfqEnabled = false }: PackageDeta
                 <Fact term="Pay in instalments" value={pkg.paymentPlanAvailable ? 'Available' : 'Not available'} />
               )}
             </dl>
+            {/* Item 9: only when the operator stated at least one room price. */}
+            {hasRoomPrices(pkg) && (
+              <div className="mt-4 border-t border-[var(--border)] pt-3" data-testid="package-room-prices">
+                <h3 className="text-sm font-semibold text-[var(--text)]">Prices by room type</h3>
+                <dl className="mt-2 grid gap-x-6 gap-y-3 sm:grid-cols-3">
+                  {ROOM_PRICES.map(({ key, label }) => (
+                    <Fact
+                      key={key}
+                      term={label}
+                      value={roomPriceText(pkg[key], pkg.currency)}
+                      hint={isStatedRoomPrice(pkg[key]) ? priceAttributionShort(operator?.companyName, pkg.updatedAt) : undefined}
+                    />
+                  ))}
+                </dl>
+              </div>
+            )}
             <p className="mt-3 text-xs leading-relaxed text-[var(--textMuted)]">
               You pay the operator directly. PilgrimCompare does not receive or hold your payment.
             </p>

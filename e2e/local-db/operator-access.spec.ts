@@ -40,6 +40,29 @@ test('CSV export then import reaches the database', async () => {
   expect(JSON.stringify(await pk.json())).toContain('CSV import check')
 })
 
+test('room prices round trip through Postgres: edit API, blank clears to NULL, CSV export (item 9)', async () => {
+  const page = operatorPage
+  const id = 'local-test-pkg-02'
+  const patch = (data: Record<string, unknown>) => page.request.patch('/api/operator/packages', { data: { id, ...data } })
+  const stored = async () => {
+    const res = await page.request.get('/api/operator/packages')
+    const pkg = ((await res.json()).packages as Array<Record<string, unknown>>).find((p) => p.id === id)!
+    return [pkg.priceQuadPerPerson ?? null, pkg.priceTriplePerPerson ?? null, pkg.priceDoublePerPerson ?? null]
+  }
+
+  expect((await patch({ priceQuadPerPerson: 1399.99, priceTriplePerPerson: null, priceDoublePerPerson: 1650 })).status()).toBe(200)
+  expect(await stored()).toEqual([1399.99, null, 1650])
+  const csv = await (await page.request.get('/api/operator/packages/csv')).text()
+  const [head, ...rows] = csv.split('\n')
+  expect(head).toContain('priceQuadPerPerson,priceTriplePerPerson,priceDoublePerPerson')
+  expect(rows.find((r) => r.includes('14 night family Umrah from Birmingham'))).toContain(',1399.99,,1650,')
+
+  // Zero is refused; blank (null) clears back to "not stated", never 0.
+  expect((await patch({ priceQuadPerPerson: 0 })).status()).toBe(400)
+  expect((await patch({ priceQuadPerPerson: null, priceDoublePerPerson: null })).status()).toBe(200)
+  expect(await stored()).toEqual([null, null, null])
+})
+
 test('profile save persists and cannot change verification', async () => {
   const page = operatorPage
   await page.goto('/operator/dashboard')

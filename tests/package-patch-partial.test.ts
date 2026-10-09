@@ -40,4 +40,14 @@ describe('PATCH /api/operator/packages changes only the fields sent', () => {
     expect(saved.inclusions).toEqual(pkg.inclusions);
     expect(saved.roomOccupancyOptions).toEqual(pkg.roomOccupancyOptions);
   });
+
+  it('a room price edit keeps the others, and null clears one to not stated (item 9)', async () => {
+    MockDB.savePackage({ ...pkg, priceQuadPerPerson: 1195 });
+    expect((await patch({ id: 'patch-1', priceDoublePerPerson: 1595 })).status).toBe(200);
+    let saved = (await Repository.getPackageById('patch-1'))!;
+    expect([saved.priceQuadPerPerson, saved.priceDoublePerPerson, saved.status]).toEqual([1195, 1595, 'published']);
+    expect((await patch({ id: 'patch-1', priceQuadPerPerson: null })).status).toBe(200);
+    saved = (await Repository.getPackageById('patch-1'))!;
+    expect(saved.priceQuadPerPerson).toBeNull();
+  });
 });

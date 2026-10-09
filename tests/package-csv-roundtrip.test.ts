@@ -21,6 +21,7 @@ const full: Package = {
   roomOccupancyOptions: { single: false, double: true, triple: true, quad: false },
   inclusions: { visa: true, flights: true, transfers: false, meals: true },
   notes: 'Notes',
+  priceQuadPerPerson: 1195, priceTriplePerPerson: 1350.5, priceDoublePerPerson: 1595,
 };
 
 const DECISION_FIELDS = [
@@ -29,6 +30,7 @@ const DECISION_FIELDS = [
   'distanceToHaramMakkahMetres', 'distanceToHaramMadinahMetres', 'distanceBandMakkah', 'distanceBandMadinah',
   'airline', 'departureAirport', 'flightType', 'depositAmount', 'paymentPlanAvailable', 'cancellationPolicy',
   'groupType', 'ziyaratIncluded', 'ziyaratDetails', 'roomOccupancyOptions', 'inclusions', 'notes',
+  'priceQuadPerPerson', 'priceTriplePerPerson', 'priceDoublePerPerson',
 ] as const;
 
 beforeEach(() => {
@@ -44,6 +46,31 @@ describe('CSV round trip keeps every decision field', () => {
     expect(errors).toEqual([]);
     const back = saved[0];
     for (const field of DECISION_FIELDS) expect(back[field], field).toEqual(full[field]);
+  });
+});
+
+describe('CSV room prices (item 9)', () => {
+  const header = 'title,pricePerPerson,currency,totalNights,pilgrimageType';
+  it('imports an older CSV without the room price columns, as not stated', async () => {
+    const { saved, errors } = await Repository.importPackagesFromCsv(ctx, `${header}\nOld file,1200,GBP,10,umrah`);
+    expect(errors).toEqual([]);
+    expect(saved[0].pricePerPerson).toBe(1200);
+    expect([saved[0].priceQuadPerPerson, saved[0].priceTriplePerPerson, saved[0].priceDoublePerPerson]).toEqual([null, null, null]);
+  });
+
+  it('exports the three columns, blank when not stated', async () => {
+    await Repository.createPackage(ctx, { ...full, title: 'Export check', cancellationPolicy: 'Plain policy', priceTriplePerPerson: null });
+    const [head, row] = (await Repository.exportPackagesAsCsv(ctx)).split('\n');
+    const cols = head.split(',');
+    const cells = row.split(',');
+    const at = (c: string) => cells[cols.indexOf(c)];
+    expect([at('priceQuadPerPerson'), at('priceTriplePerPerson'), at('priceDoublePerPerson')]).toEqual(['1195', '', '1595']);
+  });
+
+  it.each(['0', '-10', 'abc'])('refuses the row when a room price is %s, never storing 0', async (bad) => {
+    const { saved, errors } = await Repository.importPackagesFromCsv(ctx, `${header},priceTriplePerPerson\nBad room price,1200,GBP,10,umrah,${bad}`);
+    expect(saved).toEqual([]);
+    expect(errors).toEqual([{ row: 2, reason: 'Triple room (3 sharing) price must be a positive number or blank' }]);
   });
 });
 

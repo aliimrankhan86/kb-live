@@ -153,6 +153,27 @@ export function formatStatedPrice(amount: number, currency: string): string {
   }).format(amount);
 }
 
+/** Item 9: optional operator-stated price per person by room type, in display order. */
+export const ROOM_PRICES = [
+  { key: 'priceQuadPerPerson', id: 'quad', label: 'Quad room (4 sharing)' },
+  { key: 'priceTriplePerPerson', id: 'triple', label: 'Triple room (3 sharing)' },
+  { key: 'priceDoublePerPerson', id: 'double', label: 'Double room (2 sharing)' },
+] as const;
+
+type RoomPriceFields = Pick<Package, (typeof ROOM_PRICES)[number]['key']>;
+
+/** A room price counts only when stated and above 0; blank, null and 0 are "Not provided". */
+export const isStatedRoomPrice = (amount: number | null | undefined): amount is number =>
+  typeof amount === 'number' && Number.isFinite(amount) && amount > 0;
+
+/** True when the operator stated at least one room price. */
+export const hasRoomPrices = (p: RoomPriceFields): boolean =>
+  ROOM_PRICES.some(({ key }) => isStatedRoomPrice(p[key]));
+
+/** "£1,095 per person" exactly as stated, or "Not provided". Never converted. */
+export const roomPriceText = (amount: number | null | undefined, currency: string): string =>
+  isStatedRoomPrice(amount) ? `${formatStatedPrice(amount, currency)} per person` : 'Not provided';
+
 /** "From £1,495" or "£1,495": one price label for every surface. */
 export function priceText(p: { pricePerPerson: number; currency: string; priceType: string }): string {
   const amount = formatStatedPrice(p.pricePerPerson, p.currency);
