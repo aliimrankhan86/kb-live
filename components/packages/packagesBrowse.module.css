@@ -216,11 +216,17 @@
 /* ─── Results grid ────────────────────────────────────────────────────── */
 .grid {
   display: grid;
-  grid-template-columns: 1fr;
+  /* minmax(0, ...): a long unbroken title or hotel name must not widen the
+     track past the screen (UX-22: 718px page in a 386px viewport). */
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
   list-style: none;
   padding: 0;
   margin: 0;
+}
+
+.grid > li {
+  min-width: 0;
 }
 
 .gridWithBar {

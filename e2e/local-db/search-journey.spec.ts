@@ -23,8 +23,8 @@ test('browse tab and an unfiltered search show the same published packages', asy
   const browse = await cardCount(page)
   await page.goto('/search/packages')
   expect(await resultCount(page)).toBe(browse)
-  // 16 seeded: 1 draft, 1 from an unverified operator, 2 from a verified operator with no ATOL number, 1 departed.
-  expect(browse).toBe(11)
+  // 17 seeded: 1 draft, 1 from an unverified operator, 2 from a verified operator with no ATOL number, 1 departed.
+  expect(browse).toBe(12)
 })
 
 test('a departed package leaves every public list and its page says the departure has passed', async ({ page, request }) => {
@@ -62,7 +62,7 @@ test('submitting the untouched search form loses no Umrah packages', async ({ pa
   await page.goto('/umrah')
   await page.getByTestId('find-packages-submit').click()
   await page.waitForURL(/search\/packages/)
-  expect(await resultCount(page)).toBe(10)
+  expect(await resultCount(page)).toBe(11)
   expect(page.url()).not.toMatch(/departureAirport|budgetMin|departureDate/)
 })
 
@@ -75,7 +75,7 @@ test('form airport list is generated from live packages', async ({ page }) => {
 
 test('London city search includes Heathrow, Gatwick and free-text Stansted', async ({ page }) => {
   await page.goto('/search/packages?type=umrah&departureCity=London')
-  expect(await resultCount(page)).toBe(4)
+  expect(await resultCount(page)).toBe(5)
   await expect(page.getByRole('button', { name: /Remove filter: From London/ })).toBeVisible()
 })
 
@@ -92,7 +92,7 @@ test('nothing matches: honest empty state and Clear all removes location + dates
   await expect(page.getByTestId('search-empty-state')).toBeVisible()
   await expect(page.getByText('support@pilgrimcompare.co.uk').first()).toBeVisible()
   await page.getByTestId('search-empty-reset').click()
-  await expect.poll(() => resultCount(page)).toBe(10)
+  await expect.poll(() => resultCount(page)).toBe(11)
   expect(page.url()).not.toMatch(/departureAirport|departureDate/)
 })
 
@@ -143,3 +143,18 @@ for (const vp of [{ n: 'desktop', w: 1280, h: 900 }, { n: 'tablet', w: 768, h: 1
     expect.soft(errors, 'console/network errors').toEqual([])
   })
 }
+
+test('phone widths never scroll sideways, even with a very long title and hotel names (UX-22)', async ({ page }) => {
+  for (const width of [320, 360, 390]) {
+    await page.setViewportSize({ width, height: 800 })
+    for (const path of ['/packages', '/search/packages', '/packages/local-test-17', '/operators/local-test-operator-b']) {
+      await page.goto(path)
+      await page.waitForLoadState('networkidle')
+      const { scroll, client } = await page.evaluate(() => ({
+        scroll: document.documentElement.scrollWidth,
+        client: document.documentElement.clientWidth,
+      }))
+      expect(scroll, `${path} at ${width}px`).toBeLessThanOrEqual(client)
+    }
+  }
+})

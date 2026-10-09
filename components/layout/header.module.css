@@ -50,6 +50,19 @@
   flex-shrink: 0;
 }
 
+/* Narrow phones (320px): the brand gives way so the menu button stays on screen. */
+@media (max-width: 374px) {
+  .header__container {
+    gap: 0.75rem;
+  }
+
+  .header__brand,
+  .header__textLogo {
+    flex-shrink: 1;
+    min-width: 0;
+  }
+}
+
 /* Desktop Navigation — hidden on mobile */
 .header__desktopNav {
   display: none;
