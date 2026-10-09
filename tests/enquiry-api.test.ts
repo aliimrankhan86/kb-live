@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
+// Callbacks the route hands to after(); a test runs them to finish the email work.
+const scheduled: Array<() => unknown> = [];
+
 vi.mock('next/server', () => {
   const NextResponse = {
     json: (body: unknown, init?: { status?: number }) => ({
@@ -9,7 +12,7 @@ vi.mock('next/server', () => {
       status: init?.status ?? 200,
     }),
   };
-  return { NextResponse, NextRequest: class {} };
+  return { NextResponse, NextRequest: class {}, after: (fn: () => unknown) => { scheduled.push(fn); } };
 });
 
 vi.mock('@/lib/rate-limit', async () => {
@@ -62,6 +65,7 @@ describe('/api/enquiries route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.resetModules();
+    scheduled.length = 0;
   });
 
   it('returns 201 with a reference code for a valid enquiry', async () => {
@@ -77,12 +81,24 @@ describe('/api/enquiries route', () => {
     );
   });
 
-  it('fires pilgrim confirmation + operator alert emails', async () => {
-    await callRoute({ packageId: 'pkg-1', name: 'Aisha', email: 'aisha@example.com' });
-    // allow the fire-and-forget microtask to run
-    await new Promise((r) => setTimeout(r, 0));
+  it('schedules pilgrim confirmation + operator alert emails with after(), not before the response', async () => {
+    const { status } = await callRoute({ packageId: 'pkg-1', name: 'Aisha', email: 'aisha@example.com' });
+    expect(status).toBe(201);
+    expect(scheduled).toHaveLength(1);
+    expect(sendEnquiryConfirmation).not.toHaveBeenCalled();
+    await scheduled[0]();
     expect(sendEnquiryConfirmation).toHaveBeenCalledTimes(1);
     expect(sendOperatorEnquiryAlert).toHaveBeenCalledTimes(1);
+  });
+
+  it('logs a failed email send and still returns 201', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    sendEnquiryConfirmation.mockRejectedValueOnce(new Error('Resend unreachable'));
+    const { status } = await callRoute({ packageId: 'pkg-1', name: 'Aisha', email: 'aisha@example.com' });
+    expect(status).toBe(201);
+    await expect(scheduled[0]()).resolves.toBeUndefined();
+    expect(error).toHaveBeenCalledWith('[email] sendEnquiryEmails failed:', expect.objectContaining({ message: 'Resend unreachable' }));
+    error.mockRestore();
   });
 
   it('returns 400 when name is missing', async () => {

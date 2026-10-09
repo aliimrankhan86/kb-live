@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import { enquirySchema } from '@/lib/validation';
 import { Repository } from '@/lib/api/repository';
 import { checkRateLimit, getRateLimitIdentifier } from '@/lib/rate-limit';
@@ -9,8 +9,9 @@ import type { Enquiry, OperatorProfile, Package } from '@/lib/types';
 /**
  * Canonical pilgrim enquiry (Task 2): one package, one enquiry, one operator.
  * Anonymous — no auth required. Persists the enquiry with a unique reference
- * code, then fires confirmation + operator-alert emails via the EXISTING Resend
- * setup (fire-and-forget; email failure never fails the enquiry).
+ * code, then sends confirmation + operator-alert emails via the EXISTING Resend
+ * setup inside after(), so the send finishes after the response and an email
+ * failure is logged but never fails the enquiry.
  */
 export async function POST(request: NextRequest) {
   // Throttle by IP. Scoped separately from auth / quote / interest buckets.
@@ -67,8 +68,10 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Fire-and-forget: emails must not fail the API response.
-    void sendEnquiryEmails(enquiry, pkg, operator);
+    // after(): the response does not wait for email, but the platform keeps the
+    // function alive until the send ends. A bare void promise could be killed
+    // when the response returned (B0 staging: no email, nothing logged).
+    after(() => sendEnquiryEmails(enquiry, pkg, operator));
 
     return NextResponse.json({ referenceCode: enquiry.referenceCode }, { status: 201 });
   } catch (err) {
