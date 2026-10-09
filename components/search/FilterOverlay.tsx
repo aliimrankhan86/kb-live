@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { RangeSlider } from '@/components/ui/RangeSlider';
+import { DURATION_OPTIONS } from '@/components/search/search-utils';
 import {
   Dialog,
   OverlayBody,
@@ -16,7 +17,12 @@ import {
 interface FilterOverlayProps {
   isOpen: boolean;
   onClose: () => void;
+  /** Airports that live packages depart from (from the full catalogue, not the filtered list). */
+  airportOptions?: { code: string; label: string }[];
 }
+
+const durationIdFor = (min: string | null, max: string | null) =>
+  DURATION_OPTIONS.find((d) => String('min' in d ? d.min : '') === (min ?? '') && String('max' in d ? d.max : '') === (max ?? ''))?.id ?? '';
 
 const BUDGET_MIN = 300;
 const BUDGET_MAX = 3000;
@@ -44,11 +50,14 @@ const distLabel = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `$
  * It also reads the current URL on open, so it reflects what the search form
  * (or a previous filter) already applied.
  */
-export const FilterOverlay: React.FC<FilterOverlayProps> = ({ isOpen, onClose }) => {
+export const FilterOverlay: React.FC<FilterOverlayProps> = ({ isOpen, onClose, airportOptions = [] }) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  // Keyed by the codes, not the array, so a new array with the same airports
+  // does not reset the panel on every render.
+  const airportCodes = airportOptions.map((a) => a.code).join(',');
   const initial = useMemo(() => {
     const get = (k: string) => searchParams?.get(k) ?? null;
     const budgetMin = Number(get('budgetMin'));
@@ -68,14 +77,18 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({ isOpen, onClose })
       season: seasonRaw === 'flexible' ? '' : seasonRaw,
       maxDistance: Number.isFinite(maxDistanceRaw) && maxDistanceRaw > 0 ? maxDistanceRaw : DIST_MAX,
       directOnly: get('flightType') === 'direct',
+      airport: airportCodes.split(',').includes(get('departureAirport') ?? '') ? (get('departureAirport') as string) : '',
+      duration: durationIdFor(get('minNights'), get('maxNights')),
     };
-  }, [searchParams]);
+  }, [searchParams, airportCodes]);
 
   const [budget, setBudget] = useState<[number, number]>(initial.budget);
   const [stars, setStars] = useState<number[]>(initial.stars);
   const [season, setSeason] = useState<string>(initial.season);
   const [maxDistance, setMaxDistance] = useState<number>(initial.maxDistance);
   const [directOnly, setDirectOnly] = useState<boolean>(initial.directOnly);
+  const [airport, setAirport] = useState<string>(initial.airport);
+  const [duration, setDuration] = useState<string>(initial.duration);
 
   // Re-sync local state whenever the panel is (re)opened against the live URL.
   React.useEffect(() => {
@@ -85,6 +98,8 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({ isOpen, onClose })
       setSeason(initial.season);
       setMaxDistance(initial.maxDistance);
       setDirectOnly(initial.directOnly);
+      setAirport(initial.airport);
+      setDuration(initial.duration);
     }
   }, [isOpen, initial]);
 
@@ -96,7 +111,9 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({ isOpen, onClose })
     (stars.length > 0 ? 1 : 0) +
     (season ? 1 : 0) +
     (maxDistance !== DIST_MAX ? 1 : 0) +
-    (directOnly ? 1 : 0);
+    (directOnly ? 1 : 0) +
+    (airport ? 1 : 0) +
+    (duration ? 1 : 0);
 
   const apply = () => {
     const params = new URLSearchParams(searchParams?.toString() ?? '');
@@ -112,6 +129,14 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({ isOpen, onClose })
     setOrDelete('season', season || null);
     setOrDelete('maxDistance', maxDistance !== DIST_MAX ? String(maxDistance) : null);
     setOrDelete('flightType', directOnly ? 'direct' : null);
+    // An airport replaces any city search; "Any airport" leaves a city search alone.
+    if (airport) {
+      params.set('departureAirport', airport);
+      params.delete('departureCity');
+    } else if (initial.airport) params.delete('departureAirport');
+    const d = DURATION_OPTIONS.find((o) => o.id === duration);
+    setOrDelete('minNights', d && 'min' in d ? String(d.min) : null);
+    setOrDelete('maxNights', d && 'max' in d ? String(d.max) : null);
     params.delete('page');
 
     router.replace(`${pathname}?${params.toString()}`);
@@ -124,9 +149,11 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({ isOpen, onClose })
     setSeason('');
     setMaxDistance(DIST_MAX);
     setDirectOnly(false);
-    // Keep context params (type, airport, dates, sort); drop only the filters.
+    setAirport('');
+    setDuration('');
+    // Keep context params (type, dates, sort); drop the panel's filters, airport included.
     const params = new URLSearchParams(searchParams?.toString() ?? '');
-    ['budgetMin', 'budgetMax', 'hotelStars', 'season', 'maxDistance', 'flightType'].forEach((k) =>
+    ['budgetMin', 'budgetMax', 'hotelStars', 'season', 'maxDistance', 'flightType', 'departureAirport', 'departureCity', 'minNights', 'maxNights'].forEach((k) =>
       params.delete(k)
     );
     router.replace(`${pathname}?${params.toString()}`);
@@ -182,6 +209,49 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({ isOpen, onClose })
               data-testid-min="budget-min-slider"
               data-testid-max="budget-max-slider"
             />
+          </section>
+
+          {/* Departure airport (UX-09): only airports live packages leave from */}
+          {airportOptions.length > 0 && (
+            <section className="border-t border-[var(--borderSubtle)] pt-6">
+              <label htmlFor="filter-departure-airport" className="mb-3 block text-base font-semibold text-[var(--text)]">
+                Departure airport
+              </label>
+              <select
+                id="filter-departure-airport"
+                data-testid="filter-departure-airport"
+                value={airport}
+                onChange={(e) => setAirport(e.target.value)}
+                className="min-h-11 w-full rounded-lg border border-[var(--borderStrong)] bg-[var(--surfaceDark)] px-3 text-sm text-[var(--text)]"
+              >
+                <option value="">Any airport</option>
+                {airportOptions.map((a) => (
+                  <option key={a.code} value={a.code}>{a.label}</option>
+                ))}
+              </select>
+            </section>
+          )}
+
+          {/* Trip length (UX-09) */}
+          <section className="border-t border-[var(--borderSubtle)] pt-6">
+            <h3 className="mb-3 text-base font-semibold text-[var(--text)]">Trip length</h3>
+            <div className="flex flex-wrap gap-2" role="group" aria-label="Trip length">
+              {[{ id: '', label: 'Any length' }, ...DURATION_OPTIONS].map((opt) => {
+                const on = duration === opt.id;
+                return (
+                  <button
+                    key={opt.id || 'any'}
+                    type="button"
+                    data-testid={`filter-duration-${opt.id || 'any'}`}
+                    className={`${chipBase} ${on ? chipOn : chipOff}`}
+                    aria-pressed={on}
+                    onClick={() => setDuration(opt.id)}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
           </section>
 
           {/* Hotel rating */}

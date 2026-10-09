@@ -4,7 +4,7 @@
  */
 
 import type { Package as CataloguePackage } from '@/lib/types';
-import { resolveDepartureLocation, type DepartureLocation } from '@/lib/airports';
+import { UK_DEPARTURE_AIRPORTS, resolveDepartureLocation, type DepartureLocation } from '@/lib/airports';
 import { formatDate, friendlyDistance } from '@/lib/packages/display';
 
 export interface SearchFlightSegment {
@@ -49,7 +49,7 @@ export interface SearchPackageDisplay {
 // A package is never excluded for a field the user did not filter on, and a
 // missing field is reported as "Not provided", never guessed.
 
-export type CriterionId = 'budget' | 'hotelStars' | 'season' | 'distance' | 'flightType';
+export type CriterionId = 'budget' | 'hotelStars' | 'season' | 'distance' | 'flightType' | 'nights';
 
 export interface UnmetCriterion {
   id: CriterionId;
@@ -68,6 +68,8 @@ export interface SearchCriteria {
   season?: string;
   maxDistance?: number;
   directOnly?: boolean;
+  /** Trip length in total nights (UX-09). */
+  nights?: { min?: number; max?: number };
 }
 
 export interface CloseMatch {
@@ -98,7 +100,28 @@ export const FILTER_PARAM_KEYS = [
   'season',
   'maxDistance',
   'flightType',
+  'minNights',
+  'maxNights',
 ] as const;
+
+/** Duration presets for the filter panel; written to the URL as minNights / maxNights. */
+export const DURATION_OPTIONS = [
+  { id: 'up-to-7', label: 'Up to 7 nights', max: 7 },
+  { id: '8-10', label: '8 to 10 nights', min: 8, max: 10 },
+  { id: '11-14', label: '11 to 14 nights', min: 11, max: 14 },
+  { id: '15-plus', label: '15 nights or more', min: 15 },
+] as const satisfies readonly { id: string; label: string; min?: number; max?: number }[];
+
+/** Airports that live packages depart from (standards §8: never a fixed list). */
+export function liveAirportOptions(packages: CataloguePackage[]): { code: string; label: string }[] {
+  const codes = new Set(
+    packages.flatMap((p) => {
+      const loc = resolveDepartureLocation(p.departureAirport);
+      return loc?.kind === 'airport' ? [loc.codes[0]] : [];
+    })
+  );
+  return UK_DEPARTURE_AIRPORTS.filter((a) => codes.has(a.code)).map((a) => ({ code: a.code, label: `${a.name} (${a.code})` }));
+}
 
 type ParamReader = { get(key: string): string | null };
 
@@ -143,6 +166,14 @@ export function parseSearchCriteria(params: ParamReader): SearchCriteria {
   if (Number.isFinite(maxDistance) && maxDistance > 0) criteria.maxDistance = maxDistance;
 
   if (params.get('flightType') === 'direct') criteria.directOnly = true;
+
+  const minNights = toNumber(params.get('minNights'));
+  const maxNights = toNumber(params.get('maxNights'));
+  const nights = {
+    ...(Number.isInteger(minNights) && minNights > 0 ? { min: minNights } : {}),
+    ...(Number.isInteger(maxNights) && maxNights > 0 ? { max: maxNights } : {}),
+  };
+  if (nights.min !== undefined || nights.max !== undefined) criteria.nights = nights;
 
   return criteria;
 }
@@ -224,6 +255,10 @@ function unmetPreferences(p: CataloguePackage, c: SearchCriteria): UnmetCriterio
           : 'Distance to the Haram: Not provided',
       });
     }
+  }
+
+  if (c.nights && ((c.nights.min !== undefined && p.totalNights < c.nights.min) || (c.nights.max !== undefined && p.totalNights > c.nights.max))) {
+    unmet.push({ id: 'nights', reason: `Trip length: ${p.totalNights} nights` });
   }
 
   if (c.directOnly && p.flightType !== 'direct') {

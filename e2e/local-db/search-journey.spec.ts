@@ -171,3 +171,21 @@ test('long hotel names wrap to two lines on /packages cards (UX-10)', async ({ p
   expect(height).toBeGreaterThan(line * 1.5)
   expect(height).toBeLessThanOrEqual(line * 2 + 1)
 })
+
+test('filter panel narrows by departure airport and trip length, kept in the URL (UX-09)', async ({ page }) => {
+  await page.goto('/search/packages?type=umrah')
+  await page.getByTestId('filter-button').click()
+  const opts = await page.getByTestId('filter-departure-airport').locator('option').allTextContents()
+  expect(opts.join('|')).toContain('(LHR)')
+  expect(opts.join('|')).not.toContain('Glasgow')
+  await page.getByTestId('filter-departure-airport').selectOption('LHR')
+  await page.getByTestId('filter-duration-8-10').click()
+  await page.getByTestId('filter-apply-btn').click()
+  await expect(page).toHaveURL(/departureAirport=LHR/)
+  await expect(page).toHaveURL(/minNights=8&maxNights=10|maxNights=10&minNights=8/)
+  // Heathrow, 8 to 10 nights: local packages 01 and 09 (both 10 nights).
+  await expect.poll(() => resultCount(page)).toBe(2)
+  await expect(page.getByRole('button', { name: /Remove filter: 8 to 10 nights/ })).toBeVisible()
+  await page.reload()
+  expect(await resultCount(page)).toBe(2)
+})

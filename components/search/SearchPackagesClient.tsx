@@ -4,7 +4,7 @@ import { useMemo, useCallback } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import PackageList from './PackageList';
 import type { Package as CataloguePackage, OperatorProfile } from '@/lib/types';
-import { searchPackages, toSearchDisplay } from './search-utils';
+import { liveAirportOptions, searchPackages, toSearchDisplay } from './search-utils';
 import styles from './packages.module.css';
 
 interface SearchPackagesClientProps {
@@ -38,6 +38,8 @@ export function SearchPackagesClient({ allPackages, featuredSlotsEnabled, operat
     [filteredPackages]
   );
 
+  const airportOptions = useMemo(() => liveAirportOptions(allPackages), [allPackages]);
+
   const sortBy = toSortOption(searchParams?.get('sort') ?? null);
 
   const handleSortChange = useCallback(
@@ -60,6 +62,7 @@ export function SearchPackagesClient({ allPackages, featuredSlotsEnabled, operat
         onSortChange={handleSortChange}
         featuredSlotsEnabled={featuredSlotsEnabled}
         operators={operators}
+        airportOptions={airportOptions}
       />
     </div>
   );
