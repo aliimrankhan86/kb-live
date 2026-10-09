@@ -35,7 +35,7 @@ const GROUPS: Group[] = [
       { label: 'Total nights', key: 'totalNights' },
       { label: 'Makkah / Madinah', key: 'splitNights' },
       { label: 'Hotel rating', key: 'hotelRating', rank: 'hotelStarsValue', dir: 'max', best: 'best-rated hotels' },
-      { label: 'Distance to Haram', key: 'distance', rank: 'distanceValue', dir: 'min', best: 'closest to the Haram' },
+      { label: 'Distance to the mosque', key: 'distance', rank: 'distanceValue', dir: 'min', best: 'closest to the mosque' },
       { label: 'Room options', key: 'occupancy' },
     ],
   },
@@ -237,7 +237,7 @@ export function ComparisonTable({ offers = [], rows }: ComparisonTableProps) {
                         return (
                           <td
                             key={`${row.id}-${feature.key}`}
-                            className={`border-b border-l border-[var(--borderSubtle)] px-2.5 py-3 align-top leading-relaxed [overflow-wrap:anywhere] sm:px-4 ${bg} ${text}`}
+                            className={`whitespace-pre-line border-b border-l border-[var(--borderSubtle)] px-2.5 py-3 align-top leading-relaxed [overflow-wrap:anywhere] sm:px-4 ${bg} ${text}`}
                           >
                             {isWinner && (
                               <span data-testid="comparison-best" className="mb-0.5 flex items-center gap-1 text-[0.625rem] font-bold uppercase tracking-wide text-[var(--comparison-winner-text)]">

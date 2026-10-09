@@ -79,7 +79,9 @@ describe('downstream — unset wizard fields render "Not provided"', () => {
       )
     );
     expect(row.hotelRating).toBe('Makkah 5 / Madinah 4');
-    expect(row.distance).toBe('Makkah near / Madinah far');
+    expect(row.distance).toBe(
+      "Makkah: Near the Haram (Grand Mosque), a short walk\nMadinah: Further from the Prophet's Mosque, likely a shuttle or taxi"
+    );
     expect(row.groupType).toBe('Private');
   });
 });

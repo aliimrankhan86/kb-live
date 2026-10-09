@@ -1,7 +1,7 @@
 import { Offer, OperatorProfile, Package } from './types';
 import { getRegionSettings } from './i18n/region';
 import { formatDistance, formatPriceForRegion, parseDistanceKm } from './i18n/format';
-import { formatDateRange, priceText } from './packages/display';
+import { formatDateRange, friendlyDistance, priceText } from './packages/display';
 import { flightTypeLabel, groupTypeShort, ziyaratShort } from './packages/display';
 
 export interface ComparisonRow {
@@ -109,12 +109,17 @@ export function mapPackageToComparison(pkg: Package, operator?: OperatorProfile)
     return 'Not provided';
   })();
 
-  const distance = (() => {
-    const makkah = pkg.distanceBandMakkah !== 'unknown' ? pkg.distanceBandMakkah : 'Not provided';
-    const madinah = pkg.distanceBandMadinah !== 'unknown' ? pkg.distanceBandMadinah : 'Not provided';
-    if (makkah === 'Not provided' && madinah === 'Not provided') return 'Not provided';
-    return `Makkah ${makkah} / Madinah ${madinah}`;
-  })();
+  // Same source and wording as the package page: stated metres with a walking
+  // estimate, else the band. One line per city.
+  const hotelDistances = [
+    friendlyDistance('Makkah', pkg.distanceToHaramMakkahMetres, pkg.distanceBandMakkah),
+    friendlyDistance('Madinah', pkg.distanceToHaramMadinahMetres, pkg.distanceBandMadinah),
+  ];
+  const distance = hotelDistances.some(Boolean)
+    ? hotelDistances
+        .map((d, i) => `${i === 0 ? 'Makkah' : 'Madinah'}: ${d ? `${d.primary}, ${d.note}` : 'Not provided'}`)
+        .join('\n')
+    : 'Not provided';
 
   // Stated price, never converted (standards §6); same label as cards and package page.
   const price = priceText(pkg);
@@ -122,9 +127,11 @@ export function mapPackageToComparison(pkg: Package, operator?: OperatorProfile)
   const starValues = [pkg.hotelMakkahStars, pkg.hotelMadinahStars].filter(
     (s): s is 3 | 4 | 5 => typeof s === 'number'
   );
-  const bandMeters = [pkg.distanceBandMakkah, pkg.distanceBandMadinah]
-    .map((b) => BAND_METERS[b])
-    .filter((m): m is number => typeof m === 'number');
+  // Stated metres first, else the band's representative metres.
+  const bandMeters = [
+    pkg.distanceToHaramMakkahMetres || BAND_METERS[pkg.distanceBandMakkah],
+    pkg.distanceToHaramMadinahMetres || BAND_METERS[pkg.distanceBandMadinah],
+  ].filter((m): m is number => typeof m === 'number');
 
   return {
     id: pkg.id,
